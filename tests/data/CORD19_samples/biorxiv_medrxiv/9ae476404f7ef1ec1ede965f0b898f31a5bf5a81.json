@@ -1,0 +1,2085 @@
+{
+    "paper_id": "9ae476404f7ef1ec1ede965f0b898f31a5bf5a81",
+    "metadata": {
+        "title": "Epidemiological, Clinical Characteristics and Outcome of Medical Staff Infected with COVID-19 in Wuhan, China: A Retrospective Case Series Analysis",
+        "authors": [
+            {
+                "first": "Jie",
+                "middle": [],
+                "last": "Liu",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Liu",
+                "middle": [],
+                "last": "Ouyang",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Pi",
+                "middle": [],
+                "last": "Guo",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Shantou University Medical College",
+                    "location": {
+                        "settlement": "Shantou, Guangdong",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Haisheng",
+                "middle": [],
+                "last": "Wu",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Shantou University Medical College",
+                    "location": {
+                        "settlement": "Shantou, Guangdong",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Peng",
+                "middle": [],
+                "last": "Fu",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Yuliang",
+                "middle": [],
+                "last": "Chen",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Shantou University Medical College",
+                    "location": {
+                        "settlement": "Shantou, Guangdong",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Dan",
+                "middle": [],
+                "last": "Yang",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": "fyang@hust.edu.cn"
+            },
+            {
+                "first": "Xiaoyu",
+                "middle": [],
+                "last": "Han",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Yukun",
+                "middle": [],
+                "last": "Cao",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Osamah",
+                "middle": [],
+                "last": "Alwalid",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Juan",
+                "middle": [],
+                "last": "Tao",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Shuyi",
+                "middle": [],
+                "last": "Peng",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Heshui",
+                "middle": [],
+                "last": "Shi",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": "heshuishi@hust.edu.cn"
+            },
+            {
+                "first": "Fan",
+                "middle": [],
+                "last": "Yang",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": "fanyangfyang@hust.edu.cn"
+            },
+            {
+                "first": "Chuansheng",
+                "middle": [],
+                "last": "Zheng",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Huazhong University of Science and Technology",
+                    "location": {
+                        "settlement": "Wuhan",
+                        "region": "Hubei",
+                        "country": "China"
+                    }
+                },
+                "email": "chuanshengzhenghqzcsxh@sina.com."
+            },
+            {
+                "first": ";",
+                "middle": [
+                    "Peng"
+                ],
+                "last": "Fu",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": ";",
+                "middle": [
+                    "Heshui"
+                ],
+                "last": "Shi",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            }
+        ]
+    },
+    "abstract": [
+        {
+            "text": "Backgrounds Since December 2019, a novel coronavirus epidemic has emerged in Wuhan city, China and then rapidly spread to other areas. As of 20 Feb 2020, a total of 2,055 medical staff confirmed with coronavirus disease 2019 (COVID-19) caused by SARS-Cov-2 in China had been reported. We sought to explore the epidemiological, clinical characteristics and prognosis of novel coronavirus-infected medical staff.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "In this retrospective study, 64 confirmed cases of novel coronavirus-infected medical staff admitted to Union Hospital, Wuhan between 16 Jan, 2020 to 15 Feb, 2020 were included. Two groups concerned were extracted from the subjects based on duration of symptoms: group 1 (\u226410 days) and group 2 (>10 days). Epidemiological and clinical data were analyzed and compared across groups. The Kaplan-Meier plot was used to inspect the change in hospital discharge rate. The Cox regression model was utilized to identify factors associated with hospital discharge.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "The median age of medical staff included was 35 years old. 64% were female and 67% were nurses. None had an exposure to Huanan seafood wholesale market or wildlife. A small proportion of the cohort had contact with specimens (5%) as well as patients in fever clinics (8%) and isolation wards (5%). Fever (67%) was the most common symptom, followed by cough (47%) and fatigue (34%). The median time interval between symptoms onset and admission was 8.5 days. On admission, 80% of medical staff showed abnormal IL-6 levels and 34% had lymphocytopenia.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Chest CT mainly manifested as bilateral (61%), septal/subpleural (80%) and ground-glass (52%) opacities. During the study period, no patients was transferred to intensive care unit or died, and 34 (53%) had been discharged. Higher body mass index (BMI) (\u2265 24 kg/m 2 ) (HR 0.14; 95% CI 0.03-0.73), fever (HR 0.24; 95% CI 0.09-0.60) and higher levels of IL-6 on admission (HR 0.31; 95% CI 0.11-0.87) were unfavorable factors for discharge.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Interpretation In this study, medical staff infected with COVID-19 have relatively milder symptoms and favorable clinical course, which may be partly due to their . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint medical expertise, younger age and less underlying diseases. Smaller BMI, absence of fever symptoms and normal IL-6 levels on admission are favorable for discharge for medical staff. Further studies should be devoted to identifying the exact patterns of SARS-CoV-2 infection among medical staff.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        }
+    ],
+    "body_text": [
+        {
+            "text": "In December, 2019, a group of novel atypical pneumonia patients with uncertain etiology but mostly linked to the Huanan Seafood Wholesale Market emerged in Wuhan, China [1] . A later confirmed pathogen of this previously unknown pneumonia was described as a novel coronavirus, currently named as severe acute respiratory syndrome coronavirus 2 (SARS-Cov-2; previously known as 2019nCoV), was ascertained by unbiased sequencing analysis of lower respiratory tract samples from early cases on 7 Jan 2020, following which the protocol of real-time reverse-transcriptase polymerase chain reaction (RT-PCR) assay for this novel coronavirus had also been developed [2] [3] [4] [5] [6] [7] . In fact, the epidemics of the two other novel coronaviruses, namely severe acute respiratory syndrome coronavirus (SARS-CoV) and Middle East respiratory syndrome coronavirus (MERS-CoV), have posed a huge threat to public health in the past two decades [8, 9] . SARS-Cov-2 in this outbreak, like the previous two viruses, is also categorized within the same genus of the subfamily Orthocoronavirinae within the family Coronaviridae, but shows a strong affinity for human respiratory receptors [10, 11] .",
+            "cite_spans": [
+                {
+                    "start": 169,
+                    "end": 172,
+                    "text": "[1]",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 659,
+                    "end": 662,
+                    "text": "[2]",
+                    "ref_id": null
+                },
+                {
+                    "start": 663,
+                    "end": 666,
+                    "text": "[3]",
+                    "ref_id": "BIBREF1"
+                },
+                {
+                    "start": 667,
+                    "end": 670,
+                    "text": "[4]",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 671,
+                    "end": 674,
+                    "text": "[5]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 675,
+                    "end": 678,
+                    "text": "[6]",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 679,
+                    "end": 682,
+                    "text": "[7]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 937,
+                    "end": 940,
+                    "text": "[8,",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 941,
+                    "end": 943,
+                    "text": "9]",
+                    "ref_id": "BIBREF7"
+                },
+                {
+                    "start": 1177,
+                    "end": 1181,
+                    "text": "[10,",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 1182,
+                    "end": 1185,
+                    "text": "11]",
+                    "ref_id": "BIBREF9"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "By 11 Feb 2020, coronavirus disease 2019 (COVID- 19) due to the SARS-Cov-2 has caused more than 40,000 laboratory confirmed cases and 1,023 deaths among them in China [12] . Sufficient evidence indicated that the COVID-19 clustered within close-contact human groups, such as family and hospital settings [13] [14] [15] [16] [17] . The SARS-CoV-2 epidemic has transmitted throughout China and to other countries due to massive population movements before the Lunar New Year [14] , and consequently escalated as a Public Health Emergency of International Concern declared by World Health Organization (WHO) [18] . As of 4 Mar 2020, more than 90,000 confirmed cases infected with SARS-CoV-2 have been identified globally [19] .",
+            "cite_spans": [
+                {
+                    "start": 49,
+                    "end": 52,
+                    "text": "19)",
+                    "ref_id": "BIBREF17"
+                },
+                {
+                    "start": 167,
+                    "end": 171,
+                    "text": "[12]",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 304,
+                    "end": 308,
+                    "text": "[13]",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 309,
+                    "end": 313,
+                    "text": "[14]",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 314,
+                    "end": 318,
+                    "text": "[15]",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 319,
+                    "end": 323,
+                    "text": "[16]",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 324,
+                    "end": 328,
+                    "text": "[17]",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 473,
+                    "end": 477,
+                    "text": "[14]",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 605,
+                    "end": 609,
+                    "text": "[18]",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 718,
+                    "end": 722,
+                    "text": "[19]",
+                    "ref_id": "BIBREF17"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Information pointing to the epidemiology and clinical features of general confirmed cases has been accumulating. The previous studies enrolling 41, 99 and 138 confirmed cases admitted to Wuhan, respectively, provided an insight into epidemiological characteristics, clinical manifestations, treatment measures and clinical outcomes of these patients [1, 20, 21] . In particular, a recent study in Zhejiang province, China indicated that the symptoms of patients outside of Wuhan perhaps are relatively mild versus symptoms of initial cases in Wuhan [10] . Meanwhile, a new finding from a national wide descriptive report drew a huge amount of attention, which declared that the total number of confirmed novel coronavirus-infected medical staff was as high 1,716 as of 11 February 2020, with a peak incidence occurring on 28 January 2020 [12] . Hospital-related transmission are one of the causes for infection of health-care workers [21] , especially in the early stages of COVID-19 epidemic when there was a lack of knowledge about transmission approaches of SARS-CoV-2, as well as in the period when facing a shortage of protective materials. Nonetheless, the predominant cause of the infection and the failure of protection among health workers remains to be investigated [12] .",
+            "cite_spans": [
+                {
+                    "start": 350,
+                    "end": 353,
+                    "text": "[1,",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 354,
+                    "end": 357,
+                    "text": "20,",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 358,
+                    "end": 361,
+                    "text": "21]",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 549,
+                    "end": 553,
+                    "text": "[10]",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 838,
+                    "end": 842,
+                    "text": "[12]",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 934,
+                    "end": 938,
+                    "text": "[21]",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 1276,
+                    "end": 1280,
+                    "text": "[12]",
+                    "ref_id": "BIBREF10"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Despite the increased attention towards protecting medical staff from infection, information regarding the epidemiology and clinical features of medical staff confirmed with COVID-19 is scarce. This single-centered, retrospective study aimed to describe epidemiological, clinical, laboratory and radiographic features, treatment, and prognosis of a group of medical staff confirmed with COVID-19 who were admitted to Union Hospital, Wuhan. We hope the findings in the present study will provide an insight into the prevention and treatment of this novel coronavirus for the global community.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "We performed a single-centered, retrospective study on a group of novel coronavirus-infected medical staff at Wuhan Union Hospital, one of the hospitals treating patients confirmed with COVID-19 at the earliest time. Diagnosis of . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Study design and participants"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint cases with SARS-Cov-2 infection conforms to the WHO interim guidance [7] . Details regarding laboratory confirmation protocol for SARS-CoV-2 were described by previous studies [1, 21] . Throat-swab specimens were screened for SARS-CoV-2 and other respiratory viruses (influenza, respiratory syncytial virus, etc.) by real-time RT-PCR assays. A total 64 medical staff, who were confirmed by SARS-CoV-2 real-time RT-PCR test on respiratory secretions collected by throat swab and undergone serial chest CT scans following their admission to isolation wards of Union Hospital between 16 Jan and 15 Feb, 2020, were enrolled.",
+            "cite_spans": [
+                {
+                    "start": 213,
+                    "end": 216,
+                    "text": "[7]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 320,
+                    "end": 323,
+                    "text": "[1,",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 324,
+                    "end": 327,
+                    "text": "21]",
+                    "ref_id": "BIBREF19"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Study design and participants"
+        },
+        {
+            "text": "This retrospective study was approved by the Ethics of Committees of Union Hospital, Tongji Medical College, Huazhong University of Science and Technology. Written informed consent was waived due to the rapid emergence of this infectious disease.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Study design and participants"
+        },
+        {
+            "text": "The epidemiological data, medical and nursing records, laboratory examinations, chest computed tomography (CT) of all patients were reviewed and abstracted with concerted efforts of experienced clinicians. Data were collected at the time of symptoms onset, presentation for medical advice and in-patient admission. The clinicians who had experience of treating patients with confirmed SARS-Cov-2 infection reviewed and collected the medical records of patients, and preliminarily collated the data. The clinical data were extracted through a standardized form for case report as previously described [23] . Epidemiological data, including exposure histories before symptoms onset (whether there is a history of exposure to the Huanan Seafood Wholesale Market, or wildlife), and close contact with laboratory-confirmed or suspected cases of COVID-19 in a work environment (fever clinics, or isolation wards), specimens (pharyngeal swab, blood, sputum specimens, etc.) or family members with COVID-19 were collected. In addition, information about preventive medication among medical staff was also collected.",
+            "cite_spans": [
+                {
+                    "start": 600,
+                    "end": 604,
+                    "text": "[23]",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Data collection"
+        },
+        {
+            "text": "We have also collected the data on demographics, clinical manifestations, laboratory . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Data collection"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint .",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Data collection"
+        },
+        {
+            "text": "examinations and radiological studies. These included age, sex, occupation (doctor, or nurse), body mass index (BMI \u2265 24, or <24 kg/m 2 ), current smoking status (yes, or no), disease severity (non-severe, or severe), date of symptom onset, symptoms before hospital admission (fever, cough, fatigue, sore throat, myalgia, sputum production, difficulty breathing or chest tightness, chill, loss of appetite, diarrhea, and chest pain), coexisting conditions (e.g. hypertension, diabetes, etc.), laboratory testing indicators on admission (leucocyte count, lymphocyte count, platelet count, D-dimer, creatinine, creatine kinase, lactose dehydrogenase, alanine aminotransferase, aspartate aminotransferase, hemoglobin, ferritin, C-reactive protein, Amyloid A, total bilirubin, procalcitonin, erythrocyte sedimentation rate, interleukin-6 (IL-6) and lymphocyte subsets, etc.), radiologic assessments of chest CT (lung involvement, lung lobe involvement, predominant CT changes, predominant distribution of opacities, etc.), treatment measures (antibiotics agents, antiviral agents, traditional Chinese medicine, immune globulin, thymosin, corticosteroids and oxygen therapy), and complications (e.g. pneumonia, acute respiratory distress syndrome, acute cardiac injury, acute kidney injury, shock, etc.). All CT images were analyzed by two radiologists (J.L. and F.Y., who had 5 and 21 years of experience in thoracic radiology, respectively) utilizing the institutional digital database system without access to clinical and laboratory findings. Images were reviewed independently, and final decisions were reached by discussion and consensus. We estimated the time interval from symptom onset to admission with maximum information available -that is, all the exact date of initial symptoms provided by the patients. Then the aggregated data was sent to data analysis group. Prior to statistical analysis, the aggregated data were cross -checked by group members to guarantee the correctness and completeness of data.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Data collection"
+        },
+        {
+            "text": "The clinical outcomes and prognosis were continuously observed up to 24 Feb 2020.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Outcomes"
+        },
+        {
+            "text": "We defined the primary outcomes as discharge. The discharge criteria of inpatients included all the following three conditions [24] : (1) body temperature return to normal for more than 3 days and respiratory symptoms improvement; (2) resolution of lung . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [
+                {
+                    "start": 127,
+                    "end": 131,
+                    "text": "[24]",
+                    "ref_id": "BIBREF22"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Outcomes"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint involvement demonstrated by chest CT; (3) two consecutive RT-RCR tests, with sampling interval of more than 1 day, showing a negative result. Secondary outcomes consisted of hospital discharge rate and length of hospital stay. Given that treatment and monitoring of some patients in our study were still ongoing, a fixed time-interval of observation was not applied to these clinical outcomes.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Outcomes"
+        },
+        {
+            "text": "This study devoted to report the epidemiological, clinical characteristics and prognosis of medical staff confirmed with COVID-19. Continuous variables were checked for distribution normality by means of the Kolmogorov-Smirnov test, following which they were summarized as either means with standard deviations (SD) or medians with interquartile ranges (IQR) as appropriate. Counts and percentages were utilized to describe categorical variables. Given the cut-off point at 10th day of symptoms onset proposed by previous studies [1, 21] , we assigned the patients into either one of two groups based on duration of symptoms: group 1 (\u226410 days) and group 2 (>10 days). We applied a Kaplan-Meier plot to inspect the change of hospital discharge rate. The proportional hazard Cox regression model was utilized to ascertain factors associated with hospital discharge. Univariate models with a single variable once at a time were first fitted. The statistically significant risk factors as well as age and sex were, then, included into a final multivariate Cox regression model.",
+            "cite_spans": [
+                {
+                    "start": 530,
+                    "end": 533,
+                    "text": "[1,",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 534,
+                    "end": 537,
+                    "text": "21]",
+                    "ref_id": "BIBREF19"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Statistical analysis"
+        },
+        {
+            "text": "The hazards ratios (HRs) along with the 95% confidence intervals (95% CIs) were calculated.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Statistical analysis"
+        },
+        {
+            "text": "Statistical tests were two-sided with significance set at \u03b1 less than 0.05. We performed all data analyses by R software version 3.6.2 (R Foundation for Statistical Computing).",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Statistical analysis"
+        },
+        {
+            "text": ". CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Epidemiological characteristics"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint .",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Epidemiological characteristics"
+        },
+        {
+            "text": "During the study period, epidemiological and clinical data were collected on 64 medical staff with laboratory-confirmed SARS-Cov-2 infection from Wuhan Union Hospital, of whom 62 (97%) provided an exact date of symptom onset and only 1 case (2%) was severe. The patients aged between 23 and 63 years old, and median age was 35 years (IQR 29-43 years). The median age in group 1 was 37 years (IQR 32-44 years), and in group 2 it was 30 years (IQR 27-36 years). More than half of the cohort were female (64%) and nurse (67%). There were 7 (11%) overweight cases (BMI \u2265 24 kg/m 2 ) and only 1 was current smoker.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Epidemiological characteristics"
+        },
+        {
+            "text": "Among the 64 medical staff recruited, no one had an exposure to Huanan seafood wholesale market or wildlife, while 4 (6%) medical staff had family members confirmed with SARS-CoV-2 infection. During patient care, 5 (8%) and 3 (5%) cases had contact with patients in fever clinics and isolation wards, respectively, and 3 (5%) had direct contact with specimens collected from confirmed patients. 10 (16%) of 64 medical staff have used preventive medications (Table 1) .",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 457,
+                    "end": 466,
+                    "text": "(Table 1)",
+                    "ref_id": "TABREF0"
+                }
+            ],
+            "section": "Epidemiological characteristics"
+        },
+        {
+            "text": "The median duration between symptoms onset and admission was 8. days in group 2. There were 8 (13%) cases, most of whom were assigned to group 1, with one or more co-morbidities: 3 (5%) had hypertension, 2 (3%) had uterine fibroids, and one (2%) each had diabetes, depressive disorder, thyroid nodules or abdominal lymphatic tuberculosis. The three most common symptoms were fever (67%), cough (47%) and fatigue (34%). The relatively less common symptoms were sore throat, myalgia, difficulty breathing or chest tightness, sputum production, headache, chill, loss of appetite, diarrhea, and chest pain (Table 1) . Table 2 shows the laboratory and radiographic findings of 64 medical staff with confirmed COVID-19. On admission, the blood counts of 11 (17%) cases showed leukocytopenia and only one (2%) showed leukocytosis. 22 (34%) presented with . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 602,
+                    "end": 611,
+                    "text": "(Table 1)",
+                    "ref_id": "TABREF0"
+                },
+                {
+                    "start": 614,
+                    "end": 621,
+                    "text": "Table 2",
+                    "ref_id": "TABREF1"
+                }
+            ],
+            "section": "Clinical features"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint lymphocytopenia and 7 (11%) presented thrombocytopenia. Most cases demonstrated normal levels of D-dimer, creatinine, and creatine kinase, but elevated C-reactive protein and amyloid A levels were presented in 45% and 59% of cases, respectively.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Clinical features"
+        },
+        {
+            "text": "Elevated levels of alanine aminotransferase (13%) and aspartate aminotransferase (9%) were less common. A small proportion (3%) of cases had abnormal procalcitonin serum level (>0.5 ug/L). Notably, 47 (80%) of cases had high levels of IL-6 (>2.9 pg/ml). Medical staff of group 1 had more prominent laboratory abnormalities (i.e., leukocytes, lymphocytes, platelet, alanine aminotransferase, amyloid A and IL-6) as compared with those in group 2.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Clinical features"
+        },
+        {
+            "text": "As evidenced by Table 2 ",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 16,
+                    "end": 23,
+                    "text": "Table 2",
+                    "ref_id": "TABREF1"
+                }
+            ],
+            "section": "Clinical features"
+        },
+        {
+            "text": "Of the study participants, no person was transferred to an intensive care unit for mechanical ventilation due to acute respiratory distress syndrome. 9 (14%) patients needed an electrocardiograph monitoring, among whom 8 were in group 1. Empirical intravenous antibiotic treatment was administered in 55 (86%) patients. All the patients were given empirical antiviral therapy. Meanwhile, 13 (20%) were offered traditional Chinese medicine, 23 (36%) patients were given immune globulin, 33 (52%) were given thymosin, and 7 (11%) received corticosteroids. As for oxygen therapy, 32 (50%) used nasal cannula and only 2 (3%) used face mask, while no one . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint .",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "needed invasive mechanical or ventilation extracorporeal membrane oxygenation. As a whole, despite the negligible difference of antiviral treatment between two groups, most of the cases who received electrocardiogram monitoring, antibiotics, immune globulin, thymosin and oxygen therapy belonged to group 1, whereas the proportion given traditional Chinese medicine was higher in group 2 (Table 3) .",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 388,
+                    "end": 397,
+                    "text": "(Table 3)",
+                    "ref_id": "TABREF2"
+                }
+            ],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "By 24 Feb, 2020, 34 (53%) of the cases have been discharged and none had died, the remaining cases were still in hospital to receive supportive therapy. The median length of hospital stay was 12.5 (IQR 9.0-19.8) days in total, 18.0 (IQR 13.0-20.5) days in group 1 and 9.0 (IQR 6.0-11.0) days in group 2 ( Table 3 ). The overall median discharge time (i.e. equal to the time that half of the patients left the hospital) was 20 days (Figure 2A ).",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 305,
+                    "end": 312,
+                    "text": "Table 3",
+                    "ref_id": "TABREF2"
+                },
+                {
+                    "start": 431,
+                    "end": 441,
+                    "text": "(Figure 2A",
+                    "ref_id": "FIGREF4"
+                }
+            ],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "It should be noted that the endpoint of Cox model was discharge, and patients who continued to be hospitalized as of 24 Feb 2020 would be regarded as censored data.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "The HR metric derived from multivariate Cox regression model was utilized to ascertain factors significantly associated with the endpoint of patients infected with SARS-CoV-2. Results of the final multivariate Cox regression model showed that larger BMI (\u2265 24 kg/m 2 ) (HR 0.14; 95% CI 0.03-0.73), fever symptoms (HR 0.24; 95% CI 0.09-0.60) and increased IL-6 levels (> 2.9 pg/ml) on admission (HR 0.31; 95% CI 0.11-0.87) were unfavorable factors for hospital discharge (all HRs <1 and all P-values <0.05) according to Cox regression mode ( Figure 2B ).",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 541,
+                    "end": 550,
+                    "text": "Figure 2B",
+                    "ref_id": "FIGREF4"
+                }
+            ],
+            "section": "Treatment measures and prognosis"
+        },
+        {
+            "text": "By 20 Feb, 2020, 476 hospitals across China had reported, in total, 2,055 laboratory-confirmed cases of medical staff with SARS-CoV-2 infection, of which the majority (88%) were from Hubei province [25] . According to China-WHO joint investigation report, most of the infections among medical staff occurred in the early stages of the COVID-19 outbreak in Wuhan, when there was a lack of knowledge . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [
+                {
+                    "start": 198,
+                    "end": 202,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint about transmission approaches and experience to fight with the SARS-CoV-2 [25] .",
+            "cite_spans": [
+                {
+                    "start": 218,
+                    "end": 222,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Despite the outbreak of COVID-19 occurring in few scattered hospitals (e.g. 15 medical staff were infected at one hospital in Wuhan), hospital-related transmission is not the main transmission feature of COVID-19 in China [25] . Our findings advocate this viewpoint. According to our data, a small proportion of 64 novel coronavirus-infected medical staff had a direct contact with specimens of patients (5%) as well as patients in fever clinics (8%) and isolation wards (5%) during patient care.",
+            "cite_spans": [
+                {
+                    "start": 222,
+                    "end": 226,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "In addition, none of the 64 medical staff had an exposure to Huanan seafood market or wildlife, and 4 (6%) had family members with confirmed COVID-19. The exact mode of medical staff infection remains unclear. The findings are consistent with previous reports [12, 25] .",
+            "cite_spans": [
+                {
+                    "start": 260,
+                    "end": 264,
+                    "text": "[12,",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 265,
+                    "end": 268,
+                    "text": "25]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "The demographic characteristics and clinical manifestations of medical staff with confirmed COVID-19 in Wuhan were not exactly the same as general confirmed patients included in recent studies [10, 12, 26] . In our study, most of the novel coronavirus-infected medical staff analyzed were females and nurses, and had a smaller median and range of age. The medical staff infected with SARS-CoV-2 have similar signs and symptoms with general confirmed infection patients [12, 26] . The infected medical staff tended to manifest on chest CT with bilateral, subpleural ground-glass opacities, which is consistent with the recent radiological reports on COVID-19 pneumonia [27] [28] [29] [30] . Furthermore, abnormal D-dimer levels as well as abnormal functions of kidney, heart and liver was relatively rare among medical staff with SARS-CoV-2 infection.",
+            "cite_spans": [
+                {
+                    "start": 193,
+                    "end": 197,
+                    "text": "[10,",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 198,
+                    "end": 201,
+                    "text": "12,",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 202,
+                    "end": 205,
+                    "text": "26]",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 469,
+                    "end": 473,
+                    "text": "[12,",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 474,
+                    "end": 477,
+                    "text": "26]",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 668,
+                    "end": 672,
+                    "text": "[27]",
+                    "ref_id": "BIBREF25"
+                },
+                {
+                    "start": 673,
+                    "end": 677,
+                    "text": "[28]",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 678,
+                    "end": 682,
+                    "text": "[29]",
+                    "ref_id": "BIBREF28"
+                },
+                {
+                    "start": 683,
+                    "end": 687,
+                    "text": "[30]",
+                    "ref_id": null
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "In our study, only one of 64 medical staff with SARS-CoV-2 infection was severe case, none developed acute respiratory distress syndrome or transferred to intensive care unit. More than half of the cases were discharged by 24 Feb, 2020. Previous studies suggested that 13.8% of the general confirmed patients were severe cases, among whom older age, male sex, chronic diseases are more common [25, 31, 32, 33] .",
+            "cite_spans": [
+                {
+                    "start": 393,
+                    "end": 397,
+                    "text": "[25,",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 398,
+                    "end": 401,
+                    "text": "31,",
+                    "ref_id": "BIBREF29"
+                },
+                {
+                    "start": 402,
+                    "end": 405,
+                    "text": "32,",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 406,
+                    "end": 409,
+                    "text": "33]",
+                    "ref_id": "BIBREF31"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Contrarily, our study revealed that medical staff have relatively milder symptoms, . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint which may be partly due to their medical expertise, younger age and less underlying diseases.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Medical staff with symptoms onset for less than 10 days by the time of admission were compared with those with symptoms of more than 10 days. We found that medical staff with symptoms for less than 10 days had more prominent laboratory abnormalities on admission, and they also experienced relatively worse clinical course and longer hospital stay. Furthermore, the median time between symptoms onset and admission of infected medical staff in this study was 8.5 days, longer than general population as described in recent publications [10, 21] . We believe that mild cases of infected medical staff without an early hospitalization was mainly because they made admirable concessions to provide the limited-number of isolation wards for infected patients with worse conditions during the peak time of COVID-19 epidemic in Wuhan.",
+            "cite_spans": [
+                {
+                    "start": 536,
+                    "end": 540,
+                    "text": "[10,",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 541,
+                    "end": 544,
+                    "text": "21]",
+                    "ref_id": "BIBREF19"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Predictors of hospital discharge among infected medical staff were identified by Cox model. Smaller BMI, absence of fever and normal levels of IL-6 on initial stage were favorable factors for recovery and discharge. A recent study revealed that fever was identified in only half of the patients on presentation but increased to nearly 90% after hospitalization [26] . Elevated IL-6 levels were observed in 80% of infected medical staff on admission, which is associated with inflammatory response [34, 35] . To explore how absence of fever and IL-6 levels on initial stage affect the length of hospital stay and discharge of medical staff with SARS-CoV-2 infection, further studies are needed.",
+            "cite_spans": [
+                {
+                    "start": 361,
+                    "end": 365,
+                    "text": "[26]",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 497,
+                    "end": 501,
+                    "text": "[34,",
+                    "ref_id": "BIBREF32"
+                },
+                {
+                    "start": 502,
+                    "end": 505,
+                    "text": "35]",
+                    "ref_id": "BIBREF33"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Given that epidemiology and clinical features of medical staff infected with SARS-CoV-2 is unclear, our study provides an insight to prevention and treatment of medical staff at risk of COVID-19 infection. So far, more than 40,000 medical personnel outside Hubei province gathered in Wuhan for the battle against the epidemic, and China has attached great importance to infection prevention among . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint medical staff [25] . Although some safeguards have been introduced in the aspects including salary, injury suffered on the job, rest, and psychological adjustment for medical staff, the next step will continue to strengthen the promotion of these measures. Meanwhile, some potential problems remain to be solved, such as unclear patterns of infection, mental health care for medical staff [36] , and the possibility of airborne transmission from aerosol production by medical practices in health care facilities [25] . A recent study from Singapore found that surface environmental and personal protective equipment contamination caused by respiratory droplets and fecal shedding from patients infected with SARS-CoV-2, suggesting that the environment is a potential viral vector [37] . Further investigations should be devoted to identifying the exact patterns of SARS-CoV-2 infection among medical staff.",
+            "cite_spans": [
+                {
+                    "start": 158,
+                    "end": 162,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 533,
+                    "end": 537,
+                    "text": "[36]",
+                    "ref_id": "BIBREF34"
+                },
+                {
+                    "start": 656,
+                    "end": 660,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 924,
+                    "end": 928,
+                    "text": "[37]",
+                    "ref_id": "BIBREF35"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "We acknowledge some limitations of this study. First, only 64 for medical staff with confirmed COVID-19 from a single hospital in Wuhan were included. However, the population from which they were sampled was large and we did not include all of the cases during the study period. In fact, there are 2,055 laboratory-confirmed cases of COVID-19 in medical staff as of 20 Feb 2020 [25] . This limitation in our study may result in deviations in epidemiological and clinical observation characteristics. We hope that the findings presented here will encourage a more comprehensive assessment of SARS-Cov-2 infection in for medical staff. Second, more detailed information, particularly regarding specific causes of SARS-CoV-2 infection among for medical staff, was unavailable at the time of analysis; however, this is a retrospective, observational study and the data used in this study only provide a preliminary insight into epidemiological features and clinical outcomes of a group of for medical staff confirmed with COVID-19. Further research on this regard is needed.",
+            "cite_spans": [
+                {
+                    "start": 378,
+                    "end": 382,
+                    "text": "[25]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Limitations of this study"
+        },
+        {
+            "text": ". CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusion"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint .",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusion"
+        },
+        {
+            "text": "The study medical staff have relatively milder symptoms and favorable clinical course, which may be partly due to their medical expertise, younger age and less underlying diseases. Smaller BMI, absence of fever symptoms and normal IL-6 levels on admission are favorable for recovery and hospital discharge for medical staff infected ",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusion"
+        },
+        {
+            "text": "All authors declare no competing interests. . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Declaration of interests"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Figures Legends"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint . CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Figures Legends"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint There were 62 of 64 novel coronavirus-infected medical staff provided an exact date of onset, of which 37 were assigned to group 1 and 25 to group 2. The remaining 2 patients without an exact date of onset were not grouped. Data are presented as medians (interquartile ranges, IQR) and n (%). For each item, the effective sample size of total population, group 1 and group 2 is 64, 37 and 25 unless stated otherwise. * The group of patents with symptoms onset for 10 or less days by the time of admission. \u2020 The group of patents with symptoms onset for more than 10 days by the time of admission.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Tables"
+        },
+        {
+            "text": ". CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Tables"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint There were 62 of 64 novel coronavirus-infected medical staff provided an exact date of onset, of which 37 were assigned to group 1 and 25 to group 2. The remaining 2 patients without an exact date of onset were not grouped. Data are presented as medians (interquartile ranges, IQR) and n (%). * The group of patents with symptoms onset for 10 or less days by the time of first admission. \u2020 The group of patents with symptoms onset for more than 10 days by the time of first admission.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Tables"
+        },
+        {
+            "text": ". CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Tables"
+        },
+        {
+            "text": "is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Tables"
+        }
+    ],
+    "bib_entries": {
+        "BIBREF0": {
+            "ref_id": "b0",
+            "title": "Clinical features of patients infected with 2019 novel coronavirus in Wuhan, China",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Huang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "2. WHO. Novel coronavirus -China",
+            "volume": "395",
+            "issn": "",
+            "pages": "497--506",
+            "other_ids": {}
+        },
+        "BIBREF1": {
+            "ref_id": "b1",
+            "title": "Genomic characterization and epidemiology of 2019 novel coronavirus: implications of virus origins and receptor binding",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Lu",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Zhao",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet",
+            "volume": "395",
+            "issn": "",
+            "pages": "565--574",
+            "other_ids": {}
+        },
+        "BIBREF2": {
+            "ref_id": "b2",
+            "title": "A novel coronavirus outbreak of global health concern",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "P W",
+                    "middle": [],
+                    "last": "Horby",
+                    "suffix": ""
+                },
+                {
+                    "first": "F G",
+                    "middle": [],
+                    "last": "Hayden",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet",
+            "volume": "395",
+            "issn": "",
+            "pages": "470--473",
+            "other_ids": {}
+        },
+        "BIBREF3": {
+            "ref_id": "b3",
+            "title": "A novel coronavirus from patients with pneumonia in China",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Zhu",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Zhang",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "N Engl J Med",
+            "volume": "382",
+            "issn": "",
+            "pages": "727--733",
+            "other_ids": {}
+        },
+        "BIBREF4": {
+            "ref_id": "b4",
+            "title": "Genomic characterization of the 2019 novel human-pathogenic coronavirus isolated from a patient with atypical pneumonia after visiting Wuhan",
+            "authors": [
+                {
+                    "first": "J F W",
+                    "middle": [],
+                    "last": "Chan",
+                    "suffix": ""
+                },
+                {
+                    "first": "K H",
+                    "middle": [],
+                    "last": "Kok",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Zhu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Emerging Microbes & Infections",
+            "volume": "9",
+            "issn": "",
+            "pages": "221--236",
+            "other_ids": {}
+        },
+        "BIBREF5": {
+            "ref_id": "b5",
+            "title": "WHO. Coronavirus disease (COVID-19) technical guidance: laboratory testing for 2019-nCoV in humans",
+            "authors": [],
+            "year": 2020,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF6": {
+            "ref_id": "b6",
+            "title": "Identifcation of a novel coronavirus in patients with severe acute respiratory syndrome",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Drosten",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "G\u00fcnther",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Preiser",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "N Engl J Med",
+            "volume": "348",
+            "issn": "",
+            "pages": "1967--76",
+            "other_ids": {}
+        },
+        "BIBREF7": {
+            "ref_id": "b7",
+            "title": "Middle East respiratory syndrome coronavirus (MERS-CoV): announcement of the Coronavirus Study Group",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "De Groot",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Baker",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Baric",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "J Virol",
+            "volume": "87",
+            "issn": "",
+            "pages": "7790--92",
+            "other_ids": {}
+        },
+        "BIBREF8": {
+            "ref_id": "b8",
+            "title": "Clinical findings in a group of patients infected with the 2019 novel coronavirus (SARS-Cov-2) outside of Wuhan, China: retrospective case series",
+            "authors": [
+                {
+                    "first": "X W",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "X X",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "X G",
+                    "middle": [],
+                    "last": "Jiang",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "BMJ",
+            "volume": "368",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF9": {
+            "ref_id": "b9",
+            "title": "Evolution of the novel coronavirus from the ongoing Wuhan outbreak and modeling of its spike protein for risk of human transmission",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Sci China Life Sci",
+            "volume": "63",
+            "issn": "",
+            "pages": "457--460",
+            "other_ids": {}
+        },
+        "BIBREF10": {
+            "ref_id": "b10",
+            "title": "The Novel Coronavirus Pneumonia Emergency Response Epidemiology Team. The epidemiological characteristics of an outbreak of 2019 novel coronavirus diseases (COVID-19) in China",
+            "authors": [],
+            "year": 2020,
+            "venue": "Chinese Journal of Epidemiology",
+            "volume": "41",
+            "issn": "",
+            "pages": "145--151",
+            "other_ids": {}
+        },
+        "BIBREF11": {
+            "ref_id": "b11",
+            "title": "A familial cluster of pneumonia associated with the 2019 novel coronavirus indicating person-to-person transmission: a study of a family cluster",
+            "authors": [
+                {
+                    "first": "J F W",
+                    "middle": [],
+                    "last": "Chan",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Yuan",
+                    "suffix": ""
+                },
+                {
+                    "first": "K H",
+                    "middle": [],
+                    "last": "Kok",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet",
+            "volume": "395",
+            "issn": "",
+            "pages": "514--523",
+            "other_ids": {}
+        },
+        "BIBREF12": {
+            "ref_id": "b12",
+            "title": "Nowcasting and forecasting the potential domestic and international spread of the 2019-nCoV outbreak originating in Wuhan, China: A modeling study",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Leung",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Leung",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet",
+            "volume": "395",
+            "issn": "",
+            "pages": "689--697",
+            "other_ids": {}
+        },
+        "BIBREF13": {
+            "ref_id": "b13",
+            "title": "Importation and human-to-human transmission of a novel coronavirus in Vietnam",
+            "authors": [
+                {
+                    "first": "L T",
+                    "middle": [],
+                    "last": "Phan",
+                    "suffix": ""
+                },
+                {
+                    "first": "T V",
+                    "middle": [],
+                    "last": "Nguyen",
+                    "suffix": ""
+                },
+                {
+                    "first": "Q C",
+                    "middle": [],
+                    "last": "Luong",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "N Engl J Med",
+            "volume": "382",
+            "issn": "",
+            "pages": "872--874",
+            "other_ids": {}
+        },
+        "BIBREF14": {
+            "ref_id": "b14",
+            "title": "Transmission of 2019-nCoV infection from an asymptomatic contact in Germany",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Rothe",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Schunk",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Sothmann",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "N Engl J Med",
+            "volume": "382",
+            "issn": "",
+            "pages": "970--971",
+            "other_ids": {}
+        },
+        "BIBREF15": {
+            "ref_id": "b15",
+            "title": "Early transmission dynamics in Wuhan, China, of novel coronavirus-infected pneumonia",
+            "authors": [
+                {
+                    "first": "Q",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Guan",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "N Engl J Med",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1056/NEJMoa2001316"
+                ]
+            }
+        },
+        "BIBREF16": {
+            "ref_id": "b16",
+            "title": "Coronavirus disease (COVID-19) outbreak",
+            "authors": [],
+            "year": 2020,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF17": {
+            "ref_id": "b17",
+            "title": "Situation report-43",
+            "authors": [],
+            "year": 2020,
+            "venue": "WHO. Coronavirus disease (COVID-2019)",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF18": {
+            "ref_id": "b18",
+            "title": "Epidemiological and clinical characteristics of 99 cases of 2019 novel coronavirus pneumonia in Wuhan, China: a descriptive study",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Zhou",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Dong",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet",
+            "volume": "395",
+            "issn": "",
+            "pages": "507--513",
+            "other_ids": {}
+        },
+        "BIBREF19": {
+            "ref_id": "b19",
+            "title": "Clinical characteristics of 138 hospitalized patients with 2019 novel coronavirus-infected pneumonia in Wuhan, China",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Hu",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Hu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "JAMA",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF21": {
+            "ref_id": "b21",
+            "title": "The International Severe Acute Respiratory and Emerging Infection Consortium (ISARIC)",
+            "authors": [],
+            "year": 2020,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF22": {
+            "ref_id": "b22",
+            "title": "National Health Commission of the People's Republic of China. New coronavirus pneumonia diagnosis and treatment program (trial version 5, revised version)",
+            "authors": [],
+            "year": 2020,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF23": {
+            "ref_id": "b23",
+            "title": "Central People's Government of the People's Republic of China. China-WHO joint investigation report for novel coronavirus pneumonia (COVID-19)",
+            "authors": [],
+            "year": 2020,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF24": {
+            "ref_id": "b24",
+            "title": "Clinical Characteristics of Coronavirus Disease 2019 in China",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Guan",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Ni",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Hu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "N Engl J Med",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1056/NEJMoa2002032"
+                ]
+            }
+        },
+        "BIBREF25": {
+            "ref_id": "b25",
+            "title": "Radiological findings from 81 patients with COVID-19 pneumonia in Wuhan, China: a descriptive study",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Shi",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Han",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Jiang",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet Infect Dis",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/S1473-3099(20)30086-4"
+                ]
+            }
+        },
+        "BIBREF26": {
+            "ref_id": "b26",
+            "title": "Imaging profile of the COVID-19 infection: radiologic findings and literature review",
+            "authors": [
+                {
+                    "first": "M Y",
+                    "middle": [],
+                    "last": "Ng",
+                    "suffix": ""
+                },
+                {
+                    "first": "Lee",
+                    "middle": [
+                        "E Y P"
+                    ],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Radiology: Cardiothoracic Imaging",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF28": {
+            "ref_id": "b28",
+            "title": "Chest imaging appearance of COVID-19 infection",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Kong",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Agarwal",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Radiology: Cardiothoracic Imaging",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF29": {
+            "ref_id": "b29",
+            "title": "Clinical course and outcomes of critically ill patients with SARS-CoV-2 pneumonia in Wuhan, China: a single-centered, retrospective, observational study",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Yu",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet Respir Med",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "doi.org/10.1016/S2213-2600(20)30079-5"
+                ]
+            }
+        },
+        "BIBREF30": {
+            "ref_id": "b30",
+            "title": "Cancer patients in SARS-CoV-2 infection: a nationwide analysis in China",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Liang",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Guan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "Lancet Oncol",
+            "volume": "",
+            "issn": "",
+            "pages": "30096--30102",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/S1470-2045(20"
+                ]
+            }
+        },
+        "BIBREF31": {
+            "ref_id": "b31",
+            "title": "Characteristics of and Important Lessons From the Coronavirus Disease 2019 (COVID-19) Outbreak in China: Summary of a Report of 72 314 Cases From the Chinese Center for Disease Control and Prevention",
+            "authors": [
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Mcgoogan",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "JAMA",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1001/jama.2020.2648"
+                ]
+            }
+        },
+        "BIBREF32": {
+            "ref_id": "b32",
+            "title": "Into the eye of the cytokine storm. Microbiol",
+            "authors": [
+                {
+                    "first": "J R",
+                    "middle": [],
+                    "last": "Tisoncik",
+                    "suffix": ""
+                },
+                {
+                    "first": "M J",
+                    "middle": [],
+                    "last": "Korth",
+                    "suffix": ""
+                },
+                {
+                    "first": "C P",
+                    "middle": [],
+                    "last": "Simmons",
+                    "suffix": ""
+                }
+            ],
+            "year": 2012,
+            "venue": "Mol. Biol. Rev",
+            "volume": "76",
+            "issn": "",
+            "pages": "16--32",
+            "other_ids": {}
+        },
+        "BIBREF33": {
+            "ref_id": "b33",
+            "title": "IL-6 induces an anti-inflammatory response in the absence of SOCS3 in macrophages",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Yasukawa",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Ohishi",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Mori",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Nature immunology",
+            "volume": "4",
+            "issn": "",
+            "pages": "551--556",
+            "other_ids": {}
+        },
+        "BIBREF34": {
+            "ref_id": "b34",
+            "title": "Mental health care for medical staff in China during the COVID-19 outbreak",
+            "authors": [
+                {
+                    "first": "Q",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Liang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "The Lancet Psychiatry",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/S2215-0366(20)30078-X"
+                ]
+            }
+        },
+        "BIBREF35": {
+            "ref_id": "b35",
+            "title": "Surface Environmental, and Personal Protective Equipment Contamination by Severe Acute Respiratory Syndrome Coronavirus 2 (SARS-CoV-2) From a Symptomatic Patient",
+            "authors": [
+                {
+                    "first": "Swx",
+                    "middle": [],
+                    "last": "Ong",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Tan",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "Y"
+                    ],
+                    "last": "Chia",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "JAMA",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1001/jama.2020.3227"
+                ]
+            }
+        },
+        "BIBREF36": {
+            "ref_id": "b36",
+            "title": "Creatine kinase",
+            "authors": [],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF37": {
+            "ref_id": "b37",
+            "title": "Alanine aminotransferase",
+            "authors": [],
+            "year": null,
+            "venue": "",
+            "volume": "5",
+            "issn": "",
+            "pages": "5--35",
+            "other_ids": {}
+        }
+    },
+    "ref_entries": {
+        "FIGREF1": {
+            "text": "which illustrate the radiological findings in the study cohort on chest CT, 58 (91%) of 64 cases showed abnormalities (Figure 1). 39 (61%) had bilateral lung involvement (Figure 1, A and C). The right lower lobe (70 %) and left lower lobe (64%) were the most common involved lobes. Ground glass opacity was regarded as the predominant abnormality on chest CT (Figure 1, A and B) observed in 33 (52%) of cases, meanwhile subpleural distribution was predominant as identified in 51 (80%)(Figure 1, C). Thickening of the adjacent pleura, nodules, emphysema, pleural effusion and lymphadenopathy were relatively rare. CT scans also found that 19 (30%) of medical staff had one or more chronic lung lesions with a static picture on serial CT examinations(Figure 1, D).",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF2": {
+            "text": "with COVID-19. Further investigations should be devoted to identifying the exact mode of COVID-19 among medical staff. Contributors J.L., L.OY. and C.S.Z. conceptualized the article. J.L., L.OY., P.F., D.Y., Y.K.C., J.T. and S.Y.P. collected the epidemiological, clinical and radiological data. J.L., L.OY., P.G., H.S.W. and Y.L.C. cleaned and analyzed the data. J.L. and F.Y. contributed to radiological data interpretation. J.L., L.OY., P.G., H.S.W. and P.F. drafted the manuscript. X.Y.H., O.A., H.S.S., F.Y. and C.S.Z. revised the final manuscript. All authors approved the final draft of the manuscript. C.S.Z. is the guarantor. The corresponding author attests that all listed authors meet authorship.",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF3": {
+            "text": "Transverse thin-section CT scans in medical staffs infected with COVID-19 pneumonia. (A) 27-year-old woman: bilateral, peripheral ground-glass opacity in the right lower lobe and left upper lobe (arrow). (B) 41-year-old woman: focal ground-glass opacity associated with smooth interlobular and intralobular septal thickening (crazy-paving pattern). (C) 55-year-old man: bilateral, peripheral ground-glass opacity mixed consolidation pattern. (D) 28-year-old man: bilateral and linear consolidations in the right and left upper lobes (arrow), regarded as chronic lung lesion with lack of changes on serial CT examinations.",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF4": {
+            "text": "Hospital discharge rates and relevant risk factors of medical staff infected with COVID-19 pneumonia. (A) The probability of hospital discharge and the length of hospitalization. Gray area represents 95% CI ranges and symbol '+' represents censored data. (B) The results of proportional hazard Cox model. Shown are estimated hazard ratios (HRs) and 95% CI ranges of age, sex, occupation, body mass index (BMI), fever, IL-6 levels, ground-glass opacity on chest CT, bilateral involvement of chest CT and any original chronic lung lesion. The endpoint of Cox model was hospital discharge and patients who remained in hospital as of 24 Feb 2020 were regarded as censored data.",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF5": {
+            "text": "62 of 64 novel coronavirus-infected medical staff provided an exact date of onset, of which 37 were assigned to group 1 and 25 to group 2. The remaining 2 patients without an exact date of onset were not grouped. Data are presented as medians (interquartile ranges, IQR) and n (%). * The group of patents with symptoms onset for 10 or less days by the time of admission. \u2020 The group of patents with symptoms onset for more than 10 days by the time of admission.",
+            "latex": null,
+            "type": "figure"
+        },
+        "TABREF0": {
+            "text": "Demographics and baseline characteristics of 64 medical staff infected with COVID-19 pneumonia in Wuhan, China.. CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint",
+            "latex": null,
+            "type": "table"
+        },
+        "TABREF1": {
+            "text": "Laboratory and radiographic findings of 64 medical staff infected with COVID-19 pneumonia in Wuhan, China.. CC-BY-NC-ND 4.0 International license It is made available under a author/funder, who has granted medRxiv a license to display the preprint in perpetuity.is the (which was not peer-reviewed) The copyright holder for this preprint . https://doi.org/10.1101/2020.03.09.20033118 doi: medRxiv preprint",
+            "latex": null,
+            "type": "table"
+        },
+        "TABREF2": {
+            "text": "Treatments and outcomes of 64 medical staff infected with COVID-19 pneumonia in Wuhan, China.",
+            "latex": null,
+            "type": "table"
+        }
+    },
+    "back_matter": [
+        {
+            "text": "We would like to thank all colleagues for helping us during the current study. The authors would like to express their appreciation for all of the emergency services, nurses, doctors, and other hospital staff for their efforts to combat the COVID-19 outbreak.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Acknowledgments"
+        }
+    ]
+}

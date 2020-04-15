@@ -1,0 +1,3105 @@
+{
+    "paper_id": "be602928156cf0ace9899c1c8569eb4f4ea4597b",
+    "metadata": {
+        "title": "Thampi and Morris Critical Care",
+        "authors": [
+            {
+                "first": "Nisha",
+                "middle": [],
+                "last": "Thampi",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Mount Sinai Hopsital",
+                    "location": {
+                        "addrLine": "600 University Avenue, Suit 415",
+                        "postCode": "M5G 1X5",
+                        "settlement": "Toronto",
+                        "region": "ON",
+                        "country": "Canada"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Andrew",
+                "middle": [
+                    "M"
+                ],
+                "last": "Morris",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Mount Sinai Hopsital",
+                    "location": {
+                        "addrLine": "600 University Avenue, Suit 415",
+                        "postCode": "M5G 1X5",
+                        "settlement": "Toronto",
+                        "region": "ON",
+                        "country": "Canada"
+                    }
+                },
+                "email": "amorris@mtsinai.on.ca"
+            }
+        ]
+    },
+    "abstract": [
+        {
+            "text": "Infection prevention and control interventions are costeff ective and improve patient outcomes in critically ill patients in the ICU.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        }
+    ],
+    "body_text": [
+        {
+            "text": "In the last 50 years, the discipline of infection prevention and control (IPAC) has undergone numerous metamorphoses. Initially intended to address nosocomial infections at the time of a nationwide epidemic of hospital-based staphylococcal infections [1] , the practice of IPAC has shifted from that of reaction to prevention. Th ere has been increasing emphasis on prevention of nosocomial infections through principles of hand hygiene, cleaning and sterilization, and antimicrobial prophylaxis. Nonetheless, infectious diseases continue to challenge the quality of care provided in ICUs. Prompted by accreditation and patient-centered care, hospitals are challenged to provide high-quality care with fi nite fi nancial resources. Any new IPAC initiative will thus be examined for its cost-eff ectiveness.",
+            "cite_spans": [
+                {
+                    "start": 251,
+                    "end": 254,
+                    "text": "[1]",
+                    "ref_id": "BIBREF0"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Th e broad impact of infection control on rates of hospital-associated infections goes back more than 200 years. A 1795 treatise on puerperal fever by Alexander Gordon, who made seminal observations as an obste trician in the United Kingdom, suggested the illness was due to an infection, and recommended that healthcare workers (HCW) wash themselves and have their clothing fumigated after contact with these patients [2] . Th e eminent American physician Oliver Wendell Holmes also suggested that gowns worn by physicians during autopsies served as vectors for transmission of puerperal fever among women in labor in the 1800s [3] .",
+            "cite_spans": [
+                {
+                    "start": 419,
+                    "end": 422,
+                    "text": "[2]",
+                    "ref_id": "BIBREF1"
+                },
+                {
+                    "start": 629,
+                    "end": 632,
+                    "text": "[3]",
+                    "ref_id": "BIBREF2"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Ignaz Semmelweiss, a Hungarian physician and contemporary of Holmes, consolidated these theories through his epidemiologic work at a Viennese hospital with the realization that frequent contact with cadavers among medical students was associated with transmission of particles to women in labor, leading to puerperal fever and even sepsis. He is credited with introducing hand disinfection prior to vaginal examination, with a subsequent dramatic decrease in mortality [4] . Th is practice was reinforced in Florence Nightingale's 1859 treatise, in which she called for 'every nurse \u2026 to be careful to wash her hands very frequently during the day' [5] .",
+            "cite_spans": [
+                {
+                    "start": 469,
+                    "end": 472,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 649,
+                    "end": 652,
+                    "text": "[5]",
+                    "ref_id": "BIBREF4"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "While the principles of hand hygiene still apply from the time of Semmelweiss, IPAC's scope has broadened from controlling infection with highly pathogenic organisms to preventing the spread of emerging drugresistant organisms and viruses. Th e escalating costs of modern patient isolation and personal protective equipment, however, especially among critically ill patients in the ICU, call into question the wisdom of spending so much in this area. Most importantly, are these expenses justifi ed in terms of positive patient",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "You are responsible for a large medical surgical ICU. Your hospital administration has been very focused on reducing rates of hospital-acquired infections particularly in the wake of increasing public attention. However, it is time for budget preparation and your fi nancial offi cer is concerned about the escalating costs associated with patient isolation and barrier precautions/personal protective equipment. Having become aware of the high costs associated with these interventions, you start to wonder about the wisdom of spending so much in this area. Your hospital administration wants your direction on next year's expenditures. You are debating whether the expense is worthwhile and advise your hospital administration accordingly.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "outcomes? To address this question, we present a discussion on the merits, concerns and costs surrounding enhanced precautions for critically ill patients, the latter of which was found to be lacking in a systematic review of the literature performed within the last 5 years [6] .",
+            "cite_spans": [
+                {
+                    "start": 275,
+                    "end": 278,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Pro: IPAC interventions are cost-eff ective and improve patient outcomes in critically ill patients in the ICU Nosocomial infections in the ICU have been associated with signifi cant mortality and increased resource consump tion [7] . A recent study conducted prospectively across Austrian ICUs found that patients with nosocomial infections had prolonged device exposure, including endotracheal tubes, central venous catheters and urinary catheters, increased mortality rates, and longer length of stay in the ICU and the hospital [8] .",
+            "cite_spans": [
+                {
+                    "start": 229,
+                    "end": 232,
+                    "text": "[7]",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 532,
+                    "end": 535,
+                    "text": "[8]",
+                    "ref_id": "BIBREF7"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "To appreciate the impact of nosocomial infections in the ICU, one needs to look no further than the issue of methicillin-resistant Staphylococcus aureus (MRSA). During the 1990s, healthcare-associated MRSA infec tions increased dramatically [9] and MRSA was the predominant pathogen in most ICUs in the United States [10] . Moreover, these infections were associated with increased mortality and costs as compared with antibioticsusceptible strains of the same species [11, 12] . Transmission has been the major factor contributing to the increased prevalence of MRSA, with a 15-fold higher rate of transmission of MRSA among patients on standard precautions who were not yet recognized to be colonized [13, 14] .",
+            "cite_spans": [
+                {
+                    "start": 241,
+                    "end": 244,
+                    "text": "[9]",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 317,
+                    "end": 321,
+                    "text": "[10]",
+                    "ref_id": "BIBREF9"
+                },
+                {
+                    "start": 469,
+                    "end": 473,
+                    "text": "[11,",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 474,
+                    "end": 477,
+                    "text": "12]",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 703,
+                    "end": 707,
+                    "text": "[13,",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 708,
+                    "end": 711,
+                    "text": "14]",
+                    "ref_id": "BIBREF13"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Th e implementation of strict IPAC practices, including hand hygiene and active surveillance of colonized patients with subsequent barrier precautions, has been credited for the declining rates of MRSA catheter-related bloodstream infections by 50% or more in medical, surgical, cardiac and pediatric ICUs since 2001 [15] . Th e benefi ts of specifi c IPAC interventions, however, are diffi cult to tease out as many are bundled, especially those related to personal protective equipment and active surveillance. Hand hygiene has become a well-recognized means of lowering the rates of hospital-associated infections in ICU and non-ICU settings, despite highest compliance rates of only 55 to 65% [16] [17] [18] . Furthermore, two prospective studies in medical ICUs found that the use of gowns with gloves was associated with a lower risk of nosocomial cross-transmission of vancomycin-resistant Enterococcus (VRE) [19, 20] . A large multicenter trial in 108 ICUs in Michigan saw a signifi cant and durable decrease in the mean rate of catheter-related bloodstream infections with maximum sterile barrier precautions during insertion of central venous catheters and removal of unnecessary catheters [21] . Jain and colleagues also reported a signifi cant decline in rates of healthcare-associated MRSA infections in the largest prospective observational trial to date, with the implementation of an MRSA bundle in ICU and non-ICU settings across the United States [22] .",
+            "cite_spans": [
+                {
+                    "start": 317,
+                    "end": 321,
+                    "text": "[15]",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 697,
+                    "end": 701,
+                    "text": "[16]",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 702,
+                    "end": 706,
+                    "text": "[17]",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 707,
+                    "end": 711,
+                    "text": "[18]",
+                    "ref_id": "BIBREF17"
+                },
+                {
+                    "start": 916,
+                    "end": 920,
+                    "text": "[19,",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 921,
+                    "end": 924,
+                    "text": "20]",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 1200,
+                    "end": 1204,
+                    "text": "[21]",
+                    "ref_id": "BIBREF20"
+                },
+                {
+                    "start": 1465,
+                    "end": 1469,
+                    "text": "[22]",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "In an eff ort to determine which intervention has the most signifi cant impact on nosocomial infections, a retro spective study reviewed four major IPAC interventions in ICU and non-ICU settings for controlling MRSA: maximally sterile central venous catheter placement, alcohol hand rub, a hospital-wide hand hygiene campaign, and routine surveillance for MRSA in all ICU patients with implementation of barrier precautions if the patient was found to be positive [23] . Only a routine screen with subsequent contact isolation was associated with a signifi cant decrease in hospital-associated MRSA bacteremia in the ICU setting. Active surveillance for MRSA colonization among ICU patients with subsequent implementation of barrier precautions has also been shown in the non-ICU setting [23] [24] [25] and in the neonatal ICU setting [13] to signifi cantly decrease the rates of transmission and incidence of nosocomial MRSA bacteremias, despite only 55% compliance with contact precautions for ICU patients known to be colonized with MRSA [25] .",
+            "cite_spans": [
+                {
+                    "start": 464,
+                    "end": 468,
+                    "text": "[23]",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 788,
+                    "end": 792,
+                    "text": "[23]",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 793,
+                    "end": 797,
+                    "text": "[24]",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 798,
+                    "end": 802,
+                    "text": "[25]",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 835,
+                    "end": 839,
+                    "text": "[13]",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 1041,
+                    "end": 1045,
+                    "text": "[25]",
+                    "ref_id": "BIBREF24"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Against the extra costs and extra length of stay attributed to nosocomial infections among critically ill patients, IPAC interventions have been shown to be costeff ective for bloodstream infections [7, 26] . Kirkland and Weinstein estimated that the cost for a patient in contact isolation within the ICU, with highly-compliant disposable gown and latex glove use, was US$1,627 per patient (1999 valuation) [27] . Broadening handwashing compliance to patients and relatives has been calculated to save more than CDN$600,000 per year in a community hospital setting [28] .",
+            "cite_spans": [
+                {
+                    "start": 199,
+                    "end": 202,
+                    "text": "[7,",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 203,
+                    "end": 206,
+                    "text": "26]",
+                    "ref_id": "BIBREF25"
+                },
+                {
+                    "start": 209,
+                    "end": 221,
+                    "text": "Kirkland and",
+                    "ref_id": null
+                },
+                {
+                    "start": 408,
+                    "end": 412,
+                    "text": "[27]",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 566,
+                    "end": 570,
+                    "text": "[28]",
+                    "ref_id": "BIBREF27"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Numerous studies have shown that active surveillance (heterogeneously defi ned in studies as universal versus targeted screening of high-risk patients) with subsequent hand hygiene and use of gowns, gloves and/or masks is associated not only with decreased rates of nosocomial infections -especially due to MRSA and VRE -but with signifi cant cost savings. Following two MRSA outbreaks in separate neonatal ICUs, Karchmer and colleagues evaluated the costs of one institution's preventive measures -namely, weekly active surveillance cultures and isolation of MRSA-colonized patients -with the potential costs of not intervening promptly or eff ectively at the other institution [29] . Th e overall cost of surveillance cultures was US$27,590 (2002 valuation). Th e cost of isolation, which included gloves, paper gown, simple isolation mask and the 1 minute of personnel time to put on and remove the items, was estimated at US$0.94 per patient per visit, for a total of US$21,027 to 42,047 for the duration of the outbreak. Th e attributable excess costs of MRSA bacteremia infections in the other neonatal ICU was estimated at 19-fold to 27-fold higher, suggesting that the prevention of 2.8 to 4.0 MRSA bacteremias would have justifi ed the costs of the preventive measures. A cost-benefi t analysis in a medical ICU also showed that active identifi cation of patients with infection or colonization by MRSA via selective screening and isolation was more cost-eff ective than treating patients with MRSA infections, with mean excess total costs attributable to nosocomial MRSA infection at $9,275 per patient compared with a total cost of contact screening and isolation of up to $700 per patient [30] .",
+            "cite_spans": [
+                {
+                    "start": 679,
+                    "end": 683,
+                    "text": "[29]",
+                    "ref_id": "BIBREF28"
+                },
+                {
+                    "start": 1701,
+                    "end": 1705,
+                    "text": "[30]",
+                    "ref_id": "BIBREF29"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Similarly, the cost-eff ectiveness of active surveillance for all high-risk patients in one hospital was compared with estimated attributable costs due to VRE bacteremias in another hospital with 75 cases of VRE infections over a 24-month period [31] . Th e total cost of active surveillance cultures was US$91,108, and the cost of contact isolation -including gown, gloves and labor -was US$1.18 per patient per visit. Despite the excess attributable cost of VRE bacteremia being estimated from a case-control study of VRE, the cost of culture and isolation was found to be one-third the cost attributable to VRE bacteremia in an endemic setting. A similar study in a VRE-endemic oncology unit found that enhanced precautions, which included surveillance cultures, handwashing, and contact isolation with gown and glove use, resulted in fewer VRE bloodstream infections and colonized patients, with a net saving of US$189,318 over 1 year [32] . Th e authors concluded that controlling VRE transmission was cost-eff ective, particularly in a setting where the incidence of VRE bloodstream infections is at least six to nine patients per year.",
+            "cite_spans": [
+                {
+                    "start": 246,
+                    "end": 250,
+                    "text": "[31]",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 939,
+                    "end": 943,
+                    "text": "[32]",
+                    "ref_id": "BIBREF31"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Despite the small literature base, existing evidence supports IPAC interventions as cost-eff ective in decreasing transmission of MRSA and VRE among critically ill patients.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "Despite published guidelines on hospital infection control practices in ICU and non-ICU settings, there remains skepticism on whether these measures are cost-eff ective or even detrimental to the quality of patient care.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "A case-control study of patients in a medical ICU showed that HCW were highly compliant with gown and glove use, but were two times less likely to enter the rooms of patients in contact isolation and had signifi cantly less direct contact with these patients [27] . In a prospective cohort study among 139 medical inpatients infected or colonized with VRE at two medical centers, attending physicians were about one-half as likely to examine patients under contact precautions compared with those not under precautions, and only examined one-third of patients in the isolation group during morning rounds [33] . A similar observational study among surgical ICU and non-ICU patients found a reduction in the time HCW spent with patients on contact precautions (5.3 versus 10.9 visits per hour for patients not isolated) not explained by severity of illness [34] .",
+            "cite_spans": [
+                {
+                    "start": 259,
+                    "end": 263,
+                    "text": "[27]",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 605,
+                    "end": 609,
+                    "text": "[33]",
+                    "ref_id": "BIBREF32"
+                },
+                {
+                    "start": 856,
+                    "end": 860,
+                    "text": "[34]",
+                    "ref_id": "BIBREF33"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "During the severe acute respiratory syndrome outbreak in Toronto, Canada, patients with the infection were frequently alone between brief contacts with staff , and some had worsening psychological symptoms during their stay, including panic attacks. Nearly one-half of hospital employees reported diffi culty in communicating with patients through the enhanced infectious precautions [35, 36] .",
+            "cite_spans": [
+                {
+                    "start": 384,
+                    "end": 388,
+                    "text": "[35,",
+                    "ref_id": "BIBREF34"
+                },
+                {
+                    "start": 389,
+                    "end": 392,
+                    "text": "36]",
+                    "ref_id": "BIBREF35"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "Th e emerging question of patient safety was raised in a study of patients isolated for MRSA colonization or infection [37] . In addition to dramatically reduced clinical documentation, these patients were twice as likely to experience preventable adverse events, including supportive care failures such as falls, pressure ulcers, and fl uid or electrolyte disorders, and reported higher rates of dissatisfaction with the quality of care received. A prospective, randomized and controlled study in two surgical ICUs sought to determine whether barrier precautions would lower the incidence of hospitalassociated pneumonia in 153 intubated patients. Among intubated patients in two surgical ICUs, patients randomized to contact isolation with disposable gowns, gloves and hand hygiene had similar rates of airway colonization but a higher incidence of nosocomial pneumonia than patients on standard precautions with hand hygiene and gloves over a 15-month period [38] .",
+            "cite_spans": [
+                {
+                    "start": 119,
+                    "end": 123,
+                    "text": "[37]",
+                    "ref_id": "BIBREF36"
+                },
+                {
+                    "start": 962,
+                    "end": 966,
+                    "text": "[38]",
+                    "ref_id": "BIBREF37"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "Taken together, these studies suggest that isolation of patients for infection control purposes may have a deleterious eff ect on the quality of medical care received and perceived by these patients.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "Another argument against enhanced infection control measures is that they are often based on poor-quality evidence. Given the high prevalence of infl uenzaassociated respiratory illnesses in hospitals, recent studies have examined the practice of enhanced respiratory precautions. A randomized controlled trial comparing surgical masks with N95 masks among HCW during the infl uenza season showed similar rates of laboratory-confi rmed infl uenza [39] . A contemporary study among patients from an emergency department also found surgical masks to be equally as eff ective as N95 masks, with no infl uenza detected by PCR with either mask [40] . Moreover, many HCW fi nd N95 masks diffi cult to tolerate [36] . Given that a recent literature review was unable to identify high-quality studies to support the use of N95 over surgical masks in healthcare settings [41] , the lack of defi nitive data would suggest that the use of the more expensive N95 masks may not be justifi ed in most healthcare settings.",
+            "cite_spans": [
+                {
+                    "start": 447,
+                    "end": 451,
+                    "text": "[39]",
+                    "ref_id": "BIBREF38"
+                },
+                {
+                    "start": 639,
+                    "end": 643,
+                    "text": "[40]",
+                    "ref_id": "BIBREF39"
+                },
+                {
+                    "start": 704,
+                    "end": 708,
+                    "text": "[36]",
+                    "ref_id": "BIBREF35"
+                },
+                {
+                    "start": 862,
+                    "end": 866,
+                    "text": "[41]",
+                    "ref_id": "BIBREF40"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "Most of the evidence for controlling VRE transmission relates to colonization rather than bacteremia, and may not necessarily refl ect improved patient outcomes. High colonization pressure (that is, the proportion of other patients colonized with VRE within a medical ICU) is a major variable aff ecting the rate of acquisition of VRE [20, 42] . However, there have been no studies linking colonization pressure to rates of VRE-associated disease. While gown and glove use for preventing nosocomial transmission of VRE is a Grade IA recommendation by the Society for Healthcare Epidemiology of America [14] , there is no clear evidence suggesting that these infection control practices have led to a reduction in the incidence of disease. Among ICU patients who acquired and did not acquire VRE, rates of hand-washing and glove use were comparable [42] , and gowns may [20] or may not [43] have a protective eff ect over glove use alone. Furthermore, unlike MRSA, preventing VRE transmission has been suggested to be cost-eff ective only in endemic settings, where at least six patients per year will develop bloodstream infections [32] . Even then, compliance with barrier precautions may itself present as a barrier to reducing the rate of transmission of nosocomial infections. In a recent cluster-randomized controlled trial involving 5,434 admissions to 10 intervention ICUs and 3,705 admissions to eight control ICUs, there was no reported diff erence in rates of transmission of MRSA or VRE through the use of barrier precautions, in which surveillance for MRSA and VRE detection was performed in both groups and contact precautions were initiated only in the intervention group [44] . Barrier precautions were not followed as often as required by protocol, and it was suggested that this lack of adherence led to the lack of impact on transmission rates. Interestingly, this fi nding has not been demonstrated in other trials but is arguably refl ective of real-world compliance issues around infection control strategies.",
+            "cite_spans": [
+                {
+                    "start": 335,
+                    "end": 339,
+                    "text": "[20,",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 340,
+                    "end": 343,
+                    "text": "42]",
+                    "ref_id": "BIBREF41"
+                },
+                {
+                    "start": 602,
+                    "end": 606,
+                    "text": "[14]",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 848,
+                    "end": 852,
+                    "text": "[42]",
+                    "ref_id": "BIBREF41"
+                },
+                {
+                    "start": 869,
+                    "end": 873,
+                    "text": "[20]",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 885,
+                    "end": 889,
+                    "text": "[43]",
+                    "ref_id": "BIBREF42"
+                },
+                {
+                    "start": 1132,
+                    "end": 1136,
+                    "text": "[32]",
+                    "ref_id": "BIBREF31"
+                },
+                {
+                    "start": 1686,
+                    "end": 1690,
+                    "text": "[44]",
+                    "ref_id": "BIBREF43"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Con: Infection prevention and control interventions are not cost-eff ective and do not improve patient outcomes in critically ill patients in the ICU"
+        },
+        {
+            "text": "Infection control practices have made a remarkable impact on rates of cross-transmission among critically ill patients. Compliance with hand hygiene and contact precautions has been shown to be signifi cantly higher in isolation rooms, suggesting that knowledge of enhanced precautions may motivate HCW to further decrease transmission to other patients [19, 20, 27, 43, 45] . Isolation with barrier precautions has decreased the spread of MRSA infection when coupled with active surveillance cultures to detect colonized patients serving as a reservoir for spread [24] . Th e costs of implementing enhanced precautions have also been shown to be eff ective in decreasing MRSA infection, although less clearly so regarding VRE bacteremia (but certainly for VRE colonization), and arguably excessive for infl uenza (given the data for surgical masks being non-inferior to the more expensive N95 masks).",
+            "cite_spans": [
+                {
+                    "start": 354,
+                    "end": 358,
+                    "text": "[19,",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 359,
+                    "end": 362,
+                    "text": "20,",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 363,
+                    "end": 366,
+                    "text": "27,",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 367,
+                    "end": 370,
+                    "text": "43,",
+                    "ref_id": "BIBREF42"
+                },
+                {
+                    "start": 371,
+                    "end": 374,
+                    "text": "45]",
+                    "ref_id": "BIBREF44"
+                },
+                {
+                    "start": 565,
+                    "end": 569,
+                    "text": "[24]",
+                    "ref_id": "BIBREF23"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        },
+        {
+            "text": "Such IPAC interventions have been promoted as not only benefi cial to the isolated patient but also to other patients and HCW in the ICU. However, the net eff ect of IPAC measures on patient care -with less time spent in patient rooms, less time examining patients, more incomplete records of vital signs and progress notes, and, most disturbingly, increased likelihood of preventable adverse events -remains unclear.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        },
+        {
+            "text": "With the emergence of multidrug-resistant Gramnegative organisms and novel viruses, the inevitable question being put to IPAC practitioners is whether colonized patients should be identifi ed by screening and isolated to minimize transmission to other patients. Given the lack of high-quality evidence, current practice is highly variable -some institutions implement selective surveillance and isolation of patients in the ICU and non-ICU settings, and other institutions isolate only patients identifi ed with infections secondary to these pathogens.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        },
+        {
+            "text": "One argument for enhanced precautions follows the precautionary Hippocratic principle of primum non nocere (fi rst, do no harm), which has been central to IPAC since Semmelweiss's time. Th is fundamental principle, however, has been extrapolated to justify enhanced IPAC measures against drug-resistant organisms (as they are also considered preventable infections) [31, 46] . Hand hygiene clearly does not harm patients and is almost certainly benefi cial. However, barrier precautions to contain and protect HCW and other patients from infection with drug-resistant or virulent organisms may arguably cause harm to those patients under isolation.",
+            "cite_spans": [
+                {
+                    "start": 366,
+                    "end": 370,
+                    "text": "[31,",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 371,
+                    "end": 374,
+                    "text": "46]",
+                    "ref_id": "BIBREF45"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        },
+        {
+            "text": "Until there is evidence that isolating patients with multidrug-resistant organisms is of benefi t to the patient and HCW, and that such interventions are cost-eff ective in reducing the spread of disease (rather than colonization) among critically ill patients, it is diffi cult to justify enhanced surveillance and precaution strategies to the primary healthcare team without further proof [47] . Th ere is no question that controlling an outbreak is costly to the institution; however, it is not enough to use MRSA control as a prototypic approach for all emerging infections. IPAC measures should take into consideration the setting, epidemiology, virulence factors, mode of transmission and degree of transmissibility of various pathogens: treatment options and strategies for prevention and control at the patient and administrative levels may be completely diff erent among pathogenic organisms and depending on the availability of local resources.",
+            "cite_spans": [
+                {
+                    "start": 391,
+                    "end": 395,
+                    "text": "[47]",
+                    "ref_id": "BIBREF46"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        },
+        {
+            "text": "Given the recent focus on healthcare fi nancing, IPAC measures are being increasingly scrutinized in terms of costs to the hospital. Barrier precautions may require new money but resources may also be found by reprioritizing the hospital's budget, with the focus on preventing hospital-associated infections. Regardless, it is important to critically appraise and promote evidencebased practices that are not only benefi cial to patients but are also justifi ed in terms of costs saved to the institution. While some IPAC interventions have been shown to decrease rates of transmission of nosocomial pathogens, there are few studies beyond MRSA and VRE that examine the economic impact of routinely implementing such measures, including droplet isolation for critically ill patients with a cough or airborne precautions where the index of suspicion for tuberculosis is low, or screening for and isolation of asymptomatic patients with extended-spectrum \u03b2-lactamases. Given that IPAC interventions are poorly followed and may not result in reduced transmission rates, further research is important in these areas to determine whether these measures should remain the standard of care. Where the evidence is lacking, especially in the case of novel pathogens, close collaboration, research and innovation among critical care, infection control, infectious diseases, clinical microbiology and nursing staff are essential for the success of preventing and controlling infections for critically ill patients.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Resolution: In the ICU, patient isolation and barrier protection are more benefi cial than detrimental"
+        }
+    ],
+    "bib_entries": {
+        "BIBREF0": {
+            "ref_id": "b0",
+            "title": "The Epidemic Intelligence Service of the Center for Disease Control",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Langmuir",
+                    "suffix": ""
+                }
+            ],
+            "year": 1980,
+            "venue": "Public Health Rep",
+            "volume": "95",
+            "issn": "",
+            "pages": "470--477",
+            "other_ids": {}
+        },
+        "BIBREF1": {
+            "ref_id": "b1",
+            "title": "puerperal sepsis, and modern theories of infection control -Semmelweis in perspective",
+            "authors": [
+                {
+                    "first": "Im: Alexander",
+                    "middle": [],
+                    "last": "Gould",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Gordon",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "Lancet Infect Dis",
+            "volume": "10",
+            "issn": "",
+            "pages": "275--278",
+            "other_ids": {}
+        },
+        "BIBREF2": {
+            "ref_id": "b2",
+            "title": "The contagiousness of puerperal fever",
+            "authors": [
+                {
+                    "first": "O",
+                    "middle": [],
+                    "last": "Holmes",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "N Engl Q J Med Surg",
+            "volume": "1843",
+            "issn": "",
+            "pages": "501--530",
+            "other_ids": {}
+        },
+        "BIBREF3": {
+            "ref_id": "b3",
+            "title": "Pioneers in infection control. Ignaz Philipp Semmelweis",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Newsom",
+                    "suffix": ""
+                }
+            ],
+            "year": 1993,
+            "venue": "J Hosp Infect",
+            "volume": "23",
+            "issn": "",
+            "pages": "175--187",
+            "other_ids": {}
+        },
+        "BIBREF4": {
+            "ref_id": "b4",
+            "title": "Notes on Nursing: What It Is, and What It Is Not",
+            "authors": [
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Nightingale",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF5": {
+            "ref_id": "b5",
+            "title": "Eff ectiveness of barrier precautions and surveillance cultures to control transmission of multidrug-resistant organisms: a systematic review of the literature",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Aboelela",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Saiman",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Stone",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Lowy",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Quiros",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Larson",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "Am J Infect Control",
+            "volume": "34",
+            "issn": "",
+            "pages": "484--494",
+            "other_ids": {}
+        },
+        "BIBREF6": {
+            "ref_id": "b6",
+            "title": "Nosocomial bloodstream infection in critically ill patients. Excess length of stay, extra costs, and attributable mortality",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Pittet",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Tarara",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Wenzel",
+                    "suffix": ""
+                }
+            ],
+            "year": 1994,
+            "venue": "JAMA",
+            "volume": "271",
+            "issn": "",
+            "pages": "1598--1601",
+            "other_ids": {}
+        },
+        "BIBREF7": {
+            "ref_id": "b7",
+            "title": "Impact of nosocomial infections on clinical outcome and resource consumption in critically ill patients",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Burgmann",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Hiesmayr",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Savey",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Bauer",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Metnitz",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Metnitz",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "Intensive Care Med",
+            "volume": "36",
+            "issn": "",
+            "pages": "1597--1601",
+            "other_ids": {}
+        },
+        "BIBREF8": {
+            "ref_id": "b8",
+            "title": "Public Health Service, US Department of Health and Human Services: National Nosocomial Infections Surveillance (NNIS) System report, data summary from",
+            "authors": [],
+            "year": 1990,
+            "venue": "Hospital Infections Program, National Center for Infectious Diseases",
+            "volume": "27",
+            "issn": "",
+            "pages": "520--532",
+            "other_ids": {}
+        },
+        "BIBREF9": {
+            "ref_id": "b9",
+            "title": "Changes in the epidemiology of methicillin-resistant Staphylococcus aureus in intensive care units in US hospitals",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Klevens",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Edwards",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Tenover",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Mcdonald",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Horan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Gaynes",
+                    "suffix": ""
+                }
+            ],
+            "year": 1992,
+            "venue": "Clin Infect Dis",
+            "volume": "42",
+            "issn": "",
+            "pages": "389--391",
+            "other_ids": {}
+        },
+        "BIBREF10": {
+            "ref_id": "b10",
+            "title": "Comparison of mortality associated with methicillin-resistant and methicillin-susceptible Staphylococcus aureus bacteremia: a metaanalysis",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Cosgrove",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Sakoulas",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "N"
+                    ],
+                    "last": "Perencevich",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Schwaber",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Karchmer",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Carmeli",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Clin Infect Dis",
+            "volume": "36",
+            "issn": "",
+            "pages": "53--59",
+            "other_ids": {}
+        },
+        "BIBREF11": {
+            "ref_id": "b11",
+            "title": "Adverse clinical and economic outcomes attributable to methicillin resistance among patients with Staphylococcus aureus surgical site infection",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Engemann",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Carmeli",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Cosgrove",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Fowler",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "Z"
+                    ],
+                    "last": "Bronstein",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Trivette",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Briggs",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Sexton",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Kaye",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Clin Infect Dis",
+            "volume": "36",
+            "issn": "",
+            "pages": "592--598",
+            "other_ids": {}
+        },
+        "BIBREF12": {
+            "ref_id": "b12",
+            "title": "Eff ectiveness of contact isolation during a hospital outbreak of methicillin-resistant Staphylococcus aureus",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Jernigan",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Titus",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "H"
+                    ],
+                    "last": "Groschel",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Getchell-White",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Farr",
+                    "suffix": ""
+                }
+            ],
+            "year": 1996,
+            "venue": "Am J Epidemiol",
+            "volume": "143",
+            "issn": "",
+            "pages": "496--504",
+            "other_ids": {}
+        },
+        "BIBREF13": {
+            "ref_id": "b13",
+            "title": "SHEA guideline for preventing nosocomial transmission of multidrugresistant strains of Staphylococcus aureus and enterococcus",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Muto",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Jernigan",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Ostrowsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Richet",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Jarvis",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Boyce",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Farr",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Infect Control Hosp Epidemiol",
+            "volume": "24",
+            "issn": "",
+            "pages": "362--386",
+            "other_ids": {}
+        },
+        "BIBREF14": {
+            "ref_id": "b14",
+            "title": "Methicillinresistant Staphylococcus aureus central line-associated bloodstream infections in US intensive care units",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Burton",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Edwards",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Horan",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Jernigan",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Fridkin",
+                    "suffix": ""
+                }
+            ],
+            "year": 1997,
+            "venue": "",
+            "volume": "301",
+            "issn": "",
+            "pages": "727--736",
+            "other_ids": {}
+        },
+        "BIBREF15": {
+            "ref_id": "b15",
+            "title": "Comparative effi cacy of alternative hand-washing agents in reducing nosocomial infections in intensive care units",
+            "authors": [
+                {
+                    "first": "B",
+                    "middle": [
+                        "N"
+                    ],
+                    "last": "Doebbeling",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Stanley",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Sheetz",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Pfaller",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Houston",
+                    "suffix": ""
+                },
+                {
+                    "first": "Annis",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Wenzel",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "",
+                    "suffix": ""
+                }
+            ],
+            "year": 1992,
+            "venue": "N Engl J Med",
+            "volume": "327",
+            "issn": "",
+            "pages": "88--93",
+            "other_ids": {}
+        },
+        "BIBREF16": {
+            "ref_id": "b16",
+            "title": "Eff ectiveness of a hospital-wide programme to improve compliance with hand hygiene",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Pittet",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Hugonnet",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Harbarth",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Mourouga",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Sauvan",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Touveneau",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "V"
+                    ],
+                    "last": "Perneger",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "Infection Control Programme. Lancet",
+            "volume": "356",
+            "issn": "",
+            "pages": "1307--1312",
+            "other_ids": {}
+        },
+        "BIBREF17": {
+            "ref_id": "b17",
+            "title": "Reduction in nosocomial infection with improved hand hygiene in intensive care units of a tertiary care hospital in Argentina",
+            "authors": [
+                {
+                    "first": "V",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Rosenthal",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Guzman",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Safdar",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Am J Infect Control",
+            "volume": "33",
+            "issn": "",
+            "pages": "392--397",
+            "other_ids": {}
+        },
+        "BIBREF18": {
+            "ref_id": "b18",
+            "title": "A prospective study to determine whether cover gowns in addition to gloves decrease nosocomial transmission of vancomycin-resistant enterococci in an intensive care unit",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Srinivasan",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Song",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Ross",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Merz",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Brower",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Perl",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Infect Control Hosp Epidemiol",
+            "volume": "23",
+            "issn": "",
+            "pages": "424--428",
+            "other_ids": {}
+        },
+        "BIBREF19": {
+            "ref_id": "b19",
+            "title": "To gown or not to gown: the eff ect on acquisition of vancomycin-resistant enterococci",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Puzniak",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Leet",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Mayfi Eld",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Kollef",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Mundy",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Clin Infect Dis",
+            "volume": "35",
+            "issn": "",
+            "pages": "18--25",
+            "other_ids": {}
+        },
+        "BIBREF20": {
+            "ref_id": "b20",
+            "title": "An intervention to decrease catheter-related bloodstream infections in the ICU",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Pronovost",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Needham",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Berenholtz",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Sinopoli",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Chu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Cosgrove",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Sexton",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Hyzy",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Welsh",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Roth",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Bander",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Kepros",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Goeschel",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "N Engl J Med",
+            "volume": "355",
+            "issn": "",
+            "pages": "2725--2732",
+            "other_ids": {}
+        },
+        "BIBREF21": {
+            "ref_id": "b21",
+            "title": "Veterans Aff airs initiative to prevent methicillin-resistant Staphylococcus aureus infections",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Jain",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Kralovic",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Evans",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Ambrose",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Simbartl",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Obrosky",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Render",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Freyberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Jernigan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Muder",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Miller",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Roselle",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "N Engl J Med",
+            "volume": "364",
+            "issn": "",
+            "pages": "1419--1430",
+            "other_ids": {}
+        },
+        "BIBREF22": {
+            "ref_id": "b22",
+            "title": "Impact of routine intensive care unit surveillance cultures and resultant barrier precautions on hospital-wide methicillin-resistant Staphylococcus aureus bacteremia",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Huang",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Yokoe",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Hinrichsen",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Spurchise",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Datta",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Miroshnik",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Platt",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "Clin Infect Dis",
+            "volume": "43",
+            "issn": "",
+            "pages": "971--978",
+            "other_ids": {}
+        },
+        "BIBREF23": {
+            "ref_id": "b23",
+            "title": "Epidemiology of nosocomial infections caused by methicillin-resistant Staphylococcus aureus",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Thompson",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Cabezudo",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Wenzel",
+                    "suffix": ""
+                }
+            ],
+            "year": 1982,
+            "venue": "Ann Intern Med",
+            "volume": "97",
+            "issn": "",
+            "pages": "309--317",
+            "other_ids": {}
+        },
+        "BIBREF24": {
+            "ref_id": "b24",
+            "title": "Trends in methicillinresistant Staphylococcus aureus (MRSA) bloodstream infections: eff ect of the MRSA 'search and isolate' strategy in a hospital in Italy with hyperendemic MRSA",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Pan",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Carnevale",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Catenazzi",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Colombini",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Crema",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Dolcetti",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Ferrari",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Mondello",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Signorini",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Tinelli",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "Q"
+                    ],
+                    "last": "Roldan",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Carosi",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Infect Control Hosp Epidemiol",
+            "volume": "26",
+            "issn": "",
+            "pages": "127--133",
+            "other_ids": {}
+        },
+        "BIBREF25": {
+            "ref_id": "b25",
+            "title": "The attributable mortality and costs of primary nosocomial bloodstream infections in the intensive care unit",
+            "authors": [
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Digiovine",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Chenoweth",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Watts",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Higgins",
+                    "suffix": ""
+                }
+            ],
+            "year": 1999,
+            "venue": "Am J Respir Crit Care Med",
+            "volume": "160",
+            "issn": "",
+            "pages": "976--981",
+            "other_ids": {}
+        },
+        "BIBREF26": {
+            "ref_id": "b26",
+            "title": "Adverse eff ects of contact isolation",
+            "authors": [
+                {
+                    "first": "K",
+                    "middle": [
+                        "B"
+                    ],
+                    "last": "Kirkland",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Weinstein",
+                    "suffix": ""
+                }
+            ],
+            "year": 1999,
+            "venue": "Lancet",
+            "volume": "354",
+            "issn": "",
+            "pages": "1177--1178",
+            "other_ids": {}
+        },
+        "BIBREF27": {
+            "ref_id": "b27",
+            "title": "Systematic patients' hand disinfection: impact on methicillin-resistant Staphylococcus aureus infection rates in a community hospital",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Gagne",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Bedard",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Maziade",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "J Hosp Infect",
+            "volume": "75",
+            "issn": "",
+            "pages": "269--272",
+            "other_ids": {}
+        },
+        "BIBREF28": {
+            "ref_id": "b28",
+            "title": "Cost-eff ectiveness of active surveillance cultures and contact/droplet precautions for control of methicillin-resistant Staphylococcus aureus",
+            "authors": [
+                {
+                    "first": "T",
+                    "middle": [
+                        "B"
+                    ],
+                    "last": "Karchmer",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Durbin",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Simonton",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Farr",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "J Hosp Infect",
+            "volume": "51",
+            "issn": "",
+            "pages": "126--132",
+            "other_ids": {}
+        },
+        "BIBREF29": {
+            "ref_id": "b29",
+            "title": "Control of endemic methicillin-resistant Staphylococcus aureus: a cost-benefi t analysis in an intensive care unit",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Chaix",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Durand-Zaleski",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Alberti",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Brun-Buisson",
+                    "suffix": ""
+                }
+            ],
+            "year": 1999,
+            "venue": "JAMA",
+            "volume": "282",
+            "issn": "",
+            "pages": "1745--1751",
+            "other_ids": {}
+        },
+        "BIBREF30": {
+            "ref_id": "b30",
+            "title": "Cost-eff ectiveness of perirectal surveillance cultures for controlling vancomycin-resistant Enterococcus",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Muto",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Giannetta",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Durbin",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Simonton",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Farr",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Infect Control Hosp Epidemiol",
+            "volume": "23",
+            "issn": "",
+            "pages": "429--435",
+            "other_ids": {}
+        },
+        "BIBREF31": {
+            "ref_id": "b31",
+            "title": "Costs and savings associated with infection control measures that reduced transmission of vancomycin-resistant enterococci in an endemic setting",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Montecalvo",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Jarvis",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Uman",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Shay",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Petrullo",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Horowitz",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Wormser",
+                    "suffix": ""
+                }
+            ],
+            "year": 2001,
+            "venue": "Infect Control Hosp Epidemiol",
+            "volume": "22",
+            "issn": "",
+            "pages": "437--442",
+            "other_ids": {}
+        },
+        "BIBREF32": {
+            "ref_id": "b32",
+            "title": "Do physicians examine patients in contact isolation less frequently? A brief report",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Saint",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Higgins",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Nallamothu",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Chenoweth",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Am J Infect Control",
+            "volume": "31",
+            "issn": "",
+            "pages": "354--356",
+            "other_ids": {}
+        },
+        "BIBREF33": {
+            "ref_id": "b33",
+            "title": "Contact isolation in surgical patients: a barrier to care? Surgery",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Evans",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Shaff Er",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Hughes",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Smith",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Chong",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Raymond",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Pelletier",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Pruett",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Sawyer",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "",
+            "volume": "134",
+            "issn": "",
+            "pages": "180--188",
+            "other_ids": {}
+        },
+        "BIBREF34": {
+            "ref_id": "b34",
+            "title": "The immediate psychological and occupational impact of the 2003 SARS outbreak in a teaching hospital",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Maunder",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Hunter",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Vincent",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Bennett",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Peladeau",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Leszcz",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Sadavoy",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Verhaeghe",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Steinberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Mazzulli",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "CMAJ",
+            "volume": "168",
+            "issn": "",
+            "pages": "1245--1251",
+            "other_ids": {}
+        },
+        "BIBREF35": {
+            "ref_id": "b35",
+            "title": "Psychosocial eff ects of SARS on hospital staff : survey of a large tertiary care institution",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Nickell",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Crighton",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Tracy",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Al-Enazy",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Bolaji",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Hanjrah",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Hussain",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Makhlouf",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Upshur",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "CMAJ",
+            "volume": "170",
+            "issn": "",
+            "pages": "793--798",
+            "other_ids": {}
+        },
+        "BIBREF36": {
+            "ref_id": "b36",
+            "title": "Safety of patients isolated for infection control",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Stelfox",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Bates",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Redelmeier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "JAMA",
+            "volume": "290",
+            "issn": "",
+            "pages": "1899--1905",
+            "other_ids": {}
+        },
+        "BIBREF37": {
+            "ref_id": "b37",
+            "title": "Nosocomial pneumonia is not prevented by protective contact isolation in the surgical intensive care unit",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Koss",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Khalili",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Lemus",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Chelly",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Margulies",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Shabot",
+                    "suffix": ""
+                }
+            ],
+            "year": 2001,
+            "venue": "Am Surg",
+            "volume": "67",
+            "issn": "",
+            "pages": "1140--1144",
+            "other_ids": {}
+        },
+        "BIBREF38": {
+            "ref_id": "b38",
+            "title": "Surgical mask vs N95 respirator for preventing infl uenza among health care workers: a randomized trial",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Loeb",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Dafoe",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Mahony",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "John",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Sarabia",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Glavin",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Webby",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Smieja",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Earn",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Chong",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Webb",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Walter",
+                    "suffix": ""
+                }
+            ],
+            "year": 2009,
+            "venue": "JAMA",
+            "volume": "302",
+            "issn": "",
+            "pages": "1865--1871",
+            "other_ids": {}
+        },
+        "BIBREF39": {
+            "ref_id": "b39",
+            "title": "A quantitative assessment of the effi cacy of surgical and N95 masks to fi lter infl uenza virus in patients with acute infl uenza infection",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Johnson",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Druce",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Birch",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Grayson",
+                    "suffix": ""
+                }
+            ],
+            "year": 2009,
+            "venue": "Clin Infect Dis",
+            "volume": "49",
+            "issn": "",
+            "pages": "275--277",
+            "other_ids": {}
+        },
+        "BIBREF40": {
+            "ref_id": "b40",
+            "title": "Protecting healthcare workers from pandemic infl uenza: N95 or surgical masks?",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Gralton",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Mclaws",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "Crit Care Med",
+            "volume": "38",
+            "issn": "",
+            "pages": "657--667",
+            "other_ids": {}
+        },
+        "BIBREF41": {
+            "ref_id": "b41",
+            "title": "The role of 'colonization pressure' in the spread of vancomycin-resistant enterococci: an important infection control variable",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Bonten",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Slaughter",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "W"
+                    ],
+                    "last": "Ambergen",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Hayden",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Van Voorhis",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Nathan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Weinstein",
+                    "suffix": ""
+                }
+            ],
+            "year": 1998,
+            "venue": "Arch Intern Med",
+            "volume": "158",
+            "issn": "",
+            "pages": "1127--1132",
+            "other_ids": {}
+        },
+        "BIBREF42": {
+            "ref_id": "b42",
+            "title": "A comparison of the eff ect of universal use of gloves and gowns with that of glove use alone on acquisition of vancomycin-resistant enterococci in a medical intensive care unit",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Slaughter",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Hayden",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Nathan",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Hu",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Rice",
+                    "suffix": ""
+                },
+                {
+                    "first": "Van",
+                    "middle": [],
+                    "last": "Voorhis",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Matushek",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Franklin",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Weinstein",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "",
+                    "suffix": ""
+                }
+            ],
+            "year": 1996,
+            "venue": "Ann Intern Med",
+            "volume": "125",
+            "issn": "",
+            "pages": "448--456",
+            "other_ids": {}
+        },
+        "BIBREF43": {
+            "ref_id": "b43",
+            "title": "Intervention to reduce transmission of resistant bacteria in intensive care",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Huskins",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Huckabee",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "O&apos;grady",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Murray",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Kopetskie",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Zimmer",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Walker",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Sinkowitz-Cochran",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Jernigan",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Samore",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Wallace",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Goldmann",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "N Engl J Med",
+            "volume": "364",
+            "issn": "",
+            "pages": "1407--1418",
+            "other_ids": {}
+        },
+        "BIBREF44": {
+            "ref_id": "b44",
+            "title": "Care of children isolated for infection control: a prospective observational cohort study",
+            "authors": [
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Cohen",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Austin",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Weinstein",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Matlow",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Redelmeier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2008,
+            "venue": "Pediatrics",
+            "volume": "122",
+            "issn": "",
+            "pages": "411--415",
+            "other_ids": {}
+        },
+        "BIBREF45": {
+            "ref_id": "b45",
+            "title": "Methicillin-resistant Staphylococcus aureus: implications for the 1990s and eff ective control measures",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Wenzel",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Nettleman",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "N"
+                    ],
+                    "last": "Jones",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Pfaller",
+                    "suffix": ""
+                }
+            ],
+            "year": 1991,
+            "venue": "Am J Med",
+            "volume": "91",
+            "issn": "",
+            "pages": "221--227",
+            "other_ids": {}
+        },
+        "BIBREF46": {
+            "ref_id": "b46",
+            "title": "Infection Control Practices Advisory Committee: Guideline for Isolation Precautions: Preventing Transmission of Infectious Agents in Healthcare Settings",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Siegel",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Rhinehart",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Jackson",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Chiarello",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Healthcare",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {
+                "DOI": [
+                    "10.1186/cc10532"
+                ]
+            }
+        },
+        "BIBREF47": {
+            "ref_id": "b47",
+            "title": "Pro/Con debate: Are barrier precautions cost-eff ective in improving patient outcomes in the intensive care unit",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Thampi",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Morris",
+                    "suffix": ""
+                }
+            ],
+            "year": 2012,
+            "venue": "Critical Care",
+            "volume": "16",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        }
+    },
+    "ref_entries": {},
+    "back_matter": [
+        {
+            "text": "Abbreviations HCW, healthcare workers; IPAC, infection prevention and control; MRSA, methicillin-resistant Staphylococcus aureus; PCR, polymerase chain reaction; VRE, vancomycin-resistant Enterococcus.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "annex"
+        },
+        {
+            "text": "The authors declare that they have no competing interests. ",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Competing interests"
+        }
+    ]
+}

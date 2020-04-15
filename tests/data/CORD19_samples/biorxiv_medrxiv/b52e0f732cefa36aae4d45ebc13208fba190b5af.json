@@ -1,0 +1,1914 @@
+{
+    "paper_id": "b52e0f732cefa36aae4d45ebc13208fba190b5af",
+    "metadata": {
+        "title": "Full-length genome sequence of segmented RNA virus from ticks was obtained using small RNA sequencing data",
+        "authors": [
+            {
+                "first": "Xiaofeng",
+                "middle": [],
+                "last": "Xu",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "State Key Laboratory of Veterinary Etiological Biology and Key Laboratory of Veterinary Parasitology of Gansu Province",
+                    "institution": "Chinese Academy of Agricultural Science",
+                    "location": {
+                        "postCode": "730046",
+                        "settlement": "Lanzhou",
+                        "region": "Gansu",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "$",
+                "middle": [],
+                "last": "",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": "Jinlong",
+                "middle": [],
+                "last": "Bei 23$",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": "Yibo",
+                "middle": [],
+                "last": "Xuan",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "Hebei Key Laboratory of Animal Physiology, Biochemistry and Molecular Biology",
+                    "institution": "Hebei Normal University",
+                    "location": {
+                        "postCode": "050024",
+                        "settlement": "Shijiazhuang",
+                        "region": "Hebei",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Jianyuan",
+                "middle": [],
+                "last": "Chen",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Nankai University",
+                    "location": {
+                        "postCode": "300071",
+                        "settlement": "Tianjin, Tianjin",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Defu",
+                "middle": [],
+                "last": "Chen",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Nankai University",
+                    "location": {
+                        "postCode": "300071",
+                        "settlement": "Tianjin, Tianjin",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Stephen",
+                "middle": [
+                    "C"
+                ],
+                "last": "Barker",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "The University of Queensland",
+                    "location": {
+                        "postCode": "4072",
+                        "settlement": "Brisbane",
+                        "region": "QLD",
+                        "country": "Australia"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Samuel",
+                "middle": [],
+                "last": "Kelava",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "The University of Queensland",
+                    "location": {
+                        "postCode": "4072",
+                        "settlement": "Brisbane",
+                        "region": "QLD",
+                        "country": "Australia"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Bingjun",
+                "middle": [],
+                "last": "He",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "Hebei Key Laboratory of Animal Physiology, Biochemistry and Molecular Biology",
+                    "institution": "Hebei Normal University",
+                    "location": {
+                        "postCode": "050024",
+                        "settlement": "Shijiazhuang",
+                        "region": "Hebei",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Shan",
+                "middle": [],
+                "last": "Gao",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "",
+                    "institution": "Nankai University",
+                    "location": {
+                        "postCode": "300071",
+                        "settlement": "Tianjin, Tianjin",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            },
+            {
+                "first": "Ze",
+                "middle": [],
+                "last": "Chen",
+                "suffix": "",
+                "affiliation": {
+                    "laboratory": "Hebei Key Laboratory of Animal Physiology, Biochemistry and Molecular Biology",
+                    "institution": "Hebei Normal University",
+                    "location": {
+                        "postCode": "050024",
+                        "settlement": "Shijiazhuang",
+                        "region": "Hebei",
+                        "country": "P.R.China"
+                    }
+                },
+                "email": ""
+            }
+        ]
+    },
+    "abstract": [
+        {
+            "text": "In 2014, A novel tick-borne virus of the genus Flavivirus was first reported from the Mogiana region in Brazil. This virus was named the Mogiana tick virus (MGTV). Later, MGTV was also named as Jingmen tick virus (JMTV), Kindia tick virus (KDTV), Guangxi tick virus (GXTV) etc. In the present study, we used small RNA sequencing (sRNA-seq) to detect viruses in ticks and detected MGTV in Amblyomma testudinarium ticks, which had been captured in Yunnan province of China in the year of 2016. The fulllength genome sequence of a new MGTV strain Yunnan2016 (GenBank: MT080097, MT080098, MT080099 and MT080100) was obtained and recommended to be included into the NCBI RefSeq database for the future studies of MGTV. Our phylogenetic analyses showed that viruses named MGTV, JMTV, KDTV and GXTV are monophyletic: the MGTV group (lineage) of viruses. We show, for the first time, that",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        },
+        {
+            "text": "5\u2032 and 3\u2032 sRNAs can be used to obtain full-length sequences of the 5' and 3' ends of, but not limited to genome sequences of RNA viruses. And we proved the feasibility of using the sRNA-seq based method for the detection of viruses in a sample containing miniscule RNA.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        }
+    ],
+    "body_text": [
+        {
+            "text": "Next generation sequencing (NGS) has been widely applied to virus and viroid discovery in plants and animals. Compared to other NGS based methods that require viral enrichment and concentration, the small RNA sequencing (sRNA-seq) methods simplify virus detection and indeed have several other advantages [1] . The sRNA-seq based method was originally used for viral detection and identification in plants [2] and in invertebrates [3] . Although the sRNA-seq based method does not perform as well in the detection of mammalian viruses as in the detection of plant or invertebrate viruses, we still detected eight mammalian viruses: HPV-18 (Human Papillomavirus type 18) [4] , HBV (Hepatitis B Virus) [4] , HCV (Hepatitis C Virus) [4] , HIV-1 (Human Immunodeficiency Virus type 1) [4] , SMRV (Squirrel Monkey Retrovirus) [4] , EBV (Epstein-Barr Virus) [4] , SARS-CoV (Severe Acute Respiratory Syndrome Coronavirus) [5] and a DNA segment of ASFV (African Swine Fever Virus) [6] . The discovery of featured RNA fragments, including siRNA duplexes [7] , 5\u2032 and 3\u2032 end small RNAs (5\u2032 and 3\u2032 sRNAs) [8] [9] , palindromic small RNAs (psRNAs) and complemented palindromic small RNAs (cpsRNAs) [5] , has increased our capacity to detect viruses in mammals. Moreover, we found that 5\u2032 and 3\u2032 sRNAs can be used to annotate nuclear non-coding and mitochondrial genes at 1 bp resolution [10] [11] . Then, we found that 5\u2032 and 3\u2032 sRNAs can be used to obtain the full-length 5' and 3' ends of, but not limited to genome sequences of RNA viruses at 1-bp resolution.",
+            "cite_spans": [
+                {
+                    "start": 305,
+                    "end": 308,
+                    "text": "[1]",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 406,
+                    "end": 409,
+                    "text": "[2]",
+                    "ref_id": "BIBREF1"
+                },
+                {
+                    "start": 431,
+                    "end": 434,
+                    "text": "[3]",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 670,
+                    "end": 673,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 700,
+                    "end": 703,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 730,
+                    "end": 733,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 780,
+                    "end": 783,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 820,
+                    "end": 823,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 851,
+                    "end": 854,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 914,
+                    "end": 917,
+                    "text": "[5]",
+                    "ref_id": null
+                },
+                {
+                    "start": 972,
+                    "end": 975,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 1044,
+                    "end": 1047,
+                    "text": "[7]",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 1093,
+                    "end": 1096,
+                    "text": "[8]",
+                    "ref_id": "BIBREF7"
+                },
+                {
+                    "start": 1097,
+                    "end": 1100,
+                    "text": "[9]",
+                    "ref_id": null
+                },
+                {
+                    "start": 1185,
+                    "end": 1188,
+                    "text": "[5]",
+                    "ref_id": null
+                },
+                {
+                    "start": 1374,
+                    "end": 1378,
+                    "text": "[10]",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 1379,
+                    "end": 1383,
+                    "text": "[11]",
+                    "ref_id": "BIBREF11"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Ticks transmit a great variety of infectious agents to humans and other animal species, including viruses of the Flaviviridae family among the most common tick-borne viruses [12] . With the development of NGS, a number of studies have used metagenomics to search for tick-associated pathogens [13] . However, the metagenomics methods using DNA can not be applied to detect RNA viruses without DNA stages. So the transcriptomics approaches using total RNA were also applied to detect tick viruses [14] . The sRNA-seq based method has been successfully used in the detection of Rickettsia in ticks [15] . As far as we know, there had not been previous reports of virus detection in ticks using the sRNA-seq based method until the detection of the DNA segment of ASFV [6] . Although very high-depth sRNA-seq data was used to detect a DNA segment of ASFV, the coverage of the ASFV reference genome was still very low. This suggested that the sRNA-seq based method does not perform as well in the detection of DNA viruses as in the detection of RNA viruses.",
+            "cite_spans": [
+                {
+                    "start": 174,
+                    "end": 178,
+                    "text": "[12]",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 293,
+                    "end": 297,
+                    "text": "[13]",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 496,
+                    "end": 500,
+                    "text": "[14]",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 596,
+                    "end": 600,
+                    "text": "[15]",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 765,
+                    "end": 768,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "In our previous study [6] , we used sRNA-seq to detect viruses in ticks. Subsequent analyses of the detected viruses led to the discovery of a new strain of RNA virus. In 2014, this virus was first reported as a novel tick-borne virus of the genus Flavivirus from the Mogiana Region in Brazil [12] . Later, this virus was also named as Jingmen tick virus (JMTV), Kindia tick virus (KDTV) or Guangxi tick virus (GXTV) in some data from the NCBI GenBank database (Results and Discussion). In humans, viruses closely related to MGTV were found to be primarily associated with patients in Kosovo [16] . In the present study, we reported a new MGTV strain Yunnan2016 detected in Amblyomma testudinarium ticks [17] and also aimed to achieve . CC-BY-ND 4.0 International license author/funder. It is made available under a The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint the following research goals: (1) prove the feasibility of using the sRNA-seq based method in the detection of viruses in a sample (two ticks) containing miniscule RNA; (2) show how to obtain the full-length genome sequence of a RNA virus using sRNA-seq data; and (3) to provide a high-quality and well curated reference genome for the future studies of MGTV.",
+            "cite_spans": [
+                {
+                    "start": 22,
+                    "end": 25,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 293,
+                    "end": 297,
+                    "text": "[12]",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 592,
+                    "end": 596,
+                    "text": "[16]",
+                    "ref_id": null
+                },
+                {
+                    "start": 704,
+                    "end": 708,
+                    "text": "[17]",
+                    "ref_id": null
+                },
+                {
+                    "start": 1127,
+                    "end": 1130,
+                    "text": "(2)",
+                    "ref_id": "BIBREF1"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Ticks of Amblyomma testudinarium, D. nuttalli, D. niveus and D. silvarum were captured in our previous studies. Then, the sRNA-seq data from these ticks was produced and deposited in the NCBI SRA (accession numbers SRP084097 and SRP178347; Table 1 The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint \"Data\" (the first column) was aligned to the reference genome (the 3rd column) to obtain the information on the fourth and fifth columns. \"Data\" was unique for each run of sRNA-seq data in the NCBI SRA database. The virus strain Yunnan2016 (GenBank: MT080097, MT080098, MT080099 and MT080100) was detected in the present study. The reference genome of the MGTV strain Xinjiang2016 (GenBank: MK174251, MK174244, MK174230 and MK174237) was used to report Yunnan2016. \"Coverage\" and \"Depth\" indicated the genome coverage and average depth, respectively (Methods).",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 240,
+                    "end": 247,
+                    "text": "Table 1",
+                    "ref_id": null
+                }
+            ],
+            "section": "Detection of viruses in ticks using sRNA-seq data"
+        },
+        {
+            "text": "Genome coverage and average depth of the MGTV strain Yunnan2016",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Figure 1"
+        },
+        {
+            "text": "The y-axis represents the read-counts for each genomic position. A. The x-axis represents positions in the reference genome of the MGTV strain Yunnan2016 (GenBank: MT080097, MT080098, MT080099 and MT080100) and two A. testudinarium ticks were used to produce the sRNA-seq data B. The x-axis represents positions on the reference genome of the MGTV strain Xinjiang2016 (GenBank: MK174251, MK174244, MK174230 and MK174237) and two A. testudinarium ticks were used to produce the sRNAseq data; C. The x-axis represents positions on the reference genome of the MGTV strain Yunnan2016 and three species of ticks (Dermacentor nuttalli, D. niveus and D. silvarum) which were used to produce the sRNA-seq data for our negative controls.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Figure 1"
+        },
+        {
+            "text": ". CC-BY-ND 4.0 International license author/funder. It is made available under a The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Figure 1"
+        },
+        {
+            "text": "In our previous study, we proposed that 5' and 3' sRNAs can be used to annotate nuclear non-coding and mitochondrial genes at 1-bp resolution, and to identify new steady RNAs, which are usually transcribed from functional genes [9] . In the present study, we used 5' and 3' sRNAs (Figure 2A) The full-length genome sequence of the MGTV strain Yunnan2016",
+            "cite_spans": [
+                {
+                    "start": 228,
+                    "end": 231,
+                    "text": "[9]",
+                    "ref_id": null
+                }
+            ],
+            "ref_spans": [
+                {
+                    "start": 280,
+                    "end": 291,
+                    "text": "(Figure 2A)",
+                    "ref_id": "FIGREF3"
+                }
+            ],
+            "section": "Full-length genome sequence of the MGTV strain Yunnan2016"
+        },
+        {
+            "text": ". CC-BY-ND 4.0 International license author/funder. It is made available under a The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint * the MGTV strain Yunnan2016 (GenBank: MT080097, MT080098, MT080099 and MT080100). A. 5' and 3' sRNAs were used to obtain the full-length 5' and 3' ends of RNA1; B. The 5' ends and 3' sRNAs of all RNAs in the Yunnan2016 genome; C. Start codons are marked in red boxes and RNA2 has a 15-or 18-bp variable region; C. Start codons and stop codons are marked in red and blue boxes, respectively. For RNA4 of some viruses, \"GTG\" were identified as the stop codons of the second ORF and the nearby \"ATG\" codons are 48-bp downstream of the \"GTG\" codons.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Full-length genome sequence of the MGTV strain Yunnan2016"
+        },
+        {
+            "text": "Compared to the genome coverage of 86.47% (Methods) and average depth of 46.52 (Methods) when we used the Xinjiang2016 genome for reference (Figure 1A) , genome coverage increased to 97.37% and average depth to 91.11 % when we used the Yunnan2016 genome for reference ( Figure 1B) . Comparing the full-length genome sequence of Yunnan2016 with those of 16 other MGTV complete genomes (Methods), we found that all of the other complete MGTV genomes did not have the correct full-length 5' and 3' ends.",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 140,
+                    "end": 151,
+                    "text": "(Figure 1A)",
+                    "ref_id": null
+                },
+                {
+                    "start": 270,
+                    "end": 280,
+                    "text": "Figure 1B)",
+                    "ref_id": null
+                }
+            ],
+            "section": "Full-length genome sequence of the MGTV strain Yunnan2016"
+        },
+        {
+            "text": "Particularly, RNA1 (GenBank: MN025516) and RNA4 (GenBank: MN025515) of the MGTV strain TT2017-2 had 56 and 48 bp additional sequences at their 5' ends, respectively. Further analyses showed the additional sequences were identical to internal regions of the genomes. Obviously, these additional sequences had been wrongly assembled in the previous studies. Since our results showed the high quality of our full-length genome sequence of the MGTV strain Yunnan2016, we recommend that our sequencebe included in the NCBI RefSeq database for the future studies of MGTV. The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint from the 2745-, 2265-, 2427-, 2351-bp and the final CDSs were built. Although these four CDSs had large differences in their degree of evolutionary conservation, the tree topologies were still congruent ( Figure   3BCDEF ). Viruses named as MGTV, JMTV, KDTV and GXTV belong to a MGTV group with two major clades. The two branches oif Clade I had the virus strains isolated from Brazil and Guinea, and the virus strains Yunnan2016 and Xinjiang2016 (Figure 3F) . The Yunnan2016 strain was detected in A. testudinarium whereas the Xinjiang2016 strain was detected in wild rodents but its biological vector is still unknown. In Clade II (Figure 3F) , the virus strain Kosovo2013 was from humans whereas the strains TT2017-1/-2 were detected in Rhipicephalus (Boophilus) microplus. Viruses closely related to MGTV were primarily associated with patients in Kosovo: two of the three patients had a history of tick bites [16] .",
+            "cite_spans": [
+                {
+                    "start": 1622,
+                    "end": 1626,
+                    "text": "[16]",
+                    "ref_id": null
+                }
+            ],
+            "ref_spans": [
+                {
+                    "start": 913,
+                    "end": 928,
+                    "text": "Figure   3BCDEF",
+                    "ref_id": "FIGREF5"
+                },
+                {
+                    "start": 1155,
+                    "end": 1166,
+                    "text": "(Figure 3F)",
+                    "ref_id": "FIGREF5"
+                },
+                {
+                    "start": 1341,
+                    "end": 1352,
+                    "text": "(Figure 3F)",
+                    "ref_id": "FIGREF5"
+                }
+            ],
+            "section": "Full-length genome sequence of the MGTV strain Yunnan2016"
+        },
+        {
+            "text": "However, the biological vectors of the strains infecting human are still unknown. The Antilles (France) strain was detected in a pool of R. microplus and mblyomma variegatum ticks and the RT-PCR of individual ticks revealed that MGTV existed with a higher prevalence in R. microplus (42%) than A. variegatum (5%) [18] . ",
+            "cite_spans": [
+                {
+                    "start": 313,
+                    "end": 317,
+                    "text": "[18]",
+                    "ref_id": "BIBREF18"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Phylogenetic analysis of MGTV complete genomes"
+        },
+        {
+            "text": "In the present study, we reported a high-quality, fully curated and full-length genome sequence of a new strain of the Mogiana tick virus (MGTV), Yunnan2016. And we show, for the first time, that 5\u2032 and 3\u2032 sRNAs can be used to obtain full-length sequences of the 5' and 3' ends of, but not limited to genome sequences of RNA viruses. And we proved the feasibility of using the sRNA-seq based method for the detection of viruses in a sample containing miniscule RNA.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusions"
+        },
+        {
+            "text": ". CC-BY-ND 4.0 International license author/funder. It is made available under a The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusions"
+        },
+        {
+            "text": "In total, 17 MGTV strains have been found in five species of ticks: R. microplus (9 virus strains), R. geigyi (1 virus strain), A. testudinarium (2 virus strains), A. variegatum (1 strain), and A. javanense (1 strain).",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusions"
+        },
+        {
+            "text": "MGTV strains have also been isolated from humans (3 virus strains) and rodents (1 virus strain). Among these strains, the Antilles (France) strain was detected in a pool of R. microplus and A. variegatum ticks. R. microplus is one of the most widely distributed tick species in the world [19] . R. microplus primarily parasitizes livestock, but it may also feed on people in China. The detection of MGTV in A. testudinarium was reported for the first time in Laos. The nucleotide identity between the genome of the MGTV strain from Laos and the Yunnan2016 genome was 94.73%. Compared to other ticks, the host-range of A.",
+            "cite_spans": [
+                {
+                    "start": 288,
+                    "end": 292,
+                    "text": "[19]",
+                    "ref_id": "BIBREF19"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Conclusions"
+        },
+        {
+            "text": "testudinarium is very large, including mammals, amphibians, reptiles and birds, with widely distributed in tropical and subtropical areas of Asia [20] . The detection of MGTV in wild rodents and humans indicates that the ticks (e.g. R. microplus and A. testudinarium) host MGTV: this hypothesis should be well investigated in future studies.",
+            "cite_spans": [
+                {
+                    "start": 146,
+                    "end": 150,
+                    "text": "[20]",
+                    "ref_id": "BIBREF20"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Conclusions"
+        },
+        {
+            "text": "The full-length genome sequence of the MGTV strain Yunnan2016 has been deposited into NCBI GenBank database under the project accession numbers MT080097, MT080098, MT080099 and MT080100.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Methods"
+        },
+        {
+            "text": "In the present study, the 17 MGTV complete genome sequences (including the Yunnan2016) were downloaded from the NCBI GenBank database and analysed together. One genome sequence was removed because it had too many ambiguous nucleotides. The online software CD-HIT [21] (Date: 20191212) was then used to remove redundant sequences, resulting in 9 complete genome sequences for the phylogenetic analysis. The sRNA-seq data used in the present study was also deposited in the NCBI SRA database under the project accession number SRP084097 and SRP178347 ( Table 1) . Using specific primers ( Table 2) , PCR amplification coupled with Sanger sequencing was used to fill the gaps between contigs and to confirm the assembly results. The copyright holder for this preprint (which was not peer-reviewed) is the . https://doi.org/10.1101/2020.03.24.004796 doi: bioRxiv preprint \"ID\" is unique for each Sanger sequence in the present study. RNA1, RNA2, RNA3 and RNA4 of the MGTV strain Yunnan2016 have been submitted to the NCBI GenBank database under the project accession numbers MT080097, MT080098, MT080099 and MT080100, respectively. The software Fastq_clean [22] was used for sRNA data cleaning and quality control. The virus detection was performed using the pipeline VirusDetect [23] . For each detected virus, VirusDetect assigned a closest reference genome from the NCBI Genbank database to help characterize that virus. VirusDetect used reference genome coverage and average depth to quantify the detected viruses for verification. Genome coverage was defined as the proportion of read-covered positions divided by genome length whereas average depth was the total number of base pairs of aligned reads divided by the read-covered positions of the reference genome. Statistical computation and plotting were performed using the software R v2. 15.3 with the Bioconductor packages [24] .",
+            "cite_spans": [
+                {
+                    "start": 263,
+                    "end": 267,
+                    "text": "[21]",
+                    "ref_id": "BIBREF21"
+                },
+                {
+                    "start": 1153,
+                    "end": 1157,
+                    "text": "[22]",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 1276,
+                    "end": 1280,
+                    "text": "[23]",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 1843,
+                    "end": 1847,
+                    "text": "15.3",
+                    "ref_id": null
+                },
+                {
+                    "start": 1879,
+                    "end": 1883,
+                    "text": "[24]",
+                    "ref_id": "BIBREF24"
+                }
+            ],
+            "ref_spans": [
+                {
+                    "start": 551,
+                    "end": 559,
+                    "text": "Table 1)",
+                    "ref_id": null
+                },
+                {
+                    "start": 587,
+                    "end": 595,
+                    "text": "Table 2)",
+                    "ref_id": "TABREF1"
+                }
+            ],
+            "section": "Methods"
+        }
+    ],
+    "bib_entries": {
+        "BIBREF0": {
+            "ref_id": "b0",
+            "title": "Complete viral genome sequence and discovery of novel viruses by deep sequencing of small RNAs: a generic method for diagnosis, discovery and sequencing of viruses",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Kreuze",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Perez",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Untiveros",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Quispe",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Fuentes",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Barker",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Simon",
+                    "suffix": ""
+                }
+            ],
+            "year": 2009,
+            "venue": "Virology",
+            "volume": "388",
+            "issn": "1",
+            "pages": "1--7",
+            "other_ids": {}
+        },
+        "BIBREF1": {
+            "ref_id": "b1",
+            "title": "Deep Sequencing of Small RNAs in Tomato for Virus and Viroid Identification and Strain Differentiation",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Hernandez",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Wechter",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Fei",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Ling",
+                    "suffix": ""
+                }
+            ],
+            "year": 2012,
+            "venue": "PLoS ONE",
+            "volume": "7",
+            "issn": "5",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF2": {
+            "ref_id": "b2",
+            "title": "RNA interference-mediated intrinsic antiviral immunity in invertebrates",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Nayak",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Tassetto",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Kunitomi",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Andino",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Intrinsic Immunity",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF3": {
+            "ref_id": "b3",
+            "title": "Using small RNA deep sequencing data to detect human viruses",
+            "authors": [
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ruan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Kreuze",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Fei",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Zhu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "BioMed Research International",
+            "volume": "",
+            "issn": "",
+            "pages": "1--9",
+            "other_ids": {}
+        },
+        "BIBREF5": {
+            "ref_id": "b5",
+            "title": "DNA segments of African Swine Fever Virus detected for the first time in hard ticks from sheep and bovines",
+            "authors": [
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Bei",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Jin",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Dou",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Ji",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Duan",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "Systematic & Applied Acarology",
+            "volume": "24",
+            "issn": "1",
+            "pages": "180--184",
+            "other_ids": {}
+        },
+        "BIBREF6": {
+            "ref_id": "b6",
+            "title": "Using Small RNA-seq Data to Detect siRNA Duplexes Induced by Plant Viruses",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Niu",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Padmanabhan",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ruan",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Kreuze",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Ling",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Fei",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Genes",
+            "volume": "8",
+            "issn": "6",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF7": {
+            "ref_id": "b7",
+            "title": "Two featured series of rRNA-derived RNA fragments (rRFs) constitute a novel class of small RNAs",
+            "authors": [
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Guo",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Niu",
+                    "suffix": ""
+                },
+                {
+                    "first": "Q",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ruan",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Bu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Plos One",
+            "volume": "12",
+            "issn": "4",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF9": {
+            "ref_id": "b9",
+            "title": "Using pan RNA-seq analysis to reveal the ubiquitous existence of 5' and 3' end small RNAs",
+            "authors": [
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "Frontiers in Genetics",
+            "volume": "10",
+            "issn": "",
+            "pages": "1--11",
+            "other_ids": {}
+        },
+        "BIBREF10": {
+            "ref_id": "b10",
+            "title": "Using highresolution annotation of insect mitochondrial DNA to decipher tandem repeats in the control region",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Ji",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Jin",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Yin",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Luo",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Liu",
+                    "suffix": ""
+                },
+                {
+                    "first": "Q",
+                    "middle": [],
+                    "last": "Zhao",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Bu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "RNA Biology",
+            "volume": "16",
+            "issn": "6",
+            "pages": "830--837",
+            "other_ids": {}
+        },
+        "BIBREF11": {
+            "ref_id": "b11",
+            "title": "Precise annotation of human, chimpanzee, rhesus macaque and mouse mitochondrial genomes leads to insight into mitochondrial transcription in mammals",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Jin",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Cheng",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [
+                        "O"
+                    ],
+                    "last": "Yau",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Barker",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Bu",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "RNA Biology",
+            "volume": "17",
+            "issn": "1",
+            "pages": "1--8",
+            "other_ids": {}
+        },
+        "BIBREF12": {
+            "ref_id": "b12",
+            "title": "Characterisation of divergent flavivirus NS3 and NS5 protein sequences detected in Rhipicephalus microplus ticks from Brazil. Mem\u00f3rias Do Instituto Oswaldo Cruz",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Maruyama",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Castro-Jorge",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "M C"
+                    ],
+                    "last": "Ribeiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Gardinassi",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Garcia",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Brand\u00e3o",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Rodrigues",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "I"
+                    ],
+                    "last": "Okada",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Abr\u00e3o",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Ferreira",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "",
+            "volume": "109",
+            "issn": "",
+            "pages": "38--50",
+            "other_ids": {}
+        },
+        "BIBREF13": {
+            "ref_id": "b13",
+            "title": "Identification of an anellovirus and genomoviruses in ixodid ticks",
+            "authors": [
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Waits",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Edwards",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [
+                        "N"
+                    ],
+                    "last": "Cobb",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Fontenele",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Varsani",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "Virus Genes",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF14": {
+            "ref_id": "b14",
+            "title": "Extensive Diversity of RNA Viruses in Australian Ticks",
+            "authors": [
+                {
+                    "first": "Harvey",
+                    "middle": [],
+                    "last": "Erin",
+                    "suffix": ""
+                },
+                {
+                    "first": "Karrie",
+                    "middle": [],
+                    "last": "Rose",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "John-Sebastian",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Eden",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Nathan",
+                    "suffix": ""
+                },
+                {
+                    "first": "",
+                    "middle": [],
+                    "last": "Lo",
+                    "suffix": ""
+                },
+                {
+                    "first": "Abeyasuriya",
+                    "middle": [],
+                    "last": "Thilanka",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF15": {
+            "ref_id": "b15",
+            "title": "An efficient strategy of screening for pathogens in wild-caught ticks and mosquitoes by reusing small RNA deep sequencing data",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Zhuang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Zhang",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "An",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Fan",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Ma",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Anderson",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Jiang",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Liu",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Cao",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Tong",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "PLoS One",
+            "volume": "9",
+            "issn": "3",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF18": {
+            "ref_id": "b18",
+            "title": "Insights into the Host Range, Genetic Diversity, and Geographical Distribution of Jingmenviruses. mSphere",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Temmam",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Bigot",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Chr\u00e9tien",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Gondard",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "P\u00e9rot",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Pommelet",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Dufour",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Petres",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Devillers",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Hoem",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Pinarello",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Hul",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Vongphayloth",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Hertz",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Loiseau",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Dumarest",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Duong",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Vayssier-Taussat",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Grandadam",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Albina",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Dussart",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Moutailler",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Cappelle",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Brey",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Eloit",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "645--664",
+            "other_ids": {}
+        },
+        "BIBREF19": {
+            "ref_id": "b19",
+            "title": "Ticks of Australia. The species that infest domestic animals and humans",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Barker",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "R"
+                    ],
+                    "last": "Walker",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Zootaxa",
+            "volume": "3816",
+            "issn": "1",
+            "pages": "1--144",
+            "other_ids": {}
+        },
+        "BIBREF20": {
+            "ref_id": "b20",
+            "title": "Systematics and Taxonomy of Ixodida. 2020",
+            "authors": [
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                }
+            ],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF21": {
+            "ref_id": "b21",
+            "title": "Cd-hit: a fast program for clustering and comparing large sets of protein or nucleotide sequences",
+            "authors": [
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Godzik",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "Bioinformatics",
+            "volume": "22",
+            "issn": "13",
+            "pages": "1658--1659",
+            "other_ids": {}
+        },
+        "BIBREF22": {
+            "ref_id": "b22",
+            "title": "Fastq_clean: An optimized pipeline to clean the Illumina sequencing data with quality control",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Zhang",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Zhan",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Gong",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Fei",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Bioinformatics and Biomedicine (BIBM)",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF23": {
+            "ref_id": "b23",
+            "title": "VirusDetect: An automated pipeline for efficient virus discovery using deep sequencing of small RNAs",
+            "authors": [
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Zheng",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Padmanabhan",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Galvez",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Gutierrez",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Fuentes",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Ling",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Kreuze",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Fei",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "Virology",
+            "volume": "500",
+            "issn": "",
+            "pages": "130--138",
+            "other_ids": {}
+        },
+        "BIBREF24": {
+            "ref_id": "b24",
+            "title": "R language and Bioconductor in bioinformatics applications(Chinese Edition)",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Gao",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ou",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Xiao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        }
+    },
+    "ref_entries": {
+        "FIGREF0": {
+            "text": "). Using VirusDetect (Methods), MGTV was detected in A. testudinarium ticks (SRA: SRP084097), but not in D.nuttalli, D. niveus nor D. silvarum (SRA: SRP178347) that were used as negative controls. Since the A. testudinarium ticks were captured in Yunnan province of China in the year of 2016, the new MGTV strain was named the Yunnan2016 strain of MGTV. As a segmented RNA virus, MGTV comprises four RNAs in its genome, two of which (RNA1 and RNA3) are related to the nonstructural protein genes of the genus Flavivirus (family Flaviviridae), whereas the other two segments (RNA2 and RNA4) are unique to MGTV. VirusDetect (Methods) uses the closest reference sequence to report the detected virus. The reference genome of the MGTV strain Xinjiang2016 (GenBank: MK174251, MK174244, MK174230 and MK174237) was sequenced from wild rodents captured in Xinjiang province of China. The sRNA-seq data of A. testudinarium (SRA: SRR4116826) covered 86.71% of the Xinjiang2016 genome with an average depth of 46.66 (Table 1). The sample of A. testudinarium had much more sRNA-seq data aligned to the Xinjiang2016 genome (Figure 1B) or the Yunnan2016 genome (Figure 1A) than the samples of three other species (Figure 1C). RNA1, RNA3, RNA3 and RNA4 of the MGTV strain Yunnan2016 were assembled into contigs. PCR amplification coupled with Sanger sequencing (Methods) was used to fill the gaps between contigs and confirm the genome assembly. 93.7 % (2879/3073) of RNA1, 90.6 % (2528/2790) of RNA2, 88.3 % (2468/2795) of RNA3 and 95.2% (2619/2752) of RNA4 were confirmed by Sanger sequences [the polyA tails of 3'-UTRs were not part of these calculations].",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF2": {
+            "text": "to obtain the full-length genome sequence of the new MGTV strain Yunnan2016. The 5' ends of all RNAs in the Yunnan2016 genome had the sequence motif AG[T]2-3[A]4-6[C/G]nAAGTGC (Figure 2B), where [C/G]n represents a GCenriched region. The 3' ends of all RNAs in the Yunnan2016 genome have an AC-enriched region (Figure 2B). RNA1, RNA2, RNA3 and RNA4 of Yunnan2016 with lengths of 3,093, 2810, 2815 and 2772 bp were submitted to the NCBI GenBank database under the project accession numbers MT080097, MT080098, MT080099 and MT080100, respectively). The length of the polyA tail in each 3'-UTR of these RNAs was set as 20 bp. The sRNA-seq data of A. testudinarium (SRA: SRR039620) covered 97.37% of the full-length genome sequence of Yunnan2016 with an average depth of 91.11 (Table 1). 58.5% (26668/45563) of the virus reads were aligned to RNA4 (Figure 1B). Although MGTV is a positive-sense single-stranded RNA (+ssRNA) virus, the proportion of sRNA-seq reads aligned to the viral positive-and negative-strand was 1.42 (26767/18796).",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF3": {
+            "text": "Figure 2 The full-length genome sequence of the MGTV strain Yunnan2016",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF4": {
+            "text": "The putative proteins encoded by RNA1 and RNA2 are the RNA dependent RNA polymerase and the glycoprotein, respectively, whereas the putative proteins encoded by RNA4 are the capsid protein and the membrane protein. The putative protein encoded by RNA3 is unknown. In total, five protein-coding genes were annotated for the genome of the MGTV strain Yunnan2016. The RNA dependent RNA polymerase from RNA1, the putative protein from RNA3 and the capsid protein from RNA4 had lengths of 915, 809 and 255 aa, respectively. The lengths of these three proteins were the same in all 17 MGTV genomes whereas those of the other two proteins (the glycoprotein from RNA2 and the membrane protein from RNA4) differed with the other MGTV genomes. The lengths of the glycoprotein from RNA2 varied due to two mutations (Figure 2C).: T/C mutations in the start codons shortened the Coding Sequences (CDSs) of RNA2 by 21 bp whereas a small Insertions/Deletions (InDels) shortened the CDSs by 3 bp. Theoretically, four types of glycoproteins, with lengths of 745, 746, 754 or 755 aa, would be translated from RNA2, however, a glycoprotein with 746 aa was not observed in the 17 virus genomes. Since the lengths of the membrane protein from RNA4 varied due to one mutation T/C (Figure 2D), two types of membrane proteins with lengths of 522 or 539 aa can be translated from RNA4. RNA1, RNA3 and RNA4 had 2745-, 2427-and 2351-bp complete CDS 1, 3, and 4, whereas RNA2 had a 2265-bp complete CDS 2, with a 15-or 18-bp variable region removed (Figure 2C). Then, four CDSs could be connected into a total CDS. Using paired Pearson correlations between CDSs of 17 viruses, the degrees of evolutionary conservation are ranked as CDS 1, 2, 3 and 4 (Figure 3A). Five phylogenetic trees",
+            "latex": null,
+            "type": "figure"
+        },
+        "FIGREF5": {
+            "text": "Phylogenetic analysis of Mogiana tick viruses * RNA1, RNA2, RNA3 and RNA4 of the MGTV strain Yunnan2016 were submitted to the GenBank (MT080097, MT080098, MT080099 and MT080100, respectively). A. Paired Pearson correlations between CDSs of 17 viruses were used to account for the degrees of evolutionary conservation among four CDSs. Five phylogenetic trees were built from the 2745-bp (B), 2265-bp (C), 2427-bp (D), 2351-bp bp (E) and the final CDSs (F).",
+            "latex": null,
+            "type": "figure"
+        },
+        "TABREF1": {
+            "text": "Primers for PCR amplification coupled with Sanger sequencing . CC-BY-ND 4.0 International license author/funder. It is made available under a",
+            "latex": null,
+            "type": "table"
+        }
+    },
+    "back_matter": [
+        {
+            "text": "We appreciate the help equally from the people listed below. They are Professor Guoqing Liu, Dawei ",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Acknowledgments"
+        },
+        {
+            "text": "Non-financial competing interests ",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Competing interests"
+        }
+    ]
+}

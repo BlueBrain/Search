@@ -1,0 +1,1639 @@
+{
+    "paper_id": "bd21184623ceed45f1cede4066b540ff330ccb63",
+    "metadata": {
+        "title": "Detection of canine kobuvirus RNA in diarrheic fecal samples of dogs with parvoviruses",
+        "authors": [
+            {
+                "first": "Flavia",
+                "middle": [
+                    "Megumi"
+                ],
+                "last": "Miyabe",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": "Juliane",
+                "middle": [],
+                "last": "Ribeiro",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": "Alice",
+                "middle": [],
+                "last": "Fernandes Alfieri",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            },
+            {
+                "first": "Amauri",
+                "middle": [
+                    "Alcindo"
+                ],
+                "last": "Alfieri",
+                "suffix": "",
+                "affiliation": {},
+                "email": ""
+            }
+        ]
+    },
+    "abstract": [
+        {
+            "text": "Canine kobuvirus (CaKV) is a member of the Picornaviridae family and the Kobuvirus genus. CaKV was first described in fecal samples from diarrheic dogs in the USA in 2011, with subsequent reports in the UK, Italy, South Korea, China, Tanzania, and Japan. CaKV is frequently identified in feces of animals with or without clinical signs of gastroenteritis. The present study investigated the presence of CaKV in fecal samples from 53 diarrheic dogs from Londrina, southern Brazil. Using a RT-PCR assay, CaKV RNA was identified in three dogs, resulting in an overall occurrence rate of 5.7%. In addition, coinfection with canine parvovirus subtype 2b was detected in all CaKV-positive diarrheic fecal samples. Using a phylogenetic analysis based on the VP1 gene sequence, the Brazilian CaKV field strains were found to be very similar to a previously identified CaKV strain from Brazil that was found in the tissue of a puppy and were also found to be clustered with other CaKV strains detected worldwide and other kobuvirus strains identified in mouse, feline, and human hosts.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Abstract"
+        }
+    ],
+    "body_text": [
+        {
+            "text": "Gastroenteritis caused by viruses is one of the leading causes of dog hospitalization, especially in puppies under 1 year of age [17] . The viruses frequently associated with gastroenteritis in dogs are canine parvovirus type 2 (CPV-2), canine distemper virus (CDV), canine coronavirus (CCoV), rotaviruses, adenoviruses, and novel viruses that include sapovirus and kobuvirus [14] .",
+            "cite_spans": [
+                {
+                    "start": 129,
+                    "end": 133,
+                    "text": "[17]",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 376,
+                    "end": 380,
+                    "text": "[14]",
+                    "ref_id": "BIBREF13"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Kobuviruses are non-enveloped, single-stranded positivesense RNA viruses, member of the family Picornaviridae [12] . According to the International Committee on Taxonomy of Viruses [10] , Kobuvirus genus is genetically classified into six species, Aichivirus A (human kobuvirus), Aichivirus B (bovine kobuvirus), Aichivirus C (porcine kobuvirus), Aichivirus D (kagovirus 1), Aichivirus E (rabbit picornavirus), and Aichivirus F (bat kobuvirus). The viral genome encodes a leader protein (L), three structural capsid proteins (VP0, VP3, and VP1), and seven nonstructural proteins (2A-2C and 3A-3D) [18] .",
+            "cite_spans": [
+                {
+                    "start": 110,
+                    "end": 114,
+                    "text": "[12]",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 181,
+                    "end": 185,
+                    "text": "[10]",
+                    "ref_id": "BIBREF9"
+                },
+                {
+                    "start": 597,
+                    "end": 601,
+                    "text": "[18]",
+                    "ref_id": "BIBREF17"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Canine kobuvirus (CaKV) is a novel genotype classified within the species Aichivirus A. CaKV was first detected in fecal samples of dogs with gastroenteritis in the USA [11, 14] , with subsequent reports in the UK [3] , Italy [5] , South Korea [4] , China [13, 15] , Tanzania [16] , and Japan [22] . In Brazil, CaKV was detected in multiple tissues of a puppy with clinical signs of gastroenteritis resulting in the first reported occurrence of extraintestinal CaKV in dogs [21] . The occurrence of other kobuviruses species have been reported in diarrheic fecal samples from pig and cattle in Brazil [19, 20] , and there is only one study reporting a strain of CaKV found in fecal samples of nondiarrheic dogs in the country [2] .",
+            "cite_spans": [
+                {
+                    "start": 169,
+                    "end": 173,
+                    "text": "[11,",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 174,
+                    "end": 177,
+                    "text": "14]",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 214,
+                    "end": 217,
+                    "text": "[3]",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 226,
+                    "end": 229,
+                    "text": "[5]",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 244,
+                    "end": 247,
+                    "text": "[4]",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 256,
+                    "end": 260,
+                    "text": "[13,",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 261,
+                    "end": 264,
+                    "text": "15]",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 276,
+                    "end": 280,
+                    "text": "[16]",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 293,
+                    "end": 297,
+                    "text": "[22]",
+                    "ref_id": "BIBREF21"
+                },
+                {
+                    "start": 474,
+                    "end": 478,
+                    "text": "[21]",
+                    "ref_id": "BIBREF20"
+                },
+                {
+                    "start": 601,
+                    "end": 605,
+                    "text": "[19,",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 606,
+                    "end": 609,
+                    "text": "20]",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 726,
+                    "end": 729,
+                    "text": "[2]",
+                    "ref_id": "BIBREF1"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "Emerging viruses related to gastrointestinal diseases are constantly being discovered; thus, there is a need to evaluate and monitor the prevalence of these viruses to obtain more information about their genetic diversity and clinical Responsible Editor: Flavio Guimaraes Fonseca * Amauri Alcindo Alfieri alfieri@uel.br significance [12] . Therefore, the aim of this study was to evaluate the presence of CaKV in diarrheic fecal samples obtained from dogs in Londrina, PR, Southern Brazil.",
+            "cite_spans": [
+                {
+                    "start": 333,
+                    "end": 337,
+                    "text": "[12]",
+                    "ref_id": "BIBREF11"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Introduction"
+        },
+        {
+            "text": "The fecal samples evaluated in this study are part of the fecal sample collection of the Laboratory of Animal Virology at the State University of Londrina. These samples were submitted to the laboratory between 2016 and 2017 for the purposes of CPV-2 diagnosis. The dogs from which the samples were obtained showed clinical signs of gastroenteritis, such as diarrhea and vomiting. A total of 53 fecal samples were used for the investigation of CaKV. The nucleic acids were extracted from the fecal samples using phenol/chloroform/isoamyl-alcohol (25:24:1) and silica/guanidine isothyocianate [1] and eluted in 50 \u03bcl of sterile ultrapure water (DPEC). A negative control containing sterile water was included in each extraction procedure.",
+            "cite_spans": [
+                {
+                    "start": 592,
+                    "end": 595,
+                    "text": "[1]",
+                    "ref_id": "BIBREF0"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Material and methods"
+        },
+        {
+            "text": "The samples were previously tested for CPV-2 by PCR assay, using the following primers: Fw (5\u2032-CAGGAAGATATCCA GAAGGA-3\u2032) and Rv (5\u2032-GGTGCTAGTTGATATGTAAT AAACA-3\u2032), which amplify a 583 bp fragment of the VP2 protein from the viral capsid [9] . The RT-PCR assay used to detect kobuvirus RNA was performed with the primers VP1-DogF (5\u2032-CAAHCTKGARAACTTCTTCTC-3\u2032) and VP1-DogR (5\u2032-GAAGTTKGAGAGCATCTGKC-3\u2032), which amplify the partial region (330 bp) of the CaKV VP1 gene [21] . The amplified products were analyzed using 2% agarose gel electrophoresis in TBE buffer, stained with ethidium bromide, and visualized under ultraviolet light.",
+            "cite_spans": [
+                {
+                    "start": 237,
+                    "end": 240,
+                    "text": "[9]",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 465,
+                    "end": 469,
+                    "text": "[21]",
+                    "ref_id": "BIBREF20"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Material and methods"
+        },
+        {
+            "text": "The amplicon purification was conducted using the commercial Illustra GFX PCR DNA and a gel band purification kit (GE Healthcare\u00ae, Buckinghamshire, UK) according to the manufacturer's instructions, and the purified products were quantified in a Qubit\u00ae Fluorometer (Invitrogen Life Technologies, Eugene, OR, USA). The sequencing was performed using an ABI3500 Genetic Analyzer sequencer with the BigDye\u00ae Terminator v3.1 Cycle Sequencing Kit (Applied Biosystems\u00ae, Foster City, CA, USA) and the same forward and reverse primers that were used for the PCR and RT-PCR assays.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Material and methods"
+        },
+        {
+            "text": "The quality of the nucleotide (nt) sequences was determined using the Phred and CAP3 software (http://asparagin. cenargen.embrapa.br/phph/). The sequences were analyzed using the BLAST software (http://blast.ncbi.nlm.nih.gov/) to verify the similarity of the nt sequences with other sequences available in the GenBank public database.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Material and methods"
+        },
+        {
+            "text": "Nucleotide sequence alignments were generated using CLUSTAL W, which was implemented in MEGA 7.0 with an identity matrix that was obtained using the BioEdit v7.0.8.0 program. The phylogenetic tree was constructed in MEGA 7.0 using the neighbor-joining method and the Kimura 2parameter model with a bootstrap of 1,000 replicates.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Material and methods"
+        },
+        {
+            "text": "CaKV RNA was detected in 3 (5.7%) of the 53 fecal samples, while CPV-2 DNA was detected in 51 (96.22%) of the 53 samples. All of the CaKV-positive samples were found to be co-infected with CPV-2b subtype. The signalment of each of the CaKV-positive dogs is listed in Table 1 .",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 267,
+                    "end": 274,
+                    "text": "Table 1",
+                    "ref_id": "TABREF0"
+                }
+            ],
+            "section": "Results"
+        },
+        {
+            "text": "Phylogenetic analysis using a 253 bp sequence from the VP1 gene (Fig. 1) revealed that the Brazilian CaKV field strains identified in this study clustered with other strains of CaKV as well as mouse and feline kobuvirus. Analysis of the identity matrix showed that the CaKV-BR1/2017 and CaKV-BR3/2017 strains displayed 100% nt identity with one another and 94.4% with the CaKV-BR2/2017 strain. The enteric CaKV strains from this study were most closely related (92%) to the Brazilian extraintestinal BRA-Brain/2015 strain. In comparison to CaKV strains from other countries, the Brazilian strains from this study were most closely related to the strains from the UK (90.4-91.2%) and Tanzania (88-89.2%) and were more distantly related (80.8-81.2%) to CaKV strains from China.",
+            "cite_spans": [],
+            "ref_spans": [
+                {
+                    "start": 64,
+                    "end": 72,
+                    "text": "(Fig. 1)",
+                    "ref_id": null
+                }
+            ],
+            "section": "Results"
+        },
+        {
+            "text": "Kobuvirus is a relatively new and emerging genus of the Picornaviridae family that has members that infect both humans and animal species [3] . In the current study, we detected CaKV in fecal samples of diarrheic dogs from Londrina, PR, Southern Brazil using RT-PCR assay with VP1 gene specific primers.",
+            "cite_spans": [
+                {
+                    "start": 138,
+                    "end": 141,
+                    "text": "[3]",
+                    "ref_id": "BIBREF2"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "The frequency rate of CaKV found in this study (5.7%) was similar to those previously reported in diarrheic dogs in the USA (3%) [14] and Italy (4.4%) [5] . Asian countries, such as China, Japan, and South Korea, have been found a higher prevalence of CaKV in diarrheic dogs (17.9%, 37.2%, and 50.5%, respectively) [4, 15, 22] . Some reports identified CaKV not only in dogs with gastroenteritis, but also in healthy animals [14, 22] . These results demonstrate that CaKV is common in dogs; however, its enteric pathogenicity has not been fully elucidated.",
+            "cite_spans": [
+                {
+                    "start": 129,
+                    "end": 133,
+                    "text": "[14]",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 151,
+                    "end": 154,
+                    "text": "[5]",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 315,
+                    "end": 318,
+                    "text": "[4,",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 319,
+                    "end": 322,
+                    "text": "15,",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 323,
+                    "end": 326,
+                    "text": "22]",
+                    "ref_id": "BIBREF21"
+                },
+                {
+                    "start": 425,
+                    "end": 429,
+                    "text": "[14,",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 430,
+                    "end": 433,
+                    "text": "22]",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Animals that are 1 year of age or younger are the most vulnerable to gastrointestinal infection [6] ; thus, most studies have investigated CaKVonly in young dogs. A previous study in Japan [22] found the highest prevalence of CaKV in dogs that were younger than 4 months and have suggested that dogs have a strong age-dependent resistance to CaKV. Nevertheless, in the present study, CaKV was detected in dogs that were 2 months as well as 2 years old, indicating that CaKV can infect both puppies and adult dogs.",
+            "cite_spans": [
+                {
+                    "start": 96,
+                    "end": 99,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 189,
+                    "end": 193,
+                    "text": "[22]",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Enteric mixed infections in dogs have been previously reported that were caused by simultaneous infection with viral, bacterial, and parasitic agents [6] , as well as with multiple viral agents [7, 8, 17] . Most of the studies of CaKV in dogs have reported the presence of coinfections with other enteric viruses, such as CPV-2 and CCoV [3-5, 14, 15, 22] . In our study, all the CaKV-positive dogs were found to also be infected with CPV subtype 2b, suggesting that CaKV may not be the primary pathogen, and it is involved as a mild or secondary infection factor of diarrhea in dogs.",
+            "cite_spans": [
+                {
+                    "start": 150,
+                    "end": 153,
+                    "text": "[6]",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 194,
+                    "end": 197,
+                    "text": "[7,",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 198,
+                    "end": 200,
+                    "text": "8,",
+                    "ref_id": "BIBREF7"
+                },
+                {
+                    "start": 201,
+                    "end": 204,
+                    "text": "17]",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 337,
+                    "end": 354,
+                    "text": "[3-5, 14, 15, 22]",
+                    "ref_id": null
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "There are several controversies regarding the pathogenicity of CaKV in dogs. A study in China [15] reported coinfection of CaKV-infected dogs with other viral agents but also identified diarrheic dogs that were infected only with CaKV, suggesting that CaKV alone may be capable of causing infections in the canine population. Moreover, a previous study in Brazil [21] identified CaKV in multiple tissues from a puppy that was coinfected with other viral (CDV, CPV-2, CaHV-1) and parasitic agents, confirming the systemic distribution of the virus; however, CaKV was not detected by RT-PCR in the feces or intestine of the puppy. The authors suggested that a more sensitive assay might be required to detect this virus when there is concomitant infection with other severe intestinal diseases.",
+            "cite_spans": [
+                {
+                    "start": 94,
+                    "end": 98,
+                    "text": "[15]",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 363,
+                    "end": 367,
+                    "text": "[21]",
+                    "ref_id": "BIBREF20"
+                }
+            ],
+            "ref_spans": [],
+            "section": "Discussion"
+        },
+        {
+            "text": "Several studies have reported a higher similarity among different kobuvirus strains because their phylogenetic analysis was based on the RdRp gene sequence, which is located in a more greatly conserved genomic region [4, 5, 22] . However, phylogenetic analysis based on the partial VP1 gene sequence that encodes the more variable CaKV protein allowed us to obtain information on the genetic relationships among the strains we identified and other CaKV strains worldwide, as well as the various other members of the Kobuvirus genus. The CaKV strains identified in this study were found to be similar (nt identity 92%) to those previously reported in Brazil that were identified from tissues from a puppy, and the strain from nondiarrheic dogs (nt identity 89.2-90.4%), being classified into the same clade. However, these CaKV strains were placed into different clades than those detected in the UK (nt identity 90.4-91.2%), Tanzania (nt identity 88-89.2%), the USA (nt identity 86.8-87.2%), and Asian countries (nt identity South Korea 87.6-88.4% and China 80.8-81.2%). The Brazilian CaKV strains from this study had 71%, 68%, and 65% nt similarity with the feline, mouse, and human kobuviruses, respectively. Fig. 1 Phylogenetic analysis of the CaKV strains and Aichivirus A, B, and C strains based on the nucleotide sequence of a partial fragment (253 bp) of the VP1 gene using the neighbor-joining method with the Kimura-2 parameter and 1000 bootstrap replicates. The CaKV strains identified in the present study (GenBank accession numbers MG787564, MG787565, and MG787566) are labeled with a filled-in circle",
+            "cite_spans": [
+                {
+                    "start": 217,
+                    "end": 220,
+                    "text": "[4,",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 221,
+                    "end": 223,
+                    "text": "5,",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 224,
+                    "end": 227,
+                    "text": "22]",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "ref_spans": [
+                {
+                    "start": 1211,
+                    "end": 1217,
+                    "text": "Fig. 1",
+                    "ref_id": null
+                }
+            ],
+            "section": "Discussion"
+        },
+        {
+            "text": "The present report described the occurrence of CaKV RNA in diarrheic fecal samples from dogs with parvoviruses in Brazil and performed phylogenetic analysis of Brazilian CaKV enteric strains based on the VP1 gene. Further epidemiological and molecular investigations, as well as experimental studies, are necessary to clarify the pathogenic role of CaKV and to understand whether it can act alone as a primary cause of diarrhea or if it only aggravates disease caused by coinfecting agents.",
+            "cite_spans": [],
+            "ref_spans": [],
+            "section": "Conclusion"
+        }
+    ],
+    "bib_entries": {
+        "BIBREF0": {
+            "ref_id": "b0",
+            "title": "Frequency of group a rotavirus in diarrheic calves in Brazilian cattle herds",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "E"
+                    ],
+                    "last": "Parazzi",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Takiuchi",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "M\u00e9dici",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 1998,
+            "venue": "Trop Anim Health Prod",
+            "volume": "38",
+            "issn": "",
+            "pages": "521--526",
+            "other_ids": {}
+        },
+        "BIBREF1": {
+            "ref_id": "b1",
+            "title": "Proposed new strain of canine Kobuvirus from fecal samples of Brazilian domestic dogs",
+            "authors": [
+                {
+                    "first": "Bdcv",
+                    "middle": [],
+                    "last": "Barros",
+                    "suffix": ""
+                },
+                {
+                    "first": "Cmo",
+                    "middle": [],
+                    "last": "Castro",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Pereira",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Ribeiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "Jwbd",
+                    "middle": [],
+                    "last": "Junior",
+                    "suffix": ""
+                },
+                {
+                    "first": "Smm",
+                    "middle": [],
+                    "last": "Casseb",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Holanda",
+                    "suffix": ""
+                },
+                {
+                    "first": "Acr",
+                    "middle": [],
+                    "last": "Cruz",
+                    "suffix": ""
+                },
+                {
+                    "first": "Ecs",
+                    "middle": [],
+                    "last": "Junior",
+                    "suffix": ""
+                },
+                {
+                    "first": "Jdp",
+                    "middle": [],
+                    "last": "Mascarenhas",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "Microbiol Resour Announc",
+            "volume": "8",
+            "issn": "1",
+            "pages": "1292--1310",
+            "other_ids": {}
+        },
+        "BIBREF2": {
+            "ref_id": "b2",
+            "title": "Phylogeny and prevalence of kobuviruses in dogs and cats in the UK",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Carmona-Vicente",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Buesa",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Brown",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "Y"
+                    ],
+                    "last": "Merga",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "C"
+                    ],
+                    "last": "Darby",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Stavisky",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Sadler",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Gaskell",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Dawson",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Radford",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Vet Microbiol",
+            "volume": "164",
+            "issn": "3-4",
+            "pages": "246--252",
+            "other_ids": {}
+        },
+        "BIBREF3": {
+            "ref_id": "b3",
+            "title": "Phylogenetic analysis of astrovirus and kobuvirus in Korean dogs",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Choi",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "I"
+                    ],
+                    "last": "Lim",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [
+                        "K"
+                    ],
+                    "last": "Kim",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [
+                        "Y"
+                    ],
+                    "last": "Cho",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "Y"
+                    ],
+                    "last": "Song",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "An",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "J Vet Med Sci",
+            "volume": "76",
+            "issn": "8",
+            "pages": "1141--1145",
+            "other_ids": {}
+        },
+        "BIBREF4": {
+            "ref_id": "b4",
+            "title": "Canine kobuviruses in diarrhoeic dogs in Italy",
+            "authors": [
+                {
+                    "first": "Di",
+                    "middle": [],
+                    "last": "Martino",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "",
+                    "suffix": ""
+                },
+                {
+                    "first": "Di",
+                    "middle": [],
+                    "last": "Felice",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Ceci",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "",
+                    "suffix": ""
+                },
+                {
+                    "first": "Di",
+                    "middle": [],
+                    "last": "Profio",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Marsilio",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Vet Microbiol",
+            "volume": "166",
+            "issn": "1-2",
+            "pages": "246--249",
+            "other_ids": {}
+        },
+        "BIBREF5": {
+            "ref_id": "b5",
+            "title": "Enteropathogen infections in canine puppies : ( co-) occurrence , clinical relevance and risk factors",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Duijvestijn",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Mughini-Gras",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Schuurman",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Schijf",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "Vet Microbiol",
+            "volume": "195",
+            "issn": "",
+            "pages": "115--122",
+            "other_ids": {}
+        },
+        "BIBREF6": {
+            "ref_id": "b6",
+            "title": "Concomitant canine distemper , infectious canine hepatitis , canine parvoviral enteritis , canine infectious tracheobronchitis , and toxoplasmosis in a puppy",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Headley",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "Jtt",
+                    "middle": [],
+                    "last": "Fritzen",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Garcia",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Weissenb\u00f6ck",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Silva",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Bodnar",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Okano",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "J Vet Diagn Investig",
+            "volume": "25",
+            "issn": "",
+            "pages": "129--135",
+            "other_ids": {}
+        },
+        "BIBREF7": {
+            "ref_id": "b7",
+            "title": "Canine distemper virus with concomitant infections due to canine herpesvirus-1, canine parvovirus, and canine adenovirus in puppies from southern Brazil",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Headley",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Bodnar",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "P"
+                    ],
+                    "last": "Silva",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Gomes",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Okano",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Jacobs J Microbiol Pathol",
+            "volume": "2",
+            "issn": "1",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF8": {
+            "ref_id": "b8",
+            "title": "Occurrence of canine parvovirus type 2c in the United States",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Hong",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Decaro",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Desario",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Tanner",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Pardo",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Sanchez",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Buonavoglia",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "T"
+                    ],
+                    "last": "Saliki",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "J Vet Diagn Investig",
+            "volume": "19",
+            "issn": "",
+            "pages": "535--539",
+            "other_ids": {}
+        },
+        "BIBREF9": {
+            "ref_id": "b9",
+            "title": "ICTV -International Committee on Taxonomy of Viruses",
+            "authors": [],
+            "year": 2016,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF10": {
+            "ref_id": "b10",
+            "title": "Characterization of a canine homolog of human Aichivirus",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Kapoor",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Simmonds",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Dubovi",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Qaisar",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Henriquez",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Medina",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Shields",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [
+                        "I"
+                    ],
+                    "last": "Lipkin",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "J Virol",
+            "volume": "85",
+            "issn": "21",
+            "pages": "11520--11525",
+            "other_ids": {}
+        },
+        "BIBREF11": {
+            "ref_id": "b11",
+            "title": "Epidemiology of human and animal kobuviruses",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Khamrin",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Maneekarn",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Okitsu",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Ushijima",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Virus Disease",
+            "volume": "25",
+            "issn": "2",
+            "pages": "195--200",
+            "other_ids": {}
+        },
+        "BIBREF12": {
+            "ref_id": "b12",
+            "title": "Molecular characterization of new described kobuvirus in dogs with diarrhea in China",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Kong",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Zuo",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Yu",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Zhou",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Shan",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Tong",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "Springer Plus",
+            "volume": "5",
+            "issn": "1",
+            "pages": "",
+            "other_ids": {}
+        },
+        "BIBREF13": {
+            "ref_id": "b13",
+            "title": "Viruses in diarrhoeic dogs include novel kobuviruses and sapoviruses",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Pesavento",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Shan",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "M"
+                    ],
+                    "last": "Leutenegger",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Delwart",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "J Gen Virol",
+            "volume": "92",
+            "issn": "",
+            "pages": "2534--2541",
+            "other_ids": {}
+        },
+        "BIBREF14": {
+            "ref_id": "b14",
+            "title": "Prevalence and phylogenetic analysis of canine kobuviruses in diarrhoetic dogs in northeast China",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Wei",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Guo",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Geng",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Zhao",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Su",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "J Vet Med Sci",
+            "volume": "78",
+            "issn": "",
+            "pages": "7--11",
+            "other_ids": {
+                "DOI": [
+                    "10.1292/jvms.15-0414"
+                ]
+            }
+        },
+        "BIBREF15": {
+            "ref_id": "b15",
+            "title": "Molecular characterization of canine kobuvirus in wild carnivores and the domestic dog in Africa",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Olarte-Castillo",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Heeger",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [
+                        "J"
+                    ],
+                    "last": "Mazzoni",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Greenwood",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Fyumagwa",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [
+                        "D"
+                    ],
+                    "last": "Moehlman",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Hofer",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "East",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Virology",
+            "volume": "477",
+            "issn": "",
+            "pages": "89--97",
+            "other_ids": {}
+        },
+        "BIBREF16": {
+            "ref_id": "b16",
+            "title": "Identification of co-infection by rotavirus and parvovirus in dogs with gastroenteritis in Mexico",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Ortega",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "S"
+                    ],
+                    "last": "Mart\u00ednez-Casta",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [
+                        "G"
+                    ],
+                    "last": "Bautista-G\u00f3mez",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Braz J Microbiol",
+            "volume": "265",
+            "issn": "",
+            "pages": "1--5",
+            "other_ids": {}
+        },
+        "BIBREF17": {
+            "ref_id": "b17",
+            "title": "Kobuviruses -a comprehensive review",
+            "authors": [
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Reuter",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Boros",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Pankovics",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "Rev Med Virol",
+            "volume": "21",
+            "issn": "",
+            "pages": "32--41",
+            "other_ids": {}
+        },
+        "BIBREF18": {
+            "ref_id": "b18",
+            "title": "High frequency of Aichivirus C (porcine kobuvirus) infection in piglets from different geographic regions of Brazil",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ribeiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [
+                        "L"
+                    ],
+                    "last": "Arruda",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Trop Anim Health Prod",
+            "volume": "45",
+            "issn": "",
+            "pages": "1757--1762",
+            "other_ids": {}
+        },
+        "BIBREF19": {
+            "ref_id": "b19",
+            "title": "Kobuvirus (Aichivirus B) infection in Brazilian cattle herds",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ribeiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Lorenzetti",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Vet Res Commun",
+            "volume": "38",
+            "issn": "2",
+            "pages": "177--182",
+            "other_ids": {}
+        },
+        "BIBREF20": {
+            "ref_id": "b20",
+            "title": "Extra-intestinal detection of canine kobuvirus in a puppy from Southern Brazil",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Ribeiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Headley",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Diniz",
+                    "suffix": ""
+                },
+                {
+                    "first": "Aht",
+                    "middle": [],
+                    "last": "Pereira",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Lorenzetti",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "A"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [
+                        "F"
+                    ],
+                    "last": "Alfieri",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Arch Virol",
+            "volume": "162",
+            "issn": "3",
+            "pages": "867--872",
+            "other_ids": {}
+        },
+        "BIBREF21": {
+            "ref_id": "b21",
+            "title": "Detection of kobuvirus RNA in Japanese domestic dogs",
+            "authors": [
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Soma",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Matsubayashi",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Sasai",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "J Vet Med Sci",
+            "volume": "78",
+            "issn": "11",
+            "pages": "1731--1735",
+            "other_ids": {}
+        },
+        "BIBREF22": {
+            "ref_id": "b22",
+            "title": "Publisher's note Springer Nature remains neutral with regard to jurisdictional claims in published maps and institutional affiliations",
+            "authors": [],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": "",
+            "other_ids": {}
+        }
+    },
+    "ref_entries": {
+        "TABREF0": {
+            "text": "Signal of diarrheic dogs from Londrina, PR, Southern Brazil that were positive for canine kobuvirus, as determined by RT-PCR assay",
+            "latex": null,
+            "type": "table"
+        }
+    },
+    "back_matter": []
+}
