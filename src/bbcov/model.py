@@ -1,6 +1,5 @@
 import abc
 import numpy as np
-import joblib
 
 
 class Model(abc.ABC):
