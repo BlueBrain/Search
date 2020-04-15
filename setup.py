@@ -5,14 +5,17 @@ VERSION = '0.1'
 description = "Blue Brain Search"
 
 install_requires = [
-    'torch',
     'numpy',
+    'pandas',
+    'scikit-learn',
+    'scipy',
+    'torch',
 ]
 setup_requires = ['pytest-runner']
 tests_require = [
+    'flake8',
     'pytest',
     'pytest-cov',
-    'flake8',
 ]
 
 setup(

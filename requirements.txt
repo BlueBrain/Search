@@ -1,0 +1,11 @@
+# pytorch-pretrained-bert
+git+https://github.com/epfml/sent2vec
+git+https://github.com/neuml/cord19q
+ipywidgets
+numpy==1.18.2
+pdfkit
+pillow
+sentence-transformers
+tensorflow-hub
+torch==1.4.0
+transformers
