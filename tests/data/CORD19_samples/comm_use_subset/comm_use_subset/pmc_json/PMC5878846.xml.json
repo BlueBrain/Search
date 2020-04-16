@@ -1,0 +1,1642 @@
+{
+    "paper_id": "PMC5878846",
+    "metadata": {
+        "title": "Risk factors for hematemesis in Hoima and Buliisa Districts, Western Uganda, September-October 2015",
+        "authors": [
+            {
+                "first": "Steven",
+                "middle": [
+                    "Ndugwa"
+                ],
+                "last": "Kabwama",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Richardson",
+                "middle": [],
+                "last": "Mafigiri",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Stephen",
+                "middle": [],
+                "last": "Balinandi",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Atek",
+                "middle": [],
+                "last": "Kagirita",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Alex",
+                "middle": [
+                    "Ario"
+                ],
+                "last": "Riolexus",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Bao-Ping",
+                "middle": [],
+                "last": "Zhu",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            }
+        ]
+    },
+    "body_text": [
+        {
+            "text": "Hematemesis refers to the vomiting of blood, which indicates acute gastro-intestinal bleeding. Common causes of upper gastro-intestinal bleeding include peptic ulcers, cirrhosis with oesophageal or gastric varices, gastritis and esophagitis of various etiology, Mallory-Weis tears and malignancy [1]. Hematemesis could also be a symptom of chronic infection with Schistosoma Mansoni [2]. A loss of gastro-intestinal micro-vascular integrity is also a characteristic of Viral Haemorrhagic Fevers (VHF) such as Ebola, Marburg, Lassa fever, Yellow fever and Rift valley fever [3]; therefore hematemesis might indicate a VHF especially if it is accompanied by fever and bleeding from other orifices. On 17 September 2015 the Ministry of Health of Uganda received a report from Buliisa District Health Office in western Uganda about a cluster of a mysterious fatal disease in Butiaba Sub-county. The dominant symptom was hematemesis while some patients had fever. By 24 September 2015, there had been 4 deaths. Since outbreaks of VHFs have occurred in nearby districts in the past [4-6], VHF was one of the differential diagnoses for this disease outbreak initially. We conducted an investigation to establish the existence of an outbreak, verify the diagnosis of the disease and inform public health interventions.",
+            "cite_spans": [
+                {
+                    "start": 297,
+                    "end": 298,
+                    "mention": "1",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 384,
+                    "end": 385,
+                    "mention": "2",
+                    "ref_id": "BIBREF1"
+                },
+                {
+                    "start": 574,
+                    "end": 575,
+                    "mention": "3",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 1077,
+                    "end": 1078,
+                    "mention": "4",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 1079,
+                    "end": 1080,
+                    "mention": "6",
+                    "ref_id": "BIBREF5"
+                }
+            ],
+            "section": "Introduction",
+            "ref_spans": []
+        },
+        {
+            "text": "Hoima and Buliisa Districts are located in the Western region of Uganda on the shores of Lake Albert. According to the 2014 national census, Hoima has a population of 573,903 while Buliisa District has a population of 113,569 [7]. We conducted the investigation between 3 and 17 October 2015. We defined a suspected case as onset of hematemesis in a resident of Hoima, Buliisa or another neighbouring district from 1 June 2015 onward. We found cases by reviewing health facility records from June 2015 to September 2015. We also visited affected communities to search for cases using the case definition. We also interviewed village health team members, healthcare workers and case patients who sought care at the health facilities. We analyzed the case-patients' line-list data to elucidate the distribution of case-persons by person, place and time. Based on the results of the descriptive epidemiology, we formulated hypotheses about potential exposures. In the assessment of alcohol use as a potential exposure, we asked patients about the nature of alcohol they usually consumed and the average amount in one sitting. The alcohol consumed was quantified as number of standard drinks whereby one standard drink was equivalent to 285ml of beer or 30ml of distilled [8]. People who took more than 6 standard drinks were categorised as exposed. We conducted a case-control study to test alcohol intake as a possible risk factor for hematemesis among other hypotheses. In the case-control study, a case was defined as onset of hematemesis in a person during July to October 2015. A control-person was an individual without any history of hematemesis. Control-persons were matched to cases according to sex, age (\u00b1 10 years) and village of residence, with a case-to-control ratio of 1:4.",
+            "cite_spans": [
+                {
+                    "start": 227,
+                    "end": 228,
+                    "mention": "7",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 1269,
+                    "end": 1270,
+                    "mention": "8",
+                    "ref_id": "BIBREF7"
+                }
+            ],
+            "section": "Methods",
+            "ref_spans": []
+        },
+        {
+            "text": "\nLaboratory investigation: For 2 of the case-patients, an ultrasound device was used to visualize the size and structure of the internal organs around the abdomen. We collected stool samples from 3 case-patients and conducted microscopic identification of Schistosoma eggs in the sample. Blood was drawn from 1 of these 2 case-patients to perform liver function tests and a complete blood count. Multiple biological specimens (17 whole blood, 3 biopsies and 2 rectal swabs) from 19 patients were collected and tested for a battery of VHFs (including Ebola, Marburg, Crimean-Congo haemorrhagic fever (CCHF) and Rift Valley fever (RVF) viruses) using Polymerase Chain Reaction (PCR), histopathology and bacterial examinations. PCR tests were conducted at the Centers for Disease Control and Prevention/Uganda Virus Research Institute (UVRI) VHF laboratory, Entebbe, Uganda, while the bacteriological tests were performed at the Medical Research Council Microbiology Laboratory, also based at UVRI. These laboratories are national reference centres for viral and bacteriological diagnostics. The VHF diagnostic protocols used have been described before and were routinely used to confirm previous VHF outbreaks in Uganda [9]. Histopathology testing was done at the Centers for Disease Control and Prevention, Atlanta, USA.",
+            "cite_spans": [
+                {
+                    "start": 1219,
+                    "end": 1220,
+                    "mention": "9",
+                    "ref_id": "BIBREF8"
+                }
+            ],
+            "section": "Methods",
+            "ref_spans": []
+        },
+        {
+            "text": "\nStatistical analysis: Using population data from the national census [7] and the data provided by the Uganda Bureau of Statistics 2015 [10] on the age and sex distributions of the population, we calculated the attack rate by age and sex. In analysing the data from the case-control study, we used the Mantel-Haenszel method to estimate odds ratios (OR) and their confidence intervals (CI) to account for the matched study design.",
+            "cite_spans": [
+                {
+                    "start": 71,
+                    "end": 72,
+                    "mention": "7",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 137,
+                    "end": 139,
+                    "mention": "10",
+                    "ref_id": "BIBREF9"
+                }
+            ],
+            "section": "Methods",
+            "ref_spans": []
+        },
+        {
+            "text": "\nEthical considerations: The Ministry of Health of Uganda gave the directive and approval to investigate this outbreak. The Office of the Associate Director for Science, CDC/Uganda, determined that this activity was not human subjects research and its primary intent was public health practice or a disease control activity (specifically, epidemic or endemic disease control activity). Verbal informed consent was obtained from the participants before the start of each interview. Study participants were told that their participation was entirely voluntary and their refusal to answer any or all of the questions would not result in any negative consequences. Participants identified as patients were referred for free treatment at Hoima Regional Referral Hospital. To protect participants' confidentiality, personal information were de-identified during data analysis and the interview forms were locked up.",
+            "cite_spans": [],
+            "section": "Methods",
+            "ref_spans": []
+        },
+        {
+            "text": "Our active case-finding identified 56 hematemesis cases with disease onset between June and October 2015. The attack rate in Buliisa District was 15/100,000 while that in Hoima District was 5.2/100,000. The epidemic curve shows that approximately 3 cases occurred every week from June 2015 to September 2015 (Figure 1). The peak occurred in the middle of September after the Ministry of Health started community mobilization and active case-finding. The data from the review of records in both Hoima and Buliisa Districts showed an average of about 8 cases recorded for every month (Figure 2). For both years 2014 and 2015, the month of August had the highest number of cases. More cases occurred in August and September 2015, compared with the same period in 2014. Overall, we observed no consistent patterns in the trends of the case counts in the affected districts. The attack rate was higher in Hoima compared to Buliisa District. In both districts, persons aged 31-60 years had the highest attack rate followed by adults 18-30 years (Table 1). The attack rates in all age groups were higher in Buliisa compared to Hoima except the > 60 age group where Buliisa did not register any cases. no cases occurred among persons < 15 years of age in either district. Otherwise, no remarkable patterns were observed regarding the age-group distributions of the cases. In Hoima District, women had a higher attack rate than men while in Buliisa District men had a higher attack rate.",
+            "cite_spans": [],
+            "section": "Results",
+            "ref_spans": [
+                {
+                    "start": 309,
+                    "end": 317,
+                    "mention": "Figure 1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 583,
+                    "end": 591,
+                    "mention": "Figure 2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 1040,
+                    "end": 1047,
+                    "mention": "Table 1",
+                    "ref_id": "TABREF0"
+                }
+            ]
+        },
+        {
+            "text": "\nCase-control study: In the case-control study, we found statistically significant associations between self-reported history of liver disease and hematemesis and self-reported history of ulcer disease and hematemesis (Table 2). Among the medications taken before case-patients' onset of illness, use of indomethacin was significantly associated with the illness.",
+            "cite_spans": [],
+            "section": "Results",
+            "ref_spans": [
+                {
+                    "start": 219,
+                    "end": 226,
+                    "mention": "Table 2",
+                    "ref_id": "TABREF1"
+                }
+            ]
+        },
+        {
+            "text": "\nClinical and laboratory investigation: Of 2 case-patients that underwent ultrasonography, 1 showed advanced micro-nodular liver cirrhosis with tense ascites and gross splenomegaly. The differential diagnoses included severe acute large bowel inflammatory disease (amoebiasis, ulcerative colitis, crohn's disease, or schistosomiasis). This patient had low total protein 61 g/L (range 63-83) and elevated serum aspartate transferase 48 U/L (range 0-40). The complete blood count revealed a normal white blood cell count 4.9 103/uL (range 3.0-15), normal red blood cell count 3.0 106/uL (range 2.5-5.5), normal platelet count 152 103/uL (range 50-400) and low haemoglobin 7.8 g/dL (range 8.0-17). The abdominal scan of the second case-patient showed thickened gastric walls (up to 0.68cm) and an excessive amount of gastric gas. The liver, spleen, gall bladder and kidneys appeared normal and no abdominal masses or peritoneal effusion were seen. The findings were suggestive of gastroenteritis and ruled out complicated ulcers. Of the 3 stool samples examined by microscopy, one had Schistosoma ova. All samples tested were negative for Ebola, Marburg, CCHF and RVF by molecular testing. Testing of the rectal swabs using general culture for microbiological pathogens did not show any significant bacterial growth. Immunohistochemical testing on the submitted biopsies was also negative for Ebola and Marburg viruses, malaria and typhus group rickettsia.",
+            "cite_spans": [],
+            "section": "Results",
+            "ref_spans": []
+        },
+        {
+            "text": "Our investigation of the reported hematemesis outbreak ruled out a true outbreak. The surge in case count was likely to have been due to increased awareness and active case finding in the community after the initial cluster of cases were reported. Specifically, laboratory investigations did not point to VHF as the cause of this outbreak, as was initially suspected. Our data suggested that this illness cluster might have been caused by a combination of predisposing conditions (including liver disease, schistosomiasis and ulcer) and the misuse of NSAIDs (such as indomethacin and ibuprofen) that are known to trigger bleeding in patients with a bleeding tendency. In reviewing detailed clinical information of 31 patients with a post-mortem diagnosis of peptic ulcers, Felix and Stahlgren found that hematemesis was the initial symptom for 35% (11/31) of the patients; autopsy showed that 58% (18/31) of the patients had an ulcer located in the duodenum and 12 patients had an ulcer in the stomach and 10 of those patients had a bleeding ulcer [11]. In another report of 52 cases that had bleeding gastric and duodenal ulcers over 9\u00bd years, 6 of the cases resulted in deaths; all 6 deceased persons were between the ages of 35 and 60 years and 4 had a history of hematemesis [12]. Similarly, the use of anti-inflammatory drugs is known to increase the risk for upper gastro-intestinal bleeding [13]. Pathophysiologically, NSAIDs block the synthesis of prostaglandins, which promote the production of mucus that protects the lining of the gut from ulceration [14], leading to hematemesis. Epidemiologically, indomethacin use has been associated with bleeding and other adverse effects of the gastro-intestinal tract. In a Swedish study, among 18 patients treated using Indomethacin for 6 months, 8 (44%) developed gastrointestinal related complications and 1 died [15]. Also, a case-control study conducted in the United Kingdom which consisted of 1457 cases of upper gastro-intestinal bleeding and 10000 control subjects, the relative risk associated with the use of NSAIDs was 4.7 (95% CI: 3.8-5.7) [13].",
+            "cite_spans": [
+                {
+                    "start": 1049,
+                    "end": 1051,
+                    "mention": "11",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 1280,
+                    "end": 1282,
+                    "mention": "12",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 1399,
+                    "end": 1401,
+                    "mention": "13",
+                    "ref_id": "BIBREF12"
+                },
+                {
+                    "start": 1563,
+                    "end": 1565,
+                    "mention": "14",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 1868,
+                    "end": 1870,
+                    "mention": "15",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 2105,
+                    "end": 2107,
+                    "mention": "13",
+                    "ref_id": "BIBREF12"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "The clinical presentation of a distended abdomen among some of the case patients is of particular interest. Although in this investigation we did not find a statistically significant association between the history of self-reported schistosomiasis and hematemesis, the presentation of some cases with distended abdomens and the fact that one of three patients' stool specimens had positive identification of Schistosoma ova indicate that some of the case-patients have schistosomiasis. The shores of lake Albert where both Buliisa and Hoima Districts are located have the highest prevalence of symptomatic and asymptomatic Mansoni S. in Uganda [16]. The enlarged abdomen could be a result of splenomegaly from chronic infection with Mansoni S. One study revealed that even a low community prevalence of infection with Mansoni S. can influence hepatosplenic morbidity [17]. In a case series in Brazil, hematemesis frequently occurred in patients with schistosomal splenomegaly [18]. Drug administration of praziquantel either singly [19] or in combination [20] should be implemented to treat any existing schistosomal infections. Also, because infection with the parasites is a result of contact with contaminated water, the sanitation should be improved in this community. The improvement of sanitation have been shown to reduce schistosomiasis related morbidity by as much as 77% [21]. This investigation was initiated because the symptoms of initial patients were suggestive of VHFs [3]. Although VHFs were eventually ruled out, the investigation and response served as a \u201clive fire exercise\u201d for the surveillance and response capacity of the Ministry of Health. In this age when the global public health system is constantly challenged by emerging and re-emerging infectious diseases as well as new cycles of pandemics and threats of bioterrorism [22], such a \u201clive fire exercise\u201d helps to continuously improve the emergency response system. Without a timely and effective response, public health emergencies of international concern could quickly spiral out of control, as were exemplified by the Ebola epidemic in West Africa [23] and SARS pandemic in China [24]. Conversely, rapid response and control in Uganda and Nigeria were shown to effectively contain these emergencies and prevent them from becoming a public health crisis [25, 26].",
+            "cite_spans": [
+                {
+                    "start": 645,
+                    "end": 647,
+                    "mention": "16",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 868,
+                    "end": 870,
+                    "mention": "17",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 977,
+                    "end": 979,
+                    "mention": "18",
+                    "ref_id": "BIBREF17"
+                },
+                {
+                    "start": 1033,
+                    "end": 1035,
+                    "mention": "19",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 1056,
+                    "end": 1058,
+                    "mention": "20",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 1382,
+                    "end": 1384,
+                    "mention": "21",
+                    "ref_id": "BIBREF20"
+                },
+                {
+                    "start": 1486,
+                    "end": 1487,
+                    "mention": "3",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 1851,
+                    "end": 1853,
+                    "mention": "22",
+                    "ref_id": "BIBREF21"
+                },
+                {
+                    "start": 2132,
+                    "end": 2134,
+                    "mention": "23",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 2164,
+                    "end": 2166,
+                    "mention": "24",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 2337,
+                    "end": 2339,
+                    "mention": "25",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 2341,
+                    "end": 2343,
+                    "mention": "26",
+                    "ref_id": "BIBREF25"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "This investigation also revealed widespread alcohol use in this population, which is consistent with findings from previous studies showing high prevalence of alcohol use among people that reside near water bodies in Uganda [27-29]. Alcohol intake of more than 6 standard drinks has been shown to be a significant predictor of future liver disease [30]. The high levels of alcohol use could explain the high prevalence of liver disease in this population, which is a major risk factor for hematemesis [31]. Epidemiological investigations have also revealed that among persons who use NSAIDS, the risk of acute upper gastro intestinal bleeding increases with the level of alcohol consumed [32]. Pharmacies in the area should warn their clients on the risk of gastrointestinal bleeding when NSAIDS are taken with alcohol. In Uganda, many prescription and non-prescription medicines are sold by both licensed and unlicensed drug shops. Although there is legislation that specifies which medicines could be sold as non-prescription drugs, a wide gap still exists between policy and implementation [33]. This combination of a society with high levels of alcohol use and wide availability of over-the-counter medicines increases the risk of complications that arise from use of drugs such as NSAIDs, especially among persons with pre-existing conditions such as ulcers, schistosomiasis, liver disease and tuberculosis. People in rural communities in Uganda have been shown to have low access to health care [34], low satisfaction with and poor perceived accessibility of the health care services [35]. Because of poor access to healthcare, it is possible that persons in our investigation were forced to self-medicate on drugs such as NSAIDs, which elevated their risk of developing hematemesis. Targeted interventions that address the widespread alcohol use, increase access to health care and health education on the dangers of NSAID use should be carried out for persons in this community and fisher folk in general.",
+            "cite_spans": [
+                {
+                    "start": 225,
+                    "end": 227,
+                    "mention": "27",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 228,
+                    "end": 230,
+                    "mention": "29",
+                    "ref_id": "BIBREF28"
+                },
+                {
+                    "start": 349,
+                    "end": 351,
+                    "mention": "30",
+                    "ref_id": "BIBREF29"
+                },
+                {
+                    "start": 502,
+                    "end": 504,
+                    "mention": "31",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 689,
+                    "end": 691,
+                    "mention": "32",
+                    "ref_id": "BIBREF31"
+                },
+                {
+                    "start": 1094,
+                    "end": 1096,
+                    "mention": "33",
+                    "ref_id": "BIBREF32"
+                },
+                {
+                    "start": 1502,
+                    "end": 1504,
+                    "mention": "34",
+                    "ref_id": "BIBREF33"
+                },
+                {
+                    "start": 1591,
+                    "end": 1593,
+                    "mention": "35",
+                    "ref_id": "BIBREF34"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "The authors declare no competing interests.",
+            "cite_spans": [],
+            "section": "Competing interests",
+            "ref_spans": []
+        }
+    ],
+    "ref_entries": {
+        "TABREF0": {
+            "text": "Table 1: Attack rates of hematemesis by age-group and sex during an outbreak in Hoima and Buliisa districts, Western Uganda, June\u2013October 2015\n",
+            "type": "table"
+        },
+        "TABREF1": {
+            "text": "Table 2: Association between risk factors and onset of hematemesis during an outbreak in Hoima and Buliisa Districts, Western Uganda, June-October 2015\n",
+            "type": "table"
+        },
+        "FIGREF0": {
+            "text": "Figure 1: Epidemic curve showing number of hematemesis cases in Hoima and Buliisa Districts by week of onset, June-October 2015",
+            "type": "figure"
+        },
+        "FIGREF1": {
+            "text": "Figure 2: Number of hematemesis cases, by month, June-September: Hoima and Buliisa Districts, 2014 and 2015",
+            "type": "figure"
+        }
+    },
+    "back_matter": [],
+    "bib_entries": {
+        "BIBREF0": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "DI",
+                    "middle": [],
+                    "last": "Wilson",
+                    "suffix": ""
+                }
+            ],
+            "year": 1990,
+            "venue": "Clinical Methods: the History, Physical and Laboratory Examinations",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF1": {
+            "title": "Mortality due to schistosomiasis mansoni: a field study in Sudan",
+            "authors": [
+                {
+                    "first": "MM",
+                    "middle": [],
+                    "last": "Kheir",
+                    "suffix": ""
+                },
+                {
+                    "first": "IA",
+                    "middle": [],
+                    "last": "Eltoum",
+                    "suffix": ""
+                },
+                {
+                    "first": "AM",
+                    "middle": [],
+                    "last": "Saad",
+                    "suffix": ""
+                },
+                {
+                    "first": "MM",
+                    "middle": [],
+                    "last": "Ali",
+                    "suffix": ""
+                },
+                {
+                    "first": "OZ",
+                    "middle": [],
+                    "last": "Baraka",
+                    "suffix": ""
+                }
+            ],
+            "year": 1999,
+            "venue": "Am J Trop Med Hyg.",
+            "volume": "60",
+            "issn": "2",
+            "pages": "307-10",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF2": {
+            "title": "Zoonotic viral diseases and the frontier of early diagnosis, control and prevention",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Heeney",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "J Inter Med.",
+            "volume": "260",
+            "issn": "5",
+            "pages": "399-408",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF3": {
+            "title": "Newly discovered ebola virus associated with hemorrhagic fever outbreak in Uganda",
+            "authors": [
+                {
+                    "first": "JS",
+                    "middle": [],
+                    "last": "Towner",
+                    "suffix": ""
+                },
+                {
+                    "first": "TK",
+                    "middle": [],
+                    "last": "Sealy",
+                    "suffix": ""
+                },
+                {
+                    "first": "ML",
+                    "middle": [],
+                    "last": "Khristova",
+                    "suffix": ""
+                },
+                {
+                    "first": "CG",
+                    "middle": [],
+                    "last": "Albari\u00f1o",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Conlan",
+                    "suffix": ""
+                },
+                {
+                    "first": "SA",
+                    "middle": [],
+                    "last": "Reeder",
+                    "suffix": ""
+                }
+            ],
+            "year": 2008,
+            "venue": "PLoS Pathog.",
+            "volume": "4",
+            "issn": "11",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF4": {
+            "title": "Ebola Hemorrhagic Fever Transmission and Risk Factors of Contacts, Uganda",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Francesconi",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Yoti",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Declich",
+                    "suffix": ""
+                },
+                {
+                    "first": "PA",
+                    "middle": [],
+                    "last": "Onek",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Fabiani",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Olango",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "Emerg Infect Dis.",
+            "volume": "9",
+            "issn": "11",
+            "pages": "1430-7",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF5": {
+            "title": "Outbreak of Ebola hemorrhagic fever Uganda. August 2000-January 2001",
+            "authors": [],
+            "year": 2001,
+            "venue": "MMWR",
+            "volume": "50",
+            "issn": "5",
+            "pages": "73-7",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF6": {
+            "title": "",
+            "authors": [],
+            "year": 2014,
+            "venue": "National Population and Housing Census 2014 Revised Edition.",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF7": {
+            "title": "Alcohol use",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Rehm",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Room",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Monteiro",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Gmel",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Graham",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Rehn",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "comparative quantification of health risks: global and regional burden of disease due to selected major risk factors.",
+            "volume": "1",
+            "issn": "",
+            "pages": "959-1108",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF8": {
+            "title": "Genomic analysis of filoviruses associated with four viral hemorrhagic fever outbreaks in Uganda and the Democratic Republic of the Congo in 2012",
+            "authors": [
+                {
+                    "first": "CG",
+                    "middle": [],
+                    "last": "Albarino",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Shoemaker",
+                    "suffix": ""
+                },
+                {
+                    "first": "ML",
+                    "middle": [],
+                    "last": "Khristova",
+                    "suffix": ""
+                },
+                {
+                    "first": "JF",
+                    "middle": [],
+                    "last": "Wamala",
+                    "suffix": ""
+                },
+                {
+                    "first": "JJ",
+                    "middle": [],
+                    "last": "Muyembe",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Balinandi",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Virology.",
+            "volume": "442",
+            "issn": "2",
+            "pages": "97-100",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF9": {
+            "title": "",
+            "authors": [],
+            "year": 2015,
+            "venue": "2015 Statistical Abstract. Statistics House, Plot 9, Colville street",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF10": {
+            "title": "Death by undiagnosed perforated peptic ulcer: analysis of 31 cases",
+            "authors": [
+                {
+                    "first": "WR",
+                    "middle": [],
+                    "last": "Felix",
+                    "suffix": ""
+                },
+                {
+                    "first": "LH",
+                    "middle": [],
+                    "last": "Stahlgren",
+                    "suffix": ""
+                }
+            ],
+            "year": 1973,
+            "venue": "Ann Surg.",
+            "volume": "177",
+            "issn": "3",
+            "pages": "344-51",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF11": {
+            "title": "Bleeding Gastric and Duodenal Ulcers: Report of 52 Cases",
+            "authors": [
+                {
+                    "first": "JW",
+                    "middle": [],
+                    "last": "Hinton",
+                    "suffix": ""
+                }
+            ],
+            "year": 1931,
+            "venue": "Ann Surg.",
+            "volume": "93",
+            "issn": "4",
+            "pages": "844-56",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF12": {
+            "title": "Risk of upper gastrointestinal bleeding and perforation associated with Individual non-steroidal anti-inflammatory drugs",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Garc\u00eda Rodr\u00edguez",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Jick",
+                    "suffix": ""
+                }
+            ],
+            "year": 1994,
+            "venue": "The Lancet.",
+            "volume": "343",
+            "issn": "8900",
+            "pages": "769-72",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF13": {
+            "title": "Prostaglandins, NSAIDs and Gastric Mucosal Protection: Why Doesn't the Stomach Digest Itself",
+            "authors": [
+                {
+                    "first": "JL",
+                    "middle": [],
+                    "last": "Wallace",
+                    "suffix": ""
+                }
+            ],
+            "year": 2008,
+            "venue": "Physiol Rev.",
+            "volume": "88",
+            "issn": "4",
+            "pages": "1547-65",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF14": {
+            "title": "Side-effects of Indomethacin",
+            "authors": [
+                {
+                    "first": "O",
+                    "middle": [],
+                    "last": "L\u00f6vgren",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Allander",
+                    "suffix": ""
+                }
+            ],
+            "year": 1964,
+            "venue": "BMJ.",
+            "volume": "1",
+            "issn": "5375",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF15": {
+            "title": "Epidemiology and geography of Schistosoma mansoni in Uganda: implications for planning control",
+            "authors": [
+                {
+                    "first": "NB",
+                    "middle": [],
+                    "last": "Kabatereine",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Brooker",
+                    "suffix": ""
+                },
+                {
+                    "first": "EM",
+                    "middle": [],
+                    "last": "Tukahebwa",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Kazibwe",
+                    "suffix": ""
+                },
+                {
+                    "first": "AW",
+                    "middle": [],
+                    "last": "Onapa",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Trop Med Int Health.",
+            "volume": "9",
+            "issn": "3",
+            "pages": "372-80",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF16": {
+            "title": "Associating community prevalence of Schistosoma mansoni infection with prevalence of signs and symptoms",
+            "authors": [
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Van der Werf",
+                    "suffix": ""
+                },
+                {
+                    "first": "SJ",
+                    "middle": [],
+                    "last": "de Vlas",
+                    "suffix": ""
+                },
+                {
+                    "first": "CW",
+                    "middle": [],
+                    "last": "Looman",
+                    "suffix": ""
+                },
+                {
+                    "first": "NJ",
+                    "middle": [],
+                    "last": "Nagelkerke",
+                    "suffix": ""
+                },
+                {
+                    "first": "JD",
+                    "middle": [],
+                    "last": "Habbema",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Engels",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Acta Trop.",
+            "volume": "82",
+            "issn": "2",
+            "pages": "127-37",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF17": {
+            "title": "Natural history and prognosis of splenomegaly in schistosomiasis mansoni",
+            "authors": [
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Kloetzel",
+                    "suffix": ""
+                }
+            ],
+            "year": 1964,
+            "venue": "Am J Trop Med Hyg.",
+            "volume": "13",
+            "issn": "",
+            "pages": "541-4",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF18": {
+            "title": "Praziquantel: mechanisms of action, resistance and new derivatives for schistosomiasis",
+            "authors": [
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Doenhoff",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Cioli",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Utzinger",
+                    "suffix": ""
+                }
+            ],
+            "year": 2008,
+            "venue": "Curr Opin Infect Dis.",
+            "volume": "21",
+            "issn": "6",
+            "pages": "659-67",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF19": {
+            "title": "Recent investigations of artemether, a novel agent for the prevention of schistosomiasis japonica, mansoni and haematobia",
+            "authors": [
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Shuhua",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Tanner",
+                    "suffix": ""
+                },
+                {
+                    "first": "EK",
+                    "middle": [],
+                    "last": "N'Goran",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Utzinger",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Chollet",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Bergquist",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Acta Trop.",
+            "volume": "82",
+            "issn": "2",
+            "pages": "175-81",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF20": {
+            "title": "Effects of improved water supply and sanitation on ascariasis, diarrhoea, dracunculiasis, hookworm infection, schistosomiasis and trachoma",
+            "authors": [
+                {
+                    "first": "SA",
+                    "middle": [],
+                    "last": "Esrey",
+                    "suffix": ""
+                },
+                {
+                    "first": "JB",
+                    "middle": [],
+                    "last": "Potash",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Roberts",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Shiff",
+                    "suffix": ""
+                }
+            ],
+            "year": 1991,
+            "venue": "Bull World Health Organ.",
+            "volume": "69",
+            "issn": "5",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF21": {
+            "title": "Trends and directions of global public health surveillance",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Castillo-Salgado",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "Epidemiol Rev.",
+            "volume": "32",
+            "issn": "",
+            "pages": "93-109",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF22": {
+            "title": "Ebola in west Africa: from disease outbreak to humanitarian crisis",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Piot",
+                    "suffix": ""
+                },
+                {
+                    "first": "J-J",
+                    "middle": [],
+                    "last": "Muyembe",
+                    "suffix": ""
+                },
+                {
+                    "first": "WJ",
+                    "middle": [],
+                    "last": "Edmunds",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Lancet Infect Dis.",
+            "volume": "14",
+            "issn": "11",
+            "pages": "1034-5",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF23": {
+            "title": "Epidemiology and cause of severe acute respiratory syndrome (SARS) in Guangdong, People's Republic of China, in February, 2003",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Zhong",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Zheng",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Poon",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Xie",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Chan",
+                    "suffix": ""
+                }
+            ],
+            "year": 2003,
+            "venue": "The Lancet.",
+            "volume": "362",
+            "issn": "9393",
+            "pages": "1353-8",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF24": {
+            "title": "Ebola haemorrhagic fever outbreak in Masindi District, Uganda: outbreak description and lessons learned",
+            "authors": [
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Borchert",
+                    "suffix": ""
+                },
+                {
+                    "first": "I",
+                    "middle": [],
+                    "last": "Mutyaba",
+                    "suffix": ""
+                },
+                {
+                    "first": "MD",
+                    "middle": [],
+                    "last": "Van Kerkhove",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Lutwama",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Luwaga",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Bisoborwa",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "BMC Infect Dis",
+            "volume": "11",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF25": {
+            "title": "Ebola virus disease outbreak - Nigeria, July-September 2014",
+            "authors": [
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Shuaib",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Gunnala",
+                    "suffix": ""
+                },
+                {
+                    "first": "EO",
+                    "middle": [],
+                    "last": "Musa",
+                    "suffix": ""
+                },
+                {
+                    "first": "FJ",
+                    "middle": [],
+                    "last": "Mahoney",
+                    "suffix": ""
+                },
+                {
+                    "first": "O",
+                    "middle": [],
+                    "last": "Oguntimehin",
+                    "suffix": ""
+                },
+                {
+                    "first": "PM",
+                    "middle": [],
+                    "last": "Nguku",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "MMWR.",
+            "volume": "63",
+            "issn": "39",
+            "pages": "867-72",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF26": {
+            "title": "HIV and syphilis prevalence and associated risk factors among fishing communities of Lake Victoria, Uganda",
+            "authors": [
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Asiki",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Mpendo",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Abaasa",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Agaba",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Nanvubya",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Nielsen",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "Sex Transm Infect.",
+            "volume": "87",
+            "issn": "6",
+            "pages": "511-5",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF27": {
+            "title": "HIV and AIDS among fisherfolk: a threat to 'responsible fisheries'",
+            "authors": [
+                {
+                    "first": "EH",
+                    "middle": [],
+                    "last": "Allison",
+                    "suffix": ""
+                },
+                {
+                    "first": "JA",
+                    "middle": [],
+                    "last": "Seeley",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Fish Fish.",
+            "volume": "5",
+            "issn": "3",
+            "pages": "215-34",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF28": {
+            "title": "High incidence of HIV-1 infection in a general population of fishing communities around Lake Victoria, Uganda",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Kiwanuka",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Ssetaala",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Nalutaaya",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Mpendo",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Wambuzi",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Nanvubya",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "PLoS One.",
+            "volume": "9",
+            "issn": "5",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF29": {
+            "title": "Prediction of risk of liver disease by alcohol intake, sex, and age: a prospective population study",
+            "authors": [
+                {
+                    "first": "U",
+                    "middle": [],
+                    "last": "Becker",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Deis",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Sorensen",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Gronbaek",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Borch-Johnsen",
+                    "suffix": ""
+                },
+                {
+                    "first": "CF",
+                    "middle": [],
+                    "last": "Muller",
+                    "suffix": ""
+                }
+            ],
+            "year": 1996,
+            "venue": "Hepatology.",
+            "volume": "23",
+            "issn": "5",
+            "pages": "1025-9",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF30": {
+            "title": "Predictors of morbidity and mortality after the first episode of upper gastrointestinal bleeding in liver cirrhosis",
+            "authors": [
+                {
+                    "first": "JA",
+                    "middle": [],
+                    "last": "Del Olmo",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Pe\u00f1a",
+                    "suffix": ""
+                },
+                {
+                    "first": "MA",
+                    "middle": [],
+                    "last": "Serra",
+                    "suffix": ""
+                },
+                {
+                    "first": "AH",
+                    "middle": [],
+                    "last": "Wassel",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Benages",
+                    "suffix": ""
+                },
+                {
+                    "first": "JM",
+                    "middle": [],
+                    "last": "Rodrigo",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "J Hepatol.",
+            "volume": "32",
+            "issn": "1",
+            "pages": "19-24",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF31": {
+            "title": "The risk of acute major upper gastrointestinal bleeding among users of aspirin and ibuprofen at various levels of alcohol consumption",
+            "authors": [
+                {
+                    "first": "DW",
+                    "middle": [],
+                    "last": "Kaufman",
+                    "suffix": ""
+                },
+                {
+                    "first": "JP",
+                    "middle": [],
+                    "last": "Kelly",
+                    "suffix": ""
+                },
+                {
+                    "first": "B-E",
+                    "middle": [],
+                    "last": "Wiholm",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Laszlo",
+                    "suffix": ""
+                },
+                {
+                    "first": "JE",
+                    "middle": [],
+                    "last": "Sheehan",
+                    "suffix": ""
+                },
+                {
+                    "first": "RS",
+                    "middle": [],
+                    "last": "Koff",
+                    "suffix": ""
+                }
+            ],
+            "year": 1999,
+            "venue": "Am J Gastroenterol.",
+            "volume": "94",
+            "issn": "11",
+            "pages": "3189-96",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF32": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "RO",
+                    "middle": [],
+                    "last": "Adome",
+                    "suffix": ""
+                },
+                {
+                    "first": "SR",
+                    "middle": [],
+                    "last": "Whyte",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Hardon",
+                    "suffix": ""
+                }
+            ],
+            "year": 1996,
+            "venue": "Popular pills: community drug use in Uganda",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF33": {
+            "title": "Health seeking behaviour and challenges in utilising health facilities in Wakiso district, Uganda",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Musoke",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Boynton",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Butler",
+                    "suffix": ""
+                },
+                {
+                    "first": "MB",
+                    "middle": [],
+                    "last": "Musoke",
+                    "suffix": ""
+                }
+            ],
+            "year": 2014,
+            "venue": "Afr Health Sci.",
+            "volume": "14",
+            "issn": "4",
+            "pages": "1046-55",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF34": {
+            "title": "Increasing access to quality health care for the poor: community perceptions on quality care in Uganda",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Kiguli",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Ekirapa-Kiracho",
+                    "suffix": ""
+                },
+                {
+                    "first": "O",
+                    "middle": [],
+                    "last": "Okui",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Mutebi",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "MacGregor",
+                    "suffix": ""
+                },
+                {
+                    "first": "GW",
+                    "middle": [],
+                    "last": "Pariyo",
+                    "suffix": ""
+                }
+            ],
+            "year": 2009,
+            "venue": "Patient Prefer Adherence.",
+            "volume": "3",
+            "issn": "",
+            "pages": "77-85",
+            "other_ids": {
+                "DOI": []
+            }
+        }
+    }
+}
