@@ -1,9 +1,9 @@
 FROM continuumio/miniconda3
 
-ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
-ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
-ENV http_proxy='http://bbpproxy.epfl.ch:80/'
-ENV https_proxy='http://bbpproxy.epfl.ch:80/'
+# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
+# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
 
 RUN \
 conda update conda && \
