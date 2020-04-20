@@ -154,7 +154,8 @@ class Widget:
             embedding_query = self.all_models.embed_sentences(
                 query_text,
                 sentence_embedder_name,
-                eval(sentence_embedder_name.lower()))
+                getattr(self.all_models, sentence_embedder_name.lower())
+            )
             print(f'{time.time() - t0:.2f} s.')
 
             if deprioritize_text[0]:
@@ -162,7 +163,8 @@ class Widget:
                 embedding_exclu = self.all_models.embed_sentences(
                     deprioritize_text,
                     sentence_embedder_name,
-                    eval(sentence_embedder_name.lower()))
+                    getattr(self.all_models, sentence_embedder_name.lower())
+                )
                 print(f'{time.time() - t0:.2f} s.')
 
             # Process date range and has-journal filtering
