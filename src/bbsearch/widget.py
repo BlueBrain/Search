@@ -210,9 +210,9 @@ class Widget:
 
             # Load sentence embedding from the npz file
             if merge_synonyms:
-                arr = self.all_data.embeddings_syns[sentence_embedder_name]
+                arr = self.all_models.embeddings_syns[sentence_embedder_name]
             else:
-                arr = self.all_data.embeddings[sentence_embedder_name]
+                arr = self.all_models.embeddings[sentence_embedder_name]
 
             # Apply date-range and has-journal filtering to arr
             idx_col = arr[:, 0]
