@@ -24,15 +24,15 @@ class AllModels:
         use_url = "https://tfhub.dev/google/universal-sentence-encoder-large"
         self.use = hub.load(f"{use_url}/{self.use_version}")
 
-        logger.info("Load SBERT...")
+        logger.info("Loading SBERT...")
         self.sbert = SentenceTransformer('bert-base-nli-mean-tokens')
 
-        logger.info("Load BioSentVec...")
+        logger.info("Loading BioSentVec...")
         self.bsv = sent2vec.Sent2vecModel()
         self.bsv.load_model(str(self.assets_path / 'BioSentVec_PubMed_MIMICIII-bigram_d700.bin'))
         self.bsv_stopwords = set(stopwords.words('english'))
 
-        logger.info("Load SBioBERT...")
+        logger.info("Loading SBioBERT...")
         self.sbiobert = SBioBERT()
 
         logger.info("Processing synonyms...")

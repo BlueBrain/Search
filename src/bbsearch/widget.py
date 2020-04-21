@@ -274,11 +274,15 @@ class Widget:
                     try:
                         paragraph = self.all_data.find_paragraph(sentence_id_, text)
                         formatted_output = self.all_data.highlight_in_paragraph(
-                            paragraph, text, width=width, indent=2)
-                    except Exception:
-                        formatted_output = "<there was a problem retrieving the paragraph, " \
-                                           "the original sentence is:>\n"
-                        formatted_output += text
+                            paragraph, text)
+                    except Exception as err:
+                        formatted_output = f"""
+                        There was a problem retrieving the paragraph.
+
+                        The original sentence is: {text}
+
+                        The error was: {str(err)}
+                        """
                 else:
                     formatted_output = textwrap.fill(text, width=width)
 
