@@ -64,13 +64,13 @@ def cursor(cnxn, jsons_path, metadata_path):
                         'text': 'TEXT',
                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
 
-    stmt_create_articles = """CREATE TABLE articles ({})""".format(
+    stmt_create_articles = "CREATE TABLE articles ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in articles_schema.items()]))
 
-    stmt_create_id_2_sha = """CREATE TABLE article_id_2_sha ({})""".format(
+    stmt_create_id_2_sha = "CREATE TABLE article_id_2_sha ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in article_id_2_sha_schema.items()]))
 
-    stmt_create_sentences = """CREATE TABLE sentences ({})""".format(
+    stmt_create_sentences = "CREATE TABLE sentences ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
 
     cursor.execute(stmt_create_articles)

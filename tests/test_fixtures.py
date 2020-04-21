@@ -47,6 +47,6 @@ def test_metadata(metadata_path):
 
 def test_jsons(jsons_path):
     """Make sure all jsons are present."""
-    n_json_files = len(list(jsons_path.glob('**/*json')))
+    n_json_files = len(list(jsons_path.rglob('*.json')))
 
     assert n_json_files > 0
