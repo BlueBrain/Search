@@ -125,7 +125,7 @@ class Widget:
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
         self.my_widgets['report_button'].on_click(self.report_on_click)
 
-    def investigate_on_click(self, b):
+    def investigate_on_click(self, change_dict):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             self.report = ''
@@ -265,7 +265,6 @@ class Widget:
                     'SELECT Authors, Title, Published, Reference FROM articles WHERE Id = ?',
                     [article_sha]).fetchall()[0]
                 article_auth = article_auth.split(';')[0] + ' et al.'
-                date = date.split()[0]
                 ref = ref if ref else ''
                 section_name = section_name if section_name else ''
 
@@ -276,50 +275,55 @@ class Widget:
                         paragraph = self.all_data.find_paragraph(sentence_id_, text)
                         formatted_output = self.all_data.highlight_in_paragraph(
                             paragraph, text, width=width, indent=2)
-                    except:
+                    except Exception:
                         formatted_output = "<there was a problem retrieving the paragraph, " \
                                            "the original sentence is:>\n"
                         formatted_output += text
                 else:
                     formatted_output = textwrap.fill(text, width=width)
 
-                COLOR_TITLE = '#1A0DAB'
-                COLOR_METADATA = '#006621'
+                color_title = '#1A0DAB'
+                color_metadata = '#006621'
                 article_metadata = f"""
-                <a href="{ref}" style="color:{COLOR_TITLE}; font-size:17px"> 
+                <a href="{ref}" style="color:{color_title}; font-size:17px"> 
                     {article_title}
                 </a>
                 <br>
-                <p style="color:{COLOR_METADATA}; font-size:13px"> 
+                <p style="color:{color_metadata}; font-size:13px"> 
                     {article_auth} &#183; {section_name.lower().title()}
                 </p>
                 """
 
-                display(HTML(article_metadata))
-                display(HTML(formatted_output))
+                display((HTML(article_metadata),))
+                display((HTML(formatted_output),))
                 print()
 
                 self.report += article_metadata + formatted_output + "<br>"
 
-    def report_on_click(self, b):
+    def report_on_click(self, change_dict):
         print("Saving results to a pdf file.")
 
-        COLOR_HYPERPARAMETERS = '#222222'
+        color_hyperparameters = '#222222'
 
-        hyperparameters_section = f'<h1> Search Parameters </h1>' + \
-                                  f'<ul style="font-size:13; color:{COLOR_HYPERPARAMETERS}">' + \
-                                  '<li>' + '</li> <li>'.join(['<b>' +
-                                                              ' '.join(k.split('_')).title() +
-                                                              '</b>' +
-                                                              f': {repr(v.value)}'
-                                                              for k, v in self.my_widgets.items()
-                                                              if hasattr(v, 'value')]) + '</li>' + \
-                                  f'</ul>'
+        hyperparameters_section = f"""
+        <h1> Search Parameters </h1>
+        <ul style="font-size:13; color:{color_hyperparameters}">
+        <li> {'</li> <li>'.join([
+            '<b>' +
+            ' '.join(k.split('_')).title() +
+            '</b>' +
+            f': {repr(v.value)}'
+            for k, v in self.my_widgets.items()
+            if hasattr(v, 'value')])}
+        </li>
+        </ul>
+        """
 
         results_section = f"<h1> Results </h1> {self.report}"
         pdfkit.from_string(hyperparameters_section + results_section,
                            f"report_{datetime.datetime.now()}.pdf")
 
     def display(self):
-        display(widgets.VBox(list(self.my_widgets.values())))
-
+        ordered_widgets = list(self.my_widgets.values())
+        main_widget = widgets.VBox(ordered_widgets)
+        display((main_widget,))
