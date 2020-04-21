@@ -294,8 +294,8 @@ class Widget:
                 </p>
                 """
 
-                display((HTML(article_metadata),))
-                display((HTML(formatted_output),))
+                display(HTML(article_metadata))
+                display(HTML(formatted_output))
                 print()
 
                 self.report += article_metadata + formatted_output + "<br>"
@@ -326,4 +326,4 @@ class Widget:
     def display(self):
         ordered_widgets = list(self.my_widgets.values())
         main_widget = widgets.VBox(ordered_widgets)
-        display((main_widget,))
+        display(main_widget)
