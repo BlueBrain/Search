@@ -128,9 +128,9 @@ class Widget:
         self.my_widgets['report_button'].on_click(self.report_on_click)
 
     def hide_from_user(self):
-        self.my_widgets.pop('exclusion_text')
+        self.my_widgets['exclusion_text'].layout.display = 'none'
         # Remove the merge_synonyms option
-        self.my_widgets.pop('merge_synonyms')
+        self.my_widgets['merge_synonyms'].layout.display = 'none'
         # Remove some models (USE and SBERT)
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['BSV', 'SBIOBERT'],
