@@ -25,6 +25,7 @@ class Widget:
         self.my_widgets = OrderedDict()
 
         self.initialize_widgets()
+        self.hide_from_user()
 
     def initialize_widgets(self):
         # Select model to compute Sentence Embeddings
@@ -76,6 +77,7 @@ class Widget:
         self.my_widgets['has_journal'] = widgets.Checkbox(
             description="Require Journal",
             value=False)
+
         # self.my_widgets['has_doi'] = widgets.Checkbox(
         #     description="Require DOI",
         #     value=False)
@@ -125,6 +127,25 @@ class Widget:
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
         self.my_widgets['report_button'].on_click(self.report_on_click)
 
+    def hide_from_user(self):
+        self.my_widgets['exclusion_text'].layout.display = 'none'
+        # Remove the merge_synonyms option
+        self.my_widgets['merge_synonyms'].layout.display = 'none'
+        # Remove some models (USE and SBERT)
+        self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
+            options=['BSV', 'SBIOBERT'],
+            description='Model for Sentence Embedding',
+            tooltips=['BioSentVec', 'Sentence BioBERT'],
+        )
+        # Remove some deprioritization strength
+        self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
+            options=['None', 'Mild', 'Stronger'],
+            disabled=False,
+            button_style='info',
+            style={'description_width': 'initial', 'button_width': '80px'},
+            description='Deprioritization strength'
+        )
+
     def investigate_on_click(self, change_dict):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
@@ -133,13 +154,15 @@ class Widget:
             t0 = time.time()
 
             sentence_embedder_name = self.my_widgets['sent_embedder'].value
-            merge_synonyms = self.my_widgets['merge_synonyms'].value
+            merge_synonyms = self.my_widgets['merge_synonyms'].value \
+                if 'merge_synonyms' in self.my_widgets.keys() else False
             top_n_results = self.my_widgets['top_results'].value
             print_whole_paragraph = self.my_widgets['print_paragraph'].value
             query_text = self.my_widgets['query_text'].value
             deprioritize_text = self.my_widgets['deprioritize_text'].value
             deprioritize_strength = self.my_widgets['deprioritize_strength'].value
-            exclusion_text = self.my_widgets['exclusion_text'].value
+            exclusion_text = self.my_widgets['exclusion_text'].value \
+                if 'exclusion_text' in self.my_widgets.keys() else ''
 
             if merge_synonyms:
                 query_text = self.all_models.sent_preprocessing(
