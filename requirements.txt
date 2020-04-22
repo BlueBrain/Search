@@ -10,6 +10,7 @@ pandas==1.0.3
 pdfkit==0.6.1
 pillow==7.1.1
 sentence-transformers==0.2.5.1
+spacy==2.2.4
 tensorflow-hub==0.8.0
 tensorflow==2.1.0
 torch==1.4.0
