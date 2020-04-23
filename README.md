@@ -19,3 +19,4 @@ kept separated. Therefore the `data` folder contains subfolders corresponding to
 different versions and named by the date on which the CORD-19 dataset was downloaded.
 The same subfolder should also contain all files derived from that dataset.
 
+Jenkins test
