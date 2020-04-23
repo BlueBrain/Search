@@ -4,8 +4,55 @@ SQL Related functions.
 whatever
 """
 
+def get_shas_from_ids(articles_ids, db):
+    """Find articles SHA given given article IDs.
 
-def find_sentence_ids(restricted_article_ids, db):
+    Parameters
+    ----------
+    articles_ids : list
+        A list of strings representing article IDs.
+    db : sqlite3.Connection
+        A SQL database for querying the SHAs. Should contain
+        a table named "article_id_2_sha".
+
+    Returns
+    -------
+    results : list
+        A list of sentence SHAs.
+    """
+    all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
+    sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
+    results = db.execute(sql_query).fetchall()
+    results = [sha for (sha,) in results]
+
+    return results
+
+
+def get_ids_from_shas(shas, db):
+    """Find articles IDs given given article SHAs.
+
+    Parameters
+    ----------
+    articles_ids : list
+        A list of strings representing article SHAs.
+    db : sqlite3.Connection
+        A SQL database for querying the IDs. Should contain
+        a table named "article_id_2_sha".
+
+    Returns
+    -------
+    results : list
+        A list of sentence IDs.
+    """
+    all_shas_str = ', '.join([f"'{sha}'" for sha in shas])
+    sql_query = f"SELECT article_id FROM article_id_2_sha WHERE sha IN ({all_shas_str})"
+    results = db.execute(sql_query).fetchall()
+    results = [id_ for (id_,) in results]
+
+    return results
+    
+    
+def find_sentence_ids(article_shas, db):
     """Find sentence IDs given article SHAs.
 
     Parameters
@@ -14,42 +61,15 @@ def find_sentence_ids(restricted_article_ids, db):
         A list of strings representing article SHAs.
     db : sqlite3.Connection
         A SQL database for querying the sentence IDs. Should contain
-        a table named "sections".
+        a table named "sentences".
 
     Returns
     -------
     results : list
         A list of sentence IDs.
     """
-    all_shas_str = ', '.join([f"'{sha}'" for sha in restricted_article_ids])
-    sql_query = f"SELECT Id FROM sections WHERE Article IN ({all_shas_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [sha for (sha,) in results]
-
-    return results
-
-
-def find_article_ids_from_conditions(conditions, db):
-    """Find article IDs given a number of search conditions.
-
-    Parameters
-    ----------
-    conditions : list
-        A list strings representing SQL query conditions. They should be
-        formatted so that they can be used in an SQL WHERE statement,
-        for example:
-            SELECT * FROM articles WHERE <condition_1> and <condition_2>"
-    db : sqlite3.Connection
-        A SQL database for querying the article IDs. Should contain
-        a table named "articles".
-
-    Returns
-    -------
-    results : list
-        A list of article IDs (=SHAs) represented as strings.
-    """
-    condition = ' and '.join(conditions)
-    sql_query = f"SELECT Id FROM articles WHERE {condition}"
+    all_shas_str = ', '.join([f"'{sha}'" for sha in article_shas])
+    sql_query = f"SELECT sentence_id FROM sentences WHERE sha IN ({all_shas_str})"
     results = db.execute(sql_query).fetchall()
     results = [sha for (sha,) in results]
 
@@ -78,7 +98,7 @@ def get_ids_by_condition(conditions, table, db):
         A list of article IDs (=SHAs) represented as strings.
     """
     condition = ' and '.join(conditions)
-    sql_query = f"SELECT Id FROM {table} WHERE {condition}"
+    sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
     results = db.execute(sql_query).fetchall()
     results = [id_ for (id_,) in results]
 
@@ -107,7 +127,7 @@ class ArticleConditioner:
             The SQL condition
         """
         date_from, date_to = date_range
-        condition = f"Published BETWEEN '{date_from}-01-01' and '{date_to}-12-31'"
+        condition = f"date BETWEEN '{date_from}-01-01' and '{date_to}-12-31'"
 
         return condition
 
@@ -120,16 +140,12 @@ class ArticleConditioner:
         condition : str
             The SQL condition
         """
-        condition = "Publication IS NOT NULL"
+        condition = "journal IS NOT NULL"
 
         return condition
-
-
-class SentenceConditioner:
-    """Sentence conditioner."""
-
+    
     @staticmethod
-    def get_restrict_to_tag_condition(tag="COVID-19"):
+    def get_restrict_to_tag_condition(tag='has_covid19_tag'):
         """Construct a condition for restricting to a given tag.
 
         Parameters
@@ -142,8 +158,12 @@ class SentenceConditioner:
         condition : str
             The SQL condition
         """
-        condition = f"Tags IS '{tag}'"
+        condition = f"{tag} = True"
         return condition
+
+
+class SentenceConditioner:
+    """Sentence conditioner."""
 
     @staticmethod
     def get_word_exclusion_condition(word):
@@ -157,5 +177,5 @@ class SentenceConditioner:
         -------
         condition
         """
-        condition = f"Text NOT LIKE '%{word}%'"
+        condition = f"text NOT LIKE '%{word}%'"
         return condition

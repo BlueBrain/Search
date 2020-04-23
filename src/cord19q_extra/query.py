@@ -11,7 +11,7 @@ class CustomQuery(Query):
         results = []
 
         for uid, score in embeddings.search(query, method, topn):
-            cur.execute("SELECT Article, Text FROM sections WHERE id = ?", [uid])
+            cur.execute("SELECT sentence_id, text FROM sentences WHERE sentence_id = ?", [uid])
             results.append((uid, score) + cur.fetchone())
 
         return results
@@ -44,7 +44,7 @@ class CustomQuery(Query):
         for uid in sorted(documents, key=lambda k: sum([x[0] for x in documents[k]]),
                           reverse=True):
             cur.execute(
-                "SELECT Title, Authors, Published, Publication, LOE, Sample, Id, Reference from articles where id = ?",
+                "SELECT title, authors, date, journal, article_id, url from articles where article_id = ?",
                 [uid])
             article = cur.fetchone()
 
@@ -52,10 +52,8 @@ class CustomQuery(Query):
             print("Authors: %s" % Query.authors(article[1]))
             print("Published: %s" % Query.date(article[2]))
             print("Publication: %s" % article[3])
-            print("Level of Evidence: %s" % Query.loe(article[4]))
-            print("Sample: %s" % article[5])
-            print("Id: %s" % article[6])
-            print("Reference: %s" % article[7])
+            print("Id: %s" % article[4])
+            print("Reference: %s" % article[5])
 
             # Print top matches
             for score, text in documents[uid]:

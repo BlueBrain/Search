@@ -11,7 +11,9 @@ class CustomIndex(Index):
         db = sqlite3.connect(dbfile)
         cur = db.cursor()
 
-        cur.execute("SELECT Id, Text FROM sections WHERE tags is not null and labels is null")
+        cur.execute("""SELECT sentence_id, text FROM sentences
+                WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN 
+                (SELECT article_id FROM articles WHERE has_covid19_tag is True))""")
 
         count = 0
         for row in cur:
