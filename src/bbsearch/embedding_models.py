@@ -2,6 +2,7 @@ import string
 import logging
 import pathlib
 
+import nltk
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 import numpy as np
@@ -18,6 +19,10 @@ class EmbeddingModels:
 
     def __init__(self, assets_path):
         self.assets_path = pathlib.Path(assets_path)
+
+        logger.info("Downloading NLTK modules...")
+        nltk.download('punkt')
+        nltk.download('stopwords')
 
         logger.info("Loading USE...")
         self.use_version = 5
