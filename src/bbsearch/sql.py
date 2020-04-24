@@ -78,7 +78,12 @@ def find_sentence_ids(article_shas, db):
 
 def get_ids_by_condition(conditions, table, db):
     """Find entry IDs given a number of search conditions.
-
+    
+    Notes
+    -----
+    In the database 'cord19', tables are named with plural noun (e.g sentences, articles)
+    However, column id are named in singular form (e.g. sentence, article)
+    
     Parameters
     ----------
     conditions : list

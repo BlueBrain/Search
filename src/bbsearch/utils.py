@@ -12,7 +12,7 @@ from spacy.attrs import ORTH, LEMMA
 
 
 def add_abbreviations(nlp, abbreviations=None):
-    """ Add new abbreviations to the default list to avoid scission in middle of sentences. (e.g. Dr., Fig., ...).
+    """Add new abbreviations to the default list to avoid wrong scission. (e.g. Dr., Fig., ...).
     
     Parameters
     ----------
@@ -54,7 +54,7 @@ def add_abbreviations(nlp, abbreviations=None):
 
 
 def define_nlp():
-    """ Create the sentence boundary detection tools from Spacy.
+    """Create the sentence boundary detection tools from Spacy.
     
     Notes
     -----
@@ -73,7 +73,7 @@ def define_nlp():
     return nlp
 
 def segment(nlp, sentences):
-    """ Segment an paragraph/article into sentences. 
+    """Segment an paragraph/article into sentences. 
     
     Parameters
     ----------
@@ -92,7 +92,7 @@ def segment(nlp, sentences):
     return all_sentences
 
 def remove_sentences_duplicates(sentences):
-    """ Returns a filtered list of sentences. 
+    """Returns a filtered list of sentences. 
     
     Notes
     ------
@@ -120,18 +120,26 @@ def remove_sentences_duplicates(sentences):
     
     for sha, name, text in sentences:
         # Add unique text that isn't boilerplate text
-        if not text in keys and not any([x in text for x in boilerplate]):
+        if not text in keys and not any(x in text for x in boilerplate):
             unique.append((sha, name, text))
             keys.add(text)
             
     return unique
 
 def getTags(sentences):
-    """ Computes the tag for an article id through its sentences
+    """Computes the tag for an article id through its sentences.
     
     Notes
     -----
-    This tag is used to filter articles that contains mentions to covid19
+    This tag is used to filter articles that contains mentions to covid19.
+    The list of words is: 
+    'covid', 'covid 19', 'covid-19',
+    'sars cov 2', 'sars-cov 2',
+    '2019 ncov', '2019ncov', '2019-ncov', '2019 n cov', '2019n cov',
+    '2019 novel coronavirus',  'coronavirus 2019',
+    'cov-2019', 'cov 2019',
+    'coronavirus disease 2019', 'coronavirus disease 19', 'coronavirus disease' 
+    'wuhan coronavirus', 'wuhan cov', 'wuhan pneumonia'
     
     Parameters
     ----------
@@ -158,7 +166,7 @@ def getTags(sentences):
     return tag
 
 def get_tag_and_sentences(db, nlp, data_directory, article_id):
-    """ Extract all the sentences and the tag has_covid19 from an article thanks to the article_id
+    """Extract all the sentences and the tag has_covid19 from an article.
     
     Parameters
     ----------
@@ -208,7 +216,7 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
     return tag, sentences
 
 def update_covid19_tag(db, article_id, tag):
-    """ Update the covid19 tag in the articles database
+    """Update the covid19 tag in the articles database.
     
     Parameters
     ----------
@@ -223,7 +231,7 @@ def update_covid19_tag(db, article_id, tag):
     db.execute("UPDATE articles SET has_covid19_tag = ? WHERE article_id = ?", [tag, article_id])
     
 def insert_into_sentences(db, sentences):
-    """ Insert the new sentences into the database sentences
+    """Insert the new sentences into the database sentences.
     
     Parameters
     ----------
