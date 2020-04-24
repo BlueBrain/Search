@@ -11,7 +11,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .sql import ArticleConditioner, SentenceConditioner
-from .sql import get_ids_by_condition
+from .sql import get_ids_by_condition, get_shas_from_ids
 
 logger = logging.getLogger(__name__)
 
@@ -199,29 +199,36 @@ class Widget:
                 ArticleConditioner.get_date_range_condition(date_range)]
             if has_journal:
                 article_conditions.append(ArticleConditioner.get_has_journal_condition())
+            article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
+            
             restricted_article_ids = get_ids_by_condition(
                 article_conditions,
                 'articles',
                 self.all_data.db)
 
+            
+            #all_aticle_ids_str = ', '.join([f"'{article_id}'" for article_id in restricted_article_ids])
+            
+#             sentence_conditions = [
+#                 f"Article IN ({all_aticle_ids_str})",
+#                 SentenceConditioner.get_restrict_to_tag_condition("COVID-19")
+#             ]
+            # Articles ID to SHA
+            all_article_shas_str = ', '.join([f"'{sha}'" 
+                                              for sha in get_shas_from_ids(restricted_article_ids, self.all_data.db)]) 
+            sentence_conditions = [f"sha IN ({all_article_shas_str})"]
             # Apply sentence conditions
-            all_aticle_ids_str = ', '.join([f"'{sha}'" for sha in restricted_article_ids])
-            sentence_conditions = [
-                f"Article IN ({all_aticle_ids_str})",
-                SentenceConditioner.get_restrict_to_tag_condition("COVID-19")
-            ]
             excluded_words = [x for x in exclusion_text.lower().split('\n')
                               if x]  # remove empty strings
-            sentence_conditions += [
-                SentenceConditioner.get_word_exclusion_condition(word)
+            sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
                 for word in excluded_words]
             restricted_sentence_ids = get_ids_by_condition(
                 sentence_conditions,
-                'sections',
+                'sentences',
                 self.all_data.db)
-
+           
             #             n_articles = db.execute("SELECT COUNT(*) FROM articles").fetchone()
-            #             n_sentences = db.execute("SELECT COUNT(*) FROM sections").fetchone()
+            #             n_sentences = db.execute("SELECT COUNT(*) FROM sentences").fetchone()
             #             n_articles = n_articles[0]
             #             n_sentences = n_sentences[0]
             #             frac_articles = len(restricted_article_ids) / n_articles
@@ -282,11 +289,14 @@ class Widget:
                                                          similarities[indices])):
                 article_sha, section_name, text = \
                     self.all_data.db.execute(
-                        'SELECT Article, Name, Text FROM sections WHERE Id = ?',
+                        'SELECT sha, section_name, text FROM sentences WHERE sentence_id = ?',
                         [sentence_id_]).fetchall()[0]
-                article_auth, article_title, date, ref = self.all_data.db.execute(
-                    'SELECT Authors, Title, Published, Reference FROM articles WHERE Id = ?',
+                (article_id, ) = self.all_data.db.execute(
+                    'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
                     [article_sha]).fetchall()[0]
+                article_auth, article_title, date, ref = self.all_data.db.execute(
+                    'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
+                    [article_id]).fetchall()[0]
                 article_auth = article_auth.split(';')[0] + ' et al.'
                 ref = ref if ref else ''
                 section_name = section_name if section_name else ''
