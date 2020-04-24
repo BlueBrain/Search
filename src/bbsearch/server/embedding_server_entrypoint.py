@@ -1,5 +1,7 @@
 import argparse
 import logging
+import os
+import pathlib
 import sys
 
 from flask import Flask
@@ -23,14 +25,22 @@ args = parser.parse_args(sys.argv[1:])
 
 
 def main():
-    app = Flask("BBSearch Embedding Server")
-    EmbeddingServer(app)
-    app.run(
-        host=args.host,
-        port=args.port,
-        threaded=True,
-        debug=True,
-    )
+    # Check the assets_path
+    if "ASSETS_PATH" in os.environ:
+        assets_path = pathlib.Path(os.environ["ASSETS_PATH"])
+        if not assets_path.exists():
+            raise ValueError("ASSETS_PATH does not represent a valid path.")
+        # Create Server app
+        app = Flask("BBSearch Embedding Server")
+        EmbeddingServer(app, assets_path)
+        app.run(
+            host=args.host,
+            port=args.port,
+            threaded=True,
+            debug=True,
+        )
+    else:
+        raise ValueError("Environmental variable ASSETS_PATH not found.")
 
 
 if __name__ == "__main__":
