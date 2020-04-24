@@ -59,8 +59,8 @@ class EmbeddingServer:
             }
             </pre>
             </li>
-            <li>Send the JSON file to "<tt>/v1/embed</tt>"</li>
-            <li>Receive a response as a CSV file</li>
+            <li>Send the JSON file to "<tt>/v1/embed/json</tt>"</li>
+            <li>Receive a response as a JSON file</li>
         </ul>
         """
 
