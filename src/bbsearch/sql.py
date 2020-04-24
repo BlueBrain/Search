@@ -5,13 +5,13 @@ whatever
 """
 
 def get_shas_from_ids(articles_ids, db):
-    """Find articles SHA given given article IDs.
+    """Find articles SHA given article IDs.
 
     Parameters
     ----------
     articles_ids : list
         A list of strings representing article IDs.
-    db : sqlite3.Connection
+    db : sqlite3.Cursor
         A SQL database for querying the SHAs. Should contain
         a table named "article_id_2_sha".
 
@@ -29,13 +29,13 @@ def get_shas_from_ids(articles_ids, db):
 
 
 def get_ids_from_shas(shas, db):
-    """Find articles IDs given given article SHAs.
+    """Find articles IDs given article SHAs.
 
     Parameters
     ----------
-    articles_ids : list
+    shas : list
         A list of strings representing article SHAs.
-    db : sqlite3.Connection
+    db : sqlite3.Cursor
         A SQL database for querying the IDs. Should contain
         a table named "article_id_2_sha".
 
@@ -57,9 +57,9 @@ def find_sentence_ids(article_shas, db):
 
     Parameters
     ----------
-    restricted_article_ids : list
+    article_shas : list
         A list of strings representing article SHAs.
-    db : sqlite3.Connection
+    db : sqlite3.Cursor
         A SQL database for querying the sentence IDs. Should contain
         a table named "sentences".
 
@@ -88,7 +88,7 @@ def get_ids_by_condition(conditions, table, db):
             SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
     table : str
         The name of the table in `db`.
-    db : sqlite3.Connection
+    db : sqlite3.Cursor
         A SQL database for querying the article IDs. Should contain
         a table named "articles".
 
