@@ -11,12 +11,8 @@ install_requires = [
     'scipy',
     'torch',
 ]
-setup_requires = ['pytest-runner']
-tests_require = [
-    'flake8',
-    'pytest',
-    'pytest-cov',
-]
+
+extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest', 'pytest-cov']}
 
 setup(
     name="BBSearch",
@@ -27,6 +23,5 @@ setup(
     packages=find_packages("./src"),
     python_requires='>=3.6',
     install_requires=install_requires,
-    setup_requires=setup_requires,
-    tests_require=tests_require,
+    extras_require=extras_require
 )
