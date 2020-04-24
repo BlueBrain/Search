@@ -89,11 +89,13 @@ class AllData:
             if sentence in json_file['metadata']['title']:
                 paragraph = json_file['metadata']['title']
             else:
-                for text_chunk in json_file['abstract'] + json_file['body_text'] + list(json_file['ref_entries'].values()):
+                for text_chunk in json_file['abstract'] + \
+                                  json_file['body_text'] + \
+                                  list(json_file['ref_entries'].values()):
                     paragraph = text_chunk['text']
                     if sentence in paragraph:
                         break
-                        
+
                 else:
                     raise ValueError("sentence not found in body_text, abstract or ref_entries")
         else:

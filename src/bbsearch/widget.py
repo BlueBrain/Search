@@ -6,7 +6,8 @@ import textwrap
 import time
 
 import ipywidgets as widgets
-from IPython.display import HTML, display
+import IPython
+from IPython.display import HTML
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -146,7 +147,7 @@ class Widget:
             description='Deprioritization strength'
         )
 
-    def investigate_on_click(self, change_dict):
+    def investigate_on_click(self):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             self.report = ''
@@ -200,33 +201,26 @@ class Widget:
             if has_journal:
                 article_conditions.append(ArticleConditioner.get_has_journal_condition())
             article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
-            
+
             restricted_article_ids = get_ids_by_condition(
                 article_conditions,
                 'articles',
                 self.all_data.db)
 
-            
-            #all_aticle_ids_str = ', '.join([f"'{article_id}'" for article_id in restricted_article_ids])
-            
-#             sentence_conditions = [
-#                 f"Article IN ({all_aticle_ids_str})",
-#                 SentenceConditioner.get_restrict_to_tag_condition("COVID-19")
-#             ]
             # Articles ID to SHA
-            all_article_shas_str = ', '.join([f"'{sha}'" 
-                                              for sha in get_shas_from_ids(restricted_article_ids, self.all_data.db)]) 
+            all_article_shas_str = ', '.join([f"'{sha}'"
+                                              for sha in get_shas_from_ids(restricted_article_ids, self.all_data.db)])
             sentence_conditions = [f"sha IN ({all_article_shas_str})"]
             # Apply sentence conditions
             excluded_words = [x for x in exclusion_text.lower().split('\n')
                               if x]  # remove empty strings
             sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
-                for word in excluded_words]
+                                    for word in excluded_words]
             restricted_sentence_ids = get_ids_by_condition(
                 sentence_conditions,
                 'sentences',
                 self.all_data.db)
-           
+
             #             n_articles = db.execute("SELECT COUNT(*) FROM articles").fetchone()
             #             n_sentences = db.execute("SELECT COUNT(*) FROM sentences").fetchone()
             #             n_articles = n_articles[0]
@@ -322,17 +316,17 @@ class Widget:
                 color_title = '#1A0DAB'
                 color_metadata = '#006621'
                 article_metadata = f"""
-                <a href="{ref}" style="color:{color_title}; font-size:17px"> 
+                <a href="{ref}" style="color:{color_title}; font-size:17px">
                     {article_title}
                 </a>
                 <br>
-                <p style="color:{color_metadata}; font-size:13px"> 
+                <p style="color:{color_metadata}; font-size:13px">
                     {article_auth} &#183; {section_name.lower().title()}
                 </p>
                 """
 
-                display(HTML(article_metadata))
-                display(HTML(formatted_output))
+                IPython.display.display(HTML(article_metadata))
+                IPython.display.display(HTML(formatted_output))
                 print()
 
                 self.report += article_metadata + formatted_output + "<br>"
@@ -363,4 +357,4 @@ class Widget:
     def display(self):
         ordered_widgets = list(self.my_widgets.values())
         main_widget = widgets.VBox(ordered_widgets)
-        display(main_widget)
+        IPython.display.display(main_widget)

@@ -4,6 +4,7 @@ SQL Related functions.
 whatever
 """
 
+
 def get_shas_from_ids(articles_ids, db):
     """Find articles SHA given article IDs.
 
@@ -50,8 +51,8 @@ def get_ids_from_shas(shas, db):
     results = [id_ for (id_,) in results]
 
     return results
-    
-    
+
+
 def find_sentence_ids(article_shas, db):
     """Find sentence IDs given article SHAs.
 
@@ -78,12 +79,12 @@ def find_sentence_ids(article_shas, db):
 
 def get_ids_by_condition(conditions, table, db):
     """Find entry IDs given a number of search conditions.
-    
+
     Notes
     -----
     In the database 'cord19', tables are named with plural noun (e.g sentences, articles)
     However, column id are named in singular form (e.g. sentence, article)
-    
+
     Parameters
     ----------
     conditions : list
@@ -148,7 +149,7 @@ class ArticleConditioner:
         condition = "journal IS NOT NULL"
 
         return condition
-    
+
     @staticmethod
     def get_restrict_to_tag_condition(tag='has_covid19_tag'):
         """Construct a condition for restricting to a given tag.
