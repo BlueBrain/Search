@@ -10,6 +10,8 @@ install_requires = [
     'scikit-learn',
     'scipy',
     'torch',
+    'Flask',
+    'requests',
 ]
 setup_requires = ['pytest-runner']
 tests_require = [
