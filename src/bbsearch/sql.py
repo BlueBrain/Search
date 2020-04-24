@@ -4,6 +4,7 @@ SQL Related functions.
 whatever
 """
 
+
 def get_shas_from_ids(articles_ids, db):
     """Find articles SHA given article IDs.
 

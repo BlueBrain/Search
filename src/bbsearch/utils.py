@@ -30,10 +30,10 @@ def add_abbreviations(nlp, abbreviations=None):
                              ('Eqs.', [{ORTH: 'Equations', LEMMA: 'equations'}]),
                              ('Eq.', [{ORTH: 'Equation', LEMMA: 'equation'}]),
                              ('Sec.', [{ORTH: 'Section', LEMMA: 'section'}]),
-                             ('Ref.', [{ORTH: 'References', LEMMA: 'references'}]),  
-                             ('App.', [{ORTH: 'Appendix', LEMMA: 'appendix'}]), 
+                             ('Ref.', [{ORTH: 'References', LEMMA: 'references'}]),
+                             ('App.', [{ORTH: 'Appendix', LEMMA: 'appendix'}]),
                              ('Nat.', [{ORTH: 'Natural', LEMMA: 'natural'}]),
-                             ('min.', [{ORTH: 'Minimum', LEMMA: 'minimum'}]), 
+                             ('min.', [{ORTH: 'Minimum', LEMMA: 'minimum'}]),
                              ('etc.', [{ORTH: 'etc.', LEMMA: 'Et Cetera'}]),
                              ('Sci.', [{ORTH: 'Scientific', LEMMA: 'figure'}]),
                              ('Proc.', [{ORTH: 'Procedings', LEMMA: 'procedings'}]),
@@ -45,10 +45,10 @@ def add_abbreviations(nlp, abbreviations=None):
                              ('Virol.', [{ORTH: 'Virology', LEMMA: 'Virology'}]),
                              ('Tab.', [{ORTH: 'Table', LEMMA: 'Table'}]),
                              ('Clin.', [{ORTH: 'Clinical', LEMMA: 'clinical'}])]
-    
+
     if abbreviations:
         default_abbreviations.extend(abbreviations)
-        
+
     for abbreviation in default_abbreviations:
         nlp.tokenizer.add_special_case(*abbreviation)
 
@@ -69,16 +69,17 @@ def define_nlp():
     sbd = nlp.create_pipe('sentencizer')
     nlp.add_pipe(sbd)
     add_abbreviations(nlp)
-    
+
     return nlp
+
 
 def segment(nlp, sentences):
     """Segment an paragraph/article into sentences. 
     
     Parameters
     ----------
-    nlp: spacy.lang.en
-        Nlp sentence tokenizer from Spacy. 
+    nlp: spacy.language.Language
+        Spacy pipeline applying sentence segmentantion.
     
     sentences: str
         Paragraph/Article in raw text to segment into sentences.
@@ -90,6 +91,7 @@ def segment(nlp, sentences):
     """
     all_sentences = (sent.string.strip() for sent in nlp(sentences).sents)
     return all_sentences
+
 
 def remove_sentences_duplicates(sentences):
     """Returns a filtered list of sentences. 
@@ -112,21 +114,22 @@ def remove_sentences_duplicates(sentences):
     # Use list to preserve insertion order
     unique = []
     keys = set()
-    
+
     # Boilerplate text to ignore
-    boilerplate = ["COVID-19 resource centre", 
-                   "permission to make all its COVID", 
+    boilerplate = ["COVID-19 resource centre",
+                   "permission to make all its COVID",
                    "WHO COVID database"]
-    
+
     for sha, name, text in sentences:
         # Add unique text that isn't boilerplate text
-        if not text in keys and not any(x in text for x in boilerplate):
+        if text not in keys and not any(x in text for x in boilerplate):
             unique.append((sha, name, text))
             keys.add(text)
-            
+
     return unique
 
-def getTags(sentences):
+
+def get_tags(sentences):
     """Computes the tag for an article id through its sentences.
     
     Notes
@@ -152,18 +155,19 @@ def getTags(sentences):
         Value of the tag has_covid19 of the corresponding article_id 
     """
     # Keyword patterns to search for
-    keywords = [r"2019[\-\s]?n[\-\s]?cov", "2019 novel coronavirus", 
+    keywords = [r"2019[\-\s]?n[\-\s]?cov", "2019 novel coronavirus",
                 "coronavirus 2019", r"coronavirus disease (?:20)?19",
-                r"covid(?:[\-\s]?19)?", r"n\s?cov[\-\s]?2019", r"sars-cov-?2", 
+                r"covid(?:[\-\s]?19)?", r"n\s?cov[\-\s]?2019", r"sars-cov-?2",
                 r"wuhan (?:coronavirus|cov|pneumonia)"]
     # Build regular expression for each keyword. Wrap term in word boundaries
     regex = "|".join(["\\b%s\\b" % keyword.lower() for keyword in keywords])
-    tag = False # None
+    tag = False  # None
     for _, _, text in sentences:
-       # Look for at least one keyword match
+        # Look for at least one keyword match
         if re.findall(regex, text.lower()):
-            tag = True # "COVID-19"
+            tag = True  # "COVID-19"
     return tag
+
 
 def get_tag_and_sentences(db, nlp, data_directory, article_id):
     """Extract all the sentences and the tag has_covid19 from an article.
@@ -172,7 +176,7 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
     ----------
     db:
         Database
-    nlp: spacy.lang.en
+    nlp: spacy.language.Language
         Sentence Boundary Detection tool from Spacy to seperate sentences.
     data_directory: Path
         Directory where all the json files are located
@@ -189,31 +193,34 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
     sentences = []
     tag = False
 
-    article_id, article_title, article_abstract, article_directory = db.execute("SELECT article_id, title, abstract, fulltext_directory FROM articles WHERE article_id is ?", [article_id]).fetchone()
-    
+    article_id, article_title, article_abstract, article_directory = db.execute(
+        "SELECT article_id, title, abstract, fulltext_directory FROM articles WHERE article_id is ?",
+        [article_id]).fetchone()
+
     all_shas = db.execute("SELECT sha FROM article_id_2_sha WHERE article_id = ?", [article_id]).fetchall()
     title_sha = all_shas[0][0] if all_shas else None
     if article_title:
         sentences.extend([(title_sha, 'Title', sent) for sent in segment(nlp, article_title)])
     if article_abstract:
         sentences.extend([(title_sha, 'Abstract', sent) for sent in segment(nlp, article_abstract)])
-    
-    for (sha, ) in all_shas:
+
+    for (sha,) in all_shas:
         if sha:
             found_json_files = list(data_directory.glob(f'**/*{sha}*json'))
             if len(found_json_files) != 1:
                 raise ValueError(f'Found {len(found_json_files)} json files for sha {sha}')
-            with open(found_json_files[0]) as json_file:
+            with open(str(found_json_files[0])) as json_file:
                 file = json.load(json_file)
                 for sec in file['body_text']:
                     sentences.extend([(sha, sec['section'].title(), sent) for sent in segment(nlp, sec['text'])])
                 for _, v in file['ref_entries'].items():
                     sentences.extend([(sha, 'Caption', sent) for sent in segment(nlp, v['text'])])
-    
+
     sentences = remove_sentences_duplicates(sentences)
-    tag = tag or getTags(sentences)
-            
+    tag = tag or get_tags(sentences)
+
     return tag, sentences
+
 
 def update_covid19_tag(db, article_id, tag):
     """Update the covid19 tag in the articles database.
@@ -227,9 +234,10 @@ def update_covid19_tag(db, article_id, tag):
     tag: boolean
         Value of the tag. True if covid19 is mentionned, otherwise False.
     """
-    
+
     db.execute("UPDATE articles SET has_covid19_tag = ? WHERE article_id = ?", [tag, article_id])
-    
+
+
 def insert_into_sentences(db, sentences):
     """Insert the new sentences into the database sentences.
     

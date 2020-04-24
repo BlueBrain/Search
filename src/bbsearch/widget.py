@@ -6,7 +6,8 @@ import textwrap
 import time
 
 import ipywidgets as widgets
-from IPython.display import HTML, display
+import IPython
+from IPython.display import HTML
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -146,7 +147,7 @@ class Widget:
             description='Deprioritization strength'
         )
 
-    def investigate_on_click(self, change_dict):
+    def investigate_on_click(self):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             self.report = ''
@@ -206,13 +207,6 @@ class Widget:
                 'articles',
                 self.all_data.db)
 
-            
-            #all_aticle_ids_str = ', '.join([f"'{article_id}'" for article_id in restricted_article_ids])
-            
-#             sentence_conditions = [
-#                 f"Article IN ({all_aticle_ids_str})",
-#                 SentenceConditioner.get_restrict_to_tag_condition("COVID-19")
-#             ]
             # Articles ID to SHA
             all_article_shas_str = ', '.join([f"'{sha}'" 
                                               for sha in get_shas_from_ids(restricted_article_ids, self.all_data.db)]) 
@@ -221,7 +215,7 @@ class Widget:
             excluded_words = [x for x in exclusion_text.lower().split('\n')
                               if x]  # remove empty strings
             sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
-                for word in excluded_words]
+                                    for word in excluded_words]
             restricted_sentence_ids = get_ids_by_condition(
                 sentence_conditions,
                 'sentences',
@@ -331,8 +325,8 @@ class Widget:
                 </p>
                 """
 
-                display(HTML(article_metadata))
-                display(HTML(formatted_output))
+                IPython.display.display(HTML(article_metadata))
+                IPython.display.display(HTML(formatted_output))
                 print()
 
                 self.report += article_metadata + formatted_output + "<br>"
@@ -363,4 +357,4 @@ class Widget:
     def display(self):
         ordered_widgets = list(self.my_widgets.values())
         main_widget = widgets.VBox(ordered_widgets)
-        display(main_widget)
+        IPython.display.display(main_widget)
