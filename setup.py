@@ -31,4 +31,9 @@ setup(
     install_requires=install_requires,
     setup_requires=setup_requires,
     tests_require=tests_require,
+    entry_points={
+        "console_scripts": [
+            "embedding_server=bbsearch.server.embedding:main",
+        ]
+    }
 )
