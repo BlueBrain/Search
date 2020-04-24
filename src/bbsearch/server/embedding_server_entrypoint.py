@@ -10,7 +10,6 @@ from .embedding_server import EmbeddingServer
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
@@ -44,4 +43,6 @@ def main():
 
 
 if __name__ == "__main__":
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.DEBUG)
     main()
