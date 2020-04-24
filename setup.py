@@ -33,7 +33,7 @@ setup(
     tests_require=tests_require,
     entry_points={
         "console_scripts": [
-            "embedding_server=bbsearch.server.embedding:main",
+            "embedding_server=bbsearch.server.embedding_server_entrypoint:main",
         ]
     }
 )
