@@ -95,7 +95,7 @@ class AllData:
                     paragraph = text_chunk['text']
                     if sentence in paragraph:
                         break
-                        
+
                 else:
                     raise ValueError("sentence not found in body_text, abstract or ref_entries")
         else:

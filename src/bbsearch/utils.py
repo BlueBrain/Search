@@ -1,10 +1,9 @@
-""" 
+"""
 
 Generic Utils waiting for migration in proper submodule.
 
 """
 import json
-from pathlib import Path
 import re
 
 from spacy.lang.en import English
@@ -13,7 +12,7 @@ from spacy.attrs import ORTH, LEMMA
 
 def add_abbreviations(nlp, abbreviations=None):
     """Add new abbreviations to the default list to avoid wrong scission. (e.g. Dr., Fig., ...).
-    
+
     Parameters
     ----------
     nlp : spacy.lang.en.English()
@@ -55,11 +54,11 @@ def add_abbreviations(nlp, abbreviations=None):
 
 def define_nlp():
     """Create the sentence boundary detection tools from Spacy.
-    
+
     Notes
     -----
     Some custom abbreviations are added to the basic Spacy tool.
-    
+
     Returns
     -------
     nlp: spacy.lang.en
@@ -74,16 +73,15 @@ def define_nlp():
 
 
 def segment(nlp, sentences):
-    """Segment an paragraph/article into sentences. 
-    
+    """Segment an paragraph/article into sentences.
+
     Parameters
     ----------
     nlp: spacy.language.Language
         Spacy pipeline applying sentence segmentantion.
-    
     sentences: str
         Paragraph/Article in raw text to segment into sentences.
-        
+
     Returns
     -------
     all_sentences: list
@@ -94,22 +92,22 @@ def segment(nlp, sentences):
 
 
 def remove_sentences_duplicates(sentences):
-    """Returns a filtered list of sentences. 
-    
+    """Returns a filtered list of sentences.
+
     Notes
     ------
-    Duplicate and boilerplate text strings are removed. 
+    Duplicate and boilerplate text strings are removed.
     This is done to avoid duplicates coming from metadata.csv and raw json files.
-    
+
     Parameters
     ----------
-        sentences: list 
-            List of sentences with format (sha, name, text) from an article_id
-        
+    sentences: list
+        List of sentences with format (sha, name, text) from an article_id
+
     Returns
     -------
-        unique: list
-            List of sentences (without duplicates) with format (sha, name, text)
+    unique: list
+        List of sentences (without duplicates) with format (sha, name, text)
     """
     # Use list to preserve insertion order
     unique = []
@@ -131,28 +129,28 @@ def remove_sentences_duplicates(sentences):
 
 def get_tags(sentences):
     """Computes the tag for an article id through its sentences.
-    
+
     Notes
     -----
     This tag is used to filter articles that contains mentions to covid19.
-    The list of words is: 
+    The list of words is:
     'covid', 'covid 19', 'covid-19',
     'sars cov 2', 'sars-cov 2',
     '2019 ncov', '2019ncov', '2019-ncov', '2019 n cov', '2019n cov',
     '2019 novel coronavirus',  'coronavirus 2019',
     'cov-2019', 'cov 2019',
-    'coronavirus disease 2019', 'coronavirus disease 19', 'coronavirus disease' 
+    'coronavirus disease 2019', 'coronavirus disease 19', 'coronavirus disease'
     'wuhan coronavirus', 'wuhan cov', 'wuhan pneumonia'
-    
+
     Parameters
     ----------
-    sentences: list 
+    sentences: list
         List of sentences from an article_id in the format (sha, name, text)
-        
+
     Returns
     -------
     tag: boolean
-        Value of the tag has_covid19 of the corresponding article_id 
+        Value of the tag has_covid19 of the corresponding article_id
     """
     # Keyword patterns to search for
     keywords = [r"2019[\-\s]?n[\-\s]?cov", "2019 novel coronavirus",
@@ -171,7 +169,7 @@ def get_tags(sentences):
 
 def get_tag_and_sentences(db, nlp, data_directory, article_id):
     """Extract all the sentences and the tag has_covid19 from an article.
-    
+
     Parameters
     ----------
     db:
@@ -182,13 +180,13 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
         Directory where all the json files are located
     article_id: str
         ID of the article specified in the articles database.
-    
+
     Returns
     -------
     tag: boolean
         Tag value of has_covid19. This is checking if covid19 is mentionned in the paper.
     sentences: list
-        List of the extracted sentences 
+        List of the extracted sentences
     """
     sentences = []
     tag = False
@@ -224,7 +222,7 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
 
 def update_covid19_tag(db, article_id, tag):
     """Update the covid19 tag in the articles database.
-    
+
     Parameters
     ----------
     db: sql database
@@ -240,7 +238,7 @@ def update_covid19_tag(db, article_id, tag):
 
 def insert_into_sentences(db, sentences):
     """Insert the new sentences into the database sentences.
-    
+
     Parameters
     ----------
     db: sql database
