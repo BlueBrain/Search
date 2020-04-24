@@ -7,17 +7,21 @@ from flask import request, jsonify, make_response
 import numpy as np
 
 from .invalid_usage_exception import InvalidUsage
+from ..embedding_models import EmbeddingModels
+
 
 logger = logging.getLogger(__name__)
 
 
 class EmbeddingServer:
 
-    def __init__(self, app):
+    def __init__(self, app, assets_path):
         self.app = app
-        self.app.route("/")(self.welcome_page)
-        self.app.route("/v1/embed/<output_type>")(self.handle_embedding_request)
+        self.app.route("/")(self.request_welcome)
+        self.app.route("/v1/embed/<output_type>")(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
+
+        self.embedding_models = EmbeddingModels(assets_path)
 
         html_header = """
         <!DOCTYPE html>
@@ -39,7 +43,7 @@ class EmbeddingServer:
         response.status_code = error.status_code
         return response
 
-    def welcome_page(self):
+    def request_welcome(self):
         logger.info("Welcome page requested")
         html = """
         <h1>Welcome to the BBSearch Embedding REST API Server</h1>
@@ -51,7 +55,7 @@ class EmbeddingServer:
             <pre>
             {
                 "model": "&lt;embedding model name&gt;",
-                "texts": ["&lt;text1&gt;", "&lt;text2&gt;", ...]
+                "text": "&lt;text&gt;"
             }
             </pre>
             </li>
@@ -62,17 +66,19 @@ class EmbeddingServer:
 
         return self.html_header + textwrap.dedent(html).strip() + '\n'
 
-    def embed_texts(self, model, texts):
-        dim_embedding = 5
-        embeddings = np.random.rand(len(texts), dim_embedding)
-        return embeddings
+    def embed_text(self, model, text):
+        try:
+            result = self.embedding_models.embed_sentences([text], model)
+            embedding = result[0]
+            return embedding
+        except NotImplementedError as e:
+            raise InvalidUsage(f"Model {model} is not available.")
 
     @staticmethod
-    def make_csv_response(embeddings):
+    def make_csv_response(embedding):
         csv_file = io.StringIO()
         csv_writer = csv.writer(csv_file)
-        for embedding in embeddings:
-            csv_writer.writerow(str(n) for n in embedding)
+        csv_writer.writerow(str(n) for n in embedding)
 
         response = make_response(csv_file.getvalue())
         response.headers["Content-Disposition"] = "attachment; filename=export.csv"
@@ -81,16 +87,13 @@ class EmbeddingServer:
         return response
 
     @staticmethod
-    def make_json_response(embeddings):
-        json_response = {
-            "embeddings": [[float(n) for n in embedding]
-                           for embedding in embeddings]
-        }
+    def make_json_response(embedding):
+        json_response = dict(embedding=[float(n) for n in embedding])
         response = jsonify(json_response)
 
         return response
 
-    def handle_embedding_request(self, output_type):
+    def request_embedding(self, output_type):
         logger.info("Requested Embedding")
 
         if output_type.lower() not in self.output_fn:
@@ -101,8 +104,8 @@ class EmbeddingServer:
         if request.is_json:
             json_request = request.get_json()
             model = json_request["model"]
-            texts = json_request["texts"]
-            text_embeddings = self.embed_texts(model, texts)
-            return output_fn(text_embeddings)
+            text = json_request["text"]
+            text_embedding = self.embed_text(model, text)
+            return output_fn(text_embedding)
         else:
             raise InvalidUsage("Expected a JSON file")
