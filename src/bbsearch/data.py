@@ -13,10 +13,6 @@ class AllData:
 
     def __init__(self, data_path, assets_path,
                  cord_path=None, databases_path=None, embeddings_path=None):
-        logger.info("Downloading NLTK modules...")
-        nltk.download('punkt')
-        nltk.download('stopwords')
-
         logger.info("Setting data paths...")
         assert data_path.exists()
         assert assets_path.exists()
