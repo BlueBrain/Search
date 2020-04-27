@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 
 class Widget:
 
-    def __init__(self, all_data, all_models):
+    def __init__(self, all_data, embedding_models, precomputed_embeddings):
         self.all_data = all_data
-        self.all_models = all_models
+        self.embedding_models = embedding_models
+        self.precomputed_embeddings = precomputed_embeddings
+
         self.report = None
         self.my_widgets = OrderedDict()
 
@@ -165,28 +167,25 @@ class Widget:
                 if 'exclusion_text' in self.my_widgets.keys() else ''
 
             if merge_synonyms:
-                query_text = self.all_models.sent_preprocessing(
-                    [query_text], self.all_models.synonyms_index)
-                deprioritize_text = self.all_models.sent_preprocessing(
-                    [deprioritize_text], self.all_models.synonyms_index)
+                query_text = self.embedding_models.sent_preprocessing(
+                    [query_text], self.embedding_models.synonyms_index)
+                deprioritize_text = self.embedding_models.sent_preprocessing(
+                    [deprioritize_text], self.embedding_models.synonyms_index)
             else:
                 query_text = [query_text]
                 deprioritize_text = [deprioritize_text]
 
             print('Embedding query...    ', end=' ')
-            embedding_query = self.all_models.embed_sentences(
+            embedding_query = self.embedding_models.embed_sentences(
                 query_text,
-                sentence_embedder_name,
-                getattr(self.all_models, sentence_embedder_name.lower())
-            )
+                sentence_embedder_name)
             print(f'{time.time() - t0:.2f} s.')
 
             if deprioritize_text[0]:
                 print('Embedding deprioritization...', end=' ')
-                embedding_exclu = self.all_models.embed_sentences(
+                embedding_exclu = self.embedding_models.embed_sentences(
                     deprioritize_text,
-                    sentence_embedder_name,
-                    getattr(self.all_models, sentence_embedder_name.lower())
+                    sentence_embedder_name
                 )
                 print(f'{time.time() - t0:.2f} s.')
 
@@ -233,9 +232,9 @@ class Widget:
 
             # Load sentence embedding from the npz file
             if merge_synonyms:
-                arr = self.all_models.embeddings_syns[sentence_embedder_name]
+                arr = self.precomputed_embeddings.embeddings_syns[sentence_embedder_name]
             else:
-                arr = self.all_models.embeddings[sentence_embedder_name]
+                arr = self.precomputed_embeddings.embeddings[sentence_embedder_name]
 
             # Apply date-range and has-journal filtering to arr
             idx_col = arr[:, 0]
