@@ -11,14 +11,12 @@ logger = logging.getLogger(__name__)
 
 class AllData:
 
-    def __init__(self, data_path, assets_path,
+    def __init__(self, data_path,
                  cord_path=None, databases_path=None, embeddings_path=None):
         logger.info("Setting data paths...")
         assert data_path.exists()
-        assert assets_path.exists()
 
         self.data_path = data_path
-        self.assets_path = assets_path
         self.cord_path = cord_path or data_path / "CORD-19-research-challenge"
         self.databases_path = databases_path or data_path / "databases"
         self.embeddings_path = embeddings_path or data_path / "embeddings"
