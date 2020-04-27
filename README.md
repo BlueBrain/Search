@@ -19,6 +19,22 @@ kept separated. Therefore the `data` folder contains sub-folders corresponding t
 different versions and named by the date on which the CORD-19 dataset was downloaded.
 The same subfolder should also contain all files derived from that dataset.
 
+## The Docker Image
+We provide a docker file, `docker/Dockerfile` that allows to build a docker
+image with all package dependencies pre-installed.
+
+To build the docker image open a terminal in the root directory of the project
+and run the following command
+
+```bash
+$ docker build -f docker/Dockerfile -t bbs .
+```
+
+To spawn an interactive container session run
+```bash
+$ docker run -it --rm bbs
+```
+
 ## Sentence Embedding REST API
 ### Setting Up the Server
 The REST API Server runs in a docker container, so in order to use it a docker
@@ -51,8 +67,12 @@ $ docker run \
     --publish-all \
     --volume /raid/assets:/assets \
     --env ASSETS_PATH="/assets" \
+    --name embedding_server \
     embedding_server
 ```
+
+The server will take some time to initialize and to download pre-trained
+models, so give it a bit of time before trying to send requests.
 
 The flag `--rm` will ensure that the container is removed after it is stopped. The
 flag `--publish-all` opens up a port for sending requests to the server. Docker selects
