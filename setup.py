@@ -13,12 +13,8 @@ install_requires = [
     'Flask',
     'requests',
 ]
-setup_requires = ['pytest-runner']
-tests_require = [
-    'flake8',
-    'pytest',
-    'pytest-cov',
-]
+
+extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest', 'pytest-cov']}
 
 setup(
     name="BBSearch",
@@ -30,6 +26,7 @@ setup(
     python_requires='>=3.6',
     install_requires=install_requires,
     setup_requires=setup_requires,
+    extras_require=extras_require,
     tests_require=tests_require,
     entry_points={
         "console_scripts": [

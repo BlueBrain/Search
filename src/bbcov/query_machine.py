@@ -55,8 +55,8 @@ class QueryMachine:
             A single query text
         embeddings : pandas.DataFrame
             An array of shape (n_documents, d_embedding)
-        df_mask : array_like or None
-
+        k : int
+            Number of top entries to retrieve.
         exclusion_query : str or None
             Exclusion query. If None then not considered.
 

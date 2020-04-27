@@ -26,7 +26,7 @@ class AllData:
         assert self.embeddings_path.exists()
 
         logger.info("Connecting to the SQLite database...")
-        self.db = sqlite3.connect(str(self.databases_path / "articles.sqlite"))
+        self.db = sqlite3.connect(str(self.databases_path / "cord19.db"))
 
         logger.info("Reading the metadata.csv file...")
         self.df_metadata_original = pd.read_csv(self.cord_path / "metadata.csv")
@@ -63,12 +63,12 @@ class AllData:
         """
 
         sha, where_from = \
-            self.db.execute(f'SELECT Article, Name FROM sections WHERE Id = {uid}').fetchall()[0]
+            self.db.execute(f'SELECT sha, section_name FROM sentences WHERE sentence_id = {uid}').fetchall()[0]
         logger.debug(f"uid = {uid}")
         logger.debug(f"sha = {sha}")
         logger.debug(f"where_from = {where_from}")
         logger.debug(f"sentence = {sentence}")
-        if sha in list(self.df_metadata['sha']) and where_from in ['TITLE', 'ABSTRACT']:
+        if sha in list(self.df_metadata['sha']) and where_from in ['Title', 'Abstract']:
             df_row = self.df_metadata[self.df_metadata['sha'] == sha].iloc[0]
             if sentence in df_row['title']:
                 paragraph = df_row['title']
@@ -83,12 +83,15 @@ class AllData:
             if sentence in json_file['metadata']['title']:
                 paragraph = json_file['metadata']['title']
             else:
-                for text_chunk in json_file['abstract'] + json_file['body_text']:
+                for text_chunk in json_file['abstract'] + \
+                                  json_file['body_text'] + \
+                                  list(json_file['ref_entries'].values()):
                     paragraph = text_chunk['text']
                     if sentence in paragraph:
                         break
+
                 else:
-                    raise ValueError("sentence not found in body_text and abstract")
+                    raise ValueError("sentence not found in body_text, abstract or ref_entries")
         else:
             raise ValueError("SHA not found")
 
