@@ -89,8 +89,8 @@ The output should be of the following form:
 8080/tcp -> 0.0.0.0:32774
 ```
 
-which means the the public port number is `32744`. Test if the server
-started successfully by opening `localhost:32744` in your browser. You
+which means the the public port number is `32774`. Test if the server
+started successfully by opening `localhost:32774` in your browser. You
 might want to adjust the port number and the server URL if your docker
 container is running on a remote host.
 
