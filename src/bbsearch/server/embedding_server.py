@@ -70,7 +70,7 @@ class EmbeddingServer:
             result = self.embedding_models.embed_sentences([text], model)
             embedding = result[0]
             return embedding
-        except NotImplementedError as e:
+        except ValueError as e:
             raise InvalidUsage(f"Model {model} is not available.")
 
     @staticmethod
