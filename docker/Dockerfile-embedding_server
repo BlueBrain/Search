@@ -4,7 +4,7 @@ LABEL maintainer="Stanislav Schmidt <stanislav.schmidt@epfl.ch>"
 LABEL version="1.0"
 LABEL description="REST API Server for Text Embeddings"
 
-# Install git
+# Install git, gcc, and g++
 RUN apt-get update && apt-get install -y \
     git \
     gcc \
@@ -23,10 +23,12 @@ RUN true \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
-# Install the app
+# Install the app and download the NLTK data
 ADD . /src
 WORKDIR /src
-RUN python setup.py install
+RUN true \
+    && python setup.py install \
+    && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Add a user
 RUN useradd --create-home serveruser
