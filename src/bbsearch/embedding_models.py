@@ -44,6 +44,26 @@ class EmbeddingModels:
         models_to_load = self._check_models_to_load(models_to_load)
         self._load_models(models_to_load)
 
+        self.synonyms_index = self._load_synonyms()
+
+    def _load_synonyms(self):
+        logger.info("Processing synonyms...")
+        synonyms_path = self.assets_path / 'synonyms_list.txt'
+        synonyms_dict = dict()
+        with open(synonyms_path, 'r', encoding='utf-8-sig') as f:
+            for line in f:
+                line = line.strip().lower()
+                if len(line) > 0:
+                    words = [word.strip() for word in line.split('=')]
+                    synonyms_dict[words[0]] = words[1:]
+
+        del synonyms_dict['sars']
+
+        synonyms_index = {x.lower(): k.lower()
+                          for k, v in synonyms_dict.items() for x in v}
+
+        return synonyms_index
+
     def _check_models_to_load(self, models_to_load):
         if models_to_load is None:
             models_to_load_checked = self.all_supported_models
@@ -88,6 +108,22 @@ class EmbeddingModels:
                   if token not in string.punctuation and token not in self.bsv_stopwords]
         return ' '.join(tokens)
 
+    @staticmethod
+    def sent_preprocessing(sentences, synonyms_index):
+        """Pre-processing of the sentences. (Lower + Split + Replace Synonym)
+
+        Parameters
+        ----------
+        sentences : List[str]
+            List of N strings.
+        synonyms_index: dict
+            Dictionary containing as key the synonym term and as values
+            the reference of this term.
+        """
+
+        return [" ".join(synonyms_index.get(y, y) for y in word_tokenize(x.lower()))
+                for x in sentences]
+
     def embed_sentences(self, sentences, model_name):
         """Embed given sentences.
 
@@ -105,7 +141,10 @@ class EmbeddingModels:
             (n_sentences, dim_embedding).
         """
         if model_name.upper() not in self.models:
-            raise ValueError(f"Model f{model_name} is not available.")
+            raise ValueError(f"Model {model_name} is not available.")
+
+        if isinstance(sentences, str):
+            sentences = [sentences]
 
         model_name = model_name.upper()
         model = self.models[model_name]
