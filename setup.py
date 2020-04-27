@@ -14,6 +14,13 @@ install_requires = [
     'requests',
 ]
 
+setup_requires = ['pytest-runner']
+tests_require = [
+    'flake8',
+    'pytest',
+    'pytest-cov',
+]
+
 extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest', 'pytest-cov']}
 
 setup(
