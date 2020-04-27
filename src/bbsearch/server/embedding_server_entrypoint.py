@@ -2,7 +2,6 @@ import argparse
 import logging
 import os
 import pathlib
-import sys
 
 from flask import Flask
 
@@ -20,7 +19,7 @@ parser.add_argument("--port",
                     default=8080,
                     type=int,
                     help="The server port")
-args = parser.parse_args(sys.argv[1:])
+args = parser.parse_args()
 
 
 def main():
