@@ -4,7 +4,6 @@ import logging
 import textwrap
 
 from flask import request, jsonify, make_response
-import numpy as np
 
 from .invalid_usage_exception import InvalidUsage
 from ..embedding_models import EmbeddingModels
