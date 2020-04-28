@@ -4,6 +4,8 @@ numpy==1.18.2
 # pytorch-pretrained-bert
 git+https://github.com/epfml/sent2vec@6b0eddec0c95e6e7f6f06582700305957311bfb9
 # git+https://github.com/neuml/cord19q
+Flask==1.1.2
+requests==2.23.0
 ipywidgets==7.5.1
 nltk==3.4.5
 pandas==1.0.3

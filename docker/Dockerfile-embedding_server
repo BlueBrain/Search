@@ -1,0 +1,41 @@
+FROM python:3.6-slim
+
+LABEL maintainer="Stanislav Schmidt <stanislav.schmidt@epfl.ch>"
+LABEL version="1.0"
+LABEL description="REST API Server for Text Embeddings"
+
+# Install git, gcc, and g++
+RUN apt-get update && apt-get install -y \
+    git \
+    gcc \
+    g++
+
+# Install sent2vec
+RUN true \
+    && pip install \
+        Cython==0.29.13 \
+        numpy==1.18.2 \
+    && pip install git+https://github.com/epfml/sent2vec
+
+# Install requirements manualy, this layer will be cached by docker
+COPY requirements.txt /tmp
+RUN true \
+    && pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm /tmp/requirements.txt
+
+# Install the app and download the NLTK data
+ADD . /src
+WORKDIR /src
+RUN true \
+    && python setup.py install \
+    && python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+
+# Add a user
+RUN useradd --create-home serveruser
+WORKDIR /home/serveruser
+USER serveruser
+
+# Expose a port
+EXPOSE 8080
+
+ENTRYPOINT ["embedding_server", "--host=0.0.0.0", "--port=8080"]
