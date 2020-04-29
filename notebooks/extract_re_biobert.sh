@@ -1,7 +1,7 @@
 export TASK_NAME=chemprot
 export RE_DIR=/raid/covid_data/data/ChemProt_Corpus/chemprot_test_gs/
 export OUTPUT_DIR=$PWD/results_re_chemprot/
-export BIOBERT_DIR=/raid/covid_data/assets/biobert_v1.1_pubmed/
+export BIOBERT_DIR=/raid/covid_data/assets/biobert_v1.1_pubmed
 
 export BIOBERT_RE_EXEC=/raid/users/casalegn/biobert/run_re.py
 
