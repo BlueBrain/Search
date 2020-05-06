@@ -5,6 +5,7 @@ import sqlite3
 import numpy as np
 import pandas as pd
 import pytest
+import spacy
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 N_SENTENCES_PER_SECTION = 3
@@ -163,3 +164,14 @@ def embeddings_path(tmp_path_factory, cursor):
         np.save(str(model_path), a)
 
     return embeddings_path
+
+
+@pytest.fixture(scope='session')
+def model_entities():
+    """Standard English spacy model.
+
+    References
+    ----------
+    https://spacy.io/api/annotation#named-entities
+    """
+    return spacy.load("en_core_web_sm")
