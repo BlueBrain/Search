@@ -1,9 +1,12 @@
 """The `EmbeddingModels` class."""
 
+from collections import defaultdict
 import string
 import logging
 import pathlib
+import sqlite3
 import warnings
+
 
 from nltk import word_tokenize
 from nltk.corpus import stopwords
@@ -159,3 +162,78 @@ class EmbeddingModels:
             raise ValueError(f"Model f{model_name} is not available.")
 
         return embeddings
+
+    def compute_sent_emb(self,
+                         database_path,
+                         model_name,
+                         batch_size=1000,
+                         synonym_merging=False):
+        """Compute Sentences Embeddings for a given database.
+
+        Parameters
+        ----------
+        database_path: pathlib.Path
+            Path to the database with all the sentences to embed.
+        model_name: str
+            Name of the model used for the embeddings computation.
+        batch_size: int
+            Number of sentences embeddings computed per batch.
+        synonym_merging: bool
+            If True, synonyms will be merged according to the synonym list. Otherwise, nothing happens.
+
+        Returns
+        -------
+        arr: defaultdict
+            Dictionary containing the concatenated numpy array (sentence_id, embeddings)
+        """
+        x = defaultdict(list)
+        arr = dict()
+        all_ids = []
+
+        with sqlite3.connect(str(database_path)) as db:
+            curs = db.cursor()
+            curs.execute("""SELECT sentence_id, text FROM sentences
+                        WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN 
+                        (SELECT article_id FROM articles WHERE has_covid19_tag is True))""")
+            while True:
+                batch = curs.fetchmany(batch_size)
+                if not batch:
+                    break
+                ids, sentences = zip(*batch)
+
+                all_ids.extend(ids)
+
+                if synonym_merging:
+                    sentences = self.sent_preprocessing(sentences, self.synonyms_index)
+
+                x_ = self.embed_sentences(sentences, model_name=model_name)
+                x[model_name].append(x_)
+
+        xx = np.concatenate(x[model_name], axis=0)
+        all_ids = np.array(all_ids).reshape((-1, 1))
+        arr[model_name] = np.concatenate((all_ids, xx), axis=1)
+
+        return arr
+
+    def save_sentence_embeddings(self,
+                                 database_path,
+                                 synonym_merging):
+        """Saves the sentences embeddings for a database.
+
+        Parameters
+        ----------
+        database_path: pathlib.Path
+            Path to the database with all the sentences to embed.
+        synonym_merging: bool
+            If True, synonyms will be merged according to the synonym list. Otherwise, nothing happens.
+        """
+        for model_name in self.models.keys():
+            arr = self.compute_sent_emb(database_path=database_path,
+                                        model_name=model_name,
+                                        synonym_merging=synonym_merging)
+            if synonym_merging:
+                file_name = f"{model_name}_sentence_embeddings_merged_synonyms.npz"
+            else:
+                file_name = f"{model_name}_sentence_embeddings.npz"
+
+            np.savez_compressed(file=str(file_name), **arr)

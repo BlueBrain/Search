@@ -1,0 +1,25 @@
+﻿Sugar = glucose = carbohydrates
+
+
+Level = concentration
+
+
+Coronavirus = SARS = SARS-CoV-1 = SARS-CoV-2 = HCoV-NL63 = HCoV-229E = HCoV-OC43 = HCoV-HKU1 = MERS = MERS-CoV = THEV = PHEV = MHV= TGEV = IBV
+
+
+Glycosylation = N-glycosylation = N-glycans = glycans = oligomannose = high-mannose = N-glycoproteins
+
+
+Risk factor = prediction factor = susceptibility factor = severity 
+
+
+SARS = severe acute respiratory syndrome = pneumonia = ARDS = acute respiratory distress syndrome = respiratory failure  
+
+
+Glucose lowering drugs = acarbose = miglitol = metformin = gliptin = gliflozin
+
+
+Glucose transport inhibitor = Cytochalasine B = WZB117
+
+
+Chloroquine = CQ = hydroxychloroquine = HQ
