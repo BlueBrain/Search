@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from allennlp.predictors import Predictor
 import pandas as pd
-from scibert.models.text_classifier import TextClassifier
+from scibert.models.text_classifier import TextClassifier  # noqa
 
 
 class REModel(ABC):
@@ -32,7 +32,7 @@ class REModel(ABC):
     @property
     @abstractmethod
     def symbols(self):
-        """Dictionary mapping the two entity types to their annotation symbols.
+        """Generate dictionary mapping the two entity types to their annotation symbols.
 
         General structure: {'ENTITY_TYPE': ('SYMBOL_LEFT', 'SYMBOL_RIGHT')}
         Specific example: {'GGP': ('[[ ', ' ]]'),
@@ -144,6 +144,7 @@ class ChemProt(REModel):
 
     @property
     def symbols(self):
+        """Generate annotation symbols."""
         return {'GGP': ('[[ ', ' ]]'),
                 'CHEBI': ('<< ', ' >>')}
 
@@ -178,7 +179,6 @@ class ChemProt(REModel):
         str
             The most likely relation between the two entities.
         """
-
         return self.predict_proba(annotated_sentence).idxmax()
 
 
