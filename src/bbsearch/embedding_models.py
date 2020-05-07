@@ -163,11 +163,11 @@ class EmbeddingModels:
 
         return embeddings
 
-    def compute_sent_emb(self,
-                         database_path,
-                         model_name,
-                         batch_size=1000,
-                         synonym_merging=False):
+    def compute_sentences_embeddings(self,
+                                     database_path,
+                                     model_name,
+                                     batch_size=1000,
+                                     synonym_merging=False):
         """Compute Sentences Embeddings for a given database.
 
         Parameters
@@ -183,11 +183,11 @@ class EmbeddingModels:
 
         Returns
         -------
-        arr: defaultdict
+        all_embeddings_and_ids: dict
             Dictionary containing the concatenated numpy array (sentence_id, embeddings)
         """
-        x = defaultdict(list)
-        arr = dict()
+        embeddings = defaultdict(list)
+        all_embeddings_and_ids = dict()
         all_ids = []
 
         with sqlite3.connect(str(database_path)) as db:
@@ -206,14 +206,14 @@ class EmbeddingModels:
                 if synonym_merging:
                     sentences = self.sent_preprocessing(sentences, self.synonyms_index)
 
-                x_ = self.embed_sentences(sentences, model_name=model_name)
-                x[model_name].append(x_)
+                tmp_embeddings_ = self.embed_sentences(sentences, model_name=model_name)
+                embeddings[model_name].append(tmp_embeddings_)
 
-        xx = np.concatenate(x[model_name], axis=0)
+        all_embeddings = np.concatenate(embeddings[model_name], axis=0)
         all_ids = np.array(all_ids).reshape((-1, 1))
-        arr[model_name] = np.concatenate((all_ids, xx), axis=1)
+        all_embeddings_and_ids[model_name] = np.concatenate((all_ids, all_embeddings), axis=1)
 
-        return arr
+        return all_embeddings_and_ids
 
     def save_sentence_embeddings(self,
                                  database_path,
@@ -228,12 +228,12 @@ class EmbeddingModels:
             If True, synonyms will be merged according to the synonym list. Otherwise, nothing happens.
         """
         for model_name in self.models.keys():
-            arr = self.compute_sent_emb(database_path=database_path,
-                                        model_name=model_name,
-                                        synonym_merging=synonym_merging)
+            all_embeddings_and_ids = self.compute_sentences_embeddings(database_path=database_path,
+                                                                       model_name=model_name,
+                                                                       synonym_merging=synonym_merging)
             if synonym_merging:
                 file_name = f"{model_name}_sentence_embeddings_merged_synonyms.npz"
             else:
                 file_name = f"{model_name}_sentence_embeddings.npz"
 
-            np.savez_compressed(file=str(file_name), **arr)
+            np.savez_compressed(file=str(file_name), **all_embeddings_and_ids)

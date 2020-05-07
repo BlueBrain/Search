@@ -55,11 +55,11 @@ class TestEmbeddingsModels:
     def test_compute_embed_sentences(self):
         """Tests Sentences Embeddings are computed for a given database."""
         for model_name in self.models:
-            arr = self.EmbeddingModels.compute_sent_emb(database_path=self.database_path,
-                                                        model_name=model_name)
-            assert isinstance(arr, dict)
-            assert model_name in arr.keys()
-            assert isinstance(arr[model_name], np.ndarray)
+            all_embeddings_and_ids = self.EmbeddingModels.compute_sentences_embeddings(database_path=self.database_path,
+                                                                                       model_name=model_name)
+            assert isinstance(all_embeddings_and_ids, dict)
+            assert model_name in all_embeddings_and_ids.keys()
+            assert isinstance(all_embeddings_and_ids[model_name], np.ndarray)
 
     def test_saving_emb_sentences(self):
         """Tests that Sentences Embeddings are saved in corresponding files."""
