@@ -17,6 +17,7 @@ class DatabaseCreation:
     def __init__(self,
                  data_path,
                  version,
+                 saving_directory=None,
                  cord_path=None):
         """Creates SQL database object.
 
@@ -26,12 +27,16 @@ class DatabaseCreation:
             Path to the dataset
         version: str
             Version of the database created.
+        saving_directory: pathlib.Path
+            Directory where the database is going to be saved.
         cord_path: pathlib.Path
             Path to the directory containing metadata.csv
         """
         self.data_path = data_path
         self.cord_path = cord_path or data_path / "CORD19-research-challenge"
         self.version = version
+        self.saving_directory = saving_directory or Path.cwd()
+        self.filename = self.saving_directory / f'cord19_{self.version}.db'
 
         self.metadata = pd.read_csv(self.cord_path / 'metadata.csv')
 
@@ -46,10 +51,10 @@ class DatabaseCreation:
 
     def _schema_creation(self):
         """Creation of the schemas of the different tables in the database. """
-        if Path(f'cord19_{self.version}.db').exists():
+        if self.filename.exists():
             raise ValueError(f'The version {self.version} of the database already exists')
         else:
-            with sqlite3.connect(f'cord19_{self.version}.db') as db:
+            with sqlite3.connect(str(self.filename)) as db:
                 db.execute(
                     """CREATE TABLE IF NOT EXISTS article_id_2_sha
                     (
@@ -122,23 +127,23 @@ class DatabaseCreation:
         The Dataframe self.metadata is modified in this method.
         The article_id_to_sha should be created before calling this method.
         """
-        df = self.metadata
+        df = self.metadata.copy()
         df = df[df.columns[~df.columns.isin(['sha'])]]
         df.drop_duplicates('article_id', keep='first', inplace=True)
-        with sqlite3.connect(f'cord19_{self.version}.db') as db:
+        with sqlite3.connect(str(self.filename)) as db:
             df.to_sql(name='articles', con=db, index=False, if_exists='append')
 
     def _article_id_to_sha_table(self):
         """Fills the article_id_to_sha table thanks to 'metadata.csv'. '"""
         df = self.metadata[['article_id', 'sha']]
         df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
-        with sqlite3.connect(f'cord19_{self.version}.db') as db:
+        with sqlite3.connect(str(self.filename)) as db:
             df.to_sql(name='article_id_2_sha', con=db, index=False, if_exists='append')
 
     def _sentences_table(self):
         """Fills the sentences table thanks to all the json files. """
         nlp = define_nlp()
-        with sqlite3.connect(f'cord19_{self.version}.db') as db:
+        with sqlite3.connect(str(self.filename)) as db:
 
             cur = db.cursor()
             for (article_id,) in cur.execute('SELECT article_id FROM articles'):

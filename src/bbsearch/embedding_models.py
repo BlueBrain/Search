@@ -217,23 +217,31 @@ class EmbeddingModels:
 
     def save_sentence_embeddings(self,
                                  database_path,
-                                 synonym_merging):
+                                 saving_directory=None,
+                                 synonym_merging=False):
         """Saves the sentences embeddings for a database.
 
         Parameters
         ----------
         database_path: pathlib.Path
             Path to the database with all the sentences to embed.
+        saving_directory: str
+            Path where the embeddings are saved.
         synonym_merging: bool
             If True, synonyms will be merged according to the synonym list. Otherwise, nothing happens.
         """
+        saving_directory = saving_directory or pathlib.Path.cwd()
+
+        if not database_path.exists():
+            raise ValueError(f'The database {database_path} does not exist!')
+
         for model_name in self.models.keys():
             all_embeddings_and_ids = self.compute_sentences_embeddings(database_path=database_path,
                                                                        model_name=model_name,
                                                                        synonym_merging=synonym_merging)
             if synonym_merging:
-                file_name = f"{model_name}_sentence_embeddings_merged_synonyms.npz"
+                file_name = pathlib.Path(saving_directory) / f"{model_name}_sentence_embeddings_merged_synonyms.npz"
             else:
-                file_name = f"{model_name}_sentence_embeddings.npz"
+                file_name = pathlib.Path(saving_directory) / f"{model_name}_sentence_embeddings.npz"
 
             np.savez_compressed(file=str(file_name), **all_embeddings_and_ids)
