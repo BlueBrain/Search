@@ -5,14 +5,20 @@ VERSION = '0.1'
 description = "Blue Brain Search"
 
 install_requires = [
+    'absl-py',
+    'Flask',
+    'nltk',
     'numpy',
     'pandas',
+    'requests',
     'scikit-learn',
     'scipy',
-    'torch',
-    'Flask',
-    'requests',
+    'sent2vec-prebuilt',
+    'sentence-transformers',
     'spacy',
+    'tensorflow',
+    'tensorflow_hub',
+    'torch'
 ]
 
 setup_requires = ['pytest-runner']
