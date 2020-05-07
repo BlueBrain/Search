@@ -33,7 +33,7 @@ class TestDatabaseCreation:
 
     def test_tables(self):
         """Tests that the three tables expected has been created. """
-        with sqlite3.connect(self.database_path) as db:
+        with sqlite3.connect(str(self.database_path)) as db:
             curs = db.cursor()
             tables_names = curs.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
             tables_names = [table_name for (table_name, ) in tables_names]
@@ -43,7 +43,7 @@ class TestDatabaseCreation:
 
     def test_tables_content(self):
         """Tests that the tables are correctly filled. """
-        with sqlite3.connect(self.database_path) as db:
+        with sqlite3.connect(str(self.database_path)) as db:
             df = pd.read_sql("SELECT * FROM articles", db)
             assert df.shape[0] == 11
             df2 = pd.read_sql("SELECT * FROM article_id_2_sha", db)
@@ -55,7 +55,7 @@ class TestDatabaseCreation:
 
     def test_tables_columns(self):
         """Tests that the tables columns are the ones expected. """
-        with sqlite3.connect(self.database_path) as db:
+        with sqlite3.connect(str(self.database_path)) as db:
             columns_expected = {"article_id", "publisher", "title", "doi", "pmc_id", "pm_id", "licence", "abstract",
                                 "date", "authors", "journal", "microsoft_id", "covidence_id", "has_pdf_parse",
                                 "has_pmc_xml_parse", "has_covid19_tag", "fulltext_directory", "url"}
