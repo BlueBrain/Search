@@ -65,8 +65,8 @@ def run_pipeline(text, model_entities, models_relations):
                 so = (s_ent.label_, o_ent.label_)
                 if so in models_relations:
                     for re_model in models_relations[so]:
-                        preproceses_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
-                        property_ = re_model.predict(preproceses_sent)
+                        annotated_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
+                        property_ = re_model.predict(annotated_sent)
                         lines.append({'entity': s_ent.text,
                                       'entity_type': s_ent.label_,
                                       'relation_model': re_model.__class__.__name__,
