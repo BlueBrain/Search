@@ -15,11 +15,12 @@ class TestDatabaseCreation:
 
     @classmethod
     def setup_class(cls):
+        cls.database_path = Path(f'cord19_{VERSION}.db')
+        os.remove(str(cls.database_path))
         db = DatabaseCreation(data_path=Path('tests/data/'),
                               cord_path=Path('tests/data/CORD19_samples/'),
                               version=VERSION)
         db.construct()
-        cls.database_path = Path(f'cord19_{VERSION}.db')
 
     @classmethod
     def teardown_class(cls):

@@ -17,11 +17,12 @@ class TestEmbeddingsModels:
     @classmethod
     def setup_class(cls):
         """Creation of a database and loads all the Embeddings Models. """
+        cls.database_path = Path(f'cord19_{VERSION}.db')
+        os.remove(str(cls.database_path))
         db = DatabaseCreation(data_path=Path('tests/data/'),
                               cord_path=Path('tests/data/CORD19_samples/'),
                               version=VERSION)
         db.construct()
-        cls.database_path = Path(f'cord19_{VERSION}.db')
         # BSV and SBERT are currently not kept in the models_to_load for test purposes
         print('Loading models ...')
         cls.models = ["USE", "SBIOBERT"]
