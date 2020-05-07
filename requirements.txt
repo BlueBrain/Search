@@ -12,8 +12,11 @@ pandas==1.0.3
 pdfkit==0.6.1
 pillow==7.1.1
 sentence-transformers==0.2.5.1
+scispacy==0.2.4
 spacy==2.2.4
 tensorflow-hub==0.8.0
 tensorflow==2.1.0
 torch==1.4.0
 transformers==2.3.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.4/en_ner_craft_md-0.2.4.tar.gz
