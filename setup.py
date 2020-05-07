@@ -12,7 +12,8 @@ install_requires = [
     'torch',
     'Flask',
     'requests',
-    'spacy'
+    'spacy',
+    'wheel'
 ]
 
 setup_requires = ['pytest-runner']
