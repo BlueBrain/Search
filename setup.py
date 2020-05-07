@@ -45,6 +45,8 @@ setup(
     entry_points={
         "console_scripts": [
             "embedding_server=bbsearch.server.embedding_server_entrypoint:main",
+            "create_database=bbsearch.create_database_entrypoint:main",
+            "save_embeddings=bbsearch.save_embeddings_entrypoint:main"
         ]
     }
 )
