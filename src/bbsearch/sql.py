@@ -34,8 +34,11 @@ class DatabaseCreation:
         self.version = version
 
         self.metadata = pd.read_csv(self.cord_path / 'metadata.csv')
-        self.rename_columns()
 
+    def construct(self):
+        """Constructs the database."""
+
+        self._rename_columns()
         self._schema_creation()
         self._article_id_to_sha_table()
         self._articles_table()
@@ -88,7 +91,7 @@ class DatabaseCreation:
                     );
                     """)
 
-    def rename_columns(self):
+    def _rename_columns(self):
         """Renames the columns of the dataframe to follow the SQL database schema. """
         df = self.metadata
         df.rename(columns={

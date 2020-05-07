@@ -15,9 +15,10 @@ class TestDatabaseCreation:
 
     @classmethod
     def setup_class(cls):
-        DatabaseCreation(data_path=Path('tests/data/'),
-                         cord_path=Path('tests/data/CORD19_samples/'),
-                         version=VERSION)
+        db = DatabaseCreation(data_path=Path('tests/data/'),
+                              cord_path=Path('tests/data/CORD19_samples/'),
+                              version=VERSION)
+        db.construct()
         cls.database_path = Path(f'cord19_{VERSION}.db')
 
     @classmethod
