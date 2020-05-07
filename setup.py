@@ -13,7 +13,6 @@ install_requires = [
     'Flask',
     'requests',
     'spacy',
-    'wheel'
 ]
 
 setup_requires = ['pytest-runner']
