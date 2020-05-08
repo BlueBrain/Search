@@ -16,7 +16,7 @@ install_requires = [
     'sent2vec-prebuilt',
     'sentence-transformers',
     'spacy',
-    'tensorflow>=2.0.0',
+    'tensorflow>=2.0.0a0',
     'tensorflow_hub',
     'torch'
 ]
