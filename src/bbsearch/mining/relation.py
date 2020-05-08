@@ -14,7 +14,7 @@ class REModel(ABC):
     """
 
     @abstractmethod
-    def predict(self, annotated_sentence):
+    def predict(self, annotated_sentence, return_prob=False):
         """Predict the relation given an annotated sentence.
 
         Parameters
@@ -22,11 +22,15 @@ class REModel(ABC):
         annotated_sentence : str
             Sentence with exactly 2 entities being annotated accordingly.
             For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
+        return_prob : bool, optional
+            If True also returns the confidence of the predicted relation.
 
         Returns
         -------
         relation : str
             Relation type.
+        prob : float, optional
+            Confidence of the predicted relation.
         """
 
     @property
@@ -144,7 +148,6 @@ class ChemProt(REModel):
 
     @property
     def symbols(self):
-        """Generate annotation symbols."""
         return {'GGP': ('[[ ', ' ]]'),
                 'CHEBI': ('<< ', ' >>')}
 
@@ -165,21 +168,14 @@ class ChemProt(REModel):
         """
         return pd.Series(self.model_.predict(sentence=annotated_sentence)['class_probs'], index=self.classes)
 
-    def predict(self, annotated_sentence):
-        """Predict the most likely relation.
-
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with exactly 2 entities being annotated accordingly.
-            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
-
-        Returns
-        -------
-        str
-            The most likely relation between the two entities.
-        """
-        return self.predict_proba(annotated_sentence).idxmax()
+    def predict(self, annotated_sentence, return_prob=False):
+        probs = self.predict_proba(annotated_sentence)
+        relation = probs.idxmax()
+        if return_prob:
+            prob = probs.max()
+            return relation, prob
+        else:
+            return relation
 
 
 class StartWithTheSameLetter(REModel):
@@ -188,20 +184,7 @@ class StartWithTheSameLetter(REModel):
     This relation is symmetric and works on any entity type.
     """
 
-    def predict(self, annotated_sentence):
-        """Predict the relation given an annotated sentence.
-
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with exactly 2 entities being annotated accordingly.
-            For example "Our [[ dad ]] walked the [[ dog ]].". This evaluates to True.
-
-        Returns
-        -------
-        bool
-            Whether or not the two entities start with the same letter
-        """
+    def predict(self, annotated_sentence, return_prob=False):
         left_symbol, _ = self.symbols['anything']
         s_len = len(left_symbol)
 
@@ -211,12 +194,13 @@ class StartWithTheSameLetter(REModel):
         ent_1_first_letter = annotated_sentence[ent_1_first_letter_ix]
         ent_2_first_letter = annotated_sentence[ent_2_first_letter_ix]
 
-        return ent_1_first_letter.lower() == ent_2_first_letter.lower()
+        relation = ent_1_first_letter.lower() == ent_2_first_letter.lower()
+        if return_prob:
+            prob = 1.0
+            return relation, prob
+        else:
+            return relation
 
     @property
     def symbols(self):
-        """Generate symbols.
-
-        The goal is to be able to use this model on any entity types.
-        """
         return defaultdict(lambda: ('[[ ', ' ]]'))
