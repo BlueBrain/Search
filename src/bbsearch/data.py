@@ -3,7 +3,6 @@ import json
 import logging
 import sqlite3
 
-import nltk
 import pandas as pd
 
 logger = logging.getLogger(__name__)
