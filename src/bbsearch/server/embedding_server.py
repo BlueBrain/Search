@@ -46,7 +46,6 @@ class EmbeddingServer:
         logger.info("Welcome page requested")
         html = """
         <h1>Welcome to the BBSearch Embedding REST API Server</h1>
-        
         To receive a sentence embedding proceed as follows:
         <ul>
             <li>Wrap your query into a JSON file</li>
@@ -70,7 +69,7 @@ class EmbeddingServer:
             result = self.embedding_models.embed_sentences([text], model)
             embedding = result[0]
             return embedding
-        except ValueError as e:
+        except ValueError:
             raise InvalidUsage(f"Model {model} is not available.")
 
     @staticmethod
