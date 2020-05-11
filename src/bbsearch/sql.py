@@ -313,7 +313,7 @@ class ArticleConditioner:
         condition : str
             The SQL condition
         """
-        condition = f"{tag} = True"
+        condition = f"{tag} = 1"
         return condition
 
 
