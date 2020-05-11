@@ -149,7 +149,7 @@ class Widget:
             description='Deprioritization strength'
         )
 
-    def investigate_on_click(self):
+    def investigate_on_click(self, change_dict):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             self.report = ''
