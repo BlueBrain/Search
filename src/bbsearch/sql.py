@@ -3,6 +3,155 @@ SQL Related functions.
 
 whatever
 """
+from pathlib import Path
+import sqlite3
+
+import pandas as pd
+
+from bbsearch.utils import define_nlp, get_tag_and_sentences, update_covid19_tag, insert_into_sentences
+
+
+class DatabaseCreation:
+    """Creates SQL database from a specified dataset. """
+
+    def __init__(self,
+                 data_path,
+                 version,
+                 saving_directory=None,
+                 cord_path=None):
+        """Creates SQL database object.
+
+        Parameters
+        ----------
+        data_path: pathlib.Path
+            Path to the dataset
+        version: str
+            Version of the database created.
+        saving_directory: pathlib.Path
+            Directory where the database is going to be saved.
+        cord_path: pathlib.Path
+            Path to the directory containing metadata.csv
+        """
+        self.data_path = data_path
+        self.cord_path = cord_path or data_path / "CORD19-research-challenge"
+        self.version = version
+        self.saving_directory = saving_directory or Path.cwd()
+        self.filename = self.saving_directory / f'cord19_{self.version}.db'
+
+        self.metadata = pd.read_csv(self.cord_path / 'metadata.csv')
+
+    def construct(self):
+        """Constructs the database."""
+
+        self._rename_columns()
+        self._schema_creation()
+        self._article_id_to_sha_table()
+        self._articles_table()
+        self._sentences_table()
+
+    def _schema_creation(self):
+        """Creation of the schemas of the different tables in the database. """
+        if self.filename.exists():
+            raise ValueError(f'The version {self.version} of the database already exists')
+        else:
+            with sqlite3.connect(str(self.filename)) as db:
+                db.execute(
+                    """CREATE TABLE IF NOT EXISTS article_id_2_sha
+                    (
+                        article_id TEXT,
+                        sha TEXT
+                    );
+                    """)
+                db.execute(
+                    """CREATE TABLE IF NOT EXISTS articles
+                    (
+                        article_id TEXT PRIMARY KEY, 
+                        publisher TEXT, 
+                        title TEXT, 
+                        doi TEXT, 
+                        pmc_id TEXT, 
+                        pm_id INTEGER, 
+                        licence TEXT,
+                        abstract TEXT, 
+                        date DATETIME, 
+                        authors TEXT, 
+                        journal TEXT,
+                        microsoft_id INTEGER, 
+                        covidence_id TEXT, 
+                        has_pdf_parse BOOLEAN,
+                        has_pmc_xml_parse BOOLEAN, 
+                        has_covid19_tag BOOLEAN DEFAULT False,
+                        fulltext_directory TEXT, 
+                        url TEXT
+                    );
+                    """)
+                db.execute(
+                    """CREATE TABLE sentences
+                    (
+                        sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        sha TEXT,
+                        section_name TEXT,
+                        text TEXT,
+                        FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
+                    );
+                    """)
+
+    def _rename_columns(self):
+        """Renames the columns of the dataframe to follow the SQL database schema. """
+        df = self.metadata
+        df.rename(columns={
+            'cord_uid': 'article_id',
+            'sha': 'sha',
+            'source_x': 'publisher',
+            'title': 'title',
+            'doi': 'doi',
+            'pmcid': 'pmc_id',
+            'pubmed_id': 'pm_id',
+            'license': 'licence',
+            'abstract': 'abstract',
+            'publish_time': 'date',
+            'authors': 'authors',
+            'journal': 'journal',
+            'Microsoft Academic Paper ID': 'microsoft_id',
+            'WHO #Covidence': 'covidence_id',
+            'has_pdf_parse': 'has_pdf_parse',
+            'has_pmc_xml_parse': 'has_pmc_xml_parse',
+            'full_text_file': 'fulltext_directory',
+            'url': 'url'}, inplace=True)
+
+    def _articles_table(self):
+        """Fills the Article Table thanks to 'metadata.csv'.
+
+        Notes
+        -----
+        The Dataframe self.metadata is modified in this method.
+        The article_id_to_sha should be created before calling this method.
+        """
+        df = self.metadata.copy()
+        df = df[df.columns[~df.columns.isin(['sha'])]]
+        df.drop_duplicates('article_id', keep='first', inplace=True)
+        with sqlite3.connect(str(self.filename)) as db:
+            df.to_sql(name='articles', con=db, index=False, if_exists='append')
+
+    def _article_id_to_sha_table(self):
+        """Fills the article_id_to_sha table thanks to 'metadata.csv'. '"""
+        df = self.metadata[['article_id', 'sha']]
+        df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
+        with sqlite3.connect(str(self.filename)) as db:
+            df.to_sql(name='article_id_2_sha', con=db, index=False, if_exists='append')
+
+    def _sentences_table(self):
+        """Fills the sentences table thanks to all the json files. """
+        nlp = define_nlp()
+        with sqlite3.connect(str(self.filename)) as db:
+
+            cur = db.cursor()
+            for (article_id,) in cur.execute('SELECT article_id FROM articles'):
+                tag, sentences = get_tag_and_sentences(db, nlp, self.data_path, article_id)
+                update_covid19_tag(db, article_id, tag)
+                insert_into_sentences(db, sentences)
+
+            db.commit()
 
 
 def get_shas_from_ids(articles_ids, db):
