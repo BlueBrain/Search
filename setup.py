@@ -5,14 +5,16 @@ VERSION = '0.1'
 description = "Blue Brain Search"
 
 install_requires = [
+    'Flask',
     'numpy',
     'pandas',
+    'requests',
     'scikit-learn',
     'scipy',
-    'torch',
-    'Flask',
-    'requests',
+    'sent2vec',
     'spacy',
+    'torch',
+    'transformers',
 ]
 
 setup_requires = ['pytest-runner']
@@ -39,6 +41,7 @@ setup(
     entry_points={
         "console_scripts": [
             "embedding_server=bbsearch.server.embedding_server_entrypoint:main",
+            "create_database=bbsearch.create_database_entrypoint:main",
         ]
     }
 )
