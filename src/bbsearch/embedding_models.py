@@ -88,9 +88,9 @@ class SBioBERT(EmbeddingModel):
         indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
 
         # Convert inputs to PyTorch tensors
-        preprocess_sentence = torch.tensor([indexed_tokens]).to(self.device)
+        preprocessed_sentence = torch.tensor([indexed_tokens]).to(self.device)
 
-        return preprocess_sentence
+        return preprocessed_sentence
 
     def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
