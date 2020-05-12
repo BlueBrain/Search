@@ -17,7 +17,7 @@ class EmbeddingServer:
     def __init__(self, app, assets_path):
         self.app = app
         self.app.route("/")(self.request_welcome)
-        self.app.route("/v1/embed/<output_type>")(self.request_embedding)
+        self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
 
         self.embedding_models = EmbeddingModels(assets_path)
