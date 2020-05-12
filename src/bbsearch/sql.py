@@ -17,28 +17,31 @@ class DatabaseCreation:
     def __init__(self,
                  data_path,
                  version,
-                 saving_directory=None,
-                 cord_path=None):
+                 saving_directory=None):
         """Creates SQL database object.
 
         Parameters
         ----------
         data_path: pathlib.Path
-            Path to the dataset
+            Directory to the dataset where metadata.csv and all jsons file are located.
         version: str
             Version of the database created.
         saving_directory: pathlib.Path
             Directory where the database is going to be saved.
-        cord_path: pathlib.Path
-            Path to the directory containing metadata.csv
         """
         self.data_path = data_path
-        self.cord_path = cord_path or data_path / "CORD19-research-challenge"
+        if not Path(self.data_path).exists():
+            raise NotADirectoryError(f'The data directory {self.data_path} does not exit')
+
         self.version = version
+
         self.saving_directory = saving_directory or Path.cwd()
+        if not Path(self.saving_directory).exists():
+            raise NotADirectoryError(f'The saving directory {self.saving_directory} does not exit')
+
         self.filename = self.saving_directory / f'cord19_{self.version}.db'
 
-        self.metadata = pd.read_csv(self.cord_path / 'metadata.csv')
+        self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
 
     def construct(self):
         """Constructs the database."""
@@ -313,7 +316,7 @@ class ArticleConditioner:
         condition : str
             The SQL condition
         """
-        condition = f"{tag} = True"
+        condition = f"{tag} = 1"
         return condition
 
 

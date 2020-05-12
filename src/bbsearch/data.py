@@ -33,13 +33,12 @@ class AllData:
         logger.info("Removing rows with both no title and no SHA...")
         mask_useless = self.df_metadata_original['title'].isna()
         mask_useless &= self.df_metadata_original['sha'].isna()
-        self.df_metadata = self.df_metadata_original[~mask_useless]
+        self.df_metadata = self.df_metadata_original[~mask_useless].copy()
 
         logger.info("Generate fake SHAs for entries that do not have full-text...")
         mask = self.df_metadata['sha'].isna()
         self.df_metadata.loc[mask, 'sha'] = self.df_metadata.loc[mask, 'title'].apply(
             lambda text: hashlib.sha1(str(text).encode("utf-8")).hexdigest())
-        self.df_metadata.head(2)
 
         logger.info("Loading the JSON file paths...")
         self.json_paths = {json_path.stem: str(json_path)

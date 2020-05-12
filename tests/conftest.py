@@ -22,7 +22,7 @@ def assets_path(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def cnxn(tmp_path_factory):
+def fake_db_cnxn(tmp_path_factory):
     """Connection object (sqlite)."""
     db_path = tmp_path_factory.mktemp('db', numbered=False) / 'dummy.sqlite'
     cnxn = sqlite3.connect(str(db_path))
@@ -32,9 +32,9 @@ def cnxn(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def cursor(cnxn, jsons_path, metadata_path):
+def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
     """Database object (sqlite)."""
-    cursor = cnxn.cursor()
+    cursor = fake_db_cnxn.cursor()
     # create
 
     articles_schema = {'article_id': 'TEXT PRIMARY KEY',
@@ -103,10 +103,10 @@ def cursor(cnxn, jsons_path, metadata_path):
     metadata_df = pd.read_csv(str(metadata_path)).rename(columns=name_mapping).set_index('article_id')
 
     article_id_2_content = metadata_df['sha']
-    article_id_2_content.to_sql(name='article_id_2_sha', con=cnxn, index=True, if_exists='append')
+    article_id_2_content.to_sql(name='article_id_2_sha', con=fake_db_cnxn, index=True, if_exists='append')
 
     articles_content = metadata_df.drop(columns=['sha'])
-    articles_content.to_sql(name='articles', con=cnxn, index=True, if_exists='append')
+    articles_content.to_sql(name='articles', con=fake_db_cnxn, index=True, if_exists='append')
 
     temp = []
     for sha in article_id_2_content[article_id_2_content.notna()].unique():
@@ -120,11 +120,11 @@ def cursor(cnxn, jsons_path, metadata_path):
 
     sentences_content = pd.DataFrame(temp)
     sentences_content.index.name = 'sentence_id'
-    sentences_content.to_sql(name='sentences', con=cnxn, index=True, if_exists='append')
+    sentences_content.to_sql(name='sentences', con=fake_db_cnxn, index=True, if_exists='append')
 
     yield cursor
 
-    cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
+    fake_db_cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
 
 
 @pytest.fixture(scope='session')
@@ -146,13 +146,13 @@ def metadata_path():
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, cursor):
+def embeddings_path(tmp_path_factory, fake_db_cursor):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
     models = ['BERT', 'BIOBERT']
 
-    n_sentences = cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
 
     for model in models:
