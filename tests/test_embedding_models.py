@@ -3,9 +3,12 @@ import pytest
 from unittest.mock import Mock, MagicMock
 
 import numpy as np
+import sent2vec
+from sentence_transformers import SentenceTransformer
+import tensorflow as tf
 import torch
 
-from bbsearch.embedding_models import EmbeddingModel, SBioBERT, BSV
+from bbsearch.embedding_models import EmbeddingModel, SBioBERT, BSV, SBERT, USE
 
 
 class TestEmbeddingModels:
@@ -31,22 +34,27 @@ class TestEmbeddingModels:
         sbiobert = SBioBERT()
         dummy_sentence = 'This is a dummy sentence'
         preprocess_sentence = sbiobert.preprocess(dummy_sentence)
-        embedding = sbiobert.encode(preprocess_sentence)
+        embedding = sbiobert.embed(preprocess_sentence)
 
         assert isinstance(embedding, np.ndarray)
         torch_model.assert_called_once()
         auto_tokenizer.from_pretrained().tokenize.assert_called_once()
         auto_tokenizer.from_pretrained().convert_tokens_to_ids.assert_called_once()
 
-    def test_bsv_embedding(self, monkeypatch):
+    def test_bsv_embedding(self, monkeypatch, tmpdir):
 
-        sent2vec = Mock()
+        sent2vec_module = Mock()
         bsv_model = Mock(spec=sent2vec.Sent2vecModel)
-        bsv_model.return_value = np.ones([1, 512])
-        sent2vec.Sent2vecModel().load_model.return_value = bsv_model
+        bsv_model.embed_sentences.return_value = np.ones([1, 700])
+        sent2vec_module.Sent2vecModel.return_value = bsv_model
 
-        monkeypatch.setattr('bbsearch.embedding_models.sent2vec', sent2vec)
-        bsv = BSV(assets_path=Path(''))
+        monkeypatch.setattr('bbsearch.embedding_models.sent2vec', sent2vec_module)
+
+        new_file_path = Path(str(tmpdir)) / 'test.txt'
+        new_file_path.touch()
+        with pytest.raises(FileNotFoundError):
+            BSV(checkpoint_model_path=Path(''))
+        bsv = BSV(Path(new_file_path))
         dummy_sentence = 'This is a dummy sentence/test.'
         preprocess_truth = 'dummy sentence test'
 
@@ -54,6 +62,47 @@ class TestEmbeddingModels:
         assert isinstance(preprocess_sentence, str)
         assert preprocess_sentence == preprocess_truth
 
-        embedding = bsv.encode(preprocess_sentence)
+        embedding = bsv.embed(preprocess_sentence)
         assert isinstance(embedding, np.ndarray)
-        bsv_model.assert_called_once()
+        assert embedding.shape == (700,)
+        bsv_model.embed_sentences.assert_called_once()
+
+    def test_sbert_embedding(self, monkeypatch):
+
+        sentence_transormer_class = Mock()
+        sbert_model = Mock(spec=SentenceTransformer)
+        sbert_model.encode.return_value = np.ones([1, 768])  # Need to check the dimensions
+        sentence_transormer_class.return_value = sbert_model
+
+        monkeypatch.setattr('bbsearch.embedding_models.SentenceTransformer', sentence_transormer_class)
+
+        dummy_sentence = 'This is a dummy sentence/test.'
+        sbert = SBERT()
+
+        preprocessed_sentence = sbert.preprocess(dummy_sentence)
+        assert preprocessed_sentence == dummy_sentence
+
+        embedding = sbert.embed(preprocessed_sentence)
+        assert isinstance(embedding, np.ndarray)
+        assert embedding.shape == (768,)
+        sbert_model.encode.assert_called_once()
+
+    def test_use_embedding(self, monkeypatch):
+
+        hub_module = Mock()
+        use_model = Mock()
+        hub_module.load.return_value = use_model
+        use_model.return_value = tf.ones((1, 512))
+
+        monkeypatch.setattr('bbsearch.embedding_models.hub', hub_module)
+
+        dummy_sentence = 'This is a dummy sentence/test.'
+        use = USE()
+
+        preprocessed_sentence = use.preprocess(dummy_sentence)
+        assert preprocessed_sentence == dummy_sentence
+
+        embedding = use.embed(preprocessed_sentence)
+        assert isinstance(embedding, np.ndarray)
+        assert embedding.shape == (512,)
+        use_model.assert_called_once()

@@ -13,7 +13,7 @@ install_requires = [
     'scipy',
     'sent2vec-prebuilt',
     'sentence-transformers',
-    'spacy',
+    'spacy==2.2.1',
     'torch',
     'transformers',
 ]

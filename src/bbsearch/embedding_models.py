@@ -5,6 +5,8 @@ import string
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import sent2vec
+from sentence_transformers import SentenceTransformer
+import tensorflow_hub as hub
 import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
@@ -12,9 +14,8 @@ from transformers import AutoTokenizer, AutoModelWithLMHead
 class EmbeddingModel(ABC):
     """Abstract interface for the Sentences Embeddings Models."""
 
-    @abstractmethod
     def preprocess(self, raw_sentence):
-        """Preprocess the sentence (Tokenization, ...).
+        """Preprocess the sentence (Tokenization, ...) if needed by the model.
 
         Parameters
         ----------
@@ -24,32 +25,44 @@ class EmbeddingModel(ABC):
         Returns
         -------
         preprocessed_sentence:
-            Preprocessed sentence in the format expected by the model.
+            Preprocessed sentence in the format expected by the model if needed.
         """
+        return raw_sentence
 
     @abstractmethod
-    def encode(self, preprocess_sentence):
+    def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
         Parameters
         ----------
-        preprocess_sentence: str
+        preprocessed_sentence: str
             Preprocessed sentence to embed.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence.
+            One dimensional vector representing the embedding of the given sentence.
         """
 
 
 class SBioBERT(EmbeddingModel):
+    """Sentence BioBERT.
+
+    Parameters
+    ----------
+    device: torch.device
+        Torch device.
+
+    References
+    ----------
+    https://huggingface.co/gsarti/biobert-nli
+    """
 
     def __init__(self,
                  device=None):
 
         self.device = device or torch.device('cpu')
-        self.biobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
+        self.sbiobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
     def preprocess(self, raw_sentence):
@@ -65,7 +78,6 @@ class SBioBERT(EmbeddingModel):
         preprocessed_sentence: torch.Tensor
             Preprocessed sentence.
         """
-
         # Add the special tokens.
         marked_text = "[CLS] " + raw_sentence + " [SEP]"
 
@@ -80,24 +92,23 @@ class SBioBERT(EmbeddingModel):
 
         return preprocess_sentence
 
-    def encode(self, preprocess_sentence):
+    def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
         Parameters
         ----------
-        preprocess_sentence: torch.Tensor
+        preprocessed_sentence: torch.Tensor
             Preprocessed sentence to embed.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence.
+            Embedding of the specified sentence of shape (768,)
         """
-
-        segments_tensors = torch.ones_like(preprocess_sentence)
+        segments_tensors = torch.ones_like(preprocessed_sentence)
         with torch.no_grad():
-            self.biobert_model.eval()
-            encoded_layers, test = self.biobert_model(preprocess_sentence, segments_tensors)
+            self.sbiobert_model.eval()
+            encoded_layers, test = self.sbiobert_model(preprocessed_sentence, segments_tensors)
             sentence_encoding = encoded_layers[-1].squeeze().mean(axis=0)
             embedding = sentence_encoding.detach().cpu().numpy()
 
@@ -105,13 +116,26 @@ class SBioBERT(EmbeddingModel):
 
 
 class BSV(EmbeddingModel):
+    """BioSentVec.
+
+    Parameters
+    ----------
+    checkpoint_model_path: pathlib.Path
+        Path to the file of the stored model BSV.
+
+    References
+    ----------
+    https://github.com/ncbi-nlp/BioSentVec
+    """
 
     def __init__(self,
-                 assets_path):
+                 checkpoint_model_path):
 
-        self.assets_path = assets_path
-        self.bsv_path = self.assets_path / 'BioSentVec_PubMed_MIMICIII-bigram_d700.bin'
-        self.bsv_model = sent2vec.Sent2vecModel().load_model(str(self.bsv_path))
+        self.checkpoint_model_path = checkpoint_model_path
+        if not self.checkpoint_model_path.is_file():
+            raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
+        self.bsv_model = sent2vec.Sent2vecModel()
+        self.bsv_model.load_model(str(self.checkpoint_model_path))
         self.bsv_stopwords = set(stopwords.words('english'))
 
     def preprocess(self, raw_sentence):
@@ -136,18 +160,77 @@ class BSV(EmbeddingModel):
                   if token not in string.punctuation and token not in self.bsv_stopwords]
         return ' '.join(tokens)
 
-    def encode(self, preprocess_sentence):
+    def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
         Parameters
         ----------
-        preprocess_sentence: torch.Tensor
+        preprocessed_sentence: torch.Tensor
             Preprocessed sentence to embed.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence.
+            Embedding of the specified sentence of shape (700,).
         """
-        embedding = self.bsv_model(preprocess_sentence)
+        embedding = self.bsv_model.embed_sentences([preprocessed_sentence])[0]
+        return embedding
+
+
+class SBERT(EmbeddingModel):
+    """Sentence BERT.
+
+    References
+    ----------
+    https://github.com/UKPLab/sentence-transformers
+    """
+
+    def __init__(self):
+
+        self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+
+    def embed(self, preprocessed_sentence):
+        """Compute the sentences embeddings for a given sentence.
+
+        Parameters
+        ----------
+        preprocessed_sentence: str
+            Preprocessed sentence to embed.
+
+        Returns
+        -------
+        embedding: numpy.array
+            Embedding of the given sentence of shape (768,).
+        """
+        embedding = self.sbert_model.encode([preprocessed_sentence])[0]
+        return embedding
+
+
+class USE(EmbeddingModel):
+    """Universal Sentence Encoder.
+
+    References
+    ----------
+    https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder?hl=en
+    """
+
+    def __init__(self):
+
+        self.use_version = 5
+        self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
+
+    def embed(self, preprocessed_sentence):
+        """Compute the sentences embeddings for a given sentence.
+
+        Parameters
+        ----------
+        preprocessed_sentence: str
+            Preprocessed sentence to embed.
+
+        Returns
+        -------
+        embedding: numpy.array
+            Embedding of the specified sentence of shape (512,).
+        """
+        embedding = self.use_model([preprocessed_sentence]).numpy()[0]
         return embedding
