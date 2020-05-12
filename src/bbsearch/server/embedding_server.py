@@ -101,9 +101,17 @@ class EmbeddingServer:
 
         if request.is_json:
             json_request = request.get_json()
+            self._check_request_validity(json_request)
             model = json_request["model"]
             text = json_request["text"]
             text_embedding = self.embed_text(model, text)
             return output_fn(text_embedding)
         else:
             raise InvalidUsage("Expected a JSON file")
+
+    @staticmethod
+    def _check_request_validity(json_request):
+        required_keys = {"model", "text"}
+        for key in required_keys:
+            if key not in json_request:
+                raise InvalidUsage(f"Request must contain the key \"{key}\"")
