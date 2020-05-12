@@ -114,4 +114,4 @@ class EmbeddingServer:
         required_keys = {"model", "text"}
         for key in required_keys:
             if key not in json_request:
-                raise InvalidUsage(f"Request must contain the key \"{key}\"")
+                raise InvalidUsage(f"Request must contain the key '{key}'")
