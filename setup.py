@@ -13,6 +13,8 @@ install_requires = [
     'Flask',
     'requests',
     'spacy',
+    'rdflib-jsonld',
+    'faiss-cpu',
 ]
 
 setup_requires = ['pytest-runner']
