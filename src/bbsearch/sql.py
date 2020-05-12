@@ -255,8 +255,11 @@ def get_ids_by_condition(conditions, table, db):
     results : list
         A list of article IDs (=SHAs) represented as strings.
     """
-    condition = ' and '.join(conditions)
-    sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
+    if conditions:
+        condition = ' and '.join(conditions)
+        sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
+    else:
+        sql_query = f"SELECT {table[:-1]}_id FROM {table}"
     results = db.execute(sql_query).fetchall()
     results = [id_ for (id_,) in results]
 

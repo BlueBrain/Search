@@ -7,23 +7,20 @@ from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition
 from .utils import Timer
 
 
-def search(embedding_models, precomputed_embeddings, all_data, model, k, query_text, has_journal,
-           date_range, deprioritize_text, deprioritize_strength, exclusion_text, verbose=True):
+def search(embedding_model, precomputed_embeddings, database, k, query_text, has_journal=None,
+           date_range=None, deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
     """Generate search results.
 
     Returns
     -------
-    embeding_models : bbsearch.embedding_models.EmbeddingModels
-        Instance of the ``EmbeddingModels``.
+    embedding_model : bbsearch.embedding_models.EmbeddingModel
+        Instance of EmbeddingModel of the model we want to use.
 
-    precomputed_embeddings : bbssearch.precomputed_embeddings.PrecomputedEmeddings
-        Instance of the `PrecomputedEmeddings`.
+    precomputed_embeddings : np.ndarray
+        Embeddings of the model corresponding of embedding_model.
 
-    all_data : bbearch.data.AllData
-        Instance of the ``AllData``.
-
-    model : str
-        Which model to use for embeddings.
+    database : sqlite3.Cursor
+        Cursor to the database.
 
     k : int
         Number of top results to display.
@@ -66,64 +63,40 @@ def search(embedding_models, precomputed_embeddings, all_data, model, k, query_t
     """
     timer = Timer(verbose=verbose)
 
-    query_text = [query_text]
-    deprioritize_text = [deprioritize_text]
-
     with timer('query_embed'):
-        preprocessed_query_text = embedding_models.preprocess(query_text, model)
-        embedding_query = embedding_models.embed(preprocessed_query_text, model)
+        preprocessed_query_text = embedding_model.preprocess(query_text)
+        embedding_query = embedding_model.embed(preprocessed_query_text)
 
-    if deprioritize_text[0]:
+    if deprioritize_text is not None:
         with timer('deprioritize_embed'):
-            preprocessed_deprioritize_text = embedding_models.preprocess(deprioritize_text, model)
-            embedding_deprioritize = embedding_models.embed(preprocessed_deprioritize_text, model)
-
-    # Apply article conditions
-    article_conditions = [ArticleConditioner.get_date_range_condition(date_range)]
-    if has_journal:
-        article_conditions.append(ArticleConditioner.get_has_journal_condition())
-
-    with timer('article_conditioning'):
-        restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', all_data.db)
-
-    # Apply sentence conditions
-    all_aticle_ids_str = ', '.join([f"'{sha}'" for sha in restricted_article_ids])
-    sentence_conditions = [f"Article IN ({all_aticle_ids_str})",
-                           SentenceConditioner.get_restrict_to_tag_condition("COVID-19")]
-
-    excluded_words = [x for x in exclusion_text.lower().split('\n') if x]  # remove empty strings
-    sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word) for word in excluded_words]
+            preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
+            embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
     with timer('sentences_conditioning'):
-        restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sections', all_data.db)
-
-    # Load sentence embedding from the npz file
-    with timer('embeddings_load'):
-
-            arr = all_models.embeddings[model]
+        restricted_sentence_ids = get_ids_by_condition([], 'sentences', database)
 
     # Apply date-range and has-journal filtering to arr
-    idx_col = arr[:, 0]
+    idx_col = precomputed_embeddings[:, 0]
 
     with timer('considered_embeddings_lookup'):
         mask = np.isin(idx_col, restricted_sentence_ids)
 
-    arr = arr[mask]
-    if len(arr) == 0:
+    precomputed_embeddings = precomputed_embeddings[mask]
+    if len(precomputed_embeddings) == 0:
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
-    sentence_ids, embeddings_corpus = arr[:, 0], arr[:, 1:]
+    sentence_ids, embeddings_corpus = precomputed_embeddings[:, 0], precomputed_embeddings[:, 1:]
     with timer('query_similarity'):
-        similarities_query = cosine_similarity(X=embedding_query,
+        similarities_query = cosine_similarity(X=embedding_query[None, :],
                                                Y=embeddings_corpus).squeeze()
 
-    if deprioritize_text[0]:
+    if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
-            similarities_exclu = cosine_similarity(X=embedding_exclu,
-                                                   Y=embeddings_corpus).squeeze()
+            similarities_deprio = cosine_similarity(X=embedding_deprioritize[None, :],
+                                                    Y=embeddings_corpus).squeeze()
     else:
-        similarities_exclu = np.zeros_like(similarities_query)
+        similarities_deprio = np.zeros_like(similarities_query)
 
     deprioritizations = {
         'None': (1, 0),
@@ -134,7 +107,7 @@ def search(embedding_models, precomputed_embeddings, all_data, model, k, query_t
     }
     # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
     alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
-    similarities = alpha_1 * similarities_query - alpha_2 * similarities_exclu
+    similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
     with timer('sorting'):
         indices = np.argsort(-similarities)[:k]

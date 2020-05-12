@@ -150,7 +150,7 @@ def embeddings_path(tmp_path_factory, fake_db_cursor):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
-    models = ['BERT', 'BIOBERT']
+    models = ['SBERT', 'SBIOBERT', 'USE', 'BSV']
 
     n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
