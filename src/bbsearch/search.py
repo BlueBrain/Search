@@ -3,12 +3,63 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition
+from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition, get_shas_from_ids
 from .utils import Timer
 
 
-def search(embedding_model, precomputed_embeddings, database, k, query_text, has_journal=None,
-           date_range=None, deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
+def filter(database,
+           has_journal=False,
+           date_range=None,
+           exclusion_text=None):
+    """Filter sentences based on specified conditions.
+
+    Parameters
+    ----------
+    database : sqlite3.Cursor
+        Cursor to the database.
+
+    has_journal : bool
+        If True, only consider papers that have a journal information.
+
+    date_range : tuple
+        Tuple of form (start_year, end_year) representing the considered time range.
+
+    exclusion_text : str
+        New line separated collection of strings that are automatically used to exclude a given sentence.
+
+    Returns
+    -------
+    restricted_sentence_ids: list
+        List of the sentences ids after the filtration related to the criteria specified by the user.
+    """
+    # Apply article conditions
+    article_conditions = []
+    if date_range is not None:
+        article_conditions.append(ArticleConditioner.get_date_range_condition(date_range))
+    if has_journal:
+        article_conditions.append(ArticleConditioner.get_has_journal_condition())
+    article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
+
+    restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', database)
+
+    # Articles ID to SHA
+    all_article_shas_str = ', '.join([f"'{sha}'"
+                                      for sha in get_shas_from_ids(restricted_article_ids, database)])
+    sentence_conditions = [f"sha IN ({all_article_shas_str})"]
+
+    # Apply sentence conditions
+    if exclusion_text is not None:
+        excluded_words = [x for x in exclusion_text.lower().split('\n')
+                          if x]  # remove empty strings
+        sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
+                                for word in excluded_words]
+    restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', database)
+
+    return restricted_sentence_ids
+
+
+def run_search(embedding_model, precomputed_embeddings, database, k, query_text, has_journal=False, date_range=None,
+               deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
     """Generate search results.
 
     Returns
@@ -48,7 +99,7 @@ def search(embedding_model, precomputed_embeddings, database, k, query_text, has
 
     Returns
     -------
-    indices : np.array
+    sentence_ids : np.array
         1D array representing the indices of the top `k` most relevant sentences.
 
     similarities : np.array
@@ -73,7 +124,8 @@ def search(embedding_model, precomputed_embeddings, database, k, query_text, has
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
     with timer('sentences_conditioning'):
-        restricted_sentence_ids = get_ids_by_condition([], 'sentences', database)
+        restricted_sentence_ids = filter(database, has_journal=has_journal,
+                                         date_range=date_range, exclusion_text=exclusion_text)
 
     # Apply date-range and has-journal filtering to arr
     idx_col = precomputed_embeddings[:, 0]
@@ -112,4 +164,4 @@ def search(embedding_model, precomputed_embeddings, database, k, query_text, has
     with timer('sorting'):
         indices = np.argsort(-similarities)[:k]
 
-    return indices, similarities[indices], timer.stats
+    return sentence_ids[indices], similarities[indices], timer.stats

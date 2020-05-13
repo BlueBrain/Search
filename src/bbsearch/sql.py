@@ -12,7 +12,7 @@ from bbsearch.utils import define_nlp, get_tag_and_sentences, update_covid19_tag
 
 
 class DatabaseCreation:
-    """Creates SQL database from a specified dataset. """
+    """Create SQL database from a specified dataset."""
 
     def __init__(self,
                  data_path,
@@ -68,23 +68,23 @@ class DatabaseCreation:
                 db.execute(
                     """CREATE TABLE IF NOT EXISTS articles
                     (
-                        article_id TEXT PRIMARY KEY, 
-                        publisher TEXT, 
-                        title TEXT, 
-                        doi TEXT, 
-                        pmc_id TEXT, 
-                        pm_id INTEGER, 
+                        article_id TEXT PRIMARY KEY,
+                        publisher TEXT,
+                        title TEXT,
+                        doi TEXT,
+                        pmc_id TEXT,
+                        pm_id INTEGER,
                         licence TEXT,
-                        abstract TEXT, 
-                        date DATETIME, 
-                        authors TEXT, 
+                        abstract TEXT,
+                        date DATETIME,
+                        authors TEXT,
                         journal TEXT,
-                        microsoft_id INTEGER, 
-                        covidence_id TEXT, 
+                        microsoft_id INTEGER,
+                        covidence_id TEXT,
                         has_pdf_parse BOOLEAN,
-                        has_pmc_xml_parse BOOLEAN, 
+                        has_pmc_xml_parse BOOLEAN,
                         has_covid19_tag BOOLEAN DEFAULT False,
-                        fulltext_directory TEXT, 
+                        fulltext_directory TEXT,
                         url TEXT
                     );
                     """)
@@ -175,54 +175,6 @@ def get_shas_from_ids(articles_ids, db):
     """
     all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
     sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [sha for (sha,) in results]
-
-    return results
-
-
-def get_ids_from_shas(shas, db):
-    """Find articles IDs given article SHAs.
-
-    Parameters
-    ----------
-    shas : list
-        A list of strings representing article SHAs.
-    db : sqlite3.Cursor
-        A SQL database for querying the IDs. Should contain
-        a table named "article_id_2_sha".
-
-    Returns
-    -------
-    results : list
-        A list of sentence IDs.
-    """
-    all_shas_str = ', '.join([f"'{sha}'" for sha in shas])
-    sql_query = f"SELECT article_id FROM article_id_2_sha WHERE sha IN ({all_shas_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [id_ for (id_,) in results]
-
-    return results
-
-
-def find_sentence_ids(article_shas, db):
-    """Find sentence IDs given article SHAs.
-
-    Parameters
-    ----------
-    article_shas : list
-        A list of strings representing article SHAs.
-    db : sqlite3.Cursor
-        A SQL database for querying the sentence IDs. Should contain
-        a table named "sentences".
-
-    Returns
-    -------
-    results : list
-        A list of sentence IDs.
-    """
-    all_shas_str = ', '.join([f"'{sha}'" for sha in article_shas])
-    sql_query = f"SELECT sentence_id FROM sentences WHERE sha IN ({all_shas_str})"
     results = db.execute(sql_query).fetchall()
     results = [sha for (sha,) in results]
 
