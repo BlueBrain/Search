@@ -1,11 +1,8 @@
 """EntryPoint for the creation of the database."""
 import argparse
-import logging
 from pathlib import Path
 
 from bbsearch.database import DatabaseCreation
-
-logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
@@ -33,6 +30,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
     main()

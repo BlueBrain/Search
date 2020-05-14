@@ -8,9 +8,14 @@ import pytest
 import spacy
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
-N_SENTENCES_PER_SECTION = 3
-N_SECTIONS_PER_ARTICLE = 2
-EMBEDDING_SIZE = 2
+
+
+@pytest.fixture(scope='session')
+def test_parameters():
+    """Parameters needed for the tests"""
+    return {'n_sentences_per_section': 3,
+            'n_sections_per_article': 2,
+            'embedding_size': 2}
 
 
 @pytest.fixture(scope='session')
@@ -32,7 +37,7 @@ def fake_db_cnxn(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
+def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
     """Database object (sqlite)."""
     cursor = fake_db_cnxn.cursor()
     # create
@@ -123,9 +128,9 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
     temp_p = []
     paragraph_id = 0
     for sha in article_id_2_content[article_id_2_content.notna()].unique():
-        for sec_ix in range(N_SECTIONS_PER_ARTICLE):
+        for sec_ix in range(test_parameters['n_sections_per_article']):
             paragraph_text = ''
-            for sen_ix in range(N_SENTENCES_PER_SECTION):
+            for sen_ix in range(test_parameters['n_sentences_per_section']):
                 s = pd.Series({'text': 'I am a sentence {} in section {} in article {}.'.format(sen_ix, sec_ix, sha),
                                'section_name': 'section_{}'.format(sec_ix),
                                'sha': sha,
@@ -172,7 +177,7 @@ def metadata_path():
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, fake_db_cursor):
+def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
@@ -184,7 +189,8 @@ def embeddings_path(tmp_path_factory, fake_db_cursor):
     for model in models:
         model_path = embeddings_path / model / '{}.npy'.format(model)
         model_path.parent.mkdir(parents=True)
-        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1), np.random.random((n_sentences, EMBEDDING_SIZE))],
+        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
+                            np.random.random((n_sentences, test_parameters['embedding_size']))],
                            axis=1)
 
         np.save(str(model_path), a)

@@ -4,6 +4,7 @@ import string
 
 from nltk.corpus import stopwords
 from nltk import word_tokenize
+import numpy as np
 import sent2vec
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
@@ -234,3 +235,43 @@ class USE(EmbeddingModel):
         """
         embedding = self.use_model([preprocessed_sentence]).numpy()[0]
         return embedding
+
+
+def compute_database_embeddings(database, model):
+    """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
+
+    Parameters
+    ----------
+    database: sqlite3.Cursor
+        Cursor to the database with 'sentences' table.
+    model: EmbeddingModel
+        Instance of the EmbeddingModel of choice.
+
+    Returns
+    -------
+    final_embeddings: np.array
+        Huge numpy array with all sentences embeddings for the given models. Format: (sentence_id, embeddings).
+    """
+    query = """SELECT sentence_id, text FROM sentences
+            WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN
+            (SELECT article_id FROM articles WHERE has_covid19_tag is True))"""
+    all_embeddings = list()
+    all_ids = list()
+    query_execution = database.execute(query)
+    query_end = False
+    while not query_end:
+        results = query_execution.fetchone()
+        if results is not None:
+            sentence_id, sentence_text = results
+            preprocessed_sentence = model.preprocess(sentence_text)
+            embedding = model.embed(preprocessed_sentence)
+            all_ids.append(sentence_id)
+            all_embeddings.append(embedding)
+        else:
+            query_end = True
+
+    all_embeddings = np.array(all_embeddings)
+    all_ids = np.array(all_ids).reshape((-1, 1))
+    final_embeddings = np.concatenate((all_ids, all_embeddings), axis=1)
+
+    return final_embeddings
