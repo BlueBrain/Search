@@ -1,3 +1,4 @@
+"""Module for the widget."""
 from collections import OrderedDict
 import datetime
 import logging
@@ -83,7 +84,7 @@ class Widget:
         """Retrieve metadata and complete the report with HTML string given an sentence_id.
 
         Parameters
-        ---------
+        ----------
         sentence_id: int
             Sentence ID of the article needed to retrieve
         print_whole_paragraph: bool
@@ -142,6 +143,7 @@ class Widget:
         return article_metadata, formatted_output
 
     def initialize_widgets(self):
+        """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['USE', 'SBERT', 'BSV', 'SBIOBERT'],
@@ -216,6 +218,7 @@ class Widget:
         self.my_widgets['report_button'].on_click(self.report_on_click)
 
     def hide_from_user(self):
+        """Hide from the user not used functionalities in the widgets."""
         self.my_widgets['exclusion_text'].layout.display = 'none'
         # Remove some models (USE and SBERT)
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
@@ -231,6 +234,7 @@ class Widget:
             description='Deprioritization strength')
 
     def investigate_on_click(self, change_dict):
+        """Investigate button."""
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             sentence_embedder_name = self.my_widgets['sent_embedder'].value
@@ -267,6 +271,7 @@ class Widget:
                 self.report += article_metadata + formatted_output + '<br>'
 
     def report_on_click(self, change_dict):
+        """Create the report of the search."""
         print("Saving results to a pdf file.")
 
         color_hyperparameters = '#222222'
@@ -290,6 +295,7 @@ class Widget:
                            f"report_{datetime.datetime.now()}.pdf")
 
     def display(self):
+        """Display the widget."""
         ordered_widgets = list(self.my_widgets.values())
         main_widget = widgets.VBox(ordered_widgets)
         IPython.display.display(main_widget)
