@@ -16,7 +16,7 @@ class DatabaseCreation:
                  data_path,
                  version,
                  saving_directory=None):
-        """Creates SQL database object.
+        """Create SQL database object.
 
         Parameters
         ----------
@@ -42,8 +42,7 @@ class DatabaseCreation:
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
 
     def construct(self):
-        """Constructs the database."""
-
+        """Construct the database."""
         self._rename_columns()
         self._schema_creation()
         self._article_id_to_sha_table()
@@ -52,7 +51,7 @@ class DatabaseCreation:
         self._sentences_table()
 
     def _schema_creation(self):
-        """Creation of the schemas of the different tables in the database. """
+        """Create of the schemas of the different tables in the database."""
         if self.filename.exists():
             raise ValueError(f'The version {self.version} of the database already exists')
         else:
@@ -109,7 +108,7 @@ class DatabaseCreation:
                     """)
 
     def _rename_columns(self):
-        """Renames the columns of the dataframe to follow the SQL database schema. """
+        """Rename the columns of the dataframe to follow the SQL database schema."""
         df = self.metadata
         df.rename(columns={
             'cord_uid': 'article_id',
@@ -132,7 +131,7 @@ class DatabaseCreation:
             'url': 'url'}, inplace=True)
 
     def _articles_table(self):
-        """Fills the Article Table thanks to 'metadata.csv'.
+        """Fill the Article Table thanks to 'metadata.csv'.
 
         Notes
         -----
@@ -146,7 +145,7 @@ class DatabaseCreation:
             df.to_sql(name='articles', con=db, index=False, if_exists='append')
 
     def _article_id_to_sha_table(self):
-        """Fills the article_id_to_sha table thanks to 'metadata.csv'. '"""
+        """Fill the article_id_to_sha table thanks to 'metadata.csv'."""
         df = self.metadata[['article_id', 'sha']]
         df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
         with sqlite3.connect(str(self.filename)) as db:
@@ -165,7 +164,7 @@ class DatabaseCreation:
             db.commit()
 
     def _sentences_table(self):
-        """Fills the sentences table thanks to all the json files. """
+        """Fill the sentences table thanks to all the json files."""
         nlp = define_nlp()
         with sqlite3.connect(str(self.filename)) as db:
 
@@ -259,10 +258,10 @@ def segment(nlp, paragraph):
 
 
 def remove_sentences_duplicates(sentences):
-    """Returns a filtered list of sentences.
+    """Return a filtered list of sentences.
 
     Notes
-    ------
+    -----
     Duplicate and boilerplate text strings are removed.
     This is done to avoid duplicates coming from metadata.csv and raw json files.
 
@@ -295,7 +294,7 @@ def remove_sentences_duplicates(sentences):
 
 
 def get_tags(sentences):
-    """Computes the tag for an article id through its sentences.
+    """Compute the tag for an article id through its sentences.
 
     Notes
     -----
@@ -421,7 +420,6 @@ def update_covid19_tag(db, article_id, tag):
     tag: boolean
         Value of the tag. True if covid19 is mentionned, otherwise False.
     """
-
     db.execute("UPDATE articles SET has_covid19_tag = ? WHERE article_id = ?", [tag, article_id])
 
 

@@ -1,8 +1,4 @@
-"""
-
-Generic Utils waiting for migration in proper submodule.
-
-"""
+"""Generic Utils."""
 import time
 
 
@@ -117,5 +113,3 @@ class Timer:
     def stats(self):
         """Return all timing statistics."""
         return {'overall': time.time() - self.inst_time, **self.logs}
-
-

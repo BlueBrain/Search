@@ -3,19 +3,17 @@ SQL Related functions.
 
 whatever
 """
-from pathlib import Path
-import sqlite3
 
 
 def find_paragraph(sentence_id, db):
-    """Find the paragraph corresponding to the given sentence
+    """Find the paragraph corresponding to the given sentence.
 
     Parameters
     ----------
     sentence_id : int
         The identifier of the given sentence
-    sentence: str
-        The sentence to highlight
+    db: sqlite3.Cursor
+        Cursor to the database
 
     Returns
     -------

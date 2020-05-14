@@ -1,8 +1,9 @@
+"""EntryPoint for the creation of the database."""
 import argparse
 import logging
 from pathlib import Path
 
-from bbsearch.sql import DatabaseCreation
+from bbsearch.database import DatabaseCreation
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Create Database."""
     db = DatabaseCreation(data_path=Path(args.data_path),
                           version=args.version,
                           saving_directory=Path(args.saving_directory))
