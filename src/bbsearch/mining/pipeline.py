@@ -67,8 +67,8 @@ def run_pipeline(text, model_entities, models_relations, return_prob=False):
                         row_relation = {'entity': s_ent.entity,
                                         'entity_type': s_ent.entity_type,
                                         'relation_model': re_model.__class__.__name__,
-                                        'start_char': s_ent.start_char,
-                                        'end_char': s_ent.end_char,
+                                        'start_char': sent.start_char,
+                                        'end_char': sent.end_char,
                                         'property_type': 'relation',
                                         'property_value': o_ent.entity,
                                         'property_value_type': o_ent.entity_type
