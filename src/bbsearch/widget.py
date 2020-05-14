@@ -3,32 +3,143 @@ import datetime
 import logging
 import pdfkit
 import textwrap
-import time
 
 import ipywidgets as widgets
 import IPython
 from IPython.display import HTML
-import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import ArticleConditioner, SentenceConditioner
-from .sql import get_ids_by_condition, get_shas_from_ids
+from bbsearch.search import run_search
+from bbsearch.sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 
 
 class Widget:
+    """Widget for search engine.
 
-    def __init__(self, all_data, embedding_models, precomputed_embeddings):
-        self.all_data = all_data
+    Parameters
+    ----------
+    embedding_models: dict
+        Dictionary containing instances of the different embedding models.
+        The keys have to be the name of the different models and
+        the values have to be instance of 'EmbeddingModel' class.
+
+    precomputed_embeddings: dict
+        Dictionary containing the precomputed embeddings.
+        The keys have to be the name of the differents models and
+        the values have to be numpy arrays containing the embeddings.
+
+    database: sqlite3.Cursor
+        Cursor to the database used for the search engine.
+    """
+
+    def __init__(self,
+                 embedding_models,
+                 precomputed_embeddings,
+                 database):
+
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
+        self.database = database
 
-        self.report = None
+        self.report = ''
+
         self.my_widgets = OrderedDict()
-
         self.initialize_widgets()
-        self.hide_from_user()
+
+    @staticmethod
+    def highlight_in_paragraph(paragraph, sentence):
+        """Highlight a given sentence in the paragraph.
+
+        Parameters
+        ----------
+        paragraph : str
+            The paragraph in which to highlight the sentence.
+        sentence: str
+            The sentence to highlight.
+
+        Returns
+        -------
+        formatted_paragraph : str
+            The paragraph containing `sentence` with the sentence highlighted
+            in color
+        """
+        color_text = '#222222'
+        color_highlight = '#000000'
+
+        start = paragraph.index(sentence)
+        end = start + len(sentence)
+        highlighted_paragraph = f"""
+            <p style="font-size:13px; color:{color_text}">
+            {paragraph[:start]}
+            <b style="color:{color_highlight}"> {paragraph[start:end]} </b>
+            {paragraph[end:]}
+            </p>
+            """
+
+        return highlighted_paragraph
+
+    def print_single_result(self, sentence_id, print_whole_paragraph):
+        """Retrieve metadata and complete the report with HTML string given an sentence_id.
+
+        Parameters
+        ---------
+        sentence_id: int
+            Sentence ID of the article needed to retrieve
+        print_whole_paragraph: bool
+            If true, the whole paragraph will be displayed in the results of the widget.
+
+        Returns
+        -------
+        article_metadata: str
+            Formatted string containing the metadata of the article.
+        formatted_output: str
+            Formatted output of the sentence.
+        """
+        article_sha, section_name, text = \
+            self.database.execute(
+                'SELECT sha, section_name, text FROM sentences WHERE sentence_id = ?',
+                [sentence_id]).fetchall()[0]
+        (article_id,) = self.database.execute(
+            'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
+            [article_sha]).fetchall()[0]
+        article_auth, article_title, date, ref = self.database.execute(
+            'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
+            [article_id]).fetchall()[0]
+        article_auth = article_auth.split(';')[0] + ' et al.'
+        ref = ref if ref else ''
+        section_name = section_name if section_name else ''
+
+        width = 80
+        if print_whole_paragraph:
+            try:
+                paragraph = find_paragraph(sentence_id, self.database)
+                formatted_output = self.highlight_in_paragraph(
+                    paragraph, text)
+            except Exception as err:
+                formatted_output = f"""
+                                There was a problem retrieving the paragraph.
+
+                                The original sentence is: {text}
+
+                                The error was: {str(err)}
+                                """
+        else:
+            formatted_output = textwrap.fill(text, width=width)
+
+        color_title = '#1A0DAB'
+        color_metadata = '#006621'
+        article_metadata = f"""
+                        <a href="{ref}" style="color:{color_title}; font-size:17px">
+                            {article_title}
+                        </a>
+                        <br>
+                        <p style="color:{color_metadata}; font-size:13px">
+                            {article_auth} &#183; {section_name.lower().title()}
+                        </p>
+                        """
+
+        return article_metadata, formatted_output
 
     def initialize_widgets(self):
         # Select model to compute Sentence Embeddings
@@ -36,54 +147,31 @@ class Widget:
             options=['USE', 'SBERT', 'BSV', 'SBIOBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT'],
-        )
+                      'Sentence BioBERT'], )
 
         # Select n. of top results to return
         self.my_widgets['top_results'] = widgets.widgets.IntSlider(
             value=10,
             min=0,
             max=100,
-            description='Top N results'
-        )
-
-        # Choose whether to merge synonyms or not
-        self.my_widgets['merge_synonyms'] = widgets.Checkbox(
-            value=False,
-            description='Merge synonyms'
-        )
+            description='Top N results')
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
         # sentence
         self.my_widgets['print_paragraph'] = widgets.Checkbox(
             value=True,
-            description='Show whole paragraph'
-        )
+            description='Show whole paragraph')
 
         # Enter Query
         self.my_widgets['query_text'] = widgets.Textarea(
             value='Glucose is a risk factor for COVID-19',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Query'
-        )
+            description='Query')
 
-        # Filtering widgets
-        # self.my_widgets['has_title'] = widgets.Checkbox(
-        #     description="Require Title",
-        #     value=True)
-        # self.my_widgets['has_authors'] = widgets.Checkbox(
-        #     description="Require Authors",
-        #     value=True)
-        # self.my_widgets['has_abstract'] = widgets.Checkbox(
-        #     description="Require Abstract",
-        #     value=False)
         self.my_widgets['has_journal'] = widgets.Checkbox(
             description="Require Journal",
             value=False)
 
-        # self.my_widgets['has_doi'] = widgets.Checkbox(
-        #     description="Require DOI",
-        #     value=False)
         self.my_widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
@@ -96,8 +184,7 @@ class Widget:
         self.my_widgets['deprioritize_text'] = widgets.Textarea(
             value='',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Deprioritize'
-        )
+            description='Deprioritize')
 
         # Select Deprioritization Strength
         self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
@@ -105,16 +192,14 @@ class Widget:
             disabled=False,
             button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength',
-        )
+            description='Deprioritization strength', )
 
         # Enter Substrings Exclusions
         self.my_widgets['exclusion_text'] = widgets.Textarea(
             layout=widgets.Layout(width='90%', height='80px'),
             value='',
             style={'description_width': 'initial'},
-            description='Substring Exclusion (newline separated): '
-        )
+            description='Substring Exclusion (newline separated): ')
 
         # Click to run Information Retrieval!
         self.my_widgets['investigate_button'] = widgets.Button(description='Investigate!')
@@ -132,203 +217,54 @@ class Widget:
 
     def hide_from_user(self):
         self.my_widgets['exclusion_text'].layout.display = 'none'
-        # Remove the merge_synonyms option
-        self.my_widgets['merge_synonyms'].layout.display = 'none'
         # Remove some models (USE and SBERT)
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['BSV', 'SBIOBERT'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'],
-        )
+            tooltips=['BioSentVec', 'Sentence BioBERT'], )
         # Remove some deprioritization strength
         self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
             options=['None', 'Mild', 'Stronger'],
             disabled=False,
             button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength'
-        )
+            description='Deprioritization strength')
 
     def investigate_on_click(self, change_dict):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
-            self.report = ''
-            print()
-            t0 = time.time()
-
             sentence_embedder_name = self.my_widgets['sent_embedder'].value
-            merge_synonyms = self.my_widgets['merge_synonyms'].value \
-                if 'merge_synonyms' in self.my_widgets.keys() else False
-            top_n_results = self.my_widgets['top_results'].value
+            k = self.my_widgets['top_results'].value
             print_whole_paragraph = self.my_widgets['print_paragraph'].value
             query_text = self.my_widgets['query_text'].value
             deprioritize_text = self.my_widgets['deprioritize_text'].value
             deprioritize_strength = self.my_widgets['deprioritize_strength'].value
             exclusion_text = self.my_widgets['exclusion_text'].value \
                 if 'exclusion_text' in self.my_widgets.keys() else ''
-
-            if merge_synonyms:
-                query_text = self.embedding_models.sent_preprocessing(
-                    [query_text], self.embedding_models.synonyms_index)
-                deprioritize_text = self.embedding_models.sent_preprocessing(
-                    [deprioritize_text], self.embedding_models.synonyms_index)
-            else:
-                query_text = [query_text]
-                deprioritize_text = [deprioritize_text]
-
-            print('Embedding query...    ', end=' ')
-            embedding_query = self.embedding_models.embed_sentences(
-                query_text,
-                sentence_embedder_name)
-            print(f'{time.time() - t0:.2f} s.')
-
-            if deprioritize_text[0]:
-                print('Embedding deprioritization...', end=' ')
-                embedding_exclu = self.embedding_models.embed_sentences(
-                    deprioritize_text,
-                    sentence_embedder_name
-                )
-                print(f'{time.time() - t0:.2f} s.')
-
-            # Process date range and has-journal filtering
             has_journal = self.my_widgets['has_journal'].value
             date_range = self.my_widgets['date_range'].value
 
-            # Apply article conditions
-            article_conditions = [
-                ArticleConditioner.get_date_range_condition(date_range)]
-            if has_journal:
-                article_conditions.append(ArticleConditioner.get_has_journal_condition())
-            article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
+            sentence_ids, _, _ = run_search(self.embedding_models[sentence_embedder_name],
+                                            self.precomputed_embeddings[sentence_embedder_name],
+                                            database=self.database,
+                                            k=k,
+                                            query_text=query_text,
+                                            has_journal=has_journal,
+                                            date_range=date_range,
+                                            deprioritize_strength=deprioritize_strength,
+                                            deprioritize_text=deprioritize_text,
+                                            exclusion_text=exclusion_text)
 
-            restricted_article_ids = get_ids_by_condition(
-                article_conditions,
-                'articles',
-                self.all_data.db)
+            print(f'\nInvestigating: {query_text}\n')
 
-            # Articles ID to SHA
-            all_article_shas_str = ', '.join([f"'{sha}'"
-                                              for sha in get_shas_from_ids(restricted_article_ids, self.all_data.db)])
-            sentence_conditions = [f"sha IN ({all_article_shas_str})"]
-            # Apply sentence conditions
-            excluded_words = [x for x in exclusion_text.lower().split('\n')
-                              if x]  # remove empty strings
-            sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
-                                    for word in excluded_words]
-            restricted_sentence_ids = get_ids_by_condition(
-                sentence_conditions,
-                'sentences',
-                self.all_data.db)
-
-            #             n_articles = db.execute("SELECT COUNT(*) FROM articles").fetchone()
-            #             n_sentences = db.execute("SELECT COUNT(*) FROM sentences").fetchone()
-            #             n_articles = n_articles[0]
-            #             n_sentences = n_sentences[0]
-            #             frac_articles = len(restricted_article_ids) / n_articles
-            #             frac_sentences = len(restricted_sentence_ids) / n_sentences
-            #             print(f"Selected {len(restricted_article_ids)} of {n_articles} "
-            #                   f"articles ({frac_articles * 100:.1f}%).")
-            #             print(f"Selected {len(restricted_sentence_ids)} of {n_sentences} "
-            #                   f"sentences ({frac_sentences * 100:.1f})%.")
-
-            # Load sentence embedding from the npz file
-            if merge_synonyms:
-                arr = self.precomputed_embeddings.embeddings_syns[sentence_embedder_name]
-            else:
-                arr = self.precomputed_embeddings.embeddings[sentence_embedder_name]
-
-            # Apply date-range and has-journal filtering to arr
-            idx_col = arr[:, 0]
-            mask = np.isin(idx_col, restricted_sentence_ids)
-            arr = arr[mask]
-            if len(arr) == 0:
-                print("No documents left after filtering!")
-                return
-
-            # Compute similarities
-            print('Computing similarities...', end=' ')
-            sentence_ids, embeddings_corpus = arr[:, 0], arr[:, 1:]
-            similarities_query = cosine_similarity(X=embedding_query,
-                                                   Y=embeddings_corpus).squeeze()
-
-            if deprioritize_text[0]:
-                similarities_exclu = cosine_similarity(X=embedding_exclu,
-                                                       Y=embeddings_corpus).squeeze()
-            else:
-                similarities_exclu = np.zeros_like(similarities_query)
-
-            deprioritizations = {
-                'None': (1, 0),
-                'Weak': (0.9, 0.1),
-                'Mild': (0.8, 0.3),
-                'Strong': (0.5, 0.5),
-                'Stronger': (0.5, 0.7),
-            }
-            # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
-            alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
-            similarities = alpha_1 * similarities_query - alpha_2 * similarities_exclu
-
-            print(f'{time.time() - t0:.2f} s.')
-
-            print('Ranking documents...     ', end=' ')
-            indices = np.argsort(-similarities)
-            indices = indices[:top_n_results]
-
-            print(f'{time.time() - t0:.2f} s.')
-
-            print(f'\nInvestigating: {query_text[0]}\n')
-
-            for i, (sentence_id_, sim_) in enumerate(zip(sentence_ids[indices],
-                                                         similarities[indices])):
-                article_sha, section_name, text = \
-                    self.all_data.db.execute(
-                        'SELECT sha, section_name, text FROM sentences WHERE sentence_id = ?',
-                        [sentence_id_]).fetchall()[0]
-                (article_id, ) = self.all_data.db.execute(
-                    'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
-                    [article_sha]).fetchall()[0]
-                article_auth, article_title, date, ref = self.all_data.db.execute(
-                    'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
-                    [article_id]).fetchall()[0]
-                article_auth = article_auth.split(';')[0] + ' et al.'
-                ref = ref if ref else ''
-                section_name = section_name if section_name else ''
-
-                width = 80
-                if print_whole_paragraph:
-                    logger.debug(f"UID={sentence_id_}")
-                    try:
-                        paragraph = self.all_data.find_paragraph(sentence_id_, text)
-                        formatted_output = self.all_data.highlight_in_paragraph(
-                            paragraph, text)
-                    except Exception as err:
-                        formatted_output = f"""
-                        There was a problem retrieving the paragraph.
-
-                        The original sentence is: {text}
-
-                        The error was: {str(err)}
-                        """
-                else:
-                    formatted_output = textwrap.fill(text, width=width)
-
-                color_title = '#1A0DAB'
-                color_metadata = '#006621'
-                article_metadata = f"""
-                <a href="{ref}" style="color:{color_title}; font-size:17px">
-                    {article_title}
-                </a>
-                <br>
-                <p style="color:{color_metadata}; font-size:13px">
-                    {article_auth} &#183; {section_name.lower().title()}
-                </p>
-                """
+            for sentence_id in sentence_ids:
+                article_metadata, formatted_output = self.print_single_result(sentence_id, print_whole_paragraph)
 
                 IPython.display.display(HTML(article_metadata))
                 IPython.display.display(HTML(formatted_output))
-                print()
 
-                self.report += article_metadata + formatted_output + "<br>"
+                print()
+                self.report += article_metadata + formatted_output + '<br>'
 
     def report_on_click(self, change_dict):
         print("Saving results to a pdf file.")
