@@ -53,15 +53,12 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     ----------
     doc : spacy.tokens.Doc
         The entire document (input text). Note that spacy uses it for absolute referencing.
-
     sent : spacy.tokens.Span
         One sentence from the `doc` where we look for relations.
-
-    ent_1 : spacy.tokens.Span
-        The first entity in the sentence. One can get its type by using the `label_` attribute.
-
-    ent_2 : spacy.tokens.Span
-        The second entity in the sentence. One can get its type by using the `label_` attribute.
+    ent_1 : pd.Series
+        A single row of the dataframe of extracted entities, holding info on first entity in the sentence.
+    ent_2 : pd.Series
+        A single row of the dataframe of extracted entities, holding info on second entity in the sentence.
 
     etype_symbols: dict or defaultdict
         Keys represent different entity types ("GGP", "CHEBI") and the values are tuples of size 2.
@@ -78,39 +75,35 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     The implementation is non-trivial because an entity can span multiple words.
     """
     # checks
-    if ent_1 == ent_2:
+    if (ent_1.start_char == ent_2.start_char) and (ent_1.end_char == ent_2.end_char):
         raise ValueError('One needs to provide two separate entities.')
 
-    if not (sent.start <= ent_1.start <= ent_1.end <= sent.end and sent.start <= ent_2.start <= ent_2.end <= sent.end):
+    if not (sent.start_char <= ent_1.start_char <= ent_1.end_char <= sent.end_char
+            and
+            sent.start_char <= ent_2.start_char <= ent_2.end_char <= sent.end_char):
         raise ValueError('The provided entities are outside of the given sentence.')
 
-    etype_1 = ent_1.label_
-    etype_2 = ent_2.label_
+    etype_1 = ent_1.entity_type
+    etype_2 = ent_2.entity_type
 
     if not isinstance(etype_symbols, defaultdict) and not (etype_1 in etype_symbols and etype_2 in etype_symbols):
         raise ValueError('Please specify the special symbols for both of the entity types.')
 
-    tokens = []
-    i = sent.start
-    while i < sent.end:
-        new_token = ' '  # hack to keep the punctuation nice
+    # Add symbols at the proper place, for each of the entities
+    text = doc.text
+    e1, e2 = sorted([ent_1, ent_2], key=lambda e: e.start_char)
 
-        if ent_1.start == i:
-            start, end = ent_1.start, ent_1.end
-            new_token += etype_symbols[etype_1][0] + doc[start:end].text + etype_symbols[etype_1][1]
+    result = text[sent.start_char:e1.start_char] + \
+        etype_symbols[e1.entity_type][0] + \
+        e1.entity + \
+        etype_symbols[e1.entity_type][1] + \
+        text[e1.end_char:e2.start_char] + \
+        etype_symbols[e2.entity_type][0] + \
+        e2.entity + \
+        etype_symbols[e2.entity_type][1] + \
+        text[e2.end_char:sent.end_char]
 
-        elif ent_2.start == i:
-            start, end = ent_2.start, ent_2.end
-            new_token += etype_symbols[etype_2][0] + doc[start:end].text + etype_symbols[etype_2][1]
-
-        else:
-            start, end = i, i + 1
-            new_token = doc[i].text if doc[i].is_punct else new_token + doc[i].text
-
-        tokens.append(new_token)
-        i += end - start
-
-    return ''.join(tokens).strip()
+    return result
 
 
 class ChemProt(REModel):
