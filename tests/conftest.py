@@ -59,10 +59,17 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
     article_id_2_sha_schema = {'article_id': 'TEXT',
                                'sha': 'TEXT'}
 
+    paragraphs_schema = {'paragraph_id': 'INTEGER PRIMARY KEY',
+                         'sha': 'TEXT',
+                         'section_name': 'TEXT',
+                         'text': 'TEXT',
+                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
+
     sentences_schema = {'sentence_id': 'INTEGER PRIMARY KEY',
                         'sha': 'TEXT',
                         'section_name': 'TEXT',
                         'text': 'TEXT',
+                        'paragraph_id': 'INTEGER',
                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
 
     stmt_create_articles = "CREATE TABLE articles ({})".format(
@@ -71,11 +78,15 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
     stmt_create_id_2_sha = "CREATE TABLE article_id_2_sha ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in article_id_2_sha_schema.items()]))
 
+    stmt_create_paragraphs = "CREATE TABLE paragraphs ({})".format(
+        ', '.join(['{} {}'.format(k, v) for k, v in paragraphs_schema.items()]))
+
     stmt_create_sentences = "CREATE TABLE sentences ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
 
     cursor.execute(stmt_create_articles)
     cursor.execute(stmt_create_id_2_sha)
+    cursor.execute(stmt_create_paragraphs)
     cursor.execute(stmt_create_sentences)
 
     # Populate
@@ -108,19 +119,34 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path):
     articles_content = metadata_df.drop(columns=['sha'])
     articles_content.to_sql(name='articles', con=fake_db_cnxn, index=True, if_exists='append')
 
-    temp = []
+    temp_s = []
+    temp_p = []
+    paragraph_id = 0
     for sha in article_id_2_content[article_id_2_content.notna()].unique():
         for sec_ix in range(N_SECTIONS_PER_ARTICLE):
+            paragraph_text = ''
             for sen_ix in range(N_SENTENCES_PER_SECTION):
-                s = pd.Series({'text': 'I am a sentence {} in section {} in article {}'.format(sen_ix, sec_ix, sha),
+                s = pd.Series({'text': 'I am a sentence {} in section {} in article {}.'.format(sen_ix, sec_ix, sha),
                                'section_name': 'section_{}'.format(sec_ix),
-                               'sha': sha
+                               'sha': sha,
+                               'paragraph_id': paragraph_id
                                })
-                temp.append(s)
+                temp_s.append(s)
+                paragraph_text += s['text']
 
-    sentences_content = pd.DataFrame(temp)
+            p = pd.Series({'text': paragraph_text,
+                           'section_name': 'section_{}'.format(sec_ix),
+                           'sha': sha})
+            temp_p.append(p)
+            paragraph_id += 1
+
+    sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
     sentences_content.to_sql(name='sentences', con=fake_db_cnxn, index=True, if_exists='append')
+
+    paragraphs_content = pd.DataFrame(temp_p)
+    paragraphs_content.index.name = 'paragraph_id'
+    paragraphs_content.to_sql(name='paragraphs', con=fake_db_cnxn, index=True, if_exists='append')
 
     yield cursor
 

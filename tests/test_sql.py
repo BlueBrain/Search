@@ -6,7 +6,7 @@ import sqlite3
 
 import pandas as pd
 
-from bbsearch.sql import DatabaseCreation
+from bbsearch.sql import DatabaseCreation, find_paragraph
 
 
 @pytest.fixture(scope='module')
@@ -34,6 +34,7 @@ class TestDatabaseCreation:
         tables_names = [table_name for (table_name, ) in tables_names]
         assert 'article_id_2_sha' in tables_names
         assert 'sentences' in tables_names
+        assert 'paragraphs' in tables_names
         assert 'articles' in tables_names
 
     def test_tables_content(self, real_db_cnxn):
@@ -57,9 +58,12 @@ class TestDatabaseCreation:
         article_id_to_sha_expected = {"article_id", "sha"}
         article_id_to_sha_columns = set(pd.read_sql("SELECT * FROM article_id_2_sha LIMIT 1", real_db_cnxn).columns)
         assert article_id_to_sha_expected == article_id_to_sha_columns
-        sentences_expected = {"sentence_id", "sha", "section_name", "text"}
+        sentences_expected = {"sentence_id", "sha", "section_name", "text", "paragraph_id"}
         sentences_columns = set(pd.read_sql("SELECT * FROM sentences LIMIT 1", real_db_cnxn).columns)
         assert sentences_expected == sentences_columns
+        paragraphs_expected = {"paragraph_id", "sha", "section_name", "text"}
+        paragraphs_columns = set(pd.read_sql("SELECT * FROM paragraphs LIMIT 1", real_db_cnxn).columns)
+        assert paragraphs_expected == paragraphs_columns
 
     def test_errors(self, tmpdir, jsons_path):
         fake_dir = Path(str(tmpdir)) / 'fake'
@@ -83,8 +87,14 @@ class TestDatabaseCreation:
     def test_real_equals_fake_db(self, real_db_cnxn, fake_db_cursor):
         """Tests that the schema of the fake database is always the same as the real one. """
         real_db_cursor = real_db_cnxn.cursor()
-        all_tables = ['articles', 'article_id_2_sha', 'sentences']
-        for table_name in all_tables:
+        real_tables_names = real_db_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+        real_tables_names = {table_name for (table_name, ) in real_tables_names if table_name != 'sqlite_sequence'}
+        fake_tables_names = fake_db_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+        fake_tables_names = {table_name for (table_name, ) in fake_tables_names}
+        assert real_tables_names
+        assert real_tables_names == fake_tables_names
+
+        for table_name in real_tables_names:
             fake_db_schema = fake_db_cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
             real_db_schema = real_db_cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
             assert real_db_schema
@@ -92,3 +102,14 @@ class TestDatabaseCreation:
             fake_db_set = set(map(lambda x: x[1:3], fake_db_schema))
             real_db_set = set(map(lambda x: x[1:3], real_db_schema))
             assert fake_db_set == real_db_set
+
+
+class TestSQLqueries:
+
+    def test_find_paragraph(self, fake_db_cursor):
+        """Test that the find paragraph method is working."""
+        sentence_id = 7
+        sentence_text = fake_db_cursor.execute('SELECT text FROM sentences WHERE sentence_id = ?',
+                                               [sentence_id]).fetchone()[0]
+        paragraph_text = find_paragraph(sentence_id, fake_db_cursor)
+        assert sentence_text in paragraph_text

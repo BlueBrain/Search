@@ -186,14 +186,14 @@ def define_nlp():
     return nlp
 
 
-def segment(nlp, sentences):
+def segment(nlp, paragraph):
     """Segment an paragraph/article into sentences.
 
     Parameters
     ----------
     nlp: spacy.language.Language
         Spacy pipeline applying sentence segmentantion.
-    sentences: str
+    paragraph: str
         Paragraph/Article in raw text to segment into sentences.
 
     Returns
@@ -201,7 +201,7 @@ def segment(nlp, sentences):
     all_sentences: list
         List of all the sentences extracted from the paragraph.
     """
-    all_sentences = (sent.string.strip() for sent in nlp(sentences).sents)
+    all_sentences = (sent.string.strip() for sent in nlp(paragraph).sents)
     return all_sentences
 
 
@@ -281,15 +281,13 @@ def get_tags(sentences):
     return tag
 
 
-def get_tag_and_sentences(db, nlp, data_directory, article_id):
-    """Extract all the sentences and the tag has_covid19 from an article.
+def get_tag_and_paragraph(db, data_directory, article_id):
+    """Extract all the paragraph and the tag has_covid19 from an article.
 
     Parameters
     ----------
     db:
         Database
-    nlp: spacy.language.Language
-        Sentence Boundary Detection tool from Spacy to seperate sentences.
     data_directory: Path
         Directory where all the json files are located
     article_id: str
@@ -299,10 +297,10 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
     -------
     tag: boolean
         Tag value of has_covid19. This is checking if covid19 is mentionned in the paper.
-    sentences: list
-        List of the extracted sentences
+    paragraphs: list
+        List of the extracted paragraphs. (paragraph_id, paragraph)
     """
-    sentences = []
+    paragraphs = []
     tag = False
 
     article_id, article_title, article_abstract, article_directory = db.execute(
@@ -312,9 +310,9 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
     all_shas = db.execute("SELECT sha FROM article_id_2_sha WHERE article_id = ?", [article_id]).fetchall()
     title_sha = all_shas[0][0] if all_shas else None
     if article_title:
-        sentences.extend([(title_sha, 'Title', sent) for sent in segment(nlp, article_title)])
+        paragraphs.append((title_sha, 'Title', article_title))
     if article_abstract:
-        sentences.extend([(title_sha, 'Abstract', sent) for sent in segment(nlp, article_abstract)])
+        paragraphs.append((title_sha, 'Abstract', article_abstract))
 
     for (sha,) in all_shas:
         if sha:
@@ -324,14 +322,38 @@ def get_tag_and_sentences(db, nlp, data_directory, article_id):
             with open(str(found_json_files[0])) as json_file:
                 file = json.load(json_file)
                 for sec in file['body_text']:
-                    sentences.extend([(sha, sec['section'].title(), sent) for sent in segment(nlp, sec['text'])])
+                    paragraphs.append((sha, sec['section'].title(), sec['text']))
                 for _, v in file['ref_entries'].items():
-                    sentences.extend([(sha, 'Caption', sent) for sent in segment(nlp, v['text'])])
+                    paragraphs.append((sha, 'Caption', v['text']))
 
-    sentences = remove_sentences_duplicates(sentences)
-    tag = tag or get_tags(sentences)
+    tag = tag or get_tags(paragraphs)
 
-    return tag, sentences
+    return tag, paragraphs
+
+
+def get_sentences(db, nlp, paragraph_id):
+    """Extract all the sentences from the paragraph table.
+
+    Parameters
+    ----------
+    db:
+        Database
+    nlp: spacy.language.Language
+        Sentence Boundary Detection tool from Spacy to seperate sentences.
+    paragraph_id: int
+        ID of the paragraph
+
+    Returns
+    -------
+    sentences: list
+        List of the extracted sentences.
+    """
+    sentences = []
+    sha, section_name, paragraph = db.execute("SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
+                                              [paragraph_id]).fetchall()[0]
+    sentences.extend([(sha, section_name, sent, paragraph_id) for sent in segment(nlp, paragraph)])
+
+    return sentences
 
 
 def update_covid19_tag(db, article_id, tag):
@@ -358,7 +380,21 @@ def insert_into_sentences(db, sentences):
     db: sql database
         Database with the table sentences where to insert new sentences.
     sentences: list
-        List of sentences to insert in format (sha, section_name, text)
+        List of sentences to insert in format (sha, section_name, text, paragraph_id)
     """
     cur = db.cursor()
-    cur.executemany("INSERT INTO sentences (sha, section_name, text) VALUES (?, ?, ?)", sentences)
+    cur.executemany("INSERT INTO sentences (sha, section_name, text, paragraph_id) VALUES (?, ?, ?, ?)", sentences)
+
+
+def insert_into_paragraphs(db, paragraphs):
+    """Insert the new sentences into the database sentences.
+
+    Parameters
+    ----------
+    db: sql database
+        Database with the table sentences where to insert new sentences.
+    paragraphs: list
+        List of sentences to insert in format (paragraph_id, text)
+    """
+    cur = db.cursor()
+    cur.executemany("INSERT INTO paragraphs (sha, section_name, text) VALUES (?, ?, ?)", paragraphs)

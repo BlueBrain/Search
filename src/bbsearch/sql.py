@@ -8,7 +8,8 @@ import sqlite3
 
 import pandas as pd
 
-from bbsearch.utils import define_nlp, get_tag_and_sentences, update_covid19_tag, insert_into_sentences
+from bbsearch.utils import define_nlp, get_sentences, update_covid19_tag, \
+    insert_into_sentences, get_tag_and_paragraph, insert_into_paragraphs
 
 
 class DatabaseCreation:
@@ -50,6 +51,7 @@ class DatabaseCreation:
         self._schema_creation()
         self._article_id_to_sha_table()
         self._articles_table()
+        self._paragraphs_table()
         self._sentences_table()
 
     def _schema_creation(self):
@@ -89,12 +91,22 @@ class DatabaseCreation:
                     );
                     """)
                 db.execute(
+                    """CREATE TABLE paragraphs
+                    (
+                        paragraph_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        sha TEXT,
+                        section_name TEXT,
+                        text TEXT
+                    );
+                    """)
+                db.execute(
                     """CREATE TABLE sentences
                     (
                         sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         sha TEXT,
                         section_name TEXT,
                         text TEXT,
+                        paragraph_id INTEGER,
                         FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
                     );
                     """)
@@ -143,18 +155,50 @@ class DatabaseCreation:
         with sqlite3.connect(str(self.filename)) as db:
             df.to_sql(name='article_id_2_sha', con=db, index=False, if_exists='append')
 
+    def _paragraphs_table(self):
+        """Fill the paragraphs table thanks to all the json files."""
+        with sqlite3.connect(str(self.filename)) as db:
+
+            cur = db.cursor()
+            for (article_id,) in cur.execute('SELECT article_id FROM articles'):
+                tag, paragraphs = get_tag_and_paragraph(db, self.data_path, article_id)
+                update_covid19_tag(db, article_id, tag)
+                insert_into_paragraphs(db, paragraphs)
+
+            db.commit()
+
     def _sentences_table(self):
         """Fills the sentences table thanks to all the json files. """
         nlp = define_nlp()
         with sqlite3.connect(str(self.filename)) as db:
 
             cur = db.cursor()
-            for (article_id,) in cur.execute('SELECT article_id FROM articles'):
-                tag, sentences = get_tag_and_sentences(db, nlp, self.data_path, article_id)
-                update_covid19_tag(db, article_id, tag)
+            for (paragraph_id,) in cur.execute('SELECT paragraph_id FROM paragraphs'):
+                sentences = get_sentences(db, nlp, paragraph_id)
                 insert_into_sentences(db, sentences)
 
             db.commit()
+
+
+def find_paragraph(sentence_id, db):
+    """Find the paragraph corresponding to the given sentence
+
+    Parameters
+    ----------
+    sentence_id : int
+        The identifier of the given sentence
+    sentence: str
+        The sentence to highlight
+
+    Returns
+    -------
+    paragraph : str
+        The paragraph containing `sentence`
+    """
+    paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
+    paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
+
+    return paragraph
 
 
 def get_shas_from_ids(articles_ids, db):

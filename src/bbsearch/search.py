@@ -69,6 +69,8 @@ def run_search(embedding_model, precomputed_embeddings, database, k, query_text,
 
     precomputed_embeddings : np.ndarray
         Embeddings of the model corresponding of embedding_model.
+        The first column has to be the corresponding index of the sentence in the database.
+        The others columns have to be the embeddings, so need to have the same size as the model specified requires.
 
     database : sqlite3.Cursor
         Cursor to the database.
