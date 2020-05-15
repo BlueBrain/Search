@@ -28,13 +28,13 @@ class DatabaseCreation:
             Directory where the database is going to be saved.
         """
         self.data_path = data_path
-        if not Path(self.data_path).exists():
+        if not self.data_path.exists():
             raise NotADirectoryError(f'The data directory {self.data_path} does not exit')
 
         self.version = version
 
         self.saving_directory = saving_directory or Path.cwd()
-        if not Path(self.saving_directory).exists():
+        if not self.saving_directory.exists():
             raise NotADirectoryError(f'The saving directory {self.saving_directory} does not exit')
 
         self.filename = self.saving_directory / f'cord19_{self.version}.db'
@@ -280,9 +280,9 @@ def remove_sentences_duplicates(sentences):
     keys = set()
 
     # Boilerplate text to ignore
-    boilerplate = ["COVID-19 resource centre",
+    boilerplate = {"COVID-19 resource centre",
                    "permission to make all its COVID",
-                   "WHO COVID database"]
+                   "WHO COVID database"}
 
     for sha, name, text in sentences:
         # Add unique text that isn't boilerplate text
@@ -330,6 +330,7 @@ def get_tags(sentences):
         # Look for at least one keyword match
         if re.findall(regex, text.lower()):
             tag = True  # "COVID-19"
+            break
     return tag
 
 
