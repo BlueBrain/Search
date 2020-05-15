@@ -8,13 +8,13 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
     Parameters
     ----------
     doc : spacy.Doc
-        Spacy parsed document, which can e.g. obtained by calling `doc = nlp(raw_text, disable=['ner'])`.
+        Spacy parsed document, which can be obtained by calling `doc = nlp(raw_text, disable=['ner'])`.
     model_entities : spacy.language.Language
         Spacy model with pipes for parsing and ner, e.g. `model_entities=spacy.load("en_ner_craft_md")`.
     return_prob : bool, optional
         If True, the output table contains also a column with confidence scores.
     threshold : float, optional
-        If `return_porb` is `True`, only extracted entities with `confidence > threshold` are returned.
+        If `return_prob` is `True`, only extracted entities with `confidence > threshold` are returned.
     Returns
     -------
     table_extractions : pd.DataFrame
