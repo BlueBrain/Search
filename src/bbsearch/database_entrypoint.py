@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from bbsearch.database import DatabaseCreation
+from .database import DatabaseCreation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",

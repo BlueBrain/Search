@@ -5,7 +5,7 @@ import sqlite3
 
 import numpy as np
 
-import bbsearch.embedding_models as embedding_models
+from . import embedding_models
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--database",

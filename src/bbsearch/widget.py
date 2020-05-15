@@ -9,8 +9,8 @@ import ipywidgets as widgets
 import IPython
 from IPython.display import HTML
 
-from bbsearch.search import run_search
-from bbsearch.sql import find_paragraph
+from .search import run_search
+from .sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 

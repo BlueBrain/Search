@@ -5,7 +5,7 @@ import pathlib
 from flask import Flask
 
 from .embedding_server import EmbeddingServer
-from bbsearch.embedding_models import USE, SBERT, SBioBERT, BSV
+from ..embedding_models import USE, SBERT, SBioBERT, BSV
 
 
 logger = logging.getLogger(__name__)
