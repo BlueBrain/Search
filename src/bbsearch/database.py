@@ -9,7 +9,7 @@ from spacy.lang.en import English
 from spacy.attrs import ORTH, LEMMA
 
 
-class DatabaseCreation:
+class CORD19DatabaseCreation:
     """Create SQL database from a specified dataset."""
 
     def __init__(self,
@@ -38,79 +38,82 @@ class DatabaseCreation:
             raise NotADirectoryError(f'The saving directory {self.saving_directory} does not exit')
 
         self.filename = self.saving_directory / f'cord19_{self.version}.db'
+        if self.filename.exists():
+            raise ValueError(f'The version {self.version} of the database already exists')
 
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
+        self.is_constructed = False
+        self.db = sqlite3.connect(str(self.filename))
 
     def construct(self):
         """Construct the database."""
-        self._rename_columns()
-        self._schema_creation()
-        self._article_id_to_sha_table()
-        self._articles_table()
-        self._paragraphs_table()
-        self._sentences_table()
+        if not self.is_constructed:
+            self._rename_columns()
+            self._schema_creation()
+            self._article_id_to_sha_table()
+            self._articles_table()
+            self._paragraphs_table()
+            self._sentences_table()
+            self.is_constructed = True
+        else:
+            raise ValueError('This database is already constructed!')
 
     def _schema_creation(self):
-        """Create of the schemas of the different tables in the database."""
-        if self.filename.exists():
-            raise ValueError(f'The version {self.version} of the database already exists')
-        else:
-            with sqlite3.connect(str(self.filename)) as db:
-                db.execute(
-                    """CREATE TABLE IF NOT EXISTS article_id_2_sha
-                    (
-                        article_id TEXT,
-                        sha TEXT
-                    );
-                    """)
-                db.execute(
-                    """CREATE TABLE IF NOT EXISTS articles
-                    (
-                        article_id TEXT PRIMARY KEY,
-                        publisher TEXT,
-                        title TEXT,
-                        doi TEXT,
-                        pmc_id TEXT,
-                        pm_id INTEGER,
-                        licence TEXT,
-                        abstract TEXT,
-                        date DATETIME,
-                        authors TEXT,
-                        journal TEXT,
-                        microsoft_id INTEGER,
-                        covidence_id TEXT,
-                        has_pdf_parse BOOLEAN,
-                        has_pmc_xml_parse BOOLEAN,
-                        has_covid19_tag BOOLEAN DEFAULT False,
-                        fulltext_directory TEXT,
-                        url TEXT
-                    );
-                    """)
-                db.execute(
-                    """CREATE TABLE paragraphs
-                    (
-                        paragraph_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        sha TEXT,
-                        section_name TEXT,
-                        text TEXT
-                    );
-                    """)
-                db.execute(
-                    """CREATE TABLE sentences
-                    (
-                        sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        sha TEXT,
-                        section_name TEXT,
-                        text TEXT,
-                        paragraph_id INTEGER,
-                        FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
-                    );
-                    """)
+        """Create the schemas of the different tables in the database."""
+        self.db.execute(
+            """CREATE TABLE article_id_2_sha
+            (
+                article_id TEXT,
+                sha TEXT
+            );
+            """)
+        self.db.execute(
+            """CREATE TABLE articles
+            (
+                article_id TEXT PRIMARY KEY,
+                publisher TEXT,
+                title TEXT,
+                doi TEXT,
+                pmc_id TEXT,
+                pm_id INTEGER,
+                licence TEXT,
+                abstract TEXT,
+                date DATETIME,
+                authors TEXT,
+                journal TEXT,
+                microsoft_id INTEGER,
+                covidence_id TEXT,
+                has_pdf_parse BOOLEAN,
+                has_pmc_xml_parse BOOLEAN,
+                has_covid19_tag BOOLEAN DEFAULT False,
+                fulltext_directory TEXT,
+                url TEXT
+            );
+            """)
+        self.db.execute(
+            """CREATE TABLE paragraphs
+            (
+                paragraph_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sha TEXT,
+                section_name TEXT,
+                text TEXT
+            );
+            """)
+        self.db.execute(
+            """CREATE TABLE sentences
+            (
+                sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sha TEXT,
+                section_name TEXT,
+                text TEXT,
+                paragraph_id INTEGER,
+                FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
+            );
+            """)
 
     def _rename_columns(self):
         """Rename the columns of the dataframe to follow the SQL database schema."""
-        df = self.metadata
-        df.rename(columns={
+        self.metadata.rename(columns={
             'cord_uid': 'article_id',
             'sha': 'sha',
             'source_x': 'publisher',
@@ -131,62 +134,49 @@ class DatabaseCreation:
             'url': 'url'}, inplace=True)
 
     def _articles_table(self):
-        """Fill the Article Table thanks to 'metadata.csv'.
-
-        Notes
-        -----
-        The Dataframe self.metadata is modified in this method.
-        The article_id_to_sha should be created before calling this method.
-        """
+        """Fill the Article Table thanks to 'metadata.csv'."""
         df = self.metadata.copy()
         df = df[df.columns[~df.columns.isin(['sha'])]]
         df.drop_duplicates('article_id', keep='first', inplace=True)
-        with sqlite3.connect(str(self.filename)) as db:
-            df.to_sql(name='articles', con=db, index=False, if_exists='append')
+        df.to_sql(name='articles', con=self.db, index=False, if_exists='append')
 
     def _article_id_to_sha_table(self):
         """Fill the article_id_to_sha table thanks to 'metadata.csv'."""
         df = self.metadata[['article_id', 'sha']]
         df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
-        with sqlite3.connect(str(self.filename)) as db:
-            df.to_sql(name='article_id_2_sha', con=db, index=False, if_exists='append')
+        df.to_sql(name='article_id_2_sha', con=self.db, index=False, if_exists='append')
 
     def _paragraphs_table(self):
         """Fill the paragraphs table thanks to all the json files."""
-        with sqlite3.connect(str(self.filename)) as db:
-
-            cur = db.cursor()
-            for (article_id,) in cur.execute('SELECT article_id FROM articles'):
-                tag, paragraphs = get_tag_and_paragraph(db, self.data_path, article_id)
-                update_covid19_tag(db, article_id, tag)
-                insert_into_paragraphs(db, paragraphs)
-
-            db.commit()
+        cur = self.db.cursor()
+        for (article_id,) in cur.execute('SELECT article_id FROM articles'):
+            tag, paragraphs = get_tag_and_paragraph(self.db, self.data_path, article_id)
+            update_covid19_tag(self.db, article_id, tag)
+            insert_into_paragraphs(self.db, paragraphs)
+        self.db.commit()
 
     def _sentences_table(self):
         """Fill the sentences table thanks to all the json files."""
         nlp = define_nlp()
-        with sqlite3.connect(str(self.filename)) as db:
-
-            cur = db.cursor()
-            for (paragraph_id,) in cur.execute('SELECT paragraph_id FROM paragraphs'):
-                sentences = get_sentences(db, nlp, paragraph_id)
-                insert_into_sentences(db, sentences)
-
-            db.commit()
+        cur = self.db.cursor()
+        for (paragraph_id,) in cur.execute('SELECT paragraph_id FROM paragraphs'):
+            sentences = get_sentences(self.db, nlp, paragraph_id)
+            insert_into_sentences(self.db, sentences)
+        self.db.commit()
 
 
 def add_abbreviations(nlp, abbreviations=None):
-    """Add new abbreviations to the default list to avoid wrong scission. (e.g. Dr., Fig., ...).
+    """Add new abbreviations to the default list to avoid wrong scission.
 
     Parameters
     ----------
     nlp : spacy.lang.en.English()
         Spacy NLP used for the sentence boundary detection.
     abbreviations: list of tuples
-        New abbreviations to add to the default list. Format: (abbreviation, [{ORTH: value, LEMMA: value}])
+        New abbreviations to add to the default list.
+        Format: (abbreviation, [{ORTH: value, LEMMA: value}])
     """
-    default_abbreviations = [('approx.', [{ORTH: 'approximatively', LEMMA: 'approximatively'}]),
+    default_abbreviations = [('approx.', [{ORTH: 'approximately', LEMMA: 'approximately'}]),
                              ('cf.', [{ORTH: 'cf.', LEMMA: 'confer'}]),
                              ('et al.', [{ORTH: 'et al.', LEMMA: 'and others'}]),
                              ('Fig.', [{ORTH: 'Figure', LEMMA: 'figure'}]),
@@ -201,18 +191,18 @@ def add_abbreviations(nlp, abbreviations=None):
                              ('min.', [{ORTH: 'Minimum', LEMMA: 'minimum'}]),
                              ('etc.', [{ORTH: 'etc.', LEMMA: 'Et Cetera'}]),
                              ('Sci.', [{ORTH: 'Scientific', LEMMA: 'figure'}]),
-                             ('Proc.', [{ORTH: 'Procedings', LEMMA: 'procedings'}]),
+                             ('Proc.', [{ORTH: 'Proceedings', LEMMA: 'proceedings'}]),
                              ('Acad.', [{ORTH: 'Academy', LEMMA: 'Academy'}]),
                              ('No.', [{ORTH: 'Number', LEMMA: 'Number'}]),
-                             ('Med.', [{ORTH: 'Medecin', LEMMA: 'medecin'}]),
+                             ('Med.', [{ORTH: 'Medecine', LEMMA: 'medecine'}]),
                              ('Rev.', [{ORTH: 'Review', LEMMA: 'review'}]),
                              ('Subsp.', [{ORTH: 'Subspecies', LEMMA: 'Subspecies'}]),
                              ('Virol.', [{ORTH: 'Virology', LEMMA: 'Virology'}]),
                              ('Tab.', [{ORTH: 'Table', LEMMA: 'Table'}]),
                              ('Clin.', [{ORTH: 'Clinical', LEMMA: 'clinical'}])]
 
-    if abbreviations:
-        default_abbreviations.extend(abbreviations)
+    if abbreviations is not None:
+        default_abbreviations += abbreviations
 
     for abbreviation in default_abbreviations:
         nlp.tokenizer.add_special_case(*abbreviation)
@@ -239,12 +229,12 @@ def define_nlp():
 
 
 def segment(nlp, paragraph):
-    """Segment an paragraph/article into sentences.
+    """Segment a paragraph/article into sentences.
 
     Parameters
     ----------
     nlp: spacy.language.Language
-        Spacy pipeline applying sentence segmentantion.
+        Spacy pipeline applying sentence segmentation.
     paragraph: str
         Paragraph/Article in raw text to segment into sentences.
 
@@ -253,7 +243,7 @@ def segment(nlp, paragraph):
     all_sentences: list
         List of all the sentences extracted from the paragraph.
     """
-    all_sentences = (sent.string.strip() for sent in nlp(paragraph).sents)
+    all_sentences = [sent.string.strip() for sent in nlp(paragraph).sents]
     return all_sentences
 
 
@@ -277,7 +267,7 @@ def remove_sentences_duplicates(sentences):
     """
     # Use list to preserve insertion order
     unique = []
-    keys = set()
+    seen = set()
 
     # Boilerplate text to ignore
     boilerplate = {"COVID-19 resource centre",
@@ -286,9 +276,9 @@ def remove_sentences_duplicates(sentences):
 
     for sha, name, text in sentences:
         # Add unique text that isn't boilerplate text
-        if text not in keys and not any(x in text for x in boilerplate):
+        if text not in seen and not any(x in text for x in boilerplate):
             unique.append((sha, name, text))
-            keys.add(text)
+            seen.add(text)
 
     return unique
 
@@ -324,7 +314,7 @@ def get_tags(sentences):
                 r"covid(?:[\-\s]?19)?", r"n\s?cov[\-\s]?2019", r"sars-cov-?2",
                 r"wuhan (?:coronavirus|cov|pneumonia)"]
     # Build regular expression for each keyword. Wrap term in word boundaries
-    regex = "|".join(["\\b%s\\b" % keyword.lower() for keyword in keywords])
+    regex = "|".join([f"\\b{keyword}\\b" for keyword in keywords])
     tag = False  # None
     for _, _, text in sentences:
         # Look for at least one keyword match
@@ -335,21 +325,30 @@ def get_tags(sentences):
 
 
 def get_tag_and_paragraph(db, data_directory, article_id):
-    """Extract all the paragraph and the tag has_covid19 from an article.
+    """Extract paragraphs from given article and identify if is about covid19.
+
+    Notes
+    -----
+    Here are the steps implemented:
+    - First, we look at the corresponding shas for the given article_id
+    - Paragraphs are extracted:
+        - From Title and Abstract in the articles table
+        - From body_text and ref_entries in the json files.
+    - Tag is a boolean to identify if article speaks about COVID19.
 
     Parameters
     ----------
-    db:
+    db: sqlite3.Cursor()
         Database
     data_directory: Path
-        Directory where all the json files are located
+        Path to the directory containing all the json files.
     article_id: str
         ID of the article specified in the articles database.
 
     Returns
     -------
     tag: boolean
-        Tag value of has_covid19. This is checking if covid19 is mentionned in the paper.
+        Tag value of has_covid19. This is checking if covid19 is mentioned in the paper.
     paragraphs: list
         List of the extracted paragraphs. (paragraph_id, paragraph)
     """
@@ -402,9 +401,10 @@ def get_sentences(db, nlp, paragraph_id):
         List of the extracted sentences.
     """
     sentences = []
-    sha, section_name, paragraph = db.execute("SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
-                                              [paragraph_id]).fetchall()[0]
-    sentences.extend([(sha, section_name, sent, paragraph_id) for sent in segment(nlp, paragraph)])
+    sha, section_name, paragraph = db.execute(
+        "SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
+        [paragraph_id]).fetchall()[0]
+    sentences += [(sha, section_name, sent, paragraph_id) for sent in segment(nlp, paragraph)]
 
     return sentences
 

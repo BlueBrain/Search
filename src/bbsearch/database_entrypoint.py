@@ -2,7 +2,7 @@
 import argparse
 from pathlib import Path
 
-from .database import DatabaseCreation
+from .database import CORD19DatabaseCreation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
@@ -23,9 +23,9 @@ args = parser.parse_args()
 
 def main():
     """Create Database."""
-    db = DatabaseCreation(data_path=Path(args.data_path),
-                          version=args.version,
-                          saving_directory=Path(args.saving_directory))
+    db = CORD19DatabaseCreation(data_path=Path(args.data_path),
+                                version=args.version,
+                                saving_directory=Path(args.saving_directory))
     db.construct()
 
 

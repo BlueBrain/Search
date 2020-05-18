@@ -4,16 +4,16 @@ import sqlite3
 
 import pandas as pd
 
-from bbsearch.database import DatabaseCreation
+from bbsearch.database import CORD19DatabaseCreation
 
 
 @pytest.fixture(scope='module')
 def real_db_cnxn(tmp_path_factory, jsons_path):
     version = 'test'
     saving_directory = tmp_path_factory.mktemp('real_db', numbered=False)
-    db = DatabaseCreation(data_path=jsons_path,
-                          saving_directory=saving_directory,
-                          version=version)
+    db = CORD19DatabaseCreation(data_path=jsons_path,
+                                saving_directory=saving_directory,
+                                version=version)
     db.construct()
 
     database_path = saving_directory / f'cord19_{version}.db'
@@ -66,20 +66,20 @@ class TestDatabaseCreation:
     def test_errors(self, tmpdir, jsons_path):
         fake_dir = Path(str(tmpdir)) / 'fake'
         with pytest.raises(NotADirectoryError):
-            DatabaseCreation(data_path=fake_dir,
-                             saving_directory=jsons_path,
-                             version='v0')
+            CORD19DatabaseCreation(data_path=fake_dir,
+                                   saving_directory=jsons_path,
+                                   version='v0')
         with pytest.raises(NotADirectoryError):
-            DatabaseCreation(data_path=jsons_path,
-                             saving_directory=fake_dir,
-                             version='v0')
+            CORD19DatabaseCreation(data_path=jsons_path,
+                                   saving_directory=fake_dir,
+                                   version='v0')
         with pytest.raises(ValueError):
             version = 'test'
             saving_directory = Path(str(tmpdir))
             (saving_directory / f'cord19_{version}.db').touch()
-            db = DatabaseCreation(data_path=jsons_path,
-                                  saving_directory=saving_directory,
-                                  version='test')
+            db = CORD19DatabaseCreation(data_path=jsons_path,
+                                        saving_directory=saving_directory,
+                                        version='test')
             db.construct()
 
     def test_real_equals_fake_db(self, real_db_cnxn, fake_db_cursor):
