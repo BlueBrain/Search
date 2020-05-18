@@ -16,6 +16,8 @@ install_requires = [
     'spacy==2.2.1',
     'torch',
     'transformers',
+    'rdflib-jsonld',
+    'faiss-cpu',
 ]
 
 setup_requires = ['pytest-runner']
