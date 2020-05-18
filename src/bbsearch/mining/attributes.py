@@ -4,6 +4,7 @@ import logging
 import warnings
 
 import requests
+from IPython.display import HTML
 
 
 logger = logging.getLogger(__name__)
@@ -69,3 +70,82 @@ class AttributeExtractor:
                 measurements = response_json['measurements']
 
         return measurements
+
+    def annotate_quantities(self, text, measurements, width):
+        css_styles = f"""
+        <style>
+        .number  {{
+            display: inline-block;
+            background: lightgreen;
+            padding: 0.2em 0.5em;
+            border-radius: 7px;
+        }}
+        .unit {{
+            display: inline-block;
+            background: pink;
+            padding: 0.2em 0.5em;
+            border-radius: 7px;
+        }}
+        .quantityType {{
+            display: inline-block;
+            background: yellow;
+            font-variant:small-caps;
+            padding: 0.2em 0.5em;
+            border-radius: 7px;
+        }}
+        .fixedWidth {{
+            width: {width}ch;
+            text-align: justify;
+        }}
+        </style>
+        """
+
+        annotations = []
+
+        def annotate_quantity(quantity):
+            annotations = []
+            start = quantity['offsetStart']
+            end = quantity['offsetEnd']
+            formatted_text = f"<span class=\"number\">{text[start:end]}</span>"
+            quantity_type = self.get_quantity_type(quantity)
+            if quantity_type:
+                formatted_text += f"<span class=\"quantityType\">[{quantity_type}]</span>"
+            annotations.append([start, end, formatted_text])
+
+            if 'rawUnit' in quantity:
+                start = quantity['rawUnit']['offsetStart']
+                end = quantity['rawUnit']['offsetEnd']
+                annotations.append([start, end, f"<span class=\"unit\">{text[start:end]}</span>"])
+
+            return annotations
+
+        for measurement in measurements:
+            if 'quantity' in measurement:
+                annotations += annotate_quantity(measurement['quantity'])
+            elif 'quantities' in measurement:
+                for quantity in measurement['quantities']:
+                    annotations += annotate_quantity(quantity)
+            elif 'quantityMost' in measurement or 'quantityLeast' in measurement:
+                if 'quantityLeast' in measurement:
+                    annotations += annotate_quantity(measurement['quantityLeast'])
+                if 'quantityMost' in measurement:
+                    annotations += annotate_quantity(measurement['quantityMost'])
+            elif 'quantityBase' in measurement or 'quantityRange' in measurement:
+                if 'quantityBase' in measurement:
+                    annotations += annotate_quantity(measurement['quantityBase'])
+                if 'quantityRange' in measurement:
+                    annotations += annotate_quantity(measurement['quantityRange'])
+            else:
+                warnings.warn("no quantity in measurement")
+                print(measurement)
+
+        sorted(annotations, key=lambda x: x[0])
+        annotated_text = ''
+        last_idx = 0
+        for start, end, quantity in annotations:
+            annotated_text += text[last_idx:start] + quantity
+            last_idx = end
+        annotated_text += text[last_idx:]
+        html = css_styles + f"<div class=\"fixedWidth\">" + annotated_text + "</div>"
+
+        return HTML(html)
