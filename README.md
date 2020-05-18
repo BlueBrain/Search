@@ -53,20 +53,16 @@ Next a docker container has to be spawned form the image just created. In order
 to function properly, the docker container needs to have access to the 
 pre-trained models stored on disk. Currently the server only loads one model
 from disk, namely the `BioSentVec` model, and will therefore look for the file
-named `BioSentVec_PubMed_MIMICIII-bigram_d700.bin`. To have access to this file
-a volume needs to be mounted into the container that contains the model file
-and an environmental variable `ASSETS_PATH` that points to
-the directory with the model file needs to be set.
-
-Assuming that the model file is located in the folder `/raid/assets/`, all
-of the above can be done by spawning the container with the following command:
+named `BioSentVec_PubMed_MIMICIII-bigram_d700.bin`. As the path of this model
+is by default the one on `/raid` of DGX, this code can only run there. Assuming
+this is the case, all of the above can be done by spawning the container
+with the following command:
 
 ```bash
 $ docker run \
     --rm \
     --publish-all \
-    --volume /raid/assets:/assets \
-    --env ASSETS_PATH="/assets" \
+    --volume /raid:/raid \
     --name embedding_server \
     embedding_server
 ```
