@@ -3,7 +3,7 @@ import time
 
 
 class Timer:
-    r"""Convenience context manager timing functions and logging the results.
+    """Convenience context manager timing functions and logging the results.
 
     The order of execution is `__call__`,  `__enter__` and `__exit__`.
 
@@ -18,11 +18,12 @@ class Timer:
         Time of instantiation.
 
     name : str or None
-        Name of the process to be timed. The user can control the value via the `__call__` magic.
+        Name of the process to be timed.
+        The user can control the value via the `__call__` magic.
 
     logs : dict
-        Internal dictionary that stores all the times. The keys are the process names and the values are number
-        of seconds.
+        Internal dictionary that stores all the times.
+        The keys are the process names and the values are number of seconds.
 
     start_time : float or None
         Time of the last enter. Is dynamically changed when entering.
@@ -46,7 +47,7 @@ class Timer:
     def __init__(self, verbose=False):
         self.verbose = verbose
 
-        self.inst_time = time.time()
+        self.inst_time = time.perf_counter()
         self.name = None  # what key is being populated
         self.logs = {}
         self.start_time = None  # to be overwritten when entering
@@ -82,7 +83,7 @@ class Timer:
         if self.name == 'overall':
             raise ValueError("The 'overall' key is restricted for length of the lifetime of the Timer.")
 
-        self.start_time = time.time()
+        self.start_time = time.perf_counter()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Stop the timer and log internally."""
@@ -94,7 +95,7 @@ class Timer:
 
         else:
             # nothing bad happened
-            end_time = time.time()
+            end_time = time.perf_counter()
             self.logs[self.name] = end_time - self.start_time
 
             if self.verbose:
@@ -112,4 +113,4 @@ class Timer:
     @property
     def stats(self):
         """Return all timing statistics."""
-        return {'overall': time.time() - self.inst_time, **self.logs}
+        return {'overall': time.perf_counter() - self.inst_time, **self.logs}

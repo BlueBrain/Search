@@ -61,13 +61,6 @@ class CORD19DatabaseCreation:
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
         self.db.execute(
-            """CREATE TABLE article_id_2_sha
-            (
-                article_id TEXT,
-                sha TEXT
-            );
-            """)
-        self.db.execute(
             """CREATE TABLE articles
             (
                 article_id TEXT PRIMARY KEY,
@@ -88,6 +81,14 @@ class CORD19DatabaseCreation:
                 has_covid19_tag BOOLEAN DEFAULT False,
                 fulltext_directory TEXT,
                 url TEXT
+            );
+            """)
+        self.db.execute(
+            """CREATE TABLE article_id_2_sha
+            (
+                article_id TEXT,
+                sha TEXT,
+                FOREIGN KEY(article_id) REFERENCES articles(article_id)
             );
             """)
         self.db.execute(

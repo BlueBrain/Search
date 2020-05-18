@@ -166,7 +166,7 @@ class BSV(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: torch.Tensor
+        preprocessed_sentence: str
             Preprocessed sentence to embed.
 
         Returns
@@ -250,7 +250,8 @@ def compute_database_embeddings(database, model):
     Returns
     -------
     final_embeddings: np.array
-        Huge numpy array with all sentences embeddings for the given models. Format: (sentence_id, embeddings).
+        Huge numpy array with all sentences embeddings for the given models.
+        Format: (sentence_id, embeddings).
     """
     query = """SELECT sentence_id, text FROM sentences
             WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN

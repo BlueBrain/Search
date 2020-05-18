@@ -11,11 +11,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--database",
                     default="/raid/covid_data/data/v7/databases/cord19.db",
                     type=str,
-                    help="Database")
-parser.add_argument("--saving_directory",
+                    help="Database containing at least 4 tables:"
+                         "articles, article_id_to_sha, paragraphs and sentences."
+                         "This database is used to read all sentences "
+                         "and compute the embeddings. ")
+parser.add_argument("--out_dir",
                     default='/raid/covid_data/data/v7/embeddings/',
                     type=str,
-                    help="The directory path where the database is saved")
+                    help="The directory path where the embeddings are saved.")
 parser.add_argument("--models",
                     default='USE,SBERT,SBioBERT,BSV',
                     type=str,
@@ -30,19 +33,18 @@ args = parser.parse_args()
 
 def main():
     """Compute Embeddings."""
-    print(args)
     if Path(args.database).exists():
         db = sqlite3.connect(args.database).cursor()
     else:
         raise FileNotFoundError(f'The database {args.database} is not found!')
 
-    for model in args.models.split(','):
+    for model in args.models.split(',').strip():
         if model == 'BSV':
-            embedding_model = embedding_models.BSV(checkpoint_model_path=Path(args.bsv_checkpoints))
+            embedding_model = embedding_models.BSV()
         else:
             embedding_model = getattr(embedding_models, model)()
         embeddings = embedding_models.compute_database_embeddings(db, embedding_model)
-        path = Path(args.saving_directory) / model / f'{model}.npy'
+        path = Path(args.out_dir) / model / f'{model}.npy'
         np.save(path, embeddings)
 
 

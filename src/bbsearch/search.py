@@ -7,10 +7,10 @@ from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition, 
 from .utils import Timer
 
 
-def filter(database,
-           has_journal=False,
-           date_range=None,
-           exclusion_text=None):
+def filter_sentences(database,
+                     has_journal=False,
+                     date_range=None,
+                     exclusion_text=None):
     """Filter sentences based on specified conditions.
 
     Parameters
@@ -49,8 +49,7 @@ def filter(database,
 
     # Apply sentence conditions
     if exclusion_text is not None:
-        excluded_words = [x for x in exclusion_text.lower().split('\n')
-                          if x]  # remove empty strings
+        excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
         sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
                                 for word in excluded_words]
     restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', database)
@@ -62,8 +61,8 @@ def run_search(embedding_model, precomputed_embeddings, database, k, query_text,
                deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
     """Generate search results.
 
-    Returns
-    -------
+    Parameters
+    ----------
     embedding_model : bbsearch.embedding_models.EmbeddingModel
         Instance of EmbeddingModel of the model we want to use.
 
@@ -126,8 +125,10 @@ def run_search(embedding_model, precomputed_embeddings, database, k, query_text,
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
     with timer('sentences_conditioning'):
-        restricted_sentence_ids = filter(database, has_journal=has_journal,
-                                         date_range=date_range, exclusion_text=exclusion_text)
+        restricted_sentence_ids = filter_sentences(database,
+                                                   has_journal=has_journal,
+                                                   date_range=date_range,
+                                                   exclusion_text=exclusion_text)
 
     # Apply date-range and has-journal filtering to arr
     idx_col = precomputed_embeddings[:, 0]

@@ -57,9 +57,13 @@ class TestSearch:
         assert emb_mod.preprocess.call_count == 3
         assert emb_mod.embed.call_count == 3
 
-        _, _, _ = run_search(embedding_model=emb_mod,
-                             precomputed_embeddings=precomputed_embeddings,
-                             database=fake_db_cursor,
-                             query_text=query_text,
-                             deprioritize_text=deprioritized_text,
-                             k=k)
+        indices, similarities, stats = run_search(embedding_model=emb_mod,
+                                                  precomputed_embeddings=precomputed_embeddings,
+                                                  database=fake_db_cursor,
+                                                  query_text=query_text,
+                                                  deprioritize_text=deprioritized_text,
+                                                  k=k)
+
+        assert indices.shape == (k,)
+        assert similarities.shape == (k,)
+        assert isinstance(stats, dict)

@@ -27,7 +27,7 @@ class Widget:
 
     precomputed_embeddings: dict
         Dictionary containing the precomputed embeddings.
-        The keys have to be the name of the differents models and
+        The keys have to be the name of the different models and
         the values have to be numpy arrays containing the embeddings.
 
     database: sqlite3.Cursor
@@ -47,6 +47,7 @@ class Widget:
 
         self.my_widgets = OrderedDict()
         self.initialize_widgets()
+        self.hide_from_user()
 
     @staticmethod
     def highlight_in_paragraph(paragraph, sentence):
@@ -81,7 +82,7 @@ class Widget:
         return highlighted_paragraph
 
     def print_single_result(self, sentence_id, print_whole_paragraph):
-        """Retrieve metadata and complete the report with HTML string given an sentence_id.
+        """Retrieve metadata and complete the report with HTML string given sentence_id.
 
         Parameters
         ----------
@@ -119,12 +120,10 @@ class Widget:
                     paragraph, text)
             except Exception as err:
                 formatted_output = f"""
-                                There was a problem retrieving the paragraph.
-
-                                The original sentence is: {text}
-
-                                The error was: {str(err)}
-                                """
+                There was a problem retrieving the paragraph.
+                The original sentence is: {text}
+                The error was: {str(err)}
+                """
         else:
             formatted_output = textwrap.fill(text, width=width)
 
@@ -139,6 +138,7 @@ class Widget:
                             {article_auth} &#183; {section_name.lower().title()}
                         </p>
                         """
+        article_metadata = textwrap.dedent(article_metadata)
 
         return article_metadata, formatted_output
 

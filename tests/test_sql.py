@@ -2,7 +2,7 @@
 from bbsearch.sql import find_paragraph
 
 
-class TestSQLqueries:
+class TestSQLQueries:
 
     def test_find_paragraph(self, fake_db_cursor):
         """Test that the find paragraph method is working."""

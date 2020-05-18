@@ -10,7 +10,7 @@ parser.add_argument("--data_path",
                     type=str,
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
-parser.add_argument("--saving_directory",
+parser.add_argument("--out_dir",
                     default='/raid/covid_data/data/v7/',
                     type=str,
                     help="The directory path where the database is saved")
@@ -25,7 +25,7 @@ def main():
     """Create Database."""
     db = CORD19DatabaseCreation(data_path=Path(args.data_path),
                                 version=args.version,
-                                saving_directory=Path(args.saving_directory))
+                                saving_directory=Path(args.out_dir))
     db.construct()
 
 
