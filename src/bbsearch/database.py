@@ -135,20 +135,37 @@ class CORD19DatabaseCreation:
             'url': 'url'}, inplace=True)
 
     def _articles_table(self):
-        """Fill the Article Table thanks to 'metadata.csv'."""
+        """Fill the Article Table thanks to 'metadata.csv'.
+
+        The articles table has all the metadata.csv columns
+        expect the 'sha'.
+        Moreover, the columns are renamed (cfr. _rename_columns)
+        """
         df = self.metadata.copy()
-        df = df[df.columns[~df.columns.isin(['sha'])]]
+        df.drop(columns="sha", inplace=True)
         df.drop_duplicates('article_id', keep='first', inplace=True)
         df.to_sql(name='articles', con=self.db, index=False, if_exists='append')
 
     def _article_id_to_sha_table(self):
-        """Fill the article_id_to_sha table thanks to 'metadata.csv'."""
+        """Fill the article_id_to_sha table thanks to 'metadata.csv'.
+
+        The metadata.csv columns called 'sha' and 'article_id'
+        are used to create this table.
+        Moreover, several article_id can refer to the same shas
+        (for example, supplementary material, ...).
+        Several shas can also refer to the same article_id.
+        """
         df = self.metadata[['article_id', 'sha']]
         df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
         df.to_sql(name='article_id_2_sha', con=self.db, index=False, if_exists='append')
 
     def _paragraphs_table(self):
-        """Fill the paragraphs table thanks to all the json files."""
+        """Fill the paragraphs table thanks to all the json files.
+
+        For each article_id, this function extracts the corresponding
+        'sha' (and thus the json files) and extracts body_text and ref_entries
+        from those json_files.
+        """
         cur = self.db.cursor()
         for (article_id,) in cur.execute('SELECT article_id FROM articles'):
             tag, paragraphs = get_tag_and_paragraph(self.db, self.data_path, article_id)
@@ -157,7 +174,11 @@ class CORD19DatabaseCreation:
         self.db.commit()
 
     def _sentences_table(self):
-        """Fill the sentences table thanks to all the json files."""
+        """Fill the sentences table thanks to all the json files.
+
+        For each paragraph, all sentences are extracted and populate
+        the sentences table.
+        """
         nlp = define_nlp()
         cur = self.db.cursor()
         for (paragraph_id,) in cur.execute('SELECT paragraph_id FROM paragraphs'):
