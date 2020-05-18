@@ -281,6 +281,9 @@ def compute_database_embeddings(database, model):
     all_ids = list()
     query_execution = database.execute(query)
     query_end = False
+    num_sentences = 0
+    num_errors = 0
+
     while not query_end:
         results = query_execution.fetchone()
         if results is not None:
@@ -290,8 +293,12 @@ def compute_database_embeddings(database, model):
                 embedding = model.embed(preprocessed_sentence)
             except IndexError:
                 embedding = np.zeros((model.dim,))
+                num_errors += 1
             all_ids.append(sentence_id)
             all_embeddings.append(embedding)
+            num_sentences += 1
+            if num_sentences % 1000 == 0:
+                print(f'Embedded {num_sentences} with {num_errors} errors')
         else:
             query_end = True
 

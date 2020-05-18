@@ -7,11 +7,11 @@ import numpy as np
 
 from . import embedding_models
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--database",
                     default="/raid/covid_data/data/v7/databases/cord19.db",
                     type=str,
-                    help="Database containing at least 4 tables:"
+                    help="Database containing at least 4 tables:  "
                          "articles, article_id_to_sha, paragraphs and sentences."
                          "This database is used to read all sentences "
                          "and compute the embeddings. ")
@@ -43,7 +43,11 @@ def main():
         if model == 'BSV':
             embedding_model = embedding_models.BSV()
         else:
-            embedding_model = getattr(embedding_models, model)()
+            try:
+                embedding_model = getattr(embedding_models, model)()
+            except AttributeError:
+                print(f'The model {model} is not supported.')
+                continue
         embeddings = embedding_models.compute_database_embeddings(db, embedding_model)
         path = Path(args.out_dir) / model / f'{model}.npy'
         np.save(path, embeddings)

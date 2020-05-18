@@ -44,6 +44,7 @@ class CORD19DatabaseCreation:
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
         self.is_constructed = False
         self.db = sqlite3.connect(str(self.filename))
+        self.all_json_paths = self.data_path.rglob("*.json")
 
     def construct(self):
         """Construct the database."""
@@ -171,9 +172,10 @@ class CORD19DatabaseCreation:
         'sha' (and thus the json files) and extracts body_text and ref_entries
         from those json_files.
         """
+        sha_to_json_path = {json_path.stem: json_path for json_path in self.all_json_paths}
         cur = self.db.cursor()
         for (article_id,) in cur.execute('SELECT article_id FROM articles'):
-            tag, paragraphs = self.get_tag_and_paragraph(self.data_path, article_id)
+            tag, paragraphs = self.get_tag_and_paragraph(sha_to_json_path, article_id)
             self.update_covid19_tag(article_id, tag)
             self.insert_into_paragraphs(paragraphs)
         self.db.commit()
@@ -210,7 +212,7 @@ class CORD19DatabaseCreation:
 
         return nlp
 
-    def get_tag_and_paragraph(self, data_directory, article_id):
+    def get_tag_and_paragraph(self, sha_to_json_path, article_id):
         """Extract paragraphs from given article and identify if is about covid19.
 
         Notes
@@ -224,8 +226,8 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        data_directory: Path
-            Path to the directory containing all the json files.
+        sha_to_json_path: dict
+            Dictionary where key values are  shas.
         article_id: str
             ID of the article specified in the articles database.
 
@@ -252,10 +254,11 @@ class CORD19DatabaseCreation:
 
         for (sha,) in all_shas:
             if sha:
-                found_json_files = list(data_directory.glob(f'**/*{sha}*json'))
-                if len(found_json_files) != 1:
-                    raise ValueError(f'Found {len(found_json_files)} json files for sha {sha}')
-                with open(str(found_json_files[0])) as json_file:
+                if sha in sha_to_json_path.keys():
+                    found_json_files = sha_to_json_path[sha]
+                else:
+                    raise ValueError(f'Did not found json files for sha {sha}')
+                with open(str(found_json_files)) as json_file:
                     file = json.load(json_file)
                     for sec in file['body_text']:
                         paragraphs.append((sha, sec['section'].title(), sec['text']))
