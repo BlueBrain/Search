@@ -15,6 +15,11 @@ from transformers import AutoTokenizer, AutoModelWithLMHead
 class EmbeddingModel(ABC):
     """Abstract interface for the Sentences Embeddings Models."""
 
+    @property
+    @abstractmethod
+    def dim(self):
+        """Return dimension of the embedding."""
+
     def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...) if needed by the model.
 
@@ -65,6 +70,10 @@ class SBioBERT(EmbeddingModel):
         self.device = device or torch.device('cpu')
         self.sbiobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
+
+    @property
+    def dim(self):
+        return 768
 
     def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...).
@@ -139,6 +148,10 @@ class BSV(EmbeddingModel):
         self.bsv_model.load_model(str(self.checkpoint_model_path))
         self.bsv_stopwords = set(stopwords.words('english'))
 
+    @property
+    def dim(self):
+        return 700
+
     def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...).
 
@@ -190,6 +203,10 @@ class SBERT(EmbeddingModel):
 
         self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
+    @property
+    def dim(self):
+        return 768
+
     def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
@@ -219,6 +236,10 @@ class USE(EmbeddingModel):
 
         self.use_version = 5
         self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
+
+    @property
+    def dim(self):
+        return 512
 
     def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
@@ -264,8 +285,11 @@ def compute_database_embeddings(database, model):
         results = query_execution.fetchone()
         if results is not None:
             sentence_id, sentence_text = results
-            preprocessed_sentence = model.preprocess(sentence_text)
-            embedding = model.embed(preprocessed_sentence)
+            try:
+                preprocessed_sentence = model.preprocess(sentence_text)
+                embedding = model.embed(preprocessed_sentence)
+            except IndexError:
+                embedding = np.zeros((model.dim,))
             all_ids.append(sentence_id)
             all_embeddings.append(embedding)
         else:

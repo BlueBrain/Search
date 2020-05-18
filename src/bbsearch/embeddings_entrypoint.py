@@ -38,7 +38,8 @@ def main():
     else:
         raise FileNotFoundError(f'The database {args.database} is not found!')
 
-    for model in args.models.split(',').strip():
+    for model in args.models.split(','):
+        model = model.strip()
         if model == 'BSV':
             embedding_model = embedding_models.BSV()
         else:

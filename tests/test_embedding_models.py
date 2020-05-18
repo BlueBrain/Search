@@ -18,6 +18,14 @@ class TestEmbeddingModels:
         with pytest.raises(TypeError):
             EmbeddingModel()
 
+        class WrongModel(EmbeddingModel):
+
+            def embed(a):
+                pass
+
+        with pytest.raises(TypeError):
+            WrongModel()
+
     def test_sbiobert_embedding(self, monkeypatch, fake_db_cursor, test_parameters, metadata_path):
 
         torch_model = MagicMock(spec=torch.nn.Module)
