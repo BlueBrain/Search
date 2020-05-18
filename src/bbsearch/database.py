@@ -50,10 +50,15 @@ class CORD19DatabaseCreation:
         if not self.is_constructed:
             self._rename_columns()
             self._schema_creation()
+            print('Schemas of the tables are created.')
             self._article_id_to_sha_table()
+            print('Article_id_2_sha table is created.')
             self._articles_table()
+            print('Articles table is created.')
             self._paragraphs_table()
+            print('Paragraphs table is created.')
             self._sentences_table()
+            print('Sentences table is created.')
             self.is_constructed = True
         else:
             raise ValueError('This database is already constructed!')
