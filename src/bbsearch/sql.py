@@ -3,158 +3,27 @@ SQL Related functions.
 
 whatever
 """
-from pathlib import Path
-import sqlite3
-
-import pandas as pd
-
-from bbsearch.utils import define_nlp, get_tag_and_sentences, update_covid19_tag, insert_into_sentences
 
 
-class DatabaseCreation:
-    """Creates SQL database from a specified dataset. """
+def find_paragraph(sentence_id, db):
+    """Find the paragraph corresponding to the given sentence.
 
-    def __init__(self,
-                 data_path,
-                 version,
-                 saving_directory=None):
-        """Creates SQL database object.
+    Parameters
+    ----------
+    sentence_id : int
+        The identifier of the given sentence
+    db: sqlite3.Cursor
+        Cursor to the database
 
-        Parameters
-        ----------
-        data_path: pathlib.Path
-            Directory to the dataset where metadata.csv and all jsons file are located.
-        version: str
-            Version of the database created.
-        saving_directory: pathlib.Path
-            Directory where the database is going to be saved.
-        """
-        self.data_path = data_path
-        if not Path(self.data_path).exists():
-            raise NotADirectoryError(f'The data directory {self.data_path} does not exit')
+    Returns
+    -------
+    paragraph : str
+        The paragraph containing `sentence`
+    """
+    paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
+    paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
 
-        self.version = version
-
-        self.saving_directory = saving_directory or Path.cwd()
-        if not Path(self.saving_directory).exists():
-            raise NotADirectoryError(f'The saving directory {self.saving_directory} does not exit')
-
-        self.filename = self.saving_directory / f'cord19_{self.version}.db'
-
-        self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
-
-    def construct(self):
-        """Constructs the database."""
-
-        self._rename_columns()
-        self._schema_creation()
-        self._article_id_to_sha_table()
-        self._articles_table()
-        self._sentences_table()
-
-    def _schema_creation(self):
-        """Creation of the schemas of the different tables in the database. """
-        if self.filename.exists():
-            raise ValueError(f'The version {self.version} of the database already exists')
-        else:
-            with sqlite3.connect(str(self.filename)) as db:
-                db.execute(
-                    """CREATE TABLE IF NOT EXISTS article_id_2_sha
-                    (
-                        article_id TEXT,
-                        sha TEXT
-                    );
-                    """)
-                db.execute(
-                    """CREATE TABLE IF NOT EXISTS articles
-                    (
-                        article_id TEXT PRIMARY KEY, 
-                        publisher TEXT, 
-                        title TEXT, 
-                        doi TEXT, 
-                        pmc_id TEXT, 
-                        pm_id INTEGER, 
-                        licence TEXT,
-                        abstract TEXT, 
-                        date DATETIME, 
-                        authors TEXT, 
-                        journal TEXT,
-                        microsoft_id INTEGER, 
-                        covidence_id TEXT, 
-                        has_pdf_parse BOOLEAN,
-                        has_pmc_xml_parse BOOLEAN, 
-                        has_covid19_tag BOOLEAN DEFAULT False,
-                        fulltext_directory TEXT, 
-                        url TEXT
-                    );
-                    """)
-                db.execute(
-                    """CREATE TABLE sentences
-                    (
-                        sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        sha TEXT,
-                        section_name TEXT,
-                        text TEXT,
-                        FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
-                    );
-                    """)
-
-    def _rename_columns(self):
-        """Renames the columns of the dataframe to follow the SQL database schema. """
-        df = self.metadata
-        df.rename(columns={
-            'cord_uid': 'article_id',
-            'sha': 'sha',
-            'source_x': 'publisher',
-            'title': 'title',
-            'doi': 'doi',
-            'pmcid': 'pmc_id',
-            'pubmed_id': 'pm_id',
-            'license': 'licence',
-            'abstract': 'abstract',
-            'publish_time': 'date',
-            'authors': 'authors',
-            'journal': 'journal',
-            'Microsoft Academic Paper ID': 'microsoft_id',
-            'WHO #Covidence': 'covidence_id',
-            'has_pdf_parse': 'has_pdf_parse',
-            'has_pmc_xml_parse': 'has_pmc_xml_parse',
-            'full_text_file': 'fulltext_directory',
-            'url': 'url'}, inplace=True)
-
-    def _articles_table(self):
-        """Fills the Article Table thanks to 'metadata.csv'.
-
-        Notes
-        -----
-        The Dataframe self.metadata is modified in this method.
-        The article_id_to_sha should be created before calling this method.
-        """
-        df = self.metadata.copy()
-        df = df[df.columns[~df.columns.isin(['sha'])]]
-        df.drop_duplicates('article_id', keep='first', inplace=True)
-        with sqlite3.connect(str(self.filename)) as db:
-            df.to_sql(name='articles', con=db, index=False, if_exists='append')
-
-    def _article_id_to_sha_table(self):
-        """Fills the article_id_to_sha table thanks to 'metadata.csv'. '"""
-        df = self.metadata[['article_id', 'sha']]
-        df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
-        with sqlite3.connect(str(self.filename)) as db:
-            df.to_sql(name='article_id_2_sha', con=db, index=False, if_exists='append')
-
-    def _sentences_table(self):
-        """Fills the sentences table thanks to all the json files. """
-        nlp = define_nlp()
-        with sqlite3.connect(str(self.filename)) as db:
-
-            cur = db.cursor()
-            for (article_id,) in cur.execute('SELECT article_id FROM articles'):
-                tag, sentences = get_tag_and_sentences(db, nlp, self.data_path, article_id)
-                update_covid19_tag(db, article_id, tag)
-                insert_into_sentences(db, sentences)
-
-            db.commit()
+    return paragraph
 
 
 def get_shas_from_ids(articles_ids, db):
@@ -175,54 +44,6 @@ def get_shas_from_ids(articles_ids, db):
     """
     all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
     sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [sha for (sha,) in results]
-
-    return results
-
-
-def get_ids_from_shas(shas, db):
-    """Find articles IDs given article SHAs.
-
-    Parameters
-    ----------
-    shas : list
-        A list of strings representing article SHAs.
-    db : sqlite3.Cursor
-        A SQL database for querying the IDs. Should contain
-        a table named "article_id_2_sha".
-
-    Returns
-    -------
-    results : list
-        A list of sentence IDs.
-    """
-    all_shas_str = ', '.join([f"'{sha}'" for sha in shas])
-    sql_query = f"SELECT article_id FROM article_id_2_sha WHERE sha IN ({all_shas_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [id_ for (id_,) in results]
-
-    return results
-
-
-def find_sentence_ids(article_shas, db):
-    """Find sentence IDs given article SHAs.
-
-    Parameters
-    ----------
-    article_shas : list
-        A list of strings representing article SHAs.
-    db : sqlite3.Cursor
-        A SQL database for querying the sentence IDs. Should contain
-        a table named "sentences".
-
-    Returns
-    -------
-    results : list
-        A list of sentence IDs.
-    """
-    all_shas_str = ', '.join([f"'{sha}'" for sha in article_shas])
-    sql_query = f"SELECT sentence_id FROM sentences WHERE sha IN ({all_shas_str})"
     results = db.execute(sql_query).fetchall()
     results = [sha for (sha,) in results]
 
@@ -255,8 +76,11 @@ def get_ids_by_condition(conditions, table, db):
     results : list
         A list of article IDs (=SHAs) represented as strings.
     """
-    condition = ' and '.join(conditions)
-    sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
+    if conditions:
+        condition = ' and '.join(conditions)
+        sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
+    else:
+        sql_query = f"SELECT {table[:-1]}_id FROM {table}"
     results = db.execute(sql_query).fetchall()
     results = [id_ for (id_,) in results]
 
