@@ -1,6 +1,7 @@
 import collections
 import json
 import logging
+import textwrap
 import warnings
 
 import pandas as pd
@@ -38,9 +39,20 @@ class AttributeExtractor:
         return quantity_type
 
     def get_measurement_type(self, measurement):
+        logger.debug("get_measurement_type")
+        logger.debug(f"measurement:\n{measurement}")
+
         quantity_types = [self.get_quantity_type(quantity)
                           for quantity in self.iter_quantities(measurement)]
-        assert len(set(quantity_types)) == 1
+        logger.debug(f"quantity_types: {quantity_types}")
+        if not len(set(quantity_types)) == 1:
+            msg = f"""
+            Measurement contains multiple quantity types.
+            measurement:
+            {measurement}
+            quantity types found: {quantity_types}
+            """
+            logger.warning(textwrap.dedent(msg).strip())
         return quantity_types[0]
 
     def get_all_measurement_types(self, measurements):
