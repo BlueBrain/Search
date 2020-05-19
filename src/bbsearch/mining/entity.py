@@ -70,6 +70,6 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
                           'entity_type': ner.vocab.strings[k[2]],
                           'confidence_score': v})
         table_extractions = pd.DataFrame(lines, columns=headers)
-        table_extractions = table_extractions.loc[table_extractions.confidence > threshold]
+        table_extractions = table_extractions.loc[table_extractions.confidence_score > threshold]
 
     return table_extractions
