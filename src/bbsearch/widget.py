@@ -262,7 +262,7 @@ class Widget:
             print(f'\nInvestigating: {query_text}\n')
 
             for sentence_id in sentence_ids:
-                article_metadata, formatted_output = self.print_single_result(sentence_id, print_whole_paragraph)
+                article_metadata, formatted_output = self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                 IPython.display.display(HTML(article_metadata))
                 IPython.display.display(HTML(formatted_output))
