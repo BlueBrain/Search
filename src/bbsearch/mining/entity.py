@@ -12,7 +12,10 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
     model_entities : spacy.language.Language
         Spacy model with pipes for parsing and ner, e.g. `model_entities=spacy.load("en_ner_craft_md")`.
     return_prob : bool, optional
-        If True, the output table contains also a column with confidence scores.
+        If `True`, the column `confidence_score` of the output table is filled with estimates of the confidence of the
+        extracted entities, i.e. float values between 0 and 1.
+        Notice that setting `return_prob=True` may return different entities, as to access the confindence scores of
+        spaCy it is necessary to perform a forward pass using an undocumented "beam" approach.
     threshold : float, optional
         If `return_prob` is `True`, only extracted entities with `confidence > threshold` are returned.
     Returns
@@ -24,6 +27,7 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
     ----------
     [1] https://allenai.github.io/scispacy/
     [2] https://spacy.io/api/doc
+    [3] https://github.com/explosion/spaCy/issues/2601
     """
     headers = ['entity',
                'entity_type',
@@ -35,9 +39,8 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
                'ontology_source',
                'paper_id',
                'start_char',
-               'end_char']
-    if return_prob:
-        headers.append('confidence')
+               'end_char',
+               'confidence_score']
 
     ner = model_entities.get_pipe('ner')
 
@@ -54,7 +57,7 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
         table_extractions = pd.DataFrame(data=lines, columns=headers)
 
     else:
-        # This is a undocumented spaCy hack to get confidence scores: https://github.com/explosion/spaCy/issues/2601
+        # This is a undocumented spaCy hack to get confidence scores
         ner = model_entities.get_pipe('ner')
         docs = [model_entities(doc.text)]
         beam = ner.beam_parse(docs, beam_width=16)[0]
@@ -65,7 +68,7 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
                           'start_char': ent_span.start_char,
                           'end_char': ent_span.end_char,
                           'entity_type': ner.vocab.strings[k[2]],
-                          'confidence': v})
+                          'confidence_score': v})
         table_extractions = pd.DataFrame(lines, columns=headers)
         table_extractions = table_extractions.loc[table_extractions.confidence > threshold]
 

@@ -29,7 +29,7 @@ class TextMiningPipeline:
         self.model_entities = model_entities
         self.models_relations = models_relations
 
-    def __call__(self, text, return_prob=False):
+    def __call__(self, text, return_prob=False, debug=False):
         """Apply pipeline to a given text.
 
         Parameters
@@ -37,12 +37,18 @@ class TextMiningPipeline:
         text : str
             Arbitrarily long text without any preprocessing.
         return_prob : bool, optional
-        If True, the output table contains also a column with confidence scores.
+            If `True`, the column `confidence_score` of the output table is filled with estimates of the confidence of
+            the extracted entities and properties, i.e. float values between 0 and 1.
+            Notice that setting `return_prob=True` may return different entities, as to access the confindence scores of
+            spaCy it is necessary to perform a forward pass using an undocumented "beam" approach.
+        debug : bool, optional
+            If `True`, the output table contains extra columns that can be useful to debug the underlying machine
+            learning models.
 
         Returns
         -------
         table_extractions : pd.DataFrame
-                    Table containing the extracted entities, relations, and attributes.
+            Table containing the extracted entities, relations, and attributes.
         """
         headers = ['entity',
                    'entity_type',
@@ -54,9 +60,8 @@ class TextMiningPipeline:
                    'ontology_source',
                    'paper_id',
                    'start_char',
-                   'end_char']
-        if return_prob:
-            headers.append('confidence')
+                   'end_char',
+                   'confidence_score']
 
         doc = self.model_entities(text, disable=['ner'])
 
@@ -86,12 +91,14 @@ class TextMiningPipeline:
                                             'property_value_type': o_ent.entity_type
                                             }
                             if return_prob:
-                                row_relation.update(dict(zip(['property', 'confidence'],
+                                row_relation.update(dict(zip(['property', 'confidence_score'],
                                                              re_model.predict(annotated_sent, return_prob=True))))
                             else:
                                 row_relation.update({'property': re_model.predict(annotated_sent, return_prob=False)})
                             rows_relations.append(row_relation)
 
         df_relations = pd.DataFrame(rows_relations, columns=headers)
+        if not debug:
+            df_relations.drop('relation_model', axis=1, inplace=True)
 
-        return df_entities.append(df_relations, ignore_index=True)
+        return df_relations
