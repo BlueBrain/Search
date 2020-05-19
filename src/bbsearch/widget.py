@@ -146,7 +146,7 @@ class Widget:
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
-            options=['USE', 'SBERT', 'BSV', 'SBIOBERT'],
+            options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
                       'Sentence BioBERT'], )
@@ -222,7 +222,7 @@ class Widget:
         self.my_widgets['exclusion_text'].layout.display = 'none'
         # Remove some models (USE and SBERT)
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
-            options=['BSV', 'SBIOBERT'],
+            options=['BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['BioSentVec', 'Sentence BioBERT'], )
         # Remove some deprioritization strength
