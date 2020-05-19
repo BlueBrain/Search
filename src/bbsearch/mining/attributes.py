@@ -112,8 +112,8 @@ class AttributeExtractor:
 
         annotations = []
         for measurement in measurements:
-            annotations += [annotate_quantity(quantity)
-                            for quantity in self.iter_quantities(measurement)]
+            for quantity in self.iter_quantities(measurement):
+                annotations += annotate_quantity(quantity)
 
         sorted(annotations, key=lambda x: x[0])
         annotated_text = ''
