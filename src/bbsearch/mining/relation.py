@@ -13,9 +13,29 @@ class REModel(ABC):
     Inspired by SciBERT.
     """
 
+    @property
     @abstractmethod
+    def classes(self):
+        """list[str]: Names of supported relation classes."""
+
+    @abstractmethod
+    def predict_probs(self, annotated_sentence):
+        """Predict per-class probabilities for the relation between subject and object in an annotated sentence.
+
+        Parameters
+        ----------
+        annotated_sentence : str
+            Sentence with exactly 2 entities being annotated accordingly.
+            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
+
+        Returns
+        -------
+        relation_probs : pd.Series
+            Per-class probability vector. The index contains the class names, the values are the probabilities.
+        """
+
     def predict(self, annotated_sentence, return_prob=False):
-        """Predict the relation given an annotated sentence.
+        """Predict most likely relation between subject and object in an annotated sentence.
 
         Parameters
         ----------
@@ -32,6 +52,13 @@ class REModel(ABC):
         prob : float, optional
             Confidence of the predicted relation.
         """
+        probs = self.predict_probs(annotated_sentence)
+        relation = probs.idxmax()
+        if return_prob:
+            prob = probs.max()
+            return relation, prob
+        else:
+            return relation
 
     @property
     @abstractmethod
@@ -117,14 +144,13 @@ class ChemProt(REModel):
     ----------
     model_ : allennlp.predictors.text_classifier.TextClassifierPredictor
         The actual model in the backend.
-
-    classes : list
-        All possible classes.
     """
 
     def __init__(self, model_path):
         self.model_ = Predictor.from_path(model_path, predictor_name='text_classifier')
-        self.classes = [
+
+    def classes(self):
+        return [
             'INHIBITOR',
             'SUBSTRATE',
             'INDIRECT-DOWNREGULATOR',
@@ -144,31 +170,8 @@ class ChemProt(REModel):
         return {'GGP': ('[[ ', ' ]]'),
                 'CHEBI': ('<< ', ' >>')}
 
-    def predict_proba(self, annotated_sentence):
-        """Predict probability distribution over all classes.
-
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with entities being annotated accordingly.
-            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
-
-        Returns
-        -------
-        relation : pd.Series
-            Index represents all labels and the values are probabilities of each
-
-        """
+    def predict_probs(self, annotated_sentence):
         return pd.Series(self.model_.predict(sentence=annotated_sentence)['class_probs'], index=self.classes)
-
-    def predict(self, annotated_sentence, return_prob=False):
-        probs = self.predict_proba(annotated_sentence)
-        relation = probs.idxmax()
-        if return_prob:
-            prob = probs.max()
-            return relation, prob
-        else:
-            return relation
 
 
 class StartWithTheSameLetter(REModel):
@@ -176,8 +179,10 @@ class StartWithTheSameLetter(REModel):
 
     This relation is symmetric and works on any entity type.
     """
+    def classes(self):
+        return ['True', 'False']
 
-    def predict(self, annotated_sentence, return_prob=False):
+    def predict_probs(self, annotated_sentence):
         left_symbol, _ = self.symbols['anything']
         s_len = len(left_symbol)
 
@@ -187,12 +192,10 @@ class StartWithTheSameLetter(REModel):
         ent_1_first_letter = annotated_sentence[ent_1_first_letter_ix]
         ent_2_first_letter = annotated_sentence[ent_2_first_letter_ix]
 
-        relation = ent_1_first_letter.lower() == ent_2_first_letter.lower()
-        if return_prob:
-            prob = 1.0
-            return relation, prob
+        if ent_1_first_letter.lower() == ent_2_first_letter.lower():
+            return pd.Series([1, 0], index=self.classes)
         else:
-            return relation
+            return pd.Series([0, 1], index=self.classes)
 
     @property
     def symbols(self):
