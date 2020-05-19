@@ -193,7 +193,7 @@ class EmbeddingModels:
         with sqlite3.connect(str(database_path)) as db:
             curs = db.cursor()
             curs.execute("""SELECT sentence_id, text FROM sentences
-                        WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN 
+                        WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN
                         (SELECT article_id FROM articles WHERE has_covid19_tag is True))""")
             while True:
                 batch = curs.fetchmany(batch_size)

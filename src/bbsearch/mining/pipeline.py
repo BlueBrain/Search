@@ -65,14 +65,15 @@ class TextMiningPipeline:
 
         doc = self.model_entities(text, disable=['ner'])
 
+        # Extract entities in text
         df_entities = find_entities(doc, self.model_entities, return_prob)
         rows_relations = []
 
         for sent in doc.sents:
-            # Extract entities
+            # Select extracted entities in this sentence
             df_entities_sent = df_entities.loc[(df_entities.start_char >= sent.start_char) &
                                                (df_entities.end_char <= sent.end_char)]
-            # Extract relations
+            # Extract relations in this sentence
             for s_idx, s_ent in df_entities_sent.iterrows():  # potential subject
                 for o_idx, o_ent in df_entities_sent.iterrows():  # potential object
                     if s_idx == o_idx:  # relations cannot be between an entity and itself
@@ -98,7 +99,9 @@ class TextMiningPipeline:
                             rows_relations.append(row_relation)
 
         df_relations = pd.DataFrame(rows_relations, columns=headers)
-        if not debug:
-            df_relations.drop('relation_model', axis=1, inplace=True)
 
-        return df_relations
+        table_extractions = df_entities.append(df_relations, ignore_index=True)
+        if not debug:
+            table_extractions.drop('relation_model', axis=1, inplace=True)
+
+        return table_extractions

@@ -149,6 +149,7 @@ class ChemProt(REModel):
     def __init__(self, model_path):
         self.model_ = Predictor.from_path(model_path, predictor_name='text_classifier')
 
+    @property
     def classes(self):
         return [
             'INHIBITOR',
@@ -179,8 +180,10 @@ class StartWithTheSameLetter(REModel):
 
     This relation is symmetric and works on any entity type.
     """
+
+    @property
     def classes(self):
-        return ['True', 'False']
+        return ['START_WITH_SAME_LETTER', 'START_WITH_DIFFERENT_LETTER']
 
     def predict_probs(self, annotated_sentence):
         left_symbol, _ = self.symbols['anything']

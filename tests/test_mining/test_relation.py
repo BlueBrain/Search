@@ -76,5 +76,5 @@ def test_start_with_the_same_letter():
     annotated_sentence_1 = "Our [[ dad ]] walked the [[ Dog ]]."
     annotated_sentence_2 = "Our [[ dad ]] walked the [[ cat ]]."
 
-    assert re_model.predict(annotated_sentence_1) == 'True'
-    assert re_model.predict(annotated_sentence_2) == 'False'
+    assert re_model.predict(annotated_sentence_1) == 'START_WITH_SAME_LETTER'
+    assert re_model.predict(annotated_sentence_2) == 'START_WITH_DIFFERENT_LETTER'
