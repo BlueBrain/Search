@@ -41,7 +41,7 @@ def main():
     for model in args.models.split(','):
         model = model.strip()
         if model == 'BSV':
-            embedding_model = embedding_models.BSV()
+            embedding_model = embedding_models.BSV(checkpoint_model_path=Path(args.bsv_checkpoints))
         else:
             try:
                 embedding_model = getattr(embedding_models, model)()
