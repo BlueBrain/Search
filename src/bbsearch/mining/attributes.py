@@ -6,14 +6,11 @@ The main workhorse is the class `AttributeExtraction`.
 import collections
 import json
 import logging
-import textwrap
 import warnings
 
 import pandas as pd
 import requests
 from IPython.display import HTML
-
-from .entity import find_entities
 
 
 logger = logging.getLogger(__name__)
@@ -543,7 +540,7 @@ class AttributeExtractor:
             A pandas data frame with extracted attributes.
         """
         # NER
-        doc = find_entities(text, self.ee_model)
+        doc = self.ee_model(text)
         sent = list(doc.sents)[0]
         detected_entities = [ent for ent in sent.ents]
         logging.info("{} entities detected: {}".format(len(detected_entities), detected_entities))
