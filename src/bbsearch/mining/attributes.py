@@ -554,7 +554,10 @@ class AttributeExtractor:
         response_json = None
         try:
             request_data = text.encode("utf-8")
-            response = requests.post(self.core_nlp_url, data=request_data)
+            request_params = '?properties={"annotators":"depparse"}'
+            response = requests.post(
+                self.core_nlp_url + request_params,
+                data=request_data)
             assert response.status_code == 200
             response_json = json.loads(response.text)
         except requests.exceptions.RequestException:
