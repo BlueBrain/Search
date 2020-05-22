@@ -37,13 +37,17 @@ class Widget:
     def __init__(self,
                  embedding_models,
                  precomputed_embeddings,
-                 database):
+                 database,
+                 article_saver=None):
 
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
         self.database = database
 
         self.report = ''
+
+        self.radio_buttons = list()
+        self.article_saver = article_saver
 
         self.my_widgets = OrderedDict()
         self.initialize_widgets()
@@ -98,9 +102,9 @@ class Widget:
         formatted_output: str
             Formatted output of the sentence.
         """
-        article_sha, section_name, text = \
+        article_sha, section_name, text, paragraph_id = \
             self.database.execute(
-                'SELECT sha, section_name, text FROM sentences WHERE sentence_id = ?',
+                'SELECT sha, section_name, text, paragraph_id FROM sentences WHERE sentence_id = ?',
                 [sentence_id]).fetchall()[0]
         (article_id,) = self.database.execute(
             'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
@@ -140,7 +144,9 @@ class Widget:
                         """
         article_metadata = textwrap.dedent(article_metadata)
 
-        return article_metadata, formatted_output
+        article_infos = (article_id, paragraph_id)
+
+        return article_metadata, formatted_output, article_infos
 
     def initialize_widgets(self):
         """Initialize widget dictionary."""
@@ -203,6 +209,23 @@ class Widget:
             style={'description_width': 'initial'},
             description='Substring Exclusion (newline separated): ')
 
+        self.my_widgets['default_value_article_saver'] = widgets.ToggleButtons(
+            options=['Do not take this article',
+                     'Extract the paragraph',
+                     'Extract the entire article'],
+            disabled=False,
+            style={'description_width': 'initial', 'button_width': '200px'},
+            description='Default saving: ', )
+
+        def default_value_article_saver_change(change):
+            if self.radio_buttons:
+                for button in self.radio_buttons:
+                    button[1].value = change['new']
+                return change['new']
+
+        self.my_widgets['default_value_article_saver'].observe(default_value_article_saver_change,
+                                                               names='value')
+
         # Click to run Information Retrieval!
         self.my_widgets['investigate_button'] = widgets.Button(description='Investigate!')
 
@@ -210,12 +233,15 @@ class Widget:
         self.my_widgets['report_button'] = widgets.Button(description='Generate PDF Report!',
                                                           layout=widgets.Layout(width='25%'))
 
+        self.my_widgets['articles_button'] = widgets.Button(description='Generate saved articles Report!',
+                                                            layout=widgets.Layout(width='25%'))
         # Output Area
         self.my_widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
         # Callbacks
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
         self.my_widgets['report_button'].on_click(self.report_on_click)
+        self.my_widgets['articles_button'].on_click(self.article_report_on_click)
 
     def hide_from_user(self):
         """Hide from the user not used functionalities in the widgets."""
@@ -235,7 +261,10 @@ class Widget:
 
     def investigate_on_click(self, change_dict):
         """Investigate button."""
+        # Clear widget output + All the radio buttons
         self.my_widgets['out'].clear_output()
+        self.radio_buttons = list()
+
         with self.my_widgets['out']:
             sentence_embedder_name = self.my_widgets['sent_embedder'].value
             k = self.my_widgets['top_results'].value
@@ -262,13 +291,63 @@ class Widget:
             print(f'\nInvestigating: {query_text}\n')
 
             for sentence_id in sentence_ids:
-                article_metadata, formatted_output = self.print_single_result(int(sentence_id), print_whole_paragraph)
+                article_metadata, formatted_output, article_infos = \
+                    self.print_single_result(int(sentence_id), print_whole_paragraph)
+
+                radio_button = self.create_radio_buttons(article_infos, article_metadata)
+                status = self.article_saver.status_on_article_retrieve(article_infos)
 
                 IPython.display.display(HTML(article_metadata))
+                IPython.display.display(radio_button)
+                IPython.display.display(HTML(status))
                 IPython.display.display(HTML(formatted_output))
 
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
+
+    def create_radio_buttons(self, article_infos, articles_metadata):
+        """Create radio button."""
+        default_value = self.article_saver.saved_articles[article_infos][0] \
+            if article_infos in self.article_saver.saved_articles.keys() \
+            else self.my_widgets['default_value_article_saver'].value
+
+        radio_button = widgets.ToggleButtons(
+            options=['Do not take this article',
+                     'Extract the paragraph',
+                     'Extract the entire article'],
+            value=default_value,
+            description='Saving: ',
+            style={'description_width': 'initial', 'button_width': '200px'},
+            disabled=False)
+
+        if radio_button.value != 'Do not take this article':
+            self.article_saver.saved_articles[article_infos] = (radio_button.value, articles_metadata)
+
+        def on_value_change(change):
+            for i in self.radio_buttons:
+                self.article_saver.saved_articles[i[0]] = (i[1].value, articles_metadata)
+            return change['new']
+
+        self.radio_buttons.append((article_infos, radio_button))
+        self.radio_buttons[-1][-1].observe(on_value_change, names='value')
+        return radio_button
+
+    def article_report_on_click(self, change_dict):
+
+        print("Saving articles results to a pdf file.")
+        article_report = ''
+        width = 80
+
+        self.article_saver.retrieve_text()
+        for metadata, text in self.article_saver.articles_text:
+            article_report += metadata
+            article_report += textwrap.fill(text, width=width)
+            article_report += '<br/>' + '<br/>'
+
+        pdfkit.from_string(article_report,
+                           f"report_{datetime.datetime.now()}.pdf")
+
+        print('Report Generated')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
