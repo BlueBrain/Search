@@ -8,9 +8,14 @@ import pytest
 import spacy
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
-N_SENTENCES_PER_SECTION = 3
-N_SECTIONS_PER_ARTICLE = 2
-EMBEDDING_SIZE = 2
+
+
+@pytest.fixture(scope='session')
+def test_parameters():
+    """Parameters needed for the tests"""
+    return {'n_sentences_per_section': 3,
+            'n_sections_per_article': 2,
+            'embedding_size': 2}
 
 
 @pytest.fixture(scope='session')
@@ -22,7 +27,7 @@ def assets_path(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def cnxn(tmp_path_factory):
+def fake_db_cnxn(tmp_path_factory):
     """Connection object (sqlite)."""
     db_path = tmp_path_factory.mktemp('db', numbered=False) / 'dummy.sqlite'
     cnxn = sqlite3.connect(str(db_path))
@@ -32,9 +37,9 @@ def cnxn(tmp_path_factory):
 
 
 @pytest.fixture(scope='session')
-def cursor(cnxn, jsons_path, metadata_path):
+def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
     """Database object (sqlite)."""
-    cursor = cnxn.cursor()
+    cursor = fake_db_cnxn.cursor()
     # create
 
     articles_schema = {'article_id': 'TEXT PRIMARY KEY',
@@ -52,17 +57,24 @@ def cursor(cnxn, jsons_path, metadata_path):
                        'covidence_id': 'TEXT',
                        'has_pdf_parse': 'BOOLEAN',
                        'has_pmc_xml_parse': 'BOOLEAN',
-                       'has_covid19_tag': 'BOOLEAN DEFAULT False',
+                       'has_covid19_tag': 'BOOLEAN DEFAULT True',
                        'fulltext_directory': 'TEXT',
                        'url': 'TEXT'}
 
     article_id_2_sha_schema = {'article_id': 'TEXT',
                                'sha': 'TEXT'}
 
+    paragraphs_schema = {'paragraph_id': 'INTEGER PRIMARY KEY',
+                         'sha': 'TEXT',
+                         'section_name': 'TEXT',
+                         'text': 'TEXT',
+                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
+
     sentences_schema = {'sentence_id': 'INTEGER PRIMARY KEY',
                         'sha': 'TEXT',
                         'section_name': 'TEXT',
                         'text': 'TEXT',
+                        'paragraph_id': 'INTEGER',
                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
 
     stmt_create_articles = "CREATE TABLE articles ({})".format(
@@ -71,11 +83,15 @@ def cursor(cnxn, jsons_path, metadata_path):
     stmt_create_id_2_sha = "CREATE TABLE article_id_2_sha ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in article_id_2_sha_schema.items()]))
 
+    stmt_create_paragraphs = "CREATE TABLE paragraphs ({})".format(
+        ', '.join(['{} {}'.format(k, v) for k, v in paragraphs_schema.items()]))
+
     stmt_create_sentences = "CREATE TABLE sentences ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
 
     cursor.execute(stmt_create_articles)
     cursor.execute(stmt_create_id_2_sha)
+    cursor.execute(stmt_create_paragraphs)
     cursor.execute(stmt_create_sentences)
 
     # Populate
@@ -103,28 +119,43 @@ def cursor(cnxn, jsons_path, metadata_path):
     metadata_df = pd.read_csv(str(metadata_path)).rename(columns=name_mapping).set_index('article_id')
 
     article_id_2_content = metadata_df['sha']
-    article_id_2_content.to_sql(name='article_id_2_sha', con=cnxn, index=True, if_exists='append')
+    article_id_2_content.to_sql(name='article_id_2_sha', con=fake_db_cnxn, index=True, if_exists='append')
 
     articles_content = metadata_df.drop(columns=['sha'])
-    articles_content.to_sql(name='articles', con=cnxn, index=True, if_exists='append')
+    articles_content.to_sql(name='articles', con=fake_db_cnxn, index=True, if_exists='append')
 
-    temp = []
+    temp_s = []
+    temp_p = []
+    paragraph_id = 0
     for sha in article_id_2_content[article_id_2_content.notna()].unique():
-        for sec_ix in range(N_SECTIONS_PER_ARTICLE):
-            for sen_ix in range(N_SENTENCES_PER_SECTION):
-                s = pd.Series({'text': 'I am a sentence {} in section {} in article {}'.format(sen_ix, sec_ix, sha),
+        for sec_ix in range(test_parameters['n_sections_per_article']):
+            paragraph_text = ''
+            for sen_ix in range(test_parameters['n_sentences_per_section']):
+                s = pd.Series({'text': 'I am a sentence {} in section {} in article {}.'.format(sen_ix, sec_ix, sha),
                                'section_name': 'section_{}'.format(sec_ix),
-                               'sha': sha
+                               'sha': sha,
+                               'paragraph_id': paragraph_id
                                })
-                temp.append(s)
+                temp_s.append(s)
+                paragraph_text += s['text']
 
-    sentences_content = pd.DataFrame(temp)
+            p = pd.Series({'text': paragraph_text,
+                           'section_name': 'section_{}'.format(sec_ix),
+                           'sha': sha})
+            temp_p.append(p)
+            paragraph_id += 1
+
+    sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
-    sentences_content.to_sql(name='sentences', con=cnxn, index=True, if_exists='append')
+    sentences_content.to_sql(name='sentences', con=fake_db_cnxn, index=True, if_exists='append')
+
+    paragraphs_content = pd.DataFrame(temp_p)
+    paragraphs_content.index.name = 'paragraph_id'
+    paragraphs_content.to_sql(name='paragraphs', con=fake_db_cnxn, index=True, if_exists='append')
 
     yield cursor
 
-    cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
+    fake_db_cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
 
 
 @pytest.fixture(scope='session')
@@ -146,19 +177,20 @@ def metadata_path():
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, cursor):
+def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
-    models = ['BERT', 'BIOBERT']
+    models = ['SBERT', 'SBIOBERT', 'USE', 'BSV']
 
-    n_sentences = cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
 
     for model in models:
         model_path = embeddings_path / model / '{}.npy'.format(model)
         model_path.parent.mkdir(parents=True)
-        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1), np.random.random((n_sentences, EMBEDDING_SIZE))],
+        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
+                            np.random.random((n_sentences, test_parameters['embedding_size']))],
                            axis=1)
 
         np.save(str(model_path), a)
