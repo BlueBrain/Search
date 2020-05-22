@@ -34,5 +34,5 @@ USER corenlpuser
 # Expose a port
 EXPOSE 9000
 
-ENTRYPOINT exec java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000
+ENTRYPOINT exec java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -annotators "tokenize,ssplit,pos,depparse"
 
