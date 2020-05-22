@@ -100,9 +100,10 @@ class AttributeExtractor:
         logger.debug(f"quantity_types: {quantity_types}")
 
         quantity_type_counts = collections.Counter(quantity_types)
-        sorted(quantity_type_counts.most_common(),
-               key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == '')))
-        measurement_type = quantity_type_counts[0][0]
+        most_common_quantity_types = sorted(
+            quantity_type_counts.most_common(),
+            key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == '')))
+        measurement_type = most_common_quantity_types[0][0]
 
         return measurement_type
 
