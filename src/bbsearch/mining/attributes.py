@@ -556,7 +556,8 @@ class AttributeExtractor:
         logging.info("Sending CoreNLP query...")
         response_json = None
         try:
-            response = requests.post(self.core_nlp_url, data=text)
+            request_data = text.encode("utf-8")
+            response = requests.post(self.core_nlp_url, data=request_data)
             assert response.status_code == 200
             response_json = json.loads(response.text)
         except requests.exceptions.RequestException:
