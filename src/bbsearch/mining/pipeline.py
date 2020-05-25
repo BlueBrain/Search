@@ -36,6 +36,8 @@ class TextMiningPipeline:
         ----------
         text : str
             Arbitrarily long text without any preprocessing.
+        article_id: str
+            Article_id if text comes from an article from the database.
         return_prob : bool, optional
             If `True`, the column `confidence_score` of the output table is filled with estimates of the confidence of
             the extracted entities and properties, i.e. float values between 0 and 1.
