@@ -483,6 +483,8 @@ class AttributeExtractor:
                 return nn_parents
 
         results = []
+        if tokens_d[token_idx]["pos"].startswith("NN"):
+            results.append(token_idx)
         for parent_idx in self.iter_parents(dependencies, token_idx):
             results += get_nn(parent_idx)
 
