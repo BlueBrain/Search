@@ -50,7 +50,7 @@ class ArticleSaver:
         if article_infos in self.saved_articles.keys():
             status = f"""<p style="font-size:13px; color:{color_text}">
             You have already seen this paragraph and you chose the option
-            <b style="color:{color_highlight}"> {self.saved_articles[article_infos][0]} </b> </p>"""
+            <b style="color:{color_highlight}"> {self.saved_articles[article_infos]} </b> </p>"""
             return status
 
         if article_infos[0] in [k[0] for k in self.saved_articles.keys()]:
