@@ -474,7 +474,7 @@ class AttributeExtractor:
             A list of parents.
         """
         def get_nn(idx):
-            if tokens_d[idx]['pos'] == 'NN':
+            if tokens_d[idx]["pos"].startswith("NN"):
                 return [idx]
             else:
                 nn_parents = []
