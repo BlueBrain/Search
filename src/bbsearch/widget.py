@@ -32,6 +32,10 @@ class Widget:
 
     database: sqlite3.Cursor
         Cursor to the database used for the search engine.
+
+    article_saver: ArticleSaver
+        If specified, this article saver will keep all the article_id
+        of interest for the user during the different queries.
     """
 
     def __init__(self,
