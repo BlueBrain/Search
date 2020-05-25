@@ -531,6 +531,18 @@ class AttributeExtractor:
 
     @staticmethod
     def quantity_to_str(quantity):
+        """Convert a Grobid quantity to string.
+
+        Parameters
+        ----------
+        quantity : dict
+            A Grobid quantity.
+
+        Returns
+        -------
+        result : str
+            A String representation of the quantity.
+        """
         result = str(quantity["rawValue"])
         if "rawUnit" in quantity:
             result += " " + quantity["rawUnit"]["name"]
@@ -538,6 +550,22 @@ class AttributeExtractor:
         return result
 
     def measurement_to_str(self, measurement):
+        """Convert a Grobid measurement to string.
+
+        Parameters
+        ----------
+        measurement : dict
+            A Grobid measurement.
+
+        Returns
+        -------
+        quantities : list or str
+            String representations of quantities in a measurement.
+            If the measurement contains only one quantity then
+            its string representation is return as is. Otherwise
+            a list of string representations of quantities is
+            returned.
+        """
         quantities = [self.quantity_to_str(quantity)
                       for quantity in self.iter_quantities(measurement)]
 
@@ -547,6 +575,25 @@ class AttributeExtractor:
         return quantities
 
     def process_raw_annotation_df(self, df, copy=True):
+        """Add standard columns to attribute data frame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            A data frame with measurements in a raw format. This can
+            be obtained by calling `extract_attributes` with the
+            parameter `raw_attributes=True`.
+        copy : bool
+            If true then it is guaranteed that the original
+            data frame won't be modified.
+
+        Returns
+        -------
+        df : pd.DataFrame
+            A modified data frame with the raw attribute column
+            replaced by a number of more explicit columns using
+            the standard nomenclature.
+        """
         if copy:
             df = df.copy()
         if "attribute" not in df.columns:
@@ -664,7 +711,29 @@ class AttributeExtractor:
 
 
 class AttributeAnnotationTab(widgets.Tab):
+    """A tab widget for displaying attribute extractions.
+
+    It is a subclass of the `ipywidgets.Tab` class and contains
+    the following four tabs:
+    - Raw Text
+    - Named Entites
+    - Attributes
+    - Table
+    """
+
     def __init__(self, attribute_extractor, ee_model, text=None):
+        """Initialize class instance.
+
+        Parameters
+        ----------
+        attribute_extractor : AttributeExtractor
+            An instance of an attribute extractor.
+        ee_model : spacy.language.Language
+            A spacy model for named entity extraction.
+        text : str, optional
+            A text to initialize the widget with. Can be set or
+            changed later with `set_text`.
+        """
         super().__init__()
 
         self.attribute_extractor = attribute_extractor
@@ -688,6 +757,13 @@ class AttributeAnnotationTab(widgets.Tab):
             self.set_title(i, name)
 
     def set_text(self, text):
+        """Set the text for the widget.
+
+        Parameters
+        ----------
+        text : str
+            The text to assign to this widget.
+        """
         text = textwrap.dedent(text).strip()
         df = self.attribute_extractor.extract_attributes(
             text, linked_attributes_only=False)
@@ -712,8 +788,25 @@ class AttributeAnnotationTab(widgets.Tab):
 
 
 class TextCollectionWidget(widgets.VBox):
+    """A widget displaying annotations for a number o texts.
+
+    The text can be selected using a slider and the annotation
+    results will be displayed in an `AttributeAnnotationTab`
+    widget.
+    """
 
     def __init__(self, texts, attribute_extractor, ee_model):
+        """Initialize class instance.
+
+        Parameters
+        ----------
+        texts : list_like
+            A list of strings with texts to be annotated.
+        attribute_extractor : AttributeExtractor
+            An instance of an attribute extractor.
+        ee_model : spacy.language.Language
+            A spacy model for named entity extraction.
+        """
         super().__init__()
 
         assert len(texts) > 0
