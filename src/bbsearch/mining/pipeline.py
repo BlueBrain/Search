@@ -29,7 +29,7 @@ class TextMiningPipeline:
         self.model_entities = model_entities
         self.models_relations = models_relations
 
-    def __call__(self, text, return_prob=False, debug=False):
+    def __call__(self, text, article_id=None, return_prob=False, debug=False):
         """Apply pipeline to a given text.
 
         Parameters
@@ -67,6 +67,7 @@ class TextMiningPipeline:
 
         # Extract entities in text
         df_entities = find_entities(doc, self.model_entities, return_prob)
+        df_entities['paper_id'] = article_id
         rows_relations = []
 
         for sent in doc.sents:
