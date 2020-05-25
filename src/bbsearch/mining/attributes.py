@@ -218,12 +218,13 @@ class AttributeExtractor:
             for quantity in self.iter_quantities(measurement):
                 annotations += annotate_quantity(quantity)
 
-        sorted(annotations, key=lambda x: x[0])
+        annotations = sorted(annotations, key=lambda x: x[0])
         annotated_text = ''
         last_idx = 0
         for start, end, quantity in annotations:
-            annotated_text += text[last_idx:start] + quantity
-            last_idx = end
+            if start >= last_idx:
+                annotated_text += text[last_idx:start] + quantity
+                last_idx = end
         annotated_text += text[last_idx:]
         html = css_styles + "<div class=\"fixedWidth\">" + annotated_text + "</div>"
 
