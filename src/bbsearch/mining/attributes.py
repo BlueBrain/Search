@@ -526,7 +526,48 @@ class AttributeExtractor:
 
         return parent_ids
 
-    def extract_attributes(self, text, linked_attributes_only=True):
+    @staticmethod
+    def quantity_to_str(quantity):
+        result = str(quantity["rawValue"])
+        if "rawUnit" in quantity:
+            result += " " + quantity["rawUnit"]["name"]
+
+        return result
+
+    def measurement_to_str(self, measurement):
+        quantities = [self.quantity_to_str(quantity)
+                      for quantity in self.iter_quantities(measurement)]
+
+        if len(quantities) == 1:
+            quantities = quantities[0]
+
+        return quantities
+
+    def process_raw_annotation_df(self, df, copy=True):
+        if copy:
+            df = df.copy()
+        if "attribute" not in df.columns:
+            return df
+
+        def get_property(attribute):
+            m_type = self.get_measurement_type(attribute)
+            if len(m_type) > 0:
+                return f"has {m_type} {attribute['type']}"
+            else:
+                return f"has {attribute['type']}"
+
+        df["property"] = df["attribute"].apply(get_property)
+        df["property_type"] = "attribute"
+        df["property_value"] = df["attribute"].apply(self.measurement_to_str)
+        df["property_value_type"] = "int"
+        df.drop(columns="attribute", inplace=True)
+
+        return df
+
+    def extract_attributes(self,
+                           text,
+                           linked_attributes_only=True,
+                           raw_attributes=False):
         """Extract attributes from text.
 
         Parameters
@@ -536,7 +577,11 @@ class AttributeExtractor:
         linked_attributes_only : bool
             If true then only those attributes will be recorded
             for which there is an associated named entity.
-
+        raw_attributes : bool
+            If true then the resulting data frame will contain all
+            attribute information in one single column with raw
+            grobid measurements. If false then the raw data frame
+            will be processed using `process_raw_annotation_df`
         Returns
         -------
         df : pd.DataFrame
@@ -609,4 +654,9 @@ class AttributeExtractor:
 
         df_attributes = pd.DataFrame(rows, columns=columns)
 
-        return df_attributes
+        if raw_attributes:
+            return df_attributes
+        else:
+            return self.process_raw_annotation_df(df_attributes)
+
+
