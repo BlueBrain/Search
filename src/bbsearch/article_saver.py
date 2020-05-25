@@ -26,7 +26,6 @@ class ArticleSaver:
 
         self.articles_text = dict()
         self.articles_metadata = dict()
-        print('new_test')
 
     def status_on_article_retrieve(self,
                                    article_infos):
@@ -77,7 +76,6 @@ class ArticleSaver:
         cleaned_saved_articles: dict
             Clean dictionary of all the articles/paragraphs to keep.
         """
-        print('cleaning')
         cleaned_saved_articles = dict()
         articles_id_dict = defaultdict(set)
 
