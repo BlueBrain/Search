@@ -6,11 +6,14 @@ The main workhorse is the class `AttributeExtraction`.
 import collections
 import json
 import logging
+import textwrap
 import warnings
 
 import pandas as pd
 import requests
-from IPython.display import HTML
+import ipywidgets as widgets
+from spacy import displacy
+from IPython.display import display, HTML
 
 
 logger = logging.getLogger(__name__)
@@ -660,3 +663,80 @@ class AttributeExtractor:
             return self.process_raw_annotation_df(df_attributes)
 
 
+class AttributeAnnotationTab(widgets.Tab):
+    def __init__(self, attribute_extractor, ee_model, text=None):
+        super().__init__()
+
+        self.attribute_extractor = attribute_extractor
+        self.ee_model = ee_model
+
+        self._init_ui()
+
+        if text is not None:
+            self.set_text(text)
+
+    def _init_ui(self):
+        self.outputs = collections.OrderedDict()
+        self.outputs["Raw Text"] = widgets.Output()
+        self.outputs["Named Entities"] = widgets.Output(
+            layout=widgets.Layout(width="80ch"))
+        self.outputs["Attributes"] = widgets.Output()
+        self.outputs["Table"] = widgets.Output()
+
+        self.children = list(self.outputs.values())
+        for i, name in enumerate(self.outputs):
+            self.set_title(i, name)
+
+    def set_text(self, text):
+        text = textwrap.dedent(text).strip()
+        df = self.attribute_extractor.extract_attributes(
+            text, linked_attributes_only=False)
+        doc = self.ee_model(text)
+        measurements = self.attribute_extractor.get_grobid_measurements(text)
+
+        for canvas in self.outputs.values():
+            canvas.clear_output()
+
+        with self.outputs["Raw Text"]:
+            print(textwrap.fill(text, 80))
+        with self.outputs["Named Entities"]:
+            displacy_out = displacy.render(doc, style="ent")
+            if displacy_out is not None:
+                display(HTML(displacy_out))
+        with self.outputs["Attributes"]:
+            annotated = self.attribute_extractor.annotate_quantities(
+                text, measurements, 70)
+            display(annotated)
+        with self.outputs["Table"]:
+            display(df)
+
+
+class TextCollectionWidget(widgets.VBox):
+
+    def __init__(self, texts, attribute_extractor, ee_model):
+        super().__init__()
+
+        assert len(texts) > 0
+        self.texts = texts
+
+        self.idx_slider = widgets.IntSlider(
+            description="Text ID",
+            value=0,
+            min=0,
+            max=len(texts) - 1,
+            continuous_update=False)
+        self.idx_slider.observe(self._on_idx_change, names="value")
+        self.tab = AttributeAnnotationTab(attribute_extractor, ee_model)
+
+        text = self.texts[self.idx_slider.value]
+        self.tab.set_text(text)
+
+        self.children = [
+            self.idx_slider,
+            self.tab,
+        ]
+
+    def _on_idx_change(self, event):
+        idx = event["new"]
+        text = self.texts[idx]
+        self.tab.set_text(text)
