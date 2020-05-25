@@ -541,9 +541,7 @@ class AttributeExtractor:
         """
         # NER
         doc = self.ee_model(text)
-        sent = list(doc.sents)[0]
-        detected_entities = [ent for ent in sent.ents]
-        logging.info("{} entities detected: {}".format(len(detected_entities), detected_entities))
+        logging.info("{} entities detected: {}".format(len(doc.ents), doc.ents))
 
         # Grobid Quantities
         measurements = self.get_grobid_measurements(text)
@@ -576,7 +574,7 @@ class AttributeExtractor:
         rows = []
         recorded_measurements = set()
 
-        for entity in detected_entities:
+        for entity in doc.ents:
             for i, measurement in enumerate(measurements):
                 for corenlp_sentence in response_json['sentences']:
                     tokens = corenlp_sentence['tokens']
