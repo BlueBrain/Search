@@ -63,6 +63,8 @@ class TestArticleSaver:
             assert ('new_id', i) in all_articles
             if i >= 2:
                 assert ('new_id', i) in cleaned_articles
+            else:
+                assert ('new_id', i) not in cleaned_articles
 
         # All the options
         article_saver.saved_articles[('new_id', 4)] = 'Extract the entire article'

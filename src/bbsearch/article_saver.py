@@ -150,7 +150,6 @@ class ArticleSaver:
         self.articles_text.clear()
 
         clean_saved_articles = self.clean_saved_articles()
-        print(clean_saved_articles)
 
         for article_infos, option in clean_saved_articles.items():
             if self.options[option] == 'paragraph':
