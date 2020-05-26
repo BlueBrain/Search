@@ -8,7 +8,7 @@ FROM continuumio/miniconda3
 RUN \
 conda update conda && \
 apt-get update && \
-apt-get install -y gcc g++
+apt-get install -y gcc g++ wkhtmltopdf
 
 # Install sent2vec
 RUN pip install Cython numpy
@@ -22,11 +22,6 @@ RUN pip install -r requirements.txt
 
 # Install PyTorch
 # RUN conda install pytorch torchvision -c pytorch
-
-# HTML to PDF
-RUN wget https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.3/wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-RUN tar vxf wkhtmltox-0.12.3_linux-generic-amd64.tar.xz
-RUN cp wkhtmltox/bin/* /usr/local/bin/
 
 # jupyterlab-manager
 # RUN conda remove wrapt
