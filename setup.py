@@ -10,6 +10,7 @@ install_requires = [
     'numpy',
     'pandas',
     'requests',
+    'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
     'scipy',
     'sent2vec-prebuilt',
