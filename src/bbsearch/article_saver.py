@@ -151,7 +151,13 @@ class ArticleSaver:
                 self.articles_text[article_infos] = article
 
     def report(self):
-        """Create the saved articles report."""
+        """Create the saved articles report.
+
+        Returns
+        -------
+        path: str
+            Path where the report is generated
+        """
         print("Saving articles results to a pdf file.")
         article_report = ''
         width = 80
@@ -162,10 +168,10 @@ class ArticleSaver:
             article_report += textwrap.fill(text, width=width)
             article_report += '<br/>' + '<br/>'
 
-        pdfkit.from_string(article_report,
-                           f"report_{datetime.datetime.now()}.pdf")
-
+        path = f"report_{datetime.datetime.now()}.pdf"
+        pdfkit.from_string(article_report, path)
         print('Report Generated')
+        return path
 
     def summary_table(self):
         """Create a dataframe table with saved articles.
@@ -175,13 +181,12 @@ class ArticleSaver:
         table: pd.DataFrame
             DataFrame containing all the paragraphs seen and choice made for it.
         """
-        clean_saved_articles = self.clean_saved_articles()
         articles = []
-        for article_infos, option in clean_saved_articles:
-            articles += {'article_id': article_infos[0],
-                         'choice': option,
-                         'paragraph': self.extract_paragraph(article_infos[1])}
+        for article_infos, option in self.saved_articles.items():
+            articles += [{'article_id': article_infos[0],
+                          'choice': option,
+                          'paragraph': self.extract_paragraph(article_infos[1])}]
         table = pd.DataFrame(data=articles,
-                                     columns=['article_id', 'choice', 'paragraph'])
+                             columns=['article_id', 'choice', 'paragraph'])
         table.sort_values(by=['article_id'])
         return table
