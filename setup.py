@@ -6,6 +6,7 @@ description = "Blue Brain Search"
 
 install_requires = [
     'Flask',
+    'ipywidgets',
     'numpy',
     'pandas',
     'requests',
