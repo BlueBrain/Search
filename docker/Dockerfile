@@ -14,6 +14,7 @@ RUN true \
 # Install requirements.txt
 RUN mkdir -p /bbs/tmp
 COPY /requirements.txt /bbs/tmp
+RUN pip install Cython numpy
 RUN pip install -r /bbs/tmp/requirements.txt
 
 # Jupyter
