@@ -172,7 +172,7 @@ class ArticleSaver:
 
         Returns
         -------
-        summary_table: pd.DataFrame
+        table: pd.DataFrame
             DataFrame containing all the paragraphs seen and choice made for it.
         """
         clean_saved_articles = self.clean_saved_articles()
@@ -181,7 +181,7 @@ class ArticleSaver:
             articles += {'article_id': article_infos[0],
                          'choice': option,
                          'paragraph': self.extract_paragraph(article_infos[1])}
-        summary_table = pd.DataFrame(data=articles,
+        table = pd.DataFrame(data=articles,
                                      columns=['article_id', 'choice', 'paragraph'])
-        summary_table.sort_values(by=['article_id'])
-        return summary_table
+        table.sort_values(by=['article_id'])
+        return table
