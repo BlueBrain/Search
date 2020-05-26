@@ -14,6 +14,10 @@ from .sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 
+SAVING_OPTIONS = {'nothing': 'Do not take this article',
+                  'paragraph': 'Extract the paragraph',
+                  'article': 'Extract the entire article'}
+
 
 class Widget:
     """Widget for search engine.
@@ -52,6 +56,7 @@ class Widget:
 
         self.radio_buttons = list()
         self.article_saver = article_saver
+        self.saving_options = [v for k, v in SAVING_OPTIONS.items()]
 
         self.my_widgets = OrderedDict()
         self.initialize_widgets()
@@ -214,17 +219,15 @@ class Widget:
             description='Substring Exclusion (newline separated): ')
 
         self.my_widgets['default_value_article_saver'] = widgets.ToggleButtons(
-            options=['Do not take this article',
-                     'Extract the paragraph',
-                     'Extract the entire article'],
+            options=self.saving_options,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: ', )
 
         def default_value_article_saver_change(change):
             if self.radio_buttons:
-                for button in self.radio_buttons:
-                    button[1].value = change['new']
+                for article_infos, button in self.radio_buttons:
+                    button.value = change['new']
                 return change['new']
 
         self.my_widgets['default_value_article_saver'].observe(default_value_article_saver_change,
@@ -300,7 +303,7 @@ class Widget:
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     radio_button = self.create_radio_buttons(article_infos, article_metadata)
-                    status = self.article_saver.status_on_article_retrieve(article_infos)
+                    status = self.status_article_retrieve(article_infos)
 
                 IPython.display.display(HTML(article_metadata))
                 if self.article_saver:
@@ -311,6 +314,13 @@ class Widget:
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
 
+    def status_article_retrieve(self, article_infos):
+        """Return information about the saving choice of this article."""
+        color_text = '#bdbdbd'
+        status = self.article_saver.status_on_article_retrieve(article_infos)
+        status = f"""<p style="font-size:13px; color:{color_text}"> {status} </p>"""
+        return status
+
     def create_radio_buttons(self, article_infos, articles_metadata):
         """Create radio button."""
         default_value = self.article_saver.saved_articles[article_infos] \
@@ -318,22 +328,20 @@ class Widget:
             else self.my_widgets['default_value_article_saver'].value
 
         radio_button = widgets.ToggleButtons(
-            options=['Do not take this article',
-                     'Extract the paragraph',
-                     'Extract the entire article'],
+            options=self.saving_options,
             value=default_value,
             description='Saving: ',
             style={'description_width': 'initial', 'button_width': '200px'},
             disabled=False)
 
-        if radio_button.value != 'Do not take this article':
+        if radio_button.value != SAVING_OPTIONS['article']:
             self.article_saver.saved_articles[article_infos] = radio_button.value
             self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
 
         def on_value_change(change):
-            for i in self.radio_buttons:
-                self.article_saver.saved_articles[i[0]] = i[1].value
-                self.article_saver.articles_metadata[i[0][0]] = articles_metadata
+            for article_infos, button in self.radio_buttons:
+                self.article_saver.saved_articles[article_infos[0]] = button.value
+                self.article_saver.articles_metadata[article_infos[0][0]] = articles_metadata
             return change['new']
 
         self.radio_buttons.append((article_infos, radio_button))
@@ -342,20 +350,7 @@ class Widget:
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        print("Saving articles results to a pdf file.")
-        article_report = ''
-        width = 80
-
-        self.article_saver.retrieve_text()
-        for article_infos, text in self.article_saver.articles_text.items():
-            article_report += self.article_saver.articles_metadata[article_infos[0]]
-            article_report += textwrap.fill(text, width=width)
-            article_report += '<br/>' + '<br/>'
-
-        pdfkit.from_string(article_report,
-                           f"report_{datetime.datetime.now()}.pdf")
-
-        print('Report Generated')
+        self.article_saver.report()
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""

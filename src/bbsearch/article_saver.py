@@ -1,7 +1,13 @@
 """Module for the article_saver."""
 from collections import defaultdict
+import datetime
+import pdfkit
+import textwrap
+
+import pandas as pd
 
 from .sql import get_shas_from_ids
+from .widget import SAVING_OPTIONS
 
 
 class ArticleSaver:
@@ -20,15 +26,11 @@ class ArticleSaver:
         self.db = database
 
         self.saved_articles = dict()
-        self.options = {'Do not take this article': 'nothing',
-                        'Extract the paragraph': 'paragraph',
-                        'Extract the entire article': 'article'}
 
         self.articles_text = dict()
         self.articles_metadata = dict()
 
-    def status_on_article_retrieve(self,
-                                   article_infos):
+    def status_on_article_retrieve(self, article_infos):
         """Send status about an article given the article_infos (article_id, paragraph_id).
 
         Parameters
@@ -39,23 +41,16 @@ class ArticleSaver:
         Returns
         -------
         status: str
-            String in HTML format explaining if the given article has already been seen,
+            String explaining if the given article has already been seen,
             and if yes which option has been chosen by the user.
         """
-        color_text = '#bdbdbd'
-        color_highlight = '#a8a8a8'
-
-        status = f"""<p style="font-size:13px; color:{color_text}">
-        You have never seen this article </p>"""
+        status = 'You have never seen this article'
         if article_infos in self.saved_articles.keys():
-            status = f"""<p style="font-size:13px; color:{color_text}">
-            You have already seen this paragraph and you chose the option
-            <b style="color:{color_highlight}"> {self.saved_articles[article_infos]} </b> </p>"""
+            status = f'You have already seen this paragraph and ' \
+                     f'you chose the option: {self.saved_articles[article_infos]}.'
             return status
-
         if article_infos[0] in [k[0] for k in self.saved_articles.keys()]:
-            status = f"""<p style="font-size:13px; color:{color_text}">
-            You have already seen this article through different paragraphs </p>"""
+            status = f'You have already seen this article through different paragraphs'
 
         return status
 
@@ -83,15 +78,14 @@ class ArticleSaver:
             articles_id_dict[article_infos[0]].add(option)
 
         for article_id, option_set in articles_id_dict.items():
-            if 'Extract the entire article' in option_set:
-                cleaned_saved_articles[(article_id, None)] = 'Extract the entire article'
-                continue
-            elif 'Extract the paragraph' in option_set:
+            if SAVING_OPTIONS['article'] in option_set:
+                cleaned_saved_articles[(article_id, None)] = SAVING_OPTIONS['article']
+            elif SAVING_OPTIONS['paragraph'] in option_set:
                 paragraphs_id = [article_infos[1] for article_infos, option in self.saved_articles.items()
                                  if article_infos[0] == article_id and
-                                 option == 'Extract the paragraph']
+                                 option == SAVING_OPTIONS['paragraph']]
                 for paragraph_id in paragraphs_id:
-                    cleaned_saved_articles[(article_id, paragraph_id)] = 'Extract the paragraph'
+                    cleaned_saved_articles[(article_id, paragraph_id)] = SAVING_OPTIONS['paragraph']
         return cleaned_saved_articles
 
     def extract_entire_article(self, article_id):
@@ -114,14 +108,11 @@ class ArticleSaver:
             query_execution = self.db.execute(
                 """SELECT paragraph_id, text
                 FROM paragraphs WHERE sha = ? ORDER BY paragraph_id ASC""", [sha])
-            query_end = False
-            while not query_end:
+            results = query_execution.fetchone()
+            while results is not None:
+                paragraph_id, paragraph = results
+                all_paragraphs[paragraph_id] = paragraph
                 results = query_execution.fetchone()
-                if results is not None:
-                    paragraph_id, paragraph = results
-                    all_paragraphs[paragraph_id] = paragraph
-                else:
-                    query_end = True
 
         for _, text in sorted(all_paragraphs.items()):
             entire_article += text
@@ -152,9 +143,45 @@ class ArticleSaver:
         clean_saved_articles = self.clean_saved_articles()
 
         for article_infos, option in clean_saved_articles.items():
-            if self.options[option] == 'paragraph':
+            if SAVING_OPTIONS['paragraph'] == option:
                 paragraph = self.extract_paragraph(article_infos[1])
                 self.articles_text[article_infos] = paragraph
-            elif self.options[option] == 'article':
+            elif SAVING_OPTIONS['article'] == option:
                 article = self.extract_entire_article(article_infos[0])
                 self.articles_text[article_infos] = article
+
+    def report(self):
+        """Create the saved articles report."""
+        print("Saving articles results to a pdf file.")
+        article_report = ''
+        width = 80
+
+        self.retrieve_text()
+        for article_infos, text in self.articles_text.items():
+            article_report += self.articles_metadata[article_infos[0]]
+            article_report += textwrap.fill(text, width=width)
+            article_report += '<br/>' + '<br/>'
+
+        pdfkit.from_string(article_report,
+                           f"report_{datetime.datetime.now()}.pdf")
+
+        print('Report Generated')
+
+    def summary_table(self):
+        """Create a dataframe table with saved articles.
+
+        Returns
+        -------
+        summary_table: pd.DataFrame
+            DataFrame containing all the paragraphs seen and choice made for it.
+        """
+        clean_saved_articles = self.clean_saved_articles()
+        articles = []
+        for article_infos, option in clean_saved_articles:
+            articles += {'article_id': article_infos[0],
+                         'choice': option,
+                         'paragraph': self.extract_paragraph(article_infos[1])}
+        summary_table = pd.DataFrame(data=articles,
+                                     columns=['article_id', 'choice', 'paragraph'])
+        summary_table.sort_values(by=['article_id'])
+        return summary_table
