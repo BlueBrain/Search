@@ -264,9 +264,9 @@ class AttributeExtractor:
         """
         ids = []
         for token in tokens:
-            start_inside = start <= token['characterOffsetBegin'] < end
-            end_inside = start < token['characterOffsetEnd'] <= end
-            if start_inside or end_inside:
+            overlap_start = max(start, token['characterOffsetBegin'])
+            overlap_end = min(end, token['characterOffsetEnd'])
+            if overlap_start < overlap_end:
                 ids.append(token['index'])
 
         return ids
@@ -614,6 +614,74 @@ class AttributeExtractor:
 
         return df
 
+    def get_core_nlp_analysis(self, text):
+        """Send a CoreNLP query and return the result.
+
+        Parameters
+        ----------
+        text : str
+            The text to analyze with CoreNLP.
+
+        Returns
+        -------
+        response_json : dict
+            The CoreNLP response.
+        """
+        response_json = None
+        try:
+            request_data = text.encode("utf-8")
+            request_params = '?properties={"annotators":"depparse"}'
+            response = requests.post(
+                self.core_nlp_url + request_params,
+                data=request_data)
+            assert response.status_code == 200
+            response_json = json.loads(response.text)
+        except requests.exceptions.RequestException:
+            warnings.warn("There was a problem contacting the CoreNLP server.")
+        except AssertionError:
+            warnings.warn("Reply by CoreNLP was not OK.")
+        except json.JSONDecodeError:
+            warnings.warn("Could not parse the CoreNLP response JSON.")
+        finally:
+            if response_json is None:
+                response_json = {'sentences': []}
+
+        return response_json
+
+    def are_linked(self, measurement, entity, core_nlp_sentence):
+        """Determine if a measurement and an entity are link.
+
+        Parameters
+        ----------
+        measurement : dict
+            A Grobid measurement.
+        entity : spacy.tokens.Span
+            A spacy named entity.
+        core_nlp_sentence : dict
+            A CoreNLP sentences. The CoreNLP sentences can
+            be obtained from `core_nlp_response["sentences"]`.
+
+        Returns
+        -------
+        have_common_parents : bool
+            Whether or not the entity is linked to the measurement.
+        """
+        tokens = core_nlp_sentence['tokens']
+        dependencies = core_nlp_sentence['basicDependencies']
+        tokens_d = {token['index']: token for token in tokens}
+
+        measurement_ids = self.get_measurement_tokens(measurement, tokens)
+        ne_ids = self.get_entity_tokens(entity, tokens)
+
+        measurement_parents = self.find_all_parents(dependencies, tokens_d, measurement_ids)
+        ne_parents = self.find_all_parents(dependencies, tokens_d, ne_ids)
+
+        measurement_parents = set(measurement_parents)
+        ne_parents = set(ne_parents)
+        have_common_parents = len(measurement_parents & ne_parents) > 0
+
+        return have_common_parents
+
     def extract_attributes(self,
                            text,
                            linked_attributes_only=True,
@@ -647,24 +715,7 @@ class AttributeExtractor:
 
         # CoreNLP
         logging.info("Sending CoreNLP query...")
-        response_json = None
-        try:
-            request_data = text.encode("utf-8")
-            request_params = '?properties={"annotators":"depparse"}'
-            response = requests.post(
-                self.core_nlp_url + request_params,
-                data=request_data)
-            assert response.status_code == 200
-            response_json = json.loads(response.text)
-        except requests.exceptions.RequestException:
-            warnings.warn("There was a problem contacting the CoreNLP server.")
-        except AssertionError:
-            warnings.warn("Reply by CoreNLP was not OK.")
-        except json.JSONDecodeError:
-            warnings.warn("Could not parse the CoreNLP response JSON.")
-        finally:
-            if response_json is None:
-                response_json = {'sentences': []}
+        response_json = self.get_core_nlp_analysis(text)
         logging.info("CoreNLP found {} sentences".format(len(response_json['sentences'])))
 
         # Analysis
@@ -674,18 +725,9 @@ class AttributeExtractor:
 
         for entity in doc.ents:
             for i, measurement in enumerate(measurements):
-                for corenlp_sentence in response_json['sentences']:
-                    tokens = corenlp_sentence['tokens']
-                    dependencies = corenlp_sentence['basicDependencies']
-                    tokens_d = {token['index']: token for token in tokens}
-
-                    measurement_ids = self.get_measurement_tokens(measurement, tokens)
-                    ne_ids = self.get_entity_tokens(entity, tokens)
-
-                    measurement_parents = self.find_all_parents(dependencies, tokens_d, measurement_ids)
-                    ne_parents = self.find_all_parents(dependencies, tokens_d, ne_ids)
-
-                    if len(set(measurement_parents) & set(ne_parents)) > 0:
+                for core_nlp_sentence in response_json['sentences']:
+                    have_link = self.are_linked(measurement, entity, core_nlp_sentence)
+                    if have_link > 0:
                         row = {
                             "entity": entity.text,
                             "entity_type": entity.label_,
