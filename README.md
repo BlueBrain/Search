@@ -1,6 +1,6 @@
 # BBP's Effort for the COVID-19 Challenge
 
-### Installation
+## Installation
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
 ```bash
