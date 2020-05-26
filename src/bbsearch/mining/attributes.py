@@ -152,7 +152,8 @@ class AttributeExtractor:
 
         return measurements
 
-    def annotate_quantities(self, text, measurements, width):
+    @staticmethod
+    def annotate_quantities(text, measurements, width):
         """Annotate measurements in text using HTML/CSS styles.
 
         Parameters
@@ -204,7 +205,7 @@ class AttributeExtractor:
             start = quantity['offsetStart']
             end = quantity['offsetEnd']
             formatted_text = f"<span class=\"number\">{text[start:end]}</span>"
-            quantity_type = self.get_quantity_type(quantity)
+            quantity_type = AttributeExtractor.get_quantity_type(quantity)
             if quantity_type:
                 formatted_text += f"<span class=\"quantityType\">[{quantity_type}]</span>"
             annotations.append([start, end, formatted_text])
@@ -218,7 +219,7 @@ class AttributeExtractor:
 
         annotations = []
         for measurement in measurements:
-            for quantity in self.iter_quantities(measurement):
+            for quantity in AttributeExtractor.iter_quantities(measurement):
                 annotations += annotate_quantity(quantity)
 
         annotations = sorted(annotations, key=lambda x: x[0])
