@@ -8,6 +8,7 @@ install_requires = [
     'Flask',
     'numpy',
     'pandas',
+    'pdfkit',
     'requests',
     'scikit-learn',
     'scipy',
