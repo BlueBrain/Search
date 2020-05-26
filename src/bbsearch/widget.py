@@ -350,7 +350,8 @@ class Widget:
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        self.article_saver.report()
+        path = self.article_saver.report()
+        print(f'The report {path} has been created.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
