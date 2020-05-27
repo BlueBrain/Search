@@ -3,21 +3,495 @@ import pytest
 from unittest.mock import Mock
 
 from IPython.display import HTML
+import pandas as pd
 import requests
 import spacy
 
-from bbsearch.mining import AttributeExtractor
+from bbsearch.mining import AttributeExtractor, AttributeAnnotationTab
 
 
-@pytest.fixture(scope='session')
-def model_entities():
-    """Standard English spacy model.
+@pytest.fixture(scope="session")
+def example_results():
+    text = "Example text is between 5-6 meters long and the sun is 5°C hot today."
+    measurements = [
+        {'type': 'interval',
+         'quantityLeast': {'type': 'length',
+                           'rawValue': '5',
+                           'rawUnit': {'name': 'meters',
+                                       'type': 'length',
+                                       'system': 'SI base',
+                                       'offsetStart': 28,
+                                       'offsetEnd': 34},
+                           'parsedValue': {'name': '5',
+                                           'numeric': 5,
+                                           'structure': {'type': 'NUMBER', 'formatted': '5'},
+                                           'parsed': '5'},
+                           'normalizedQuantity': 5,
+                           'normalizedUnit': {'name': 'm', 'type': 'length', 'system': 'SI base'},
+                           'offsetStart': 24,
+                           'offsetEnd': 25},
+         'quantityMost': {'type': 'length',
+                          'rawValue': '6',
+                          'rawUnit': {'name': 'meters',
+                                      'type': 'length',
+                                      'system': 'SI base',
+                                      'offsetStart': 28,
+                                      'offsetEnd': 34},
+                          'parsedValue': {'name': '6',
+                                          'numeric': 6,
+                                          'structure': {'type': 'NUMBER', 'formatted': '6'},
+                                          'parsed': '6'},
+                          'normalizedQuantity': 6,
+                          'normalizedUnit': {'name': 'm', 'type': 'length', 'system': 'SI base'},
+                          'offsetStart': 26,
+                          'offsetEnd': 27}},
+        {'type': 'value',
+         'quantity': {'type': 'temperature',
+                      'rawValue': '5',
+                      'rawUnit': {'name': '°C',
+                                  'type': 'temperature',
+                                  'system': 'SI derived',
+                                  'offsetStart': 56,
+                                  'offsetEnd': 58},
+                      'parsedValue': {'name': '5',
+                                      'numeric': 5,
+                                      'structure': {'type': 'NUMBER', 'formatted': '5'},
+                                      'parsed': '5'},
+                      'normalizedQuantity': 278.15,
+                      'normalizedUnit': {'name': 'K', 'type': 'temperature', 'system': 'SI base'},
+                      'offsetStart': 55,
+                      'offsetEnd': 56}}]
+    core_nlp_response = {
+        'sentences': [{'index': 0,
+                       'basicDependencies': [{'dep': 'ROOT',
+                                              'governor': 0,
+                                              'governorGloss': 'ROOT',
+                                              'dependent': 9,
+                                              'dependentGloss': 'long'},
+                                             {'dep': 'compound',
+                                              'governor': 2,
+                                              'governorGloss': 'text',
+                                              'dependent': 1,
+                                              'dependentGloss': 'Example'},
+                                             {'dep': 'nsubj',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 2,
+                                              'dependentGloss': 'text'},
+                                             {'dep': 'cop',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 3,
+                                              'dependentGloss': 'is'},
+                                             {'dep': 'advmod',
+                                              'governor': 7,
+                                              'governorGloss': '6',
+                                              'dependent': 4,
+                                              'dependentGloss': 'between'},
+                                             {'dep': 'compound',
+                                              'governor': 7,
+                                              'governorGloss': '6',
+                                              'dependent': 5,
+                                              'dependentGloss': '5'},
+                                             {'dep': 'punct',
+                                              'governor': 7,
+                                              'governorGloss': '6',
+                                              'dependent': 6,
+                                              'dependentGloss': '-'},
+                                             {'dep': 'nummod',
+                                              'governor': 8,
+                                              'governorGloss': 'meters',
+                                              'dependent': 7,
+                                              'dependentGloss': '6'},
+                                             {'dep': 'obl:npmod',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 8,
+                                              'dependentGloss': 'meters'},
+                                             {'dep': 'cc',
+                                              'governor': 16,
+                                              'governorGloss': 'hot',
+                                              'dependent': 10,
+                                              'dependentGloss': 'and'},
+                                             {'dep': 'det',
+                                              'governor': 12,
+                                              'governorGloss': 'sun',
+                                              'dependent': 11,
+                                              'dependentGloss': 'the'},
+                                             {'dep': 'nsubj',
+                                              'governor': 16,
+                                              'governorGloss': 'hot',
+                                              'dependent': 12,
+                                              'dependentGloss': 'sun'},
+                                             {'dep': 'cop',
+                                              'governor': 16,
+                                              'governorGloss': 'hot',
+                                              'dependent': 13,
+                                              'dependentGloss': 'is'},
+                                             {'dep': 'nummod',
+                                              'governor': 15,
+                                              'governorGloss': '°C',
+                                              'dependent': 14,
+                                              'dependentGloss': '5'},
+                                             {'dep': 'obl:npmod',
+                                              'governor': 16,
+                                              'governorGloss': 'hot',
+                                              'dependent': 15,
+                                              'dependentGloss': '°C'},
+                                             {'dep': 'conj',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 16,
+                                              'dependentGloss': 'hot'},
+                                             {'dep': 'obl:tmod',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 17,
+                                              'dependentGloss': 'today'},
+                                             {'dep': 'punct',
+                                              'governor': 9,
+                                              'governorGloss': 'long',
+                                              'dependent': 18,
+                                              'dependentGloss': '.'}],
+                       'enhancedDependencies': [{'dep': 'ROOT',
+                                                 'governor': 0,
+                                                 'governorGloss': 'ROOT',
+                                                 'dependent': 9,
+                                                 'dependentGloss': 'long'},
+                                                {'dep': 'compound',
+                                                 'governor': 2,
+                                                 'governorGloss': 'text',
+                                                 'dependent': 1,
+                                                 'dependentGloss': 'Example'},
+                                                {'dep': 'nsubj',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 2,
+                                                 'dependentGloss': 'text'},
+                                                {'dep': 'cop',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 3,
+                                                 'dependentGloss': 'is'},
+                                                {'dep': 'advmod',
+                                                 'governor': 7,
+                                                 'governorGloss': '6',
+                                                 'dependent': 4,
+                                                 'dependentGloss': 'between'},
+                                                {'dep': 'compound',
+                                                 'governor': 7,
+                                                 'governorGloss': '6',
+                                                 'dependent': 5,
+                                                 'dependentGloss': '5'},
+                                                {'dep': 'punct',
+                                                 'governor': 7,
+                                                 'governorGloss': '6',
+                                                 'dependent': 6,
+                                                 'dependentGloss': '-'},
+                                                {'dep': 'nummod',
+                                                 'governor': 8,
+                                                 'governorGloss': 'meters',
+                                                 'dependent': 7,
+                                                 'dependentGloss': '6'},
+                                                {'dep': 'obl:npmod',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 8,
+                                                 'dependentGloss': 'meters'},
+                                                {'dep': 'cc',
+                                                 'governor': 16,
+                                                 'governorGloss': 'hot',
+                                                 'dependent': 10,
+                                                 'dependentGloss': 'and'},
+                                                {'dep': 'det',
+                                                 'governor': 12,
+                                                 'governorGloss': 'sun',
+                                                 'dependent': 11,
+                                                 'dependentGloss': 'the'},
+                                                {'dep': 'nsubj',
+                                                 'governor': 16,
+                                                 'governorGloss': 'hot',
+                                                 'dependent': 12,
+                                                 'dependentGloss': 'sun'},
+                                                {'dep': 'cop',
+                                                 'governor': 16,
+                                                 'governorGloss': 'hot',
+                                                 'dependent': 13,
+                                                 'dependentGloss': 'is'},
+                                                {'dep': 'nummod',
+                                                 'governor': 15,
+                                                 'governorGloss': '°C',
+                                                 'dependent': 14,
+                                                 'dependentGloss': '5'},
+                                                {'dep': 'obl:npmod',
+                                                 'governor': 16,
+                                                 'governorGloss': 'hot',
+                                                 'dependent': 15,
+                                                 'dependentGloss': '°C'},
+                                                {'dep': 'conj:and',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 16,
+                                                 'dependentGloss': 'hot'},
+                                                {'dep': 'obl:tmod',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 17,
+                                                 'dependentGloss': 'today'},
+                                                {'dep': 'punct',
+                                                 'governor': 9,
+                                                 'governorGloss': 'long',
+                                                 'dependent': 18,
+                                                 'dependentGloss': '.'}],
+                       'enhancedPlusPlusDependencies': [{'dep': 'ROOT',
+                                                         'governor': 0,
+                                                         'governorGloss': 'ROOT',
+                                                         'dependent': 9,
+                                                         'dependentGloss': 'long'},
+                                                        {'dep': 'compound',
+                                                         'governor': 2,
+                                                         'governorGloss': 'text',
+                                                         'dependent': 1,
+                                                         'dependentGloss': 'Example'},
+                                                        {'dep': 'nsubj',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 2,
+                                                         'dependentGloss': 'text'},
+                                                        {'dep': 'cop',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 3,
+                                                         'dependentGloss': 'is'},
+                                                        {'dep': 'advmod',
+                                                         'governor': 7,
+                                                         'governorGloss': '6',
+                                                         'dependent': 4,
+                                                         'dependentGloss': 'between'},
+                                                        {'dep': 'compound',
+                                                         'governor': 7,
+                                                         'governorGloss': '6',
+                                                         'dependent': 5,
+                                                         'dependentGloss': '5'},
+                                                        {'dep': 'punct',
+                                                         'governor': 7,
+                                                         'governorGloss': '6',
+                                                         'dependent': 6,
+                                                         'dependentGloss': '-'},
+                                                        {'dep': 'nummod',
+                                                         'governor': 8,
+                                                         'governorGloss': 'meters',
+                                                         'dependent': 7,
+                                                         'dependentGloss': '6'},
+                                                        {'dep': 'obl:npmod',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 8,
+                                                         'dependentGloss': 'meters'},
+                                                        {'dep': 'cc',
+                                                         'governor': 16,
+                                                         'governorGloss': 'hot',
+                                                         'dependent': 10,
+                                                         'dependentGloss': 'and'},
+                                                        {'dep': 'det',
+                                                         'governor': 12,
+                                                         'governorGloss': 'sun',
+                                                         'dependent': 11,
+                                                         'dependentGloss': 'the'},
+                                                        {'dep': 'nsubj',
+                                                         'governor': 16,
+                                                         'governorGloss': 'hot',
+                                                         'dependent': 12,
+                                                         'dependentGloss': 'sun'},
+                                                        {'dep': 'cop',
+                                                         'governor': 16,
+                                                         'governorGloss': 'hot',
+                                                         'dependent': 13,
+                                                         'dependentGloss': 'is'},
+                                                        {'dep': 'nummod',
+                                                         'governor': 15,
+                                                         'governorGloss': '°C',
+                                                         'dependent': 14,
+                                                         'dependentGloss': '5'},
+                                                        {'dep': 'obl:npmod',
+                                                         'governor': 16,
+                                                         'governorGloss': 'hot',
+                                                         'dependent': 15,
+                                                         'dependentGloss': '°C'},
+                                                        {'dep': 'conj:and',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 16,
+                                                         'dependentGloss': 'hot'},
+                                                        {'dep': 'obl:tmod',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 17,
+                                                         'dependentGloss': 'today'},
+                                                        {'dep': 'punct',
+                                                         'governor': 9,
+                                                         'governorGloss': 'long',
+                                                         'dependent': 18,
+                                                         'dependentGloss': '.'}],
+                       'tokens': [{'index': 1,
+                                   'word': 'Example',
+                                   'originalText': 'Example',
+                                   'characterOffsetBegin': 0,
+                                   'characterOffsetEnd': 7,
+                                   'pos': 'NN',
+                                   'before': '',
+                                   'after': ' '},
+                                  {'index': 2,
+                                   'word': 'text',
+                                   'originalText': 'text',
+                                   'characterOffsetBegin': 8,
+                                   'characterOffsetEnd': 12,
+                                   'pos': 'NN',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 3,
+                                   'word': 'is',
+                                   'originalText': 'is',
+                                   'characterOffsetBegin': 13,
+                                   'characterOffsetEnd': 15,
+                                   'pos': 'VBZ',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 4,
+                                   'word': 'between',
+                                   'originalText': 'between',
+                                   'characterOffsetBegin': 16,
+                                   'characterOffsetEnd': 23,
+                                   'pos': 'IN',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 5,
+                                   'word': '5',
+                                   'originalText': '5',
+                                   'characterOffsetBegin': 24,
+                                   'characterOffsetEnd': 25,
+                                   'pos': 'CD',
+                                   'before': ' ',
+                                   'after': ''},
+                                  {'index': 6,
+                                   'word': '-',
+                                   'originalText': '-',
+                                   'characterOffsetBegin': 25,
+                                   'characterOffsetEnd': 26,
+                                   'pos': 'HYPH',
+                                   'before': '',
+                                   'after': ''},
+                                  {'index': 7,
+                                   'word': '6',
+                                   'originalText': '6',
+                                   'characterOffsetBegin': 26,
+                                   'characterOffsetEnd': 27,
+                                   'pos': 'CD',
+                                   'before': '',
+                                   'after': ' '},
+                                  {'index': 8,
+                                   'word': 'meters',
+                                   'originalText': 'meters',
+                                   'characterOffsetBegin': 28,
+                                   'characterOffsetEnd': 34,
+                                   'pos': 'NNS',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 9,
+                                   'word': 'long',
+                                   'originalText': 'long',
+                                   'characterOffsetBegin': 35,
+                                   'characterOffsetEnd': 39,
+                                   'pos': 'RB',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 10,
+                                   'word': 'and',
+                                   'originalText': 'and',
+                                   'characterOffsetBegin': 40,
+                                   'characterOffsetEnd': 43,
+                                   'pos': 'CC',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 11,
+                                   'word': 'the',
+                                   'originalText': 'the',
+                                   'characterOffsetBegin': 44,
+                                   'characterOffsetEnd': 47,
+                                   'pos': 'DT',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 12,
+                                   'word': 'sun',
+                                   'originalText': 'sun',
+                                   'characterOffsetBegin': 48,
+                                   'characterOffsetEnd': 51,
+                                   'pos': 'NN',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 13,
+                                   'word': 'is',
+                                   'originalText': 'is',
+                                   'characterOffsetBegin': 52,
+                                   'characterOffsetEnd': 54,
+                                   'pos': 'VBZ',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 14,
+                                   'word': '5',
+                                   'originalText': '5',
+                                   'characterOffsetBegin': 55,
+                                   'characterOffsetEnd': 56,
+                                   'pos': 'CD',
+                                   'before': ' ',
+                                   'after': ''},
+                                  {'index': 15,
+                                   'word': '°C',
+                                   'originalText': '°C',
+                                   'characterOffsetBegin': 56,
+                                   'characterOffsetEnd': 58,
+                                   'pos': 'NN',
+                                   'before': '',
+                                   'after': ' '},
+                                  {'index': 16,
+                                   'word': 'hot',
+                                   'originalText': 'hot',
+                                   'characterOffsetBegin': 59,
+                                   'characterOffsetEnd': 62,
+                                   'pos': 'JJ',
+                                   'before': ' ',
+                                   'after': ' '},
+                                  {'index': 17,
+                                   'word': 'today',
+                                   'originalText': 'today',
+                                   'characterOffsetBegin': 63,
+                                   'characterOffsetEnd': 68,
+                                   'pos': 'NN',
+                                   'before': ' ',
+                                   'after': ''},
+                                  {'index': 18,
+                                   'word': '.',
+                                   'originalText': '.',
+                                   'characterOffsetBegin': 68,
+                                   'characterOffsetEnd': 69,
+                                   'pos': '.',
+                                   'before': '',
+                                   'after': ''}]}]}
 
-    References
-    ----------
-    https://spacy.io/api/annotation#named-entities
-    """
-    return spacy.load("en_core_web_sm")
+    tokens = core_nlp_response["sentences"][0]["tokens"]
+    token_d = {token["index"]: token for token in tokens}
+    dependencies = core_nlp_response["sentences"][0]["basicDependencies"]
+
+    results = {
+        "text": text,
+        "measurements": measurements,
+        "core_nlp_response": core_nlp_response,
+        "tokens": tokens,
+        "token_d": token_d,
+        "dependencies": dependencies,
+    }
+
+    return results
 
 
 @pytest.fixture(scope="session")
@@ -241,7 +715,7 @@ class TestAttributeExtraction:
         assert isinstance(annotated_text, HTML)
 
     def test_get_quantity_tokens(self, extractor: AttributeExtractor):
-        text = "Example text is 5 m long."
+        # text = "Example text is 5 m long."
         quantity = {
             'type': 'length',
             'rawValue': '5',
@@ -319,3 +793,156 @@ class TestAttributeExtraction:
         found_tokens = extractor.get_quantity_tokens(quantity, tokens)
         assert len(found_tokens) == 2
         assert set(found_tokens) == {4, 5}
+
+    def test_get_measurement_tokens(self, extractor, example_results):
+        measurement = example_results["measurements"][0]
+        tokens = example_results["tokens"]
+
+        measurement_tokens = extractor.get_measurement_tokens(measurement, tokens)
+        assert set(measurement_tokens) == {5, 7, 8}
+
+    def test_get_entity_tokens(self, model_entities, extractor, example_results):
+        text = "Example text is between 5-6 meters long."
+        doc = model_entities(text)
+        entity = doc[2:4]
+        tokens = example_results["tokens"]
+
+        entity_tokens = extractor.get_entity_tokens(entity, tokens)
+        assert set(entity_tokens) == {3, 4}
+
+    def test_iter_parents(self, extractor, example_results):
+        dependencies = example_results["dependencies"]
+
+        child_idx = 1
+        parent_ids = extractor.iter_parents(dependencies, child_idx)
+        assert set(parent_ids) == {2}
+
+        child_idx = 9
+        parent_ids = extractor.iter_parents(dependencies, child_idx)
+        assert set(parent_ids) == set()
+
+    def test_find_nn_parents(self, extractor, example_results):
+        dependencies = example_results["dependencies"]
+        token_d = example_results["token_d"]
+
+        token_idx = 4
+        assert token_d[token_idx]["word"] == "between"
+        parent_ids = extractor.find_nn_parents(dependencies, token_d, token_idx)
+        assert set(parent_ids) == {8}
+
+        token_idx = 1
+        assert token_d[token_idx]["word"] == "Example"
+        parent_ids = extractor.find_nn_parents(dependencies, token_d, token_idx)
+        assert set(parent_ids) == {1, 2}
+
+    def test_find_all_parents(self, extractor, example_results):
+        dependencies = example_results["dependencies"]
+        token_d = example_results["token_d"]
+
+        token_ids = [2, 3, 4]
+        parent_ids = extractor.find_all_parents(dependencies, token_d, token_ids)
+        assert set(parent_ids) == {2, 8}
+
+    def test_quantity_to_str(self, extractor, example_results):
+        measurement = example_results["measurements"][0]
+        quantity_1 = extractor.quantity_to_str(measurement["quantityLeast"])
+        quantity_2 = extractor.quantity_to_str(measurement["quantityMost"])
+
+        assert quantity_1 == "5 meters"
+        assert quantity_2 == "6 meters"
+
+    def test_measurement_to_str(self, extractor, example_results):
+        measurement = example_results["measurements"][0]
+        measurement_str = extractor.measurement_to_str(measurement)
+
+        assert measurement_str == ["5 meters", "6 meters"]
+
+    def test_process_raw_annotation_df(self, extractor, example_results):
+        df = pd.DataFrame()
+        df_processed = extractor.process_raw_annotation_df(df, copy=False)
+        assert df is df_processed
+
+        measurement = example_results["measurements"][0]
+        df = pd.DataFrame([{"attribute": measurement}])
+        df_processed = extractor.process_raw_annotation_df(df)
+        row = df_processed.iloc[0]
+        assert row["property"] == "has length interval"
+        assert row["property_type"] == "attribute"
+        assert row["property_value"] == ["5 meters", "6 meters"]
+        assert row["property_value_type"] == "int"
+
+    def test_get_core_nlp_analysis(self, extractor, example_results, monkeypatch):
+        text = example_results["text"]
+
+        core_nlp_response = example_results["core_nlp_response"]
+        real_response_json = core_nlp_response
+        response = requests.Response()
+        response.status_code = 200
+        response._content = json.dumps(real_response_json).encode("utf-8")
+
+        fake_requests = Mock()
+        monkeypatch.setattr('bbsearch.mining.attributes.requests', fake_requests)
+        fake_requests.post.return_value = response
+
+        response_json = extractor.get_core_nlp_analysis(text)
+        assert response_json.keys() == real_response_json.keys()
+
+    def test_are_linked(self, model_entities, extractor, example_results):
+        core_nlp_response = example_results["core_nlp_response"]
+        core_nlp_sentence = core_nlp_response["sentences"][0]
+        measurement = example_results["measurements"][0]
+        text = example_results["text"]
+        doc = model_entities(text)
+
+        expect = [
+            False, False, False, True, True, True, True, True, False, False,
+            False, False, False, False, False, False, False, False, False]
+        for i, expected_result in enumerate(expect):
+            result = extractor.are_linked(measurement, doc[i:i+1], core_nlp_sentence)
+            assert result == expected_result
+
+    def test_extract_attributes(self, extractor, example_results, monkeypatch):
+        text = example_results["text"]
+
+        measurements = example_results["measurements"]
+        core_nlp_response = example_results["core_nlp_response"]
+
+        def fake_grobid(text):
+            return measurements
+
+        def fake_core_nlp(text):
+            return core_nlp_response
+
+        monkeypatch.setattr(extractor, "get_grobid_measurements", fake_grobid)
+        monkeypatch.setattr(extractor, "get_core_nlp_analysis", fake_core_nlp)
+
+        expect_columns = ["property", "property_type", "property_value", "property_value_type"]
+
+        df = extractor.extract_attributes(text)
+        assert isinstance(df, pd.DataFrame)
+        assert set(expect_columns).issubset(set(df.columns))
+
+        ee_model = spacy.load("en_ner_craft_md")
+        monkeypatch.setattr(extractor, "ee_model", ee_model)
+
+        df = extractor.extract_attributes(text)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 0
+        assert set(expect_columns).issubset(set(df.columns))
+
+        df = extractor.extract_attributes(text, linked_attributes_only=False)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 2
+        assert set(expect_columns).issubset(set(df.columns))
+
+        df = extractor.extract_attributes(text, raw_attributes=True)
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == 0
+        assert set(["attribute"]).issubset(set(df.columns))
+
+
+class TestAttributeAnnotationTab:
+
+    def test_init(self, extractor, model_entities):
+        annotation_tab = AttributeAnnotationTab(extractor, model_entities)
+        assert isinstance(annotation_tab, AttributeAnnotationTab)
