@@ -386,42 +386,6 @@ class AttributeExtractor:
             tokens)
 
     @staticmethod
-    def find_compound_parents(dependencies, tokens_d, token_idx):
-        """Parse CoreNLP dependencies to find parents of token.
-
-        To link named entities to attributes parents for both
-        entity tokens and attribute tokens need to be extracted.
-        See `extract_attributes` for more information
-
-        This is one possible strategy for finding parents of
-        a given token. For a given entity find direct
-        parents with the relation type "compound".
-
-        Parameters
-        ----------
-        dependencies : list
-            CoreNLP dependencies found in
-            response['sentences'][idx][['basicDependencies']
-        tokens_d : dict
-            CoreNLP token dictionary mapping token indices
-            to tokens. See `extract_attributes`.
-        token_idx : int
-            The index of the token for which parents
-            need to be found.
-
-        Returns
-        -------
-        parents : list
-            A list of parents.
-        """
-        parents = []
-        for link in dependencies:
-            if link['dependent'] == token_idx and link['dep'] == "compound":
-                parents.append(link['governor'])
-
-        return parents
-
-    @staticmethod
     def iter_parents(dependencies, token_idx):
         """Iterate over all parents of a token.
 
