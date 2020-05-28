@@ -56,7 +56,7 @@ class Widget:
 
         self.radio_buttons = list()
         self.article_saver = article_saver
-        self.saving_options = [v for k, v in SAVING_OPTIONS.items()]
+        self.saving_options = list(SAVING_OPTIONS.values())
 
         self.my_widgets = OrderedDict()
         self.initialize_widgets()
