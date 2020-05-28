@@ -14,9 +14,9 @@ from .sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 
-SAVING_OPTIONS = {'nothing': 'Do not take this article',
-                  'paragraph': 'Extract the paragraph',
-                  'article': 'Extract the entire article'}
+SAVING_OPTIONS = OrderedDict({'nothing': 'Do not take this article',
+                              'paragraph': 'Extract the paragraph',
+                              'article': 'Extract the entire article'})
 
 
 class Widget:
