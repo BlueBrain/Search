@@ -340,8 +340,8 @@ class Widget:
 
         def on_value_change(change):
             for article_infos, button in self.radio_buttons:
-                self.article_saver.saved_articles[article_infos[0]] = button.value
-                self.article_saver.articles_metadata[article_infos[0][0]] = articles_metadata
+                self.article_saver.saved_articles[article_infos] = button.value
+                self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
             return change['new']
 
         self.radio_buttons.append((article_infos, radio_button))
