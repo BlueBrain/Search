@@ -48,7 +48,7 @@ class AttributeExtractor:
         """Get the type of a Grobid quantity.
 
         The top-level Grobid object is a measurement. A measurement can
-        contain one ore more than one quantities.
+        contain one or more than one quantities.
 
         Some Grobid quantities have a type attached to them, e.g.
         "mass", "concentration", etc. This is the type that is
@@ -118,7 +118,7 @@ class AttributeExtractor:
         Returns
         -------
         all_type_counts : collections.Counter
-            The counts of al
+            The counts of all measurement types.
         """
         all_types = [self.get_measurement_type(m) for m in measurements]
         all_type_counts = collections.Counter(all_types)
