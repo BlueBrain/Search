@@ -92,7 +92,8 @@ class TextMiningPipeline:
                                             'end_char': sent.end_char,
                                             'property_type': 'relation',
                                             'property_value': o_ent.entity,
-                                            'property_value_type': o_ent.entity_type
+                                            'property_value_type': o_ent.entity_type,
+                                            'paper_id': article_id
                                             }
                             if return_prob:
                                 row_relation.update(dict(zip(['property', 'confidence_score'],
