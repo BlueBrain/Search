@@ -115,7 +115,7 @@ class ArticleSaver:
                 results = query_execution.fetchone()
 
         for _, text in sorted(all_paragraphs.items()):
-            entire_article += text
+            entire_article += text + '\n\n'
 
         return entire_article
 
