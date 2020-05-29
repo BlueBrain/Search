@@ -8,6 +8,7 @@ install_requires = [
     'Flask',
     'numpy',
     'pandas',
+    'pdfkit',
     'requests',
     'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
