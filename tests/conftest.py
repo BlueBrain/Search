@@ -19,11 +19,11 @@ def test_parameters():
 
 
 @pytest.fixture(scope='session')
-def assets_path(tmp_path_factory):
+def trained_models_path(tmp_path_factory):
     """Path to assets."""
-    assets_path = tmp_path_factory.mktemp('assets', numbered=False)
+    trained_models_path = tmp_path_factory.mktemp('trained_models_path', numbered=False)
 
-    return assets_path
+    return trained_models_path
 
 
 @pytest.fixture(scope='session')
@@ -187,8 +187,7 @@ def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
 
     for model in models:
-        model_path = embeddings_path / model / '{}.npy'.format(model)
-        model_path.parent.mkdir(parents=True)
+        model_path = embeddings_path / '{}.npy'.format(model)
         a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
                             np.random.random((n_sentences, test_parameters['embedding_size']))],
                            axis=1)
