@@ -5,30 +5,27 @@ FROM continuumio/miniconda3
 # ENV http_proxy='http://bbpproxy.epfl.ch:80/'
 # ENV https_proxy='http://bbpproxy.epfl.ch:80/'
 
-RUN \
-conda update conda && \
-apt-get update && \
-apt-get install -y gcc g++ wkhtmltopdf
-
-# Install sent2vec
-RUN pip install Cython numpy
-RUN pip install git+https://github.com/epfml/sent2vec
+# Update conda, install additional system packages
+RUN true \
+	&& conda update conda \
+	&& apt-get update \
+	&& apt-get install -y gcc g++ build-essential vim wkhtmltopdf
 
 # Install requirements.txt
 RUN mkdir -p /bbs/tmp
 COPY /requirements.txt /bbs/tmp
-WORKDIR /bbs/tmp
-RUN pip install -r requirements.txt
+RUN pip install Cython numpy
+RUN pip install -r /bbs/tmp/requirements.txt
 
-# Install PyTorch
-# RUN conda install pytorch torchvision -c pytorch
-
-# jupyterlab-manager
-# RUN conda remove wrapt
+# Jupyter
 RUN conda install -c conda-forge nodejs
 RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN jupyter labextension install @jupyterlab/toc
+EXPOSE 8888
+
+RUN groupadd -g 999 docker
+RUN useradd --create-home --uid 1000 --gid docker bbsuser
 
 WORKDIR /bbs
 RUN rm -rf /bbs/tmp
-CMD /bin/bash
-
+ENTRYPOINT exec /bin/bash

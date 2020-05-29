@@ -15,7 +15,7 @@ class EmbeddingServer:
     def __init__(self, app, embedding_models):
         self.app = app
         self.app.route("/")(self.request_welcome)
-        self.app.route("/v1/embed/<output_type>")(self.request_embedding)
+        self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
 
         self.embedding_models = embedding_models
@@ -100,9 +100,17 @@ class EmbeddingServer:
 
         if request.is_json:
             json_request = request.get_json()
+            self._check_request_validity(json_request)
             model = json_request["model"]
             text = json_request["text"]
             text_embedding = self.embed_text(model, text)
             return output_fn(text_embedding)
         else:
             raise InvalidUsage("Expected a JSON file")
+
+    @staticmethod
+    def _check_request_validity(json_request):
+        required_keys = {"model", "text"}
+        for key in required_keys:
+            if key not in json_request:
+                raise InvalidUsage(f"Request must contain the key '{key}'")
