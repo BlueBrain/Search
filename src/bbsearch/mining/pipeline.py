@@ -29,13 +29,15 @@ class TextMiningPipeline:
         self.model_entities = model_entities
         self.models_relations = models_relations
 
-    def __call__(self, text, return_prob=False, debug=False):
+    def __call__(self, text, article_id=None, return_prob=False, debug=False):
         """Apply pipeline to a given text.
 
         Parameters
         ----------
         text : str
             Arbitrarily long text without any preprocessing.
+        article_id: str
+            Article_id if text comes from an article from the database.
         return_prob : bool, optional
             If `True`, the column `confidence_score` of the output table is filled with estimates of the confidence of
             the extracted entities and properties, i.e. float values between 0 and 1.
@@ -67,6 +69,7 @@ class TextMiningPipeline:
 
         # Extract entities in text
         df_entities = find_entities(doc, self.model_entities, return_prob)
+        df_entities['paper_id'] = article_id
         rows_relations = []
 
         for sent in doc.sents:
@@ -89,7 +92,8 @@ class TextMiningPipeline:
                                             'end_char': sent.end_char,
                                             'property_type': 'relation',
                                             'property_value': o_ent.entity,
-                                            'property_value_type': o_ent.entity_type
+                                            'property_value_type': o_ent.entity_type,
+                                            'paper_id': article_id
                                             }
                             if return_prob:
                                 row_relation.update(dict(zip(['property', 'confidence_score'],

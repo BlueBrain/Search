@@ -9,6 +9,7 @@ install_requires = [
     'ipywidgets',
     'numpy',
     'pandas',
+    'pdfkit',
     'requests',
     'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
