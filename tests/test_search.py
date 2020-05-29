@@ -17,7 +17,7 @@ class TestSearch:
         emb_mod.preprocess.return_value = query_text
         emb_mod.embed.return_value = np.ones((2,))
 
-        precomputed_embeddings = np.load(str(embeddings_path / model / f'{model}.npy'))
+        precomputed_embeddings = np.load(str(embeddings_path / f'{model}.npy'))
 
         deprioritized_text = 'Vegetables'
         deprioritized_strength = 'Mild'

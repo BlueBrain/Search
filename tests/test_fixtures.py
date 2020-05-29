@@ -29,9 +29,7 @@ def test_embeddings(embeddings_path, fake_db_cursor):
     n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
 
     for p in embeddings_path.iterdir():
-        model_path = p / '{}.npy'.format(p.stem)
-
-        a = np.load(str(model_path))
+        a = np.load(str(p))
 
         assert isinstance(a, np.ndarray)
         assert a.shape[0] == n_sentences
