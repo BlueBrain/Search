@@ -19,14 +19,6 @@ def test_parameters():
 
 
 @pytest.fixture(scope='session')
-def trained_models_path(tmp_path_factory):
-    """Path to assets."""
-    trained_models_path = tmp_path_factory.mktemp('trained_models_path', numbered=False)
-
-    return trained_models_path
-
-
-@pytest.fixture(scope='session')
 def fake_db_cnxn(tmp_path_factory):
     """Connection object (sqlite)."""
     db_path = tmp_path_factory.mktemp('db', numbered=False) / 'dummy.sqlite'
