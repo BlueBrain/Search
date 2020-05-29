@@ -6,21 +6,19 @@ import textwrap
 from flask import request, jsonify, make_response
 
 from .invalid_usage_exception import InvalidUsage
-from ..embedding_models import EmbeddingModels
-
 
 logger = logging.getLogger(__name__)
 
 
 class EmbeddingServer:
 
-    def __init__(self, app, assets_path):
+    def __init__(self, app, embedding_models):
         self.app = app
         self.app.route("/")(self.request_welcome)
         self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
 
-        self.embedding_models = EmbeddingModels(assets_path)
+        self.embedding_models = embedding_models
 
         html_header = """
         <!DOCTYPE html>
@@ -66,10 +64,11 @@ class EmbeddingServer:
 
     def embed_text(self, model, text):
         try:
-            result = self.embedding_models.embed_sentences([text], model)
-            embedding = result[0]
+            model_instance = self.embedding_models[model]
+            preprocessed_sentence = model_instance.preprocess(text)
+            embedding = model_instance.embed(preprocessed_sentence)
             return embedding
-        except ValueError:
+        except KeyError:
             raise InvalidUsage(f"Model {model} is not available.")
 
     @staticmethod
