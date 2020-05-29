@@ -238,10 +238,10 @@ class Widget:
 
         # Click to run Generate Report!
         self.my_widgets['report_button'] = widgets.Button(description='Generate Report of Search Results',
-                                                          layout=widgets.Layout(width='25%'))
+                                                          layout=widgets.Layout(width='auto'))
 
         self.my_widgets['articles_button'] = widgets.Button(description='Generate Report of Selected Articles',
-                                                            layout=widgets.Layout(width='25%'))
+                                                            layout=widgets.Layout(width='auto'))
         # Output Area
         self.my_widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
