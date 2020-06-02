@@ -6,8 +6,10 @@ description = "Blue Brain Search"
 
 install_requires = [
     'Flask',
+    'ipywidgets',
     'numpy',
     'pandas',
+    'pdfkit',
     'requests',
     'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
