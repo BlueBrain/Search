@@ -232,7 +232,6 @@ class AttributeExtractor:
         annotated_text += text[last_idx:]
         html = css_styles + "<div class=\"fixedWidth\">" + annotated_text + "</div>"
 
-
         output = HTML(html)
 
         return output
