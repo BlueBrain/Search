@@ -137,7 +137,7 @@ def highlight_dataset(baseline_dataset_df, ground_truth_df):
         annotations = list()
         for index, entity in ground_truth_df[ground_truth_df['sentence_id'] == sentence_id].iterrows():
             annotations += [(entity['start_char'], entity['end_char'], entity['entity_type'])]
-        output = highlight_sentences(sentence, annotations) + '<br>'
+        output = highlight_sentences(sentence, annotations, entity_color_dict) + '<br>'
         complete_text += output
 
     return complete_text
