@@ -1,4 +1,5 @@
 import logging
+import pathlib
 
 import numpy as np
 import sqlite3
@@ -14,9 +15,13 @@ logger = logging.getLogger(__name__)
 class LocalSearcher(Searcher):
 
     def __init__(self, trained_models_path, embeddings_path, databases_path):
+        self.trained_models_path = pathlib.Path(trained_models_path)
+        self.embeddings_path = pathlib.Path(embeddings_path)
+        self.databases_path = pathlib.Path(databases_path)
+
         logger.info("Initializing embedding models...")
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-        bsv_model_path = trained_models_path / bsv_model_name
+        bsv_model_path = self.trained_models_path / bsv_model_name
         self.embedding_models = {
             "BSV":  BSV(checkpoint_model_path=bsv_model_path),
             "SBioBERT": SBioBERT()
@@ -24,12 +29,12 @@ class LocalSearcher(Searcher):
 
         logger.info("Loading precomputed embeddings...")
         self.precomputed_embeddings = {
-            model_name: np.load(embeddings_path / f"{model_name}.npy").astype(np.float32)
+            model_name: np.load(self.embeddings_path / f"{model_name}.npy").astype(np.float32)
             for model_name in self.embedding_models}
         # astype(np.float32) speeds up the search
 
         logger.info("Connecting to the Cord19 database...")
-        db_path = databases_path / "cord19.db"
+        db_path = self.databases_path / "cord19.db"
         assert db_path.is_file()
         self.database_connection = sqlite3.connect(str(db_path))
 

@@ -54,7 +54,7 @@ setup(
             "embedding_server=bbsearch.server.embedding_server_entrypoint:main",
             "create_database=bbsearch.database_entrypoint:main",
             "compute_embeddings=bbsearch.embeddings_entrypoint:main",
-            "search_server=bbsearch.server.search_server_entrypoint.py:main",
+            "search_server=bbsearch.server.search_server_entrypoint:main",
         ]
     }
 )

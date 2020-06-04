@@ -20,7 +20,7 @@ parser.add_argument("--embeddings_path",
                     default="/raid/bbs_data/cord19_v7/embeddings",
                     type=str,
                     help="The folder with the precomputed embeddings")
-parser.add_argument("--databeses_path",
+parser.add_argument("--databases_path",
                     default="/raid/bbs_data/cord19_v7/databases",
                     type=str,
                     help="The folder with databases.")
