@@ -27,7 +27,7 @@ RUN true \
 # Install the app
 ADD . /src
 WORKDIR /src
-RUN python setup.py install
+RUN pip install .
 
 # Add a user
 RUN useradd --create-home serveruser
