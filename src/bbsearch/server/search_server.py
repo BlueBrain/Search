@@ -29,9 +29,8 @@ class SearchServer:
                 query_text,
                 **json_request)
 
-            sentence_ids = [idx.item() for idx in sentence_ids],
-            similarities = [sim.item() for sim in similarities],
-            stats = stats
+            sentence_ids = sentence_ids.tolist(),
+            similarities = similarities.tolist(),
         else:
             sentence_ids = None
             similarities = None
