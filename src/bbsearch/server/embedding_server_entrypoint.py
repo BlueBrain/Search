@@ -1,14 +1,4 @@
 import argparse
-import logging
-import pathlib
-
-from flask import Flask
-
-from .embedding_server import EmbeddingServer
-from ..embedding_models import USE, SBERT, SBioBERT, BSV
-
-
-logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
@@ -27,10 +17,16 @@ args = parser.parse_args()
 
 
 def main():
-    embedding_models = {'USE': USE(),
-                        'SBERT': SBERT(),
-                        'BSV': BSV(checkpoint_model_path=pathlib.Path(args.bsv_checkpoints)),
-                        'SBioBERT': SBioBERT()}
+    import pathlib
+    from flask import Flask
+    from .embedding_server import EmbeddingServer
+    from ..embedding_models import USE, SBERT, SBioBERT, BSV
+
+    embedding_models = {
+        'USE': USE(),
+        'SBERT': SBERT(),
+        'BSV': BSV(checkpoint_model_path=pathlib.Path(args.bsv_checkpoints)),
+        'SBioBERT': SBioBERT()}
 
     # Create Server app
     app = Flask("BBSearch Embedding Server")
@@ -44,6 +40,4 @@ def main():
 
 
 if __name__ == "__main__":
-    logging.basicConfig()
-    logging.getLogger().setLevel(logging.DEBUG)
     main()

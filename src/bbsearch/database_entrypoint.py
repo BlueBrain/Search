@@ -1,8 +1,5 @@
 """EntryPoint for the creation of the database."""
 import argparse
-from pathlib import Path
-
-from .database import CORD19DatabaseCreation
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
@@ -22,10 +19,14 @@ args = parser.parse_args()
 
 
 def main():
+    from pathlib import Path
+    from .database import CORD19DatabaseCreation
+
     """Create Database."""
-    db = CORD19DatabaseCreation(data_path=Path(args.data_path),
-                                version=args.version,
-                                saving_directory=Path(args.out_dir))
+    db = CORD19DatabaseCreation(
+        data_path=Path(args.data_path),
+        version=args.version,
+        saving_directory=Path(args.out_dir))
     db.construct()
 
 
