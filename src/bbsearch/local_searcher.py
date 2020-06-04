@@ -34,9 +34,8 @@ class LocalSearcher(Searcher):
         # astype(np.float32) speeds up the search
 
         logger.info("Connecting to the Cord19 database...")
-        db_path = self.databases_path / "cord19.db"
-        assert db_path.is_file()
-        self.database_connection = sqlite3.connect(str(db_path))
+        self.database_path = self.databases_path / "cord19.db"
+        assert self.database_path.is_file()
 
     def query(self,
               which_model,
@@ -49,17 +48,18 @@ class LocalSearcher(Searcher):
               deprioritize_text=None,
               verbose=True):
 
-        results = run_search(
-            self.embedding_models[which_model],
-            self.precomputed_embeddings[which_model],
-            self.database_connection,
-            k,
-            query_text,
-            has_journal,
-            date_range,
-            deprioritize_strength,
-            exclusion_text,
-            deprioritize_text,
-            verbose)
+        with sqlite3.connect(str(self.database_path)) as database_connection:
+            results = run_search(
+                self.embedding_models[which_model],
+                self.precomputed_embeddings[which_model],
+                database_connection.cursor(),
+                k,
+                query_text,
+                has_journal,
+                date_range,
+                deprioritize_strength,
+                exclusion_text,
+                deprioritize_text,
+                verbose)
 
         return results
