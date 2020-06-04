@@ -351,12 +351,14 @@ class Widget:
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        path = self.article_saver.report()
-        print(f'The report {path} has been created.')
+        with self.my_widgets['out']:
+            self.article_saver.report()
+            print('The PDF report has been created.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
-        print("Saving results to a pdf file.")
+        with self.my_widgets['out']:
+            print('The PDF report has been created.')
 
         color_hyperparameters = '#222222'
 
