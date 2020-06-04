@@ -29,12 +29,18 @@ class SearchServer:
                 query_text,
                 **json_request)
 
-            result = dict(
-                sentence_ids=[idx.item() for idx in sentence_ids],
-                similarities=[sim.item() for sim in similarities],
-                stats=stats)
+            sentence_ids = [idx.item() for idx in sentence_ids],
+            similarities = [sim.item() for sim in similarities],
+            stats = stats
         else:
-            result = {}
+            sentence_ids = None
+            similarities = None
+            stats = None
 
-        response = jsonify(result)
-        return response
+        response = dict(
+            sentence_ids=sentence_ids,
+            similarities=similarities,
+            stats=stats)
+        response_json = jsonify(response)
+
+        return response_json
