@@ -246,7 +246,8 @@ class GoldStandardDataset():
         entity_types = self.ground_truth_annotation['entity_type'].unique()
         entity_color_dict = {entity_type: color_list[index, :] for index, entity_type in enumerate(entity_types)}
 
-        ground_truth_df = self.ground_truth_annotation.sort_values(['sentence_id', 'start_char'])
+        ground_truth_df = self.ground_truth_annotation.sort_values(['sentence_id', 'start_char', 'end_char'],
+                                                                   ascending=[True, True, False])
 
         # Just to show the color of each entity types
         for entity_type, color in entity_color_dict.items():
