@@ -29,17 +29,16 @@ class SearchServer:
                 query_text,
                 **json_request)
 
-            sentence_ids = sentence_ids.tolist(),
-            similarities = similarities.tolist(),
+            response = dict(
+                sentence_ids=sentence_ids.tolist(),
+                similarities=similarities.tolist(),
+                stats=stats)
         else:
-            sentence_ids = None
-            similarities = None
-            stats = None
+            response = dict(
+                sentence_ids=None,
+                similarities=None,
+                stats=None)
 
-        response = dict(
-            sentence_ids=sentence_ids,
-            similarities=similarities,
-            stats=stats)
         response_json = jsonify(response)
 
         return response_json
