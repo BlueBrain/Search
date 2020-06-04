@@ -48,7 +48,8 @@ class GoldStandardDataset():
         print('Spacy model loaded!')
 
         self.entity_types_to_entity = entities_dict
-        if not isinstance(list(self.entity_types_to_entity.keys())[0], list):
+        if not isinstance(list(self.entity_types_to_entity.keys())[0], set) \
+                and not isinstance(list(self.entity_types_to_entity.keys())[0], list):
             for entity_type, entities in self.entity_types_to_entity.items():
                 entities = entities.split(',')
                 entities = set([word.strip() for word in entities])
