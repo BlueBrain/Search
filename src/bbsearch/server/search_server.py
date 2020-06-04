@@ -30,8 +30,8 @@ class SearchServer:
                 **json_request)
 
             result = dict(
-                sentence_ids=sentence_ids,
-                similarities=similarities,
+                sentence_ids=[idx.item() for idx in sentence_ids],
+                similarities=[sim.item() for sim in similarities],
                 stats=stats)
         else:
             result = {}
