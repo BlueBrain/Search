@@ -18,7 +18,17 @@ class SearchServer:
     def query(self):
         if request.is_json:
             json_request = request.get_json()
-            sentence_ids, similarities, stats = self.local_searcher.query(**json_request)
+
+            which_model = json_request.pop("which_model")
+            k = json_request.pop("k")
+            query_text = json_request.pop("query_text")
+
+            sentence_ids, similarities, stats = self.local_searcher.query(
+                which_model,
+                k,
+                query_text,
+                **json_request)
+
             result = dict(
                 sentence_ids=sentence_ids,
                 similarities=similarities,

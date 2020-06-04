@@ -52,7 +52,7 @@ class LocalSearcher(Searcher):
         results = run_search(
             self.embedding_models[which_model],
             self.precomputed_embeddings[which_model],
-            self.database_connection.cursor(),
+            self.database_connection,
             k,
             query_text,
             has_journal,
