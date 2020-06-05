@@ -14,8 +14,8 @@ class ArticleSaver:
 
     Parameters
     ----------
-    database: sqlite3.Cursor
-        Cursor to the database. The database is supposed to have paragraphs and
+    database: sqlite3.Connection
+        Connection to the database. The database is supposed to have paragraphs and
         articles tables.
     """
 
