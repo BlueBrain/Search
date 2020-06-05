@@ -1,5 +1,6 @@
 """The search server."""
 import logging
+import pathlib
 
 from flask import request, jsonify
 import numpy as np
@@ -32,6 +33,9 @@ class SearchServer:
                  embeddings_path,
                  databases_path):
         self.app = app
+
+        trained_models_path = pathlib.Path(trained_models_path)
+        embeddings_path = pathlib.Path(embeddings_path)
 
         logger.info("Initializing embedding models...")
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
