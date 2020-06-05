@@ -1,8 +1,14 @@
 """The search server."""
+import logging
 
 from flask import request, jsonify
+import numpy as np
 
+from ..embedding_models import BSV, SBioBERT
 from ..local_searcher import LocalSearcher
+
+
+logger = logging.getLogger(__name__)
 
 
 class SearchServer:
@@ -26,9 +32,26 @@ class SearchServer:
                  embeddings_path,
                  databases_path):
         self.app = app
-        self.local_searcher = LocalSearcher(trained_models_path, embeddings_path, databases_path)
+
+        logger.info("Initializing embedding models...")
+        bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
+        bsv_model_path = trained_models_path / bsv_model_name
+        embedding_models = {
+            "BSV": BSV(checkpoint_model_path=bsv_model_path),
+            "SBioBERT": SBioBERT()
+        }
+
+        logger.info("Loading precomputed embeddings...")
+        precomputed_embeddings = {
+            model_name: np.load(embeddings_path / f"{model_name}.npy").astype(np.float32)
+            for model_name in embedding_models
+            }
+
+        self.local_searcher = LocalSearcher(
+            embedding_models, precomputed_embeddings, databases_path)
 
         app.route("/", methods=["POST"])(self.query)
+        logger.info("Server initialization done.")
 
     def query(self):
         """The main query callback routed to "/".
