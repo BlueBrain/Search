@@ -3,11 +3,9 @@
 import logging
 import pathlib
 
-import numpy as np
 import sqlite3
 
 from .search import run_search
-from .embedding_models import BSV, SBioBERT
 
 
 logger = logging.getLogger(__name__)
@@ -25,34 +23,19 @@ class LocalSearcher:
 
     Parameters
     ----------
-    trained_models_path : str or pathlib.Path
-        The folder containing pre-trained models.
-    embeddings_path : str or pathlib.Path
-        The folder containing pre-computed embeddings.
+    embedding_models : dict
+        The pre-trained models.
+    precomputed_embeddings : dict
+        The pre-computed embeddings.
     databases_path : str or pathlib.Path
         The folder containing the SQL databases.
     """
 
-    def __init__(self, trained_models_path, embeddings_path, databases_path):
-        self.trained_models_path = pathlib.Path(trained_models_path)
-        self.embeddings_path = pathlib.Path(embeddings_path)
+    def __init__(self, embedding_models, precomputed_embeddings, databases_path):
+        self.embedding_models = embedding_models
+        self.precomputed_embeddings = precomputed_embeddings
         self.databases_path = pathlib.Path(databases_path)
 
-        logger.info("Initializing embedding models...")
-        bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-        bsv_model_path = self.trained_models_path / bsv_model_name
-        self.embedding_models = {
-            "BSV":  BSV(checkpoint_model_path=bsv_model_path),
-            "SBioBERT": SBioBERT()
-        }
-
-        logger.info("Loading precomputed embeddings...")
-        self.precomputed_embeddings = {
-            model_name: np.load(self.embeddings_path / f"{model_name}.npy").astype(np.float32)
-            for model_name in self.embedding_models}
-        # astype(np.float32) speeds up the search
-
-        logger.info("Connecting to the Cord19 database...")
         self.database_path = self.databases_path / "cord19.db"
         assert self.database_path.is_file()
 
