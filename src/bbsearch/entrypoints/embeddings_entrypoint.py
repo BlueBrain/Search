@@ -30,7 +30,7 @@ def main():
     from pathlib import Path
     import sqlite3
     import numpy as np
-    from bbsearch import embedding_models
+    from .. import embedding_models
 
     """Compute Embeddings."""
     if Path(args.out_dir).exists():

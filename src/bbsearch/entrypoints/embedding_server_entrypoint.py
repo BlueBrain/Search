@@ -19,8 +19,8 @@ args = parser.parse_args()
 def main():
     import pathlib
     from flask import Flask
-    from bbsearch.server.embedding_server import EmbeddingServer
-    from bbsearch.embedding_models import USE, SBERT, SBioBERT, BSV
+    from ..server.embedding_server import EmbeddingServer
+    from ..embedding_models import USE, SBERT, SBioBERT, BSV
 
     embedding_models = {
         'USE': USE(),

@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 def main():
     from pathlib import Path
-    from bbsearch.database import CORD19DatabaseCreation
+    from ..database import CORD19DatabaseCreation
 
     """Create Database."""
     db = CORD19DatabaseCreation(
