@@ -3,6 +3,9 @@ python:
   - "3.6"
   - "3.7"
   - "3.8"
+
+before_install:
+  - pip install flake8; flake8 src/
 # command to install dependencies
 install:
   - pip install --upgrade pip
@@ -12,4 +15,5 @@ install:
 before_script:
   - pip freeze
 # command to run tests
-script: pytest --color=yes
+script:
+  - pytest --color=yes
