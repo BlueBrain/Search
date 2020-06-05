@@ -64,7 +64,7 @@ class GoldStandardDataset():
 
         self.all_words = dict()
         for entity in self.entity_to_entity_type.keys():
-            self.all_words[entity] = {word.lemma_ for word in self.nlp(entity)}
+            self.all_words[entity] = [word.lemma_ for word in self.nlp(entity)]
 
         self.baseline_dataset = baseline_dataset
         self.ground_truth_annotation = None
