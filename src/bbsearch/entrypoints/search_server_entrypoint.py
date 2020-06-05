@@ -29,7 +29,7 @@ args = parser.parse_args()
 
 def main():
     from flask import Flask
-    from .search_server import SearchServer
+    from bbsearch.server.search_server import SearchServer
 
     app = Flask("BBSearch Server")
     SearchServer(app, args.models_path, args.embeddings_path, args.databases_path)
