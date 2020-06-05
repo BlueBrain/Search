@@ -276,7 +276,7 @@ def compute_database_embeddings(database, model):
     """
     query = """SELECT sentence_id, text FROM sentences
             WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN
-            (SELECT article_id FROM articles WHERE has_covid19_tag is True))"""
+            (SELECT article_id FROM articles WHERE has_covid19_tag = 1))"""
     all_embeddings = list()
     all_ids = list()
     query_execution = database.execute(query)
