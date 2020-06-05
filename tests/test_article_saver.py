@@ -35,7 +35,7 @@ class TestArticleSaver:
         article_saver.retrieve_text()
         assert isinstance(article_saver.df_chosen_texts, pd.DataFrame)
         assert article_saver.df_chosen_texts.columns.to_list() == ['article_id', 'section_name', 'paragraph_id', 'text']
-        assert len(article_saver.df_chosen_texts) == len(all_articles_paragraphs_id) + n_paragraphs_full_article - 1 
+        assert len(article_saver.df_chosen_texts) == len(all_articles_paragraphs_id) + n_paragraphs_full_article - 1
 
         # Check summary table
         summary_table = article_saver.summary_table()
@@ -55,8 +55,8 @@ class TestArticleSaver:
         article_saver.retrieve_text()
         for i in range(2):
             assert ('new_id', i) in all_articles
-            assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') & \
-                    (article_saver.df_chosen_texts.paragraph_id == i)].empty
+            assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') &
+                                                     (article_saver.df_chosen_texts.paragraph_id == i)].empty
 
         # 'Do not take this article option' and 'Extract the paragraph' options
         for i in range(2, 4):
@@ -66,8 +66,8 @@ class TestArticleSaver:
         for i in range(4):
             assert ('new_id', i) in all_articles
             if i >= 2:
-                assert not article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') & \
-                    (article_saver.df_chosen_texts.paragraph_id == i)].empty
+                assert not article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') &
+                                                             (article_saver.df_chosen_texts.paragraph_id == i)].empty
             else:
-                assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') & \
-                    (article_saver.df_chosen_texts.paragraph_id == i)].empty
+                assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == 'new_id') &
+                                                         (article_saver.df_chosen_texts.paragraph_id == i)].empty
