@@ -126,7 +126,7 @@ class GoldStandardDataset():
                     start_chars, end_chars = self.find_tokens(nlp_sentence, self.all_words[word_])
                     for start, end in zip(start_chars, end_chars):
                         new_line = [{'sentence_id': sentence_id,
-                                     'entity': word_,
+                                     'entity': sentence[start:end],
                                      'start_char': start,
                                      'end_char': end,
                                      'entity_type': self.entity_to_entity_type[word_].upper()}]
