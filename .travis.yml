@@ -6,8 +6,8 @@ python:
 
 before_install:
   - pip install flake8 pydocstyle
-  - flake8 src/ 2>&1
-  - pydocstyle src/ 2>&1
+  - flake8 src/ || true
+  - pydocstyle src/ || true
 # command to install dependencies
 install:
   - pip install --upgrade pip
