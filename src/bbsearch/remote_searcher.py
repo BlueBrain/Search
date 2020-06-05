@@ -1,10 +1,16 @@
+"""Remote BBS Searcher."""
 import json
 import requests
 
-from bbsearch.searcher import Searcher
 
+class RemoteSearcher:
+    """The remote BBS searcher.
 
-class RemoteSearcher(Searcher):
+    Parameters
+    ----------
+    search_server_url : str
+        The URL of the remote search server.
+    """
 
     def __init__(self, search_server_url):
         self.search_server_url = search_server_url
@@ -19,6 +25,32 @@ class RemoteSearcher(Searcher):
               exclusion_text=None,
               deprioritize_text=None,
               verbose=True):
+        """Do the search.
+
+        Parameters
+        ----------
+        which_model : str
+            The name of the model to use.
+        k : int
+            Number of top results to display.
+        query_text : str
+            Query.
+        has_journal : bool
+            If True, only consider papers that have a journal information.
+        date_range : tuple
+            Tuple of form (start_year, end_year) representing the considered
+            time range.
+        deprioritize_text : str
+            Text query of text to be deprioritized.
+        deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
+            How strong the deprioritization is.
+        exclusion_text : str
+            New line separated collection of strings that are automatically
+            used to exclude a given sentence.
+        verbose : bool
+            If True, then printing statistics to standard output.
+        """
+
         payload = dict(
             which_model=which_model,
             k=k,

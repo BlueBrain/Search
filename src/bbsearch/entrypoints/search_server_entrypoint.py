@@ -1,3 +1,4 @@
+"""The entrypoint script for the search server."""
 import argparse
 
 
@@ -28,6 +29,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Execute the entry point."""
     from flask import Flask
     from ..server.search_server import SearchServer
 

@@ -1,10 +1,11 @@
+"""Local BBS Searcher."""
+
 import logging
 import pathlib
 
 import numpy as np
 import sqlite3
 
-from .searcher import Searcher
 from .search import run_search
 from .embedding_models import BSV, SBioBERT
 
@@ -12,7 +13,25 @@ from .embedding_models import BSV, SBioBERT
 logger = logging.getLogger(__name__)
 
 
-class LocalSearcher(Searcher):
+class LocalSearcher:
+    """Search locally using assets on disk.
+
+    This class requires for several deep-learning modules
+    to be loaded and for pre-trained models, pre-computed
+    embeddings, and the SQL database to be loaded in memory.
+
+    This is more or less a wrapper around `run_search`
+    from `bbsearch.search`.
+
+    Parameters
+    ----------
+    trained_models_path : str or pathlib.Path
+        The folder containing pre-trained models.
+    embeddings_path : str or pathlib.Path
+        The folder containing pre-computed embeddings.
+    databases_path : str or pathlib.Path
+        The folder containing the SQL databases.
+    """
 
     def __init__(self, trained_models_path, embeddings_path, databases_path):
         self.trained_models_path = pathlib.Path(trained_models_path)
@@ -47,7 +66,36 @@ class LocalSearcher(Searcher):
               exclusion_text=None,
               deprioritize_text=None,
               verbose=True):
+        """Do the search.
 
+        Parameters
+        ----------
+        which_model : str
+            The name of the model to use.
+        k : int
+            Number of top results to display.
+        query_text : str
+            Query.
+        has_journal : bool
+            If True, only consider papers that have a journal information.
+        date_range : tuple
+            Tuple of form (start_year, end_year) representing the considered
+            time range.
+        deprioritize_text : str
+            Text query of text to be deprioritized.
+        deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
+            How strong the deprioritization is.
+        exclusion_text : str
+            New line separated collection of strings that are automatically
+            used to exclude a given sentence.
+        verbose : bool
+            If True, then printing statistics to standard output.
+
+        Returns
+        -------
+        results : tuple
+            All results returned by `run_search`.
+        """
         with sqlite3.connect(str(self.database_path)) as database_connection:
             results = run_search(
                 self.embedding_models[which_model],

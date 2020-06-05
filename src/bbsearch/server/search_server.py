@@ -1,9 +1,24 @@
+"""The search server."""
+
 from flask import request, jsonify
 
 from ..local_searcher import LocalSearcher
 
 
 class SearchServer:
+    """The BBS search server.
+
+    Parameters
+    ----------
+    app : flask.Flask
+        The Flask app wrapping the server.
+    trained_models_path : str or pathlib.Path
+        The folder containing pre-trained models.
+    embeddings_path : str or pathlib.Path
+        The folder containing pre-computed embeddings.
+    databases_path : str or pathlib.Path
+        The folder containing the SQL databases.
+    """
 
     def __init__(self,
                  app,
@@ -16,6 +31,13 @@ class SearchServer:
         app.route("/", methods=["POST"])(self.query)
 
     def query(self):
+        """The main query callback routed to "/".
+
+        Returns
+        -------
+        response_json : flask.Response
+            The JSON response to the query.
+        """
         if request.is_json:
             json_request = request.get_json()
 

@@ -22,7 +22,8 @@ class Widget:
 
     Parameters
     ----------
-    searcher : bbsearch.searcher.Searcher
+    searcher : bbsearch.searcher.local_searcher.LocalSearcher or
+               bbsearch.searcher.remote_searcher.RemoteSearcher
         The search engine.
 
     article_saver: ArticleSaver
