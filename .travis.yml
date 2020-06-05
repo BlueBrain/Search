@@ -5,8 +5,9 @@ python:
   - "3.8"
 
 before_install:
-  - pip install flake8; flake8 src/ 2>&1
-  - pip install pydocstyle; pydocstyle src/ 2>&1
+  - pip install flake8 pydocstyle
+  - flake8 src/ 2>&1
+  - pydocstyle src/ 2>&1
 # command to install dependencies
 install:
   - pip install --upgrade pip
