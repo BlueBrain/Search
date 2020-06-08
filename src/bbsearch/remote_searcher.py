@@ -1,5 +1,4 @@
 """Remote BBS Searcher."""
-import json
 import requests
 
 
@@ -65,7 +64,7 @@ class RemoteSearcher:
 
         response = requests.post(self.search_server_url, json=payload)
         if response.ok:
-            response_json = json.loads(response.text)
+            response_json = response.json()
             sentence_ids = response_json["sentence_ids"]
             similarities = response_json["similarities"]
             stats = response_json["stats"]
