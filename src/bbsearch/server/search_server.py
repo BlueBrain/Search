@@ -6,7 +6,7 @@ from flask import request, jsonify
 import numpy as np
 
 from ..embedding_models import BSV, SBioBERT
-from ..local_searcher import LocalSearcher
+from ..search import LocalSearcher
 
 
 logger = logging.getLogger(__name__)
