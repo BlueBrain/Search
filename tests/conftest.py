@@ -21,7 +21,7 @@ def test_parameters():
 @pytest.fixture(scope='session')
 def fake_db_cnxn(tmp_path_factory):
     """Connection object (sqlite)."""
-    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'dummy.sqlite'
+    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19.db'
     cnxn = sqlite3.connect(str(db_path))
     yield cnxn
 

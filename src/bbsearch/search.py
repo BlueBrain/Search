@@ -1,4 +1,6 @@
 """Collection of functions focused on searching."""
+import pathlib
+import sqlite3
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -33,7 +35,8 @@ class LocalSearcher:
         self.databases_path = pathlib.Path(databases_path)
 
         self.database_path = self.databases_path / "cord19.db"
-        assert self.database_path.is_file()
+        if not self.database_path.is_file():
+            raise FileNotFoundError('{} does not exist'.format(self.database_path))
 
     def query(self,
               which_model,
