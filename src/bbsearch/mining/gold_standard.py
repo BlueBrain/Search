@@ -137,18 +137,20 @@ class GoldStandardDataset():
 
         self.ground_truth_annotation = pd.DataFrame(ground_truth)
 
-    def _create_baseline_dataset(self, max_iter=1000000):
+    def _create_baseline_dataset(self, start_index=0, max_iter=1000000):
         """Create baseline_dataset and ground_truth annotations.
 
         Parameters
         ----------
+        start_index: int
+            Index of the first sentence to check in the sentences pd.DataFrame
         max_iter: int
             Number of sentences to go through to find the words_to_find
         """
         ground_truth = list()
         words_to_find = list(self.all_words.keys())
         baseline_dataset_ids = set()
-        index = 0
+        index = start_index
 
         while words_to_find and index < max_iter:
 
