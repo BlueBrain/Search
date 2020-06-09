@@ -152,7 +152,7 @@ class GoldStandardDataset():
         baseline_dataset_ids = set()
         index = start_index
 
-        while words_to_find and index < max_iter:
+        while words_to_find and index < max_iter + start_index:
 
             sentence_infos = self.sentences.iloc[index]
             sentence, sentence_id = sentence_infos['text'], sentence_infos['sentence_id']
@@ -169,7 +169,7 @@ class GoldStandardDataset():
                             start_chars, end_chars = self.find_tokens(nlp_sentence, self.all_words[word_])
                             for start, end in zip(start_chars, end_chars):
                                 new_line = [{'sentence_id': sentence_id,
-                                             'entity': word_,
+                                             'entity': sentence[start:end],
                                              'start_char': start,
                                              'end_char': end,
                                              'entity_type': self.entity_to_entity_type[word_].upper()}]
