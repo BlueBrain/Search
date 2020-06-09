@@ -21,10 +21,10 @@ parser.add_argument("--embeddings_path",
                     default="/raid/bbs_data/cord19_v7/embeddings",
                     type=str,
                     help="The folder with the precomputed embeddings")
-parser.add_argument("--databases_path",
-                    default="/raid/bbs_data/cord19_v7/databases",
+parser.add_argument("--database_path",
+                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
-                    help="The folder with databases.")
+                    help="The path to the SQL database.")
 args = parser.parse_args()
 
 
@@ -34,7 +34,7 @@ def main():
     from ..server.search_server import SearchServer
 
     app = Flask("BBSearch Server")
-    SearchServer(app, args.models_path, args.embeddings_path, args.databases_path)
+    SearchServer(app, args.models_path, args.embeddings_path, args.database_path)
     app.run(
         host=args.host,
         port=args.port,

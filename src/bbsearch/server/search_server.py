@@ -23,15 +23,15 @@ class SearchServer:
         The folder containing pre-trained models.
     embeddings_path : str or pathlib.Path
         The folder containing pre-computed embeddings.
-    databases_path : str or pathlib.Path
-        The folder containing the SQL databases.
+    database_path : str or pathlib.Path
+        The path to where the database file is.
     """
 
     def __init__(self,
                  app,
                  trained_models_path,
                  embeddings_path,
-                 databases_path):
+                 database_path):
         self.app = app
 
         trained_models_path = pathlib.Path(trained_models_path)
@@ -52,7 +52,7 @@ class SearchServer:
             }
 
         self.local_searcher = LocalSearcher(
-            embedding_models, precomputed_embeddings, databases_path)
+            embedding_models, precomputed_embeddings, database_path)
 
         app.route("/", methods=["POST"])(self.query)
         logger.info("Server initialization done.")

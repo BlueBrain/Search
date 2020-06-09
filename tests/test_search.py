@@ -32,7 +32,7 @@ class TestLocalSearcher:
         embedding_models = {model_name: emb_mod}
 
         # get database path
-        database_path = tmp_path_factory.getbasetemp() / 'db'  # created by fake_db_cnxn fixture
+        database_path = tmp_path_factory.getbasetemp() / 'db' / 'cord19.db'  # created by fake_db_cnxn fixture
 
         # actual test
         local_searcher = LocalSearcher(embedding_models, precomputed_embeddings, database_path)

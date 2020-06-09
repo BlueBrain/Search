@@ -25,16 +25,15 @@ class LocalSearcher:
         The pre-trained models.
     precomputed_embeddings : dict
         The pre-computed embeddings.
-    databases_path : str or pathlib.Path
-        The folder containing the SQL databases.
+    database_path : str or pathlib.Path
+        The path to where the database file is.
     """
 
-    def __init__(self, embedding_models, precomputed_embeddings, databases_path):
+    def __init__(self, embedding_models, precomputed_embeddings, database_path):
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
-        self.databases_path = pathlib.Path(databases_path)
+        self.database_path = pathlib.Path(database_path)
 
-        self.database_path = self.databases_path / "cord19.db"
         if not self.database_path.is_file():
             raise FileNotFoundError('{} does not exist'.format(self.database_path))
 
