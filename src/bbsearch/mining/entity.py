@@ -18,6 +18,7 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
         spaCy it is necessary to perform a forward pass using an undocumented "beam" approach.
     threshold : float, optional
         If `return_prob` is `True`, only extracted entities with `confidence > threshold` are returned.
+
     Returns
     -------
     table_extractions : pd.DataFrame

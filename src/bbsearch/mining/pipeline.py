@@ -7,6 +7,8 @@ import spacy
 
 
 class TextMiningPipeline:
+    """Mining pipeline interface."""
+
     def __init__(self, model_entities, models_relations):
         """Pipeline for extracting entities, relations, and attributes of interest.
 

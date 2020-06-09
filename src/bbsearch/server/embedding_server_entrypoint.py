@@ -1,3 +1,4 @@
+"""Entrypoint for launching an embedding server."""
 import argparse
 import logging
 import pathlib
@@ -6,7 +7,6 @@ from flask import Flask
 
 from .embedding_server import EmbeddingServer
 from ..embedding_models import USE, SBERT, SBioBERT, BSV
-
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +27,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Parse arguments and run Flask application."""
     embedding_models = {'USE': USE(),
                         'SBERT': SBERT(),
                         'BSV': BSV(checkpoint_model_path=pathlib.Path(args.bsv_checkpoints)),

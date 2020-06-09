@@ -73,6 +73,7 @@ class SBioBERT(EmbeddingModel):
 
     @property
     def dim(self):
+        """Return dimension of the embedding."""
         return 768
 
     def preprocess(self, raw_sentence):
@@ -150,6 +151,7 @@ class BSV(EmbeddingModel):
 
     @property
     def dim(self):
+        """Return dimension of the embedding."""
         return 700
 
     def preprocess(self, raw_sentence):
@@ -205,6 +207,7 @@ class SBERT(EmbeddingModel):
 
     @property
     def dim(self):
+        """Return dimension of the embedding."""
         return 768
 
     def embed(self, preprocessed_sentence):
@@ -239,6 +242,7 @@ class USE(EmbeddingModel):
 
     @property
     def dim(self):
+        """Return dimension of the embedding."""
         return 512
 
     def embed(self, preprocessed_sentence):
