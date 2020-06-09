@@ -98,7 +98,6 @@ class ArticleSaver:
         width = 80
 
         self.retrieve_text()
-        print(self.df_chosen_texts)
         for article_id, text in self.df_chosen_texts[['article_id', 'text']].values:
             article_report += self.articles_metadata[article_id]
             article_report += textwrap.fill(text, width=width)
