@@ -337,10 +337,10 @@ class Widget:
 
         if radio_button.value != SAVING_OPTIONS['article']:
             self.article_saver.saved_articles[article_infos] = radio_button.value
-            self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
+
+        self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
 
         def on_value_change(change):
-            self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
             for infos, button in self.radio_buttons:
                 self.article_saver.saved_articles[infos] = button.value
             return change['new']
