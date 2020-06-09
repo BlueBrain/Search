@@ -50,7 +50,7 @@ class ArticleSaver:
                      f'you chose the option: {self.saved_articles[article_infos]}.'
             return status
         if article_infos[0] in [k[0] for k in self.saved_articles.keys()]:
-            status = f'You have already seen this article through different paragraphs'
+            status = 'You have already seen this article through different paragraphs'
 
         return status
 
