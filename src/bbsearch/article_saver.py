@@ -98,10 +98,11 @@ class ArticleSaver:
         width = 80
 
         self.retrieve_text()
-        for article_id, text in self.df_chosen_texts[['article_id', 'text']].values:
+        for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
+            df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             article_report += self.articles_metadata[article_id]
-            article_report += textwrap.fill(text, width=width)
-            article_report += '<br/>' + '<br/>'
+            article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
+            article_report += '<br/>' * 2
 
         path = f"report_{datetime.datetime.now()}.pdf"
         pdfkit.from_string(article_report, path)
