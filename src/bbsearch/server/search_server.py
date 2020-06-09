@@ -1,4 +1,5 @@
 """The search server."""
+import json
 import logging
 import pathlib
 
@@ -7,7 +8,6 @@ import numpy as np
 
 from ..embedding_models import BSV, SBioBERT
 from ..search import LocalSearcher
-
 
 logger = logging.getLogger(__name__)
 
@@ -49,13 +49,19 @@ class SearchServer:
         precomputed_embeddings = {
             model_name: np.load(embeddings_path / f"{model_name}.npy").astype(np.float32)
             for model_name in embedding_models
-            }
+        }
 
         self.local_searcher = LocalSearcher(
             embedding_models, precomputed_embeddings, database_path)
 
+        app.route("/hello", methods=["POST"])(self.hello)
         app.route("/", methods=["POST"])(self.query)
         logger.info("Server initialization done.")
+
+    @staticmethod
+    def hello():
+        """Send status that guarantees that the server is up and running."""
+        return json.dumps(True)
 
     def query(self):
         """The main query callback routed to "/".
