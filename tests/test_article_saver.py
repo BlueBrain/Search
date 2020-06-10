@@ -41,8 +41,8 @@ class TestArticleSaver:
 
         # Check that the status feedback is working fine
         for article_id, paragraph_id_list in all_articles_paragraphs_id.items():
-            assert(article_saver.status_on_article_retrieve((article_id, paragraph_id_list[0])), str)
-        assert(article_saver.status_on_article_retrieve((article_id, '1000')), str)
+            assert isinstance(article_saver.status_on_article_retrieve((article_id, paragraph_id_list[0])), str)
+        assert isinstance(article_saver.status_on_article_retrieve((article_id, '1000')), str)
 
         # Check that the cleaning part is working
         # Only 'Do not take this article option'

@@ -1,5 +1,7 @@
 # BBP's Effort for the COVID-19 Challenge
 
+[![Build Status](https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master)](https://travis-ci.com/BlueBrain/BlueBrainSearch)
+
 ## Installation
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
