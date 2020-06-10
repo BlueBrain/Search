@@ -1,11 +1,6 @@
 """EntryPoint for the computation and saving of the embeddings."""
 import argparse
-from pathlib import Path
-import sqlite3
 
-import numpy as np
-
-from . import embedding_models
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--database",
@@ -33,6 +28,11 @@ args = parser.parse_args()
 
 def main():
     """Compute Embeddings."""
+    from pathlib import Path
+    import sqlite3
+    import numpy as np
+    from .. import embedding_models
+
     if Path(args.out_dir).exists():
         raise FileNotFoundError(f'The output directory {args.out_dir} does not exist!')
 
@@ -44,7 +44,8 @@ def main():
     for model in args.models.split(','):
         model = model.strip()
         if model == 'BSV':
-            embedding_model = embedding_models.BSV(checkpoint_model_path=Path(args.bsv_checkpoints))
+            embedding_model = embedding_models.BSV(
+                checkpoint_model_path=Path(args.bsv_checkpoints))
         else:
             try:
                 embedding_model = getattr(embedding_models, model)()

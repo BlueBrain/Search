@@ -6,10 +6,8 @@ import pdfkit
 import textwrap
 
 import ipywidgets as widgets
-import IPython
-from IPython.display import HTML
+from IPython.display import display, HTML
 
-from .search import run_search
 from .sql import find_paragraph
 
 logger = logging.getLogger(__name__)
@@ -24,18 +22,8 @@ class Widget:
 
     Parameters
     ----------
-    embedding_models: dict
-        Dictionary containing instances of the different embedding models.
-        The keys have to be the name of the different models and
-        the values have to be instance of 'EmbeddingModel' class.
-
-    precomputed_embeddings: dict
-        Dictionary containing the precomputed embeddings.
-        The keys have to be the name of the different models and
-        the values have to be numpy arrays containing the embeddings.
-
-    database: sqlite3.Cursor
-        Cursor to the database used for the search engine.
+    searcher : bbsearch.search.LocalSearcher or bbsearch.remote_searcher.RemoteSearcher
+        The search engine.
 
     article_saver: ArticleSaver
         If specified, this article saver will keep all the article_id
@@ -43,13 +31,11 @@ class Widget:
     """
 
     def __init__(self,
-                 embedding_models,
-                 precomputed_embeddings,
+                 searcher,
                  database,
                  article_saver=None):
 
-        self.embedding_models = embedding_models
-        self.precomputed_embeddings = precomputed_embeddings
+        self.searcher = searcher
         self.database = database
 
         self.report = ''
@@ -110,6 +96,10 @@ class Widget:
             Formatted string containing the metadata of the article.
         formatted_output: str
             Formatted output of the sentence.
+        article_infos : tuple
+            A tuple with two elements (article_id, paragraph_id) containing
+            the information about the article.
+
         """
         article_sha, section_name, text, paragraph_id = \
             self.database.execute(
@@ -285,16 +275,15 @@ class Widget:
             has_journal = self.my_widgets['has_journal'].value
             date_range = self.my_widgets['date_range'].value
 
-            sentence_ids, _, _ = run_search(self.embedding_models[sentence_embedder_name],
-                                            self.precomputed_embeddings[sentence_embedder_name],
-                                            database=self.database,
-                                            k=k,
-                                            query_text=query_text,
-                                            has_journal=has_journal,
-                                            date_range=date_range,
-                                            deprioritize_strength=deprioritize_strength,
-                                            deprioritize_text=deprioritize_text,
-                                            exclusion_text=exclusion_text)
+            sentence_ids, _, _ = self.searcher.query(
+                sentence_embedder_name,
+                k=k,
+                query_text=query_text,
+                has_journal=has_journal,
+                date_range=date_range,
+                deprioritize_strength=deprioritize_strength,
+                deprioritize_text=deprioritize_text,
+                exclusion_text=exclusion_text)
 
             print(f'\nInvestigating: {query_text}\n')
 
@@ -306,11 +295,11 @@ class Widget:
                     radio_button = self.create_radio_buttons(article_infos, article_metadata)
                     status = self.status_article_retrieve(article_infos)
 
-                IPython.display.display(HTML(article_metadata))
+                display(HTML(article_metadata))
                 if self.article_saver:
-                    IPython.display.display(radio_button)
-                    IPython.display.display(HTML(status))
-                IPython.display.display(HTML(formatted_output))
+                    display(radio_button)
+                    display(HTML(status))
+                display(HTML(formatted_output))
 
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
@@ -384,4 +373,4 @@ class Widget:
         """Display the widget."""
         ordered_widgets = list(self.my_widgets.values())
         main_widget = widgets.VBox(ordered_widgets)
-        IPython.display.display(main_widget)
+        display(main_widget)

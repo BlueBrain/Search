@@ -1,10 +1,97 @@
 """Collection of functions focused on searching."""
+import pathlib
+import sqlite3
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition, get_shas_from_ids
 from .utils import Timer
+
+
+class LocalSearcher:
+    """Search locally using assets on disk.
+
+    This class requires for several deep-learning modules
+    to be loaded and for pre-trained models, pre-computed
+    embeddings, and the SQL database to be loaded in memory.
+
+    This is more or less a wrapper around `run_search`
+    from `bbsearch.search`.
+
+    Parameters
+    ----------
+    embedding_models : dict
+        The pre-trained models.
+    precomputed_embeddings : dict
+        The pre-computed embeddings.
+    database_path : str or pathlib.Path
+        The path to where the database file is.
+    """
+
+    def __init__(self, embedding_models, precomputed_embeddings, database_path):
+        self.embedding_models = embedding_models
+        self.precomputed_embeddings = precomputed_embeddings
+        self.database_path = pathlib.Path(database_path)
+
+        if not self.database_path.is_file():
+            raise FileNotFoundError('{} does not exist'.format(self.database_path))
+
+    def query(self,
+              which_model,
+              k,
+              query_text,
+              has_journal=False,
+              date_range=None,
+              deprioritize_strength='None',
+              exclusion_text=None,
+              deprioritize_text=None,
+              verbose=True):
+        """Do the search.
+
+        Parameters
+        ----------
+        which_model : str
+            The name of the model to use.
+        k : int
+            Number of top results to display.
+        query_text : str
+            Query.
+        has_journal : bool
+            If True, only consider papers that have a journal information.
+        date_range : tuple
+            Tuple of form (start_year, end_year) representing the considered
+            time range.
+        deprioritize_text : str
+            Text query of text to be deprioritized.
+        deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
+            How strong the deprioritization is.
+        exclusion_text : str
+            New line separated collection of strings that are automatically
+            used to exclude a given sentence.
+        verbose : bool
+            If True, then printing statistics to standard output.
+
+        Returns
+        -------
+        results : tuple
+            All results returned by `run_search`.
+        """
+        with sqlite3.connect(str(self.database_path)) as database_connection:
+            results = run_search(
+                self.embedding_models[which_model],
+                self.precomputed_embeddings[which_model],
+                database_connection.cursor(),
+                k,
+                query_text,
+                has_journal,
+                date_range,
+                deprioritize_strength,
+                exclusion_text,
+                deprioritize_text,
+                verbose)
+
+        return results
 
 
 def filter_sentences(database,
