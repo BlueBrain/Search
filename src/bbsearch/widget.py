@@ -326,12 +326,12 @@ class Widget:
 
         if radio_button.value != SAVING_OPTIONS['article']:
             self.article_saver.saved_articles[article_infos] = radio_button.value
-            self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
+
+        self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
 
         def on_value_change(change):
-            for article_infos, button in self.radio_buttons:
-                self.article_saver.saved_articles[article_infos] = button.value
-                self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
+            for infos, button in self.radio_buttons:
+                self.article_saver.saved_articles[infos] = button.value
             return change['new']
 
         self.radio_buttons.append((article_infos, radio_button))
@@ -340,12 +340,14 @@ class Widget:
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        path = self.article_saver.report()
-        print(f'The report {path} has been created.')
+        with self.my_widgets['out']:
+            self.article_saver.report()
+            print('The PDF report has been created.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
-        print("Saving results to a pdf file.")
+        with self.my_widgets['out']:
+            print('The PDF report has been created.')
 
         color_hyperparameters = '#222222'
 

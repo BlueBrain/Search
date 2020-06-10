@@ -1,3 +1,4 @@
+"""Entrypoint for launching an embedding server."""
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -17,6 +18,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Parse arguments and run Flask application."""
     import pathlib
     from flask import Flask
     from ..server.embedding_server import EmbeddingServer

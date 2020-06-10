@@ -49,7 +49,7 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
                        'covidence_id': 'TEXT',
                        'has_pdf_parse': 'BOOLEAN',
                        'has_pmc_xml_parse': 'BOOLEAN',
-                       'has_covid19_tag': 'BOOLEAN DEFAULT True',
+                       'has_covid19_tag': 'BOOLEAN DEFAULT 1',
                        'fulltext_directory': 'TEXT',
                        'url': 'TEXT'}
 

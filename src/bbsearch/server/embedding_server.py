@@ -1,3 +1,4 @@
+"""Implementation of a server that computes sentence embeddings."""
 import csv
 import io
 import logging
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class EmbeddingServer:
+    """Wrapper class representing the embedding server."""
 
     def __init__(self, app, embedding_models):
         self.app = app
@@ -35,12 +37,14 @@ class EmbeddingServer:
 
     @staticmethod
     def handle_invalid_usage(error):
+        """Handle invalid usage."""
         print("Handling invalid usage!")
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
 
     def request_welcome(self):
+        """Generate a welcome page."""
         logger.info("Welcome page requested")
         html = """
         <h1>Welcome to the BBSearch Embedding REST API Server</h1>
@@ -63,6 +67,25 @@ class EmbeddingServer:
         return self.html_header + textwrap.dedent(html).strip() + '\n'
 
     def embed_text(self, model, text):
+        """Embed text.
+
+        Parameters
+        ----------
+        model : str
+            String representing the model name.
+        text : str
+            Text to be embedded.
+
+        Returns
+        -------
+        np.ndarray
+            1D array representing the text embedding.
+
+        Raises
+        ------
+        InvalidUsage
+            If the model name is invalid.
+        """
         try:
             model_instance = self.embedding_models[model]
             preprocessed_sentence = model_instance.preprocess(text)
@@ -73,6 +96,7 @@ class EmbeddingServer:
 
     @staticmethod
     def make_csv_response(embedding):
+        """Generate a csv response."""
         csv_file = io.StringIO()
         csv_writer = csv.writer(csv_file)
         csv_writer.writerow(str(n) for n in embedding)
@@ -85,12 +109,14 @@ class EmbeddingServer:
 
     @staticmethod
     def make_json_response(embedding):
+        """Generate a json response."""
         json_response = dict(embedding=[float(n) for n in embedding])
         response = jsonify(json_response)
 
         return response
 
     def request_embedding(self, output_type):
+        """Request embedding."""
         logger.info("Requested Embedding")
 
         if output_type.lower() not in self.output_fn:
