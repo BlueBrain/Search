@@ -49,7 +49,6 @@ class RemoteSearcher:
         verbose : bool
             If True, then printing statistics to standard output.
         """
-
         payload = dict(
             which_model=which_model,
             k=k,

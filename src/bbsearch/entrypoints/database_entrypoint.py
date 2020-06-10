@@ -19,10 +19,10 @@ args = parser.parse_args()
 
 
 def main():
+    """Run database construction."""
     from pathlib import Path
     from ..database import CORD19DatabaseCreation
 
-    """Create Database."""
     db = CORD19DatabaseCreation(
         data_path=Path(args.data_path),
         version=args.version,

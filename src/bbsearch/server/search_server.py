@@ -64,7 +64,9 @@ class SearchServer:
         return json.dumps(True)
 
     def query(self):
-        """The main query callback routed to "/".
+        """Respond to a query.
+
+        The main query callback routed to "/".
 
         Returns
         -------

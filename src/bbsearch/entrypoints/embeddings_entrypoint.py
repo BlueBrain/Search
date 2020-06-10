@@ -27,12 +27,12 @@ args = parser.parse_args()
 
 
 def main():
+    """Compute Embeddings."""
     from pathlib import Path
     import sqlite3
     import numpy as np
     from .. import embedding_models
 
-    """Compute Embeddings."""
     if Path(args.out_dir).exists():
         raise FileNotFoundError(f'The output directory {args.out_dir} does not exist!')
 
