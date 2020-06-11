@@ -1,5 +1,6 @@
 import io
 import logging
+import pathlib
 
 from flask import jsonify, make_response
 import pandas as pd
@@ -16,6 +17,7 @@ class MiningServer:
     def __init__(self, app, models_path):
         self.version = "1.0"
         self.name = "MiningServer"
+        self.models_path = pathlib.Path(models_path)
 
         self.app = app
         self.app.route("/", methods=["POST"])(self.pipeline)
@@ -35,6 +37,7 @@ class MiningServer:
         response = {
             "name": self.name,
             "version": self.version,
+            "models_path": str(self.models_path)
         }
 
         return jsonify(response)
