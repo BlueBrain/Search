@@ -27,7 +27,7 @@ class MiningServer:
         ee_model = spacy.load("en_ner_craft_md")
 
         # Relations Extractors (RE)
-        chemprot_model_path = models_path / 'scibert_chemprot.tar.gz'
+        chemprot_model_path = self.models_path / 'scibert_chemprot.tar.gz'
         re_models = {('CHEBI', 'GGP'): [ChemProt(chemprot_model_path)]}
 
         # Full Pipeline
