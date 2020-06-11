@@ -13,7 +13,7 @@ class MiningServer:
 
         self.app = app
         self.app.route("/", methods=["POST"])(self.pipeline)
-        self.app.route("/identify", methods=["POST"])(self.pipeline)
+        self.app.route("/identify", methods=["POST"])(self.identify)
 
     def identify(self):
         response = {
