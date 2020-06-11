@@ -1,9 +1,9 @@
+"""The mining server."""
 import io
 import logging
 import pathlib
 
 from flask import jsonify, make_response, request
-import pandas as pd
 import spacy
 
 from ..mining import ChemProt, TextMiningPipeline
@@ -13,6 +13,15 @@ logger = logging.getLogger(__name__)
 
 
 class MiningServer:
+    """The BBS mining server.
+
+    Parameters
+    ----------
+    app : flask.Flask
+        The Flask app wrapping the server.
+    models_path : str or pathlib.Path
+        The folder containing pre-trained models.
+    """
 
     def __init__(self, app, models_path):
         self.version = "1.0"
@@ -34,6 +43,7 @@ class MiningServer:
         self.text_mining_pipeline = TextMiningPipeline(ee_model, re_models)
 
     def help(self):
+        """Help the user by sending information about the server."""
         response = {
             "name": self.name,
             "version": self.version,
@@ -47,11 +57,24 @@ class MiningServer:
 
     @staticmethod
     def make_error_response(error_message):
-        response = {"error": error_message}
+        """Create response if there is an error during the process.
 
-        return jsonify(response)
+        Parameters
+        ----------
+        error_message: str
+            Error message to send if there is an issue.
+
+        Returns
+        -------
+        response: str
+            Response to send with the error_message in a json format.
+        """
+        response = jsonify({"error": error_message})
+
+        return response
 
     def pipeline(self):
+        """Respond to a mining query."""
         if request.is_json:
             json_request = request.get_json()
             text = json_request.get("text")
@@ -78,5 +101,3 @@ class MiningServer:
             response = self.make_error_response("The request has to be a JSON object.")
 
         return response
-
-
