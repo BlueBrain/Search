@@ -1,9 +1,11 @@
-import csv
 import io
 import logging
 
 from flask import jsonify, make_response
 import pandas as pd
+import spacy
+
+from ..mining import ChemProt, TextMiningPipeline
 
 
 logger = logging.getLogger(__name__)
@@ -11,13 +13,23 @@ logger = logging.getLogger(__name__)
 
 class MiningServer:
 
-    def __init__(self, app):
+    def __init__(self, app, models_path):
         self.version = "1.0"
         self.name = "MiningServer"
 
         self.app = app
         self.app.route("/", methods=["POST"])(self.pipeline)
         self.app.route("/identify", methods=["POST"])(self.identify)
+
+        # Entities Extractors (EE)
+        ee_model = spacy.load("en_ner_craft_md")
+
+        # Relations Extractors (RE)
+        chemprot_model_path = models_path / 'scibert_chemprot.tar.gz'
+        re_models = {('CHEBI', 'GGP'): [ChemProt(chemprot_model_path)]}
+
+        # Full Pipeline
+        self.text_mining_pipeline = TextMiningPipeline(ee_model, re_models)
 
     def identify(self):
         response = {

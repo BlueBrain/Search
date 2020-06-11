@@ -13,10 +13,10 @@ parser.add_argument("--port",
                     default=8080,
                     type=int,
                     help="The server port")
-# parser.add_argument("--models_path",
-#                     default="/raid/bbs_data/trained_models",
-#                     type=str,
-#                     help="The folder with pretrained models")
+parser.add_argument("--models_path",
+                    default="/raid/bbs_data/trained_models",
+                    type=str,
+                    help="The folder with pretrained models")
 # parser.add_argument("--embeddings_path",
 #                     default="/raid/bbs_data/cord19_v7/embeddings",
 #                     type=str,
@@ -34,7 +34,7 @@ def main():
     from ..server.mining_server import MiningServer
 
     app = Flask("BBSearch Server")
-    MiningServer(app)
+    MiningServer(app, args.models_path)
     app.run(
         host=args.host,
         port=args.port,

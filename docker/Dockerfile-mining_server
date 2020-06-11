@@ -40,9 +40,8 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 # Expose a port
 EXPOSE 8080
 ENV MODELS_PATH="/raid/bbs_data/trained_models"
-ENV EMBEDDINGS_PATH="/raid/bbs_data/cord19_v7/embeddings"
-ENV DATABASE_PATH="/raid/bbs_data/cord19_v7/databases/cord19.db"
 
 ENTRYPOINT exec mining_server \
     --host=0.0.0.0 \
-    --port=8080
+    --port=8080 \
+    --models_path $MODELS_PATH
