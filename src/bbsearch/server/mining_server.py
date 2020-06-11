@@ -38,9 +38,16 @@ class MiningServer:
             "name": self.name,
             "version": self.version,
             "models_path": str(self.models_path),
-            "mandatory fields": ["text"],
-            "optional fields": ["article_id", "return_prob", "debug"]
+            "description": "Run the BBS text mining pipeline on a given text.",
+            "required fields": ["text"],
+            "optional fields": ["article_id", "return_prob", "debug"],
         }
+
+        return jsonify(response)
+
+    @staticmethod
+    def make_error_response(error_message):
+        response = {"error": error_message}
 
         return jsonify(response)
 
@@ -53,9 +60,7 @@ class MiningServer:
             debug = json_request.get("debug") or False
 
             if text is None:
-                response = jsonify({
-                    "error": "The request text is empty"
-                })
+                response = self.make_error_response("The request text is missing.")
             else:
                 df = self.text_mining_pipeline(
                     text=text,
@@ -63,17 +68,14 @@ class MiningServer:
                     return_prob=return_prob,
                     debug=debug)
 
-                csv_file_buffer = io.StringIO()
-                df.to_csv(csv_file_buffer, index=False)
-
-                response = make_response(csv_file_buffer.getvalue())
-                response.headers["Content-Disposition"] = "attachment; filename=mining_results.csv"
+                with io.StringIO() as csv_file_buffer:
+                    df.to_csv(csv_file_buffer, index=False)
+                    response = make_response(csv_file_buffer.getvalue())
                 response.headers["Content-Type"] = "text/csv"
+                response.headers["Content-Disposition"] = "attachment; filename=bbs_mining_results.csv"
 
         else:
-            response = jsonify({
-                "error": "The request has to be a JSON object."
-            })
+            response = self.make_error_response("The request has to be a JSON object.")
 
         return response
 
