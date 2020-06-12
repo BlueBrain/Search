@@ -12,7 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class EmbeddingServer:
-    """Wrapper class representing the embedding server."""
+    """Wrapper class representing the embedding server.
+
+    Parameters
+    ----------
+    app: flask.Flask()
+        Flask application
+    embedding_models: dict
+        Dictionary whom keys are name of embedding_models
+        and values are instance of the embedding models.
+    """
 
     def __init__(self, app, embedding_models):
         self.app = app
