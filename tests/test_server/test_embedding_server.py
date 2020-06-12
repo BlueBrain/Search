@@ -5,8 +5,8 @@ from bbsearch.embedding_models import SBioBERT
 from bbsearch.server.embedding_server import EmbeddingServer
 
 
-@pytest.fixture
-def embedding_client(monkeypatch):
+@pytest.fixture(scope='session')
+def embedding_client():
     """Fixture to create a client for mining_server."""
 
     sbiobert = SBioBERT()
@@ -22,7 +22,7 @@ def embedding_client(monkeypatch):
 
 class TestEmbeddingServer:
 
-    def test_embedding_server_welcome(self, embedding_client):
+    def test_embedding_server_help(self, embedding_client):
         response = embedding_client.post('/help')
         assert response.status_code == 200
         assert response.json['name'] == 'EmbeddingServer'

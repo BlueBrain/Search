@@ -4,22 +4,22 @@ from unittest.mock import MagicMock, Mock
 
 import numpy as np
 
-from bbsearch.embedding_models import BSV
 from bbsearch.server.search_server import SearchServer
 
 
 @pytest.fixture
-def search_client(monkeypatch, embeddings_path, fake_db_cnxn, tmpdir):
+def search_client(monkeypatch, embeddings_path, fake_db_cnxn):
     """Fixture to create a client for mining_server."""
 
-    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
-
-    bsv_model_inst = MagicMock(spec=BSV)
+    bsv_model_inst = MagicMock()
     bsv_model_class = Mock()
     bsv_model_class.return_value = bsv_model_inst
     bsv_model_inst.preprocess.return_value = 'hello'
     bsv_model_inst.embed.return_value = np.ones((2,))
+
     monkeypatch.setattr('bbsearch.server.search_server.BSV', bsv_model_class)
+
+    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
 
     app = Flask("BBSearch Test Search Server")
 
@@ -34,12 +34,12 @@ def search_client(monkeypatch, embeddings_path, fake_db_cnxn, tmpdir):
 
 class TestSearchServer:
 
-    def test_search_server_welcome(self, search_client):
+    def test_search_server(self, search_client):
+
         response = search_client.post('/help')
         assert response.status_code == 200
         assert response.json['name'] == 'SearchServer'
 
-    def test_search_server_query(self, search_client):
         request_json = {'which_model': 'BSV',
                         'k': 3,
                         'query_text': 'hello'}
