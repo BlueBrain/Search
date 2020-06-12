@@ -35,8 +35,9 @@ def search_client(monkeypatch, embeddings_path, fake_db_cnxn, tmpdir):
 class TestSearchServer:
 
     def test_search_server_welcome(self, search_client):
-        response = search_client.post('/hello')
+        response = search_client.post('/help')
         assert response.status_code == 200
+        assert response.json['name'] == 'SearchServer'
 
     def test_search_server_query(self, search_client):
         request_json = {'which_model': 'BSV',
