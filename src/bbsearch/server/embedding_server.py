@@ -29,7 +29,7 @@ class EmbeddingServer:
 
         self.app = app
         self.app.route("/")(self.request_welcome)
-        self.app.route("/help")(self.help)
+        self.app.route("/help", methods=["POST"])(self.help)
         self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
 
