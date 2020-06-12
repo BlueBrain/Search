@@ -1,5 +1,4 @@
 """The search server."""
-import json
 import logging
 import pathlib
 
