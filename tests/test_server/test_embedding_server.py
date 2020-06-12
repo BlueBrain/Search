@@ -23,6 +23,11 @@ def embedding_client(monkeypatch):
 class TestEmbeddingServer:
 
     def test_embedding_server_welcome(self, embedding_client):
+        response = embedding_client.post('/help')
+        assert response.status_code == 200
+        assert response.json['name'] == 'EmbeddingServer'
+
+    def test_embedding_server_welcome(self, embedding_client):
         response = embedding_client.get('/')
         assert response.status_code == 200
         response = embedding_client.post('/')

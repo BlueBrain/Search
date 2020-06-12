@@ -24,8 +24,12 @@ class EmbeddingServer:
     """
 
     def __init__(self, app, embedding_models):
+        self.name = 'EmbeddingServer'
+        self.version = "1.0"
+
         self.app = app
         self.app.route("/")(self.request_welcome)
+        self.app.route("/help")(self.help)
         self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
         self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
 
@@ -51,6 +55,18 @@ class EmbeddingServer:
         response = jsonify(error.to_dict())
         response.status_code = error.status_code
         return response
+
+    def help(self):
+        """Help the user by sending information about the server."""
+        response = {
+            "name": self.name,
+            "version": self.version,
+            "description": "Run the BBS embedding computation server "
+                           "for a given sentence.",
+            "required fields": ["text", "model"]
+        }
+
+        return jsonify(response)
 
     def request_welcome(self):
         """Generate a welcome page."""
