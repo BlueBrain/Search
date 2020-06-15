@@ -1,0 +1,1023 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+
+    <style>
+      textarea, select, input, button { outline: none; }
+
+      html, body {
+        margin: 0;
+      }
+
+      #graph-host {
+        position: absolute;
+      }
+
+      #info {
+        background: rgb(241, 241, 241);
+        padding: 10px;
+        min-width: fit-content;
+        width: 500px;
+        font-family: sans-serif;
+        font-size: 15px;
+        color: #505050;
+        margin-left: 15px;
+        border: solid 1px #80808038;
+        position: absolute;
+        right: 0;
+      }
+
+      #item-input {
+        min-width: 300px;
+        font-size: 17px;
+        border: none;
+        padding: 4px;
+        color: #0a9bb9;
+      }
+
+      #list-container {
+        z-index: 2;
+        position: absolute;
+        padding: 5px;
+        background: rgba(25, 214, 253, 0.9);
+        /* background: linear-gradient(343deg, rgba(0, 188, 226, 0.85) 0%, rgba(0, 212, 255, 1) 100%); */
+        font-size: 17px;
+        font-family: sans-serif;
+        overflow-y: hidden;        
+        border: solid 1px #0093b3;
+        min-width: fit-content;
+        height: fit-content;
+        width: fit-content;
+      }
+
+      #item-list {
+        overflow-y: scroll;
+        display: none;
+        margin-top: 15px;
+        max-height: 500px;
+      }
+
+      .item {
+        margin-bottom: 5px;
+        cursor: pointer;
+        padding: 6px;
+        transition: all 0.2s;
+        color: #0d4a56;
+      }
+
+      .item:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .node::before {
+        content: "●";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 3px;
+        border-radius: 3px;
+      }
+
+      .edge::before {
+        content: "\\";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 5px;
+        border-radius: 3px;
+      }
+
+
+      .edge::after {
+        content: "[edge]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      .node::after {
+        content: "[node]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      #download-bt {
+        margin: 0 5px;
+        cursor: pointer;
+      }
+
+    </style>
+
+  <script src='https://unpkg.com/panzoom@9.2.4/dist/panzoom.min.js'></script>
+
+  </head>
+  <body>
+
+    <div id="list-container">
+      <div style="display: inline-flex;">
+        <div id="download-bt" title="Download graph as an image">
+          <img style="width: 28px;"  src='arrow-dl.svg'/>
+        </div>
+        <input id="item-input" placeholder="Search" autocomplete="off"/>
+      </div>
+      <div id="item-list"></div>
+    </div>
+
+    <div id="graph-host"></div>
+    <div id='info'>Click on items to show data</div>
+
+    
+
+    <script>
+
+      var options = {}
+      var dataset  = JSON.parse(`[
+  {
+    "data": {
+      "id": "hyjojnnn"
+    },
+    "style": {
+      "label": "hyjojnnn",
+      "width": 30,
+      "height": 30,
+      "background-color": "purple",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "khrjjtpg"
+    },
+    "style": {
+      "label": "khrjjtpg",
+      "width": 30,
+      "height": 30,
+      "background-color": "brown",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "rquqhgdy"
+    },
+    "style": {
+      "label": "rquqhgdy",
+      "width": 30,
+      "height": 30,
+      "background-color": "#00aade",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "bxntzeti"
+    },
+    "style": {
+      "label": "bxntzeti",
+      "width": 30,
+      "height": 30,
+      "background-color": "#8912f9",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "yqluvvlb"
+    },
+    "style": {
+      "label": "yqluvvlb",
+      "width": 30,
+      "height": 30,
+      "background-color": "pink",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "bqbkmsep"
+    },
+    "style": {
+      "label": "bqbkmsep",
+      "width": 30,
+      "height": 30,
+      "background-color": "orange",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "frkbfvrl"
+    },
+    "style": {
+      "label": "frkbfvrl",
+      "width": 30,
+      "height": 30,
+      "background-color": "green",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "hmujwccb"
+    },
+    "style": {
+      "label": "hmujwccb",
+      "width": 30,
+      "height": 30,
+      "background-color": "#009955",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "mjgwivhf"
+    },
+    "style": {
+      "label": "mjgwivhf",
+      "width": 30,
+      "height": 30,
+      "background-color": "#782087",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota"
+    },
+    "style": {
+      "label": "bhsrgota",
+      "width": 30,
+      "height": 30,
+      "background-color": "#338811",
+      "font-size": "2px",
+      "color": "black"
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_hyjojnnn",
+      "source": "bhsrgota",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "yqluvvlb_bxntzeti",
+      "source": "yqluvvlb",
+      "target": "bxntzeti"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_khrjjtpg",
+      "source": "bhsrgota",
+      "target": "khrjjtpg"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hyjojnnn_bhsrgota",
+      "source": "hyjojnnn",
+      "target": "bhsrgota"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bqbkmsep_khrjjtpg",
+      "source": "bqbkmsep",
+      "target": "khrjjtpg"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "frkbfvrl_rquqhgdy",
+      "source": "frkbfvrl",
+      "target": "rquqhgdy"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_hyjojnnn",
+      "source": "bhsrgota",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "rquqhgdy_khrjjtpg",
+      "source": "rquqhgdy",
+      "target": "khrjjtpg"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hyjojnnn_mjgwivhf",
+      "source": "hyjojnnn",
+      "target": "mjgwivhf"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hmujwccb_yqluvvlb",
+      "source": "hmujwccb",
+      "target": "yqluvvlb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_frkbfvrl",
+      "source": "bhsrgota",
+      "target": "frkbfvrl"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "mjgwivhf_yqluvvlb",
+      "source": "mjgwivhf",
+      "target": "yqluvvlb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hyjojnnn_mjgwivhf",
+      "source": "hyjojnnn",
+      "target": "mjgwivhf"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hyjojnnn_khrjjtpg",
+      "source": "hyjojnnn",
+      "target": "khrjjtpg"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hmujwccb_bqbkmsep",
+      "source": "hmujwccb",
+      "target": "bqbkmsep"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_bqbkmsep",
+      "source": "bhsrgota",
+      "target": "bqbkmsep"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_hyjojnnn",
+      "source": "bhsrgota",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "yqluvvlb_bxntzeti",
+      "source": "yqluvvlb",
+      "target": "bxntzeti"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "mjgwivhf_hmujwccb",
+      "source": "mjgwivhf",
+      "target": "hmujwccb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bqbkmsep_khrjjtpg",
+      "source": "bqbkmsep",
+      "target": "khrjjtpg"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "mjgwivhf_hmujwccb",
+      "source": "mjgwivhf",
+      "target": "hmujwccb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "hmujwccb_yqluvvlb",
+      "source": "hmujwccb",
+      "target": "yqluvvlb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "rquqhgdy_bxntzeti",
+      "source": "rquqhgdy",
+      "target": "bxntzeti"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "khrjjtpg_yqluvvlb",
+      "source": "khrjjtpg",
+      "target": "yqluvvlb"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "khrjjtpg_hyjojnnn",
+      "source": "khrjjtpg",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "mjgwivhf_hyjojnnn",
+      "source": "mjgwivhf",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bqbkmsep_bhsrgota",
+      "source": "bqbkmsep",
+      "target": "bhsrgota"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "yqluvvlb_bxntzeti",
+      "source": "yqluvvlb",
+      "target": "bxntzeti"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "bhsrgota_bqbkmsep",
+      "source": "bhsrgota",
+      "target": "bqbkmsep"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 1,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  },
+  {
+    "data": {
+      "id": "frkbfvrl_hyjojnnn",
+      "source": "frkbfvrl",
+      "target": "hyjojnnn"
+    },
+    "style": {
+      "label": "",
+      "font-size": "10px",
+      "width": 100,
+      "color": "black",
+      "line-color": "pink",
+      "line-style": "solid",
+      "curve-style": "bezier",
+      "target-arrow-shape": "triangle",
+      "target-arrow-color": "pink",
+      "arrow-scale": 0.5
+    }
+  }
+]
+
+
+      `)
+
+      console.log(dataset)
+    </script>  
+    <script src="core.js"></script>
+
+    <script>
+      let infoDiv = document.getElementById('info')
+
+      let result = refreshGraph(dataset, {
+        //nodeRadiusProperty: 'style.width',
+        nodeColorProperty: 'style.background-color',
+        // edgeThicknessProperty: 'style.width',
+        mode: 'directional',
+
+        onEdgeEnter: function(highlightedEdges, allNodes, allEdges) {
+          console.log(highlightedEdges)
+          return
+          infoDiv.innerHTML = `
+          ${highlightedEdges.length} connections between the nodes <b>${highlightedEdges[0].data.source}</b> and <b>${highlightedEdges[0].data.target}</b>:</br>
+          <ul>
+            ${highlightedEdges.map(ed => `<li>edge id: <b>${ed.data.id}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+        onEdgeLeave: function(highlightedEdges, allNodes, allEdges) {
+          console.log(highlightedEdges)
+          infoDiv.innerHTML = ''
+        },
+
+
+        onNodeEnter: function(node, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          console.log(node, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges)
+          let nodeId = node.data.id
+          
+
+          infoDiv.innerHTML = `
+          The node <b>${nodeId}</b> has ${inboundConnectedNodes.length} inbound connections from nodes: </br>
+          <ul>
+            ${inboundConnectedNodes.map(conn => `<li><b>${conn.from}</b> by edge <b>${conn.by}</b></li>`).join('')}
+          </ul>
+          </br>
+
+          and ${outboundConnectedNodes.length} outbound connections to nodes: </br>
+          <ul>
+            ${outboundConnectedNodes.map(conn => `<li><b>${conn.to}</b> by edge <b>${conn.by}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+
+        onNodeLeave: function(node, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          infoDiv.innerHTML = ''
+        }, 
+
+        ...options
+
+      })
+
+      const panZoomInstance = panzoom(result.radialGraph.getElementsByTagName('g')[0],
+      {
+        smoothScroll: false,
+      })
+      
+      panZoomInstance.pause()
+
+      document.addEventListener('keydown', (evt) => {
+        console.log('keydown', evt)
+        
+        if (evt.key === 'Alt') {
+          panZoomInstance.resume()
+        }
+      })
+
+      document.addEventListener('keyup', (evt) => {
+        console.log('keyup', evt)
+        if (evt.key === 'Alt') {
+          panZoomInstance.pause()
+        }
+      })
+
+      const graphHost = document.getElementById('graph-host')
+      graphHost.appendChild(result.radialGraph)
+
+      const allItemIds = Object.keys(result.itemMapper)
+      const itemInput = document.getElementById('item-input')
+      const itemList = document.getElementById('item-list')
+      let previouslyHoveredItemId = null
+      let previouslyClickedItemId = null
+
+      
+      const noResultDiv = document.createElement('div')
+      noResultDiv.classList.add('item')
+      noResultDiv.innerText = 'no result'
+
+
+      function updateList(subst = '') {
+        itemList.innerHTML = ''
+        let filteredIdList = allItemIds
+
+        if (subst !== '') {
+          itemList.style.display = 'inherit'
+          filteredIdList = filteredIdList.filter((id) => id.toLowerCase().includes(subst.toLowerCase()))
+        } else {
+          itemList.style.display = 'none'
+          return
+        }
+
+        if (filteredIdList.length === 0) {
+          itemList.appendChild(noResultDiv)
+        }
+
+        filteredIdList.forEach((id) => {
+          let itemButton = document.createElement('div')
+          itemButton.textContent = id
+          itemButton.classList.add('item')
+          itemButton.classList.add(result.itemMapper[id].type)
+
+          itemList.appendChild(itemButton)
+
+          itemButton.addEventListener('mouseenter', (evt) => {
+            if (previouslyHoveredItemId && previouslyHoveredItemId !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyHoveredItemId].svg.dispatchEvent(fakeEvt)
+              previouslyHoveredItemId = null
+            }
+
+            let fakeEvt = new MouseEvent('mouseenter')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyHoveredItemId = id
+          })
+
+          itemButton.addEventListener('mouseleave', (evt) => {
+            if (id !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            }
+          })
+
+
+          itemButton.addEventListener('mousedown', (evt) => {
+            if (previouslyClickedItemId && previouslyClickedItemId !== id) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyClickedItemId].svg.dispatchEvent(fakeEvt)
+            }
+
+            let fakeEvt = new MouseEvent('mousedown')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyClickedItemId = id
+
+            itemInput.value = ''
+            updateList('')
+          })
+
+        })
+
+      }
+
+      itemInput.addEventListener('input', (evt) => {
+        updateList(evt.target.value)
+      })
+
+
+      const downloadBt = document.getElementById('download-bt')
+
+      downloadBt.addEventListener('mousedown', (evt) => {
+        const filename = "graph.svg"
+        const content = `<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">${graphHost.innerHTML}`
+        const element = document.createElement('a')
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+      })
+
+      updateList()
+
+
+    </script>
+  </body>
+</html>
+
