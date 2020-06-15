@@ -17,7 +17,7 @@ install_requires = [
     'sent2vec-prebuilt',
     'sentence-transformers',
     'scispacy',
-    'en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz',
+    'en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz',
     'en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.4/en_ner_craft_md-0.2.4.tar.gz',
     'spacy==2.2.1',
     'tensorflow',
