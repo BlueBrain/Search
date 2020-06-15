@@ -1,23 +1,23 @@
+"""Collection of functions for evaluation of NER models."""
 import json
 import pandas as pd
 
 from spacy.tokens import Doc
 
 
-# helpers
 def prodigy2df(cnxn):
     """Convert prodigy annotations to a pd.DataFrame.
 
     Parameters
     ----------
-    cursor : sqlite3.Cursor
-        Cursor to the prodigy database.
+    cnxn : sqlite3.Connection
+        Connection to the prodigy database.
 
     Returns
     -------
-    pd.DataFrame
-        Each row represents one token, the columns are 'source', 'sentence_id',  'class',
-        'start_char', end_char', 'token_id', 'text'.
+    final_table : pd.DataFrame
+        Each row represents one token, the columns are 'source', 'sentence_id', 'class',
+        'start_char', end_char', 'id', 'text'.
     """
     not_entity_symbol = 'O'
 
@@ -57,23 +57,32 @@ def prodigy2df(cnxn):
     return final_table
 
 
-# helpers
 def spacy2df(spacy_model, ground_truth_tokenization):
-    """Turn NER of a spacy model into a pd.DataFrame
+    """Turn NER of a spacy model into a pd.DataFrame.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     spacy_model : spacy.language.Language
-        Spacy model that will be used for NER (not tokenization)
+        Spacy model that will be used for NER (not tokenization).
 
     ground_truth_tokenization : list
         List of str (words) representing the ground truth tokenization. This will guarantee
         that the ground truth dataframe will be aligned with the prediction dataframe.
 
+    Returns
+    -------
+    pd.DataFrame
+        Each row represents one token, the columns are 'text' and 'class'.
+
+    Notes
+    -----
+    One should run the `prodigy2df` first in order to obtain the `ground_truth_tokenization`. If
+    it is the case then `ground_truth_tokenization=prodigy_table['text'].to_list()`.
+
     """
     not_entity_symbol = 'O'
 
-    doc = Doc(spacy_model.vocab, words=ground_truth_tokenization['text'].to_list())
+    doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
     ner = spacy_model.get_pipe('ner')
     new_doc = ner(doc)
 

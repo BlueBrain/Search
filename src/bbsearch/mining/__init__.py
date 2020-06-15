@@ -5,6 +5,7 @@ from .attributes import (
     AttributeAnnotationTab,
     TextCollectionWidget)
 from .entity import find_entities
+from .eval import prodigy2df, spacy2df
 from .pipeline import TextMiningPipeline
 from .relation import ChemProt, REModel, StartWithTheSameLetter, annotate
 
@@ -17,5 +18,7 @@ __all__ = [
     'StartWithTheSameLetter',
     'annotate',
     'find_entities',
-    'TextMiningPipeline'
+    'TextMiningPipeline',
+    'prodigy2df',
+    'spacy2df'
 ]
