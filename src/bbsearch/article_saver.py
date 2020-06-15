@@ -76,7 +76,14 @@ class ArticleSaver:
         self.retrieve_text()
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
-            article_report += self.articles_metadata[article_id]
+            if len(df_article['section_name'].unique()) == 1:
+                article_report += self.articles_metadata[article_id]
+            else:
+                substring = '&#183;'
+                article_report += self.articles_metadata[article_id].split(substring)[0] + '&#183;'
+                article_report += f'{len(df_article["section_name"].unique())} different ' \
+                                  f'sections are selected for this article.'
+                article_report += '</p>'
             article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
             article_report += '<br/>' * 2
 
