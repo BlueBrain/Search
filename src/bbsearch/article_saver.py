@@ -26,30 +26,6 @@ class ArticleSaver:
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
         self.articles_metadata = dict()
 
-    def status_on_article_retrieve(self, article_infos):
-        """Send status about an article given the article_infos (article_id, paragraph_id).
-
-        Parameters
-        ----------
-        article_infos: tuple
-            Tuple (article_id, paragraph_id) of a given paragraph.
-
-        Returns
-        -------
-        status: str
-            String explaining if the given article has already been seen,
-            and if yes which option has been chosen by the user.
-        """
-        status = 'You have never seen this article'
-        if article_infos in self.saved_articles.keys():
-            status = f'You have already seen this paragraph and ' \
-                     f'you chose the option: {self.saved_articles[article_infos]}.'
-            return status
-        if article_infos[0] in [k[0] for k in self.saved_articles.keys()]:
-            status = 'You have already seen this article through different paragraphs'
-
-        return status
-
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]

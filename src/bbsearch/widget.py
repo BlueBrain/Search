@@ -293,12 +293,10 @@ class Widget:
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     radio_button = self.create_radio_buttons(article_infos, article_metadata)
-                    status = self.status_article_retrieve(article_infos)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
                     display(radio_button)
-                    display(HTML(status))
                 display(HTML(formatted_output))
 
                 print()
