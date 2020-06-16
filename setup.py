@@ -28,7 +28,9 @@ install_requires = [
     'faiss-cpu',
     'jupyter_server_proxy',
     'jupyter_dash',
-    'networkx'
+    'networkx',
+    'dash-cytoscape',
+    'dash-table'
 ]
 tests_require = [
     'flake8',
