@@ -39,7 +39,7 @@ def main():
         host=args.host,
         port=args.port,
         threaded=True,
-        debug=True,
+        debug=False,
     )
 
 
