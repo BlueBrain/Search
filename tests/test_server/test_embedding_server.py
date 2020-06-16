@@ -1,7 +1,9 @@
 from flask import Flask
 import pytest
+from unittest.mock import Mock
 
-from bbsearch.embedding_models import SBioBERT
+import numpy as np
+
 from bbsearch.server.embedding_server import EmbeddingServer
 
 
@@ -9,7 +11,9 @@ from bbsearch.server.embedding_server import EmbeddingServer
 def embedding_client():
     """Fixture to create a client for mining_server."""
 
-    sbiobert = SBioBERT()
+    sbiobert = Mock()
+    sbiobert.preprocess.return_value = 'This is a dummy sentence'
+    sbiobert.embed.return_value = np.ones((2,))
     embedding_models = {'sbiobert': sbiobert}
 
     app = Flask("BBSearch Test Embedding Server")

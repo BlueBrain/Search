@@ -79,8 +79,8 @@ class MiningServer:
             json_request = request.get_json()
             text = json_request.get("text")
             article_id = json_request.get("article_id")
-            return_prob = json_request.get("return_prob") or False
-            debug = json_request.get("debug") or False
+            return_prob = json_request.get("return_prob", False)
+            debug = json_request.get("debug", False)
 
             if text is None:
                 response = self.make_error_response("The request text is missing.")
