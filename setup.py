@@ -26,6 +26,9 @@ install_requires = [
     'transformers',
     'rdflib-jsonld',
     'faiss-cpu',
+    'jupyter_server_proxy',
+    'jupyter_dash',
+    'networkx'
 ]
 tests_require = [
     'flake8',
