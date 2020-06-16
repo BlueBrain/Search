@@ -47,10 +47,26 @@ class MiningServer:
         response = {
             "name": self.name,
             "version": self.version,
-            "models_path": str(self.models_path),
             "description": "Run the BBS text mining pipeline on a given text.",
-            "required fields": ["text"],
-            "optional fields": ["article_id", "return_prob", "debug"],
+            "POST": {
+                "/help": {
+                    "description": "Get this help.",
+                    "response_content_type": "application/json"
+                },
+                "/": {
+                    "description": "Compute text mining pipeline"
+                                   "(extract entities and relations).",
+                    "response_content_type": "text/csv",
+                    "required_fields": {
+                        "text": []
+                    },
+                    "accepted_fields": {
+                        "article_id": [],
+                        "return_prob": [True, False],
+                        "debug": [True, False]
+                    }
+                }
+            }
         }
 
         return jsonify(response)

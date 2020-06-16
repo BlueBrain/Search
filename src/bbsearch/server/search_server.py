@@ -66,9 +66,30 @@ class SearchServer:
             "name": self.name,
             "version": self.version,
             "description": "Run the BBS text search for a given sentence.",
-            "required fields": ["text", "model", "k"],
-            "optional fields": ['has_journal', 'date_range', 'deprioritize_strength',
-                                'exclusion_text', 'deprioritize_text']
+            "POST": {
+                "/help": {
+                    "description": "Get this help.",
+                    "response_content_type": "application/json"
+                },
+                "/": {
+                    "description": "Compute search through database"
+                                   "and give back most similar sentences to the query.",
+                    "response_content_type": "application/json",
+                    "required_fields": {
+                        "query_text": [],
+                        "which_model": ["BSV", "SBioBERT"],
+                        "k": 'integer number'
+                    },
+                    "accepted_fields": {
+                        "has_journal": [True, False],
+                        "data_range": ('start_date', 'end_date'),
+                        "deprioritize_strength": ['None', 'Weak', 'Mild',
+                                                  'Strong', 'Stronger'],
+                        "exclusion_text": [],
+                        "deprioritize_text": []
+                    }
+                }
+            }
         }
 
         return jsonify(response)

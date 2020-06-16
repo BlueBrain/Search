@@ -61,9 +61,27 @@ class EmbeddingServer:
         response = {
             "name": self.name,
             "version": self.version,
-            "description": "Run the BBS embedding computation server "
-                           "for a given sentence.",
-            "required fields": ["text", "model"]
+            "description": "Run the BBS embedding computation server for a given sentence.",
+            "GET": {
+                "/": {
+                    "description": "Get the welcome page.",
+                    "response_content_type": "text/html"
+                }
+            },
+            "POST": {
+                "/help": {
+                    "description": "Get this help.",
+                    "response_content_type": "application/json"
+                },
+                "/v1/embed/json": {
+                    "description": "Compute text embeddings.",
+                    "response_content_type": "application/json",
+                    "required_fields": {
+                                    "model": ["BSV", "SBioBERT", "SBERT", "USE"],
+                                    "text": []
+                    }
+                }
+            }
         }
 
         return jsonify(response)
