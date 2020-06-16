@@ -60,9 +60,13 @@ def find_entities(doc, model_entities, return_prob=False, threshold=0.5):
     else:
         # This is a undocumented spaCy hack to get confidence scores
         ner = model_entities.get_pipe('ner')
-        docs = [model_entities(doc.text)]
-        beam = ner.beam_parse(docs, beam_width=16)[0]
-        entities = ner.moves.get_beam_annot(beam)
+        new_doc = model_entities(doc.text)
+        if len(new_doc) > 0:
+            beam = ner.beam_parse([new_doc], beam_width=16)[0]
+            entities = ner.moves.get_beam_annot(beam)
+        else:
+            entities = {}
+
         for k, v in entities.items():
             ent_span = doc[k[0]:k[1]]
             lines.append({'entity': ent_span.text,
