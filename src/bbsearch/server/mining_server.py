@@ -126,7 +126,7 @@ class MiningServer:
             return selected_ee_models, selected_re_models, error
 
         else:
-            ee_model_names = requested_ee_models.split(',')
+            ee_model_names = set(requested_ee_models.split(','))
             try:
                 selected_ee_models = [self.all_ee_models[model_name.strip()] for model_name in ee_model_names]
             except KeyError:
@@ -139,7 +139,7 @@ class MiningServer:
         if not requested_re_models:
             selected_re_models = {}
         else:
-            re_model_names = requested_re_models.split(',')
+            re_model_names = set(requested_re_models.split(','))
             selected_re_models = defaultdict(list)
             for model_name in re_model_names:
                 try:
