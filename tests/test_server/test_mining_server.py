@@ -41,6 +41,8 @@ class TestMiningServer:
     def test_mining_server_pipeline(self, mining_client):
         request_json = {
             "text": 'hello',
+            "ee_models": 'en_ner_craft_md',
+            "re_models": 'chemprot',
             "article_id": 5,
             "return_prob": False}
         response = mining_client.post('/', json=request_json)
@@ -49,10 +51,35 @@ class TestMiningServer:
                                                 'property_value_type,' \
                                                 'ontology_source,paper_id,start_char,end_char,confidence_score\n'
         request_json = {"article_id": 5,
+                        "ee_models": 'en_ner_craft_md',
+                        "re_models": '',
                         "return_prob": False}
         response = mining_client.post('/', json=request_json)
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": "The request text is missing."}
+
         request_json = "text"
         response = mining_client.post('/', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
+
+        request_json = {"text": 'hello',
+                        "article_id": 5,
+                        "ee_models": '',
+                        "return_prob": False}
+        response = mining_client.post('/', json=request_json)
+        assert list(response.json.keys()) == ["error"]
+
+        request_json = {"text": 'hello',
+                        "article_id": 5,
+                        "ee_models": 'wrong_entity_model',
+                        "return_prob": False}
+        response = mining_client.post('/', json=request_json)
+        assert list(response.json.keys()) == ["error"]
+
+        request_json = {"text": 'hello',
+                        "article_id": 5,
+                        "ee_models": 'en_ner_craft_md',
+                        "re_models": 'wrong_relation_model',
+                        "return_prob": False}
+        response = mining_client.post('/', json=request_json)
+        assert list(response.json.keys()) == ["error"]
