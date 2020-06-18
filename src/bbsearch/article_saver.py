@@ -60,7 +60,7 @@ class ArticleSaver:
         article_ids_full_list = ','.join((f"\"{id_}\"" for id_ in article_ids_full))
 
         sql_query = f"""
-        SELECT a.article_id, p.section_name, p.paragraph_id, p.text
+        SELECT article_id, section_name, paragraph_id, text
         FROM (
                  SELECT *
                  FROM paragraphs
@@ -82,7 +82,7 @@ class ArticleSaver:
         paragraph_ids_list = ','.join((f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id']))
 
         sql_query = f"""
-        SELECT a.article_id, p.section_name, p.paragraph_id, p.text
+        SELECT article_id, section_name, paragraph_id, text
         FROM (
                  SELECT *
                  FROM paragraphs
