@@ -12,7 +12,7 @@ def test_overall(model_entities):
 
     # wrong arguments
     with pytest.raises(TypeError):
-        pipeline = TextMiningPipeline([model_entities], {('etype_1', 'etype_2'): ['WRONG TYPE']})
+        pipeline = TextMiningPipeline(model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
 
     # entities are [Britney Spears, Brazil, yesterday]
     doc = model_entities(text)
@@ -34,7 +34,7 @@ def test_overall(model_entities):
     models_relations = {('PERSON', 'DATE'): [StartWithTheSameLetter()],
                         ('PERSON', 'GPE'): [StartWithTheSameLetter()]
                         }
-    pipeline = TextMiningPipeline([model_entities], models_relations)
+    pipeline = TextMiningPipeline(model_entities, models_relations)
     df = pipeline(text)
 
     assert isinstance(df, pd.DataFrame)

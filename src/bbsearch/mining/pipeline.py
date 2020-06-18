@@ -14,9 +14,7 @@ class TextMiningPipeline:
 
         Parameters
         ----------
-        model_entities : list
-            List of all the model_entities needed for the entities extraction phase.
-            All those elements has to be an instance of `spacy.language.Language`.
+        model_entities : spacy.language.Language
             Spacy model with pipes for parsing and ner, e.g. `model_entities=spacy.load("en_ner_craft_md")`.
         models_relations : dict
             The keys are pairs (two element tuples) of entity types (i.e. ('GGP', 'CHEBI')). The first entity type
@@ -24,7 +22,7 @@ class TextMiningPipeline:
             inside of `model_entities`. The value is a list of instances of relation extraction models, that is
             instances of some subclass of `REModel`.
         """
-        if not all([isinstance(model, spacy.language.Language) for model in model_entities]):
+        if not isinstance(model_entities, spacy.language.Language):
             raise TypeError('Current implementation requires `model_entities` to be an instance of '
                             '`spacy.language.Language`. Try with `model_entities==spacy.load("en_ner_craft_md")`')
         if not all([isinstance(model, REModel) for model_list in models_relations.values() for model in model_list]):
@@ -69,51 +67,42 @@ class TextMiningPipeline:
                    'end_char',
                    'confidence_score']
 
+        doc = self.model_entities(text, disable=['ner'])
+
+        # Extract entities in text
+        df_entities = find_entities(doc, self.model_entities, return_prob)
+        df_entities['paper_id'] = article_id
         rows_relations = []
-        df_entities = pd.DataFrame(columns=headers)
 
-        for ee_model in self.model_entities:
-            doc = ee_model(text, disable=['ner'])
-
-            # Extract entities in text
-            new_df_entities = find_entities(doc, ee_model, return_prob)
-            new_df_entities['paper_id'] = article_id
-
-            df_entities = df_entities.append(new_df_entities, ignore_index=True)
-
-            if self.models_relations:
-                for sent in doc.sents:
-                    # Select extracted entities in this sentence
-                    df_entities_sent = new_df_entities.loc[(new_df_entities.start_char >= sent.start_char) &
-                                                           (new_df_entities.end_char <= sent.end_char)]
-                    # Extract relations in this sentence
-
-                    for s_idx, s_ent in df_entities_sent.iterrows():  # potential subject
-                        for o_idx, o_ent in df_entities_sent.iterrows():  # potential object
-                            if s_idx == o_idx:  # relations cannot be between an entity and itself
-                                continue
-                            so = (s_ent.entity_type, o_ent.entity_type)
-                            if so in self.models_relations:
-                                for re_model in self.models_relations[so]:
-                                    annotated_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
-                                    row_relation = {'entity': s_ent.entity,
-                                                    'entity_type': s_ent.entity_type,
-                                                    'relation_model': re_model.__class__.__name__,
-                                                    'start_char': sent.start_char,
-                                                    'end_char': sent.end_char,
-                                                    'property_type': 'relation',
-                                                    'property_value': o_ent.entity,
-                                                    'property_value_type': o_ent.entity_type,
-                                                    'paper_id': article_id
-                                                    }
-                                    if return_prob:
-                                        row_relation.update(dict(zip(['property', 'confidence_score'],
-                                                                     re_model.predict(annotated_sent,
-                                                                                      return_prob=True))))
-                                    else:
-                                        row_relation.update({'property': re_model.predict(annotated_sent,
-                                                                                          return_prob=False)})
-                                    rows_relations.append(row_relation)
+        for sent in doc.sents:
+            # Select extracted entities in this sentence
+            df_entities_sent = df_entities.loc[(df_entities.start_char >= sent.start_char) &
+                                               (df_entities.end_char <= sent.end_char)]
+            # Extract relations in this sentence
+            for s_idx, s_ent in df_entities_sent.iterrows():  # potential subject
+                for o_idx, o_ent in df_entities_sent.iterrows():  # potential object
+                    if s_idx == o_idx:  # relations cannot be between an entity and itself
+                        continue
+                    so = (s_ent.entity_type, o_ent.entity_type)
+                    if so in self.models_relations:
+                        for re_model in self.models_relations[so]:
+                            annotated_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
+                            row_relation = {'entity': s_ent.entity,
+                                            'entity_type': s_ent.entity_type,
+                                            'relation_model': re_model.__class__.__name__,
+                                            'start_char': sent.start_char,
+                                            'end_char': sent.end_char,
+                                            'property_type': 'relation',
+                                            'property_value': o_ent.entity,
+                                            'property_value_type': o_ent.entity_type,
+                                            'paper_id': article_id
+                                            }
+                            if return_prob:
+                                row_relation.update(dict(zip(['property', 'confidence_score'],
+                                                             re_model.predict(annotated_sent, return_prob=True))))
+                            else:
+                                row_relation.update({'property': re_model.predict(annotated_sent, return_prob=False)})
+                            rows_relations.append(row_relation)
 
         df_relations = pd.DataFrame(rows_relations, columns=headers)
 
