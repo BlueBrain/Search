@@ -1,12 +1,18 @@
 """Module for the article_saver."""
 import datetime
+from collections import OrderedDict
+
 import pdfkit
 import textwrap
 
 import pandas as pd
 
 from .sql import get_shas_from_ids
-from .widget import SAVING_OPTIONS
+
+
+SAVING_OPTIONS = OrderedDict([('nothing',  'Do not take this article'),
+                              ('paragraph', 'Extract the paragraph'),
+                              ('article', 'Extract the entire article')])
 
 
 class ArticleSaver:

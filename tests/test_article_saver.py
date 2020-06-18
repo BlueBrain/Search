@@ -1,7 +1,6 @@
 import pandas as pd
 
-from bbsearch.article_saver import ArticleSaver
-from bbsearch.widget import SAVING_OPTIONS
+from bbsearch.article_saver import ArticleSaver, SAVING_OPTIONS
 
 
 class TestArticleSaver:
