@@ -27,8 +27,6 @@ install_requires = [
     'rdflib-jsonld',
     'faiss-cpu',
 ]
-
-setup_requires = ['pytest-runner']
 tests_require = [
     'flake8',
     'pytest',
@@ -46,7 +44,6 @@ setup(
     packages=find_packages("./src"),
     python_requires='>=3.6',
     install_requires=install_requires,
-    setup_requires=setup_requires,
     extras_require=extras_require,
     tests_require=tests_require,
     entry_points={
@@ -55,6 +52,7 @@ setup(
             "create_database=bbsearch.entrypoints.database_entrypoint:main",
             "compute_embeddings=bbsearch.entrypoints.embeddings_entrypoint:main",
             "search_server=bbsearch.entrypoints.search_server_entrypoint:main",
+            "mining_server=bbsearch.entrypoints.mining_server_entrypoint:main",
         ]
     }
 )
