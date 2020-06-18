@@ -52,6 +52,7 @@ setup(
             "create_database=bbsearch.entrypoints.database_entrypoint:main",
             "compute_embeddings=bbsearch.entrypoints.embeddings_entrypoint:main",
             "search_server=bbsearch.entrypoints.search_server_entrypoint:main",
+            "mining_server=bbsearch.entrypoints.mining_server_entrypoint:main",
         ]
     }
 )
