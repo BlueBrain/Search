@@ -1,0 +1,371 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Blue Brain Graph Viz</title>
+
+    <style>
+      textarea, select, input, button { outline: none; }
+
+      html, body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      #graph-host {
+        position: absolute;
+      }
+
+      #graph-host svg {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #info {
+        background: rgb(241, 241, 241);
+        padding: 10px;
+        min-width: fit-content;
+        width: 500px;
+        font-size: 15px;
+        color: #505050;
+        margin-left: 15px;
+        border: solid 1px #80808038;
+        position: absolute;
+        right: 0;
+      }
+
+      #item-input {
+        min-width: 300px;
+        font-size: 17px;
+        border: none;
+        padding: 4px;
+        color: #0a9bb9;
+      }
+
+      #list-container {
+        z-index: 2;
+        position: absolute;
+        padding: 5px;
+        background: rgba(25, 214, 253, 0.9);
+        /* background: linear-gradient(343deg, rgba(0, 188, 226, 0.85) 0%, rgba(0, 212, 255, 1) 100%); */
+        font-size: 17px;
+        font-family: sans-serif;
+        overflow-y: hidden;        
+        border: solid 1px #0093b3;
+        min-width: fit-content;
+        height: fit-content;
+        width: fit-content;
+      }
+
+      #item-list {
+        overflow-y: scroll;
+        display: none;
+        margin-top: 15px;
+        max-height: 500px;
+      }
+
+      .item {
+        margin-bottom: 5px;
+        cursor: pointer;
+        padding: 6px;
+        transition: all 0.2s;
+        color: #0d4a56;
+      }
+
+      .item:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .node::before {
+        content: "●";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 3px;
+        border-radius: 3px;
+      }
+
+      .edge::before {
+        content: "\\";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 5px;
+        border-radius: 3px;
+      }
+
+
+      .edge::after {
+        content: "[edge]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      .node::after {
+        content: "[node]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      #download-bt {
+        margin: 0 5px;
+        cursor: pointer;
+      }
+
+      #arrow-dl {
+        fill: white;
+      }
+
+      #arrow-dl:hover {
+        fill: rgb(0, 100, 131);
+      }
+
+      #zoompan-info {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin: auto;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .key {
+        background: gainsboro;
+        padding: 16px 5px 5px 5px;
+        border-radius: 3px;
+        font-size: 13px;
+        border-bottom: solid 1px grey;
+        color: #737373;
+      }
+
+    </style>
+
+    <script>
+      PANZOOM
+    </script>
+  </head>
+  <body>
+
+    <div id="list-container">
+      <div style="display: inline-flex;">
+        <div id="download-bt" title="Download graph as an image">
+          <svg id="arrow-dl" width="28px" viewBox="0 0 1720 1750" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M559,267.5l602,0l0,622l559,0l-860,860l-860,-860l559,0l0,-622Z"/><rect x="559" y="0" width="602" height="203.5"/></svg>
+        </div>
+        <input id="item-input" placeholder="Search" autocomplete="off"/>
+      </div>
+      <div id="item-list"></div>
+    </div>
+
+    <div id="zoompan-info">
+      Press the key <span class="key">option</span> or <span class="key">alt</span> to scroll and pan
+    </div>
+
+    <div id="graph-host"></div>
+    <div id='info'>Click on items to show data</div>
+
+    <!-- <div style="display: flex;">
+      <div id="graph-host"></div>
+      <div id='info'></div>
+    </div> -->
+
+    <script>
+      var dataset = {}
+      try {
+        dataset = JSON.parse('SHARED_DATASET')
+      } catch(e) {
+        document.getElementById('info').innerHTML = 'The SHARED_DATASET must be overloaded'
+      }
+
+      var options = {}
+      try{
+        options = JSON.parse('SHARED_OPTIONS')
+      } catch(e){
+        console.warn('Using default options, SHARED_OPTIONS is not used')
+        document.getElementById('info').innerHTML = 'Using default options, SHARED_OPTIONS is not used'
+      }
+
+    </script>  
+    <script>
+    CORE_JS
+    </script>
+
+    <script>
+      let infoDiv = document.getElementById('info')
+      let isPanZooming = false
+
+      let result = refreshGraph(dataset, {
+        onEdgeClick: function(highlightedEdges, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          console.log(highlightedEdges)
+          infoDiv.innerHTML = `
+          ${highlightedEdges.length} connections between the nodes <b>${allNodes[highlightedEdges[0].data.source].style.label}</b> and <b>${allNodes[highlightedEdges[0].data.target].style.label}</b>:</br>
+          <ul>
+            ${highlightedEdges.map(ed => `<li>edge id: <b>${allEdges[ed.data.id].style.label}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+        onEdgeEnter: function(highlightedEdges, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          infoDiv.innerHTML = 'Click on items to show data'
+        },
+
+        onNodeClick: function(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          console.log(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges)
+
+          infoDiv.innerHTML = `
+          The node <b>${allNodes[nodeId].style.label}</b> has ${inboundConnectedNodes.length} inbound connections from nodes: </br>
+          <ul>
+            ${inboundConnectedNodes.map(conn => `<li><b>${allNodes[conn.from].style.label}</b> by edge <b>${allEdges[conn.by].style.label}</b></li>`).join('')}
+          </ul>
+          </br>
+
+          and ${outboundConnectedNodes.length} outbound connections to nodes: </br>
+          <ul>
+            ${outboundConnectedNodes.map(conn => `<li><b>${allNodes[conn.to].style.label}</b> by edge <b>${allEdges[conn.by].style.label}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+        onNodeEnter: function(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          infoDiv.innerHTML = 'Click on items to show data'
+        }, 
+        ...options
+      })
+
+      // enabling pan and zoom
+      const panZoomInstance = panzoom(result.radialGraph.getElementsByTagName('g')[0])
+      panZoomInstance.pause()
+
+      document.addEventListener('keydown', (evt) => {
+        console.log('keydown', evt)
+        
+        if (evt.key === 'Alt') {
+          isPanZooming = true
+          panZoomInstance.resume()
+        }
+      })
+
+      document.addEventListener('keyup', (evt) => {
+        console.log('keyup', evt)
+        if (evt.key === 'Alt') {
+          isPanZooming = false
+          panZoomInstance.pause()
+        }
+      })
+
+      console.log('result', result)
+      
+
+      const graphHost = document.getElementById('graph-host')
+      graphHost.appendChild(result.radialGraph)
+
+      const allItemLabels = Object.keys(result.itemMapper).sort().map((id) => {
+        return {
+          id: id,
+          label: result.itemMapper[id].data.style.label,
+        }
+      })
+      const itemInput = document.getElementById('item-input')
+      const itemList = document.getElementById('item-list')
+      let previouslyHoveredItemId = null
+      let previouslyClickedItemId = null
+
+      function updateList(subst = '') {
+        itemList.innerHTML = ''
+        let filteredLabelList = allItemLabels
+
+        if (subst !== '') {
+          itemList.style.display = 'inherit'
+          
+          filteredLabelList = filteredLabelList.filter((idAndLabel) => idAndLabel.label.toLowerCase().includes(subst.toLowerCase()))
+        } else {
+          itemList.style.display = 'none'
+          return
+        }
+
+        filteredLabelList.forEach((idAndLabel) => {
+          const id = idAndLabel.id
+          const label = idAndLabel.label
+
+          let itemButton = document.createElement('div')
+          itemButton.textContent = label
+          itemButton.classList.add('item')
+          itemButton.classList.add(result.itemMapper[id].type)
+
+          itemList.appendChild(itemButton)
+
+          itemButton.addEventListener('mouseenter', (evt) => {
+            if (previouslyHoveredItemId && previouslyHoveredItemId !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyHoveredItemId].svg.dispatchEvent(fakeEvt)
+              previouslyHoveredItemId = null
+            }
+
+            let fakeEvt = new MouseEvent('mouseenter')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyHoveredItemId = id
+          })
+
+          itemButton.addEventListener('mouseleave', (evt) => {
+            if (id !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            }
+          })
+
+
+          itemButton.addEventListener('mousedown', (evt) => {
+            if (previouslyClickedItemId && previouslyClickedItemId !== id) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyClickedItemId].svg.dispatchEvent(fakeEvt)
+            }
+
+            let fakeEvt = new MouseEvent('mousedown')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyClickedItemId = id
+
+            itemInput.value = ''
+            updateList('')
+          })
+
+        })
+
+      }
+
+      itemInput.addEventListener('input', (evt) => {
+        updateList(evt.target.value)
+      })
+
+      const downloadBt = document.getElementById('download-bt')
+
+      downloadBt.addEventListener('mousedown', (evt) => {
+        const filename = "graph.svg"
+        const content = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>${graphHost.innerHTML}`
+        const element = document.createElement('a')
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+      })
+
+      updateList()
+
+    </script>
+  </body>
+</html>
+
