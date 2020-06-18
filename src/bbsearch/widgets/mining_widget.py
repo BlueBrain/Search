@@ -84,3 +84,51 @@ class MiningWidget(widgets.VBox):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
             display(self.table_extractions)
+
+
+class TypeSelectionBox(widgets.VBox):
+
+    def __init__(self, option_dict, label=None, **vbox_kwargs):
+        super().__init__(**vbox_kwargs)
+        self.checkboxes = OrderedDict()
+        for type_name, (type_label, initial_value) in option_dict.items():
+            checkbox = widgets.Checkbox(
+                value=initial_value,
+                description=type_label)
+            self.checkboxes[type_name] = checkbox
+        self.children = tuple(self.checkboxes.values())
+
+        if label is not None:
+            self.children = (widgets.Label(label),) + self.children
+
+    def get_selected(self):
+        selected = set()
+        for name, checkbox in self.checkboxes.items():
+            if checkbox.value:
+                selected.add(name)
+        return selected
+
+
+class MiningConfigurationWidget(widgets.VBox):
+
+    def __init__(self, available_entity_types, available_relation_types, **vbox_kwargs):
+        super().__init__(**vbox_kwargs)
+        selector_layout = {"border": "black dotted 1pt"}
+        self.entity_selector = TypeSelectionBox(
+            available_entity_types,
+            label="Entity Types",
+            layout=selector_layout)
+        self.relation_selector = TypeSelectionBox(
+            available_relation_types,
+            label="Relation Types",
+            layout=selector_layout)
+        self.children = (
+            widgets.Label("Select entity and relation types"),
+            widgets.HBox(children=(self.entity_selector, self.relation_selector))
+        )
+
+    def get_selected_entity_types(self):
+        return self.entity_selector.get_selected()
+
+    def get_selected_relation_types(self):
+        return self.relation_selector.get_selected()
