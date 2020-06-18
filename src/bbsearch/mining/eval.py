@@ -5,7 +5,7 @@ import pandas as pd
 from spacy.tokens import Doc
 
 
-def prodigy2df(cnxn):
+def prodigy2df(cnxn, not_entity_symbol='O'):
     """Convert prodigy annotations to a pd.DataFrame.
 
     Parameters
@@ -13,14 +13,15 @@ def prodigy2df(cnxn):
     cnxn : sqlite3.Connection
         Connection to the prodigy database.
 
+    not_entity_symbol : str
+        A symbol to use for tokens that are not an entity.
+
     Returns
     -------
     final_table : pd.DataFrame
         Each row represents one token, the columns are 'source', 'sentence_id', 'class',
         'start_char', end_char', 'id', 'text'.
     """
-    not_entity_symbol = 'O'
-
     first_df = pd.read_sql('SELECT * FROM example', cnxn)
 
     final_table_rows = []
@@ -57,7 +58,7 @@ def prodigy2df(cnxn):
     return final_table
 
 
-def spacy2df(spacy_model, ground_truth_tokenization):
+def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
     """Turn NER of a spacy model into a pd.DataFrame.
 
     Parameters
@@ -68,6 +69,9 @@ def spacy2df(spacy_model, ground_truth_tokenization):
     ground_truth_tokenization : list
         List of str (words) representing the ground truth tokenization. This will guarantee
         that the ground truth dataframe will be aligned with the prediction dataframe.
+
+    not_entity_symbol : str
+        A symbol to use for tokens that are not an entity.
 
     Returns
     -------
@@ -80,8 +84,6 @@ def spacy2df(spacy_model, ground_truth_tokenization):
     it is the case then `ground_truth_tokenization=prodigy_table['text'].to_list()`.
 
     """
-    not_entity_symbol = 'O'
-
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
     ner = spacy_model.get_pipe('ner')
     new_doc = ner(doc)
