@@ -57,7 +57,7 @@ class ArticleSaver:
                                                    columns=['article_id', 'paragraph_id', 'option'])
 
         article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
-        article_ids_full_list = ','.join((f"\"{id_}\"" for id_ in article_ids_full))
+        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
 
         sql_query = f"""
         SELECT article_id, section_name, paragraph_id, text
@@ -79,7 +79,7 @@ class ArticleSaver:
         df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
         df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
 
-        paragraph_ids_list = ','.join((f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id']))
+        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id'])
 
         sql_query = f"""
         SELECT article_id, section_name, paragraph_id, text
