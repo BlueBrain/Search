@@ -181,7 +181,7 @@ class MiningConfigurationWidget(widgets.HBox):
 
         self.right_panel = widgets.VBox()
         self.entity_selector = TypeSelectionBox(
-            {entity_type: entity_type_d[entity_type] for entity_type in entities_we_want},
+            [(entity_type, entity_type_d[entity_type]) for entity_type in entities_we_want],
             label="All Entity Types",
             style={"border": "black dotted 1pt"})
         self.entity_selector.register_checkbox_listener(self.entity_change_callback)
