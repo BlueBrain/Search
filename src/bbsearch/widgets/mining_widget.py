@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from functools import partial
 import io
 import warnings
 
@@ -6,6 +7,32 @@ from IPython.display import display
 import ipywidgets as widgets
 import pandas as pd
 import requests
+
+
+entity_type_d = {
+    "CHEMICAL": "Chemical",
+    "DRUG": "Drug",
+    "PERSON": "Person",
+    "COUNTRY": "Country",
+}
+
+relation_type_d = {
+    "UPREGULATES": "upregulates",
+    "DOWNREGULATES": "downregulates",
+    "ACTIVATES": "activates",
+    "INHIBITS": "inhibits",
+    "IS_ANTAGONIST_OF": "is antagonist of",
+    "LOVES": "loves",
+    "HATES": "hates",
+    "BORN_IN": "born in",
+    "LIVES_IN": "lives in",
+}
+
+available_relation_types = {
+    ("CHEMICAL", "DRUG"): {"UPREGULATES", "DOWNREGULATES", "ACTIVATES", "INHIBITS", "IS_ANTAGONIST_OF"},
+    ("PERSON", "PERSON"): {"LOVES", "HATES"},
+    ("PERSON", "COUNTRY"): {"BORN_IN", "LIVES_IN"}
+}
 
 
 class MiningWidget(widgets.VBox):
@@ -88,18 +115,50 @@ class MiningWidget(widgets.VBox):
 
 class TypeSelectionBox(widgets.VBox):
 
-    def __init__(self, option_dict, label=None, **vbox_kwargs):
+    def __init__(self, options, label=None, **vbox_kwargs):
         super().__init__(**vbox_kwargs)
-        self.checkboxes = OrderedDict()
-        for type_name, (type_label, initial_value) in option_dict.items():
-            checkbox = widgets.Checkbox(
-                value=initial_value,
-                description=type_label)
-            self.checkboxes[type_name] = checkbox
-        self.children = tuple(self.checkboxes.values())
+        self.options = options
+        self.checkbox_listeners = []
 
+        button_layout = widgets.Layout(width="30px", margin="0 0 0 5px")
+
+        self.select_all = widgets.Button(description="", layout=button_layout, icon="check")
+        self.deselect_all = widgets.Button(description="", layout=button_layout, icon="close")
+        self.select_all.on_click(partial(self._change_all, new_state=True))
+        self.deselect_all.on_click(partial(self._change_all, new_state=False))
+        self.header_panel = widgets.HBox(children=(self.select_all, self.deselect_all))
         if label is not None:
-            self.children = (widgets.Label(label),) + self.children
+            self.header_panel.children = self.header_panel.children + (widgets.Label(label),)
+
+        self.checkboxes = OrderedDict()
+        for type_name, type_label in options:
+            checkbox = widgets.Checkbox(
+                value=False,
+                description=type_label,
+                indent=False)
+            self.checkboxes[type_name] = checkbox
+            checkbox.observe(self._on_checkbox_change, names="value")
+
+        self.button_box = widgets.HBox(children=(self.select_all, self.deselect_all))
+        self.out = widgets.Output()
+
+        self.children = (self.header_panel,) + tuple(self.checkboxes.values()) + (self.out,)
+
+    def _on_checkbox_change(self, event):
+        all_checkbox_states = {}
+        for type_name, type_label in self.options:
+            all_checkbox_states[type_name] = self.checkboxes[type_name].value
+
+        for listener_fn in self.checkbox_listeners:
+            listener_fn(all_checkbox_states)
+
+    def _change_all(self, b, new_state):
+        with self.out:
+            for checkbox in self.checkboxes.values():
+                checkbox.value = new_state
+
+    def register_checkbox_listener(self, listener_fn):
+        self.checkbox_listeners.append(listener_fn)
 
     def get_selected(self):
         selected = set()
@@ -108,27 +167,56 @@ class TypeSelectionBox(widgets.VBox):
                 selected.add(name)
         return selected
 
+    def set_enabled(self, enabled=True):
+        for checkbox in self.checkboxes.values():
+            checkbox.disabled = not enabled
+        self.select_all.disabled = not enabled
+        self.deselect_all.disabled = not enabled
 
-class MiningConfigurationWidget(widgets.VBox):
 
-    def __init__(self, available_entity_types, available_relation_types, **vbox_kwargs):
-        super().__init__(**vbox_kwargs)
-        selector_layout = {"border": "black dotted 1pt"}
+class MiningConfigurationWidget(widgets.HBox):
+
+    def __init__(self, entities_we_want, relations_we_want):
+        super().__init__()
+
+        self.right_panel = widgets.VBox()
         self.entity_selector = TypeSelectionBox(
-            available_entity_types,
-            label="Entity Types",
-            layout=selector_layout)
-        self.relation_selector = TypeSelectionBox(
-            available_relation_types,
-            label="Relation Types",
-            layout=selector_layout)
+            {entity_type: entity_type_d[entity_type] for entity_type in entities_we_want},
+            label="All Entity Types",
+            style={"border": "black dotted 1pt"})
+        self.entity_selector.register_checkbox_listener(self.entity_change_callback)
         self.children = (
-            widgets.Label("Select entity and relation types"),
-            widgets.HBox(children=(self.entity_selector, self.relation_selector))
+            self.entity_selector,
+            self.right_panel
         )
+        self.out = widgets.Output()
+
+        self.relation_lists = OrderedDict()
+        for entity_pair, relations in relations_we_want.items():
+            label = "{} - {}".format(entity_type_d[entity_pair[0]], entity_type_d[entity_pair[1]])
+            values = [(relation, relation_type_d[relation]) for relation in relations]
+            self.relation_lists[entity_pair] = TypeSelectionBox(
+                values,
+                label=label)
+        self.right_panel.children = (
+            *self.relation_lists.values(),
+            self.out,
+        )
+
+    def entity_change_callback(self, entity_statuses):
+        with self.out:
+            checked_entities = {entity for entity, status in entity_statuses.items() if status}
+            for (entity_1, entity_2), selection_box in self.relation_lists.items():
+                if entity_1 in checked_entities and entity_2 in checked_entities:
+                    selection_box.set_enabled(True)
+                else:
+                    selection_box.set_enabled(False)
 
     def get_selected_entity_types(self):
         return self.entity_selector.get_selected()
 
     def get_selected_relation_types(self):
-        return self.relation_selector.get_selected()
+        selected = {}
+        for entity_pair, box in self.relation_lists.items():
+            selected[entity_pair] = box.get_selected()
+        return selected
