@@ -41,7 +41,7 @@ class TestProdigy2df:
 
         monkeypatch.setattr('bbsearch.mining.eval.pd.read_sql', fake_read_sql)
 
-        df = prodigy2df(fake_cnxn)
+        df = prodigy2df(fake_cnxn, dataset_name='cord19_JohnSmith')
 
         assert isinstance(df, pd.DataFrame)
         assert len(df) == n_examples * (len(prodigy_content['tokens']) if answer == 'accept' else 0)

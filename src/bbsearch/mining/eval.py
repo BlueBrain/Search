@@ -5,14 +5,15 @@ import pandas as pd
 from spacy.tokens import Doc
 
 
-def prodigy2df(cnxn, not_entity_symbol='O'):
+def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
     """Convert prodigy annotations to a pd.DataFrame.
 
     Parameters
     ----------
     cnxn : sqlite3.Connection
         Connection to the prodigy database.
-
+    dataset_name : str
+        Name of the dataset from which to retrieve annotations.
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.
 
@@ -22,7 +23,21 @@ def prodigy2df(cnxn, not_entity_symbol='O'):
         Each row represents one token, the columns are 'source', 'sentence_id', 'class',
         'start_char', end_char', 'id', 'text'.
     """
-    first_df = pd.read_sql('SELECT * FROM example', cnxn)
+    first_df = pd.read_sql(f'''
+        SELECT *
+        FROM example
+        WHERE example.id IN
+              (
+                  SELECT link.example_id
+                  FROM link
+                  WHERE link.dataset_id IN
+                        (
+                            SELECT dataset.id
+                            FROM dataset
+                            WHERE dataset.name = {dataset_name}
+                        )
+              )''',
+                           cnxn)
 
     final_table_rows = []
     for _, row in first_df.iterrows():
