@@ -176,8 +176,13 @@ class TypeSelectionBox(widgets.VBox):
 
 class MiningConfigurationWidget(widgets.HBox):
 
-    def __init__(self, entities_we_want, relations_we_want):
+    def __init__(self, entities_we_want=None, relations_we_want=None):
         super().__init__()
+
+        if entities_we_want is None:
+            entities_we_want = entity_type_d.keys()
+        if relations_we_want is None:
+            relations_we_want = available_relation_types
 
         self.right_panel = widgets.VBox()
         self.entity_selector = TypeSelectionBox(
