@@ -34,7 +34,7 @@ def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
                         (
                             SELECT dataset.id
                             FROM dataset
-                            WHERE dataset.name = {dataset_name}
+                            WHERE dataset.name = "{dataset_name}"
                         )
               )''',
                            cnxn)
