@@ -1,10 +1,10 @@
 """Collection of tests focused on the bbsearch.mining.relation module"""
+from unittest.mock import Mock
 
-import pandas as pd
-from spacy.tokens import Doc, Span
 import pytest
+from spacy.tokens import Doc, Span
 
-from bbsearch.mining import StartWithTheSameLetter, annotate
+from bbsearch.mining import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):
@@ -13,17 +13,9 @@ def test_annotate(model_entities):
     # entities are [Bill Gates, Microsoft, USA]
     # etypes are ['PERSON', 'ORG', 'GPE']
     doc = model_entities(text)
-    lines = []
-    for e in doc.ents:
-        lines.append({
-            'entity': e.text,
-            'entity_type': e.label_,
-            'start_char': e.start_char,
-            'end_char': e.end_char
-        })
-    df_entities = pd.DataFrame(lines, columns=['entity', 'entity_type', 'start_char', 'end_char'])
+    ents = list(doc.ents)
     sents = list(doc.sents)
-    etypes = df_entities.entity_type
+    etypes = [e.label_ for e in ents]
     etype_symbols = {'PERSON': ('<< ', ' >>'),
                      'ORG': ('[[ ', ' ]]'),
                      'GPE': ('{{ ', ' }}')
@@ -32,42 +24,75 @@ def test_annotate(model_entities):
     # Just make sure the the spacy model is the same
     assert isinstance(doc, Doc)
 
-    assert len(df_entities) == 3
+    assert len(ents) == 3
+    assert all([isinstance(e, Span) for e in ents])
 
     assert len(sents) == 2
     assert all([isinstance(s, Span) for s in sents])
 
-    assert etypes.tolist() == ['PERSON', 'ORG', 'GPE']
+    assert etypes == ['PERSON', 'ORG', 'GPE']
 
     # Wrong arguments
     with pytest.raises(ValueError):
-        annotate(doc, sents[1], df_entities.iloc[0], df_entities.iloc[0], etype_symbols)  # identical entities
+        annotate(doc, sents[1], ents[0], ents[0], etype_symbols)  # identical entities
 
     with pytest.raises(ValueError):
-        annotate(doc, sents[0], df_entities.iloc[0], df_entities.iloc[1], etype_symbols)  # not in the right sentence
+        annotate(doc, sents[0], ents[0], ents[1], etype_symbols)  # not in the right sentence
 
     with pytest.raises(ValueError):
-        annotate(doc, sents[1], df_entities.iloc[0], df_entities.iloc[1], {})  # missing symbols
+        annotate(doc, sents[1], ents[0], ents[1], {})  # missing symbols
 
     # Actual tests
-    res_1 = annotate(doc, sents[1], df_entities.iloc[0], df_entities.iloc[1], etype_symbols)
-    res_2 = annotate(doc, sents[1], df_entities.iloc[1], df_entities.iloc[2], etype_symbols)
-    res_3 = annotate(doc, sents[1], df_entities.iloc[2], df_entities.iloc[0], etype_symbols)
+    res_1 = annotate(doc, sents[1], ents[0], ents[1], etype_symbols)
+    res_2 = annotate(doc, sents[1], ents[1], ents[2], etype_symbols)
+    res_3 = annotate(doc, sents[1], ents[2], ents[0], etype_symbols)
 
     true_1 = '<< Bill Gates >> founded [[ Microsoft ]] and currently lives in the USA.'
     true_2 = 'Bill Gates founded [[ Microsoft ]] and currently lives in the {{ USA }}.'
     true_3 = '<< Bill Gates >> founded Microsoft and currently lives in the {{ USA }}.'
 
-    assert res_1 == annotate(doc, sents[1], df_entities.iloc[1], df_entities.iloc[0], etype_symbols)  # symmetric
-    assert res_2 == annotate(doc, sents[1], df_entities.iloc[2], df_entities.iloc[1], etype_symbols)  # symmetric
-    assert res_3 == annotate(doc, sents[1], df_entities.iloc[0], df_entities.iloc[2], etype_symbols)  # symmetric
+    assert res_1 == annotate(doc, sents[1], ents[1], ents[0], etype_symbols)  # symmetric
+    assert res_2 == annotate(doc, sents[1], ents[2], ents[1], etype_symbols)  # symmetric
+    assert res_3 == annotate(doc, sents[1], ents[0], ents[2], etype_symbols)  # symmetric
 
     assert res_1 == true_1
     assert res_2 == true_2
     assert res_3 == true_3
 
 
-def test_start_with_the_same_letter():
+@pytest.mark.parametrize('return_prob', [True, False])
+def test_chemprot(monkeypatch, return_prob):
+    class_probs = 13 * [0]
+    class_probs[7] = 1
+
+    fake_model = Mock()
+    fake_model.predict.return_value = {'class_probs': class_probs}
+
+    fake_predictor = Mock()
+    fake_predictor.from_path.return_value = fake_model
+
+    monkeypatch.setattr('bbsearch.mining.relation.Predictor', fake_predictor)
+
+    re_model = ChemProt('')
+    annotated_sentence = "The selective << betaAR >> agonist [[ isoproterenol ]] caused an" \
+                         " enhancement of hippocampal CA3 network activity"
+
+    outputs = re_model.predict(annotated_sentence, return_prob)
+
+    # predict
+    if return_prob:
+        assert outputs[0] == 'AGONIST'
+        assert outputs[1] == 1
+    else:
+        assert outputs == 'AGONIST'
+
+    # Symbols
+    assert re_model.symbols == {'GGP': ('[[ ', ' ]]'),
+                                'CHEBI': ('<< ', ' >>')}
+
+
+@pytest.mark.parametrize('return_prob', [True, False])
+def test_start_with_the_same_letter(return_prob):
     re_model = StartWithTheSameLetter()
 
     assert re_model.symbols['etype_1'] == ('[[ ', ' ]]')
@@ -76,5 +101,23 @@ def test_start_with_the_same_letter():
     annotated_sentence_1 = "Our [[ dad ]] walked the [[ Dog ]]."
     annotated_sentence_2 = "Our [[ dad ]] walked the [[ cat ]]."
 
-    assert re_model.predict(annotated_sentence_1) == 'START_WITH_SAME_LETTER'
-    assert re_model.predict(annotated_sentence_2) == 'START_WITH_DIFFERENT_LETTER'
+    outputs_1 = re_model.predict(annotated_sentence_1, return_prob)
+    outputs_2 = re_model.predict(annotated_sentence_2, return_prob)
+
+    if return_prob:
+        assert len(outputs_1) == 2 and len(outputs_2) == 2
+
+        relation_1 = outputs_1[0]
+        relation_2 = outputs_2[0]
+
+        prob_1 = outputs_1[1]
+        prob_2 = outputs_2[1]
+
+        assert prob_1 == 1 and prob_2 == 1
+
+    else:
+        relation_1 = outputs_1
+        relation_2 = outputs_2
+
+    assert relation_1 == 'START_WITH_SAME_LETTER'
+    assert relation_2 == 'START_WITH_DIFFERENT_LETTER'
