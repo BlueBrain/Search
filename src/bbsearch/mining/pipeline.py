@@ -21,10 +21,13 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
         is the subject and the second one is the object. Note that the entity types should correspond to those inside
         of `model_entities`. The value is a list of instances of relation extraction models,
         that is instances of some subclass of ``REModel``.
+    debug : bool
+        If True, columns are not necessarily matching the specification. However, they
+        contain debugging information. If False, then matching exactly the specification.
 
     Returns
     -------
-    result : pd.DataFrame
+    pd.DataFrame
         The final table. If `debug=True` then it contains all the metadata. If False then it
         only contains columns in the official specification.
     """
@@ -73,16 +76,17 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                         for re_model in models_relations[so]:
                             annotated_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
                             property_ = re_model.predict(annotated_sent)
-                            lines.append({'entity': s_ent.text,
-                                          'entity_type': s_ent.label_,
-                                          'relation_model': re_model.__class__.__name__,
-                                          'start_pos': s_ent.start_char,
-                                          'end_pos': s_ent.end_char,
-                                          'property_type': 'relation',
-                                          'property': property_,
-                                          'property_value': o_ent.text,
-                                          'property_value_type': o_ent.label_
-                                          })
+                            lines.append(dict(entity=s_ent.text,
+                                              entity_type=s_ent.label_,
+                                              relation_model=re_model.__class__.__name__,
+                                              start_pos=s_ent.start_char,
+                                              end_pos=s_ent.end_char,
+                                              property_type='relation',
+                                              property=property_,
+                                              property_value=o_ent.text,
+                                              property_value_type=o_ent.label_,
+                                              **metadata
+                                              ))
 
     df_all = pd.DataFrame(lines)
 
