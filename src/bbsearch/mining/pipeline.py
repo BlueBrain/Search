@@ -47,8 +47,8 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
              'property_value_type',
              'ontology_source',
              'paper_id',  # article_id:section_name:paragraph_id
-             'start_pos',
-             'end_pos']
+             'start_char',
+             'end_char']
 
     docs_gen = model_entities.pipe(texts, disable=['tagger'], as_tuples=True)
     lines = []
@@ -61,8 +61,8 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                 # add single lines for entities
                 lines.append(dict(entity=s_ent.text,
                                   entity_type=s_ent.label_,
-                                  start_pos=s_ent.start_char,
-                                  end_pos=s_ent.end_char,
+                                  start_char=s_ent.start_char,
+                                  end_char=s_ent.end_char,
                                   **metadata)
                              )
 
@@ -79,8 +79,8 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                             lines.append(dict(entity=s_ent.text,
                                               entity_type=s_ent.label_,
                                               relation_model=re_model.__class__.__name__,
-                                              start_pos=s_ent.start_char,
-                                              end_pos=s_ent.end_char,
+                                              start_char=s_ent.start_char,
+                                              end_char=s_ent.end_char,
                                               property_type='relation',
                                               property=property_,
                                               property_value=o_ent.text,
