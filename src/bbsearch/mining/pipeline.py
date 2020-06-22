@@ -46,7 +46,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
              'property_type',
              'property_value_type',
              'ontology_source',
-             'paper_id',
+             'paper_id',  # article_id:section_name:paragraph_id
              'start_pos',
              'end_pos']
 

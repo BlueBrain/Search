@@ -26,7 +26,7 @@ class MiningServer:
         Path to the sql database.
     """
 
-    def __init__(self, app, models_path, database):
+    def __init__(self, app, models_path, database_path):
         self.version = "1.0"
         self.name = "MiningServer"
         self.models_path = pathlib.Path(models_path)
@@ -44,8 +44,6 @@ class MiningServer:
         self.re_models = {}
 
     def help(self):
-        """Help the user by sending information about the server."""
-
         response = {
             "name": self.name,
             "version": self.version,
@@ -70,7 +68,7 @@ class MiningServer:
                                    "the database",
                     "response_content_type": "text/csv",
                     "required_fields": {
-                        "paragraph_ids": [],
+                        "paragraph_ids": [('paragraph_id_1', 'article_id_1'), ],
                     },
                     "accepted_fields": {
                         "debug": [True, False]
@@ -78,6 +76,8 @@ class MiningServer:
                 }
             }
         }
+        """Help the user by sending information about the server."""
+
         return jsonify(response)
 
     @staticmethod
@@ -115,6 +115,7 @@ class MiningServer:
                                 f" paragraph_id IN ({paragraph_ids_joined })"
 
                     texts_df = pd.read_sql(sql_query, db_cnxn)
+                    raise NotImplementedError()
                     texts = []  # TOD
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
 
