@@ -68,7 +68,7 @@ class MiningServer:
                                    "the database",
                     "response_content_type": "text/csv",
                     "required_fields": {
-                        "paragraph_ids": [('paragraph_id_1', 'article_id_1'), ],
+                        "identifiers": [('article_id_1', 'paragraph_id_1'), ],
                     },
                     "accepted_fields": {
                         "debug": [True, False]
@@ -102,21 +102,27 @@ class MiningServer:
         """Respond to a query on specific paragraphs in the database."""
         if request.is_json:
             json_request = request.get_json()
-            paragraph_ids = json_request.get("paragraph_ids")
+            identifiers = json_request.get("identifiers")
             debug = json_request.get("debug", False)
 
-            if paragraph_ids is None:
+            if identifiers is None:
                 response = self.make_error_response("The request text is missing.")
+                return response
+
             else:
-                paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in set(paragraph_ids))
+                tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
+                paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
 
                 with sqlite3.connect(str(self.database_path)) as db_cnxn:
                     sql_query = f"SELECT paragraph_id, section_name, text FROM paragraphs WHERE" \
-                                f" paragraph_id IN ({paragraph_ids_joined })"
+                                f" paragraph_id IN ({paragraph_ids_joined})"
 
                     texts_df = pd.read_sql(sql_query, db_cnxn)
-                    raise NotImplementedError()
-                    texts = []  # TOD
+                    texts = [(row['text'],
+                              {'paper_id':
+                               f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
+                             for _, row in texts_df.iterrows()]
+
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
 
                 with io.StringIO() as csv_file_buffer:
