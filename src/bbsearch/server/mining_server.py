@@ -44,6 +44,7 @@ class MiningServer:
         self.re_models = {}
 
     def help(self):
+        """Respond to the help."""
         response = {
             "name": self.name,
             "version": self.version,
