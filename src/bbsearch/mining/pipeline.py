@@ -50,12 +50,18 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
              'start_char',
              'end_char']
 
-    docs_gen = model_entities.pipe(texts, disable=['tagger'], as_tuples=True)
+    if models_relations:
+        disable_pipe = ['tagger']  # the parser is needed to decompose text into sentences.
+    else:
+        disable_pipe = ['tagger', 'parser']
+
+    docs_gen = model_entities.pipe(texts, disable=disable_pipe, as_tuples=True)
     lines = []
 
     for doc, metadata in docs_gen:
-        for sent in doc.sents:
-            detected_entities = [ent for ent in sent.ents]
+        subtexts = doc.sents if models_relations else [doc]
+        for subtext in subtexts:
+            detected_entities = [ent for ent in subtext.ents]
 
             for s_ent in detected_entities:
                 # add single lines for entities
@@ -74,7 +80,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                     so = (s_ent.label_, o_ent.label_)
                     if so in models_relations:
                         for re_model in models_relations[so]:
-                            annotated_sent = annotate(doc, sent, s_ent, o_ent, re_model.symbols)
+                            annotated_sent = annotate(doc, subtext, s_ent, o_ent, re_model.symbols)
                             property_ = re_model.predict(annotated_sent)
                             lines.append(dict(entity=s_ent.text,
                                               entity_type=s_ent.label_,

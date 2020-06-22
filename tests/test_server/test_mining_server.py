@@ -7,7 +7,7 @@ from bbsearch.mining.relation import ChemProt
 from bbsearch.server.mining_server import MiningServer
 
 
-@pytest.fixture
+@pytest.fixture(scope='session')
 def mining_client(fake_db_cnxn):
     """Fixture to create a client for mining_server."""
 
@@ -42,3 +42,21 @@ class TestMiningServer:
         request_json = "text"
         response = mining_client.post('/text', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
+
+    def test_mining_server_database(self, mining_client):
+        request_json = {}
+        response = mining_client.post('/database', json=request_json)
+        assert list(response.json.keys()) == ["error"]
+        assert response.json == {"error": "The request identifiers is missing."}
+
+        request_json = "text"
+        response = mining_client.post('/database', data=request_json)
+        assert response.json == {"error": "The request has to be a JSON object."}
+
+        identifiers = [('w8579f54', 4)]
+        request_json = {"identifiers": identifiers}
+        response = mining_client.post('/database', json=request_json)
+        assert response.headers['Content-Type'] == 'text/csv'
+        assert response.data.decode('utf-8') == 'entity,entity_type,property,property_value,property_type,' \
+                                                'property_value_type,' \
+                                                'ontology_source,paper_id,start_char,end_char\n'
