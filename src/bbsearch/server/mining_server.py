@@ -106,7 +106,7 @@ class MiningServer:
             debug = json_request.get("debug", False)
 
             if identifiers is None:
-                response = self.make_error_response("The request text is missing.")
+                response = self.make_error_response("The request identifiers is missing.")
                 return response
 
             else:
