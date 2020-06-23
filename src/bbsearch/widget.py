@@ -111,7 +111,11 @@ class Widget:
         article_auth, article_title, date, ref = self.database.execute(
             'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
             [article_id]).fetchall()[0]
-        article_auth = article_auth.split(';')[0] + ' et al.'
+        try:
+            article_auth = article_auth.split(';')[0] + ' et al.'
+        except AttributeError:
+            article_auth = ''
+
         ref = ref if ref else ''
         section_name = section_name if section_name else ''
 
@@ -160,7 +164,7 @@ class Widget:
         self.my_widgets['top_results'] = widgets.widgets.IntSlider(
             value=10,
             min=0,
-            max=100,
+            max=10000,
             description='Top N results')
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
