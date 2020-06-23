@@ -17,7 +17,7 @@ install_requires = [
     'sent2vec-prebuilt',
     'sentence-transformers',
     'scispacy',
-    'en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz',
+    'en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.5/en_core_web_sm-2.2.5.tar.gz',
     'en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.4/en_ner_craft_md-0.2.4.tar.gz',
     'spacy==2.2.1',
     'tensorflow',
@@ -26,6 +26,11 @@ install_requires = [
     'transformers',
     'rdflib-jsonld',
     'faiss-cpu',
+    'jupyter_server_proxy',
+    'jupyter_dash',
+    'networkx',
+    'dash-cytoscape',
+    'dash-table'
 ]
 tests_require = [
     'flake8',
@@ -33,7 +38,7 @@ tests_require = [
     'pytest-cov',
 ]
 
-extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest', 'pytest-cov']}
+extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest>=4.6', 'pytest-cov']}
 
 setup(
     name="BBSearch",
@@ -52,6 +57,7 @@ setup(
             "create_database=bbsearch.entrypoints.database_entrypoint:main",
             "compute_embeddings=bbsearch.entrypoints.embeddings_entrypoint:main",
             "search_server=bbsearch.entrypoints.search_server_entrypoint:main",
+            "mining_server=bbsearch.entrypoints.mining_server_entrypoint:main",
         ]
     }
 )

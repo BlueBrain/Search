@@ -1,5 +1,4 @@
 """The search server."""
-import json
 import logging
 import pathlib
 
@@ -32,6 +31,9 @@ class SearchServer:
                  trained_models_path,
                  embeddings_path,
                  database_path):
+
+        self.version = "1.0"
+        self.name = "SearchServer"
         self.app = app
 
         trained_models_path = pathlib.Path(trained_models_path)
@@ -54,14 +56,43 @@ class SearchServer:
         self.local_searcher = LocalSearcher(
             embedding_models, precomputed_embeddings, database_path)
 
-        app.route("/hello", methods=["POST"])(self.hello)
+        app.route("/help", methods=["POST"])(self.help)
         app.route("/", methods=["POST"])(self.query)
         logger.info("Server initialization done.")
 
-    @staticmethod
-    def hello():
-        """Send status that guarantees that the server is up and running."""
-        return json.dumps(True)
+    def help(self):
+        """Help the user by sending information about the server."""
+        response = {
+            "name": self.name,
+            "version": self.version,
+            "description": "Run the BBS text search for a given sentence.",
+            "POST": {
+                "/help": {
+                    "description": "Get this help.",
+                    "response_content_type": "application/json"
+                },
+                "/": {
+                    "description": "Compute search through database"
+                                   "and give back most similar sentences to the query.",
+                    "response_content_type": "application/json",
+                    "required_fields": {
+                        "query_text": [],
+                        "which_model": ["BSV", "SBioBERT"],
+                        "k": 'integer number'
+                    },
+                    "accepted_fields": {
+                        "has_journal": [True, False],
+                        "data_range": ('start_date', 'end_date'),
+                        "deprioritize_strength": ['None', 'Weak', 'Mild',
+                                                  'Strong', 'Stronger'],
+                        "exclusion_text": [],
+                        "deprioritize_text": []
+                    }
+                }
+            }
+        }
+
+        return jsonify(response)
 
     def query(self):
         """Respond to a query.

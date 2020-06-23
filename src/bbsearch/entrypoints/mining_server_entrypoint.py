@@ -1,4 +1,4 @@
-"""The entrypoint script for the search server."""
+"""The entrypoint script for the mining server."""
 import argparse
 
 
@@ -17,24 +17,16 @@ parser.add_argument("--models_path",
                     default="/raid/bbs_data/trained_models",
                     type=str,
                     help="The folder with pretrained models")
-parser.add_argument("--embeddings_path",
-                    default="/raid/bbs_data/cord19_v7/embeddings",
-                    type=str,
-                    help="The folder with the precomputed embeddings")
-parser.add_argument("--database_path",
-                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
-                    type=str,
-                    help="The path to the SQL database.")
 args = parser.parse_args()
 
 
 def main():
     """Execute the entry point."""
     from flask import Flask
-    from ..server.search_server import SearchServer
+    from ..server.mining_server import MiningServer
 
     app = Flask("BBSearch Server")
-    SearchServer(app, args.models_path, args.embeddings_path, args.database_path)
+    MiningServer(app, args.models_path)
     app.run(
         host=args.host,
         port=args.port,

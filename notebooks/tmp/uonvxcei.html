@@ -1,0 +1,2822 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Blue Brain Graph Viz</title>
+
+    <style>
+      textarea, select, input, button { outline: none; }
+
+      html, body {
+        margin: 0;
+        font-family: sans-serif;
+      }
+
+      #graph-host {
+        position: absolute;
+      }
+
+      #graph-host svg {
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #info {
+        background: rgb(241, 241, 241);
+        padding: 10px;
+        min-width: fit-content;
+        width: 500px;
+        font-size: 15px;
+        color: #505050;
+        margin-left: 15px;
+        border: solid 1px #80808038;
+        position: absolute;
+        right: 0;
+      }
+
+      #item-input {
+        min-width: 300px;
+        font-size: 17px;
+        border: none;
+        padding: 4px;
+        color: #0a9bb9;
+      }
+
+      #list-container {
+        z-index: 2;
+        position: absolute;
+        padding: 5px;
+        background: rgba(25, 214, 253, 0.9);
+        /* background: linear-gradient(343deg, rgba(0, 188, 226, 0.85) 0%, rgba(0, 212, 255, 1) 100%); */
+        font-size: 17px;
+        font-family: sans-serif;
+        overflow-y: hidden;        
+        border: solid 1px #0093b3;
+        min-width: fit-content;
+        height: fit-content;
+        width: fit-content;
+      }
+
+      #item-list {
+        overflow-y: scroll;
+        display: none;
+        margin-top: 15px;
+        max-height: 500px;
+      }
+
+      .item {
+        margin-bottom: 5px;
+        cursor: pointer;
+        padding: 6px;
+        transition: all 0.2s;
+        color: #0d4a56;
+      }
+
+      .item:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .node::before {
+        content: "●";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 3px;
+        border-radius: 3px;
+      }
+
+      .edge::before {
+        content: "\\";
+        margin-right: 4px;
+        background: white;
+        padding: 0px 5px;
+        border-radius: 3px;
+      }
+
+
+      .edge::after {
+        content: "[edge]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      .node::after {
+        content: "[node]";
+        font-size: 13px;
+        margin-left: 5px;
+        font-family: monospace;
+        color: #ffffffcc;
+      }
+
+      #download-bt {
+        margin: 0 5px;
+        cursor: pointer;
+      }
+
+      #arrow-dl {
+        fill: white;
+      }
+
+      #arrow-dl:hover {
+        fill: rgb(0, 100, 131);
+      }
+
+      #zoompan-info {
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        margin: auto;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      .key {
+        background: gainsboro;
+        padding: 16px 5px 5px 5px;
+        border-radius: 3px;
+        font-size: 13px;
+        border-bottom: solid 1px grey;
+        color: #737373;
+      }
+
+    </style>
+
+    <script>
+      (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.panzoom = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+'use strict';
+/**
+ * Allows to drag and zoom svg elements
+ */
+var wheel = require('wheel');
+var animate = require('amator');
+var eventify = require('ngraph.events');
+var kinetic = require('./lib/kinetic.js');
+var createTextSelectionInterceptor = require('./lib/createTextSelectionInterceptor.js');
+var domTextSelectionInterceptor = createTextSelectionInterceptor();
+var fakeTextSelectorInterceptor = createTextSelectionInterceptor(true);
+var Transform = require('./lib/transform.js');
+var makeSvgController = require('./lib/svgController.js');
+var makeDomController = require('./lib/domController.js');
+
+var defaultZoomSpeed = 1;
+var defaultDoubleTapZoomSpeed = 1.75;
+var doubleTapSpeedInMS = 300;
+
+module.exports = createPanZoom;
+
+/**
+ * Creates a new instance of panzoom, so that an object can be panned and zoomed
+ *
+ * @param {DOMElement} domElement where panzoom should be attached.
+ * @param {Object} options that configure behavior.
+ */
+function createPanZoom(domElement, options) {
+  options = options || {};
+
+  var panController = options.controller;
+
+  if (!panController) {
+    if (makeSvgController.canAttach(domElement)) {
+      panController = makeSvgController(domElement, options);
+    } else if (makeDomController.canAttach(domElement)) {
+      panController = makeDomController(domElement, options);
+    }
+  }
+
+  if (!panController) {
+    throw new Error(
+      'Cannot create panzoom for the current type of dom element'
+    );
+  }
+  var owner = panController.getOwner();
+  // just to avoid GC pressure, every time we do intermediate transform
+  // we return this object. For internal use only. Never give it back to the consumer of this library
+  var storedCTMResult = { x: 0, y: 0 };
+
+  var isDirty = false;
+  var transform = new Transform();
+
+  if (panController.initTransform) {
+    panController.initTransform(transform);
+  }
+
+  var filterKey = typeof options.filterKey === 'function' ? options.filterKey : noop;
+  // TODO: likely need to unite pinchSpeed with zoomSpeed
+  var pinchSpeed = typeof options.pinchSpeed === 'number' ? options.pinchSpeed : 1;
+  var bounds = options.bounds;
+  var maxZoom = typeof options.maxZoom === 'number' ? options.maxZoom : Number.POSITIVE_INFINITY;
+  var minZoom = typeof options.minZoom === 'number' ? options.minZoom : 0;
+
+  var boundsPadding = typeof options.boundsPadding === 'number' ? options.boundsPadding : 0.05;
+  var zoomDoubleClickSpeed = typeof options.zoomDoubleClickSpeed === 'number' ? options.zoomDoubleClickSpeed : defaultDoubleTapZoomSpeed;
+  var beforeWheel = options.beforeWheel || noop;
+  var beforeMouseDown = options.beforeMouseDown || noop;
+  var speed = typeof options.zoomSpeed === 'number' ? options.zoomSpeed : defaultZoomSpeed;
+  var transformOrigin = parseTransformOrigin(options.transformOrigin);
+  var textSelection = options.enableTextSelection ? fakeTextSelectorInterceptor : domTextSelectionInterceptor;
+
+  validateBounds(bounds);
+
+  if (options.autocenter) {
+    autocenter();
+  }
+
+  var frameAnimation;
+  var lastTouchEndTime = 0;
+  var lastSingleFingerOffset;
+  var touchInProgress = false;
+
+  // We only need to fire panstart when actual move happens
+  var panstartFired = false;
+
+  // cache mouse coordinates here
+  var mouseX;
+  var mouseY;
+
+  var pinchZoomLength;
+
+  var smoothScroll;
+  if ('smoothScroll' in options && !options.smoothScroll) {
+    // If user explicitly asked us not to use smooth scrolling, we obey
+    smoothScroll = rigidScroll();
+  } else {
+    // otherwise we use forward smoothScroll settings to kinetic API
+    // which makes scroll smoothing.
+    smoothScroll = kinetic(getPoint, scroll, options.smoothScroll);
+  }
+
+  var moveByAnimation;
+  var zoomToAnimation;
+
+  var multiTouch;
+  var paused = false;
+
+  listenForEvents();
+
+  var api = {
+    dispose: dispose,
+    moveBy: internalMoveBy,
+    moveTo: moveTo,
+    centerOn: centerOn,
+    zoomTo: publicZoomTo,
+    zoomAbs: zoomAbs,
+    smoothZoom: smoothZoom,
+    smoothZoomAbs: smoothZoomAbs,
+    showRectangle: showRectangle,
+
+    pause: pause,
+    resume: resume,
+    isPaused: isPaused,
+
+    getTransform: getTransformModel,
+
+    getMinZoom: getMinZoom,
+    setMinZoom: setMinZoom,
+
+    getMaxZoom: getMaxZoom,
+    setMaxZoom: setMaxZoom,
+
+    getTransformOrigin: getTransformOrigin,
+    setTransformOrigin: setTransformOrigin,
+
+    getZoomSpeed: getZoomSpeed,
+    setZoomSpeed: setZoomSpeed
+  };
+
+  eventify(api);
+
+  return api;
+
+  function pause() {
+    releaseEvents();
+    paused = true;
+  }
+
+  function resume() {
+    if (paused) {
+      listenForEvents();
+      paused = false;
+    }
+  }
+
+  function isPaused() {
+    return paused;
+  }
+
+  function showRectangle(rect) {
+    // TODO: this duplicates autocenter. I think autocenter should go.
+    var clientRect = owner.getBoundingClientRect();
+    var size = transformToScreen(clientRect.width, clientRect.height);
+
+    var rectWidth = rect.right - rect.left;
+    var rectHeight = rect.bottom - rect.top;
+    if (!Number.isFinite(rectWidth) || !Number.isFinite(rectHeight)) {
+      throw new Error('Invalid rectangle');
+    }
+
+    var dw = size.x / rectWidth;
+    var dh = size.y / rectHeight;
+    var scale = Math.min(dw, dh);
+    transform.x = -(rect.left + rectWidth / 2) * scale + size.x / 2;
+    transform.y = -(rect.top + rectHeight / 2) * scale + size.y / 2;
+    transform.scale = scale;
+  }
+
+  function transformToScreen(x, y) {
+    if (panController.getScreenCTM) {
+      var parentCTM = panController.getScreenCTM();
+      var parentScaleX = parentCTM.a;
+      var parentScaleY = parentCTM.d;
+      var parentOffsetX = parentCTM.e;
+      var parentOffsetY = parentCTM.f;
+      storedCTMResult.x = x * parentScaleX - parentOffsetX;
+      storedCTMResult.y = y * parentScaleY - parentOffsetY;
+    } else {
+      storedCTMResult.x = x;
+      storedCTMResult.y = y;
+    }
+
+    return storedCTMResult;
+  }
+
+  function autocenter() {
+    var w; // width of the parent
+    var h; // height of the parent
+    var left = 0;
+    var top = 0;
+    var sceneBoundingBox = getBoundingBox();
+    if (sceneBoundingBox) {
+      // If we have bounding box - use it.
+      left = sceneBoundingBox.left;
+      top = sceneBoundingBox.top;
+      w = sceneBoundingBox.right - sceneBoundingBox.left;
+      h = sceneBoundingBox.bottom - sceneBoundingBox.top;
+    } else {
+      // otherwise just use whatever space we have
+      var ownerRect = owner.getBoundingClientRect();
+      w = ownerRect.width;
+      h = ownerRect.height;
+    }
+    var bbox = panController.getBBox();
+    if (bbox.width === 0 || bbox.height === 0) {
+      // we probably do not have any elements in the SVG
+      // just bail out;
+      return;
+    }
+    var dh = h / bbox.height;
+    var dw = w / bbox.width;
+    var scale = Math.min(dw, dh);
+    transform.x = -(bbox.left + bbox.width / 2) * scale + w / 2 + left;
+    transform.y = -(bbox.top + bbox.height / 2) * scale + h / 2 + top;
+    transform.scale = scale;
+  }
+
+  function getTransformModel() {
+    // TODO: should this be read only?
+    return transform;
+  }
+
+  function getMinZoom() {
+    return minZoom;
+  }
+
+  function setMinZoom(newMinZoom) {
+    minZoom = newMinZoom;
+  }
+
+  function getMaxZoom() {
+    return maxZoom;
+  }
+
+  function setMaxZoom(newMaxZoom) {
+    maxZoom = newMaxZoom;
+  }
+
+  function getTransformOrigin() {
+    return transformOrigin;
+  }
+
+  function setTransformOrigin(newTransformOrigin) {
+    transformOrigin = parseTransformOrigin(newTransformOrigin);
+  }
+
+  function getZoomSpeed() {
+    return speed;
+  }
+
+  function setZoomSpeed(newSpeed) {
+    if (!Number.isFinite(newSpeed)) {
+      throw new Error('Zoom speed should be a number');
+    }
+    speed = newSpeed;
+  }
+
+  function getPoint() {
+    return {
+      x: transform.x,
+      y: transform.y
+    };
+  }
+
+  function moveTo(x, y) {
+    transform.x = x;
+    transform.y = y;
+
+    keepTransformInsideBounds();
+
+    triggerEvent('pan');
+    makeDirty();
+  }
+
+  function moveBy(dx, dy) {
+    moveTo(transform.x + dx, transform.y + dy);
+  }
+
+  function keepTransformInsideBounds() {
+    var boundingBox = getBoundingBox();
+    if (!boundingBox) return;
+
+    var adjusted = false;
+    var clientRect = getClientRect();
+
+    var diff = boundingBox.left - clientRect.right;
+    if (diff > 0) {
+      transform.x += diff;
+      adjusted = true;
+    }
+    // check the other side:
+    diff = boundingBox.right - clientRect.left;
+    if (diff < 0) {
+      transform.x += diff;
+      adjusted = true;
+    }
+
+    // y axis:
+    diff = boundingBox.top - clientRect.bottom;
+    if (diff > 0) {
+      // we adjust transform, so that it matches exactly our bounding box:
+      // transform.y = boundingBox.top - (boundingBox.height + boundingBox.y) * transform.scale =>
+      // transform.y = boundingBox.top - (clientRect.bottom - transform.y) =>
+      // transform.y = diff + transform.y =>
+      transform.y += diff;
+      adjusted = true;
+    }
+
+    diff = boundingBox.bottom - clientRect.top;
+    if (diff < 0) {
+      transform.y += diff;
+      adjusted = true;
+    }
+    return adjusted;
+  }
+
+  /**
+   * Returns bounding box that should be used to restrict scene movement.
+   */
+  function getBoundingBox() {
+    if (!bounds) return; // client does not want to restrict movement
+
+    if (typeof bounds === 'boolean') {
+      // for boolean type we use parent container bounds
+      var ownerRect = owner.getBoundingClientRect();
+      var sceneWidth = ownerRect.width;
+      var sceneHeight = ownerRect.height;
+
+      return {
+        left: sceneWidth * boundsPadding,
+        top: sceneHeight * boundsPadding,
+        right: sceneWidth * (1 - boundsPadding),
+        bottom: sceneHeight * (1 - boundsPadding)
+      };
+    }
+
+    return bounds;
+  }
+
+  function getClientRect() {
+    var bbox = panController.getBBox();
+    var leftTop = client(bbox.left, bbox.top);
+
+    return {
+      left: leftTop.x,
+      top: leftTop.y,
+      right: bbox.width * transform.scale + leftTop.x,
+      bottom: bbox.height * transform.scale + leftTop.y
+    };
+  }
+
+  function client(x, y) {
+    return {
+      x: x * transform.scale + transform.x,
+      y: y * transform.scale + transform.y
+    };
+  }
+
+  function makeDirty() {
+    isDirty = true;
+    frameAnimation = window.requestAnimationFrame(frame);
+  }
+
+  function zoomByRatio(clientX, clientY, ratio) {
+    if (isNaN(clientX) || isNaN(clientY) || isNaN(ratio)) {
+      throw new Error('zoom requires valid numbers');
+    }
+
+    var newScale = transform.scale * ratio;
+
+    if (newScale < minZoom) {
+      if (transform.scale === minZoom) return;
+
+      ratio = minZoom / transform.scale;
+    }
+    if (newScale > maxZoom) {
+      if (transform.scale === maxZoom) return;
+
+      ratio = maxZoom / transform.scale;
+    }
+
+    var size = transformToScreen(clientX, clientY);
+
+    transform.x = size.x - ratio * (size.x - transform.x);
+    transform.y = size.y - ratio * (size.y - transform.y);
+
+    // TODO: https://github.com/anvaka/panzoom/issues/112
+    if (bounds && boundsPadding === 1 && minZoom === 1) {
+      transform.scale *= ratio;
+      keepTransformInsideBounds();
+    } else {
+      var transformAdjusted = keepTransformInsideBounds();
+      if (!transformAdjusted) transform.scale *= ratio;
+    }
+
+    triggerEvent('zoom');
+
+    makeDirty();
+  }
+
+  function zoomAbs(clientX, clientY, zoomLevel) {
+    var ratio = zoomLevel / transform.scale;
+    zoomByRatio(clientX, clientY, ratio);
+  }
+
+  function centerOn(ui) {
+    var parent = ui.ownerSVGElement;
+    if (!parent)
+      throw new Error('ui element is required to be within the scene');
+
+    // TODO: should i use controller's screen CTM?
+    var clientRect = ui.getBoundingClientRect();
+    var cx = clientRect.left + clientRect.width / 2;
+    var cy = clientRect.top + clientRect.height / 2;
+
+    var container = parent.getBoundingClientRect();
+    var dx = container.width / 2 - cx;
+    var dy = container.height / 2 - cy;
+
+    internalMoveBy(dx, dy, true);
+  }
+
+  function internalMoveBy(dx, dy, smooth) {
+    if (!smooth) {
+      return moveBy(dx, dy);
+    }
+
+    if (moveByAnimation) moveByAnimation.cancel();
+
+    var from = { x: 0, y: 0 };
+    var to = { x: dx, y: dy };
+    var lastX = 0;
+    var lastY = 0;
+
+    moveByAnimation = animate(from, to, {
+      step: function (v) {
+        moveBy(v.x - lastX, v.y - lastY);
+
+        lastX = v.x;
+        lastY = v.y;
+      }
+    });
+  }
+
+  function scroll(x, y) {
+    cancelZoomAnimation();
+    moveTo(x, y);
+  }
+
+  function dispose() {
+    releaseEvents();
+  }
+
+  function listenForEvents() {
+    owner.addEventListener('mousedown', onMouseDown, { passive: false });
+    owner.addEventListener('dblclick', onDoubleClick, { passive: false });
+    owner.addEventListener('touchstart', onTouch, { passive: false });
+    owner.addEventListener('keydown', onKeyDown, { passive: false });
+
+    // Need to listen on the owner container, so that we are not limited
+    // by the size of the scrollable domElement
+    wheel.addWheelListener(owner, onMouseWheel, { passive: false });
+
+    makeDirty();
+  }
+
+  function releaseEvents() {
+    wheel.removeWheelListener(owner, onMouseWheel);
+    owner.removeEventListener('mousedown', onMouseDown);
+    owner.removeEventListener('keydown', onKeyDown);
+    owner.removeEventListener('dblclick', onDoubleClick);
+    owner.removeEventListener('touchstart', onTouch);
+
+    if (frameAnimation) {
+      window.cancelAnimationFrame(frameAnimation);
+      frameAnimation = 0;
+    }
+
+    smoothScroll.cancel();
+
+    releaseDocumentMouse();
+    releaseTouches();
+    textSelection.release();
+
+    triggerPanEnd();
+  }
+
+  function frame() {
+    if (isDirty) applyTransform();
+  }
+
+  function applyTransform() {
+    isDirty = false;
+
+    // TODO: Should I allow to cancel this?
+    panController.applyTransform(transform);
+
+    triggerEvent('transform');
+    frameAnimation = 0;
+  }
+
+  function onKeyDown(e) {
+    var x = 0,
+      y = 0,
+      z = 0;
+    if (e.keyCode === 38) {
+      y = 1; // up
+    } else if (e.keyCode === 40) {
+      y = -1; // down
+    } else if (e.keyCode === 37) {
+      x = 1; // left
+    } else if (e.keyCode === 39) {
+      x = -1; // right
+    } else if (e.keyCode === 189 || e.keyCode === 109) {
+      // DASH or SUBTRACT
+      z = 1; // `-` -  zoom out
+    } else if (e.keyCode === 187 || e.keyCode === 107) {
+      // EQUAL SIGN or ADD
+      z = -1; // `=` - zoom in (equal sign on US layout is under `+`)
+    }
+
+    if (filterKey(e, x, y, z)) {
+      // They don't want us to handle the key: https://github.com/anvaka/panzoom/issues/45
+      return;
+    }
+
+    if (x || y) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      var clientRect = owner.getBoundingClientRect();
+      // movement speed should be the same in both X and Y direction:
+      var offset = Math.min(clientRect.width, clientRect.height);
+      var moveSpeedRatio = 0.05;
+      var dx = offset * moveSpeedRatio * x;
+      var dy = offset * moveSpeedRatio * y;
+
+      // TODO: currently we do not animate this. It could be better to have animation
+      internalMoveBy(dx, dy);
+    }
+
+    if (z) {
+      var scaleMultiplier = getScaleMultiplier(z * 100);
+      var offset = transformOrigin ? getTransformOriginOffset() : midPoint();
+      publicZoomTo(offset.x, offset.y, scaleMultiplier);
+    }
+  }
+
+  function midPoint() {
+    var ownerRect = owner.getBoundingClientRect();
+    return {
+      x: ownerRect.width / 2,
+      y: ownerRect.height / 2
+    };
+  }
+
+  function onTouch(e) {
+    // let the override the touch behavior
+    beforeTouch(e);
+
+    if (e.touches.length === 1) {
+      return handleSingleFingerTouch(e, e.touches[0]);
+    } else if (e.touches.length === 2) {
+      // handleTouchMove() will care about pinch zoom.
+      pinchZoomLength = getPinchZoomLength(e.touches[0], e.touches[1]);
+      multiTouch = true;
+      startTouchListenerIfNeeded();
+    }
+  }
+
+  function beforeTouch(e) {
+    // TODO: Need to unify this filtering names. E.g. use `beforeTouch`
+    if (options.onTouch && !options.onTouch(e)) {
+      // if they return `false` from onTouch, we don't want to stop
+      // events propagation. Fixes https://github.com/anvaka/panzoom/issues/12
+      return;
+    }
+
+    e.stopPropagation();
+    e.preventDefault();
+  }
+
+  function beforeDoubleClick(e) {
+    // TODO: Need to unify this filtering names. E.g. use `beforeDoubleClick``
+    if (options.onDoubleClick && !options.onDoubleClick(e)) {
+      // if they return `false` from onTouch, we don't want to stop
+      // events propagation. Fixes https://github.com/anvaka/panzoom/issues/46
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleSingleFingerTouch(e) {
+    var touch = e.touches[0];
+    var offset = getOffsetXY(touch);
+    lastSingleFingerOffset = offset;
+    var point = transformToScreen(offset.x, offset.y);
+    mouseX = point.x;
+    mouseY = point.y;
+
+    smoothScroll.cancel();
+    startTouchListenerIfNeeded();
+  }
+
+  function startTouchListenerIfNeeded() {
+    if (touchInProgress) {
+      // no need to do anything, as we already listen to events;
+      return;
+    }
+
+    touchInProgress = true;
+    document.addEventListener('touchmove', handleTouchMove);
+    document.addEventListener('touchend', handleTouchEnd);
+    document.addEventListener('touchcancel', handleTouchEnd);
+  }
+
+  function handleTouchMove(e) {
+    if (e.touches.length === 1) {
+      e.stopPropagation();
+      var touch = e.touches[0];
+
+      var offset = getOffsetXY(touch);
+      var point = transformToScreen(offset.x, offset.y);
+
+      var dx = point.x - mouseX;
+      var dy = point.y - mouseY;
+
+      if (dx !== 0 && dy !== 0) {
+        triggerPanStart();
+      }
+      mouseX = point.x;
+      mouseY = point.y;
+      internalMoveBy(dx, dy);
+    } else if (e.touches.length === 2) {
+      // it's a zoom, let's find direction
+      multiTouch = true;
+      var t1 = e.touches[0];
+      var t2 = e.touches[1];
+      var currentPinchLength = getPinchZoomLength(t1, t2);
+
+      // since the zoom speed is always based on distance from 1, we need to apply
+      // pinch speed only on that distance from 1:
+      var scaleMultiplier =
+        1 + (currentPinchLength / pinchZoomLength - 1) * pinchSpeed;
+
+      var firstTouchPoint = getOffsetXY(t1);
+      var secondTouchPoint = getOffsetXY(t2);
+      mouseX = (firstTouchPoint.x + secondTouchPoint.x) / 2;
+      mouseY = (firstTouchPoint.y + secondTouchPoint.y) / 2;
+      if (transformOrigin) {
+        var offset = getTransformOriginOffset();
+        mouseX = offset.x;
+        mouseY = offset.y;
+      }
+
+      publicZoomTo(mouseX, mouseY, scaleMultiplier);
+
+      pinchZoomLength = currentPinchLength;
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  }
+
+  function handleTouchEnd(e) {
+    if (e.touches.length > 0) {
+      var offset = getOffsetXY(e.touches[0]);
+      var point = transformToScreen(offset.x, offset.y);
+      mouseX = point.x;
+      mouseY = point.y;
+    } else {
+      var now = new Date();
+      if (now - lastTouchEndTime < doubleTapSpeedInMS) {
+        if (transformOrigin) {
+          var offset = getTransformOriginOffset();
+          smoothZoom(offset.x, offset.y, zoomDoubleClickSpeed);
+        } else {
+          // We want untransformed x/y here.
+          smoothZoom(lastSingleFingerOffset.x, lastSingleFingerOffset.y, zoomDoubleClickSpeed);
+        }
+      }
+
+      lastTouchEndTime = now;
+
+      triggerPanEnd();
+      releaseTouches();
+    }
+  }
+
+  function getPinchZoomLength(finger1, finger2) {
+    var dx = finger1.clientX - finger2.clientX;
+    var dy = finger1.clientY - finger2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function onDoubleClick(e) {
+    beforeDoubleClick(e);
+    var offset = getOffsetXY(e);
+    if (transformOrigin) {
+      // TODO: looks like this is duplicated in the file.
+      // Need to refactor
+      offset = getTransformOriginOffset();
+    }
+    smoothZoom(offset.x, offset.y, zoomDoubleClickSpeed);
+  }
+
+  function onMouseDown(e) {
+    // if client does not want to handle this event - just ignore the call
+    if (beforeMouseDown(e)) return;
+
+    if (touchInProgress) {
+      // modern browsers will fire mousedown for touch events too
+      // we do not want this: touch is handled separately.
+      e.stopPropagation();
+      return false;
+    }
+    // for IE, left click == 1
+    // for Firefox, left click == 0
+    var isLeftButton =
+      (e.button === 1 && window.event !== null) || e.button === 0;
+    if (!isLeftButton) return;
+
+    smoothScroll.cancel();
+
+    var offset = getOffsetXY(e);
+    var point = transformToScreen(offset.x, offset.y);
+    mouseX = point.x;
+    mouseY = point.y;
+
+    // We need to listen on document itself, since mouse can go outside of the
+    // window, and we will loose it
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    textSelection.capture(e.target || e.srcElement);
+
+    return false;
+  }
+
+  function onMouseMove(e) {
+    // no need to worry about mouse events when touch is happening
+    if (touchInProgress) return;
+
+    triggerPanStart();
+
+    var offset = getOffsetXY(e);
+    var point = transformToScreen(offset.x, offset.y);
+    var dx = point.x - mouseX;
+    var dy = point.y - mouseY;
+
+    mouseX = point.x;
+    mouseY = point.y;
+
+    internalMoveBy(dx, dy);
+  }
+
+  function onMouseUp() {
+    textSelection.release();
+    triggerPanEnd();
+    releaseDocumentMouse();
+  }
+
+  function releaseDocumentMouse() {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+    panstartFired = false;
+  }
+
+  function releaseTouches() {
+    document.removeEventListener('touchmove', handleTouchMove);
+    document.removeEventListener('touchend', handleTouchEnd);
+    document.removeEventListener('touchcancel', handleTouchEnd);
+    panstartFired = false;
+    multiTouch = false;
+    touchInProgress = false;
+  }
+
+  function onMouseWheel(e) {
+    // if client does not want to handle this event - just ignore the call
+    if (beforeWheel(e)) return;
+
+    smoothScroll.cancel();
+
+    var delta = e.deltaY;
+    if (e.deltaMode > 0) delta *= 100;
+
+    var scaleMultiplier = getScaleMultiplier(delta);
+
+    if (scaleMultiplier !== 1) {
+      var offset = transformOrigin
+        ? getTransformOriginOffset()
+        : getOffsetXY(e);
+      publicZoomTo(offset.x, offset.y, scaleMultiplier);
+      e.preventDefault();
+    }
+  }
+
+  function getOffsetXY(e) {
+    var offsetX, offsetY;
+    // I tried using e.offsetX, but that gives wrong results for svg, when user clicks on a path.
+    var ownerRect = owner.getBoundingClientRect();
+    offsetX = e.clientX - ownerRect.left;
+    offsetY = e.clientY - ownerRect.top;
+
+    return { x: offsetX, y: offsetY };
+  }
+
+  function smoothZoom(clientX, clientY, scaleMultiplier) {
+    var fromValue = transform.scale;
+    var from = { scale: fromValue };
+    var to = { scale: scaleMultiplier * fromValue };
+
+    smoothScroll.cancel();
+    cancelZoomAnimation();
+
+    zoomToAnimation = animate(from, to, {
+      step: function (v) {
+        zoomAbs(clientX, clientY, v.scale);
+      },
+      done: triggerZoomEnd
+    });
+  }
+
+  function smoothZoomAbs(clientX, clientY, toScaleValue) {
+    var fromValue = transform.scale;
+    var from = { scale: fromValue };
+    var to = { scale: toScaleValue };
+
+    smoothScroll.cancel();
+    cancelZoomAnimation();
+
+    zoomToAnimation = animate(from, to, {
+      step: function (v) {
+        zoomAbs(clientX, clientY, v.scale);
+      }
+    });
+  }
+
+  function getTransformOriginOffset() {
+    var ownerRect = owner.getBoundingClientRect();
+    return {
+      x: ownerRect.width * transformOrigin.x,
+      y: ownerRect.height * transformOrigin.y
+    };
+  }
+
+  function publicZoomTo(clientX, clientY, scaleMultiplier) {
+    smoothScroll.cancel();
+    cancelZoomAnimation();
+    return zoomByRatio(clientX, clientY, scaleMultiplier);
+  }
+
+  function cancelZoomAnimation() {
+    if (zoomToAnimation) {
+      zoomToAnimation.cancel();
+      zoomToAnimation = null;
+    }
+  }
+
+  function getScaleMultiplier(delta) {
+    var sign = Math.sign(delta);
+    var deltaAdjustedSpeed = Math.min(0.25, Math.abs(speed * delta / 128));
+    return 1 - sign * deltaAdjustedSpeed;
+  }
+
+  function triggerPanStart() {
+    if (!panstartFired) {
+      triggerEvent('panstart');
+      panstartFired = true;
+      smoothScroll.start();
+    }
+  }
+
+  function triggerPanEnd() {
+    if (panstartFired) {
+      // we should never run smooth scrolling if it was multiTouch (pinch zoom animation):
+      if (!multiTouch) smoothScroll.stop();
+      triggerEvent('panend');
+    }
+  }
+
+  function triggerZoomEnd() {
+    triggerEvent('zoomend');
+  }
+
+  function triggerEvent(name) {
+    api.fire(name, api);
+  }
+}
+
+function parseTransformOrigin(options) {
+  if (!options) return;
+  if (typeof options === 'object') {
+    if (!isNumber(options.x) || !isNumber(options.y))
+      failTransformOrigin(options);
+    return options;
+  }
+
+  failTransformOrigin();
+}
+
+function failTransformOrigin(options) {
+  console.error(options);
+  throw new Error(
+    [
+      'Cannot parse transform origin.',
+      'Some good examples:',
+      '  "center center" can be achieved with {x: 0.5, y: 0.5}',
+      '  "top center" can be achieved with {x: 0.5, y: 0}',
+      '  "bottom right" can be achieved with {x: 1, y: 1}'
+    ].join('\n')
+  );
+}
+
+function noop() { }
+
+function validateBounds(bounds) {
+  var boundsType = typeof bounds;
+  if (boundsType === 'undefined' || boundsType === 'boolean') return; // this is okay
+  // otherwise need to be more thorough:
+  var validBounds =
+    isNumber(bounds.left) &&
+    isNumber(bounds.top) &&
+    isNumber(bounds.bottom) &&
+    isNumber(bounds.right);
+
+  if (!validBounds)
+    throw new Error(
+      'Bounds object is not valid. It can be: ' +
+      'undefined, boolean (true|false) or an object {left, top, right, bottom}'
+    );
+}
+
+function isNumber(x) {
+  return Number.isFinite(x);
+}
+
+// IE 11 does not support isNaN:
+function isNaN(value) {
+  if (Number.isNaN) {
+    return Number.isNaN(value);
+  }
+
+  return value !== value;
+}
+
+function rigidScroll() {
+  return {
+    start: noop,
+    stop: noop,
+    cancel: noop
+  };
+}
+
+function autoRun() {
+  if (typeof document === 'undefined') return;
+
+  var scripts = document.getElementsByTagName('script');
+  if (!scripts) return;
+  var panzoomScript;
+
+  for (var i = 0; i < scripts.length; ++i) {
+    var x = scripts[i];
+    if (x.src && x.src.match(/\bpanzoom(\.min)?\.js/)) {
+      panzoomScript = x;
+      break;
+    }
+  }
+
+  if (!panzoomScript) return;
+
+  var query = panzoomScript.getAttribute('query');
+  if (!query) return;
+
+  var globalName = panzoomScript.getAttribute('name') || 'pz';
+  var started = Date.now();
+
+  tryAttach();
+
+  function tryAttach() {
+    var el = document.querySelector(query);
+    if (!el) {
+      var now = Date.now();
+      var elapsed = now - started;
+      if (elapsed < 2000) {
+        // Let's wait a bit
+        setTimeout(tryAttach, 100);
+        return;
+      }
+      // If we don't attach within 2 seconds to the target element, consider it a failure
+      console.error('Cannot find the panzoom element', globalName);
+      return;
+    }
+    var options = collectOptions(panzoomScript);
+    console.log(options);
+    window[globalName] = createPanZoom(el, options);
+  }
+
+  function collectOptions(script) {
+    var attrs = script.attributes;
+    var options = {};
+    for (var i = 0; i < attrs.length; ++i) {
+      var attr = attrs[i];
+      var nameValue = getPanzoomAttributeNameValue(attr);
+      if (nameValue) {
+        options[nameValue.name] = nameValue.value;
+      }
+    }
+
+    return options;
+  }
+
+  function getPanzoomAttributeNameValue(attr) {
+    if (!attr.name) return;
+    var isPanZoomAttribute =
+      attr.name[0] === 'p' && attr.name[1] === 'z' && attr.name[2] === '-';
+
+    if (!isPanZoomAttribute) return;
+
+    var name = attr.name.substr(3);
+    var value = JSON.parse(attr.value);
+    return { name: name, value: value };
+  }
+}
+
+autoRun();
+
+},{"./lib/createTextSelectionInterceptor.js":2,"./lib/domController.js":3,"./lib/kinetic.js":4,"./lib/svgController.js":5,"./lib/transform.js":6,"amator":7,"ngraph.events":9,"wheel":10}],2:[function(require,module,exports){
+/**
+ * Disallows selecting text.
+ */
+module.exports = createTextSelectionInterceptor;
+
+function createTextSelectionInterceptor(useFake) {
+  if (useFake) {
+    return {
+      capture: noop,
+      release: noop
+    };
+  }
+
+  var dragObject;
+  var prevSelectStart;
+  var prevDragStart;
+  var wasCaptured = false;
+
+  return {
+    capture: capture,
+    release: release
+  };
+
+  function capture(domObject) {
+    wasCaptured = true;
+    prevSelectStart = window.document.onselectstart;
+    prevDragStart = window.document.ondragstart;
+
+    window.document.onselectstart = disabled;
+
+    dragObject = domObject;
+    dragObject.ondragstart = disabled;
+  }
+
+  function release() {
+    if (!wasCaptured) return;
+    
+    wasCaptured = false;
+    window.document.onselectstart = prevSelectStart;
+    if (dragObject) dragObject.ondragstart = prevDragStart;
+  }
+}
+
+function disabled(e) {
+  e.stopPropagation();
+  return false;
+}
+
+function noop() {}
+
+},{}],3:[function(require,module,exports){
+module.exports = makeDomController
+
+module.exports.canAttach = isDomElement;
+
+function makeDomController(domElement, options) {
+  var elementValid = isDomElement(domElement); 
+  if (!elementValid) {
+    throw new Error('panzoom requires DOM element to be attached to the DOM tree')
+  }
+
+  var owner = domElement.parentElement;
+  domElement.scrollTop = 0;
+  
+  if (!options.disableKeyboardInteraction) {
+    owner.setAttribute('tabindex', 0);
+  }
+
+  var api = {
+    getBBox: getBBox,
+    getOwner: getOwner,
+    applyTransform: applyTransform,
+  }
+  
+  return api
+
+  function getOwner() {
+    return owner
+  }
+
+  function getBBox() {
+    // TODO: We should probably cache this?
+    return  {
+      left: 0,
+      top: 0,
+      width: domElement.clientWidth,
+      height: domElement.clientHeight
+    }
+  }
+
+  function applyTransform(transform) {
+    // TODO: Should we cache this?
+    domElement.style.transformOrigin = '0 0 0';
+    domElement.style.transform = 'matrix(' +
+      transform.scale + ', 0, 0, ' +
+      transform.scale + ', ' +
+      transform.x + ', ' + transform.y + ')'
+  }
+}
+
+function isDomElement(element) {
+  return element && element.parentElement && element.style;
+}
+
+},{}],4:[function(require,module,exports){
+/**
+ * Allows smooth kinetic scrolling of the surface
+ */
+module.exports = kinetic;
+
+function kinetic(getPoint, scroll, settings) {
+  if (typeof settings !== 'object') {
+    // setting could come as boolean, we should ignore it, and use an object.
+    settings = {};
+  }
+
+  var minVelocity = typeof settings.minVelocity === 'number' ? settings.minVelocity : 5;
+  var amplitude = typeof settings.amplitude === 'number' ? settings.amplitude : 0.25;
+  var cancelAnimationFrame = typeof settings.cancelAnimationFrame === 'function' ? settings.cancelAnimationFrame : getCancelAnimationFrame();
+  var requestAnimationFrame = typeof settings.requestAnimationFrame === 'function' ? settings.requestAnimationFrame : getRequestAnimationFrame();
+
+  var lastPoint;
+  var timestamp;
+  var timeConstant = 342;
+
+  var ticker;
+  var vx, targetX, ax;
+  var vy, targetY, ay;
+
+  var raf;
+
+  return {
+    start: start,
+    stop: stop,
+    cancel: dispose
+  };
+
+  function dispose() {
+    cancelAnimationFrame(ticker);
+    cancelAnimationFrame(raf);
+  }
+
+  function start() {
+    lastPoint = getPoint();
+
+    ax = ay = vx = vy = 0;
+    timestamp = new Date();
+
+    cancelAnimationFrame(ticker);
+    cancelAnimationFrame(raf);
+
+    // we start polling the point position to accumulate velocity
+    // Once we stop(), we will use accumulated velocity to keep scrolling
+    // an object.
+    ticker = requestAnimationFrame(track);
+  }
+
+  function track() {
+    var now = Date.now();
+    var elapsed = now - timestamp;
+    timestamp = now;
+
+    var currentPoint = getPoint();
+
+    var dx = currentPoint.x - lastPoint.x;
+    var dy = currentPoint.y - lastPoint.y;
+
+    lastPoint = currentPoint;
+
+    var dt = 1000 / (1 + elapsed);
+
+    // moving average
+    vx = 0.8 * dx * dt + 0.2 * vx;
+    vy = 0.8 * dy * dt + 0.2 * vy;
+
+    ticker = requestAnimationFrame(track);
+  }
+
+  function stop() {
+    cancelAnimationFrame(ticker);
+    cancelAnimationFrame(raf);
+
+    var currentPoint = getPoint();
+
+    targetX = currentPoint.x;
+    targetY = currentPoint.y;
+    timestamp = Date.now();
+
+    if (vx < -minVelocity || vx > minVelocity) {
+      ax = amplitude * vx;
+      targetX += ax;
+    }
+
+    if (vy < -minVelocity || vy > minVelocity) {
+      ay = amplitude * vy;
+      targetY += ay;
+    }
+
+    raf = requestAnimationFrame(autoScroll);
+  }
+
+  function autoScroll() {
+    var elapsed = Date.now() - timestamp;
+
+    var moving = false;
+    var dx = 0;
+    var dy = 0;
+
+    if (ax) {
+      dx = -ax * Math.exp(-elapsed / timeConstant);
+
+      if (dx > 0.5 || dx < -0.5) moving = true;
+      else dx = ax = 0;
+    }
+
+    if (ay) {
+      dy = -ay * Math.exp(-elapsed / timeConstant);
+
+      if (dy > 0.5 || dy < -0.5) moving = true;
+      else dy = ay = 0;
+    }
+
+    if (moving) {
+      scroll(targetX + dx, targetY + dy);
+      raf = requestAnimationFrame(autoScroll);
+    }
+  }
+}
+
+function getCancelAnimationFrame() {
+  if (typeof cancelAnimationFrame === 'function') return cancelAnimationFrame;
+  return clearTimeout;
+}
+
+function getRequestAnimationFrame() {
+  if (typeof requestAnimationFrame === 'function') return requestAnimationFrame;
+
+  return function (handler) {
+    return setTimeout(handler, 16);
+  }
+}
+},{}],5:[function(require,module,exports){
+module.exports = makeSvgController
+module.exports.canAttach = isSVGElement;
+
+function makeSvgController(svgElement, options) {
+  if (!isSVGElement(svgElement)) {
+    throw new Error('svg element is required for svg.panzoom to work')
+  }
+
+  var owner = svgElement.ownerSVGElement
+  if (!owner) {
+    throw new Error(
+      'Do not apply panzoom to the root <svg> element. ' +
+      'Use its child instead (e.g. <g></g>). ' +
+      'As of March 2016 only FireFox supported transform on the root element')
+  }
+
+  if (!options.disableKeyboardInteraction) {
+    owner.setAttribute('tabindex', 0);
+  }
+
+  var api = {
+    getBBox: getBBox,
+    getScreenCTM: getScreenCTM,
+    getOwner: getOwner,
+    applyTransform: applyTransform,
+    initTransform: initTransform
+  }
+  
+  return api
+
+  function getOwner() {
+    return owner
+  }
+
+  function getBBox() {
+    var bbox =  svgElement.getBBox()
+    return {
+      left: bbox.x,
+      top: bbox.y,
+      width: bbox.width,
+      height: bbox.height,
+    }
+  }
+
+  function getScreenCTM() {
+    var ctm = owner.getCTM();
+    if (!ctm) {
+      // This is likely firefox: https://bugzilla.mozilla.org/show_bug.cgi?id=873106
+      // The code below is not entirely correct, but still better than nothing
+      return owner.getScreenCTM();
+    }
+    return ctm;
+  }
+
+  function initTransform(transform) {
+    var screenCTM = svgElement.getCTM()
+
+    // The above line returns null on Firefox
+    if (screenCTM === null) {
+      screenCTM = document.createElementNS("http://www.w3.org/2000/svg", "svg").createSVGMatrix()
+    }
+
+    transform.x = screenCTM.e;
+    transform.y = screenCTM.f;
+    transform.scale = screenCTM.a;
+    owner.removeAttributeNS(null, 'viewBox');
+  }
+
+  function applyTransform(transform) {
+    svgElement.setAttribute('transform', 'matrix(' +
+      transform.scale + ' 0 0 ' +
+      transform.scale + ' ' +
+      transform.x + ' ' + transform.y + ')')
+  }
+}
+
+function isSVGElement(element) {
+  return element && element.ownerSVGElement && element.getCTM;
+}
+},{}],6:[function(require,module,exports){
+module.exports = Transform;
+
+function Transform() {
+  this.x = 0;
+  this.y = 0;
+  this.scale = 1;
+}
+
+},{}],7:[function(require,module,exports){
+var BezierEasing = require('bezier-easing')
+
+// Predefined set of animations. Similar to CSS easing functions
+var animations = {
+  ease:  BezierEasing(0.25, 0.1, 0.25, 1),
+  easeIn: BezierEasing(0.42, 0, 1, 1),
+  easeOut: BezierEasing(0, 0, 0.58, 1),
+  easeInOut: BezierEasing(0.42, 0, 0.58, 1),
+  linear: BezierEasing(0, 0, 1, 1)
+}
+
+
+module.exports = animate;
+module.exports.makeAggregateRaf = makeAggregateRaf;
+module.exports.sharedScheduler = makeAggregateRaf();
+
+
+function animate(source, target, options) {
+  var start = Object.create(null)
+  var diff = Object.create(null)
+  options = options || {}
+  // We let clients specify their own easing function
+  var easing = (typeof options.easing === 'function') ? options.easing : animations[options.easing]
+
+  // if nothing is specified, default to ease (similar to CSS animations)
+  if (!easing) {
+    if (options.easing) {
+      console.warn('Unknown easing function in amator: ' + options.easing);
+    }
+    easing = animations.ease
+  }
+
+  var step = typeof options.step === 'function' ? options.step : noop
+  var done = typeof options.done === 'function' ? options.done : noop
+
+  var scheduler = getScheduler(options.scheduler)
+
+  var keys = Object.keys(target)
+  keys.forEach(function(key) {
+    start[key] = source[key]
+    diff[key] = target[key] - source[key]
+  })
+
+  var durationInMs = typeof options.duration === 'number' ? options.duration : 400
+  var durationInFrames = Math.max(1, durationInMs * 0.06) // 0.06 because 60 frames pers 1,000 ms
+  var previousAnimationId
+  var frame = 0
+
+  previousAnimationId = scheduler.next(loop)
+
+  return {
+    cancel: cancel
+  }
+
+  function cancel() {
+    scheduler.cancel(previousAnimationId)
+    previousAnimationId = 0
+  }
+
+  function loop() {
+    var t = easing(frame/durationInFrames)
+    frame += 1
+    setValues(t)
+    if (frame <= durationInFrames) {
+      previousAnimationId = scheduler.next(loop)
+      step(source)
+    } else {
+      previousAnimationId = 0
+      setTimeout(function() { done(source) }, 0)
+    }
+  }
+
+  function setValues(t) {
+    keys.forEach(function(key) {
+      source[key] = diff[key] * t + start[key]
+    })
+  }
+}
+
+function noop() { }
+
+function getScheduler(scheduler) {
+  if (!scheduler) {
+    var canRaf = typeof window !== 'undefined' && window.requestAnimationFrame
+    return canRaf ? rafScheduler() : timeoutScheduler()
+  }
+  if (typeof scheduler.next !== 'function') throw new Error('Scheduler is supposed to have next(cb) function')
+  if (typeof scheduler.cancel !== 'function') throw new Error('Scheduler is supposed to have cancel(handle) function')
+
+  return scheduler
+}
+
+function rafScheduler() {
+  return {
+    next: window.requestAnimationFrame.bind(window),
+    cancel: window.cancelAnimationFrame.bind(window)
+  }
+}
+
+function timeoutScheduler() {
+  return {
+    next: function(cb) {
+      return setTimeout(cb, 1000/60)
+    },
+    cancel: function (id) {
+      return clearTimeout(id)
+    }
+  }
+}
+
+function makeAggregateRaf() {
+  var frontBuffer = new Set();
+  var backBuffer = new Set();
+  var frameToken = 0;
+
+  return {
+    next: next,
+    cancel: next,
+    clearAll: clearAll
+  }
+
+  function clearAll() {
+    frontBuffer.clear();
+    backBuffer.clear();
+    cancelAnimationFrame(frameToken);
+    frameToken = 0;
+  }
+
+  function next(callback) {
+    backBuffer.add(callback);
+    renderNextFrame();
+  }
+
+  function renderNextFrame() {
+    if (!frameToken) frameToken = requestAnimationFrame(renderFrame);
+  }
+
+  function renderFrame() {
+    frameToken = 0;
+
+    var t = backBuffer;
+    backBuffer = frontBuffer;
+    frontBuffer = t;
+
+    frontBuffer.forEach(function(callback) {
+      callback();
+    });
+    frontBuffer.clear();
+  }
+
+  function cancel(callback) {
+    backBuffer.delete(callback);
+  }
+}
+
+},{"bezier-easing":8}],8:[function(require,module,exports){
+/**
+ * https://github.com/gre/bezier-easing
+ * BezierEasing - use bezier curve for transition easing function
+ * by Gaëtan Renaudeau 2014 - 2015 – MIT License
+ */
+
+// These values are established by empiricism with tests (tradeoff: performance VS precision)
+var NEWTON_ITERATIONS = 4;
+var NEWTON_MIN_SLOPE = 0.001;
+var SUBDIVISION_PRECISION = 0.0000001;
+var SUBDIVISION_MAX_ITERATIONS = 10;
+
+var kSplineTableSize = 11;
+var kSampleStepSize = 1.0 / (kSplineTableSize - 1.0);
+
+var float32ArraySupported = typeof Float32Array === 'function';
+
+function A (aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+function B (aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+function C (aA1)      { return 3.0 * aA1; }
+
+// Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+function calcBezier (aT, aA1, aA2) { return ((A(aA1, aA2) * aT + B(aA1, aA2)) * aT + C(aA1)) * aT; }
+
+// Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+function getSlope (aT, aA1, aA2) { return 3.0 * A(aA1, aA2) * aT * aT + 2.0 * B(aA1, aA2) * aT + C(aA1); }
+
+function binarySubdivide (aX, aA, aB, mX1, mX2) {
+  var currentX, currentT, i = 0;
+  do {
+    currentT = aA + (aB - aA) / 2.0;
+    currentX = calcBezier(currentT, mX1, mX2) - aX;
+    if (currentX > 0.0) {
+      aB = currentT;
+    } else {
+      aA = currentT;
+    }
+  } while (Math.abs(currentX) > SUBDIVISION_PRECISION && ++i < SUBDIVISION_MAX_ITERATIONS);
+  return currentT;
+}
+
+function newtonRaphsonIterate (aX, aGuessT, mX1, mX2) {
+ for (var i = 0; i < NEWTON_ITERATIONS; ++i) {
+   var currentSlope = getSlope(aGuessT, mX1, mX2);
+   if (currentSlope === 0.0) {
+     return aGuessT;
+   }
+   var currentX = calcBezier(aGuessT, mX1, mX2) - aX;
+   aGuessT -= currentX / currentSlope;
+ }
+ return aGuessT;
+}
+
+function LinearEasing (x) {
+  return x;
+}
+
+module.exports = function bezier (mX1, mY1, mX2, mY2) {
+  if (!(0 <= mX1 && mX1 <= 1 && 0 <= mX2 && mX2 <= 1)) {
+    throw new Error('bezier x values must be in [0, 1] range');
+  }
+
+  if (mX1 === mY1 && mX2 === mY2) {
+    return LinearEasing;
+  }
+
+  // Precompute samples table
+  var sampleValues = float32ArraySupported ? new Float32Array(kSplineTableSize) : new Array(kSplineTableSize);
+  for (var i = 0; i < kSplineTableSize; ++i) {
+    sampleValues[i] = calcBezier(i * kSampleStepSize, mX1, mX2);
+  }
+
+  function getTForX (aX) {
+    var intervalStart = 0.0;
+    var currentSample = 1;
+    var lastSample = kSplineTableSize - 1;
+
+    for (; currentSample !== lastSample && sampleValues[currentSample] <= aX; ++currentSample) {
+      intervalStart += kSampleStepSize;
+    }
+    --currentSample;
+
+    // Interpolate to provide an initial guess for t
+    var dist = (aX - sampleValues[currentSample]) / (sampleValues[currentSample + 1] - sampleValues[currentSample]);
+    var guessForT = intervalStart + dist * kSampleStepSize;
+
+    var initialSlope = getSlope(guessForT, mX1, mX2);
+    if (initialSlope >= NEWTON_MIN_SLOPE) {
+      return newtonRaphsonIterate(aX, guessForT, mX1, mX2);
+    } else if (initialSlope === 0.0) {
+      return guessForT;
+    } else {
+      return binarySubdivide(aX, intervalStart, intervalStart + kSampleStepSize, mX1, mX2);
+    }
+  }
+
+  return function BezierEasing (x) {
+    // Because JavaScript number are imprecise, we should guarantee the extremes are right.
+    if (x === 0) {
+      return 0;
+    }
+    if (x === 1) {
+      return 1;
+    }
+    return calcBezier(getTForX(x), mY1, mY2);
+  };
+};
+
+},{}],9:[function(require,module,exports){
+module.exports = function eventify(subject) {
+  validateSubject(subject);
+
+  var eventsStorage = createEventsStorage(subject);
+  subject.on = eventsStorage.on;
+  subject.off = eventsStorage.off;
+  subject.fire = eventsStorage.fire;
+  return subject;
+};
+
+function createEventsStorage(subject) {
+  // Store all event listeners to this hash. Key is event name, value is array
+  // of callback records.
+  //
+  // A callback record consists of callback function and its optional context:
+  // { 'eventName' => [{callback: function, ctx: object}] }
+  var registeredEvents = Object.create(null);
+
+  return {
+    on: function (eventName, callback, ctx) {
+      if (typeof callback !== 'function') {
+        throw new Error('callback is expected to be a function');
+      }
+      var handlers = registeredEvents[eventName];
+      if (!handlers) {
+        handlers = registeredEvents[eventName] = [];
+      }
+      handlers.push({callback: callback, ctx: ctx});
+
+      return subject;
+    },
+
+    off: function (eventName, callback) {
+      var wantToRemoveAll = (typeof eventName === 'undefined');
+      if (wantToRemoveAll) {
+        // Killing old events storage should be enough in this case:
+        registeredEvents = Object.create(null);
+        return subject;
+      }
+
+      if (registeredEvents[eventName]) {
+        var deleteAllCallbacksForEvent = (typeof callback !== 'function');
+        if (deleteAllCallbacksForEvent) {
+          delete registeredEvents[eventName];
+        } else {
+          var callbacks = registeredEvents[eventName];
+          for (var i = 0; i < callbacks.length; ++i) {
+            if (callbacks[i].callback === callback) {
+              callbacks.splice(i, 1);
+            }
+          }
+        }
+      }
+
+      return subject;
+    },
+
+    fire: function (eventName) {
+      var callbacks = registeredEvents[eventName];
+      if (!callbacks) {
+        return subject;
+      }
+
+      var fireArguments;
+      if (arguments.length > 1) {
+        fireArguments = Array.prototype.splice.call(arguments, 1);
+      }
+      for(var i = 0; i < callbacks.length; ++i) {
+        var callbackInfo = callbacks[i];
+        callbackInfo.callback.apply(callbackInfo.ctx, fireArguments);
+      }
+
+      return subject;
+    }
+  };
+}
+
+function validateSubject(subject) {
+  if (!subject) {
+    throw new Error('Eventify cannot use falsy object as events subject');
+  }
+  var reservedWords = ['on', 'fire', 'off'];
+  for (var i = 0; i < reservedWords.length; ++i) {
+    if (subject.hasOwnProperty(reservedWords[i])) {
+      throw new Error("Subject cannot be eventified, since it already has property '" + reservedWords[i] + "'");
+    }
+  }
+}
+
+},{}],10:[function(require,module,exports){
+/**
+ * This module used to unify mouse wheel behavior between different browsers in 2014
+ * Now it's just a wrapper around addEventListener('wheel');
+ *
+ * Usage:
+ *  var addWheelListener = require('wheel').addWheelListener;
+ *  var removeWheelListener = require('wheel').removeWheelListener;
+ *  addWheelListener(domElement, function (e) {
+ *    // mouse wheel event
+ *  });
+ *  removeWheelListener(domElement, function);
+ */
+
+module.exports = addWheelListener;
+
+// But also expose "advanced" api with unsubscribe:
+module.exports.addWheelListener = addWheelListener;
+module.exports.removeWheelListener = removeWheelListener;
+
+
+function addWheelListener(element, listener, useCapture) {
+  element.addEventListener('wheel', listener, useCapture);
+}
+
+function removeWheelListener( element, listener, useCapture ) {
+  element.removeEventListener('wheel', listener, useCapture);
+}
+},{}]},{},[1])(1)
+});
+
+    </script>
+  </head>
+  <body>
+
+    <div id="list-container">
+      <div style="display: inline-flex;">
+        <div id="download-bt" title="Download graph as an image">
+          <svg id="arrow-dl" width="28px" viewBox="0 0 1720 1750" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;"><path d="M559,267.5l602,0l0,622l559,0l-860,860l-860,-860l559,0l0,-622Z"/><rect x="559" y="0" width="602" height="203.5"/></svg>
+        </div>
+        <input id="item-input" placeholder="Search" autocomplete="off"/>
+      </div>
+      <div id="item-list"></div>
+    </div>
+
+    <div id="zoompan-info">
+      Press the key <span class="key">option</span> or <span class="key">alt</span> to scroll and pan
+    </div>
+
+    <div id="graph-host"></div>
+    <div id='info'>Click on items to show data</div>
+
+    <!-- <div style="display: flex;">
+      <div id="graph-host"></div>
+      <div id='info'></div>
+    </div> -->
+
+    <script>
+      var dataset = {}
+      try {
+        dataset = JSON.parse('[{"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host"}, "style": {"label": "host", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "taxon", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes"}, "style": {"label": "lysosomes", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice"}, "style": {"label": "mice", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion"}, "style": {"label": "autophagy_deletion", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "chebi", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion"}, "style": {"label": "deletion", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b"}, "style": {"label": "atg4b", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "ggp", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells"}, "style": {"label": "cells", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular"}, "style": {"label": "intracellular", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "go", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "cl", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "so", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine"}, "style": {"label": "arginine", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen"}, "style": {"label": "glycogen", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7"}, "style": {"label": "atg7", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene"}, "style": {"label": "autophagy_gene", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes"}, "style": {"label": "genes", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion"}, "style": {"label": "deletion", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b"}, "style": {"label": "downregulator", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7"}, "style": {"label": "downregulator", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}]')
+      } catch(e) {
+        document.getElementById('info').innerHTML = 'The [{"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host"}, "style": {"label": "host", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "taxon", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes"}, "style": {"label": "lysosomes", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice"}, "style": {"label": "mice", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion"}, "style": {"label": "autophagy_deletion", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "chebi", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion"}, "style": {"label": "deletion", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b"}, "style": {"label": "atg4b", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "ggp", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells"}, "style": {"label": "cells", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular"}, "style": {"label": "intracellular", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "go", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "cl", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "so", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine"}, "style": {"label": "arginine", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen"}, "style": {"label": "glycogen", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7"}, "style": {"label": "atg7", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene"}, "style": {"label": "autophagy_gene", "width": 5, "height": 5, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes"}, "style": {"label": "genes", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion"}, "style": {"label": "deletion", "width": 30, "height": 30, "background-color": "pink", "font-size": "10px", "color": "#ed87e0"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/host", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/lysosomes", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/mice", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/taxon"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b"}, "style": {"label": "downregulator", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7"}, "style": {"label": "downregulator", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg4b", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/cells", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/intracellular", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/go"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/arginine", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/glycogen", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/chebi"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/atg7", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/ggp"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/autophagy_gene", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/cl"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/genes", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}, {"data": {"id": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion_https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so", "source": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/data/entity/deletion", "target": "https://bbp.epfl.ch/nexus/v1/resources/covid19-kg/vocab/so"}, "style": {"label": "type", "font-size": "6px", "width": 2, "color": "black", "line-color": "#DDDDDD", "line-style": "solid"}}] must be overloaded'
+      }
+
+      var options = {}
+      try{
+        options = JSON.parse('{"labelProperty": "style.label", "nodeRadiusProperty": "style.width", "minNodeRadius": 14, "maxNodeRadius": 20, "minEdgeThickness": 1, "maxEdgeThickness": 20, "edgeThicknessProperty": "style.width", "graphPadding": 100, "mode": "mono", "defaultNodeColor": "orange", "linkColor": "#00bef2", "centerGravity": 0.3, "smoothTransition": false}')
+      } catch(e){
+        console.warn('Using default options, {"labelProperty": "style.label", "nodeRadiusProperty": "style.width", "minNodeRadius": 14, "maxNodeRadius": 20, "minEdgeThickness": 1, "maxEdgeThickness": 20, "edgeThicknessProperty": "style.width", "graphPadding": 100, "mode": "mono", "defaultNodeColor": "orange", "linkColor": "#00bef2", "centerGravity": 0.3, "smoothTransition": false} is not used')
+        document.getElementById('info').innerHTML = 'Using default options, {"labelProperty": "style.label", "nodeRadiusProperty": "style.width", "minNodeRadius": 14, "maxNodeRadius": 20, "minEdgeThickness": 1, "maxEdgeThickness": 20, "edgeThicknessProperty": "style.width", "graphPadding": 100, "mode": "mono", "defaultNodeColor": "orange", "linkColor": "#00bef2", "centerGravity": 0.3, "smoothTransition": false} is not used'
+      }
+
+    </script>  
+    <script>
+    
+    
+    function FindLineCircleIntersections(cx, cy, radius, point1, point2) {
+      let intersections = []
+      let dx, dy, A, B, C, det, t
+
+      dx = point2.x - point1.x;
+      dy = point2.y - point1.y;
+
+      A = dx * dx + dy * dy;
+      B = 2 * (dx * (point1.x - cx) + dy * (point1.y - cy));
+      C = (point1.x - cx) * (point1.x - cx) +
+          (point1.y - cy) * (point1.y - cy) -
+          radius * radius;
+
+      det = B * B - 4 * A * C;
+      if ((A <= 0.0000001) || (det < 0))
+      {
+        // no intersection
+      } else if (det == 0) {
+          // One solution.
+          t = -B / (2 * A);
+    
+          intersections.push({
+            x: point1.x + t * dx,
+            y: point1.y + t * dy
+          })
+
+      } else {
+          // Two solutions.
+          t = ((-B + Math.sqrt(det)) / (2 * A));
+          intersections.push({
+            x: point1.x + t * dx,
+            y: point1.y + t * dy
+          })
+
+          t = ((-B - Math.sqrt(det)) / (2 * A));
+          intersections.push({
+            x: point1.x + t * dx,
+            y: point1.y + t * dy
+          })
+      }
+      return intersections
+  }
+
+  // From an object that contains prop and a prop string such as 'myProp.mySubProp.mySubSubProp.1'
+  // return the value of it
+  function digObject(obj, prop) {
+    const propList = prop.split('.')
+    let tmpSubObj = obj
+
+    for (let i = 0; i < propList.length; i += 1) {
+      tmpSubObj = tmpSubObj[propList[i]]
+    }
+    return tmpSubObj
+  }
+
+
+    const container = document.getElementById('cont')
+    const SVG_NS = 'http://www.w3.org/2000/svg'
+
+    // create bezier curve path from points
+    function strBezier(from, to, control1, control2=null) {
+      let _control2 = control2 ? control2 : control1
+      return `M${from.x} ${from.y} C ${control1.x} ${control1.y}, ${_control2.x} ${_control2.y}, ${to.x} ${to.y}`
+    }
+
+
+    function refreshGraph(dataset, options = {}) {
+      const minNodeRadius = 'minNodeRadius' in options ? options.minNodeRadius : 10
+      const maxNodeRadius = 'maxNodeRadius' in options ? options.maxNodeRadius : 50
+      const nodeRadiusProperty = 'nodeRadiusProperty' in options ? options.nodeRadiusProperty : false
+      const minEdgeThickness = 'minEdgeThickness' in options ? options.minEdgeThickness : 1.5
+      const maxEdgeThickness = 'maxEdgeThickness' in options ? options.maxEdgeThickness : 80
+      const edgeThicknessProperty = 'edgeThicknessProperty' in options ? options.edgeThicknessProperty : false
+      const labelProperty = 'labelProperty' in options ? options.labelProperty : false
+      const nodePadding = 'nodePadding' in options ? options.nodePadding : (minNodeRadius + maxNodeRadius)
+      const graphPadding = 'graphPadding' in options ? options.graphPadding : maxNodeRadius * 2
+      const graphMode = 'mode' in options && ['directional', 'mono'].includes(options.mode) ? options.mode : 'mono'
+      const defaultNodeColor = 'defaultNodeColor' in options ? options.defaultNodeColor : '#ccc'
+      const nodeColorProperty = 'nodeColorProperty' in options ? options.nodeColorProperty : false
+      const linkColor = 'linkColor' in options ? options.linkColor : 'grey'
+      const inboundLinkColor = 'inboundLinkColor' in options ? options.inboundLinkColor : '#076dd9'
+      const outboundLinkColor = 'outboundLinkColor' in options ? options.outboundLinkColor : '#db2612'
+      const onEdgeEnter = 'onEdgeEnter' in options ? options.onEdgeEnter : null
+      const onEdgeLeave = 'onEdgeLeave' in options ? options.onEdgeLeave : null
+      const onEdgeClick = 'onEdgeClick' in options ? options.onEdgeClick : null
+      const onNodeEnter = 'onNodeEnter' in options ? options.onNodeEnter : null
+      const onNodeLeave = 'onNodeLeave' in options ? options.onNodeLeave : null
+      const onNodeClick = 'onNodeClick' in options ? options.onNodeClick : null
+      const centerGravity = 'centerGravity' in options ? options.centerGravity : 0.3
+      const smoothTransition = 'smoothTransition' in options  && options.smoothTransition === false ? '' : 'transition: all 0.2s;'
+
+
+      const defaultCurveOpacity = 0.1
+      const highlightedCurveOpacity = 0.7
+
+      let nodes = {}
+      let edges = {}
+      // to count the number of link to and from nodes. The keys are node ids
+      let linkCounter = {}
+      const connectionsToTarget = {} // the key is the 'target node' id
+      const connectionsFromSource = {} // the key is the 'source node' id
+      const connectionFromSourceToTarget = {} // the key is the edge id
+      const drawableEdges = {} // keys are 'nodeId_A nodeId_B' where A and B are in alphabetical order
+      
+      // keys is nodeId or edgeId, value is {svg: DomEl, data: nodeObj or EdgeObj}
+      const itemMapper = {}
+
+
+      // sorting and indexing the nodes and the edges
+      for (let i = 0; i < dataset.length; i += 1) {
+        let el = dataset[i]
+
+        // nodes and edges must at least have an id prop inside of a data prop
+        if (!('data' in el) || ('data' in el && !('id' in el.data))) {
+          continue
+        }
+
+        // this element is an edge
+        if ('source' in el.data && 'target' in el.data) {
+          const edgeId = el.data.id
+          edges[edgeId] = el
+          
+          const sourceNodeId = el.data.source
+          const targetNodeId = el.data.target
+          
+          // counting connection on source
+          if (!(sourceNodeId in linkCounter)) {
+            linkCounter[sourceNodeId] = 0
+          }
+          linkCounter[sourceNodeId] += 1
+
+          // counting conenction on target
+          if (!(targetNodeId in linkCounter)) {
+            linkCounter[targetNodeId] = 0
+          }
+          linkCounter[targetNodeId] += 1
+
+          // adding to the outbound connection dictionnary
+          if(!(targetNodeId in connectionsToTarget)) {
+            connectionsToTarget[targetNodeId] = []
+          }
+          connectionsToTarget[targetNodeId].push({from: sourceNodeId, by: edgeId})
+
+          // adding to the inbound connection dictionnary
+          if (!(sourceNodeId in connectionsFromSource)) {
+            connectionsFromSource[sourceNodeId] = []
+          }
+          connectionsFromSource[sourceNodeId].push({to: targetNodeId, by: edgeId})
+    
+          // adding to the edges dictionary
+          connectionFromSourceToTarget[edgeId] = {
+            from: sourceNodeId,
+            to: targetNodeId
+          }
+
+          // we want to aggregate the edge connections.
+          // If mono mode, we dont care about node order, we just want each pair to be in the same order (alphabetical).
+          // If directional mode, we do care of the order and keep it with "source target"
+          let drawableEdgesKey = graphMode === 'mono' ? [sourceNodeId, targetNodeId].sort().join(' ') : [sourceNodeId, targetNodeId].join(' ')
+          if (!(drawableEdgesKey in drawableEdges)) {
+            drawableEdges[drawableEdgesKey] = []
+          }
+          drawableEdges[drawableEdgesKey].push(el)
+
+        } else 
+        
+        // this element is a node
+        {
+          let nodeId = el.data.id
+          nodes[nodeId] = el
+
+          // make sure that if a node has 0 connections it's still countain the count 0
+          // (just to conformity with the others)
+          if (!(nodeId in linkCounter)) {
+            linkCounter[nodeId] = 0
+          }
+        }
+      }
+
+      // finding the min and max number of connections. This will determine dot sizes
+      let nodeIds = Object.keys(nodes)
+      let nodeLabels = {}
+      let allNumberOfLinks = Object.values(linkCounter)
+      let minNumberOfLinks = Math.min(...allNumberOfLinks) // TODO: compare perf of destructuring vs. for loop
+      let maxNumberOfLinks = Math.max(...allNumberOfLinks)
+
+      let nodeRadiuses = {}
+      let nodePositions = {}
+      let nodeRadiusSum = 0
+
+      // computing what is going to be the radius of the whole graph.
+      // Also computing the labels
+      for (let i = 0; i < nodeIds.length; i += 1) {
+        let nodeId = nodeIds[i]
+        let node = nodes[nodeId]
+        let nodeNbConnection = linkCounter[nodeId]
+        let radius = 1
+        
+        if (nodeRadiusProperty) {
+          radius = digObject(node, nodeRadiusProperty)
+        } else {
+          radius = minNodeRadius + ((nodeNbConnection - minNumberOfLinks) / (maxNumberOfLinks - minNumberOfLinks)) * (maxNodeRadius - minNodeRadius)
+        }
+
+        nodeRadiuses[nodeId] = radius
+        nodeRadiusSum += radius
+
+        if (labelProperty) {
+          nodeLabels[nodeId] = digObject(node, labelProperty)
+        } else {
+          nodeLabels[nodeId] = nodeId//.split('/').pop().split('#').pop()
+        }
+      }
+
+      const graphPerimeter = 2 * nodeRadiusSum + nodeIds.length * nodePadding
+      const graphRadius = graphPerimeter / (2 * Math.PI)
+      // let canvasSize = Math.ceil(graphRadius + 2 * maxNodeRadius + 2 * graphPadding)
+      let canvasSize = 2 * Math.ceil(graphRadius + maxNodeRadius + graphPadding)
+      const graphCenter = {x: canvasSize / 2, y: canvasSize / 2}
+
+      const radialGraph = document.createElementNS("http://www.w3.org/2000/svg", "svg") // document.createElement('svg')
+      radialGraph.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+      radialGraph.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')
+      radialGraph.setAttribute('height', `${canvasSize}`)
+      radialGraph.setAttribute('width', `${canvasSize}`)
+      radialGraph.setAttribute('viewBox', `0 0 ${canvasSize} ${canvasSize}`)
+
+      const mainGroup = document.createElementNS(SVG_NS, 'g')
+      radialGraph.appendChild(mainGroup)
+
+      let defs = document.createElementNS(SVG_NS, 'defs')
+      radialGraph.appendChild(defs)
+
+      // adding the neutral arrow marker
+      let arrowNeutralPath = document.createElementNS(SVG_NS, 'path')
+      arrowNeutralPath.setAttributeNS(null, 'd', 'M 0 0 L 2 1 L 0 2 z')
+      arrowNeutralPath.setAttributeNS(null, 'fill', linkColor)
+      let arrowNeutral = document.createElementNS(SVG_NS, 'marker')
+      arrowNeutral.setAttributeNS(null, 'id', 'arrowNeutral')
+      arrowNeutral.setAttributeNS(null, 'markerWidth', 6)
+      arrowNeutral.setAttributeNS(null, 'markerHeight', 6)
+      arrowNeutral.setAttributeNS(null, 'refX', 0.01)
+      arrowNeutral.setAttributeNS(null, 'refY', 1)
+      arrowNeutral.setAttributeNS(null, 'orient', 'auto')
+      arrowNeutral.appendChild(arrowNeutralPath)
+      defs.appendChild(arrowNeutral)
+      
+
+
+      // adding the inbound arrow marker
+      let arrowInboundPath = document.createElementNS(SVG_NS, 'path')
+      arrowInboundPath.setAttributeNS(null, 'd', 'M 0 0 L 2 1 L 0 2 z')
+      arrowInboundPath.setAttributeNS(null, 'fill', inboundLinkColor)
+      let arrowInbound = document.createElementNS(SVG_NS, 'marker')
+      arrowInbound.setAttributeNS(null, 'id', 'arrowInbound')
+      arrowInbound.setAttributeNS(null, 'markerWidth', 6)
+      arrowInbound.setAttributeNS(null, 'markerHeight', 6)
+      arrowInbound.setAttributeNS(null, 'refX', 0.01)
+      arrowInbound.setAttributeNS(null, 'refY', 1)
+      arrowInbound.setAttributeNS(null, 'orient', 'auto')
+      arrowInbound.appendChild(arrowInboundPath)
+      defs.appendChild(arrowInbound)
+
+
+      // adding the outbound arrow marker
+      let arrowOutboundPath = document.createElementNS(SVG_NS, 'path')
+      arrowOutboundPath.setAttributeNS(null, 'd', 'M 0 0 L 2 1 L 0 2 z')
+      arrowOutboundPath.setAttributeNS(null, 'fill', outboundLinkColor)
+      let arrowOutbound = document.createElementNS(SVG_NS, 'marker')
+      arrowOutbound.setAttributeNS(null, 'id', 'arrowOutbound')
+      arrowOutbound.setAttributeNS(null, 'markerWidth', 6)
+      arrowOutbound.setAttributeNS(null, 'markerHeight', 6)
+      arrowOutbound.setAttributeNS(null, 'refX', 0.01)
+      arrowOutbound.setAttributeNS(null, 'refY', 1)
+      arrowOutbound.setAttributeNS(null, 'orient', 'auto')
+      arrowOutbound.appendChild(arrowOutboundPath)
+      defs.appendChild(arrowOutbound)
+      
+
+
+      // compute node positions
+      let perimeterProgress = 0
+      for (let i = 0; i < nodeIds.length; i += 1) {
+        const nodeId = nodeIds[i]
+        const node = nodes[nodeIds[i]]
+        perimeterProgress += nodeRadiuses[nodeId]
+        const angle = (Math.PI * 2) * (perimeterProgress / graphPerimeter)
+        const x = Math.cos(angle) * graphRadius + graphCenter.x
+        const y = Math.sin(angle) * graphRadius + graphCenter.y
+        nodePositions[nodeId] = {x: x, y: y}
+        perimeterProgress += nodeRadiuses[nodeId] + nodePadding
+      }
+
+
+
+      // Adding the svg nodes
+      let svgCircleById = {}
+      let svgLabelById = {}
+      let nodeColorById = {}
+
+      // compute drawable edges thicknesses and draw them
+      const smallestLink = Math.min(...Object.values(drawableEdges).map(de => de.length)) // in number of occurence
+      const largestLink = Math.max(...Object.values(drawableEdges).map(de => de.length)) // in number of occurence
+      const drawableEdgeKeys = Object.keys(drawableEdges)
+      const svgEdgesBySourceId = {}
+      const svgEdgesByTargetId = {}
+      const drawableEdgesThicknesses = {}
+
+      switch (graphMode) {
+        case 'mono':
+          drawEdges()
+          drawNodes()
+        break
+        case 'directional':
+        default:
+          drawNodes()
+          drawEdges()
+      }
+      
+
+      function drawNodes() {
+        for (let i = 0; i < nodeIds.length; i += 1) {
+          let nodeId = nodeIds[i]
+          let node = nodes[nodeIds[i]]
+
+          let nodeColor = defaultNodeColor
+
+          if (nodeColorProperty) {
+            nodeColor = digObject(node, nodeColorProperty)
+          }
+
+          nodeColorById[nodeId] = nodeColor
+          
+          let circle = document.createElementNS(SVG_NS, 'circle')
+          circle.setAttributeNS(null, 'cx', nodePositions[nodeId].x)
+          circle.setAttributeNS(null, 'cy', nodePositions[nodeId].y)
+          circle.setAttributeNS(null, 'r', nodeRadiuses[nodeId])
+          circle.setAttributeNS(null, 'id', nodeId)
+          circle.setAttributeNS(null, 'style', `fill: ${nodeColor}; stroke-width: 0px; stroke: ${nodeColor}; ${smoothTransition} stroke-opacity: 0.3;` )
+          mainGroup.appendChild(circle)
+          svgCircleById[nodeId] = circle
+
+          itemMapper[nodeId] = {
+            svg: circle,
+            data: node,
+            type: 'node',
+          }
+
+          circle.addEventListener('mouseenter', (evt) => {
+            let nodeId = evt.target.id
+            document.getElementById(evt.target.id).style['stroke-width'] = `${Math.max(nodeRadiuses[nodeId] / 2, 5)}px`
+
+            svgLabelById[nodeId].style.fill = nodeColor
+
+            if (graphMode === 'directional') {
+              // update color of outbound links
+              if (nodeId in svgEdgesBySourceId) {
+                svgEdgesBySourceId[nodeId].forEach(ed => {
+                  ed.style.stroke = outboundLinkColor
+                  ed.style.opacity = highlightedCurveOpacity
+                  ed.setAttributeNS(null, 'marker-end', 'url(#arrowOutbound)')
+                })
+              }
+
+              // update color of inbound links
+              if (nodeId in svgEdgesByTargetId) {
+                svgEdgesByTargetId[nodeId].forEach(ed => {
+                  ed.style.stroke = inboundLinkColor
+                  ed.style.opacity = highlightedCurveOpacity
+                  ed.setAttributeNS(null, 'marker-end', 'url(#arrowInbound)')
+                })
+              }
+
+              
+
+            } else if (graphMode === 'mono') {
+              // update color of outbound links
+              if (nodeId in svgEdgesBySourceId) {
+                svgEdgesBySourceId[nodeId].forEach(ed => {
+                  ed.style.opacity = highlightedCurveOpacity
+                })
+              }
+
+              // update color of inbound links
+              if (nodeId in svgEdgesByTargetId) {
+                svgEdgesByTargetId[nodeId].forEach(ed => {
+                  ed.style.opacity = highlightedCurveOpacity
+                })
+              }
+            }
+
+            if (nodeId in connectionsFromSource) {
+              connectionsFromSource[nodeId].forEach(conn => {
+                let connectedToNode = svgCircleById[conn.to]
+                connectedToNode.style['stroke-width'] = `${Math.max(nodeRadiuses[conn.to] / 2, 5)}px`
+                svgLabelById[conn.to].style.fill = nodeColorById[conn.to] 
+              })
+            }
+
+
+            if (nodeId in connectionsToTarget) {
+              connectionsToTarget[nodeId].forEach(conn => {
+                let connectedFromNode = svgCircleById[conn.from]
+                connectedFromNode.style['stroke-width'] = `${Math.max(nodeRadiuses[conn.from] / 2, 5)}px`
+                svgLabelById[conn.from].style.fill = nodeColorById[conn.from] 
+              })
+            }
+
+
+        
+            if (typeof onNodeEnter === 'function') {
+              onNodeEnter(nodes[nodeId], connectionsToTarget[nodeId] || [], connectionsFromSource[nodeId] || [], nodes, edges)
+            }
+
+          })
+    
+          circle.addEventListener('mouseleave', (evt) => {
+            let nodeId = evt.target.id
+            document.getElementById(evt.target.id).style['stroke-width'] = '0px'
+
+            svgLabelById[nodeId].style.fill = 'black'
+
+
+            if (graphMode === 'directional') {
+              // update color of outbound links
+              if (nodeId in svgEdgesBySourceId) {
+                svgEdgesBySourceId[nodeId].forEach(ed => {
+                  ed.style.stroke = linkColor
+                  ed.style.opacity = defaultCurveOpacity
+                  ed.setAttributeNS(null, 'marker-end', 'url(#arrowNeutral)')
+                })
+              }
+
+              // update color of intbound links
+              if (nodeId in svgEdgesByTargetId) {
+                svgEdgesByTargetId[nodeId].forEach(ed => {
+                  ed.style.stroke = linkColor
+                  ed.style.opacity = defaultCurveOpacity
+                  ed.setAttributeNS(null, 'marker-end', 'url(#arrowNeutral)')
+                })
+              }
+
+            } else if (graphMode === 'mono') {
+              // update color of outbound links
+              if (nodeId in svgEdgesBySourceId) {
+                svgEdgesBySourceId[nodeId].forEach(ed => {
+                  ed.style.opacity = defaultCurveOpacity
+                })
+              }
+
+              // update color of intbound links
+              if (nodeId in svgEdgesByTargetId) {
+                svgEdgesByTargetId[nodeId].forEach(ed => {
+                  ed.style.opacity = defaultCurveOpacity
+                })
+              }
+            }
+
+            if (nodeId in connectionsFromSource) {
+              connectionsFromSource[nodeId].forEach(conn => {
+                let connectedToNode = svgCircleById[conn.to]
+                connectedToNode.style['stroke-width'] = '0px'
+                svgLabelById[conn.to].style.fill = 'black'
+              })
+            }
+
+            if (nodeId in connectionsToTarget) {
+              connectionsToTarget[nodeId].forEach(conn => {
+                let connectedFromNode = svgCircleById[conn.from]
+                connectedFromNode.style['stroke-width'] = '0px'
+                svgLabelById[conn.from].style.fill = 'black'
+              })
+            }
+
+            if (typeof onNodeLeave === 'function') {
+              let nodeId = evt.target.id
+              onNodeLeave(nodes[nodeId], connectionsToTarget[nodeId] || [], connectionsFromSource[nodeId] || [], nodes, edges)
+            }
+
+          })
+
+
+          circle.addEventListener('mousedown', (evt) => {
+            if (typeof onNodeClick === 'function') {
+              onNodeClick(nodeId, connectionsToTarget[nodeId] || [], connectionsFromSource[nodeId] || [], nodes, edges)
+            }
+          })
+
+
+          // the label position is along the axis that goes from the center of the graph to the center of the diagonal
+          let nodeRadius = nodeRadiuses[nodeId]
+          let nodeCenter = nodePositions[nodeId]
+          let graphCenterToNodeCenter = {x: nodeCenter.x - graphCenter.x, y: nodeCenter.y - graphCenter.y}
+          let graphCenterToNodeCenterNorm = (graphCenterToNodeCenter.x ** 2 + graphCenterToNodeCenter.y ** 2) ** 0.5
+          let graphCenterToNodeCenterNormalized = {x: graphCenterToNodeCenter.x / graphCenterToNodeCenterNorm, y: graphCenterToNodeCenter.y / graphCenterToNodeCenterNorm}
+          let labelAnchorPosition = {
+            x: nodeCenter.x + graphCenterToNodeCenterNormalized.x * (Math.max(nodeRadius + 2, nodeRadius * 1.5)),
+            y: nodeCenter.y + graphCenterToNodeCenterNormalized.y * (Math.max(nodeRadius + 2, nodeRadius * 1.5))
+          }
+
+          let textAnchor = nodeCenter.x >= graphCenter.x ? 'start' : 'end'
+          let labelRotationDeg = Math.atan2(graphCenterToNodeCenterNormalized.y, graphCenterToNodeCenterNormalized.x) * 180 / Math.PI + (nodeCenter.x >= graphCenter.x ? 0 : 180)
+          let fontSize = 5 * nodeRadiuses[nodeId] ** 0.4
+
+          let labelSvg = document.createElementNS(SVG_NS, 'text')
+          labelSvg.innerHTML = nodeLabels[nodeId]
+          labelSvg.setAttributeNS(null, 'id', nodeId)
+          labelSvg.setAttributeNS(null, 'x', labelAnchorPosition.x)
+          labelSvg.setAttributeNS(null, 'y', labelAnchorPosition.y)
+          labelSvg.setAttributeNS(null, 'text-anchor', textAnchor)
+          labelSvg.setAttributeNS(null, 'transform', `rotate(${labelRotationDeg}, ${labelAnchorPosition.x}, ${labelAnchorPosition.y})`)
+          labelSvg.setAttributeNS(null, 'alignment-baseline', 'middle')
+          labelSvg.setAttributeNS(null, 'style', `font-family: sans-serif; font-size: ${fontSize}; cursor: pointer; user-select: none; ${smoothTransition}`)
+          mainGroup.appendChild(labelSvg)
+
+          svgLabelById[nodeId] = labelSvg
+
+          labelSvg.addEventListener('mouseenter', (evt) => {
+            evt.target.style.fill = nodeColor
+            let nodeId = evt.target.id
+
+            let evt2 = new MouseEvent('mouseenter')
+            svgCircleById[nodeId].dispatchEvent(evt2)
+          })
+
+
+          labelSvg.addEventListener('mouseleave', (evt) => {
+            evt.target.style.fill = 'black'
+            let nodeId = evt.target.id
+
+            let evt2 = new MouseEvent('mouseleave')
+            svgCircleById[nodeId].dispatchEvent(evt2)
+          })
+
+
+          labelSvg.addEventListener('mousedown', (evt) => {
+            let nodeId = evt.target.id
+            let evt2 = new MouseEvent('mousedown')
+            svgCircleById[nodeId].dispatchEvent(evt2)
+          })
+
+        }
+      }
+
+
+
+
+      function drawEdges(){
+        for (let i = 0; i < drawableEdgeKeys.length; i += 1) {
+          const drawableEdgeId = drawableEdgeKeys[i]
+          const drawableEdgeLength = drawableEdges[drawableEdgeId].length // in number of occurence
+          let thickness = minEdgeThickness + ((drawableEdgeLength - smallestLink) / (maxNumberOfLinks - smallestLink)) * (maxEdgeThickness - minEdgeThickness)
+
+
+          if (edgeThicknessProperty) {
+            thickness = digObject(drawableEdges[drawableEdgeId][0], edgeThicknessProperty)
+          }
+
+          drawableEdgesThicknesses[drawableEdgeId] = thickness
+
+          const sourceNodeId = drawableEdges[drawableEdgeId][0].data.source
+          const sourceNodePosition = nodePositions[sourceNodeId]
+          const sourceNodeRadius = nodeRadiuses[sourceNodeId]
+
+          const targetNodeId = drawableEdges[drawableEdgeId][0].data.target
+          const targetNodePosition = nodePositions[targetNodeId]
+          const targetNodeRadius = nodeRadiuses[targetNodeId]
+
+          let weightPosition = {
+            x: graphCenter.x * centerGravity + ((sourceNodePosition.x + targetNodePosition.x) / 2) * (1 - centerGravity),
+            y: graphCenter.y * centerGravity + ((sourceNodePosition.y + targetNodePosition.y) / 2) * (1 - centerGravity),
+          }
+
+          const sourceNodeRadiusIntersection = graphMode === 'mono' ? 0.7 : 1
+          const targetNodeRadiusIntersection = graphMode === 'mono' ? 0.7 : 1.2
+
+          // gives 2 point, but we want to keep only one
+          let intersectionsWithSourceNode = FindLineCircleIntersections(sourceNodePosition.x, sourceNodePosition.y, sourceNodeRadius * sourceNodeRadiusIntersection, sourceNodePosition, weightPosition)
+          let hitsourceNode = (weightPosition.x - intersectionsWithSourceNode[0].x) ** 2 + (weightPosition.y - intersectionsWithSourceNode[0].y) ** 2 
+                          < (weightPosition.x - intersectionsWithSourceNode[1].x) ** 2 + (weightPosition.y - intersectionsWithSourceNode[1].y) ** 2
+                          ? intersectionsWithSourceNode[0]
+                          : intersectionsWithSourceNode[1]
+
+          // adding just a bit of randomness to prevent similar edges to be on top of each other
+          // hitsourceNode.x = hitsourceNode.x + Math.random() * (sourceNodeRadius * 0.2 * 2) - sourceNodeRadius * 0.2
+          // hitsourceNode.y = hitsourceNode.y + Math.random() * (sourceNodeRadius * 0.2 * 2) - sourceNodeRadius * 0.2
+          
+          let intersectionsWithTargetNode = FindLineCircleIntersections(targetNodePosition.x, targetNodePosition.y, targetNodeRadius * targetNodeRadiusIntersection, targetNodePosition, weightPosition)
+          let hittargetNode = (weightPosition.x - intersectionsWithTargetNode[0].x) ** 2 + (weightPosition.y - intersectionsWithTargetNode[0].y) ** 2 
+                          < (weightPosition.x - intersectionsWithTargetNode[1].x) ** 2 + (weightPosition.y - intersectionsWithTargetNode[1].y) ** 2
+                          ? intersectionsWithTargetNode[0]
+                          : intersectionsWithTargetNode[1]
+
+          // adding just a bit of randomness to prevent similar edges to be on top of each other
+          // hittargetNode.x = hittargetNode.x + Math.random() * (targetNodeRadius * 0.2 * 2) - targetNodeRadius * 0.2
+          // hittargetNode.y = hittargetNode.y + Math.random() * (targetNodeRadius * 0.2 * 2) - targetNodeRadius * 0.2
+
+          
+
+          // create the svg curve
+          let curve = document.createElementNS(SVG_NS, 'path')
+          curve.setAttributeNS(null, 'd', strBezier(hitsourceNode, hittargetNode, weightPosition) )
+          curve.setAttributeNS(null, 'stroke', linkColor)
+          // curve.setAttributeNS(null, 'stroke-width', `${0.5 + Math.random() * 2}px`)
+          curve.setAttributeNS(null, 'stroke-width', `${thickness}px`)
+          curve.setAttributeNS(null, 'fill', 'none')
+          curve.setAttributeNS(null, 'opacity', defaultCurveOpacity)
+          curve.setAttributeNS(null, 'id', drawableEdgeId)
+          curve.setAttributeNS(null, 'sourceNodeId', sourceNodeId)
+          curve.setAttributeNS(null, 'targetNodeId', targetNodeId)
+          curve.setAttributeNS(null, 'style', `${smoothTransition}`)
+
+          for (let i = 0; i < drawableEdges[drawableEdgeId].length; i += 1) {
+            itemMapper[drawableEdges[drawableEdgeId][i].data.id] = {
+              svg: curve,
+              data: drawableEdges[drawableEdgeId][i],
+              type: 'edge',
+            }
+          }
+          
+
+          if (graphMode === 'directional') {
+            curve.setAttributeNS(null, 'marker-end', 'url(#arrowNeutral)')
+          }
+          mainGroup.appendChild(curve)
+
+          if (!(sourceNodeId in svgEdgesBySourceId)) {
+            svgEdgesBySourceId[sourceNodeId] = []
+          }
+          svgEdgesBySourceId[sourceNodeId].push(curve)
+
+          if (!(targetNodeId in svgEdgesByTargetId)) {
+            svgEdgesByTargetId[targetNodeId] = []
+          }
+          svgEdgesByTargetId[targetNodeId].push(curve)
+
+
+          curve.addEventListener('mouseenter', (evt) => {
+            let drawableEdgeId = evt.target.id
+            let edge = drawableEdges[drawableEdgeId][0] // the first, all the others are about the same nodes anyways
+            let sourceNodeId = edge.data.source
+            let targetNodeId = edge.data.target
+
+            svgCircleById[sourceNodeId].style['stroke-width'] = `${Math.max(nodeRadiuses[sourceNodeId] / 2, 5)}px`
+            svgCircleById[targetNodeId].style['stroke-width'] = `${Math.max(nodeRadiuses[targetNodeId] / 2, 5)}px`
+            svgLabelById[sourceNodeId].style.fill = nodeColorById[sourceNodeId] 
+            svgLabelById[targetNodeId].style.fill = nodeColorById[targetNodeId] 
+
+            evt.target.style.opacity = highlightedCurveOpacity
+
+            if (typeof onEdgeEnter === 'function') {
+              onEdgeEnter(drawableEdges[drawableEdgeId] || [], nodes, edges)
+            }
+          })
+
+          curve.addEventListener('mousedown', (evt) => {
+            let drawableEdgeId = evt.target.id
+
+            if (typeof onEdgeClick === 'function') {
+              onEdgeClick(drawableEdges[drawableEdgeId] || [], nodes, edges)
+            }
+          })
+
+          curve.addEventListener('mouseleave', (evt) => {
+            let drawableEdgeId = evt.target.id
+            let edge = drawableEdges[drawableEdgeId][0] // the first, all the others are about the same nodes anyways
+            let sourceNodeId = edge.data.source
+            let targetNodeId = edge.data.target
+
+            svgCircleById[sourceNodeId].style['stroke-width'] = '0px'
+            svgCircleById[targetNodeId].style['stroke-width'] = '0px'
+            svgLabelById[sourceNodeId].style.fill = 'black'
+            svgLabelById[targetNodeId].style.fill = 'black'
+
+            evt.target.style.opacity = defaultCurveOpacity
+
+            if (typeof onEdgeLeave === 'function') {
+              onEdgeLeave(drawableEdges[drawableEdgeId]  || [], nodes, edges)
+            }
+          })
+          
+        }
+      }
+
+
+
+      return {
+        radialGraph,
+        itemMapper,
+      }
+
+      
+    }
+
+
+    </script>
+
+    <script>
+      let infoDiv = document.getElementById('info')
+      let isPanZooming = false
+
+      let result = refreshGraph(dataset, {
+        onEdgeClick: function(highlightedEdges, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          console.log(highlightedEdges)
+          infoDiv.innerHTML = `
+          ${highlightedEdges.length} connections between the nodes <b>${allNodes[highlightedEdges[0].data.source].style.label}</b> and <b>${allNodes[highlightedEdges[0].data.target].style.label}</b>:</br>
+          <ul>
+            ${highlightedEdges.map(ed => `<li>edge id: <b>${allEdges[ed.data.id].style.label}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+        onEdgeEnter: function(highlightedEdges, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          infoDiv.innerHTML = 'Click on items to show data'
+        },
+
+        onNodeClick: function(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          console.log(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges)
+
+          infoDiv.innerHTML = `
+          The node <b>${allNodes[nodeId].style.label}</b> has ${inboundConnectedNodes.length} inbound connections from nodes: </br>
+          <ul>
+            ${inboundConnectedNodes.map(conn => `<li><b>${allNodes[conn.from].style.label}</b> by edge <b>${allEdges[conn.by].style.label}</b></li>`).join('')}
+          </ul>
+          </br>
+
+          and ${outboundConnectedNodes.length} outbound connections to nodes: </br>
+          <ul>
+            ${outboundConnectedNodes.map(conn => `<li><b>${allNodes[conn.to].style.label}</b> by edge <b>${allEdges[conn.by].style.label}</b></li>`).join('')}
+          </ul>
+          `
+        },
+
+        onNodeEnter: function(nodeId, inboundConnectedNodes, outboundConnectedNodes, allNodes, allEdges) {
+          if (isPanZooming) {
+            return
+          }
+          infoDiv.innerHTML = 'Click on items to show data'
+        }, 
+        ...options
+      })
+
+      // enabling pan and zoom
+      const panZoomInstance = panzoom(result.radialGraph.getElementsByTagName('g')[0])
+      panZoomInstance.pause()
+
+      document.addEventListener('keydown', (evt) => {
+        console.log('keydown', evt)
+        
+        if (evt.key === 'Alt') {
+          isPanZooming = true
+          panZoomInstance.resume()
+        }
+      })
+
+      document.addEventListener('keyup', (evt) => {
+        console.log('keyup', evt)
+        if (evt.key === 'Alt') {
+          isPanZooming = false
+          panZoomInstance.pause()
+        }
+      })
+
+      console.log('result', result)
+      
+
+      const graphHost = document.getElementById('graph-host')
+      graphHost.appendChild(result.radialGraph)
+
+      const allItemLabels = Object.keys(result.itemMapper).sort().map((id) => {
+        return {
+          id: id,
+          label: result.itemMapper[id].data.style.label,
+        }
+      })
+      const itemInput = document.getElementById('item-input')
+      const itemList = document.getElementById('item-list')
+      let previouslyHoveredItemId = null
+      let previouslyClickedItemId = null
+
+      function updateList(subst = '') {
+        itemList.innerHTML = ''
+        let filteredLabelList = allItemLabels
+
+        if (subst !== '') {
+          itemList.style.display = 'inherit'
+          
+          filteredLabelList = filteredLabelList.filter((idAndLabel) => idAndLabel.label.toLowerCase().includes(subst.toLowerCase()))
+        } else {
+          itemList.style.display = 'none'
+          return
+        }
+
+        filteredLabelList.forEach((idAndLabel) => {
+          const id = idAndLabel.id
+          const label = idAndLabel.label
+
+          let itemButton = document.createElement('div')
+          itemButton.textContent = label
+          itemButton.classList.add('item')
+          itemButton.classList.add(result.itemMapper[id].type)
+
+          itemList.appendChild(itemButton)
+
+          itemButton.addEventListener('mouseenter', (evt) => {
+            if (previouslyHoveredItemId && previouslyHoveredItemId !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyHoveredItemId].svg.dispatchEvent(fakeEvt)
+              previouslyHoveredItemId = null
+            }
+
+            let fakeEvt = new MouseEvent('mouseenter')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyHoveredItemId = id
+          })
+
+          itemButton.addEventListener('mouseleave', (evt) => {
+            if (id !== previouslyClickedItemId) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            }
+          })
+
+
+          itemButton.addEventListener('mousedown', (evt) => {
+            if (previouslyClickedItemId && previouslyClickedItemId !== id) {
+              let fakeEvt = new MouseEvent('mouseleave')
+              result.itemMapper[previouslyClickedItemId].svg.dispatchEvent(fakeEvt)
+            }
+
+            let fakeEvt = new MouseEvent('mousedown')
+            result.itemMapper[id].svg.dispatchEvent(fakeEvt)
+            previouslyClickedItemId = id
+
+            itemInput.value = ''
+            updateList('')
+          })
+
+        })
+
+      }
+
+      itemInput.addEventListener('input', (evt) => {
+        updateList(evt.target.value)
+      })
+
+      const downloadBt = document.getElementById('download-bt')
+
+      downloadBt.addEventListener('mousedown', (evt) => {
+        const filename = "graph.svg"
+        const content = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>${graphHost.innerHTML}`
+        const element = document.createElement('a')
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content))
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+      })
+
+      updateList()
+
+    </script>
+  </body>
+</html>
+
