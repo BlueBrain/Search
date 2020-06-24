@@ -7,9 +7,14 @@ from bbsearch.mining.relation import ChemProt
 from bbsearch.server.mining_server import MiningServer
 
 
-@pytest.fixture(scope='session')
-def mining_client(fake_db_cnxn):
+@pytest.fixture
+def mining_client(fake_db_cnxn, model_entities, monkeypatch):
     """Fixture to create a client for mining_server."""
+
+    spacy_mock = Mock()
+    spacy_mock.load.return_value = model_entities
+
+    monkeypatch.setattr('bbsearch.server.mining_server.spacy', spacy_mock)
 
     app = Flask("BBSearch Test Mining Server")
     database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
