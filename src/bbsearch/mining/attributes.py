@@ -11,9 +11,9 @@ import warnings
 
 import pandas as pd
 import requests
-from IPython.display import HTML
-
-from .entity import find_entities
+import ipywidgets as widgets
+from spacy import displacy
+from IPython.display import display, HTML
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class AttributeExtractor:
         """Get the type of a Grobid quantity.
 
         The top-level Grobid object is a measurement. A measurement can
-        contain one ore more than one quantities.
+        contain one or more than one quantities.
 
         Some Grobid quantities have a type attached to them, e.g.
         "mass", "concentration", etc. This is the type that is
@@ -100,9 +100,10 @@ class AttributeExtractor:
         logger.debug(f"quantity_types: {quantity_types}")
 
         quantity_type_counts = collections.Counter(quantity_types)
-        sorted(quantity_type_counts.most_common(),
-               key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == '')))
-        measurement_type = quantity_type_counts[0][0]
+        most_common_quantity_types = sorted(
+            quantity_type_counts.most_common(),
+            key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == '')))
+        measurement_type = most_common_quantity_types[0][0]
 
         return measurement_type
 
@@ -117,7 +118,7 @@ class AttributeExtractor:
         Returns
         -------
         all_type_counts : collections.Counter
-            The counts of al
+            The counts of all measurement types.
         """
         all_types = [self.get_measurement_type(m) for m in measurements]
         all_type_counts = collections.Counter(all_types)
@@ -151,7 +152,8 @@ class AttributeExtractor:
 
         return measurements
 
-    def annotate_quantities(self, text, measurements, width):
+    @staticmethod
+    def annotate_quantities(text, measurements, width):
         """Annotate measurements in text using HTML/CSS styles.
 
         Parameters
@@ -203,7 +205,7 @@ class AttributeExtractor:
             start = quantity['offsetStart']
             end = quantity['offsetEnd']
             formatted_text = f"<span class=\"number\">{text[start:end]}</span>"
-            quantity_type = self.get_quantity_type(quantity)
+            quantity_type = AttributeExtractor.get_quantity_type(quantity)
             if quantity_type:
                 formatted_text += f"<span class=\"quantityType\">[{quantity_type}]</span>"
             annotations.append([start, end, formatted_text])
@@ -217,15 +219,16 @@ class AttributeExtractor:
 
         annotations = []
         for measurement in measurements:
-            for quantity in self.iter_quantities(measurement):
+            for quantity in AttributeExtractor.iter_quantities(measurement):
                 annotations += annotate_quantity(quantity)
 
-        sorted(annotations, key=lambda x: x[0])
+        annotations = sorted(annotations, key=lambda x: x[0])
         annotated_text = ''
         last_idx = 0
         for start, end, quantity in annotations:
-            annotated_text += text[last_idx:start] + quantity
-            last_idx = end
+            if start >= last_idx:
+                annotated_text += text[last_idx:start] + quantity
+                last_idx = end
         annotated_text += text[last_idx:]
         html = css_styles + "<div class=\"fixedWidth\">" + annotated_text + "</div>"
 
@@ -262,9 +265,9 @@ class AttributeExtractor:
         """
         ids = []
         for token in tokens:
-            start_inside = start <= token['characterOffsetBegin'] < end
-            end_inside = start < token['characterOffsetEnd'] <= end
-            if start_inside or end_inside:
+            overlap_start = max(start, token['characterOffsetBegin'])
+            overlap_end = min(end, token['characterOffsetEnd'])
+            if overlap_start < overlap_end:
                 ids.append(token['index'])
 
         return ids
@@ -383,42 +386,6 @@ class AttributeExtractor:
             tokens)
 
     @staticmethod
-    def find_compound_parents(dependencies, tokens_d, token_idx):
-        """Parse CoreNLP dependencies to find parents of token.
-
-        To link named entities to attributes parents for both
-        entity tokens and attribute tokens need to be extracted.
-        See `extract_attributes` for more information
-
-        This is one possible strategy for finding parents of
-        a given token. For a given entity find direct
-        parents with the relation type "compound".
-
-        Parameters
-        ----------
-        dependencies : list
-            CoreNLP dependencies found in
-            response['sentences'][idx][['basicDependencies']
-        tokens_d : dict
-            CoreNLP token dictionary mapping token indices
-            to tokens. See `extract_attributes`.
-        token_idx : int
-            The index of the token for which parents
-            need to be found.
-
-        Returns
-        -------
-        parents : list
-            A list of parents.
-        """
-        parents = []
-        for link in dependencies:
-            if link['dependent'] == token_idx and link['dep'] == "compound":
-                parents.append(link['governor'])
-
-        return parents
-
-    @staticmethod
     def iter_parents(dependencies, token_idx):
         """Iterate over all parents of a token.
 
@@ -476,7 +443,7 @@ class AttributeExtractor:
             A list of parents.
         """
         def get_nn(idx):
-            if tokens_d[idx]['pos'] == 'NN':
+            if tokens_d[idx]["pos"].startswith("NN"):
                 return [idx]
             else:
                 nn_parents = []
@@ -485,6 +452,8 @@ class AttributeExtractor:
                 return nn_parents
 
         results = []
+        if tokens_d[token_idx]["pos"].startswith("NN"):
+            results.append(token_idx)
         for parent_idx in self.iter_parents(dependencies, token_idx):
             results += get_nn(parent_idx)
 
@@ -525,37 +494,111 @@ class AttributeExtractor:
 
         return parent_ids
 
-    def extract_attributes(self, text, linked_attributes_only=True):
-        """Extract attributes from text.
+    @staticmethod
+    def quantity_to_str(quantity):
+        """Convert a Grobid quantity to string.
 
         Parameters
         ----------
-        text : str
-            The text for attribute extraction.
-        linked_attributes_only : bool
-            If true then only those attributes will be recorded
-            for which there is an associated named entity.
+        quantity : dict
+            A Grobid quantity.
+
+        Returns
+        -------
+        result : str
+            A String representation of the quantity.
+        """
+        result = str(quantity["rawValue"])
+        if "rawUnit" in quantity:
+            result += " " + quantity["rawUnit"]["name"]
+
+        return result
+
+    def measurement_to_str(self, measurement):
+        """Convert a Grobid measurement to string.
+
+        Parameters
+        ----------
+        measurement : dict
+            A Grobid measurement.
+
+        Returns
+        -------
+        quantities : list or str
+            String representations of quantities in a measurement.
+            If the measurement contains only one quantity then
+            its string representation is return as is. Otherwise
+            a list of string representations of quantities is
+            returned.
+        """
+        quantities = [self.quantity_to_str(quantity)
+                      for quantity in self.iter_quantities(measurement)]
+
+        if len(quantities) == 1:
+            quantities = quantities[0]
+
+        return quantities
+
+    def process_raw_annotation_df(self, df, copy=True):
+        """Add standard columns to attribute data frame.
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            A data frame with measurements in a raw format. This can
+            be obtained by calling `extract_attributes` with the
+            parameter `raw_attributes=True`.
+        copy : bool
+            If true then it is guaranteed that the original
+            data frame won't be modified.
 
         Returns
         -------
         df : pd.DataFrame
-            A pandas data frame with extracted attributes.
+            A modified data frame with the raw attribute column
+            replaced by a number of more explicit columns using
+            the standard nomenclature.
         """
-        # NER
-        doc = find_entities(text, self.ee_model)
-        sent = list(doc.sents)[0]
-        detected_entities = [ent for ent in sent.ents]
-        logging.info("{} entities detected: {}".format(len(detected_entities), detected_entities))
+        if copy:
+            df = df.copy()
+        if "attribute" not in df.columns:
+            return df
 
-        # Grobid Quantities
-        measurements = self.get_grobid_measurements(text)
-        logging.info("{} measurements detected".format(len(measurements)))
+        def get_property(attribute):
+            m_type = self.get_measurement_type(attribute)
+            if len(m_type) > 0:
+                return f"has {m_type} {attribute['type']}"
+            else:
+                return f"has {attribute['type']}"
 
-        # CoreNLP
-        logging.info("Sending CoreNLP query...")
+        df["property"] = df["attribute"].apply(get_property)
+        df["property_type"] = "attribute"
+        df["property_value"] = df["attribute"].apply(self.measurement_to_str)
+        df["property_value_type"] = "int"
+        df.drop(columns="attribute", inplace=True)
+
+        return df
+
+    def get_core_nlp_analysis(self, text):
+        """Send a CoreNLP query and return the result.
+
+        Parameters
+        ----------
+        text : str
+            The text to analyze with CoreNLP.
+
+        Returns
+        -------
+        response_json : dict
+            The CoreNLP response.
+        """
         response_json = None
         try:
-            response = requests.post(self.core_nlp_url, data=text)
+            request_data = text.encode("utf-8")
+            request_params = '?properties={"annotators":"depparse"}'
+            response = requests.post(
+                self.core_nlp_url + request_params,
+                data=request_data)
             assert response.status_code == 200
             response_json = json.loads(response.text)
         except requests.exceptions.RequestException:
@@ -567,6 +610,77 @@ class AttributeExtractor:
         finally:
             if response_json is None:
                 response_json = {'sentences': []}
+
+        return response_json
+
+    def are_linked(self, measurement, entity, core_nlp_sentence):
+        """Determine if a measurement and an entity are link.
+
+        Parameters
+        ----------
+        measurement : dict
+            A Grobid measurement.
+        entity : spacy.tokens.Span
+            A spacy named entity.
+        core_nlp_sentence : dict
+            A CoreNLP sentences. The CoreNLP sentences can
+            be obtained from `core_nlp_response["sentences"]`.
+
+        Returns
+        -------
+        have_common_parents : bool
+            Whether or not the entity is linked to the measurement.
+        """
+        tokens = core_nlp_sentence['tokens']
+        dependencies = core_nlp_sentence['basicDependencies']
+        tokens_d = {token['index']: token for token in tokens}
+
+        measurement_ids = self.get_measurement_tokens(measurement, tokens)
+        ne_ids = self.get_entity_tokens(entity, tokens)
+
+        measurement_parents = self.find_all_parents(dependencies, tokens_d, measurement_ids)
+        ne_parents = self.find_all_parents(dependencies, tokens_d, ne_ids)
+
+        measurement_parents = set(measurement_parents)
+        ne_parents = set(ne_parents)
+        have_common_parents = len(measurement_parents & ne_parents) > 0
+
+        return have_common_parents
+
+    def extract_attributes(self,
+                           text,
+                           linked_attributes_only=True,
+                           raw_attributes=False):
+        """Extract attributes from text.
+
+        Parameters
+        ----------
+        text : str
+            The text for attribute extraction.
+        linked_attributes_only : bool
+            If true then only those attributes will be recorded
+            for which there is an associated named entity.
+        raw_attributes : bool
+            If true then the resulting data frame will contain all
+            attribute information in one single column with raw
+            grobid measurements. If false then the raw data frame
+            will be processed using `process_raw_annotation_df`
+        Returns
+        -------
+        df : pd.DataFrame
+            A pandas data frame with extracted attributes.
+        """
+        # NER
+        doc = self.ee_model(text)
+        logging.info("{} entities detected: {}".format(len(doc.ents), doc.ents))
+
+        # Grobid Quantities
+        measurements = self.get_grobid_measurements(text)
+        logging.info("{} measurements detected".format(len(measurements)))
+
+        # CoreNLP
+        logging.info("Sending CoreNLP query...")
+        response_json = self.get_core_nlp_analysis(text)
         logging.info("CoreNLP found {} sentences".format(len(response_json['sentences'])))
 
         # Analysis
@@ -574,20 +688,11 @@ class AttributeExtractor:
         rows = []
         recorded_measurements = set()
 
-        for entity in detected_entities:
+        for entity in doc.ents:
             for i, measurement in enumerate(measurements):
-                for corenlp_sentence in response_json['sentences']:
-                    tokens = corenlp_sentence['tokens']
-                    dependencies = corenlp_sentence['basicDependencies']
-                    tokens_d = {token['index']: token for token in tokens}
-
-                    measurement_ids = self.get_measurement_tokens(measurement, tokens)
-                    ne_ids = self.get_entity_tokens(entity, tokens)
-
-                    measurement_parents = self.find_all_parents(dependencies, tokens_d, measurement_ids)
-                    ne_parents = self.find_all_parents(dependencies, tokens_d, ne_ids)
-
-                    if len(set(measurement_parents) & set(ne_parents)) > 0:
+                for core_nlp_sentence in response_json['sentences']:
+                    have_link = self.are_linked(measurement, entity, core_nlp_sentence)
+                    if have_link > 0:
                         row = {
                             "entity": entity.text,
                             "entity_type": entity.label_,
@@ -606,4 +711,132 @@ class AttributeExtractor:
 
         df_attributes = pd.DataFrame(rows, columns=columns)
 
-        return df_attributes
+        if raw_attributes:
+            return df_attributes
+        else:
+            return self.process_raw_annotation_df(df_attributes)
+
+
+class AttributeAnnotationTab(widgets.Tab):
+    """A tab widget for displaying attribute extractions.
+
+    It is a subclass of the `ipywidgets.Tab` class and contains
+    the following four tabs:
+    - Raw Text
+    - Named Entites
+    - Attributes
+    - Table
+    """
+
+    def __init__(self, attribute_extractor, ee_model, text=None):
+        """Initialize class instance.
+
+        Parameters
+        ----------
+        attribute_extractor : AttributeExtractor
+            An instance of an attribute extractor.
+        ee_model : spacy.language.Language
+            A spacy model for named entity extraction.
+        text : str, optional
+            A text to initialize the widget with. Can be set or
+            changed later with `set_text`.
+        """
+        super().__init__()
+
+        self.attribute_extractor = attribute_extractor
+        self.ee_model = ee_model
+
+        self._init_ui()
+
+        if text is not None:
+            self.set_text(text)
+
+    def _init_ui(self):
+        self.outputs = collections.OrderedDict()
+        self.outputs["Raw Text"] = widgets.Output()
+        self.outputs["Named Entities"] = widgets.Output(
+            layout=widgets.Layout(width="80ch"))
+        self.outputs["Attributes"] = widgets.Output()
+        self.outputs["Table"] = widgets.Output()
+
+        self.children = list(self.outputs.values())
+        for i, name in enumerate(self.outputs):
+            self.set_title(i, name)
+
+    def set_text(self, text):
+        """Set the text for the widget.
+
+        Parameters
+        ----------
+        text : str
+            The text to assign to this widget.
+        """
+        text = textwrap.dedent(text).strip()
+        df = self.attribute_extractor.extract_attributes(
+            text, linked_attributes_only=False)
+        doc = self.ee_model(text)
+        measurements = self.attribute_extractor.get_grobid_measurements(text)
+
+        for canvas in self.outputs.values():
+            canvas.clear_output()
+
+        with self.outputs["Raw Text"]:
+            print(textwrap.fill(text, 80))
+        with self.outputs["Named Entities"]:
+            displacy_out = displacy.render(doc, style="ent")
+            if displacy_out is not None:
+                display(HTML(displacy_out))
+        with self.outputs["Attributes"]:
+            annotated = self.attribute_extractor.annotate_quantities(
+                text, measurements, 70)
+            display(annotated)
+        with self.outputs["Table"]:
+            display(df)
+
+
+class TextCollectionWidget(widgets.VBox):
+    """A widget displaying annotations for a number o texts.
+
+    The text can be selected using a slider and the annotation
+    results will be displayed in an `AttributeAnnotationTab`
+    widget.
+    """
+
+    def __init__(self, texts, attribute_extractor, ee_model):
+        """Initialize class instance.
+
+        Parameters
+        ----------
+        texts : list_like
+            A list of strings with texts to be annotated.
+        attribute_extractor : AttributeExtractor
+            An instance of an attribute extractor.
+        ee_model : spacy.language.Language
+            A spacy model for named entity extraction.
+        """
+        super().__init__()
+
+        assert len(texts) > 0
+        self.texts = texts
+
+        self.idx_slider = widgets.IntSlider(
+            description="Text ID",
+            value=0,
+            min=0,
+            max=len(texts) - 1,
+            continuous_update=False)
+        self.idx_slider.observe(self._on_idx_change, names="value")
+        self.tab = AttributeAnnotationTab(attribute_extractor, ee_model)
+
+        text = self.texts[self.idx_slider.value]
+        self.tab.set_text(text)
+
+        self.children = [
+            self.idx_slider,
+            self.tab,
+        ]
+
+    def _on_idx_change(self, event):
+        idx = event["new"]
+        text = self.texts[idx]
+        self.tab.set_text(text)

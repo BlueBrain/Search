@@ -13,20 +13,20 @@ import pandas as pd
 import pytest
 
 
-def test_database(cursor):
+def test_database(fake_db_cursor):
     """Make sure database tables setup correctly."""
     for table_name in ['articles', 'article_id_2_sha', 'sentences']:
-        res = cursor.execute('SELECT * FROM {}'.format(table_name)).fetchall()
+        res = fake_db_cursor.execute('SELECT * FROM {}'.format(table_name)).fetchall()
 
         assert len(res) > 0
 
     with pytest.raises(OperationalError):
-        cursor.execute('SELECT * FROM fake_table').fetchall()
+        fake_db_cursor.execute('SELECT * FROM fake_table').fetchall()
 
 
-def test_embeddings(embeddings_path, cursor):
+def test_embeddings(embeddings_path, fake_db_cursor):
     """Make sure all sentences are embedded."""
-    n_sentences = cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
 
     for p in embeddings_path.iterdir():
         model_path = p / '{}.npy'.format(p.stem)

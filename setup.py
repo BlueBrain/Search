@@ -5,14 +5,22 @@ VERSION = '0.1'
 description = "Blue Brain Search"
 
 install_requires = [
+    'Flask',
+    'ipywidgets',
     'numpy',
     'pandas',
+    'pdfkit',
+    'requests',
+    'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
     'scipy',
+    'sent2vec-prebuilt',
+    'sentence-transformers',
+    'spacy==2.2.1',
     'torch',
-    'Flask',
-    'requests',
-    'spacy',
+    'transformers',
+    'rdflib-jsonld',
+    'faiss-cpu',
 ]
 
 setup_requires = ['pytest-runner']
@@ -39,6 +47,8 @@ setup(
     entry_points={
         "console_scripts": [
             "embedding_server=bbsearch.server.embedding_server_entrypoint:main",
+            "create_database=bbsearch.database_entrypoint:main",
+            "compute_embeddings=bbsearch.embeddings_entrypoint:main",
         ]
     }
 )

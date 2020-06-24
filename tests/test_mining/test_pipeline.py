@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import StartWithTheSameLetter, run_pipeline
+from bbsearch.mining import StartWithTheSameLetter, TextMiningPipeline
 
 
 def test_overall(model_entities):
@@ -12,7 +12,7 @@ def test_overall(model_entities):
 
     # wrong arguments
     with pytest.raises(TypeError):
-        run_pipeline(text, model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
+        pipeline = TextMiningPipeline(model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
 
     # entities are [Britney Spears, Brazil, yesterday]
     doc = model_entities(text)
@@ -34,8 +34,8 @@ def test_overall(model_entities):
     models_relations = {('PERSON', 'DATE'): [StartWithTheSameLetter()],
                         ('PERSON', 'GPE'): [StartWithTheSameLetter()]
                         }
-
-    df = run_pipeline(text, model_entities, models_relations)
+    pipeline = TextMiningPipeline(model_entities, models_relations)
+    df = pipeline(text)
 
     assert isinstance(df, pd.DataFrame)
     assert len(df) == 3 + 1 + 1  # 3 entities, 1 ('PERSON', 'DATE') relation and ('PERSON', 'GPE') relation

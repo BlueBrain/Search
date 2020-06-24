@@ -13,9 +13,14 @@ class REModel(ABC):
     Inspired by SciBERT.
     """
 
+    @property
     @abstractmethod
-    def predict(self, annotated_sentence):
-        """Predict the relation given an annotated sentence.
+    def classes(self):
+        """list[str]: Names of supported relation classes."""
+
+    @abstractmethod
+    def predict_probs(self, annotated_sentence):
+        """Predict per-class probabilities for the relation between subject and object in an annotated sentence.
 
         Parameters
         ----------
@@ -25,9 +30,35 @@ class REModel(ABC):
 
         Returns
         -------
+        relation_probs : pd.Series
+            Per-class probability vector. The index contains the class names, the values are the probabilities.
+        """
+
+    def predict(self, annotated_sentence, return_prob=False):
+        """Predict most likely relation between subject and object in an annotated sentence.
+
+        Parameters
+        ----------
+        annotated_sentence : str
+            Sentence with exactly 2 entities being annotated accordingly.
+            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
+        return_prob : bool, optional
+            If True also returns the confidence of the predicted relation.
+
+        Returns
+        -------
         relation : str
             Relation type.
+        prob : float, optional
+            Confidence of the predicted relation.
         """
+        probs = self.predict_probs(annotated_sentence)
+        relation = probs.idxmax()
+        if return_prob:
+            prob = probs.max()
+            return relation, prob
+        else:
+            return relation
 
     @property
     @abstractmethod
@@ -49,15 +80,12 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     ----------
     doc : spacy.tokens.Doc
         The entire document (input text). Note that spacy uses it for absolute referencing.
-
     sent : spacy.tokens.Span
         One sentence from the `doc` where we look for relations.
-
-    ent_1 : spacy.tokens.Span
-        The first entity in the sentence. One can get its type by using the `label_` attribute.
-
-    ent_2 : spacy.tokens.Span
-        The second entity in the sentence. One can get its type by using the `label_` attribute.
+    ent_1 : pd.Series
+        A single row of the dataframe of extracted entities, holding info on first entity in the sentence.
+    ent_2 : pd.Series
+        A single row of the dataframe of extracted entities, holding info on second entity in the sentence.
 
     etype_symbols: dict or defaultdict
         Keys represent different entity types ("GGP", "CHEBI") and the values are tuples of size 2.
@@ -74,39 +102,35 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     The implementation is non-trivial because an entity can span multiple words.
     """
     # checks
-    if ent_1 == ent_2:
+    if (ent_1.start_char == ent_2.start_char) and (ent_1.end_char == ent_2.end_char):
         raise ValueError('One needs to provide two separate entities.')
 
-    if not (sent.start <= ent_1.start <= ent_1.end <= sent.end and sent.start <= ent_2.start <= ent_2.end <= sent.end):
+    if not (sent.start_char <= ent_1.start_char <= ent_1.end_char <= sent.end_char
+            and
+            sent.start_char <= ent_2.start_char <= ent_2.end_char <= sent.end_char):
         raise ValueError('The provided entities are outside of the given sentence.')
 
-    etype_1 = ent_1.label_
-    etype_2 = ent_2.label_
+    etype_1 = ent_1.entity_type
+    etype_2 = ent_2.entity_type
 
     if not isinstance(etype_symbols, defaultdict) and not (etype_1 in etype_symbols and etype_2 in etype_symbols):
         raise ValueError('Please specify the special symbols for both of the entity types.')
 
-    tokens = []
-    i = sent.start
-    while i < sent.end:
-        new_token = ' '  # hack to keep the punctuation nice
+    # Add symbols at the proper place, for each of the entities
+    text = doc.text
+    e1, e2 = sorted([ent_1, ent_2], key=lambda e: e.start_char)
 
-        if ent_1.start == i:
-            start, end = ent_1.start, ent_1.end
-            new_token += etype_symbols[etype_1][0] + doc[start:end].text + etype_symbols[etype_1][1]
+    result = text[sent.start_char:e1.start_char] + \
+        etype_symbols[e1.entity_type][0] + \
+        e1.entity + \
+        etype_symbols[e1.entity_type][1] + \
+        text[e1.end_char:e2.start_char] + \
+        etype_symbols[e2.entity_type][0] + \
+        e2.entity + \
+        etype_symbols[e2.entity_type][1] + \
+        text[e2.end_char:sent.end_char]
 
-        elif ent_2.start == i:
-            start, end = ent_2.start, ent_2.end
-            new_token += etype_symbols[etype_2][0] + doc[start:end].text + etype_symbols[etype_2][1]
-
-        else:
-            start, end = i, i + 1
-            new_token = doc[i].text if doc[i].is_punct else new_token + doc[i].text
-
-        tokens.append(new_token)
-        i += end - start
-
-    return ''.join(tokens).strip()
+    return result
 
 
 class ChemProt(REModel):
@@ -120,14 +144,14 @@ class ChemProt(REModel):
     ----------
     model_ : allennlp.predictors.text_classifier.TextClassifierPredictor
         The actual model in the backend.
-
-    classes : list
-        All possible classes.
     """
 
     def __init__(self, model_path):
         self.model_ = Predictor.from_path(model_path, predictor_name='text_classifier')
-        self.classes = [
+
+    @property
+    def classes(self):
+        return [
             'INHIBITOR',
             'SUBSTRATE',
             'INDIRECT-DOWNREGULATOR',
@@ -144,42 +168,11 @@ class ChemProt(REModel):
 
     @property
     def symbols(self):
-        """Generate annotation symbols."""
         return {'GGP': ('[[ ', ' ]]'),
                 'CHEBI': ('<< ', ' >>')}
 
-    def predict_proba(self, annotated_sentence):
-        """Predict probability distribution over all classes.
-
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with entities being annotated accordingly.
-            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
-
-        Returns
-        -------
-        relation : pd.Series
-            Index represents all labels and the values are probabilities of each
-
-        """
+    def predict_probs(self, annotated_sentence):
         return pd.Series(self.model_.predict(sentence=annotated_sentence)['class_probs'], index=self.classes)
-
-    def predict(self, annotated_sentence):
-        """Predict the most likely relation.
-
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with exactly 2 entities being annotated accordingly.
-            For example "<< Cytarabine >> inhibits [[ DNA polymerase ]]."
-
-        Returns
-        -------
-        str
-            The most likely relation between the two entities.
-        """
-        return self.predict_proba(annotated_sentence).idxmax()
 
 
 class StartWithTheSameLetter(REModel):
@@ -188,20 +181,11 @@ class StartWithTheSameLetter(REModel):
     This relation is symmetric and works on any entity type.
     """
 
-    def predict(self, annotated_sentence):
-        """Predict the relation given an annotated sentence.
+    @property
+    def classes(self):
+        return ['START_WITH_SAME_LETTER', 'START_WITH_DIFFERENT_LETTER']
 
-        Parameters
-        ----------
-        annotated_sentence : str
-            Sentence with exactly 2 entities being annotated accordingly.
-            For example "Our [[ dad ]] walked the [[ dog ]].". This evaluates to True.
-
-        Returns
-        -------
-        bool
-            Whether or not the two entities start with the same letter
-        """
+    def predict_probs(self, annotated_sentence):
         left_symbol, _ = self.symbols['anything']
         s_len = len(left_symbol)
 
@@ -211,12 +195,11 @@ class StartWithTheSameLetter(REModel):
         ent_1_first_letter = annotated_sentence[ent_1_first_letter_ix]
         ent_2_first_letter = annotated_sentence[ent_2_first_letter_ix]
 
-        return ent_1_first_letter.lower() == ent_2_first_letter.lower()
+        if ent_1_first_letter.lower() == ent_2_first_letter.lower():
+            return pd.Series([1, 0], index=self.classes)
+        else:
+            return pd.Series([0, 1], index=self.classes)
 
     @property
     def symbols(self):
-        """Generate symbols.
-
-        The goal is to be able to use this model on any entity types.
-        """
         return defaultdict(lambda: ('[[ ', ' ]]'))
