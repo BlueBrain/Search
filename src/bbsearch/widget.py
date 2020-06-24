@@ -293,12 +293,10 @@ class Widget:
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     radio_button = self.create_radio_buttons(article_infos, article_metadata)
-                    status = self.status_article_retrieve(article_infos)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
                     display(radio_button)
-                    display(HTML(status))
                 display(HTML(formatted_output))
 
                 print()
@@ -324,7 +322,7 @@ class Widget:
             style={'description_width': 'initial', 'button_width': '200px'},
             disabled=False)
 
-        if radio_button.value != SAVING_OPTIONS['article']:
+        if radio_button.value != SAVING_OPTIONS['nothing']:
             self.article_saver.saved_articles[article_infos] = radio_button.value
 
         self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
