@@ -164,7 +164,7 @@ class Widget:
         self.my_widgets['top_results'] = widgets.widgets.IntSlider(
             value=10,
             min=0,
-            max=10000,
+            max=100,
             description='Top N results')
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the

@@ -81,24 +81,6 @@ class MiningServer:
 
         return jsonify(response)
 
-    @staticmethod
-    def make_error_response(error_message):
-        """Create response if there is an error during the process.
-
-        Parameters
-        ----------
-        error_message: str
-            Error message to send if there is an issue.
-
-        Returns
-        -------
-        response: str
-            Response to send with the error_message in a json format.
-        """
-        response = jsonify({"error": error_message})
-
-        return response
-
     def pipeline_database(self):
         """Respond to a query on specific paragraphs in the database."""
         if request.is_json:
@@ -126,11 +108,7 @@ class MiningServer:
 
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
 
-                with io.StringIO() as csv_file_buffer:
-                    df.to_csv(csv_file_buffer, index=False)
-                    response = make_response(csv_file_buffer.getvalue())
-                response.headers["Content-Type"] = "text/csv"
-                response.headers["Content-Disposition"] = "attachment; filename=bbs_mining_results.csv"
+                response = self.create_response(df)
 
         else:
             response = self.make_error_response("The request has to be a JSON object.")
@@ -149,13 +127,48 @@ class MiningServer:
             else:
                 df = run_pipeline([(text, {})], self.ee_model, self.re_models, debug=debug)
 
-                with io.StringIO() as csv_file_buffer:
-                    df.to_csv(csv_file_buffer, index=False)
-                    response = make_response(csv_file_buffer.getvalue())
-                response.headers["Content-Type"] = "text/csv"
-                response.headers["Content-Disposition"] = "attachment; filename=bbs_mining_results.csv"
+                response = self.create_response(df)
 
         else:
             response = self.make_error_response("The request has to be a JSON object.")
 
+        return response
+
+    @staticmethod
+    def make_error_response(error_message):
+        """Create response if there is an error during the process.
+
+        Parameters
+        ----------
+        error_message: str
+            Error message to send if there is an issue.
+
+        Returns
+        -------
+        response: str
+            Response to send with the error_message in a json format.
+        """
+        response = jsonify({"error": error_message})
+
+        return response
+
+    @staticmethod
+    def create_response(dataframe):
+        """Create the response thanks to dataframe.
+
+        Parameters
+        ----------
+        dataframe: pd.DataFrame
+            DataFrame containing all the data.
+
+        Returns
+        -------
+        response: requests.response
+            Response containing the dataframe converted in csv table.
+        """
+        with io.StringIO() as csv_file_buffer:
+            dataframe.to_csv(csv_file_buffer, index=False)
+            response = make_response(csv_file_buffer.getvalue())
+        response.headers["Content-Type"] = "text/csv"
+        response.headers["Content-Disposition"] = "attachment; filename=bbs_mining_results.csv"
         return response

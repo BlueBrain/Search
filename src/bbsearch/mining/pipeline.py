@@ -34,7 +34,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
     # sanity checks
     if not isinstance(model_entities, spacy.language.Language):
         raise TypeError('Current implementation requires `model_entities` to be an instance of '
-                        '`spacy.language.Language`. Try with `model_entities==spacy.load("en_ner_craft_md")`')
+                        '`spacy.language.Language`. Try with `model_entities=spacy.load("en_ner_craft_md")`')
 
     if not all([isinstance(model, REModel) for model_list in models_relations.values() for model in model_list]):
         raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
