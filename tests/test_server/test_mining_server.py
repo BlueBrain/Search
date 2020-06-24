@@ -37,9 +37,11 @@ class TestMiningServer:
         request_json = {"text": 'hello'}
         response = mining_client.post('/text', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
-        assert response.data.decode('utf-8') == 'entity,entity_type,property,property_value,property_type,' \
-                                                'property_value_type,' \
-                                                'ontology_source,paper_id,start_char,end_char\n'
+        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
+                                                               'property_value,property_type,' \
+                                                               'property_value_type,' \
+                                                               'ontology_source,paper_id,' \
+                                                               'start_char,end_char'
         request_json = {}
         response = mining_client.post('/text', json=request_json)
         assert list(response.json.keys()) == ["error"]
@@ -62,6 +64,8 @@ class TestMiningServer:
         request_json = {"identifiers": identifiers}
         response = mining_client.post('/database', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
-        assert response.data.decode('utf-8') == 'entity,entity_type,property,property_value,property_type,' \
-                                                'property_value_type,' \
-                                                'ontology_source,paper_id,start_char,end_char\n'
+        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
+                                                               'property_value,property_type,' \
+                                                               'property_value_type,' \
+                                                               'ontology_source,paper_id,' \
+                                                               'start_char,end_char'
