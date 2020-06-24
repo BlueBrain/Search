@@ -41,11 +41,6 @@ class TestArticleSaver:
         summary_table = article_saver.summary_table()
         assert isinstance(summary_table, pd.DataFrame)
 
-        # Check that the status feedback is working fine
-        for article_id, paragraph_id_list in all_articles_paragraphs_id.items():
-            assert isinstance(article_saver.status_on_article_retrieve((article_id, paragraph_id_list[0])), str)
-        assert isinstance(article_saver.status_on_article_retrieve((article_id, '1000')), str)
-
         ARTICLE_ID = 'w8579f54'
         # Check that the cleaning part is working
         # Only 'Do not take this article option'

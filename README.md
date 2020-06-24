@@ -121,7 +121,7 @@ where `"text"` is the sentence you want to embed, and `"model"` can be one
 of the following:
 - `"USE"` (Universal Sentence Embedding)
 - `"SBERT"` (Sentence BERT)
-- `"SBIOBERT"` (Sentence BioBERT)
+- `"SBioBERT"` (Sentence BioBERT)
 - `"BSV"` (BioSentVec)
 
 The server will respond with either a JSON file or a CSV file, according to
