@@ -8,25 +8,20 @@ from bbsearch.server.mining_server import MiningServer
 
 
 @pytest.fixture
-def mining_client(monkeypatch):
+def mining_client(fake_db_cnxn, model_entities, monkeypatch):
     """Fixture to create a client for mining_server."""
 
-    chemprot_inst = MagicMock(spec=ChemProt)
+    spacy_mock = Mock()
+    spacy_mock.load.return_value = model_entities
 
-    chemprot_class = Mock()
-    chemprot_class.return_value = chemprot_inst
-
-    chemprot_inst.classes.return_value = ['test1', 'test2']
-    chemprot_inst.symbols.return_value = {'GGP': ('[[ ', ' ]]'), 'CHEBI': ('<< ', ' >>')}
-    chemprot_inst.predict.return_value = 'test1'
-    chemprot_inst.predict_probs.return_value = ''
-
-    monkeypatch.setattr('bbsearch.server.mining_server.ChemProt', chemprot_class)
+    monkeypatch.setattr('bbsearch.server.mining_server.spacy', spacy_mock)
 
     app = Flask("BBSearch Test Mining Server")
+    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
 
     mining_server = MiningServer(app=app,
-                                 models_path='')
+                                 models_path='',
+                                 database_path=database_path)
     mining_server.app.config['TESTING'] = True
     with mining_server.app.test_client() as client:
         yield client
@@ -39,20 +34,38 @@ class TestMiningServer:
         assert response.json['name'] == 'MiningServer'
 
     def test_mining_server_pipeline(self, mining_client):
-        request_json = {
-            "text": 'hello',
-            "article_id": 5,
-            "return_prob": False}
-        response = mining_client.post('/', json=request_json)
+        request_json = {"text": 'hello'}
+        response = mining_client.post('/text', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
-        assert response.data.decode('utf-8') == 'entity,entity_type,property,property_value,property_type,' \
-                                                'property_value_type,' \
-                                                'ontology_source,paper_id,start_char,end_char,confidence_score\n'
-        request_json = {"article_id": 5,
-                        "return_prob": False}
-        response = mining_client.post('/', json=request_json)
+        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
+                                                               'property_value,property_type,' \
+                                                               'property_value_type,' \
+                                                               'ontology_source,paper_id,' \
+                                                               'start_char,end_char'
+        request_json = {}
+        response = mining_client.post('/text', json=request_json)
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": "The request text is missing."}
         request_json = "text"
-        response = mining_client.post('/', data=request_json)
+        response = mining_client.post('/text', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
+
+    def test_mining_server_database(self, mining_client):
+        request_json = {}
+        response = mining_client.post('/database', json=request_json)
+        assert list(response.json.keys()) == ["error"]
+        assert response.json == {"error": "The request identifiers is missing."}
+
+        request_json = "text"
+        response = mining_client.post('/database', data=request_json)
+        assert response.json == {"error": "The request has to be a JSON object."}
+
+        identifiers = [('w8579f54', 4)]
+        request_json = {"identifiers": identifiers}
+        response = mining_client.post('/database', json=request_json)
+        assert response.headers['Content-Type'] == 'text/csv'
+        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
+                                                               'property_value,property_type,' \
+                                                               'property_value_type,' \
+                                                               'ontology_source,paper_id,' \
+                                                               'start_char,end_char'

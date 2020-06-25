@@ -4,15 +4,17 @@ import pandas as pd
 import pytest
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import StartWithTheSameLetter, TextMiningPipeline
+from bbsearch.mining import StartWithTheSameLetter, run_pipeline
 
 
-def test_overall(model_entities):
+@pytest.mark.parametrize('n_paragraphs', [0, 1, 5])
+@pytest.mark.parametrize('debug', [True, False], ids=['debug', 'official_spec'])
+def test_overall(model_entities, debug, n_paragraphs):
     text = 'This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too.'
 
     # wrong arguments
     with pytest.raises(TypeError):
-        pipeline = TextMiningPipeline(model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
+        run_pipeline([], model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
 
     # entities are [Britney Spears, Brazil, yesterday]
     doc = model_entities(text)
@@ -34,8 +36,62 @@ def test_overall(model_entities):
     models_relations = {('PERSON', 'DATE'): [StartWithTheSameLetter()],
                         ('PERSON', 'GPE'): [StartWithTheSameLetter()]
                         }
-    pipeline = TextMiningPipeline(model_entities, models_relations)
-    df = pipeline(text)
+    texts = n_paragraphs * [(text, {'important_parameter': 10})]
+    df = run_pipeline(texts, model_entities, models_relations, debug)
+
+    official_specs = ['entity',
+                      'entity_type',
+                      'property',
+                      'property_value',
+                      'property_type',
+                      'property_value_type',
+                      'ontology_source',
+                      'paper_id',
+                      'start_char',
+                      'end_char']
 
     assert isinstance(df, pd.DataFrame)
-    assert len(df) == 3 + 1 + 1  # 3 entities, 1 ('PERSON', 'DATE') relation and ('PERSON', 'GPE') relation
+    assert len(df) == n_paragraphs * (
+            3 + 1 + 1)  # 3 entities, 1 ('PERSON', 'DATE') relation and ('PERSON', 'GPE') relation
+
+    if n_paragraphs > 0:
+        if debug:
+            assert df.columns.to_list() != official_specs
+            assert 'important_parameter' in df.columns
+            assert all(df['important_parameter'] == 10)
+
+        else:
+            assert df.columns.to_list() == official_specs
+
+
+@pytest.mark.parametrize('n_paragraphs', [0, 1, 5])
+@pytest.mark.parametrize('debug', [True, False], ids=['debug', 'official_spec'])
+def test_without_relation(model_entities, debug, n_paragraphs):
+    text = 'This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too.'
+
+    models_relations = {}
+    texts = n_paragraphs * [(text, {'important_parameter': 10})]
+    df = run_pipeline(texts, model_entities, models_relations, debug)
+
+    official_specs = ['entity',
+                      'entity_type',
+                      'property',
+                      'property_value',
+                      'property_type',
+                      'property_value_type',
+                      'ontology_source',
+                      'paper_id',
+                      'start_char',
+                      'end_char']
+
+    assert isinstance(df, pd.DataFrame)
+    assert len(df) == n_paragraphs * 3  # 3 entities
+
+    if n_paragraphs > 0:
+        if debug:
+            assert df.columns.to_list() != official_specs
+            assert 'important_parameter' in df.columns
+            assert all(df['important_parameter'] == 10)
+
+        else:
+            assert df.columns.to_list() == official_specs

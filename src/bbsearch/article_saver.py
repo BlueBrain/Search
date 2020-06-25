@@ -16,6 +16,24 @@ class ArticleSaver:
     database: sqlite3.Connection
         Connection to the database. The database is supposed to have paragraphs and
         articles tables.
+
+    Attributes
+    ----------
+    saved_articles : dict
+        The keys are a tuple where the first element is the article_id and the second
+        is the paragraph_id. The values are one of the 3 options below:
+        - 'Do not take this article'
+        - 'Extract the paragraph'
+        - 'Extract the entire article'
+
+    df_chosen_texts : pd.DataFrame
+        The rows represent different paragraphs and the columns are 'article_id', 'section_name',
+        'paragraph_id', 'text'.
+
+    articles_metadata : dict
+        The keys are article_ids and the value is a string (HTML formatting) with title,
+        authors, etc.
+
     """
 
     def __init__(self,
