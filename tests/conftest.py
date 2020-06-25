@@ -19,17 +19,9 @@ def test_parameters():
 
 
 @pytest.fixture(scope='session')
-def assets_path(tmp_path_factory):
-    """Path to assets."""
-    assets_path = tmp_path_factory.mktemp('assets', numbered=False)
-
-    return assets_path
-
-
-@pytest.fixture(scope='session')
 def fake_db_cnxn(tmp_path_factory):
     """Connection object (sqlite)."""
-    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'dummy.sqlite'
+    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19.db'
     cnxn = sqlite3.connect(str(db_path))
     yield cnxn
 
@@ -57,7 +49,7 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
                        'covidence_id': 'TEXT',
                        'has_pdf_parse': 'BOOLEAN',
                        'has_pmc_xml_parse': 'BOOLEAN',
-                       'has_covid19_tag': 'BOOLEAN DEFAULT True',
+                       'has_covid19_tag': 'BOOLEAN DEFAULT 1',
                        'fulltext_directory': 'TEXT',
                        'url': 'TEXT'}
 
@@ -181,14 +173,13 @@ def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
-    models = ['SBERT', 'SBIOBERT', 'USE', 'BSV']
+    models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
 
     n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
 
     for model in models:
-        model_path = embeddings_path / model / '{}.npy'.format(model)
-        model_path.parent.mkdir(parents=True)
+        model_path = embeddings_path / '{}.npy'.format(model)
         a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
                             np.random.random((n_sentences, test_parameters['embedding_size']))],
                            axis=1)

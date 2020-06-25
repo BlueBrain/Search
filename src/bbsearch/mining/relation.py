@@ -151,6 +151,7 @@ class ChemProt(REModel):
 
     @property
     def classes(self):
+        """Names of supported relation classes."""
         return [
             'INHIBITOR',
             'SUBSTRATE',
@@ -168,10 +169,12 @@ class ChemProt(REModel):
 
     @property
     def symbols(self):
+        """Symbols for annotation."""
         return {'GGP': ('[[ ', ' ]]'),
                 'CHEBI': ('<< ', ' >>')}
 
     def predict_probs(self, annotated_sentence):
+        """Predict probabilities for the relation."""
         return pd.Series(self.model_.predict(sentence=annotated_sentence)['class_probs'], index=self.classes)
 
 
@@ -183,9 +186,11 @@ class StartWithTheSameLetter(REModel):
 
     @property
     def classes(self):
+        """Names of supported relation classes."""
         return ['START_WITH_SAME_LETTER', 'START_WITH_DIFFERENT_LETTER']
 
     def predict_probs(self, annotated_sentence):
+        """Predict probabilities for the relation."""
         left_symbol, _ = self.symbols['anything']
         s_len = len(left_symbol)
 
@@ -202,4 +207,5 @@ class StartWithTheSameLetter(REModel):
 
     @property
     def symbols(self):
+        """Symbols for annotation."""
         return defaultdict(lambda: ('[[ ', ' ]]'))

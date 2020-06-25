@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+cache:
+  pip: true
+
+before_install:
+  - pip install flake8 pydocstyle
+  - flake8 src/
+  - pydocstyle src/
+# command to install dependencies
+install:
+  - pip install --upgrade pip wheel pytest
+  - pip install --upgrade .[dev]
+  - python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
+before_script:
+  - pip freeze
+# command to run tests
+script:
+  - pytest --color=yes --cov-report term-missing

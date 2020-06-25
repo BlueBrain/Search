@@ -1,5 +1,8 @@
+"""Custom exceptions."""
+
+
 class InvalidUsage(Exception):
-    """An exception used in the REST API server
+    """An exception used in the REST API server.
 
     The code was largely copied from
     https://flask.palletsprojects.com/en/1.1.x/patterns/apierrors/
@@ -14,6 +17,7 @@ class InvalidUsage(Exception):
             self.status_code = status_code
 
     def to_dict(self):
+        """Generate a dictionary."""
         rv = dict()
         rv['message'] = self.message
         return rv
