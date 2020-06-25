@@ -16,6 +16,24 @@ class ArticleSaver:
     database: sqlite3.Connection
         Connection to the database. The database is supposed to have paragraphs and
         articles tables.
+
+    Attributes
+    ----------
+    saved_articles : dict
+        The keys are a tuple where the first element is the article_id and the second
+        is the paragraph_id. The values are one of the 3 options below:
+        - 'Do not take this article'
+        - 'Extract the paragraph'
+        - 'Extract the entire article'
+
+    df_chosen_texts : pd.DataFrame
+        The rows represent different paragraphs and the columns are 'article_id', 'section_name',
+        'paragraph_id', 'text'.
+
+    articles_metadata : dict
+        The keys are article_ids and the value is a string (HTML formatting) with title,
+        authors, etc.
+
     """
 
     def __init__(self,
@@ -24,30 +42,6 @@ class ArticleSaver:
         self.saved_articles = dict()
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
         self.articles_metadata = dict()
-
-    def status_on_article_retrieve(self, article_infos):
-        """Send status about an article given the article_infos (article_id, paragraph_id).
-
-        Parameters
-        ----------
-        article_infos: tuple
-            Tuple (article_id, paragraph_id) of a given paragraph.
-
-        Returns
-        -------
-        status: str
-            String explaining if the given article has already been seen,
-            and if yes which option has been chosen by the user.
-        """
-        status = 'You have never seen this article'
-        if article_infos in self.saved_articles.keys():
-            status = f'You have already seen this paragraph and ' \
-                     f'you chose the option: {self.saved_articles[article_infos]}.'
-            return status
-        if article_infos[0] in [k[0] for k in self.saved_articles.keys()]:
-            status = 'You have already seen this article through different paragraphs'
-
-        return status
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
@@ -110,7 +104,14 @@ class ArticleSaver:
         self.retrieve_text()
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
-            article_report += self.articles_metadata[article_id]
+            if len(df_article['section_name'].unique()) == 1:
+                article_report += self.articles_metadata[article_id]
+            else:
+                substring = '&#183;'
+                article_report += self.articles_metadata[article_id].split(substring)[0] + '&#183;'
+                article_report += f'{len(df_article["section_name"].unique())} different ' \
+                                  f'sections are selected for this article.'
+                article_report += '</p>'
             article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
             article_report += '<br/>' * 2
 

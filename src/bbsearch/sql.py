@@ -3,6 +3,45 @@ SQL Related functions.
 
 whatever
 """
+import pandas as pd
+
+
+def get_paragraph_ids(article_ids, db_cnxn):
+    """Given a list of article ids find all the corresponding paragraph ids.
+
+    Parameters
+    ----------
+    article_ids : list
+        List of article ids. Note that they are the primary keys in the `articles` table.
+
+    db_cnxn : sqlite3.Connection
+        Connection to the database.
+
+    Returns
+    -------
+    pd.Series
+        The unique index represents the paragraph ids and the values represent the article ids.
+    """
+    article_ids_joined = ','.join(f"\"{id_}\"" for id_ in set(article_ids))
+
+    sql_query = f"""
+    SELECT article_id, paragraph_id
+    FROM (
+             SELECT paragraph_id, sha
+             FROM paragraphs
+             WHERE sha IN (
+                 SELECT sha
+                 FROM article_id_2_sha
+                 WHERE article_id IN ({article_ids_joined})
+             )
+         ) p
+             INNER JOIN
+         article_id_2_sha a
+         ON a.sha = p.sha;
+    """
+    results = pd.read_sql(sql_query, db_cnxn)
+
+    return pd.Series(results['article_id'], index=results['paragraph_id'])
 
 
 def find_paragraph(sentence_id, db):
