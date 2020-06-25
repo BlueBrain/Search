@@ -13,7 +13,9 @@ LABEL description="REST API Server for Text Embeddings"
 RUN apt-get update && apt-get install -y \
     git \
     gcc \
-    g++
+    g++ \
+    build-essential \
+    vim
 
 # Install sent2vec
 RUN true \
@@ -31,7 +33,7 @@ RUN true \
 # Install the app 
 ADD . /src
 WORKDIR /src
-RUN python setup.py install
+RUN pip install .
 
 # Add a user
 RUN useradd --create-home serveruser
