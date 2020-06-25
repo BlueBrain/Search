@@ -45,5 +45,7 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Expose a port
 EXPOSE 8080
+ENV LOG_DIR="/raid/projects/bbs/logs"
+ENV LOG_NAME="bbs_embedding.log"
 
 ENTRYPOINT ["embedding_server", "--host=0.0.0.0", "--port=8080"]
