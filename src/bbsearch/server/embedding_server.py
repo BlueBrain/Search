@@ -143,6 +143,16 @@ class EmbeddingServer:
             return embedding
         except KeyError:
             raise InvalidUsage(f"Model {model} is not available.")
+        except RuntimeError:
+            msg = f"""
+            An unhandled error occurred. You may want to contact the
+            developers and provide them the model name and the text
+            of the query that caused this error.
+            
+            "model": "{model}"
+            "text": "{text}"
+            """
+            raise InvalidUsage(textwrap.dedent(msg).strip())
 
     @staticmethod
     def make_csv_response(embedding):
