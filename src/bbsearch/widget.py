@@ -101,16 +101,18 @@ class Widget:
             the information about the article.
 
         """
-        article_sha, section_name, text, paragraph_id = \
-            self.database.execute(
-                'SELECT sha, section_name, text, paragraph_id FROM sentences WHERE sentence_id = ?',
-                [sentence_id]).fetchall()[0]
-        (article_id,) = self.database.execute(
-            'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
-            [article_sha]).fetchall()[0]
-        article_auth, article_title, date, ref = self.database.execute(
-            'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
-            [article_id]).fetchall()[0]
+        database_cursor = self.database.cursor()
+        database_cursor.execute('SELECT sha, section_name, text, paragraph_id FROM sentences WHERE sentence_id = %s',
+                                (sentence_id,))
+        results = database_cursor.fetchall()[0]
+        article_sha, section_name, text, paragraph_id = results
+        database_cursor.execute('SELECT article_id FROM article_id_2_sha WHERE sha = %s',
+                                (article_sha,))
+        (article_id,) = database_cursor.fetchall()[0]
+        database_cursor.execute('SELECT authors, title, date, url FROM articles WHERE article_id = %s',
+                                (article_id))
+        results = database_cursor.fetchall()[0]
+        article_auth, article_title, date, ref = results
         try:
             article_auth = article_auth.split(';')[0] + ' et al.'
         except AttributeError:
@@ -122,7 +124,7 @@ class Widget:
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.database)
+                paragraph = find_paragraph(sentence_id, database_cursor)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:

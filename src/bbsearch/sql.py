@@ -59,8 +59,11 @@ def find_paragraph(sentence_id, db):
     paragraph : str
         The paragraph containing `sentence`
     """
-    paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
-    paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
+
+    db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = %s ', (sentence_id,))
+    paragraph_id = db.fetchone()[0]
+    db.execute('SELECT text FROM paragraphs WHERE paragraph_id = %s', (paragraph_id,))
+    paragraph = db.fetchone()[0]
 
     return paragraph
 
