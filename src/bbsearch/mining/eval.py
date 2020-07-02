@@ -118,7 +118,7 @@ def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
 
 
 def unique_etypes(iob, return_counts=False, mode='iob'):
-    """Returns the sorted unique entity types from a vector of annotations in IOB format.
+    """Return the sorted unique entity types from a vector of annotations in IOB format.
 
     Parameters
     ----------
