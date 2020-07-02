@@ -266,7 +266,7 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
             n_pred = np.count_nonzero(ent_pred.values())
             true_pos = np.count_nonzero((ent_true & ent_pred).values())
         else:
-            raise ValueError(f'Only available modes are \'token\' and \'iob\'.')
+            raise ValueError(f'Mode {mode} is not available.')
 
         false_neg = n_true - true_pos
         false_pos = n_pred - true_pos
@@ -359,10 +359,10 @@ def ner_confusion(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, retur
         out = []
         for etype, confusion in report.items():
             out.append(f'{etype}')
-            out.append(f'* false negatives')
+            out.append('* false negatives')
             for w in confusion['false_neg']:
                 out.append('  - ' + w)
-            out.append(f'* false positives')
+            out.append('* false positives')
             for w in confusion['false_pos']:
                 out.append('  - ' + w)
             out.append('')
