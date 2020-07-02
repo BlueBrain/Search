@@ -53,8 +53,6 @@ def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
         for ent in spans:
             for ix, token_ix in enumerate(range(ent['token_start'], ent['token_end'] + 1)):
                 ent_label = ent['label'].upper()
-                if ent_label == 'ORGANS':
-                    ent_label = 'ORGAN'
 
                 classes[token_ix] = "{}-{}".format('B' if ix == 0 else 'I', ent_label)
 
