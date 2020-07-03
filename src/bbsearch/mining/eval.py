@@ -262,9 +262,9 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
         elif mode == 'token':
             ent_true = iob_true.isin([f'B-{etype}', f'I-{etype}'])
             ent_pred = iob_pred.isin([f'B-{etypes_map[etype]}', f'I-{etypes_map[etype]}'])
-            n_true = np.count_nonzero(ent_true.values())
-            n_pred = np.count_nonzero(ent_pred.values())
-            true_pos = np.count_nonzero((ent_true & ent_pred).values())
+            n_true = np.count_nonzero(ent_true.values)
+            n_pred = np.count_nonzero(ent_pred.values)
+            true_pos = np.count_nonzero((ent_true & ent_pred).values)
         else:
             raise ValueError(f'Mode {mode} is not available.')
 
