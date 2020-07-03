@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import unique_etypes
+from bbsearch.mining.eval import unique_etypes, iob2idx
 
 
 class TestProdigy2df:
@@ -79,7 +79,24 @@ class TestSpacy2df:
 ])
 def test_unique_etypes(ner_annotations, annotations, etypes, counts):
     for mode in ('iob', 'token'):
-        assert unique_etypes(ner_annotations['class_1'], return_counts=False, mode=mode) \
+        assert unique_etypes(ner_annotations[annotations], return_counts=False, mode=mode) \
             == etypes
-        assert unique_etypes(ner_annotations['class_1'], return_counts=True, mode=mode) \
+        assert unique_etypes(ner_annotations[annotations], return_counts=True, mode=mode) \
             == (etypes, counts[mode])
+
+
+@pytest.mark.parametrize('annotations, etype, idxs', [
+    ('annotations_1', 'CONDITION', [[103, 104], [108, 108]]),
+    ('annotations_1', 'DISEASE', [[34, 37], [40, 40], [120, 121], [148, 149]]),
+    ('annotations_2', 'PATHWAY', [[135, 136]]),
+    ('annotations_1', 'POTATOES', None)
+])
+def test_iob2idx(ner_annotations, annotations, etype, idxs):
+    if idxs is not None:
+        pd.testing.assert_frame_equal(iob2idx(ner_annotations[annotations], etype),
+                                      pd.DataFrame(data=idxs, columns=['start', 'end']))
+    else:
+        pd.testing.assert_frame_equal(iob2idx(ner_annotations[annotations], etype),
+                                      pd.DataFrame(data={'start': [], 'end': []},
+                                                   index=pd.Int64Index([]),
+                                                   dtype='int64'))
