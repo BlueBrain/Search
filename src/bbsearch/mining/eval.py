@@ -289,7 +289,7 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
         return '\n'.join(out)
 
 
-def ner_confusion(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, return_dict=False):
+def ner_errors(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, return_dict=False):
     """Build a summary report collecting false positives and false negatives for each entity type.
 
     Parameters
