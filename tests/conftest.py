@@ -198,3 +198,10 @@ def model_entities():
     https://spacy.io/api/annotation#named-entities
     """
     return spacy.load("en_core_web_sm")
+
+
+@pytest.fixture(scope='session')
+def ner_annotations():
+    csv_filename = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval' / 'ner_iob_sample.csv'
+    df = pd.read_csv(csv_filename)
+    return df

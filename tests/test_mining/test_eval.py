@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
+from bbsearch.mining.eval import unique_etypes
 
 
 class TestProdigy2df:
@@ -64,3 +65,21 @@ class TestSpacy2df:
         assert df['class'].to_list() == classes
         assert 'class' in df.columns
         assert 'text' in df.columns
+
+
+@pytest.mark.parametrize('annotations, etypes, counts', [
+    ('annotations_1',
+     ['CONDITION', 'DISEASE', 'ORGANISM', 'PATHWAY'],
+     {'iob': [2, 4, 6, 2], 'token': [3, 9, 9, 4]}
+     ),
+    ('annotations_2',
+     ['CONDITION', 'DISEASE', 'PATHWAY', 'TAXON'],
+     {'iob': [1, 6, 1, 8], 'token': [1, 11, 2, 11]}
+     )
+])
+def test_unique_etypes(ner_annotations, annotations, etypes, counts):
+    for mode in ('iob', 'token'):
+        assert unique_etypes(ner_annotations['class_1'], return_counts=False, mode=mode) \
+            == etypes
+        assert unique_etypes(ner_annotations['class_1'], return_counts=True, mode=mode) \
+            == (etypes, counts[mode])
