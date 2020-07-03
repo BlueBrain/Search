@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import unique_etypes, iob2idx
+from bbsearch.mining.eval import unique_etypes, iob2idx, idx2text
 
 
 class TestProdigy2df:
@@ -100,3 +100,14 @@ def test_iob2idx(ner_annotations, annotations, etype, idxs):
                                       pd.DataFrame(data={'start': [], 'end': []},
                                                    index=pd.Int64Index([]),
                                                    dtype='int64'))
+
+
+@pytest.mark.parametrize('annotations, etype, texts', [
+    ('annotations_1', 'CONDITION', ['worldwide outbreak', 'hospitalization']),
+    ('annotations_1', 'ORGANISM', ['human coronaviruses', 'Human coronaviruses',
+                                   'Human coronaviruses', 'HCoVs', 'infant', 'infant']),
+    ('annotations_2', 'PATHWAY', ['respiratory immunity']),
+    ('annotations_1', 'POTATOES', [])])
+def test_idx2text(ner_annotations, annotations, etype, texts):
+    assert texts == \
+           idx2text(ner_annotations.text, iob2idx(ner_annotations[annotations], etype)).tolist()
