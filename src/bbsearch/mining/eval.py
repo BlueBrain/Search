@@ -275,13 +275,14 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
         f1_score = 2 * true_pos / (2 * true_pos + false_pos + false_neg)
         report[etype] = OrderedDict([('precision', precision),
                                      ('recall', recall),
-                                     ('f1_score', f1_score)])
+                                     ('f1-score', f1_score),
+                                     ('support', n_true)])
 
     if return_dict:
         return report
     else:
         out = [''.join(f'{col_name:>10s}'
-                       for col_name in ['', 'precision', 'recall', 'f1_score', 'support'])]
+                       for col_name in ['', 'precision', 'recall', 'f1-score', 'support'])]
         for etype, metrics_scores in report.items():
             out.append(f'{etype:>10s}'
                        + ''.join(f'{metric_val:>10.2f}' for metric_val in metrics_scores.values())

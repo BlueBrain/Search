@@ -1,12 +1,14 @@
+from collections import OrderedDict
 import json
 import sqlite3
 from unittest.mock import Mock
 
+import numpy as np
 import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import unique_etypes, iob2idx, idx2text
+from bbsearch.mining.eval import unique_etypes, iob2idx, idx2text, ner_report
 
 
 class TestProdigy2df:
@@ -111,3 +113,47 @@ def test_iob2idx(ner_annotations, annotations, etype, idxs):
 def test_idx2text(ner_annotations, annotations, etype, texts):
     assert texts == \
            idx2text(ner_annotations.text, iob2idx(ner_annotations[annotations], etype)).tolist()
+
+
+@pytest.mark.parametrize('mode, etypes_map, dict_tp_fn_fp', [
+    ('iob', {'ORGANISM': 'TAXON'},
+     {'CONDITION':  [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [6, 0, 2]}),
+    ('token', {'ORGANISM': 'TAXON'},
+     {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [9, 0, 2]}),
+    ('iob', None,
+     {'CONDITION': [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [0, 6, 0]}),
+    ('token', None,
+     {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [0, 9, 0]})
+
+])
+def test_ner_report(ner_annotations, mode, etypes_map, dict_tp_fn_fp):
+    report_str = ner_report(
+        ner_annotations['annotations_1'],
+        ner_annotations['annotations_2'],
+        mode=mode,
+        etypes_map=etypes_map,
+        return_dict=False)
+    report_dict = ner_report(
+        ner_annotations['annotations_1'],
+        ner_annotations['annotations_2'],
+        mode=mode,
+        etypes_map=etypes_map,
+        return_dict=True)
+
+    assert isinstance(report_str, str)
+    assert isinstance(report_dict, OrderedDict)
+
+    etypes = ['CONDITION', 'DISEASE', 'ORGANISM', 'PATHWAY']
+    assert list(report_dict.keys()) == etypes
+    for etype in etypes:
+        assert set(report_dict[etype].keys()) == {'precision', 'recall', 'f1-score', 'support'}
+        tp, fn, fp = dict_tp_fn_fp[etype]
+        tot_true_pos = tp + fn
+        tot_pred_pos = tp + fp
+        prec_ = (tp / tot_pred_pos) if tot_pred_pos > 0 else 0
+        recall_ = tp / tot_true_pos
+        f1_ = (2 * prec_ * recall_ / (prec_ + recall_))  if tot_pred_pos > 0 else 0
+        np.testing.assert_almost_equal(prec_, report_dict[etype]['precision'])
+        np.testing.assert_almost_equal(recall_, report_dict[etype]['recall'])
+        np.testing.assert_almost_equal(f1_, report_dict[etype]['f1-score'])
+        np.testing.assert_almost_equal(tot_true_pos, report_dict[etype]['support'])
