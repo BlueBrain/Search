@@ -72,15 +72,15 @@ class TestSpacy2df:
 @pytest.mark.parametrize('annotations, etypes, counts', [
     ('annotations_1',
      ['CONDITION', 'DISEASE', 'ORGANISM', 'PATHWAY'],
-     {'iob': [2, 4, 6, 2], 'token': [3, 9, 9, 4]}
+     {'entity': [2, 4, 6, 2], 'token': [3, 9, 9, 4]}
      ),
     ('annotations_2',
      ['CONDITION', 'DISEASE', 'PATHWAY', 'TAXON'],
-     {'iob': [1, 6, 1, 8], 'token': [1, 11, 2, 11]}
+     {'entity': [1, 6, 1, 8], 'token': [1, 11, 2, 11]}
      )
 ])
 def test_unique_etypes(ner_annotations, annotations, etypes, counts):
-    for mode in ('iob', 'token'):
+    for mode in ('entity', 'token'):
         assert unique_etypes(ner_annotations[annotations], return_counts=False, mode=mode) \
             == etypes
         assert unique_etypes(ner_annotations[annotations], return_counts=True, mode=mode) \
@@ -116,11 +116,11 @@ def test_idx2text(ner_annotations, annotations, etype, texts):
 
 
 @pytest.mark.parametrize('mode, etypes_map, dict_tp_fn_fp', [
-    ('iob', {'ORGANISM': 'TAXON'},
+    ('entity', {'ORGANISM': 'TAXON'},
      {'CONDITION':  [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [6, 0, 2]}),
     ('token', {'ORGANISM': 'TAXON'},
      {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [9, 0, 2]}),
-    ('iob', None,
+    ('entity', None,
      {'CONDITION': [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [0, 6, 0]}),
     ('token', None,
      {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [0, 9, 0]})

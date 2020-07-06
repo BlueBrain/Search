@@ -117,7 +117,7 @@ def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
     return pd.DataFrame(all_rows)
 
 
-def unique_etypes(iob, return_counts=False, mode='iob'):
+def unique_etypes(iob, return_counts=False, mode='entity'):
     """Return the sorted unique entity types from a vector of annotations in IOB format.
 
     Parameters
@@ -130,7 +130,7 @@ def unique_etypes(iob, return_counts=False, mode='iob'):
         If True, also return the number of times each unique entity type appears in the input.
 
     mode : str, optional
-        Evaluation mode. One of 'iob', 'token'.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
 
     Returns
     -------
@@ -146,7 +146,7 @@ def unique_etypes(iob, return_counts=False, mode='iob'):
     if not return_counts:
         return unique
     else:
-        if mode == 'iob':
+        if mode == 'entity':
             unique_counts = [np.count_nonzero((iob == f'B-{etype}').values)
                              for etype in unique]
         elif mode == 'token':
@@ -209,7 +209,7 @@ def idx2text(tokens, idxs):
                       for s, e in zip(idxs['start'], idxs['end'])], index=idxs.index, dtype='str')
 
 
-def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=False):
+def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=False):
     """Build a summary report showing the main ner evaluation metrics.
 
     Parameters
@@ -221,7 +221,7 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
         Predicted IOB annotations.
 
     mode : str, optional
-        Evaluation mode. One of 'iob', 'token'.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
@@ -252,7 +252,7 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
                   for etype in etypes_counts.keys()}
 
     for etype in etypes_counts.keys():
-        if mode == 'iob':
+        if mode == 'entity':
             idxs_true = iob2idx(iob_true, etype=etype)
             idxs_pred = iob2idx(iob_pred, etype=etypes_map[etype])
             n_true = len(idxs_true)
@@ -290,7 +290,7 @@ def ner_report(iob_true, iob_pred, mode='iob', etypes_map=None, return_dict=Fals
         return '\n'.join(out)
 
 
-def ner_errors(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, return_dict=False):
+def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, return_dict=False):
     """Build a summary report collecting false positives and false negatives for each entity type.
 
     Parameters
@@ -305,7 +305,7 @@ def ner_errors(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, return_d
         Tokens obtained from tokenization of a text.
 
     mode : str, optional
-        Evaluation mode. One of 'iob', 'token'.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
@@ -334,7 +334,7 @@ def ner_errors(iob_true, iob_pred, tokens, mode='iob', etypes_map=None, return_d
                   for etype in etypes}
 
     report = OrderedDict()
-    if mode == 'iob':
+    if mode == 'entity':
         for etype in etypes:
             idxs_true = iob2idx(iob_true, etype=etype)
             idxs_pred = iob2idx(iob_pred, etype=etypes_map[etype])
