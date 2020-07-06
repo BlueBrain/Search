@@ -2,8 +2,10 @@
 from collections import OrderedDict
 import json
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import sklearn
 
 from spacy.tokens import Doc
 
@@ -285,7 +287,8 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
                        for col_name in ['', 'precision', 'recall', 'f1-score', 'support'])]
         for etype, metrics_scores in report.items():
             out.append(f'{etype:>10s}'
-                       + ''.join(f'{metric_val:>10.2f}' for metric_val in metrics_scores.values())
+                       + ''.join(f'{metrics_scores[metric_name]:>10.2f}'
+                                 for metric_name in ['precision', 'recall', 'f1-score'])
                        + f'{etypes_counts[etype]:>10d}')
         return '\n'.join(out)
 
@@ -368,3 +371,136 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
                 out.append('  - ' + w)
             out.append('')
         return '\n'.join(out)
+
+
+def confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
+    """Compute confusion matrix to evaluate the accuracy of a NER model.
+
+    Parameters
+    ----------
+    iob_true : pd.Series[str]
+         Ground truth (correct) IOB annotations.
+
+    iob_pred : pd.Series[str]
+        Predicted IOB annotations.
+
+    normalize : {'true', 'pred', 'all'}, default=None
+        Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the
+        population. If None, the confusion matrix will not be normalized.
+
+    mode : str, optional
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+
+    Returns
+    -------
+    cm : pd.DataFrame
+        Dataframe where the index contains the ground truth entity types and the columns contain the
+        predicted entity types.
+    """
+    etypes_true = unique_etypes(iob_true)
+    etypes_pred = unique_etypes(iob_pred)
+
+    if mode == 'entity':
+        cm_vals = np.zeros(shape=(len(etypes_true) + 1, len(etypes_pred) + 1))
+        idxs_true = {etype: iob2idx(iob_true, etype=etype) for etype in etypes_true}
+        idxs_pred = {etype: iob2idx(iob_pred, etype=etype) for etype in etypes_pred}
+
+        for i, etype_true in enumerate(etypes_true):
+            n_true = len(idxs_true[etypes_true])
+            for j, etype_pred in enumerate(etypes_pred):
+                idxs_pred = iob2idx(iob_pred, etype=etype_pred)
+                cm_vals[i, j] = np.count_nonzero(
+                    (idxs_true[etype_true]['start'].isin(idxs_pred[etype_pred]['start']) &
+                     idxs_true[etype_pred]['end'].isin(idxs_pred[etype_pred]['end'])
+                     ).values)
+            cm_vals[i, -i] = n_true - cm_vals[i, :-1].sum()
+        for j, etype_pred in enumerate(etypes_pred):
+            cm_vals[-1, j] = len(idxs_pred[etype_pred]) - cm_vals[:-1, j]
+
+    elif mode == 'token':
+        etypes_all = sorted(set(etypes_true + etypes_pred)) + ['O']
+
+        iob_true = iob_true.str.replace('B-', '').str.replace('I-', '')
+        iob_pred = iob_pred.str.replace('B-', '').str.replace('I-', '')
+        cm = pd.DataFrame(
+            data=sklearn.metrics.confusion_matrix(iob_true, iob_pred, labels=etypes_all),
+            columns=etypes_all,
+            index=etypes_all
+        )
+        etypes_true.append('O')
+        etypes_pred.append('O')
+        cm = cm[etypes_pred].loc[etypes_true]
+        cm_vals = cm.values
+    else:
+        raise ValueError(f'Mode \'{mode}\' is not available.')
+
+    if normalize == 'true':
+        cm_vals = cm_vals / cm_vals.sum(axis=1, keepdims=True)
+    elif normalize == 'pred':
+        cm_vals = cm_vals / cm_vals.sum(axis=0, keepdims=True)
+    elif normalize == 'all':
+        cm_vals = cm_vals / cm_vals.sum()
+    cm_vals = np.nan_to_num(cm_vals)
+
+    cm = pd.DataFrame(cm_vals, columns=etypes_pred[:-1] + ['None'], index=etypes_true[:-1] + ['None'])
+
+    return cm
+
+
+def plot_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity', cmap='viridis',
+                          ax=None):
+    """Plot Confusion Matrix for NER evaluation.
+
+    Parameters
+    ----------
+    iob_true : pd.Series[str]
+         Ground truth (correct) IOB annotations.
+
+    iob_pred : pd.Series[str]
+        Predicted IOB annotations.
+
+    normalize : {'true', 'pred', 'all'}, default=None
+        Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the
+        population. If None, the confusion matrix will not be normalized.
+
+    mode : str, optional
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+
+    cmap : str or matplotlib Colormap, default='viridis'
+        Colormap recognized by matplotlib.
+
+    ax : matplotlib Axes, default=None
+        Axes object to plot on. If `None`, a new figure and axes is
+        created and returned.
+
+    Returns
+    -------
+    ax : matplotlib Axes
+        Axes object where the matrix was plotted.
+    """
+    cm = confusion_matrix(iob_true, iob_pred, normalize=normalize, mode=mode)
+
+    x = cm.values
+    e_types_true = cm.index
+    e_types_pred = cm.columns
+
+    if ax is None:
+        f, ax = plt.subplots(figsize=(len(e_types_pred) * .6, len(e_types_true) * .6))
+
+    max_val = 1 if (normalize is not None) else x[:-1, :-1].max()
+    ax.imshow(-np.minimum(x, max_val), cmap=cmap, vmin=-max_val, vmax=0)
+
+    for i in range(len(x)):
+        for j in range(len(x.T)):
+            c = 'k' if x[i, j] < max_val / 2 else 'w'
+            text = f'{round(100 * x[i, j]):d}%' if (normalize is not None) else f'{x[i, j]:,d}'
+            ax.text(j, i, text, ha='center', va='center', color=c, fontsize=12)
+
+    ax.set_xticks(np.arange(len(e_types_pred)))
+    ax.set_yticks(np.arange(len(e_types_true)))
+    ax.set_xticklabels(list(e_types_pred), rotation=90, fontsize=15)
+    ax.set_yticklabels(e_types_true, fontsize=15)
+    ax.set_xlabel('Predicted', fontsize=20)
+    ax.set_ylabel('True', fontsize=20)
+
+    return ax
