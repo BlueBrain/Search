@@ -412,9 +412,12 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
                     (idxs_true[etype_true]['start'].isin(idxs_pred[etype_pred]['start']) &
                      idxs_true[etype_pred]['end'].isin(idxs_pred[etype_pred]['end'])
                      ).values)
-            cm_vals[i, -i] = n_true - cm_vals[i, :-1].sum()
+            cm_vals[i, -1] = n_true - cm_vals[i, :-1].sum()
         for j, etype_pred in enumerate(etypes_pred):
             cm_vals[-1, j] = len(idxs_pred[etype_pred]) - cm_vals[:-1, j].sum()
+
+        columns = etypes_pred + ['None']
+        index = etypes_true + ['None']
 
     elif mode == 'token':
         etypes_all = sorted(set(etypes_true + etypes_pred)) + ['O']
@@ -430,6 +433,9 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
         etypes_pred.append('O')
         cm = cm[etypes_pred].loc[etypes_true]
         cm_vals = cm.values
+
+        columns = etypes_pred[:-1] + ['None']
+        index = etypes_true[:-1] + ['None']
     else:
         raise ValueError(f'Mode \'{mode}\' is not available.')
 
@@ -441,7 +447,7 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
         cm_vals = cm_vals / cm_vals.sum()
     cm_vals = np.nan_to_num(cm_vals)
 
-    cm = pd.DataFrame(cm_vals, columns=etypes_pred[:-1] + ['None'], index=etypes_true[:-1] + ['None'])
+    cm = pd.DataFrame(cm_vals, columns=columns, index=index)
 
     return cm
 
