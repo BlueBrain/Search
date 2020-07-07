@@ -373,7 +373,7 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
         return '\n'.join(out)
 
 
-def confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
+def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
     """Compute confusion matrix to evaluate the accuracy of a NER model.
 
     Parameters
@@ -447,7 +447,7 @@ def confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
     return cm
 
 
-def plot_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity', cmap='viridis',
+def plot_ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity', cmap='viridis',
                           ax=None):
     """Plot Confusion Matrix for NER evaluation.
 
@@ -478,7 +478,7 @@ def plot_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity', cma
     ax : matplotlib Axes
         Axes object where the matrix was plotted.
     """
-    cm = confusion_matrix(iob_true, iob_pred, normalize=normalize, mode=mode)
+    cm = ner_confusion_matrix(iob_true, iob_pred, normalize=normalize, mode=mode)
 
     x = cm.values
     e_types_true = cm.index
