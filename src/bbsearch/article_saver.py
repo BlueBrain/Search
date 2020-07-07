@@ -77,19 +77,21 @@ class ArticleSaver:
         df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
 
         paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id'])
-
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE paragraph_id IN ({paragraph_ids_list})
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON p.sha = a.sha;
-        """
-        df_extractions_pars = pd.read_sql(sql_query, self.db)
+        if paragraph_ids_list:
+            sql_query = f"""
+            SELECT article_id, section_name, paragraph_id, text
+            FROM (
+                     SELECT *
+                     FROM paragraphs
+                     WHERE paragraph_id IN ({paragraph_ids_list})
+                 ) p
+                     INNER JOIN
+                 article_id_2_sha a
+                 ON p.sha = a.sha;
+            """
+            df_extractions_pars = pd.read_sql(sql_query, self.db)
+        else:
+            df_extractions_pars = pd.DataFrame()
 
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
 
