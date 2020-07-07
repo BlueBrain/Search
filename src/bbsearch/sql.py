@@ -148,7 +148,7 @@ def find_paragraph(sentence_id, session):
     sentence_id : int
         The identifier of the given sentence
     session: SQLAlchemy.orm.session
-        Cursor to the database
+        SQLAlchemy session connected to the database.
 
     Returns
     -------

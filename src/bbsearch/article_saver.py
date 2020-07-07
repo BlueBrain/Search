@@ -14,8 +14,8 @@ class ArticleSaver:
     Parameters
     ----------
     database: sqlalchemy.Engine
-        Connection to the database. The database is supposed to have paragraphs and
-        articles tables.
+        SQLAlchemy Engine connected to the database.
+        Database should contains articles, article_id_2_sha and paragraphs tables.
 
     Attributes
     ----------
