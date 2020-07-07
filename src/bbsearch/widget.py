@@ -111,7 +111,7 @@ class Widget:
             filter(Article_id_2_sha.sha == article_sha).all()
         article_id = article_id_2_sha[0].article_id
         article = self.database.query(Articles).filter(Articles.article_id == article_id).one()
-        article_auth, article_title, date, ref = article.authors, article.title, article.date, article.url
+        article_auth, article_title, ref = article.authors, article.title, article.url
         try:
             article_auth = article_auth.split(';')[0] + ' et al.'
         except AttributeError:
