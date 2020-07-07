@@ -493,7 +493,7 @@ def plot_ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity',
     for i in range(len(x)):
         for j in range(len(x.T)):
             c = 'k' if x[i, j] < max_val / 2 else 'w'
-            text = f'{round(100 * x[i, j]):d}%' if (normalize is not None) else f'{x[i, j]:,d}'
+            text = f'{int(round(100 * x[i, j])):d}%' if (normalize is not None) else f'{x[i, j]:,d}'
             ax.text(j, i, text, ha='center', va='center', color=c, fontsize=12)
 
     ax.set_xticks(np.arange(len(e_types_pred)))
