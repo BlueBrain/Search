@@ -410,7 +410,7 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
             for j, etype_pred in enumerate(etypes_pred):
                 cm_vals[i, j] = np.count_nonzero(
                     (idxs_true[etype_true]['start'].isin(idxs_pred[etype_pred]['start']) &
-                     idxs_true[etype_pred]['end'].isin(idxs_pred[etype_pred]['end'])
+                     idxs_true[etype_true]['end'].isin(idxs_pred[etype_pred]['end'])
                      ).values)
             cm_vals[i, -1] = n_true - cm_vals[i, :-1].sum()
         for j, etype_pred in enumerate(etypes_pred):
