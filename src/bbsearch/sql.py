@@ -11,6 +11,8 @@ Base = declarative_base()
 
 
 class Articles(Base):
+    """Articles table."""
+
     __tablename__ = 'articles'
     __table_args__ = {'extend_existing': True}
 
@@ -36,6 +38,7 @@ class Articles(Base):
     def init(self, article_id, publisher, title, doi, pmc_id, pm_id, licence, abstract, date, authors, journal,
              microsoft_id,
              covidence_id, has_pdf_parse, has_pmc_xml_parse, has_covid19_tag, fulltext_directory, url):
+        """Init of the articles table."""
         self.article_id = article_id
         self.publisher = publisher
         self.title = title
@@ -57,6 +60,8 @@ class Articles(Base):
 
 
 class Article_id_2_sha(Base):
+    """Article_id_2_sha table."""
+
     __tablename__ = 'article_id_2_sha'
     __table_args__ = {'extend_existing': True}
 
@@ -64,11 +69,14 @@ class Article_id_2_sha(Base):
     sha = Column(String)
 
     def init(self, article_id, sha):
+        """Init of the article_id_2_sha table."""
         self.article_id = article_id
         self.sha = sha
 
 
 class Sentences(Base):
+    """Sentences table."""
+
     __tablename__ = 'sentences'
     __table_args__ = {'extend_existing': True}
 
@@ -79,6 +87,7 @@ class Sentences(Base):
     paragraph_id = Column(Integer)
 
     def init(self, sentence_id, sha, section_name, text, paragraph_id):
+        """Init of the sentences table."""
         self.sentence_id = sentence_id
         self.sha = sha
         self.section_name = section_name
@@ -87,6 +96,8 @@ class Sentences(Base):
 
 
 class Paragraphs(Base):
+    """Paragraphs table."""
+
     __tablename__ = 'paragraphs'
     __table_args__ = {'extend_existing': True}
 
@@ -96,6 +107,7 @@ class Paragraphs(Base):
     text = Column(String)
 
     def init(self, paragraph_id, sha, section_name, text):
+        """Init of the paragraphs table."""
         self.paragraph_id = paragraph_id
         self.sha = sha
         self.section_name = section_name
