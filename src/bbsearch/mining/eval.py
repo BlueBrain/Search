@@ -401,21 +401,20 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
     etypes_pred = unique_etypes(iob_pred)
 
     if mode == 'entity':
-        cm_vals = np.zeros(shape=(len(etypes_true) + 1, len(etypes_pred) + 1))
+        cm_vals = np.zeros(shape=(len(etypes_true) + 1, len(etypes_pred) + 1), dtype='int64')
         idxs_true = {etype: iob2idx(iob_true, etype=etype) for etype in etypes_true}
         idxs_pred = {etype: iob2idx(iob_pred, etype=etype) for etype in etypes_pred}
 
         for i, etype_true in enumerate(etypes_true):
-            n_true = len(idxs_true[etypes_true])
+            n_true = len(idxs_true[etype_true])
             for j, etype_pred in enumerate(etypes_pred):
-                idxs_pred = iob2idx(iob_pred, etype=etype_pred)
                 cm_vals[i, j] = np.count_nonzero(
                     (idxs_true[etype_true]['start'].isin(idxs_pred[etype_pred]['start']) &
                      idxs_true[etype_pred]['end'].isin(idxs_pred[etype_pred]['end'])
                      ).values)
             cm_vals[i, -i] = n_true - cm_vals[i, :-1].sum()
         for j, etype_pred in enumerate(etypes_pred):
-            cm_vals[-1, j] = len(idxs_pred[etype_pred]) - cm_vals[:-1, j]
+            cm_vals[-1, j] = len(idxs_pred[etype_pred]) - cm_vals[:-1, j].sum()
 
     elif mode == 'token':
         etypes_all = sorted(set(etypes_true + etypes_pred)) + ['O']
@@ -448,7 +447,7 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity'):
 
 
 def plot_ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode='entity', cmap='viridis',
-                          ax=None):
+                              ax=None):
     """Plot Confusion Matrix for NER evaluation.
 
     Parameters
