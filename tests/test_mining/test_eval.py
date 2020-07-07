@@ -8,7 +8,8 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import unique_etypes, iob2idx, idx2text, ner_report
+from bbsearch.mining.eval import (unique_etypes, iob2idx, idx2text, ner_report,
+                                  ner_confusion_matrix, plot_ner_confusion_matrix)
 
 
 class TestProdigy2df:
@@ -69,73 +70,87 @@ class TestSpacy2df:
         assert 'text' in df.columns
 
 
-@pytest.mark.parametrize('annotations, etypes, counts', [
-    ('annotations_1',
+@pytest.mark.parametrize('dataset, annotator, etypes, counts', [
+    ('bio', 'annotator_1',
      ['CONDITION', 'DISEASE', 'ORGANISM', 'PATHWAY'],
      {'entity': [2, 4, 6, 2], 'token': [3, 9, 9, 4]}
      ),
-    ('annotations_2',
+    ('bio', 'annotator_2',
      ['CONDITION', 'DISEASE', 'PATHWAY', 'TAXON'],
      {'entity': [1, 6, 1, 8], 'token': [1, 11, 2, 11]}
+     ),
+    ('sample', 'annotator_1',
+     ['a', 'b', 'd'],
+     {'entity': [4, 3, 1], 'token': [5, 4, 1]}
+     ),
+    ('sample', 'annotator_2',
+     ['b', 'c'],
+     {'entity': [2, 6], 'token': [4, 8]}
      )
 ])
-def test_unique_etypes(ner_annotations, annotations, etypes, counts):
+def test_unique_etypes(ner_annotations, dataset, annotator, etypes, counts):
     for mode in ('entity', 'token'):
-        assert unique_etypes(ner_annotations[annotations], return_counts=False, mode=mode) \
-            == etypes
-        assert unique_etypes(ner_annotations[annotations], return_counts=True, mode=mode) \
-            == (etypes, counts[mode])
+        assert unique_etypes(ner_annotations[dataset][annotator], return_counts=False, mode=mode) \
+               == etypes
+        assert unique_etypes(ner_annotations[dataset][annotator], return_counts=True, mode=mode) \
+               == (etypes, counts[mode])
 
 
-@pytest.mark.parametrize('annotations, etype, idxs', [
-    ('annotations_1', 'CONDITION', [[103, 104], [108, 108]]),
-    ('annotations_1', 'DISEASE', [[34, 37], [40, 40], [120, 121], [148, 149]]),
-    ('annotations_2', 'PATHWAY', [[135, 136]]),
-    ('annotations_1', 'POTATOES', None)
+@pytest.mark.parametrize('dataset, annotator, etype, idxs', [
+    ('bio', 'annotator_1', 'CONDITION', [[103, 104], [108, 108]]),
+    ('bio', 'annotator_1', 'DISEASE', [[34, 37], [40, 40], [120, 121], [148, 149]]),
+    ('bio', 'annotator_2', 'PATHWAY', [[135, 136]]),
+    ('bio', 'annotator_1', 'POTATOES', None),
+    ('sample', 'annotator_1', 'b', [[2, 2], [8, 9], [13, 13]]),
+    ('sample', 'annotator_2', 'c', [[0, 0], [1, 2], [3, 3], [5, 5], [10, 11], [12, 12]]),
 ])
-def test_iob2idx(ner_annotations, annotations, etype, idxs):
+def test_iob2idx(ner_annotations, dataset, annotator, etype, idxs):
     if idxs is not None:
-        pd.testing.assert_frame_equal(iob2idx(ner_annotations[annotations], etype),
+        pd.testing.assert_frame_equal(iob2idx(ner_annotations[dataset][annotator], etype),
                                       pd.DataFrame(data=idxs, columns=['start', 'end']))
     else:
-        pd.testing.assert_frame_equal(iob2idx(ner_annotations[annotations], etype),
+        pd.testing.assert_frame_equal(iob2idx(ner_annotations[dataset][annotator], etype),
                                       pd.DataFrame(data={'start': [], 'end': []},
                                                    index=pd.Int64Index([]),
                                                    dtype='int64'))
 
 
-@pytest.mark.parametrize('annotations, etype, texts', [
-    ('annotations_1', 'CONDITION', ['worldwide outbreak', 'hospitalization']),
-    ('annotations_1', 'ORGANISM', ['human coronaviruses', 'Human coronaviruses',
-                                   'Human coronaviruses', 'HCoVs', 'infant', 'infant']),
-    ('annotations_2', 'PATHWAY', ['respiratory immunity']),
-    ('annotations_1', 'POTATOES', [])])
-def test_idx2text(ner_annotations, annotations, etype, texts):
+@pytest.mark.parametrize('dataset, annotator, etype, texts', [
+    ('bio', 'annotator_1', 'CONDITION', ['worldwide outbreak', 'hospitalization']),
+    ('bio', 'annotator_1', 'ORGANISM', ['human coronaviruses', 'Human coronaviruses',
+                                        'Human coronaviruses', 'HCoVs', 'infant', 'infant']),
+    ('bio', 'annotator_2', 'PATHWAY', ['respiratory immunity']),
+    ('bio', 'annotator_1', 'POTATOES', [])])
+def test_idx2text(ner_annotations, dataset, annotator, etype, texts):
     assert texts == \
-           idx2text(ner_annotations.text, iob2idx(ner_annotations[annotations], etype)).tolist()
+           idx2text(ner_annotations[dataset]['text'],
+                    iob2idx(ner_annotations[dataset][annotator], etype)).tolist()
 
 
-@pytest.mark.parametrize('mode, etypes_map, dict_tp_fn_fp', [
-    ('entity', {'ORGANISM': 'TAXON'},
-     {'CONDITION':  [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [6, 0, 2]}),
-    ('token', {'ORGANISM': 'TAXON'},
+@pytest.mark.parametrize('dataset, mode, etypes_map, dict_tp_fn_fp', [
+    ('bio', 'entity', {'ORGANISM': 'TAXON'},
+     {'CONDITION': [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [6, 0, 2]}),
+    ('bio', 'token', {'ORGANISM': 'TAXON'},
      {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [9, 0, 2]}),
-    ('entity', None,
+    ('bio', 'entity', None,
      {'CONDITION': [1, 1, 0], 'DISEASE': [3, 1, 3], 'PATHWAY': [1, 1, 0], 'ORGANISM': [0, 6, 0]}),
-    ('token', None,
-     {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [0, 9, 0]})
-
+    ('bio', 'token', None,
+     {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [0, 9, 0]}),
+    ('sample', 'entity', {'a': 'c'},
+     {'a': [2, 2, 4], 'b':[1, 2, 1], 'd': [0, 1, 0]}),
+    ('sample', 'token', {'a': 'c'},
+     {'a': [4, 1, 4], 'b': [3, 1, 1], 'd': [0, 1, 0]})
 ])
-def test_ner_report(ner_annotations, mode, etypes_map, dict_tp_fn_fp):
+def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
     report_str = ner_report(
-        ner_annotations['annotations_1'],
-        ner_annotations['annotations_2'],
+        ner_annotations[dataset]['annotator_1'],
+        ner_annotations[dataset]['annotator_2'],
         mode=mode,
         etypes_map=etypes_map,
         return_dict=False)
     report_dict = ner_report(
-        ner_annotations['annotations_1'],
-        ner_annotations['annotations_2'],
+        ner_annotations[dataset]['annotator_1'],
+        ner_annotations[dataset]['annotator_2'],
         mode=mode,
         etypes_map=etypes_map,
         return_dict=True)
@@ -143,7 +158,7 @@ def test_ner_report(ner_annotations, mode, etypes_map, dict_tp_fn_fp):
     assert isinstance(report_str, str)
     assert isinstance(report_dict, OrderedDict)
 
-    etypes = ['CONDITION', 'DISEASE', 'ORGANISM', 'PATHWAY']
+    etypes = sorted(dict_tp_fn_fp.keys())
     assert list(report_dict.keys()) == etypes
     for etype in etypes:
         assert set(report_dict[etype].keys()) == {'precision', 'recall', 'f1-score', 'support'}
@@ -152,8 +167,49 @@ def test_ner_report(ner_annotations, mode, etypes_map, dict_tp_fn_fp):
         tot_pred_pos = tp + fp
         prec_ = (tp / tot_pred_pos) if tot_pred_pos > 0 else 0
         recall_ = tp / tot_true_pos
-        f1_ = (2 * prec_ * recall_ / (prec_ + recall_))  if tot_pred_pos > 0 else 0
+        f1_ = (2 * prec_ * recall_ / (prec_ + recall_)) if tot_pred_pos > 0 else 0
         np.testing.assert_almost_equal(prec_, report_dict[etype]['precision'])
         np.testing.assert_almost_equal(recall_, report_dict[etype]['recall'])
         np.testing.assert_almost_equal(f1_, report_dict[etype]['f1-score'])
         np.testing.assert_almost_equal(tot_true_pos, report_dict[etype]['support'])
+
+
+@pytest.mark.parametrize('dataset, mode, cm_vals', [
+    ('bio', 'token', [[1, 0, 0, 0, 2],
+                      [0, 8, 0, 0, 1],
+                      [0, 0, 0, 9, 0],
+                      [0, 0, 2, 0, 2],
+                      [0, 3, 0, 2, 170]]),
+    ('bio', 'entity', [[1, 0, 0, 0, 1],
+                       [0, 3, 0, 0, 1],
+                       [0, 0, 0, 6, 0],
+                       [0, 0, 1, 0, 1],
+                       [0, 3, 0, 2, 0]]),
+    ('sample', 'token', [[0, 4, 1],
+                         [3, 1, 0],
+                         [0, 1, 0],
+                         [1, 2, 1]]),
+    ('sample', 'entity', [[0, 2, 2],
+                          [1, 0, 2],
+                          [0, 1, 0],
+                          [1, 3, 0]])
+])
+def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
+    iob_true = ner_annotations[dataset]['annotator_1']
+    iob_pred = ner_annotations[dataset]['annotator_2']
+    cm_vals = np.array(cm_vals)
+
+    ax = plot_ner_confusion_matrix(iob_true=iob_true, iob_pred=iob_pred, normalize=None, mode=mode)
+    assert ax is not None
+
+    cm = ner_confusion_matrix(iob_true=iob_true, iob_pred=iob_pred, normalize=None, mode=mode)
+    assert isinstance(cm, pd.DataFrame)
+    assert cm.index.tolist() == (unique_etypes(iob_true) + ['None'])
+    assert cm.columns.tolist() == (unique_etypes(iob_pred) + ['None'])
+    np.testing.assert_almost_equal(cm.values, cm_vals)
+
+    cm_1 = ner_confusion_matrix(iob_true=iob_true, iob_pred=iob_pred, normalize='true', mode=mode)
+    cm_2 = ner_confusion_matrix(iob_true=iob_true, iob_pred=iob_pred, normalize='pred', mode=mode)
+
+    np.testing.assert_almost_equal(cm_1.values, cm_vals / cm_vals.sum(axis=1, keepdims=True))
+    np.testing.assert_almost_equal(cm_2.values, cm_vals / cm_vals.sum(axis=0, keepdims=True))

@@ -203,5 +203,15 @@ def model_entities():
 @pytest.fixture(scope='session')
 def ner_annotations():
     csv_filename = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval' / 'ner_iob_sample.csv'
-    df = pd.read_csv(csv_filename)
-    return df
+
+    return {
+        'bio':
+            pd.read_csv(csv_filename),
+        'sample':
+            pd.DataFrame(data={
+                'annotator_1': ['B-a', 'B-a', 'B-b', 'B-a', 'O', 'B-a', 'I-a', 'O', 'B-b', 'I-b',
+                                'O', 'O', 'B-d', 'B-b'],
+                'annotator_2': ['B-c', 'B-c', 'I-c', 'B-c', 'O', 'B-c', 'O', 'B-b', 'I-b', 'I-b',
+                                'B-c', 'I-c', 'B-c', 'B-b']
+            })
+    }
