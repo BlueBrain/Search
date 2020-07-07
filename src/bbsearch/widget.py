@@ -8,7 +8,7 @@ import textwrap
 import ipywidgets as widgets
 from IPython.display import display, HTML
 
-from .sql import find_paragraph
+from .sql import find_paragraph, Sentences, Article_id_2_sha, Articles
 
 logger = logging.getLogger(__name__)
 
@@ -101,18 +101,14 @@ class Widget:
             the information about the article.
 
         """
-        database_cursor = self.database.cursor()
-        database_cursor.execute('SELECT sha, section_name, text, paragraph_id FROM sentences WHERE sentence_id = %s',
-                                (sentence_id,))
-        results = database_cursor.fetchall()[0]
-        article_sha, section_name, text, paragraph_id = results
-        database_cursor.execute('SELECT article_id FROM article_id_2_sha WHERE sha = %s',
-                                (article_sha,))
-        (article_id,) = database_cursor.fetchall()[0]
-        database_cursor.execute('SELECT authors, title, date, url FROM articles WHERE article_id = %s',
-                                (article_id))
-        results = database_cursor.fetchall()[0]
-        article_auth, article_title, date, ref = results
+        sentence = self.database.query(Sentences).filter(Sentences.sentence_id == sentence_id).one()
+        article_sha, section_name, text, paragraph_id = \
+            sentence.sha, sentence.section_name, sentence.text, sentence.paragraph_id
+        article_id_2_sha = self.database.query(Article_id_2_sha).\
+            filter(Article_id_2_sha.sha == article_sha).all()
+        article_id = article_id_2_sha[0].article_id
+        article = self.database.query(Articles).filter(Articles.article_id == article_id).one()
+        article_auth, article_title, date, ref = article.authors, article.title, article.date, article.url
         try:
             article_auth = article_auth.split(';')[0] + ' et al.'
         except AttributeError:
@@ -124,7 +120,7 @@ class Widget:
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, database_cursor)
+                paragraph = find_paragraph(sentence_id, self.database)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:

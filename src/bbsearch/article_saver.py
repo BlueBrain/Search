@@ -13,7 +13,7 @@ class ArticleSaver:
 
     Parameters
     ----------
-    database: sqlite3.Connection
+    database: sqlalchemy.Engine
         Connection to the database. The database is supposed to have paragraphs and
         articles tables.
 
@@ -53,22 +53,25 @@ class ArticleSaver:
         article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
         article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
 
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE sha IN (
-                     SELECT sha
-                     FROM article_id_2_sha
-                     WHERE article_id IN ({article_ids_full_list})
-                 )
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON a.sha = p.sha;
-        """
-        df_extractions_full = pd.read_sql(sql_query, self.db)
+        if article_ids_full_list:
+            sql_query = f"""
+            SELECT article_id, section_name, paragraph_id, text
+            FROM (
+                     SELECT *
+                     FROM paragraphs
+                     WHERE sha IN (
+                         SELECT sha
+                         FROM article_id_2_sha
+                         WHERE article_id IN ({article_ids_full_list})
+                     )
+                 ) p
+                     INNER JOIN
+                 article_id_2_sha a
+                 ON a.sha = p.sha;
+            """
+            df_extractions_full = pd.read_sql(sql_query, self.db)
+        else:
+            df_extractions_full = pd.DataFrame()
 
         df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
         df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]

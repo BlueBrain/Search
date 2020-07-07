@@ -4,6 +4,102 @@ SQL Related functions.
 whatever
 """
 import pandas as pd
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+
+
+class Articles(Base):
+    __tablename__ = 'articles'
+    __table_args__ = {'extend_existing': True}
+
+    article_id = Column(String, primary_key=True)
+    publisher = Column(String)
+    title = Column(String)
+    doi = Column(String)
+    pmc_id = Column(String)
+    pm_id = Column(Integer)
+    licence = Column(String)
+    abstract = Column(String)
+    date = Column(String)
+    authors = Column(String)
+    journal = Column(String)
+    microsoft_id = Column(Integer)
+    covidence_id = Column(String)
+    has_pdf_parse = Column(Boolean)
+    has_pmc_xml_parse = Column(Boolean)
+    has_covid19_tag = Column(Boolean)
+    fulltext_directory = Column(String)
+    url = Column(String)
+
+    def init(self, article_id, publisher, title, doi, pmc_id, pm_id, licence, abstract, date, authors, journal,
+             microsoft_id,
+             covidence_id, has_pdf_parse, has_pmc_xml_parse, has_covid19_tag, fulltext_directory, url):
+        self.article_id = article_id
+        self.publisher = publisher
+        self.title = title
+        self.doi = doi
+        self.pmc_id = pmc_id
+        self.pm_id = pm_id
+        self.license = licence
+        self.abstract = abstract
+        self.date = date
+        self.authors = authors
+        self.journal = journal
+        self.microsoft_id = microsoft_id
+        self.covidence_id = covidence_id
+        self.has_pdf_parse = has_pdf_parse
+        self.has_pmc_xml_parse = has_pmc_xml_parse
+        self.has_covid19_tag = has_covid19_tag
+        self.fulltext_directory = fulltext_directory
+        self.url = url
+
+
+class Article_id_2_sha(Base):
+    __tablename__ = 'article_id_2_sha'
+    __table_args__ = {'extend_existing': True}
+
+    article_id = Column(String, ForeignKey('articles.article_id'), primary_key=True)
+    sha = Column(String)
+
+    def init(self, article_id, sha):
+        self.article_id = article_id
+        self.sha = sha
+
+
+class Sentences(Base):
+    __tablename__ = 'sentences'
+    __table_args__ = {'extend_existing': True}
+
+    sentence_id = Column(Integer, primary_key=True)
+    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
+    section_name = Column(String)
+    text = Column(String)
+    paragraph_id = Column(Integer)
+
+    def init(self, sentence_id, sha, section_name, text, paragraph_id):
+        self.sentence_id = sentence_id
+        self.sha = sha
+        self.section_name = section_name
+        self.text = text
+        self.paragraph_id = paragraph_id
+
+
+class Paragraphs(Base):
+    __tablename__ = 'paragraphs'
+    __table_args__ = {'extend_existing': True}
+
+    paragraph_id = Column(Integer, primary_key=True)
+    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
+    section_name = Column(String)
+    text = Column(String)
+
+    def init(self, paragraph_id, sha, section_name, text):
+        self.paragraph_id = paragraph_id
+        self.sha = sha
+        self.section_name = section_name
+        self.text = text
 
 
 def get_paragraph_ids(article_ids, db_cnxn):
@@ -44,14 +140,14 @@ def get_paragraph_ids(article_ids, db_cnxn):
     return pd.Series(results['article_id'], index=results['paragraph_id'])
 
 
-def find_paragraph(sentence_id, db):
+def find_paragraph(sentence_id, session):
     """Find the paragraph corresponding to the given sentence.
 
     Parameters
     ----------
     sentence_id : int
         The identifier of the given sentence
-    db: sqlite3.Cursor
+    session: SQLAlchemy.orm.session
         Cursor to the database
 
     Returns
@@ -59,12 +155,11 @@ def find_paragraph(sentence_id, db):
     paragraph : str
         The paragraph containing `sentence`
     """
-    db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = %s ', (sentence_id,))
-    paragraph_id = db.fetchone()[0]
-    db.execute('SELECT text FROM paragraphs WHERE paragraph_id = %s', (paragraph_id,))
-    paragraph = db.fetchone()[0]
+    sentence = session.query(Sentences).filter(Sentences.sentence_id == sentence_id).one()
+    paragraph_id = sentence.paragraph_id
+    paragraph = session.query(Paragraphs).filter(Paragraphs.paragraph_id == paragraph_id).one()
 
-    return paragraph
+    return paragraph.text
 
 
 def get_shas_from_ids(articles_ids, db):
