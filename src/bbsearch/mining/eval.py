@@ -227,8 +227,8 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotaitons. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground true and TAXON in predictions.
+        entity type names in the predicted annotations. Useful when entity types have different
+        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
@@ -312,8 +312,8 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotaitons. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground true and TAXON in predictions.
+        entity type names in the predicted annotations. Useful when entity types have different
+        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
