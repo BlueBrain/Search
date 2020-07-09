@@ -6,9 +6,10 @@ from bbsearch.widget import SAVING_OPTIONS
 
 class TestArticleSaver:
 
-    def test_article_saver(self, fake_db_cursor):
+    def test_article_saver(self, fake_db_cursor, fake_slqalchemy_engine):
         """Test that article_saver is good. """
-        article_saver = ArticleSaver(database=fake_db_cursor.connection)
+
+        article_saver = ArticleSaver(engine=fake_slqalchemy_engine)
 
         # Check the possible article_id, paragraphs_id of the fake database
         # Create a fake article_saver.saved_articles dictionary

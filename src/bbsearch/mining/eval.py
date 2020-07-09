@@ -10,8 +10,8 @@ def prodigy2df(cnxn, not_entity_symbol='O'):
 
     Parameters
     ----------
-    cnxn : sqlite3.Connection
-        Connection to the prodigy database.
+    cnxn : SQLAlchemy connectable (engine/connection) or database str URI
+        or DBAPI2 connection (fallback mode)'.
 
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.

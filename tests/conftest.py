@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import spacy
+import sqlalchemy
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 
@@ -148,6 +149,21 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
     yield cursor
 
     fake_db_cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
+
+
+@pytest.fixture(scope='session')
+def fake_slqalchemy_engine(fake_db_cnxn):
+    """Connection object (sqlite)."""
+    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
+    engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+    return engine
+
+
+@pytest.fixture(scope='session')
+def fake_slqalchemy_cnxn(fake_slqalchemy_engine):
+    """Connection object (sqlite)."""
+    sqlalchemy_cnxn = fake_slqalchemy_engine.connect()
+    return sqlalchemy_cnxn
 
 
 @pytest.fixture(scope='session')

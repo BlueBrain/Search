@@ -45,7 +45,7 @@ class TestLocalSearcher:
         assert emb_mod.embed.call_count == 1
 
 
-def test_run_search(fake_db_cursor, embeddings_path):
+def test_run_search(fake_db_cnxn, embeddings_path):
     model = 'SBERT'
     query_text = 'I want to know everything about the universe.'
     k = 5
@@ -65,7 +65,7 @@ def test_run_search(fake_db_cursor, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cursor,
+                                              database=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=None,
                                               deprioritize_strength=deprioritized_strength,
@@ -82,7 +82,7 @@ def test_run_search(fake_db_cursor, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cursor,
+                                              database=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=deprioritized_text,
                                               date_range=(3000, 3001),
@@ -96,7 +96,7 @@ def test_run_search(fake_db_cursor, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cursor,
+                                              database=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=deprioritized_text,
                                               k=k)

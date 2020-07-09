@@ -14,7 +14,7 @@ def get_paragraph_ids(article_ids, db_cnxn):
     article_ids : list
         List of article ids. Note that they are the primary keys in the `articles` table.
 
-    db_cnxn : sqlite3.Connection
+    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
         Connection to the database.
 
     Returns
@@ -41,38 +41,43 @@ def get_paragraph_ids(article_ids, db_cnxn):
     """
     results = pd.read_sql(sql_query, db_cnxn)
 
-    return pd.Series(results['article_id'], index=results['paragraph_id'])
+    return pd.Series(results['article_id'].tolist(), index=results['paragraph_id'])
 
 
-def find_paragraph(sentence_id, db):
+def find_paragraph(sentence_id, db_cnxn):
     """Find the paragraph corresponding to the given sentence.
 
     Parameters
     ----------
     sentence_id : int
         The identifier of the given sentence
-    db: sqlite3.Cursor
-        Cursor to the database
+    db_cnxn: sqlite3.Connection or SQLAlchemy.Connection
+        Connection to the database
 
     Returns
     -------
     paragraph : str
         The paragraph containing `sentence`
     """
-    paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
-    paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
+    sql_query = f'SELECT paragraph_id FROM sentences WHERE sentence_id = {sentence_id}'
+    paragraph_id = pd.read_sql(sql_query, db_cnxn).iloc[0]['paragraph_id']
+    sql_query = f'SELECT text FROM paragraphs WHERE paragraph_id = {paragraph_id}'
+    paragraph = pd.read_sql(sql_query, db_cnxn).iloc[0]['text']
+
+    # paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
+    # paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
 
     return paragraph
 
 
-def get_shas_from_ids(articles_ids, db):
+def get_shas_from_ids(articles_ids, db_cnxn):
     """Find articles SHA given article IDs.
 
     Parameters
     ----------
     articles_ids : list
         A list of strings representing article IDs.
-    db : sqlite3.Cursor
+    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
         A SQL database for querying the SHAs. Should contain
         a table named "article_id_2_sha".
 
@@ -83,13 +88,14 @@ def get_shas_from_ids(articles_ids, db):
     """
     all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
     sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
-    results = db.execute(sql_query).fetchall()
-    results = [sha for (sha,) in results]
+    results = pd.read_sql(sql_query, db_cnxn)['sha'].tolist()
+    # results = db.execute(sql_query).fetchall()
+    # results = [sha for (sha,) in results]
 
     return results
 
 
-def get_ids_by_condition(conditions, table, db):
+def get_ids_by_condition(conditions, table, db_cnxn):
     """Find entry IDs given a number of search conditions.
 
     Notes
@@ -106,7 +112,7 @@ def get_ids_by_condition(conditions, table, db):
             SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
     table : str
         The name of the table in `db`.
-    db : sqlite3.Cursor
+    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
         A SQL database for querying the article IDs. Should contain
         a table named "articles".
 
@@ -120,8 +126,10 @@ def get_ids_by_condition(conditions, table, db):
         sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
     else:
         sql_query = f"SELECT {table[:-1]}_id FROM {table}"
-    results = db.execute(sql_query).fetchall()
-    results = [id_ for (id_,) in results]
+
+    results = pd.read_sql(sql_query, db_cnxn)[f'{table[:-1]}_id'].tolist()
+    # results = db.execute(sql_query).fetchall()
+    # results = [id_ for (id_,) in results]
 
     return results
 
