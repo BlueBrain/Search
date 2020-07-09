@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import (unique_etypes, iob2idx, idx2text, ner_report,
+from bbsearch.mining.eval import (unique_etypes, iob2idx, idx2text, ner_report, ner_errors,
                                   ner_confusion_matrix, plot_ner_confusion_matrix)
 
 
@@ -213,3 +213,33 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
 
     np.testing.assert_almost_equal(cm_1.values, cm_vals / cm_vals.sum(axis=1, keepdims=True))
     np.testing.assert_almost_equal(cm_2.values, cm_vals / cm_vals.sum(axis=0, keepdims=True))
+
+
+@pytest.mark.parametrize('dataset, mode, errors_expected', [
+    ('bio', 'token', [('CONDITION', {'false_neg': ['outbreak', 'worldwide'],
+                                     'false_pos': []}),
+                      ('DISEASE', {'false_neg': [','],
+                                   'false_pos': ['OC43', 'infection', 'infection']}),
+                      ('ORGANISM', {'false_neg': [],
+                                    'false_pos': ['children', 'children']}),
+                      ('PATHWAY', {'false_neg': ['infection', 'rate'],
+                                   'false_pos': []})]),
+    ('bio', 'entity', [('CONDITION', {'false_neg': ['worldwide outbreak'],
+                                      'false_pos': []}),
+                       ('DISEASE', {'false_neg': ['respiratory tract infection ,'],
+                                    'false_pos': ['OC43 infection', 'infection',
+                                                  'respiratory tract infection']}),
+                       ('ORGANISM', {'false_neg': [],
+                                     'false_pos': ['children', 'children']}),
+                       ('PATHWAY', {'false_neg': ['infection rate'],
+                                    'false_pos': []})])
+])
+def test_ner_confusion_matrix(ner_annotations, dataset, mode, errors_expected):
+    iob_true = ner_annotations[dataset]['annotator_1']
+    iob_pred = ner_annotations[dataset]['annotator_2']
+    tokens = ner_annotations[dataset]['text']
+    etypes_map = {'ORGANISM': 'TAXON'}
+    errors_out = ner_errors(iob_true, iob_pred, tokens, mode=mode, etypes_map=etypes_map,
+                            return_dict=True)
+    errors_expected = OrderedDict(errors_expected)
+    assert errors_out == errors_expected

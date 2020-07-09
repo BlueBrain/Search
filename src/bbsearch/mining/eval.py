@@ -160,7 +160,7 @@ def unique_etypes(iob, return_counts=False, mode='entity'):
 
 
 def iob2idx(iob, etype):
-    """Retrieve start and end indexes of entities from annotations in IOB format.
+    """Retrieve start and end indices of entities from annotations in IOB format.
 
     Parameters
     ----------
@@ -191,7 +191,7 @@ def iob2idx(iob, etype):
 
 
 def idx2text(tokens, idxs):
-    """Retrieve entities text from a list of tokens and start and end indexes.
+    """Retrieve entities text from a list of tokens and start and end indices.
 
     Parameters
     ----------
@@ -205,7 +205,7 @@ def idx2text(tokens, idxs):
     Returns
     -------
     texts : pd.Series[str]
-        Texts of each entity identified by the indexes provided in input.
+        Texts of each entity identified by the indices provided in input.
     """
     return pd.Series([' '.join(tokens[s:e + 1])
                       for s, e in zip(idxs['start'], idxs['end'])], index=idxs.index, dtype='str')
@@ -227,8 +227,8 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotaitons. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground true and TAXON in predictions.
+        entity type names in the predicted annotations. Useful when entity types have different
+        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
@@ -249,9 +249,9 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
     report = OrderedDict()
 
     etypes_counts = dict(zip(*unique_etypes(iob_true, mode=mode, return_counts=True)))
-    etypes_map = etypes_map if etypes_map is not None else dict()
-    etypes_map = {etype: etypes_map.get(etype, etype)
-                  for etype in etypes_counts.keys()}
+    etypes_map = etypes_map or dict()
+    for etype in etypes_counts.keys() - etypes_map.keys():
+        etypes_map[etype] = etype
 
     for etype in etypes_counts.keys():
         if mode == 'entity':
@@ -312,8 +312,8 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
 
     etypes_map : dict, optional
         Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotaitons. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground true and TAXON in predictions.
+        entity type names in the predicted annotations. Useful when entity types have different
+        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
@@ -349,9 +349,10 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
                               'false_pos': sorted(idx2text(tokens, idxs_false_pos).tolist())})
     elif mode == 'token':
         for etype in etypes:
-            etype_symbols = [f'B-{etype}', f'I-{etype}']
-            false_neg = tokens[iob_true.isin(etype_symbols) & (~iob_pred.isin(etype_symbols))]
-            false_pos = tokens[(~iob_true.isin(etype_symbols)) & iob_pred.isin(etype_symbols)]
+            etype_symbols_t = [f'B-{etype}', f'I-{etype}']
+            etype_symbols_p = [f'B-{etypes_map[etype]}', f'I-{etypes_map[etype]}']
+            false_neg = tokens[iob_true.isin(etype_symbols_t) & (~iob_pred.isin(etype_symbols_p))]
+            false_pos = tokens[(~iob_true.isin(etype_symbols_t)) & iob_pred.isin(etype_symbols_p)]
             report[etype] = ({'false_neg': sorted(false_neg.tolist()),
                               'false_pos': sorted(false_pos.tolist())})
     else:
