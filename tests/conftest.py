@@ -152,7 +152,7 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
 
 
 @pytest.fixture(scope='session')
-def fake_slqalchemy_engine(fake_db_cnxn):
+def fake_sqlalchemy_engine(fake_db_cnxn):
     """Connection object (sqlite)."""
     database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
     engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
@@ -160,9 +160,9 @@ def fake_slqalchemy_engine(fake_db_cnxn):
 
 
 @pytest.fixture(scope='session')
-def fake_slqalchemy_cnxn(fake_slqalchemy_engine):
+def fake_sqlalchemy_cnxn(fake_sqlalchemy_engine):
     """Connection object (sqlite)."""
-    sqlalchemy_cnxn = fake_slqalchemy_engine.connect()
+    sqlalchemy_cnxn = fake_sqlalchemy_engine.connect()
     return sqlalchemy_cnxn
 
 

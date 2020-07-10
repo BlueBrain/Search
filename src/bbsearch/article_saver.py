@@ -4,7 +4,6 @@ import pdfkit
 import textwrap
 
 import pandas as pd
-import sqlalchemy
 
 from .widget import SAVING_OPTIONS
 
@@ -14,9 +13,9 @@ class ArticleSaver:
 
     Parameters
     ----------
-    engine: SQLAlchemy.Engine
-        Engine connected to the database. The database is supposed to have paragraphs and
-        articles tables.
+    connection: SQLAlchemy connectable (engine/connection) or database str URI
+        An SQL database connectable compatible with `pandas.read_sql`.
+        The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
@@ -37,21 +36,8 @@ class ArticleSaver:
 
     """
 
-    def __init__(self,
-                 engine):
-        self.engine = engine
-        metadata = sqlalchemy.MetaData()
-        self.connection = engine.connect()
-
-        self.sentences = sqlalchemy.Table('sentences', metadata,
-                                          autoload=True, autoload_with=self.engine)
-        self.paragraphs = sqlalchemy.Table('paragraphs', metadata,
-                                           autoload=True, autoload_with=self.engine)
-        self.articles = sqlalchemy.Table('articles', metadata,
-                                         autoload=True, autoload_with=self.engine)
-        self.article_id_2_sha = sqlalchemy.Table('article_id_2_sha', metadata,
-                                                 autoload=True, autoload_with=self.engine)
-
+    def __init__(self, connection):
+        self.connection = connection
         self.saved_articles = dict()
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
         self.articles_metadata = dict()
@@ -64,52 +50,42 @@ class ArticleSaver:
                                                    columns=['article_id', 'paragraph_id', 'option'])
 
         article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
+        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
 
-        shas = sqlalchemy.select(
-            [self.article_id_2_sha.c.sha]
-        ).where(self.article_id_2_sha.c.article_id.in_(article_ids_full))
-
-        p = sqlalchemy.select(
-            [self.paragraphs.c.paragraph_id,
-             self.paragraphs.c.sha.label('p_sha'),
-             self.paragraphs.c.section_name,
-             self.paragraphs.c.text]
-        ).where(self.paragraphs.c.sha.in_(shas))
-
-        query = sqlalchemy.select(
-            [self.article_id_2_sha.c.article_id,
-             p.c.section_name,
-             p.c.paragraph_id,
-             p.c.text]
-        )
-        query = query.select_from(
-            p.join(self.article_id_2_sha,
-                   p.c.p_sha == self.article_id_2_sha.c.sha
-                   )
-        )
-        df_extractions_full = pd.read_sql(query, self.connection)
+        sql_query = f"""
+        SELECT article_id, section_name, paragraph_id, text
+        FROM (
+                 SELECT *
+                 FROM paragraphs
+                 WHERE sha IN (
+                     SELECT sha
+                     FROM article_id_2_sha
+                     WHERE article_id IN ({article_ids_full_list})
+                 )
+             ) p
+                 INNER JOIN
+             article_id_2_sha a
+             ON a.sha = p.sha;
+        """
+        df_extractions_full = pd.read_sql(sql_query, self.connection)
 
         df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
         df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
 
-        p = sqlalchemy.select(
-            [self.paragraphs.c.paragraph_id,
-             self.paragraphs.c.sha.label('p_sha'),
-             self.paragraphs.c.section_name,
-             self.paragraphs.c.text]
-        ).where(self.paragraphs.c.paragraph_id.in_(df_only_paragraph['paragraph_id'].tolist()))
+        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id'])
 
-        query = sqlalchemy.select(
-            [self.article_id_2_sha.c.article_id,
-             p.c.section_name,
-             p.c.paragraph_id,
-             p.c.text])
-
-        query = query.select_from(
-            p.join(self.article_id_2_sha,
-                   p.c.p_sha == self.article_id_2_sha.c.sha
-                   ))
-        df_extractions_pars = pd.read_sql(query, self.connection)
+        sql_query = f"""
+        SELECT article_id, section_name, paragraph_id, text
+        FROM (
+                 SELECT *
+                 FROM paragraphs
+                 WHERE paragraph_id IN ({paragraph_ids_list})
+             ) p
+                 INNER JOIN
+             article_id_2_sha a
+             ON p.sha = a.sha;
+        """
+        df_extractions_pars = pd.read_sql(sql_query, self.connection)
 
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
 
