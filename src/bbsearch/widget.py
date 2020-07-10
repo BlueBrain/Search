@@ -5,10 +5,9 @@ import logging
 import pdfkit
 import textwrap
 
-import ipywidgets as widgets
 from IPython.display import display, HTML
+import ipywidgets as widgets
 import pandas as pd
-import sqlalchemy
 
 from .sql import find_paragraph
 
@@ -27,30 +26,18 @@ class Widget:
     searcher : bbsearch.search.LocalSearcher or bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
-    engine : SQLAlchemy Engine.
-        Connection to the database.
+    engine : sqlalchemy.engine.Engine
+        SQLAlchemy engine referring to the database
 
     article_saver: ArticleSaver
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
     """
 
-    def __init__(self,
-                 searcher,
-                 engine,
-                 article_saver=None):
+    def __init__(self, searcher, engine, article_saver=None):
 
         self.searcher = searcher
-
         self.engine = engine
-        metadata = sqlalchemy.MetaData()
-        self.connection = self.engine.connect()
-        self.sentences = sqlalchemy.Table('sentences', metadata,
-                                          autoload=True, autoload_with=self.engine)
-        self.articles = sqlalchemy.Table('articles', metadata,
-                                         autoload=True, autoload_with=self.engine)
-        self.article_id_2_sha = sqlalchemy.Table('article_id_2_sha', metadata,
-                                                 autoload=True, autoload_with=self.engine)
 
         self.report = ''
 
@@ -115,22 +102,28 @@ class Widget:
             the information about the article.
 
         """
-        sql_query = sqlalchemy.select([self.sentences])\
-            .where(self.sentences.c.sentence_id == sentence_id)
-        sentence = pd.read_sql(sql_query, self.connection)
+        sql_query = f"""
+        SELECT sha, section_name, text, paragraph_id
+        FROM sentences
+        WHERE sentence_id = {sentence_id}
+        """
+        sentence = pd.read_sql(sql_query, self.engine)
         article_sha, section_name, text, paragraph_id = \
             sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
 
-        sql_query = sqlalchemy.select([self.article_id_2_sha])\
-            .where(self.article_id_2_sha.c.sha == article_sha)
-        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
+        sql_query = f"""
+        SELECT article_id
+        FROM article_id_2_sha
+        WHERE sha = {article_sha}
+        """
+        article_id = pd.read_sql(sql_query, self.engine).iloc[0]['article_id']
 
-        ## Currently issue with datetime parsing !!!
-        sql_query = sqlalchemy.select([self.articles.c.authors, self.articles.c.title,
-                                       self.articles.c.url])\
-            .where(self.articles.c.article_id == article_id)
-        article = pd.read_sql(sql_query, self.connection)
-
+        sql_query = f"""
+        SELECT authors, title, url
+        FROM articles
+        WHERE article_id = {article_id}
+        """
+        article = pd.read_sql(sql_query, self.engine)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -139,8 +132,8 @@ class Widget:
         except AttributeError:
             article_auth = ''
 
-        ref = ref if ref else ''
-        section_name = section_name if section_name else ''
+        ref = ref or ""
+        section_name = section_name or ""
 
         width = 80
         if print_whole_paragraph:
