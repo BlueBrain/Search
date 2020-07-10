@@ -26,18 +26,18 @@ class Widget:
     searcher : bbsearch.search.LocalSearcher or bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
-    engine : sqlalchemy.engine.Engine
-        SQLAlchemy engine referring to the database
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the SQL database
 
     article_saver: ArticleSaver
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
     """
 
-    def __init__(self, searcher, engine, article_saver=None):
+    def __init__(self, searcher, connection, article_saver=None):
 
         self.searcher = searcher
-        self.engine = engine
+        self.connection = connection
 
         self.report = ''
 
@@ -107,7 +107,7 @@ class Widget:
         FROM sentences
         WHERE sentence_id = "{sentence_id}"
         """
-        sentence = pd.read_sql(sql_query, self.engine)
+        sentence = pd.read_sql(sql_query, self.connection)
         article_sha, section_name, text, paragraph_id = \
             sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
 
@@ -116,14 +116,14 @@ class Widget:
         FROM article_id_2_sha
         WHERE sha = "{article_sha}"
         """
-        article_id = pd.read_sql(sql_query, self.engine).iloc[0]['article_id']
+        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
 
         sql_query = f"""
         SELECT authors, title, url
         FROM articles
         WHERE article_id = "{article_id}"
         """
-        article = pd.read_sql(sql_query, self.engine)
+        article = pd.read_sql(sql_query, self.connection)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -138,7 +138,7 @@ class Widget:
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.engine)
+                paragraph = find_paragraph(sentence_id, self.connection)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:

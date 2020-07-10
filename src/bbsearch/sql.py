@@ -14,7 +14,7 @@ def get_paragraph_ids(article_ids, db_cnxn):
     article_ids : list
         List of article ids. Note that they are the primary keys in the `articles` table.
 
-    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
+    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database.
 
     Returns
@@ -51,7 +51,7 @@ def find_paragraph(sentence_id, db_cnxn):
     ----------
     sentence_id : int
         The identifier of the given sentence
-    db_cnxn: sqlite3.Connection or SQLAlchemy.Connection
+    db_cnxn: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database
 
     Returns
@@ -77,7 +77,7 @@ def get_shas_from_ids(articles_ids, db_cnxn):
     ----------
     articles_ids : list
         A list of strings representing article IDs.
-    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
+    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         A SQL database for querying the SHAs. Should contain
         a table named "article_id_2_sha".
 
@@ -112,7 +112,7 @@ def get_ids_by_condition(conditions, table, db_cnxn):
             SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
     table : str
         The name of the table in `db`.
-    db_cnxn : sqlite3.Connection or SQLAlchemy.Connection
+    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         A SQL database for querying the article IDs. Should contain
         a table named "articles".
 
