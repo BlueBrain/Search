@@ -6,7 +6,6 @@ import pathlib
 from flask import jsonify, make_response, request
 import pandas as pd
 import spacy
-import sqlalchemy
 
 from ..mining import run_pipeline
 
@@ -22,21 +21,15 @@ class MiningServer:
         The Flask app wrapping the server.
     models_path : str or pathlib.Path
         The folder containing pre-trained models.
-    database_path : str or pathlib.Path
-        Path to the sql database.
+    engine : sqlalchemy.engine.Engine
+        SQLAlchemy engine referring to the database
     """
 
-    def __init__(self, app, models_path, database_path):
+    def __init__(self, app, models_path, engine):
         self.version = "1.0"
         self.name = "MiningServer"
         self.models_path = pathlib.Path(models_path)
-        self.database_path = pathlib.Path(database_path)
-
-        self.engine = sqlalchemy.create_engine(f'sqlite:///{str(self.database_path)}')
-        metadata = sqlalchemy.MetaData()
-        self.connection = self.engine.connect()
-        self.paragraphs = sqlalchemy.Table('paragraphs', metadata,
-                                           autoload=True, autoload_with=self.engine)
+        self.engine = engine
 
         self.app = app
         self.app.route("/text", methods=["POST"])(self.pipeline_text)
@@ -100,10 +93,15 @@ class MiningServer:
 
             else:
                 tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
+                paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
 
-                query = sqlalchemy.select([self.paragraphs])\
-                    .where(self.paragraphs.c.paragraph_id.in_(tmp_dict.keys()))
-                texts_df = pd.read_sql(query, self.connection)
+                sql_query = f"""
+                SELECT paragraph_id, section_name, text
+                FROM paragraphs
+                WHERE paragraph_id IN ({paragraph_ids_joined})
+                """
+
+                texts_df = pd.read_sql(sql_query, self.engine)
                 texts = [(row['text'],
                           {'paper_id':
                            f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
