@@ -214,3 +214,27 @@ def model_entities():
     https://spacy.io/api/annotation#named-entities
     """
     return spacy.load("en_core_web_sm")
+
+
+@pytest.fixture(scope='session')
+def ner_annotations():
+    csv_filename = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval' / 'ner_iob_sample.csv'
+
+    return {
+        'bio':
+            pd.read_csv(csv_filename),
+        'sample':
+            pd.DataFrame(data={
+                'annotator_1': ['B-a', 'B-a', 'B-b', 'B-a', 'O', 'B-a', 'I-a', 'O', 'B-b', 'I-b',
+                                'O', 'O', 'B-d', 'B-b'],
+                'annotator_2': ['B-c', 'B-c', 'I-c', 'B-c', 'O', 'B-c', 'O', 'B-b', 'I-b', 'I-b',
+                                'B-c', 'I-c', 'B-c', 'B-b']
+            })
+    }
+
+
+@pytest.fixture(scope='session')
+def punctuation_annotations():
+    files_location = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval'
+    return {mode: pd.read_csv(files_location / f'iob_punctuation_{mode}.csv')
+            for mode in ('before', 'after')}
