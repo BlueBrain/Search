@@ -9,7 +9,8 @@ import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
 from bbsearch.mining.eval import (unique_etypes, iob2idx, idx2text, ner_report, ner_errors,
-                                  ner_confusion_matrix, plot_ner_confusion_matrix)
+                                  ner_confusion_matrix, plot_ner_confusion_matrix,
+                                  remove_punctuation)
 
 
 class TestProdigy2df:
@@ -243,3 +244,8 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, errors_expected):
                             return_dict=True)
     errors_expected = OrderedDict(errors_expected)
     assert errors_out == errors_expected
+
+
+def test_remove_punctuation(punctuation_annotations):
+    df_after = remove_punctuation(punctuation_annotations['before'])
+    pd.testing.assert_frame_equal(df_after, punctuation_annotations['after'])

@@ -215,3 +215,10 @@ def ner_annotations():
                                 'B-c', 'I-c', 'B-c', 'B-b']
             })
     }
+
+
+@pytest.fixture(scope='session')
+def punctuation_annotations():
+    files_location = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval'
+    return {mode: pd.read_csv(files_location / f'iob_punctuation_{mode}.csv')
+            for mode in ('before', 'after')}

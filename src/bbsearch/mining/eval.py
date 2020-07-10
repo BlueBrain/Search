@@ -1,6 +1,7 @@
 """Collection of functions for evaluation of NER models."""
 from collections import OrderedDict
 import json
+import string
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -117,6 +118,39 @@ def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
                              'text': token.text})
 
     return pd.DataFrame(all_rows)
+
+
+def remove_punctuation(df):
+    """Remove punctuation from a dataframe with tokens and entity annotations.
+
+    Important: this function should be called only after all the annotations have been
+    loaded by calling `prodigy2df()` and `spacy2df()`.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame with tokens and annotations, can be generated calling `prodigy2df()` and
+        `spacy2df()`. Should include a column "text" containing one token per row, and one
+        or more columns of annotations in IOB format named as "class_XXX".
+
+    Returns
+    -------
+    df_cleaned : pd.DataFrame
+        DataFrame with removed punctuation.
+    """
+    is_punctuation = df['text'].isin(list(string.punctuation))
+
+    annotations_cols = [col for col in df.columns if col.startswith('class_')]
+    for col in annotations_cols:
+        for idx in df.index[is_punctuation & df[col].str.startswith('B-')]:
+            i = idx
+            while df.iloc[i]['text'] in list(string.punctuation):
+                i += 1
+            df.iloc[i, df.columns.get_loc(col)] = \
+                'B' + df.iloc[i][col][1:]
+
+    df_cleaned = df[~is_punctuation].reset_index(drop=True)
+    return df_cleaned
 
 
 def unique_etypes(iob, return_counts=False, mode='entity'):
