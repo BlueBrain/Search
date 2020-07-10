@@ -64,9 +64,6 @@ def find_paragraph(sentence_id, db_cnxn):
     sql_query = f'SELECT text FROM paragraphs WHERE paragraph_id = {paragraph_id}'
     paragraph = pd.read_sql(sql_query, db_cnxn).iloc[0]['text']
 
-    # paragraph_id = db.execute('SELECT paragraph_id FROM sentences WHERE sentence_id = ? ', [sentence_id]).fetchone()[0]
-    # paragraph = db.execute('SELECT text FROM paragraphs WHERE paragraph_id = ?', [paragraph_id]).fetchone()[0]
-
     return paragraph
 
 

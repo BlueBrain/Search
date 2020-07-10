@@ -1,9 +1,7 @@
 """Test for the mining server."""
 from flask import Flask
 import pytest
-from unittest.mock import Mock, MagicMock
-
-from bbsearch.mining.relation import ChemProt
+from unittest.mock import Mock
 from bbsearch.server.mining_server import MiningServer
 
 

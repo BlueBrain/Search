@@ -1,8 +1,6 @@
-import pathlib
 from unittest.mock import Mock
 
 import numpy as np
-import pytest
 
 from bbsearch.search import LocalSearcher, run_search
 
