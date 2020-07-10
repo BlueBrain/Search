@@ -30,11 +30,17 @@ args = parser.parse_args()
 
 def main():
     """Execute the entry point."""
+    import pathlib
     from flask import Flask
+    import sqlalchemy
     from ..server.search_server import SearchServer
 
     app = Flask("BBSearch Server")
-    SearchServer(app, args.models_path, args.embeddings_path, args.database_path)
+    models_path = pathlib.Path(args.models_path)
+    embeddings_path = pathlib.Path(args.models_path)
+    engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
+
+    SearchServer(app, models_path, embeddings_path, engine)
     app.run(
         host=args.host,
         port=args.port,

@@ -8,13 +8,8 @@ from bbsearch.search import LocalSearcher, run_search
 
 
 class TestLocalSearcher:
-    def test_error(self, tmpdir):
-        fake_dir = pathlib.Path(str(tmpdir))
 
-        with pytest.raises(FileNotFoundError):
-            LocalSearcher({}, {}, fake_dir)
-
-    def test_query(self, embeddings_path, tmp_path_factory):
+    def test_query(self, embeddings_path, fake_sqlalchemy_engine):
         emb_path = [p for p in embeddings_path.iterdir()][0]
 
         model_name = emb_path.stem
@@ -31,11 +26,8 @@ class TestLocalSearcher:
         emb_mod.embed.return_value = np.ones((dim,))
         embedding_models = {model_name: emb_mod}
 
-        # get database path
-        database_path = tmp_path_factory.getbasetemp() / 'db' / 'cord19.db'  # created by fake_db_cnxn fixture
-
         # actual test
-        local_searcher = LocalSearcher(embedding_models, precomputed_embeddings, database_path)
+        local_searcher = LocalSearcher(embedding_models, precomputed_embeddings, fake_sqlalchemy_engine)
         indices, similarities, stats = local_searcher.query(model_name, k=k, query_text=query_text)
 
         assert indices.shape == (k,)
@@ -65,7 +57,7 @@ def test_run_search(fake_db_cnxn, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cnxn,
+                                              connection=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=None,
                                               deprioritize_strength=deprioritized_strength,
@@ -82,7 +74,7 @@ def test_run_search(fake_db_cnxn, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cnxn,
+                                              connection=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=deprioritized_text,
                                               date_range=(3000, 3001),
@@ -96,7 +88,7 @@ def test_run_search(fake_db_cnxn, embeddings_path):
 
     indices, similarities, stats = run_search(embedding_model=emb_mod,
                                               precomputed_embeddings=precomputed_embeddings,
-                                              database=fake_db_cnxn,
+                                              connection=fake_db_cnxn,
                                               query_text=query_text,
                                               deprioritize_text=deprioritized_text,
                                               k=k)

@@ -1,7 +1,4 @@
 """Collection of functions focused on searching."""
-import pathlib
-import sqlite3
-
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -25,17 +22,14 @@ class LocalSearcher:
         The pre-trained models.
     precomputed_embeddings : dict
         The pre-computed embeddings.
-    database_path : str or pathlib.Path
-        The path to where the database file is.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        The database connection.
     """
 
-    def __init__(self, embedding_models, precomputed_embeddings, database_path):
+    def __init__(self, embedding_models, precomputed_embeddings, connection):
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
-        self.database_path = pathlib.Path(database_path)
-
-        if not self.database_path.is_file():
-            raise FileNotFoundError('{} does not exist'.format(self.database_path))
+        self.connection = connection
 
     def query(self,
               which_model,
@@ -77,24 +71,23 @@ class LocalSearcher:
         results : tuple
             All results returned by `run_search`.
         """
-        with sqlite3.connect(str(self.database_path)) as database_connection:
-            results = run_search(
-                self.embedding_models[which_model],
-                self.precomputed_embeddings[which_model],
-                database_connection,
-                k,
-                query_text,
-                has_journal,
-                date_range,
-                deprioritize_strength,
-                exclusion_text,
-                deprioritize_text,
-                verbose)
+        results = run_search(
+            self.embedding_models[which_model],
+            self.precomputed_embeddings[which_model],
+            self.connection,
+            k,
+            query_text,
+            has_journal,
+            date_range,
+            deprioritize_strength,
+            exclusion_text,
+            deprioritize_text,
+            verbose)
 
         return results
 
 
-def filter_sentences(database,
+def filter_sentences(connection,
                      has_journal=False,
                      date_range=None,
                      exclusion_text=None):
@@ -102,8 +95,8 @@ def filter_sentences(database,
 
     Parameters
     ----------
-    database : sqlite3.Cursor
-        Cursor to the database.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the database.
 
     has_journal : bool
         If True, only consider papers that have a journal information.
@@ -127,11 +120,11 @@ def filter_sentences(database,
         article_conditions.append(ArticleConditioner.get_has_journal_condition())
     article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
 
-    restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', database)
+    restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', connection)
 
     # Articles ID to SHA
     all_article_shas_str = ', '.join([f"'{sha}'"
-                                      for sha in get_shas_from_ids(restricted_article_ids, database)])
+                                      for sha in get_shas_from_ids(restricted_article_ids, connection)])
     sentence_conditions = [f"sha IN ({all_article_shas_str})"]
 
     # Apply sentence conditions
@@ -139,12 +132,12 @@ def filter_sentences(database,
         excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
         sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
                                 for word in excluded_words]
-    restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', database)
+    restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', connection)
 
     return restricted_sentence_ids
 
 
-def run_search(embedding_model, precomputed_embeddings, database, k, query_text, has_journal=False, date_range=None,
+def run_search(embedding_model, precomputed_embeddings, connection, k, query_text, has_journal=False, date_range=None,
                deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
     """Generate search results.
 
@@ -158,8 +151,8 @@ def run_search(embedding_model, precomputed_embeddings, database, k, query_text,
         The first column has to be the corresponding index of the sentence in the database.
         The others columns have to be the embeddings, so need to have the same size as the model specified requires.
 
-    database : sqlite3.Cursor
-        Cursor to the database.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the database.
 
     k : int
         Number of top results to display.
@@ -212,7 +205,7 @@ def run_search(embedding_model, precomputed_embeddings, database, k, query_text,
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
     with timer('sentences_conditioning'):
-        restricted_sentence_ids = filter_sentences(database,
+        restricted_sentence_ids = filter_sentences(connection,
                                                    has_journal=has_journal,
                                                    date_range=date_range,
                                                    exclusion_text=exclusion_text)

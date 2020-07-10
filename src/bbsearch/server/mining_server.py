@@ -21,15 +21,15 @@ class MiningServer:
         The Flask app wrapping the server.
     models_path : str or pathlib.Path
         The folder containing pre-trained models.
-    engine : sqlalchemy.engine.Engine
-        SQLAlchemy engine referring to the database
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        The database connection.
     """
 
-    def __init__(self, app, models_path, engine):
+    def __init__(self, app, models_path, connection):
         self.version = "1.0"
         self.name = "MiningServer"
         self.models_path = pathlib.Path(models_path)
-        self.engine = engine
+        self.connection = connection
 
         self.app = app
         self.app.route("/text", methods=["POST"])(self.pipeline_text)
@@ -101,7 +101,7 @@ class MiningServer:
                 WHERE paragraph_id IN ({paragraph_ids_joined})
                 """
 
-                texts_df = pd.read_sql(sql_query, self.engine)
+                texts_df = pd.read_sql(sql_query, self.connection)
                 texts = [(row['text'],
                           {'paper_id':
                            f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
