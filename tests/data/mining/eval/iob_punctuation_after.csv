@@ -1,0 +1,17 @@
+text,class_ann1,class_ann2,class_ann3
+Potato,B-VEGETABLE,B-VEGETABLE,B-VEGETABLE
+Solanum,B-VEGETABLE,I-VEGETABLE,B-VEGETABLE
+tuberosum,I-VEGETABLE,I-VEGETABLE,I-VEGETABLE
+is,O,O,O
+a,O,O,O
+vegetable,B-VEGETABLE,B-VEGETABLE,B-VEGETABLE
+Cherry,B-FRUIT,B-FRUIT,B-FRUIT
+tomato,I-FRUIT,I-FRUIT,I-FRUIT
+is,O,O,O
+technically,O,O,O
+a,O,O,O
+fruit,B-FRUIT,B-VEGETABLE,B-FRUIT
+but,O,O,O
+few,O,O,O
+know,O,O,O
+that,O,O,O
