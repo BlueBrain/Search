@@ -105,7 +105,7 @@ class Widget:
         sql_query = f"""
         SELECT sha, section_name, text, paragraph_id
         FROM sentences
-        WHERE sentence_id = {sentence_id}
+        WHERE sentence_id = "{sentence_id}"
         """
         sentence = pd.read_sql(sql_query, self.engine)
         article_sha, section_name, text, paragraph_id = \
@@ -114,14 +114,14 @@ class Widget:
         sql_query = f"""
         SELECT article_id
         FROM article_id_2_sha
-        WHERE sha = {article_sha}
+        WHERE sha = "{article_sha}"
         """
         article_id = pd.read_sql(sql_query, self.engine).iloc[0]['article_id']
 
         sql_query = f"""
         SELECT authors, title, url
         FROM articles
-        WHERE article_id = {article_id}
+        WHERE article_id = "{article_id}"
         """
         article = pd.read_sql(sql_query, self.engine)
         article_auth, article_title, ref = \
