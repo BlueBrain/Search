@@ -3,7 +3,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--database",
+parser.add_argument("--database_path",
                     default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="Database containing at least 4 tables:  "
@@ -29,7 +29,7 @@ args = parser.parse_args()
 def main():
     """Compute Embeddings."""
     from pathlib import Path
-    import sqlite3
+    import sqlalchemy
     import numpy as np
     from .. import embedding_models
 
@@ -37,7 +37,7 @@ def main():
         raise FileNotFoundError(f'The output directory {args.out_dir} does not exist!')
 
     if Path(args.database).exists():
-        db = sqlite3.connect(args.database).cursor()
+        engine = sqlalchemy.create_engine(f"sqlite:////{args.database_path}")
     else:
         raise FileNotFoundError(f'The database {args.database} is not found!')
 
@@ -52,7 +52,7 @@ def main():
             except AttributeError:
                 print(f'The model {model} is not supported.')
                 continue
-        embeddings = embedding_models.compute_database_embeddings(db, embedding_model)
+        embeddings = embedding_models.compute_database_embeddings(engine, embedding_model)
         path = Path(args.out_dir) / f'{model}.npy'
         np.save(path, embeddings)
 
