@@ -86,8 +86,6 @@ def get_shas_from_ids(articles_ids, db_cnxn):
     all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
     sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
     results = pd.read_sql(sql_query, db_cnxn)['sha'].tolist()
-    # results = db.execute(sql_query).fetchall()
-    # results = [sha for (sha,) in results]
 
     return results
 
@@ -125,8 +123,6 @@ def get_ids_by_condition(conditions, table, db_cnxn):
         sql_query = f"SELECT {table[:-1]}_id FROM {table}"
 
     results = pd.read_sql(sql_query, db_cnxn)[f'{table[:-1]}_id'].tolist()
-    # results = db.execute(sql_query).fetchall()
-    # results = [id_ for (id_,) in results]
 
     return results
 
