@@ -13,9 +13,9 @@ class ArticleSaver:
 
     Parameters
     ----------
-    database: sqlite3.Connection
-        Connection to the database. The database is supposed to have paragraphs and
-        articles tables.
+    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        An SQL database connectable compatible with `pandas.read_sql`.
+        The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
@@ -36,9 +36,8 @@ class ArticleSaver:
 
     """
 
-    def __init__(self,
-                 database):
-        self.db = database
+    def __init__(self, connection):
+        self.connection = connection
         self.saved_articles = dict()
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
         self.articles_metadata = dict()
@@ -68,7 +67,7 @@ class ArticleSaver:
              article_id_2_sha a
              ON a.sha = p.sha;
         """
-        df_extractions_full = pd.read_sql(sql_query, self.db)
+        df_extractions_full = pd.read_sql(sql_query, self.connection)
 
         df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
         df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
@@ -86,7 +85,7 @@ class ArticleSaver:
              article_id_2_sha a
              ON p.sha = a.sha;
         """
-        df_extractions_pars = pd.read_sql(sql_query, self.db)
+        df_extractions_pars = pd.read_sql(sql_query, self.connection)
 
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
 

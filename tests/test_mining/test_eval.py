@@ -235,7 +235,7 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
                        ('PATHWAY', {'false_neg': ['infection rate'],
                                     'false_pos': []})])
 ])
-def test_ner_confusion_matrix(ner_annotations, dataset, mode, errors_expected):
+def test_ner_errors(ner_annotations, dataset, mode, errors_expected):
     iob_true = ner_annotations[dataset]['annotator_1']
     iob_pred = ner_annotations[dataset]['annotator_2']
     tokens = ner_annotations[dataset]['text']

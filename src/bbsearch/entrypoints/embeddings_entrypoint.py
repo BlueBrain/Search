@@ -3,7 +3,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--database",
+parser.add_argument("--database_path",
                     default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="Database containing at least 4 tables:  "
@@ -28,32 +28,37 @@ args = parser.parse_args()
 
 def main():
     """Compute Embeddings."""
-    from pathlib import Path
-    import sqlite3
+    import pathlib
+    import sqlalchemy
     import numpy as np
     from .. import embedding_models
 
-    if Path(args.out_dir).exists():
-        raise FileNotFoundError(f'The output directory {args.out_dir} does not exist!')
+    out_dir = pathlib.Path(args.out_dir)
+    database_path = pathlib.Path(args.database_path)
+    bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)
 
-    if Path(args.database).exists():
-        db = sqlite3.connect(args.database).cursor()
-    else:
-        raise FileNotFoundError(f'The database {args.database} is not found!')
+    if not out_dir.exists():
+        raise FileNotFoundError(f'The output directory {out_dir} does not exist!')
+    if not database_path.exists():
+        raise FileNotFoundError(f'The database {database_path} is not found!')
+
+    engine = sqlalchemy.create_engine(f"sqlite:////{database_path}")
 
     for model in args.models.split(','):
         model = model.strip()
         if model == 'BSV':
             embedding_model = embedding_models.BSV(
-                checkpoint_model_path=Path(args.bsv_checkpoints))
+                checkpoint_model_path=bsv_checkpoints)
         else:
             try:
-                embedding_model = getattr(embedding_models, model)()
+                embedding_model_cls = getattr(embedding_models, model)
+                embedding_model = embedding_model_cls()
             except AttributeError:
                 print(f'The model {model} is not supported.')
                 continue
-        embeddings = embedding_models.compute_database_embeddings(db, embedding_model)
-        path = Path(args.out_dir) / f'{model}.npy'
+
+        embeddings = embedding_models.compute_database_embeddings(engine, embedding_model)
+        path = out_dir / f'{model}.npy'
         np.save(path, embeddings)
 
 

@@ -16,7 +16,7 @@ def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
 
     Parameters
     ----------
-    cnxn : sqlite3.Connection
+    cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the prodigy database.
     dataset_name : str
         Name of the dataset from which to retrieve annotations.

@@ -22,19 +22,20 @@ class SearchServer:
         The folder containing pre-trained models.
     embeddings_path : str or pathlib.Path
         The folder containing pre-computed embeddings.
-    database_path : str or pathlib.Path
-        The path to where the database file is.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        The database connection.
     """
 
     def __init__(self,
                  app,
                  trained_models_path,
                  embeddings_path,
-                 database_path):
+                 connection):
 
         self.version = "1.0"
         self.name = "SearchServer"
         self.app = app
+        self.connection = connection
 
         trained_models_path = pathlib.Path(trained_models_path)
         embeddings_path = pathlib.Path(embeddings_path)
@@ -54,7 +55,7 @@ class SearchServer:
         }
 
         self.local_searcher = LocalSearcher(
-            embedding_models, precomputed_embeddings, database_path)
+            embedding_models, precomputed_embeddings, self.connection)
 
         app.route("/help", methods=["POST"])(self.help)
         app.route("/", methods=["POST"])(self.query)
