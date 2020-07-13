@@ -26,7 +26,7 @@ class TestEmbeddingModels:
         with pytest.raises(TypeError):
             WrongModel()
 
-    def test_sbiobert_embedding(self, monkeypatch, fake_db_cnxn, test_parameters, metadata_path):
+    def test_sbiobert_embedding(self, monkeypatch, fake_sqlalchemy_engine, test_parameters, metadata_path):
         torch_model = MagicMock(spec=torch.nn.Module)
         torch_model.return_value = (torch.ones([1, 8, 768]), torch.ones([1, 768]))
 
@@ -52,10 +52,10 @@ class TestEmbeddingModels:
         n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_db_cnxn, sbiobert)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbiobert)
         assert embeddings.shape == (n_sentences, 769)
 
-    def test_bsv_embedding(self, monkeypatch, tmpdir, fake_db_cnxn, test_parameters, metadata_path):
+    def test_bsv_embedding(self, monkeypatch, tmpdir, fake_sqlalchemy_engine, test_parameters, metadata_path):
         sent2vec_module = Mock()
         bsv_model = Mock(spec=sent2vec.Sent2vecModel)
         bsv_model.embed_sentences.return_value = np.ones([1, 700])
@@ -83,10 +83,10 @@ class TestEmbeddingModels:
         n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_db_cnxn, bsv)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, bsv)
         assert embeddings.shape == (n_sentences, 701)
 
-    def test_sbert_embedding(self, monkeypatch, fake_db_cnxn, metadata_path, test_parameters):
+    def test_sbert_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
         sentence_transormer_class = Mock()
         sbert_model = Mock(spec=SentenceTransformer)
         sbert_model.encode.return_value = np.ones([1, 768])  # Need to check the dimensions
@@ -108,10 +108,10 @@ class TestEmbeddingModels:
         n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_db_cnxn, sbert)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbert)
         assert embeddings.shape == (n_sentences, 769)
 
-    def test_use_embedding(self, monkeypatch, fake_db_cnxn, metadata_path, test_parameters):
+    def test_use_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
         hub_module = Mock()
         use_model = Mock()
         hub_module.load.return_value = use_model
@@ -133,5 +133,5 @@ class TestEmbeddingModels:
         n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_db_cnxn, use)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, use)
         assert embeddings.shape == (n_sentences, 513)
