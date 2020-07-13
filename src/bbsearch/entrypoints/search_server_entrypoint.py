@@ -37,7 +37,7 @@ def main():
 
     app = Flask("BBSearch Server")
     models_path = pathlib.Path(args.models_path)
-    embeddings_path = pathlib.Path(args.models_path)
+    embeddings_path = pathlib.Path(args.embeddings_path)
     engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
 
     SearchServer(app, models_path, embeddings_path, engine)
