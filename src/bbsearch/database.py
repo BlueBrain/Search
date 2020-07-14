@@ -3,10 +3,99 @@ import json
 import pandas as pd
 from pathlib import Path
 import re
-import sqlite3
+# import sqlite3
+
+import sqlalchemy
+from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
 
 from spacy.lang.en import English
 from spacy.attrs import ORTH, LEMMA
+
+class Articles(Base):
+    """Articles table."""
+    __tablename__ = 'articles'
+    __table_args__ = {'extend_existing': True}
+    article_id = Column(String, primary_key=True)
+    publisher = Column(String)
+    title = Column(String)
+    doi = Column(String)
+    pmc_id = Column(String)
+    pm_id = Column(Integer)
+    licence = Column(String)
+    abstract = Column(String)
+    date = Column(String)
+    authors = Column(String)
+    journal = Column(String)
+    microsoft_id = Column(Integer)
+    covidence_id = Column(String)
+    has_pdf_parse = Column(Boolean)
+    has_pmc_xml_parse = Column(Boolean)
+    has_covid19_tag = Column(Boolean)
+    fulltext_directory = Column(String)
+    url = Column(String)
+    def init(self, article_id, publisher, title, doi, pmc_id, pm_id, licence, abstract, date, authors, journal,
+             microsoft_id,
+             covidence_id, has_pdf_parse, has_pmc_xml_parse, has_covid19_tag, fulltext_directory, url):
+        """Init of the articles table."""
+        self.article_id = article_id
+        self.publisher = publisher
+        self.title = title
+        self.doi = doi
+        self.pmc_id = pmc_id
+        self.pm_id = pm_id
+        self.license = licence
+        self.abstract = abstract
+        self.date = date
+        self.authors = authors
+        self.journal = journal
+        self.microsoft_id = microsoft_id
+        self.covidence_id = covidence_id
+        self.has_pdf_parse = has_pdf_parse
+        self.has_pmc_xml_parse = has_pmc_xml_parse
+        self.has_covid19_tag = has_covid19_tag
+        self.fulltext_directory = fulltext_directory
+        self.url = url
+class Article_id_2_sha(Base):
+    """Article_id_2_sha table."""
+    __tablename__ = 'article_id_2_sha'
+    __table_args__ = {'extend_existing': True}
+    article_id = Column(String, ForeignKey('articles.article_id'), primary_key=True)
+    sha = Column(String)
+    def init(self, article_id, sha):
+        """Init of the article_id_2_sha table."""
+        self.article_id = article_id
+        self.sha = sha
+class Sentences(Base):
+    """Sentences table."""
+    __tablename__ = 'sentences'
+    __table_args__ = {'extend_existing': True}
+    sentence_id = Column(Integer, primary_key=True)
+    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
+    section_name = Column(String)
+    text = Column(String)
+    paragraph_id = Column(Integer)
+    def init(self, sentence_id, sha, section_name, text, paragraph_id):
+        """Init of the sentences table."""
+        self.sentence_id = sentence_id
+        self.sha = sha
+        self.section_name = section_name
+        self.text = text
+        self.paragraph_id = paragraph_id
+class Paragraphs(Base):
+    """Paragraphs table."""
+    __tablename__ = 'paragraphs'
+    __table_args__ = {'extend_existing': True}
+    paragraph_id = Column(Integer, primary_key=True)
+    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
+    section_name = Column(String)
+    text = Column(String)
+    def init(self, paragraph_id, sha, section_name, text):
+        """Init of the paragraphs table."""
+        self.paragraph_id = paragraph_id
+        self.sha = sha
+        self.section_name = section_name
+        self.text = text
 
 
 class CORD19DatabaseCreation:
@@ -43,7 +132,8 @@ class CORD19DatabaseCreation:
 
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
         self.is_constructed = False
-        self.db = sqlite3.connect(str(self.filename))
+        # self.db = sqlite3.connect(str(self.filename))
+        self.engine = sqlalchemy.create_engine(f'sqlite:///{self.filename}')
         self.all_json_paths = self.data_path.rglob("*.json")
 
     def construct(self):
@@ -66,79 +156,69 @@ class CORD19DatabaseCreation:
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
-        self.db.execute(
-            """CREATE TABLE articles
-            (
-                article_id TEXT PRIMARY KEY,
-                publisher TEXT,
-                title TEXT,
-                doi TEXT,
-                pmc_id TEXT,
-                pm_id INTEGER,
-                licence TEXT,
-                abstract TEXT,
-                date DATETIME,
-                authors TEXT,
-                journal TEXT,
-                microsoft_id INTEGER,
-                covidence_id TEXT,
-                has_pdf_parse BOOLEAN,
-                has_pmc_xml_parse BOOLEAN,
-                has_covid19_tag BOOLEAN DEFAULT False,
-                fulltext_directory TEXT,
-                url TEXT
-            );
-            """)
-        self.db.execute(
-            """CREATE TABLE article_id_2_sha
-            (
-                article_id TEXT,
-                sha TEXT,
-                FOREIGN KEY(article_id) REFERENCES articles(article_id)
-            );
-            """)
-        self.db.execute(
-            """CREATE TABLE paragraphs
-            (
-                paragraph_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sha TEXT,
-                section_name TEXT,
-                text TEXT
-            );
-            """)
-        self.db.execute(
-            """CREATE TABLE sentences
-            (
-                sentence_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                sha TEXT,
-                section_name TEXT,
-                text TEXT,
-                paragraph_id INTEGER,
-                FOREIGN KEY(sha) REFERENCES article_id_2_sha(sha)
-            );
-            """)
+        metadata = sqlalchemy.MetaData()
 
-    def _rename_columns(self):
-        """Rename the columns of the dataframe to follow the SQL database schema."""
-        self.metadata.rename(columns={
-            'cord_uid': 'article_id',
-            'sha': 'sha',
-            'source_x': 'publisher',
-            'title': 'title',
-            'doi': 'doi',
-            'pmcid': 'pmc_id',
-            'pubmed_id': 'pm_id',
-            'license': 'licence',
-            'abstract': 'abstract',
-            'publish_time': 'date',
-            'authors': 'authors',
-            'journal': 'journal',
-            'Microsoft Academic Paper ID': 'microsoft_id',
-            'WHO #Covidence': 'covidence_id',
-            'has_pdf_parse': 'has_pdf_parse',
-            'has_pmc_xml_parse': 'has_pmc_xml_parse',
-            'full_text_file': 'fulltext_directory',
-            'url': 'url'}, inplace=True)
+        self.articles_table = \
+            sqlalchemy.Table('articles', metadata,
+                             sqlalchemy.Column('article_id', sqlalchemy.Integer(), primary_key=True),
+                             sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
+                             sqlalchemy.Column('sha', sqlalchemy.String(40)),
+                             sqlalchemy.Column('source_x', sqlalchemy.Text()),
+                             sqlalchemy.Column('title', sqlalchemy.Text()),
+                             sqlalchemy.Column('doi', sqlalchemy.Text()),
+                             sqlalchemy.Column('pmcid', sqlalchemy.Text()),
+                             sqlalchemy.Column('pubmed_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('license', sqlalchemy.Text()),
+                             sqlalchemy.Column('abstract', sqlalchemy.Text()),
+                             sqlalchemy.Column('publish_time', sqlalchemy.Date()),
+                             sqlalchemy.Column('authors', sqlalchemy.Text()),
+                             sqlalchemy.Column('journal', sqlalchemy.Text()),
+                             sqlalchemy.Column('mag_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('who_covidence_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('arxiv_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
+                             sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
+                             sqlalchemy.Column('url', sqlalchemy.Text()),
+                             sqlalchemy.Column('s2_id', sqlalchemy.Text())
+                             )
+
+        self.sentences_table = \
+            sqlalchemy.Table('sentences', metadata,
+                             sqlalchemy.Column('sentence_id', sqlalchemy.Integer(),
+                                               primary_key=True),
+                             sqlalchemy.Column('section_name', sqlalchemy.Text()),
+                             sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                               sqlalchemy.ForeignKey("articles.article_id"),
+                                               nullable=False),
+                             sqlalchemy.Column('text', sqlalchemy.Text()),
+                             sqlalchemy.Column('paragraph_id', sqlalchemy.Integer()),
+                             sqlalchemy.Column('paragraph_position', sqlalchemy.Integer())
+                             )
+
+        with self.engine.begin() as connection:
+            metadata.create_all(connection)
+
+    # def _rename_columns(self):
+    #     """Rename the columns of the dataframe to follow the SQL database schema."""
+    #     self.metadata.rename(columns={
+    #         'cord_uid': 'article_id',
+    #         'sha': 'sha',
+    #         'source_x': 'publisher',
+    #         'title': 'title',
+    #         'doi': 'doi',
+    #         'pmcid': 'pmc_id',
+    #         'pubmed_id': 'pm_id',
+    #         'license': 'licence',
+    #         'abstract': 'abstract',
+    #         'publish_time': 'date',
+    #         'authors': 'authors',
+    #         'journal': 'journal',
+    #         'Microsoft Academic Paper ID': 'microsoft_id',
+    #         'WHO #Covidence': 'covidence_id',
+    #         'has_pdf_parse': 'has_pdf_parse',
+    #         'has_pmc_xml_parse': 'has_pmc_xml_parse',
+    #         'full_text_file': 'fulltext_directory',
+    #         'url': 'url'}, inplace=True)
 
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
@@ -173,12 +253,12 @@ class CORD19DatabaseCreation:
         from those json_files.
         """
         sha_to_json_path = {json_path.stem: json_path for json_path in self.all_json_paths}
-        cur = self.db.cursor()
+        cur = self.sqlalchemy.cursor()
         for (article_id,) in cur.execute('SELECT article_id FROM articles'):
             tag, paragraphs = self.get_tag_and_paragraph(sha_to_json_path, article_id)
             self.update_covid19_tag(article_id, tag)
             self.insert_into_paragraphs(paragraphs)
-        self.db.commit()
+        self.sqlalchemy.commit()
 
     def _sentences_table(self):
         """Fill the sentences table thanks to all the json files.
@@ -187,11 +267,11 @@ class CORD19DatabaseCreation:
         the sentences table.
         """
         nlp = self.define_nlp()
-        cur = self.db.cursor()
+        cur = self.sqlalchemy.cursor()
         for (paragraph_id,) in cur.execute('SELECT paragraph_id FROM paragraphs'):
             sentences = self.get_sentences(nlp, paragraph_id)
             self.insert_into_sentences(sentences)
-        self.db.commit()
+        self.sqlalchemy.commit()
 
     def define_nlp(self):
         """Create the sentence boundary detection tools from Spacy.
@@ -241,11 +321,11 @@ class CORD19DatabaseCreation:
         paragraphs = []
         tag = False
 
-        article_id, article_title, article_abstract, article_directory = self.db.execute(
+        article_id, article_title, article_abstract, article_directory = self.sqlalchemy.execute(
             "SELECT article_id, title, abstract, fulltext_directory FROM articles WHERE article_id is ?",
             [article_id]).fetchone()
 
-        all_shas = self.db.execute("SELECT sha FROM article_id_2_sha WHERE article_id = ?", [article_id]).fetchall()
+        all_shas = self.sqlalchemy.execute("SELECT sha FROM article_id_2_sha WHERE article_id = ?", [article_id]).fetchall()
         title_sha = all_shas[0][0] if all_shas else None
         if article_title:
             paragraphs.append((title_sha, 'Title', article_title))
@@ -285,7 +365,7 @@ class CORD19DatabaseCreation:
             List of the extracted sentences.
         """
         sentences = []
-        sha, section_name, paragraph = self.db.execute(
+        sha, section_name, paragraph = self.sqlalchemy.execute(
             "SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
             [paragraph_id]).fetchall()[0]
         sentences += [(sha, section_name, sent, paragraph_id) for sent in self.segment(nlp, paragraph)]
@@ -302,7 +382,7 @@ class CORD19DatabaseCreation:
         tag: boolean
             Value of the tag. True if covid19 is mentionned, otherwise False.
         """
-        self.db.execute("UPDATE articles SET has_covid19_tag = ? WHERE article_id = ?", [tag, article_id])
+        self.sqlalchemy.execute("UPDATE articles SET has_covid19_tag = ? WHERE article_id = ?", [tag, article_id])
 
     def insert_into_sentences(self, sentences):
         """Insert the new sentences into the database sentences.
@@ -312,7 +392,7 @@ class CORD19DatabaseCreation:
         sentences: list
             List of sentences to insert in format (sha, section_name, text, paragraph_id)
         """
-        cur = self.db.cursor()
+        cur = self.sqlalchemy.cursor()
         cur.executemany("INSERT INTO sentences (sha, section_name, text, paragraph_id) VALUES (?, ?, ?, ?)", sentences)
 
     def insert_into_paragraphs(self, paragraphs):
@@ -323,7 +403,7 @@ class CORD19DatabaseCreation:
         paragraphs: list
             List of sentences to insert in format (paragraph_id, text)
         """
-        cur = self.db.cursor()
+        cur = self.sqlalchemy.cursor()
         cur.executemany("INSERT INTO paragraphs (sha, section_name, text) VALUES (?, ?, ?)", paragraphs)
 
     @staticmethod
