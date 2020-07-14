@@ -134,15 +134,15 @@ class CORD19DatabaseCreation:
         self.is_constructed = False
         # self.db = sqlite3.connect(str(self.filename))
         self.engine = sqlalchemy.create_engine(f'sqlite:///{self.filename}')
-        self.all_json_paths = self.data_path.rglob("*.json")
+        # self.all_json_paths = self.data_path.rglob("*.json")
 
     def construct(self):
         """Construct the database."""
         if not self.is_constructed:
-            self._rename_columns()
+            # self._rename_columns()
             self._schema_creation()
             print('Schemas of the tables are created.')
-            self._article_id_to_sha_table()
+            # self._article_id_to_sha_table()
             print('Article_id_2_sha table is created.')
             self._articles_table()
             print('Articles table is created.')
@@ -160,7 +160,8 @@ class CORD19DatabaseCreation:
 
         self.articles_table = \
             sqlalchemy.Table('articles', metadata,
-                             sqlalchemy.Column('article_id', sqlalchemy.Integer(), primary_key=True),
+                             sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                               primary_key=True, autoincrement=True),
                              sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
                              sqlalchemy.Column('sha', sqlalchemy.String(40)),
                              sqlalchemy.Column('source_x', sqlalchemy.Text()),
@@ -185,14 +186,16 @@ class CORD19DatabaseCreation:
         self.sentences_table = \
             sqlalchemy.Table('sentences', metadata,
                              sqlalchemy.Column('sentence_id', sqlalchemy.Integer(),
-                                               primary_key=True),
+                                               primary_key=True, autoincrement=True),
                              sqlalchemy.Column('section_name', sqlalchemy.Text()),
                              sqlalchemy.Column('article_id', sqlalchemy.Integer(),
                                                sqlalchemy.ForeignKey("articles.article_id"),
                                                nullable=False),
                              sqlalchemy.Column('text', sqlalchemy.Text()),
-                             sqlalchemy.Column('paragraph_id', sqlalchemy.Integer()),
-                             sqlalchemy.Column('paragraph_position', sqlalchemy.Integer())
+                             sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
+                                               nullable=False),
+                             sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
+                                               nullable=False)
                              )
 
         with self.engine.begin() as connection:
@@ -228,37 +231,36 @@ class CORD19DatabaseCreation:
         Moreover, the columns are renamed (cfr. _rename_columns)
         """
         df = self.metadata.copy()
-        df.drop(columns="sha", inplace=True)
-        df.drop_duplicates('article_id', keep='first', inplace=True)
-        df.to_sql(name='articles', con=self.db, index=False, if_exists='append')
+        df.drop_duplicates('cord_uid', keep='first', inplace=True)
+        df.to_sql(name='articles', con=self.engine, index=False, if_exists='append')
 
-    def _article_id_to_sha_table(self):
-        """Fill the article_id_to_sha table thanks to 'metadata.csv'.
+    # def _article_id_to_sha_table(self):
+    #     """Fill the article_id_to_sha table thanks to 'metadata.csv'.
+    #
+    #     The metadata.csv columns called 'sha' and 'article_id'
+    #     are used to create this table.
+    #     Moreover, several article_id can refer to the same shas
+    #     (for example, supplementary material, ...).
+    #     Several shas can also refer to the same article_id.
+    #     """
+    #     df = self.metadata[['article_id', 'sha']]
+    #     df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
+    #     df.to_sql(name='article_id_2_sha', con=self.db, index=False, if_exists='append')
 
-        The metadata.csv columns called 'sha' and 'article_id'
-        are used to create this table.
-        Moreover, several article_id can refer to the same shas
-        (for example, supplementary material, ...).
-        Several shas can also refer to the same article_id.
-        """
-        df = self.metadata[['article_id', 'sha']]
-        df = df.set_index(['article_id']).apply(lambda x: x.str.split('; ').explode()).reset_index()
-        df.to_sql(name='article_id_2_sha', con=self.db, index=False, if_exists='append')
-
-    def _paragraphs_table(self):
-        """Fill the paragraphs table thanks to all the json files.
-
-        For each article_id, this function extracts the corresponding
-        'sha' (and thus the json files) and extracts body_text and ref_entries
-        from those json_files.
-        """
-        sha_to_json_path = {json_path.stem: json_path for json_path in self.all_json_paths}
-        cur = self.sqlalchemy.cursor()
-        for (article_id,) in cur.execute('SELECT article_id FROM articles'):
-            tag, paragraphs = self.get_tag_and_paragraph(sha_to_json_path, article_id)
-            self.update_covid19_tag(article_id, tag)
-            self.insert_into_paragraphs(paragraphs)
-        self.sqlalchemy.commit()
+    # def _paragraphs_table(self):
+    #     """Fill the paragraphs table thanks to all the json files.
+    #
+    #     For each article_id, this function extracts the corresponding
+    #     'sha' (and thus the json files) and extracts body_text and ref_entries
+    #     from those json_files.
+    #     """
+    #     sha_to_json_path = {json_path.stem: json_path for json_path in self.all_json_paths}
+    #     cur = self.sqlalchemy.cursor()
+    #     for (article_id,) in cur.execute('SELECT article_id FROM articles'):
+    #         tag, paragraphs = self.get_tag_and_paragraph(sha_to_json_path, article_id)
+    #         self.update_covid19_tag(article_id, tag)
+    #         self.insert_into_paragraphs(paragraphs)
+    #     self.sqlalchemy.commit()
 
     def _sentences_table(self):
         """Fill the sentences table thanks to all the json files.
@@ -349,28 +351,28 @@ class CORD19DatabaseCreation:
 
         return tag, paragraphs
 
-    def get_sentences(self, nlp, paragraph_id):
-        """Extract all the sentences from the paragraph table.
-
-        Parameters
-        ----------
-        nlp: spacy.language.Language
-            Sentence Boundary Detection tool from Spacy to seperate sentences.
-        paragraph_id: int
-            ID of the paragraph
-
-        Returns
-        -------
-        sentences: list
-            List of the extracted sentences.
-        """
-        sentences = []
-        sha, section_name, paragraph = self.sqlalchemy.execute(
-            "SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
-            [paragraph_id]).fetchall()[0]
-        sentences += [(sha, section_name, sent, paragraph_id) for sent in self.segment(nlp, paragraph)]
-
-        return sentences
+    # def get_sentences(self, nlp, paragraph_id):
+    #     """Extract all the sentences from the paragraph table.
+    #
+    #     Parameters
+    #     ----------
+    #     nlp: spacy.language.Language
+    #         Sentence Boundary Detection tool from Spacy to seperate sentences.
+    #     paragraph_id: int
+    #         ID of the paragraph
+    #
+    #     Returns
+    #     -------
+    #     sentences: list
+    #         List of the extracted sentences.
+    #     """
+    #     sentences = []
+    #     sha, section_name, paragraph = self.sqlalchemy.execute(
+    #         "SELECT sha, section_name, text FROM paragraphs WHERE paragraph_id = ?",
+    #         [paragraph_id]).fetchall()[0]
+    #     sentences += [(sha, section_name, sent, paragraph_id) for sent in self.segment(nlp, paragraph)]
+    #
+    #     return sentences
 
     def update_covid19_tag(self, article_id, tag):
         """Update the covid19 tag in the articles database.
