@@ -180,7 +180,7 @@ class CORD19DatabaseCreation:
                                                                 'sentence_pos_in_paragraph'])
                 sentences_df.to_sql(name='sentences', con=self.engine, index=False, if_exists='append')
 
-            except:
+            except Exception:
                 rejected_articles += [int(article['article_id'])]
                 print(len(rejected_articles), 'Rejected Articles:', rejected_articles[-1])
 
