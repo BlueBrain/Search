@@ -52,7 +52,7 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('article_id', sqlalchemy.Integer(),
                                                primary_key=True, autoincrement=True),
                              sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
-                             sqlalchemy.Column('sha', sqlalchemy.String(40)),
+                             sqlalchemy.Column('sha', sqlalchemy.Text()),
                              sqlalchemy.Column('source_x', sqlalchemy.Text()),
                              sqlalchemy.Column('title', sqlalchemy.Text()),
                              sqlalchemy.Column('doi', sqlalchemy.Text()),
