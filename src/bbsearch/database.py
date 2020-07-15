@@ -99,6 +99,7 @@ class CORD19DatabaseCreation:
         """
         df = self.metadata.copy()
         df.drop_duplicates('cord_uid', keep='first', inplace=True)
+        df['publish_time'] = pd.to_datetime(df['publish_time'])
         df.to_sql(name='articles', con=self.engine, index=False, if_exists='append')
 
     def _sentences_table(self, model_name='en_core_sci_lg'):
