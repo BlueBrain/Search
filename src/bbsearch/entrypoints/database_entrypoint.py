@@ -17,13 +17,16 @@ args = parser.parse_args()
 def main():
     """Run database construction."""
     from pathlib import Path
+    import getpass
     import sqlalchemy
     from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':
-        engine = sqlalchemy.create_engine(f'sqlite:///raid/bbs_data/cord19_v35/databases/')
+        engine = sqlalchemy.create_engine('sqlite:///raid/bbs_data/cord19_v35/databases/')
     elif args.db_type == 'mysql':
-        engine = sqlalchemy.create_engine(f'mysql+pymysql://root:password@dgx1.bbp.epfl.ch:3306/cord19_v35')
+        password = getpass.getpass('Password:' )
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://root:{password}'
+                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v35')
     else:
         raise ValueError('This is not an handled db_type.')
 

@@ -1,7 +1,8 @@
 """Module for the Database Creation."""
 import json
-import pandas as pd
+import time
 
+import pandas as pd
 import spacy
 import sqlalchemy
 
@@ -130,6 +131,8 @@ class CORD19DatabaseCreation:
         pdf = 0
         pmc = 0
         rejected_articles = []
+        num_articles = 0
+        start = time.perf_counter()
 
         for _, article in articles_table.iterrows():
             try:
@@ -183,6 +186,11 @@ class CORD19DatabaseCreation:
             except Exception:
                 rejected_articles += [int(article['article_id'])]
                 print(len(rejected_articles), 'Rejected Articles:', rejected_articles[-1])
+
+            num_articles += 1
+            if num_articles % 1000 == 0:
+                print('Number of articles: ', num_articles,
+                      'in', f'{time.perf_counter() - start:.1f} seconds')
 
         return pmc, pdf, rejected_articles
 
