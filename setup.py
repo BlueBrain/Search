@@ -11,6 +11,7 @@ install_requires = [
     'numpy>=1.16.1',
     'pandas',
     'pdfkit',
+    'pymysql',
     'requests',
     'scibert @ git+https://github.com/allenai/scibert',
     'scikit-learn',
