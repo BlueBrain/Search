@@ -117,6 +117,8 @@ class CORD19DatabaseCreation:
             Number of articles with at least one pmc_json.
         pdf: int
             Number of articles that does not have pmc_json file but at least one pdf_json.
+        rejected_articles: list of int
+            Article_id of the articles that raises an error during the parsing.
         """
         nlp = spacy.load(model_name, disable=["tagger", "ner"])
 
@@ -127,90 +129,85 @@ class CORD19DatabaseCreation:
 
         pdf = 0
         pmc = 0
+        rejected_articles = []
+
         for _, article in articles_table.iterrows():
-            sentences = []
-            article_id = int(article['article_id'])
-            paragraph_pos_in_article = 0
+            try:
+                paragraphs = []
+                article_id = int(article['article_id'])
+                paragraph_pos_in_article = 0
 
-            # Read title and abstract
-            if article['title'] is not None:
-                sentences += [{
-                    'section_name': 'Title',
-                    'article_id': article_id,
-                    'text': sent,
-                    'paragraph_pos_in_article': paragraph_pos_in_article,
-                    'sentence_pos_in_paragraph': sentence_pos_in_paragraph,
-                } for sentence_pos_in_paragraph, sent
-                    in enumerate(self.segment(nlp, article['title']))]
-                paragraph_pos_in_article += 1
-            if article['abstract'] is not None:
-                sentences += [{
-                    'section_name': 'Abstract',
-                    'article_id': article_id,
-                    'text': sent,
-                    'paragraph_pos_in_article': paragraph_pos_in_article,
-                    'sentence_pos_in_paragraph': sentence_pos_in_paragraph,
-                } for sentence_pos_in_paragraph, sent in enumerate(self.segment(nlp, article['abstract']))]
-                paragraph_pos_in_article += 1
+                # Read title and abstract
+                if article['title'] is not None:
+                    paragraphs += [(article['title'], {'section_name': 'Title', 'article_id': article_id,
+                                                       'paragraph_pos_in_article': paragraph_pos_in_article})]
+                    paragraph_pos_in_article += 1
+                if article['abstract'] is not None:
+                    paragraphs += [(article['abstract'], {'section_name': 'Title', 'article_id': article_id,
+                                                          'paragraph_pos_in_article': paragraph_pos_in_article})]
+                    paragraph_pos_in_article += 1
 
-            # Find files linked to articles
-            if article['pmc_json_files'] is not None:
-                pmc += 1
-                jsons_path = article['pmc_json_files'].split('; ')
-            elif article['pdf_json_files'] is not None:
-                pdf += 1
-                jsons_path = article['pdf_json_files'].split('; ')
-            else:
-                jsons_path = []
+                # Find files linked to articles
+                if article['pmc_json_files'] is not None:
+                    pmc += 1
+                    jsons_path = article['pmc_json_files'].split('; ')
+                elif article['pdf_json_files'] is not None:
+                    pdf += 1
+                    jsons_path = article['pdf_json_files'].split('; ')
+                else:
+                    jsons_path = []
 
-            # Load json
-            for json_path in jsons_path:
-                json_path = self.data_path + json_path.strip()
-                with open(str(json_path), 'r') as json_file:
-                    file = json.load(json_file)
+                # Load json
+                for json_path in jsons_path:
+                    json_path = self.data_path / json_path.strip()
+                    with open(str(json_path), 'r') as json_file:
+                        file = json.load(json_file)
 
-                    for paragraph_pos_in_article, section in enumerate(file['body_text'],
-                                                                       start=paragraph_pos_in_article):
-                        sentences += [{
-                            'section_name': section['section'].title(),
-                            'article_id': article_id,
-                            'text': sent,
-                            'paragraph_pos_in_article': paragraph_pos_in_article,
-                            'sentence_pos_in_paragraph': sentence_pos_in_paragraph,
-                        } for sentence_pos_in_paragraph, sent in enumerate(self.segment(nlp, section['text']))]
+                        for paragraph_pos_in_article, section in enumerate(file['body_text'],
+                                                                           start=paragraph_pos_in_article):
+                            paragraphs += [(section['text'], {'section_name': section['section'].title(),
+                                                              'article_id': article_id,
+                                                              'paragraph_pos_in_article': paragraph_pos_in_article})]
 
-                    for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
-                                                                      start=paragraph_pos_in_article):
-                        sentences += [{
-                            'section_name': 'Caption',
-                            'article_id': article_id,
-                            'text': sent,
-                            'paragraph_pos_in_article': paragraph_pos_in_article,
-                            'sentence_pos_in_paragraph': sentence_pos_in_paragraph,
-                        } for sentence_pos_in_paragraph, sent in enumerate(self.segment(nlp, v['text']))]
+                        for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
+                                                                          start=paragraph_pos_in_article):
+                            paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
+                                                        'paragraph_pos_in_article': paragraph_pos_in_article})]
 
-            sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
-                                                            'text', 'paragraph_pos_in_article',
-                                                            'sentence_pos_in_paragraph'])
-            sentences_df.to_sql(name='sentences', con=self.engine, index=False, if_exists='append')
+                sentences = self.segment(nlp, paragraphs)
+                sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
+                                                                'text', 'paragraph_pos_in_article',
+                                                                'sentence_pos_in_paragraph'])
+                sentences_df.to_sql(name='sentences', con=self.engine, index=False, if_exists='append')
 
-        return pmc, pdf
+            except:
+                rejected_articles += [int(article['article_id'])]
+                print(len(rejected_articles), 'Rejected Articles:', rejected_articles[-1])
+
+        return pmc, pdf, rejected_articles
 
     @staticmethod
-    def segment(nlp, paragraph):
+    def segment(nlp, paragraphs):
         """Segment a paragraph/article into sentences.
 
         Parameters
         ----------
         nlp: spacy.language.Language
             Spacy pipeline applying sentence segmentation.
-        paragraph: str
-            Paragraph/Article in raw text to segment into sentences.
+        paragraphs: List of tuples (text, metadata)
+            List of Paragraph/Article in raw text to segment into sentences. [(text, metadata), ]
 
         Returns
         -------
-        all_sentences: list
+        all_sentences: list of dict
             List of all the sentences extracted from the paragraph.
         """
-        all_sentences = [sent.string.strip() for sent in nlp(paragraph).sents]
+        if isinstance(paragraphs, str):
+            paragraphs = [paragraphs, ]
+
+        all_sentences = []
+        for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
+            for pos, sent in enumerate(paragraph.sents):
+                all_sentences += [{'text': str(sent), 'sentence_pos_in_paragraph': pos, **metadata}]
+
         return all_sentences
