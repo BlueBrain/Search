@@ -1,99 +1,9 @@
 """Module for the Database Creation."""
 import json
 import pandas as pd
-from pathlib import Path
-import re
-# import sqlite3
 
 import spacy
 import sqlalchemy
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-
-class Articles(Base):
-    """Articles table."""
-    __tablename__ = 'articles'
-    __table_args__ = {'extend_existing': True}
-    article_id = Column(String, primary_key=True)
-    publisher = Column(String)
-    title = Column(String)
-    doi = Column(String)
-    pmc_id = Column(String)
-    pm_id = Column(Integer)
-    licence = Column(String)
-    abstract = Column(String)
-    date = Column(String)
-    authors = Column(String)
-    journal = Column(String)
-    microsoft_id = Column(Integer)
-    covidence_id = Column(String)
-    has_pdf_parse = Column(Boolean)
-    has_pmc_xml_parse = Column(Boolean)
-    has_covid19_tag = Column(Boolean)
-    fulltext_directory = Column(String)
-    url = Column(String)
-    def init(self, article_id, publisher, title, doi, pmc_id, pm_id, licence, abstract, date, authors, journal,
-             microsoft_id,
-             covidence_id, has_pdf_parse, has_pmc_xml_parse, has_covid19_tag, fulltext_directory, url):
-        """Init of the articles table."""
-        self.article_id = article_id
-        self.publisher = publisher
-        self.title = title
-        self.doi = doi
-        self.pmc_id = pmc_id
-        self.pm_id = pm_id
-        self.license = licence
-        self.abstract = abstract
-        self.date = date
-        self.authors = authors
-        self.journal = journal
-        self.microsoft_id = microsoft_id
-        self.covidence_id = covidence_id
-        self.has_pdf_parse = has_pdf_parse
-        self.has_pmc_xml_parse = has_pmc_xml_parse
-        self.has_covid19_tag = has_covid19_tag
-        self.fulltext_directory = fulltext_directory
-        self.url = url
-class Article_id_2_sha(Base):
-    """Article_id_2_sha table."""
-    __tablename__ = 'article_id_2_sha'
-    __table_args__ = {'extend_existing': True}
-    article_id = Column(String, ForeignKey('articles.article_id'), primary_key=True)
-    sha = Column(String)
-    def init(self, article_id, sha):
-        """Init of the article_id_2_sha table."""
-        self.article_id = article_id
-        self.sha = sha
-class Sentences(Base):
-    """Sentences table."""
-    __tablename__ = 'sentences'
-    __table_args__ = {'extend_existing': True}
-    sentence_id = Column(Integer, primary_key=True)
-    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
-    section_name = Column(String)
-    text = Column(String)
-    paragraph_id = Column(Integer)
-    def init(self, sentence_id, sha, section_name, text, paragraph_id):
-        """Init of the sentences table."""
-        self.sentence_id = sentence_id
-        self.sha = sha
-        self.section_name = section_name
-        self.text = text
-        self.paragraph_id = paragraph_id
-class Paragraphs(Base):
-    """Paragraphs table."""
-    __tablename__ = 'paragraphs'
-    __table_args__ = {'extend_existing': True}
-    paragraph_id = Column(Integer, primary_key=True)
-    sha = Column(String, ForeignKey('article_id_2_sha.sha'))
-    section_name = Column(String)
-    text = Column(String)
-    def init(self, paragraph_id, sha, section_name, text):
-        """Init of the paragraphs table."""
-        self.paragraph_id = paragraph_id
-        self.sha = sha
-        self.section_name = section_name
-        self.text = text
 
 
 class CORD19DatabaseCreation:
@@ -101,38 +11,23 @@ class CORD19DatabaseCreation:
 
     def __init__(self,
                  data_path,
-                 version,
-                 saving_directory=None):
+                 engine):
         """Create SQL database object.
 
         Parameters
         ----------
         data_path: pathlib.Path
             Directory to the dataset where metadata.csv and all jsons file are located.
-        version: str
-            Version of the database created.
-        saving_directory: pathlib.Path
-            Directory where the database is going to be saved.
+        engine: SQLAlchemy.Engine
+            Engine linked to the database.
         """
         self.data_path = data_path
         if not self.data_path.exists():
             raise NotADirectoryError(f'The data directory {self.data_path} does not exit')
 
-        self.version = version
-
-        self.saving_directory = saving_directory or Path.cwd()
-        if not self.saving_directory.exists():
-            raise NotADirectoryError(f'The saving directory {self.saving_directory} does not exit')
-
-        self.filename = self.saving_directory / f'cord19_{self.version}.db'
-        if self.filename.exists():
-            raise ValueError(f'The version {self.version} of the database already exists')
-
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
         self.is_constructed = False
-        # self.db = sqlite3.connect(str(self.filename))
-        self.engine = sqlalchemy.create_engine(f'sqlite:///{self.filename}')
-        # self.all_json_paths = self.data_path.rglob("*.json")
+        self.engine = engine
 
     def construct(self):
         """Construct the database."""
