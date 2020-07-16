@@ -61,7 +61,7 @@ class SearchWidget(widgets.VBox):
         self.current_sentence_ids = []
         self.saving_options = list(SAVING_OPTIONS.values())
 
-        self.my_widgets = dict()
+        self.widgets = dict()
         self._init_widgets()
         self._adjust_widgets()
         self._init_ui()
@@ -69,14 +69,14 @@ class SearchWidget(widgets.VBox):
     def _init_widgets(self):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
-        self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
+        self.widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
                       'Sentence BioBERT'], )
 
         # Select n. of top results to return
-        self.my_widgets['top_results'] = widgets.widgets.IntSlider(
+        self.widgets['top_results'] = widgets.widgets.IntSlider(
             value=10,
             min=0,
             max=100,
@@ -84,21 +84,21 @@ class SearchWidget(widgets.VBox):
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
         # sentence
-        self.my_widgets['print_paragraph'] = widgets.Checkbox(
+        self.widgets['print_paragraph'] = widgets.Checkbox(
             value=True,
             description='Show whole paragraph')
 
         # Enter Query
-        self.my_widgets['query_text'] = widgets.Textarea(
+        self.widgets['query_text'] = widgets.Textarea(
             value='Glucose is a risk factor for COVID-19',
             layout=widgets.Layout(width='90%', height='80px'),
             description='Query')
 
-        self.my_widgets['has_journal'] = widgets.Checkbox(
+        self.widgets['has_journal'] = widgets.Checkbox(
             description="Require Journal",
             value=False)
 
-        self.my_widgets['date_range'] = widgets.IntRangeSlider(
+        self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
             min=1900,
@@ -107,13 +107,13 @@ class SearchWidget(widgets.VBox):
             layout=widgets.Layout(width='80ch'))
 
         # Enter Deprioritization Query
-        self.my_widgets['deprioritize_text'] = widgets.Textarea(
+        self.widgets['deprioritize_text'] = widgets.Textarea(
             value='',
             layout=widgets.Layout(width='90%', height='80px'),
             description='Deprioritize')
 
         # Select Deprioritization Strength
-        self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
+        self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
             options=['None', 'Weak', 'Mild', 'Strong', 'Stronger'],
             disabled=False,
             button_style='info',
@@ -121,17 +121,25 @@ class SearchWidget(widgets.VBox):
             description='Deprioritization strength', )
 
         # Enter Substrings Exclusions
-        self.my_widgets['exclusion_text'] = widgets.Textarea(
+        self.widgets['exclusion_text'] = widgets.Textarea(
             layout=widgets.Layout(width='90%', height='80px'),
             value='',
             style={'description_width': 'initial'},
             description='Substring Exclusion (newline separated): ')
 
-        self.my_widgets['default_value_article_saver'] = widgets.ToggleButtons(
+        self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
             options=self.saving_options,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: ', )
+        self.widgets['default_saving_paragraph'] = widgets.Checkbox(
+            description="Save paragraph",
+            value=False,
+            indent=False)
+        self.widgets['default_saving_article'] = widgets.Checkbox(
+            description="Save article",
+            value=False,
+            indent=False)
 
         def default_value_article_saver_change(change):
             if self.radio_buttons:
@@ -139,48 +147,48 @@ class SearchWidget(widgets.VBox):
                     button.value = change['new']
                 return change['new']
 
-        self.my_widgets['default_value_article_saver'].observe(default_value_article_saver_change,
-                                                               names='value')
+        self.widgets['default_value_article_saver'].observe(default_value_article_saver_change,
+                                                            names='value')
 
         # Click to run Information Retrieval!
-        self.my_widgets['investigate_button'] = widgets.Button(description='Investigate!',
-                                                               layout=widgets.Layout(width='50%'))
+        self.widgets['investigate_button'] = widgets.Button(description='Investigate!',
+                                                            layout=widgets.Layout(width='50%'))
 
         # Click to run Generate Report!
-        self.my_widgets['report_button'] = widgets.Button(description='Generate Report of Search Results',
-                                                          layout=widgets.Layout(width='50%'))
+        self.widgets['report_button'] = widgets.Button(description='Generate Report of Search Results',
+                                                       layout=widgets.Layout(width='50%'))
 
-        self.my_widgets['articles_button'] = widgets.Button(description='Generate Report of Selected Articles',
-                                                            layout=widgets.Layout(width='50%'))
+        self.widgets['articles_button'] = widgets.Button(description='Generate Report of Selected Articles',
+                                                         layout=widgets.Layout(width='50%'))
         # Output Area
-        self.my_widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
+        self.widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
         # Page buttons
-        self.my_widgets['page_back'] = widgets.Button(
+        self.widgets['page_back'] = widgets.Button(
             description="←", layout={'width': 'auto'})
-        self.my_widgets['page_label'] = widgets.Label(value="Page - of -")
-        self.my_widgets['page_forward'] = widgets.Button(
+        self.widgets['page_label'] = widgets.Label(value="Page - of -")
+        self.widgets['page_forward'] = widgets.Button(
             description="→", layout={'width': 'auto'})
-        self.my_widgets['page_back'].on_click(
+        self.widgets['page_back'].on_click(
             lambda b: self.set_page(self.current_page - 1))
-        self.my_widgets['page_forward'].on_click(
+        self.widgets['page_forward'].on_click(
             lambda b: self.set_page(self.current_page + 1))
 
         # Callbacks
-        self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
-        self.my_widgets['report_button'].on_click(self.report_on_click)
-        self.my_widgets['articles_button'].on_click(self.article_report_on_click)
+        self.widgets['investigate_button'].on_click(self.investigate_on_click)
+        self.widgets['report_button'].on_click(self.report_on_click)
+        self.widgets['articles_button'].on_click(self.article_report_on_click)
 
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
-        self.my_widgets['exclusion_text'].layout.display = 'none'
+        self.widgets['exclusion_text'].layout.display = 'none'
         # Remove some models (USE and SBERT)
-        self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
+        self.widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['BioSentVec', 'Sentence BioBERT'], )
         # Remove some deprioritization strength
-        self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
+        self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
             options=['None', 'Mild', 'Stronger'],
             disabled=False,
             button_style='info',
@@ -189,30 +197,32 @@ class SearchWidget(widgets.VBox):
 
     def _init_ui(self):
         page_selection = widgets.HBox(children=[
-                self.my_widgets['page_back'],
-                self.my_widgets['page_label'],
-                self.my_widgets['page_forward']
+                self.widgets['page_back'],
+                self.widgets['page_label'],
+                self.widgets['page_forward']
         ])
         self.children = [
-            self.my_widgets['sent_embedder'],
-            self.my_widgets['top_results'],
-            self.my_widgets['print_paragraph'],
-            self.my_widgets['query_text'],
-            self.my_widgets['has_journal'],
-            self.my_widgets['date_range'],
-            self.my_widgets['deprioritize_text'],
-            self.my_widgets['deprioritize_strength'],
-            self.my_widgets['exclusion_text'],
-            self.my_widgets['default_value_article_saver'],
-            self.my_widgets['investigate_button'],
+            self.widgets['sent_embedder'],
+            self.widgets['top_results'],
+            self.widgets['print_paragraph'],
+            self.widgets['query_text'],
+            self.widgets['has_journal'],
+            self.widgets['date_range'],
+            self.widgets['deprioritize_text'],
+            self.widgets['deprioritize_strength'],
+            self.widgets['exclusion_text'],
+            self.widgets['default_value_article_saver'],
+            self.widgets['default_saving_paragraph'],
+            self.weidgets['default_saving_article'],
+            self.widgets['investigate_button'],
             page_selection,
-            self.my_widgets['out'],
+            self.widgets['out'],
             page_selection,
-            self.my_widgets['report_button'],
-            self.my_widgets['articles_button'],
+            self.widgets['report_button'],
+            self.widgets['articles_button'],
         ]
 
-        with self.my_widgets['out']:
+        with self.widgets['out']:
             init_text = """
               ____  ____   _____ 
              |  _ \|  _ \ / ____|
@@ -345,19 +355,19 @@ class SearchWidget(widgets.VBox):
         """Investigate button callback."""
 
         # Get user selection
-        which_model = self.my_widgets['sent_embedder'].value
-        k = self.my_widgets['top_results'].value
-        query_text = self.my_widgets['query_text'].value
-        deprioritize_text = self.my_widgets['deprioritize_text'].value
-        deprioritize_strength = self.my_widgets['deprioritize_strength'].value
-        exclusion_text = self.my_widgets['exclusion_text'].value \
-            if 'exclusion_text' in self.my_widgets.keys() else ''
-        has_journal = self.my_widgets['has_journal'].value
-        date_range = self.my_widgets['date_range'].value
+        which_model = self.widgets['sent_embedder'].value
+        k = self.widgets['top_results'].value
+        query_text = self.widgets['query_text'].value
+        deprioritize_text = self.widgets['deprioritize_text'].value
+        deprioritize_strength = self.widgets['deprioritize_strength'].value
+        exclusion_text = self.widgets['exclusion_text'].value \
+            if 'exclusion_text' in self.widgets.keys() else ''
+        has_journal = self.widgets['has_journal'].value
+        date_range = self.widgets['date_range'].value
 
         # Clear output and show waiting message
-        self.my_widgets['out'].clear_output()
-        with self.my_widgets['out']:
+        self.widgets['out'].clear_output()
+        with self.widgets['out']:
             print(f'Processing query \"{query_text}\"...')
             print('Sending query to server...')
 
@@ -384,15 +394,15 @@ class SearchWidget(widgets.VBox):
         if self.current_page != new_page or force:
             self.current_page = new_page
             page_label = f'Page {self.current_page + 1} of {self.n_pages}'
-            self.my_widgets['page_label'].value = page_label
+            self.widgets['page_label'].value = page_label
             self._update_page_display()
 
     def _update_page_display(self):
-        with self.my_widgets['out']:
-            print_whole_paragraph = self.my_widgets['print_paragraph'].value
+        with self.widgets['out']:
+            print_whole_paragraph = self.widgets['print_paragraph'].value
             self.radio_buttons = list()
 
-            self.my_widgets['out'].clear_output()
+            self.widgets['out'].clear_output()
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
             for sentence_id in self.current_sentence_ids[start:end]:
@@ -401,6 +411,10 @@ class SearchWidget(widgets.VBox):
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
+                    if self.widgets['default_saving_paragraph'].value is True:
+                        self.article_saver.add_paragraph(article_id, paragraph_id)
+                    if self.widgets['default_saving_article'].value is True:
+                        self.article_saver.add_article(article_id)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(article_id, paragraph_id)
 
                 display(HTML(article_metadata))
@@ -414,7 +428,7 @@ class SearchWidget(widgets.VBox):
                 self.report += article_metadata + formatted_output + '<br>'
 
     def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
-        with self.my_widgets['out']:
+        with self.widgets['out']:
             print(f"Toggled: {article_id}, {paragraph_id}")
             print(f"Change: {change}")
         if change["new"] is True:
@@ -423,7 +437,7 @@ class SearchWidget(widgets.VBox):
             self.article_saver.remove_paragraph(article_id, paragraph_id)
 
     def _on_save_article_change(self, change, article_id=None):
-        with self.my_widgets['out']:
+        with self.widgets['out']:
             print(f"Toggled: {article_id}")
             print(f"Change: {change}")
         if change["new"] is True:
@@ -477,7 +491,7 @@ class SearchWidget(widgets.VBox):
         """Create radio button."""
         default_value = self.article_saver.saved_articles[article_infos] \
             if article_infos in self.article_saver.saved_articles.keys() \
-            else self.my_widgets['default_value_article_saver'].value
+            else self.widgets['default_value_article_saver'].value
 
         def on_value_change(change):
             for infos, button in self.radio_buttons:
@@ -502,13 +516,13 @@ class SearchWidget(widgets.VBox):
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        with self.my_widgets['out']:
+        with self.widgets['out']:
             self.article_saver.report()
             print('The PDF report has been created.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
-        with self.my_widgets['out']:
+        with self.widgets['out']:
             print('The PDF report has been created.')
 
         color_hyperparameters = '#222222'
@@ -521,7 +535,7 @@ class SearchWidget(widgets.VBox):
             ' '.join(k.split('_')).title() +
             '</b>' +
             f': {repr(v.value)}'
-            for k, v in self.my_widgets.items()
+            for k, v in self.widgets.items()
             if hasattr(v, 'value')])}
         </li>
         </ul>
