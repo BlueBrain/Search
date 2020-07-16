@@ -213,7 +213,7 @@ class SearchWidget(widgets.VBox):
             self.widgets['exclusion_text'],
             self.widgets['default_value_article_saver'],
             self.widgets['default_saving_paragraph'],
-            self.weidgets['default_saving_article'],
+            self.widgets['default_saving_article'],
             self.widgets['investigate_button'],
             page_selection,
             self.widgets['out'],
