@@ -363,17 +363,20 @@ class SearchWidget(widgets.VBox):
         self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
             print(f'Processing query \"{query_text}\"...')
+            print('Sending query to server...')
 
-        # Perform search query
-        self.current_results, *_ = self.searcher.query(
-            which_model=which_model,
-            k=k,
-            query_text=query_text,
-            has_journal=has_journal,
-            date_range=date_range,
-            deprioritize_strength=deprioritize_strength,
-            deprioritize_text=deprioritize_text,
-            exclusion_text=exclusion_text)
+            # Perform search query
+            self.current_results, *_ = self.searcher.query(
+                which_model=which_model,
+                k=k,
+                query_text=query_text,
+                has_journal=has_journal,
+                date_range=date_range,
+                deprioritize_strength=deprioritize_strength,
+                deprioritize_text=deprioritize_text,
+                exclusion_text=exclusion_text)
+
+            print('Updating the results display...')
 
         # Update the results display
         self._update_results_display()
