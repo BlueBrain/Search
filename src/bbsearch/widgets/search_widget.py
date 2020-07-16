@@ -50,7 +50,7 @@ class SearchWidget(widgets.VBox):
         self.searcher = searcher
         self.connection = connection
         self.article_saver = article_saver
-        self.results_per_page = min(0, results_per_page)
+        self.results_per_page = max(1, results_per_page)
 
         self.report = ''
 
