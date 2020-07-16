@@ -127,4 +127,4 @@ class MiningWidget(widgets.VBox):
         if self.table_extractions is not None:
             return self.table_extractions.copy()
         else:
-            return None
+            return pd.DataFrame()
