@@ -103,8 +103,7 @@ class CORD19DatabaseCreation:
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
             try:
-                new_df = article.to_frame()
-                new_df.to_sql(name='articles', con=self.engine, index=False, if_exists='append')
+                article.to_sql(name='articles', con=self.engine, index=False, if_exists='append')
             except Exception as e:
                 print(e)
                 rejected_articles += [index]
