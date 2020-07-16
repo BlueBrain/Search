@@ -49,8 +49,9 @@ class MiningWidget(widgets.VBox):
     def _init_ui(self):
         self.children = [
             self.widgets['input_text'],
-            self.widgets['mine_text'],
-            self.widgets['mine_articles'],
+            widgets.HBox(children=[
+                self.widgets['mine_text'],
+                self.widgets['mine_articles']]),
             self.widgets['out'],
         ]
 
@@ -121,3 +122,9 @@ class MiningWidget(widgets.VBox):
             text = self.widgets['input_text'].value
             self.table_extractions = self.textmining_pipeline(text)
             display(self.table_extractions)
+
+    def get_extracted_table(self):
+        if self.table_extractions is not None:
+            return self.table_extractions.copy()
+        else:
+            return None
