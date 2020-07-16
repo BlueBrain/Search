@@ -22,7 +22,10 @@ def main():
     from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':
-        engine = sqlalchemy.create_engine('sqlite:///raid/bbs_data/cord19_v35/databases/')
+        database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
+        if not Path(database_path).exists():
+            Path(database_path).touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
     elif args.db_type == 'mysql':
         password = getpass.getpass('Password:' )
         engine = sqlalchemy.create_engine(f'mysql+pymysql://root:{password}'
