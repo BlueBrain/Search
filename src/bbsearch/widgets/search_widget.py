@@ -275,13 +275,13 @@ class SearchWidget(widgets.VBox):
         # Page buttons
         self.my_widgets['page_back'] = widgets.Button(
             description="←", layout={'width': 'auto'})
-        self.my_widgets['page_label'] = widgets.Label(value="-")
+        self.my_widgets['page_label'] = widgets.Label(value="Page - of -")
         self.my_widgets['page_forward'] = widgets.Button(
             description="→", layout={'width': 'auto'})
         self.my_widgets['page_back'].on_click(
-            lambda b: self._set_page(self.current_page - 1))
+            lambda b: self.set_page(self.current_page - 1))
         self.my_widgets['page_forward'].on_click(
-            lambda b: self._set_page(self.current_page + 1))
+            lambda b: self.set_page(self.current_page + 1))
 
         # Callbacks
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
@@ -312,6 +312,9 @@ class SearchWidget(widgets.VBox):
             self.my_widgets['out'],
             page_selection,
         ]
+
+        with self.my_widgets['out']:
+            print("Click \"Investiage\" to display some results.")
 
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
@@ -365,9 +368,9 @@ class SearchWidget(widgets.VBox):
                 len(self.current_results) / self.results_per_page)
 
         # Update the results display
-        self._set_page(0)
+        self.set_page(0)
 
-    def _set_page(self, new_page):
+    def set_page(self, new_page):
         if self.current_page != new_page:
             self.current_page = max(0, min(new_page, self.n_pages - 1))
             self.my_widgets['page_label'].value = f'Page {self.current_page + 1} of {self.n_pages}'
