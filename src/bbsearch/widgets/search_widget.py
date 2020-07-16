@@ -306,11 +306,11 @@ class SearchWidget(widgets.VBox):
             self.my_widgets['exclusion_text'],
             self.my_widgets['default_value_article_saver'],
             self.my_widgets['investigate_button'],
-            self.my_widgets['report_button'],
-            self.my_widgets['articles_button'],
             page_selection,
             self.my_widgets['out'],
             page_selection,
+            self.my_widgets['report_button'],
+            self.my_widgets['articles_button'],
         ]
 
         with self.my_widgets['out']:
@@ -371,8 +371,9 @@ class SearchWidget(widgets.VBox):
         self.set_page(0)
 
     def set_page(self, new_page):
+        new_page = max(0, min(new_page, self.n_pages - 1))
         if self.current_page != new_page:
-            self.current_page = max(0, min(new_page, self.n_pages - 1))
+            self.current_page = new_page
             self.my_widgets['page_label'].value = f'Page {self.current_page + 1} of {self.n_pages}'
             self._update_page_display()
 
