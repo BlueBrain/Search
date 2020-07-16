@@ -56,7 +56,7 @@ class SearchWidget(widgets.VBox):
 
         self.report = ''
 
-        self.radio_buttons = list()
+        self.radio_buttons = []
         self.current_results = []
         self.saving_options = list(SAVING_OPTIONS.values())
 
@@ -64,124 +64,6 @@ class SearchWidget(widgets.VBox):
         self._init_widgets()
         self._adjust_widgets()
         self._init_ui()
-
-    @staticmethod
-    def highlight_in_paragraph(paragraph, sentence):
-        """Highlight a given sentence in the paragraph.
-
-        Parameters
-        ----------
-        paragraph : str
-            The paragraph in which to highlight the sentence.
-        sentence: str
-            The sentence to highlight.
-
-        Returns
-        -------
-        formatted_paragraph : str
-            The paragraph containing `sentence` with the sentence highlighted
-            in color
-        """
-        color_text = '#222222'
-        color_highlight = '#000000'
-
-        start = paragraph.index(sentence)
-        end = start + len(sentence)
-        highlighted_paragraph = f"""
-            <p style="font-size:13px; color:{color_text}">
-            {paragraph[:start]}
-            <b style="color:{color_highlight}"> {paragraph[start:end]} </b>
-            {paragraph[end:]}
-            </p>
-            """
-
-        return highlighted_paragraph
-
-    def print_single_result(self, sentence_id, print_whole_paragraph):
-        """Retrieve metadata and complete the report with HTML string given sentence_id.
-
-        Parameters
-        ----------
-        sentence_id: int
-            Sentence ID of the article needed to retrieve
-        print_whole_paragraph: bool
-            If true, the whole paragraph will be displayed in the results of the widget.
-
-        Returns
-        -------
-        article_metadata: str
-            Formatted string containing the metadata of the article.
-        formatted_output: str
-            Formatted output of the sentence.
-        article_infos : tuple
-            A tuple with two elements (article_id, paragraph_id) containing
-            the information about the article.
-
-        """
-        sql_query = f"""
-        SELECT sha, section_name, text, paragraph_id
-        FROM sentences
-        WHERE sentence_id = "{sentence_id}"
-        """
-        sentence = pd.read_sql(sql_query, self.connection)
-        article_sha, section_name, text, paragraph_id = \
-            sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
-
-        sql_query = f"""
-        SELECT article_id
-        FROM article_id_2_sha
-        WHERE sha = "{article_sha}"
-        """
-        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
-
-        sql_query = f"""
-        SELECT authors, title, url
-        FROM articles
-        WHERE article_id = "{article_id}"
-        """
-        article = pd.read_sql(sql_query, self.connection)
-        article_auth, article_title, ref = \
-            article.iloc[0][['authors', 'title', 'url']]
-
-        try:
-            article_auth = article_auth.split(';')[0] + ' et al.'
-        except AttributeError:
-            article_auth = ''
-
-        ref = ref or ""
-        section_name = section_name or ""
-
-        width = 80
-        if print_whole_paragraph:
-            try:
-                paragraph = find_paragraph(sentence_id, self.connection)
-                formatted_output = self.highlight_in_paragraph(
-                    paragraph, text)
-            except Exception as err:
-                formatted_output = f"""
-                There was a problem retrieving the paragraph.
-                The original sentence is: {text}
-                The error was: {str(err)}
-                """
-        else:
-            formatted_output = textwrap.fill(text, width=width)
-
-        color_title = '#1A0DAB'
-        color_metadata = '#006621'
-        article_metadata = f"""
-                        <a href="{ref}" style="color:{color_title}; font-size:17px">
-                            {article_title}
-                        </a>
-                        <br>
-                        <p style="color:{color_metadata}; font-size:13px">
-                            {article_auth} &#183; {section_name.lower().title()}
-                        </p>
-                        """
-        article_metadata = textwrap.dedent(article_metadata)
-
-        article_infos = (article_id, paragraph_id)
-
-        return article_metadata, formatted_output, article_infos
 
     def _init_widgets(self):
         """Initialize widget dictionary."""
@@ -288,6 +170,22 @@ class SearchWidget(widgets.VBox):
         self.my_widgets['report_button'].on_click(self.report_on_click)
         self.my_widgets['articles_button'].on_click(self.article_report_on_click)
 
+    def _adjust_widgets(self):
+        """Hide from the user not used functionalities in the widgets."""
+        self.my_widgets['exclusion_text'].layout.display = 'none'
+        # Remove some models (USE and SBERT)
+        self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
+            options=['BSV', 'SBioBERT'],
+            description='Model for Sentence Embedding',
+            tooltips=['BioSentVec', 'Sentence BioBERT'], )
+        # Remove some deprioritization strength
+        self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
+            options=['None', 'Mild', 'Stronger'],
+            disabled=False,
+            button_style='info',
+            style={'description_width': 'initial', 'button_width': '80px'},
+            description='Deprioritization strength')
+
     def _init_ui(self):
         page_selection = widgets.HBox(children=[
                 self.my_widgets['page_back'],
@@ -314,23 +212,135 @@ class SearchWidget(widgets.VBox):
         ]
 
         with self.my_widgets['out']:
-            print("Click \"Investiage\" to display some results.")
+            init_text = """
+              ____  ____   _____ 
+             |  _ \|  _ \ / ____|
+             | |_) | |_) | (___  
+             |  _ <|  _ < \___ \ 
+             | |_) | |_) |____) |
+             |____/|____/|_____/ 
+                                               
+            Click \"Investiage\" to display some results.
+            """
+            print(textwrap.dedent(init_text))
 
-    def _adjust_widgets(self):
-        """Hide from the user not used functionalities in the widgets."""
-        self.my_widgets['exclusion_text'].layout.display = 'none'
-        # Remove some models (USE and SBERT)
-        self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
-            options=['BSV', 'SBioBERT'],
-            description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'], )
-        # Remove some deprioritization strength
-        self.my_widgets['deprioritize_strength'] = widgets.ToggleButtons(
-            options=['None', 'Mild', 'Stronger'],
-            disabled=False,
-            button_style='info',
-            style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength')
+    @staticmethod
+    def highlight_in_paragraph(paragraph, sentence):
+        """Highlight a given sentence in the paragraph.
+
+        Parameters
+        ----------
+        paragraph : str
+            The paragraph in which to highlight the sentence.
+        sentence: str
+            The sentence to highlight.
+
+        Returns
+        -------
+        formatted_paragraph : str
+            The paragraph containing `sentence` with the sentence highlighted
+            in color
+        """
+        color_text = '#222222'
+        color_highlight = '#000000'
+
+        start = paragraph.index(sentence)
+        end = start + len(sentence)
+        highlighted_paragraph = f"""
+            <p style="font-size:13px; color:{color_text}">
+            {paragraph[:start]}
+            <b style="color:{color_highlight}"> {paragraph[start:end]} </b>
+            {paragraph[end:]}
+            </p>
+            """
+
+        return highlighted_paragraph
+
+    def print_single_result(self, sentence_id, print_whole_paragraph):
+        """Retrieve metadata and complete the report with HTML string given sentence_id.
+
+        Parameters
+        ----------
+        sentence_id: int
+            Sentence ID of the article needed to retrieve
+        print_whole_paragraph: bool
+            If true, the whole paragraph will be displayed in the results of the widget.
+
+        Returns
+        -------
+        article_metadata: str
+            Formatted string containing the metadata of the article.
+        formatted_output: str
+            Formatted output of the sentence.
+        article_infos : tuple
+            A tuple with two elements (article_id, paragraph_id) containing
+            the information about the article.
+
+        """
+        sql_query = f"""
+        SELECT sha, section_name, text, paragraph_id
+        FROM sentences
+        WHERE sentence_id = "{sentence_id}"
+        """
+        sentence = pd.read_sql(sql_query, self.connection)
+        article_sha, section_name, text, paragraph_id = \
+            sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
+
+        sql_query = f"""
+        SELECT article_id
+        FROM article_id_2_sha
+        WHERE sha = "{article_sha}"
+        """
+        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
+
+        sql_query = f"""
+        SELECT authors, title, url
+        FROM articles
+        WHERE article_id = "{article_id}"
+        """
+        article = pd.read_sql(sql_query, self.connection)
+        article_auth, article_title, ref = \
+            article.iloc[0][['authors', 'title', 'url']]
+
+        try:
+            article_auth = article_auth.split(';')[0] + ' et al.'
+        except AttributeError:
+            article_auth = ''
+
+        ref = ref or ""
+        section_name = section_name or ""
+
+        width = 80
+        if print_whole_paragraph:
+            try:
+                paragraph = find_paragraph(sentence_id, self.connection)
+                formatted_output = self.highlight_in_paragraph(
+                    paragraph, text)
+            except Exception as err:
+                formatted_output = f"""
+                There was a problem retrieving the paragraph.
+                The original sentence is: {text}
+                The error was: {str(err)}
+                """
+        else:
+            formatted_output = textwrap.fill(text, width=width)
+
+        color_title = '#1A0DAB'
+        color_metadata = '#006621'
+        article_metadata = f"""
+            <a href="{ref}" style="color:{color_title}; font-size:17px">
+                {article_title}
+            </a>
+            <br>
+            <p style="color:{color_metadata}; font-size:13px">
+                {article_auth} &#183; {section_name.lower().title()}
+            </p>
+            """
+        article_metadata = textwrap.dedent(article_metadata)
+
+        article_infos = (article_id, paragraph_id)
+
+        return article_metadata, formatted_output, article_infos
 
     def investigate_on_click(self, change_dict):
         """Investigate button callback."""
@@ -374,7 +384,8 @@ class SearchWidget(widgets.VBox):
         new_page = max(0, min(new_page, self.n_pages - 1))
         if self.current_page != new_page or force:
             self.current_page = new_page
-            self.my_widgets['page_label'].value = f'Page {self.current_page + 1} of {self.n_pages}'
+            page_label = f'Page {self.current_page + 1} of {self.n_pages}'
+            self.my_widgets['page_label'].value = page_label
             self._update_page_display()
 
     def _update_page_display(self):
@@ -413,25 +424,25 @@ class SearchWidget(widgets.VBox):
             if article_infos in self.article_saver.saved_articles.keys() \
             else self.my_widgets['default_value_article_saver'].value
 
+        def on_value_change(change):
+            for infos, button in self.radio_buttons:
+                self.article_saver.saved_articles[infos] = button.value
+            return change['new']
+
         radio_button = widgets.ToggleButtons(
             options=self.saving_options,
             value=default_value,
             description='Saving: ',
             style={'description_width': 'initial', 'button_width': '200px'},
             disabled=False)
+        radio_button.observe(on_value_change, names='value')
 
         if radio_button.value != SAVING_OPTIONS['nothing']:
             self.article_saver.saved_articles[article_infos] = radio_button.value
 
         self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
-
-        def on_value_change(change):
-            for infos, button in self.radio_buttons:
-                self.article_saver.saved_articles[infos] = button.value
-            return change['new']
-
         self.radio_buttons.append((article_infos, radio_button))
-        self.radio_buttons[-1][-1].observe(on_value_change, names='value')
+
         return radio_button
 
     def article_report_on_click(self, change_dict):
