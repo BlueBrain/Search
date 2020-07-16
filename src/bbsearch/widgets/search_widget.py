@@ -51,6 +51,8 @@ class SearchWidget(widgets.VBox):
         self.connection = connection
         self.article_saver = article_saver
         self.results_per_page = max(1, results_per_page)
+        self.n_pages = 1
+        self.current_page = 0
 
         self.report = ''
 
@@ -270,19 +272,24 @@ class SearchWidget(widgets.VBox):
         # Output Area
         self.my_widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
-        # Page slider
-        self.my_widgets['page_slider'] = widgets.IntSlider(
-            value=1,
-            min=1,
-            max=1,
-            description="Page:",
-            continuous_update=False,
-        )
+        # Page buttons
+        self.my_widgets['page_back'] = widgets.Button(description="←")
+        self.my_widgets['page_label'] = widgets.Label(value="-")
+        self.my_widgets['page_forward'] = widgets.Button(description="→")
+        self.my_widgets['page_back'].on_click(
+            lambda b: self._set_page(self.current_page - 1))
+        self.my_widgets['page_forward'].on_click(
+            lambda b: self._set_page(self.current_page + 1))
 
         # Callbacks
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
         self.my_widgets['report_button'].on_click(self.report_on_click)
         self.my_widgets['articles_button'].on_click(self.article_report_on_click)
+
+    def _set_page(self, current_page):
+        self.current_page = max(0, min(current_page, self.n_pages - 1))
+        self.my_widgets['page_label'].value = f'Page {self.current_page + 1} of {self.n_pages}'
+        self._update_page_display()
 
     def _init_ui(self):
         self.children = [
@@ -299,8 +306,12 @@ class SearchWidget(widgets.VBox):
             self.my_widgets['investigate_button'],
             self.my_widgets['report_button'],
             self.my_widgets['articles_button'],
-            self.my_widgets['page_slider'],
             self.my_widgets['out'],
+            widgets.HBox(children=[
+                self.my_widgets['page_back'],
+                self.my_widgets['page_label'],
+                self.my_widgets['page_forward']
+            ])
         ]
 
     def _adjust_widgets(self):
@@ -319,18 +330,15 @@ class SearchWidget(widgets.VBox):
             style={'description_width': 'initial', 'button_width': '80px'},
             description='Deprioritization strength')
 
-    def _update_results_display(self, current_page=0):
+    def _update_page_display(self):
         with self.my_widgets['out']:
-            n_pages = math.ceil(len(self.current_results) / self.results_per_page)
-            current_page = max(0, min(current_page, n_pages - 1))
-            self.my_widgets['page_slider'].max = n_pages
-            self.my_widgets['page_slider'].value = current_page + 1
-
             print_whole_paragraph = self.my_widgets['print_paragraph'].value
             self.radio_buttons = list()
 
             self.my_widgets['out'].clear_output()
-            for sentence_id in self.current_results[current_page:current_page + self.results_per_page]:
+            start = self.current_page
+            end = self.current_page + self.results_per_page
+            for sentence_id in self.current_results[start:end]:
                 if self.article_saver:
                     article_metadata, formatted_output, article_infos = \
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
@@ -377,9 +385,12 @@ class SearchWidget(widgets.VBox):
                 exclusion_text=exclusion_text)
 
             print('Updating the results display...')
+            self.n_pages = math.ceil(
+                len(self.current_results) / self.results_per_page)
+            self.current_page = 0
 
         # Update the results display
-        self._update_results_display()
+        self._update_page_display()
 
     def status_article_retrieve(self, article_infos):
         """Return information about the saving choice of this article."""
