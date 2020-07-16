@@ -1,4 +1,4 @@
-"""Module for the widget."""
+"""The Search widget."""
 from collections import OrderedDict
 import datetime
 import logging
@@ -9,7 +9,7 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 
-from .sql import find_paragraph
+from ..sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ SAVING_OPTIONS = OrderedDict([('nothing',  'Do not take this article'),
                               ('article', 'Extract the entire article')])
 
 
-class Widget:
+class SearchWidget:
     """Widget for search engine.
 
     Parameters
