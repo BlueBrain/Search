@@ -218,6 +218,7 @@ class CORD19DatabaseCreation:
         Notes
         -----
         Here are the steps implemented:
+
         - First, we look at the corresponding shas for the given article_id
         - Paragraphs are extracted:
             - From Title and Abstract in the articles table

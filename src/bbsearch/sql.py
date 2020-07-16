@@ -104,7 +104,8 @@ def get_ids_by_condition(conditions, table, db_cnxn):
         A list strings representing SQL query conditions. They should be
         formatted so that they can be used in an SQL WHERE statement,
         for example:
-            SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
+
+            - SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
     table : str
         The name of the table in `db`.
     db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
