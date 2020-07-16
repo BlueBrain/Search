@@ -16,7 +16,7 @@ from ..sql import find_paragraph
 logger = logging.getLogger(__name__)
 
 SAVING_OPTIONS = collections.OrderedDict([
-    ('nothing',  'Do not take this article'),
+    ('nothing', 'Do not take this article'),
     ('paragraph', 'Extract the paragraph'),
     ('article', 'Extract the entire article')
 ])
@@ -59,6 +59,7 @@ class SearchWidget(widgets.VBox):
 
         self.radio_buttons = []
         self.current_sentence_ids = []
+        self.seen_sentence_ids = set()
         self.saving_options = list(SAVING_OPTIONS.values())
 
         self.widgets = dict()
@@ -197,9 +198,9 @@ class SearchWidget(widgets.VBox):
 
     def _init_ui(self):
         page_selection = widgets.HBox(children=[
-                self.widgets['page_back'],
-                self.widgets['page_label'],
-                self.widgets['page_forward']
+            self.widgets['page_back'],
+            self.widgets['page_label'],
+            self.widgets['page_forward']
         ])
         self.children = [
             self.widgets['sent_embedder'],
@@ -411,11 +412,7 @@ class SearchWidget(widgets.VBox):
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
-                    if self.widgets['default_saving_paragraph'].value is True:
-                        self.article_saver.add_paragraph(article_id, paragraph_id)
-                    if self.widgets['default_saving_article'].value is True:
-                        self.article_saver.add_article(article_id)
-                    chk_article, chk_paragraph = self._create_saving_checkboxes(article_id, paragraph_id)
+                    chk_article, chk_paragraph = self._create_saving_checkboxes(article_id, paragraph_id, sentence_id)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
@@ -445,7 +442,7 @@ class SearchWidget(widgets.VBox):
         else:
             self.article_saver.remove_article(article_id)
 
-    def _create_saving_checkboxes(self, article_id, paragraph_id):
+    def _create_saving_checkboxes(self, article_id, paragraph_id, sentence_id):
         chk_paragraph = widgets.Checkbox(
             value=False,
             description='Save Paragraph',
@@ -475,8 +472,17 @@ class SearchWidget(widgets.VBox):
             chk_paragraph.disabled = True
             chk_article.disabled = True
         else:
-            chk_paragraph.value = self.article_saver.has_paragraph(article_id, paragraph_id)
-            chk_article.value = self.article_saver.has_article(article_id)
+            # Seeing this result for the first time - set the default values.
+            if sentence_id not in self.seen_sentence_ids:
+                chk_paragraph.value = self.widgets["default_saving_paragraph"].value
+                chk_article.value = self.widgets["default_saving_article"].value
+                self.seen_sentence_ids.add(sentence_id)
+
+            # Check if this article/paragraph has been saved before
+            if self.article_saver.has_paragraph(article_id, paragraph_id):
+                chk_paragraph.value = True
+            if self.article_saver.has_article(article_id):
+                chk_article.value = True
 
         return chk_article, chk_paragraph
 
