@@ -48,11 +48,11 @@ class SearchWidget(widgets.VBox):
                  results_per_page=10):
         super().__init__()
 
-        DONT_SAVE = 0
-        SAVE_PARAGRAPH = 1
-        SAVE_ARTICLE = 2
+        self.DONT_SAVE = 0
+        self.SAVE_PARAGRAPH = 1
+        self.SAVE_ARTICLE = 2
 
-        saving_labels = {
+        self.saving_labels = {
             self.DONT_SAVE: "Don't save",
             self.SAVE_PARAGRAPH: "Save paragraph",
             self.SAVE_ARTICLE: "Save whole article",
