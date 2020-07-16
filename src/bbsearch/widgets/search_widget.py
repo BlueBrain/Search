@@ -2,6 +2,7 @@
 import collections
 import datetime
 import logging
+import math
 import pdfkit
 import textwrap
 
@@ -31,22 +32,30 @@ class SearchWidget(widgets.VBox):
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the SQL database
 
-    article_saver: ArticleSaver
+    article_saver: ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
+
+    results_per_page : int, optional
+        The number of results to display per results page.
     """
 
-    def __init__(self, searcher, connection, article_saver=None):
+    def __init__(self,
+                 searcher,
+                 connection,
+                 article_saver=None,
+                 results_per_page=10):
         super().__init__()
 
         self.searcher = searcher
         self.connection = connection
+        self.article_saver = article_saver
+        self.results_per_page = min(0, results_per_page)
 
         self.report = ''
 
         self.radio_buttons = list()
         self.current_results = []
-        self.article_saver = article_saver
         self.saving_options = list(SAVING_OPTIONS.values())
 
         self.my_widgets = dict()
@@ -261,6 +270,15 @@ class SearchWidget(widgets.VBox):
         # Output Area
         self.my_widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
+        # Page slider
+        self.my_widgets['page_slider'] = widgets.IntSlider(
+            value=1,
+            min=1,
+            max=1,
+            description="Page:",
+            continuous_update=False,
+        )
+
         # Callbacks
         self.my_widgets['investigate_button'].on_click(self.investigate_on_click)
         self.my_widgets['report_button'].on_click(self.report_on_click)
@@ -281,6 +299,7 @@ class SearchWidget(widgets.VBox):
             self.my_widgets['investigate_button'],
             self.my_widgets['report_button'],
             self.my_widgets['articles_button'],
+            self.my_widgets['page_slider'],
             self.my_widgets['out'],
         ]
 
@@ -300,12 +319,18 @@ class SearchWidget(widgets.VBox):
             style={'description_width': 'initial', 'button_width': '80px'},
             description='Deprioritization strength')
 
-    def _update_results_display(self):
+    def _update_results_display(self, current_page=0):
+        n_pages = math.ceil(len(self.current_results) / self.results_per_page)
+        current_page = max(0, min(current_page, n_pages - 1))
+        self.my_widgets['page_slider'].max = n_pages
+        self.my_widgets['page_slider'].value = current_page + 1
+
         print_whole_paragraph = self.my_widgets['print_paragraph'].value
         self.radio_buttons = list()
 
+        self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
-            for sentence_id in self.current_results:
+            for sentence_id in self.current_results[current_page:current_page + self.results_per_page]:
                 if self.article_saver:
                     article_metadata, formatted_output, article_infos = \
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
