@@ -380,7 +380,7 @@ class SearchWidget(widgets.VBox):
 
             self.my_widgets['out'].clear_output()
             start = self.current_page * self.results_per_page
-            end = self.current_page + self.results_per_page
+            end = start + self.results_per_page
             for sentence_id in self.current_results[start:end]:
                 if self.article_saver:
                     article_metadata, formatted_output, article_infos = \
