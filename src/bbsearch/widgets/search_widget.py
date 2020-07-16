@@ -320,16 +320,16 @@ class SearchWidget(widgets.VBox):
             description='Deprioritization strength')
 
     def _update_results_display(self, current_page=0):
-        n_pages = math.ceil(len(self.current_results) / self.results_per_page)
-        current_page = max(0, min(current_page, n_pages - 1))
-        self.my_widgets['page_slider'].max = n_pages
-        self.my_widgets['page_slider'].value = current_page + 1
-
-        print_whole_paragraph = self.my_widgets['print_paragraph'].value
-        self.radio_buttons = list()
-
-        self.my_widgets['out'].clear_output()
         with self.my_widgets['out']:
+            n_pages = math.ceil(len(self.current_results) / self.results_per_page)
+            current_page = max(0, min(current_page, n_pages - 1))
+            self.my_widgets['page_slider'].max = n_pages
+            self.my_widgets['page_slider'].value = current_page + 1
+
+            print_whole_paragraph = self.my_widgets['print_paragraph'].value
+            self.radio_buttons = list()
+
+            self.my_widgets['out'].clear_output()
             for sentence_id in self.current_results[current_page:current_page + self.results_per_page]:
                 if self.article_saver:
                     article_metadata, formatted_output, article_infos = \
