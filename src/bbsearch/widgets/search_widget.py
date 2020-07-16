@@ -426,18 +426,12 @@ class SearchWidget(widgets.VBox):
                 self.report += article_metadata + formatted_output + '<br>'
 
     def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
-        with self.widgets['out']:
-            print(f"Toggled: {article_id}, {paragraph_id}")
-            print(f"Change: {change}")
         if change["new"] is True:
             self.article_saver.add_paragraph(article_id, paragraph_id)
         else:
             self.article_saver.remove_paragraph(article_id, paragraph_id)
 
     def _on_save_article_change(self, change, article_id=None):
-        with self.widgets['out']:
-            print(f"Toggled: {article_id}")
-            print(f"Change: {change}")
         if change["new"] is True:
             self.article_saver.add_article(article_id)
         else:
