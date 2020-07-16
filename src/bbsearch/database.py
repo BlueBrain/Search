@@ -103,12 +103,15 @@ class CORD19DatabaseCreation:
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
             try:
-                article.to_sql(name='articles', con=self.engine, index=False, if_exists='append')
+                article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
             except Exception as e:
                 print(e)
                 rejected_articles += [index]
                 print('Number of articles rejected: ', len(rejected_articles))
                 print('Last rejected: ', rejected_articles[-1])
+
+            if index % 1000 == 0:
+                print('Number of articles saved: ', index)
 
     def _sentences_table(self, model_name='en_core_sci_lg'):
         """Fill the sentences table thanks to all the json files.

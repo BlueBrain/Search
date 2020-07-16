@@ -19,7 +19,7 @@ def main():
     from pathlib import Path
     import getpass
     import sqlalchemy
-    from bbsearch.database import CORD19DatabaseCreation
+    from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':
         engine = sqlalchemy.create_engine('sqlite:///raid/bbs_data/cord19_v35/databases/')
