@@ -1,6 +1,8 @@
 # Custom entries
 /data/
 /assets/
+/src/sandbox
+/notebooks/untracked
 /.idea/
 .DS_Store
 
