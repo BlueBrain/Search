@@ -42,6 +42,18 @@ class ArticleSaver:
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
         self.articles_metadata = dict()
 
+        self.state = set()
+
+    def add_item(self, article_id, paragraph_id=None):
+        self.state.add((article_id, paragraph_id))
+
+    def remove_item(self, article_id, paragraph_id=None):
+        if self.has_item(article_id, paragraph_id):
+            self.state.remove((article_id, paragraph_id))
+
+    def has_item(self, article_id, paragraph_id=None):
+        return (article_id, paragraph_id) in self.state
+
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]

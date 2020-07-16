@@ -1,6 +1,7 @@
 """The Search widget."""
 import collections
 import datetime
+import functools
 import logging
 import math
 import pdfkit
@@ -46,6 +47,16 @@ class SearchWidget(widgets.VBox):
                  article_saver=None,
                  results_per_page=10):
         super().__init__()
+
+        DONT_SAVE = 0
+        SAVE_PARAGRAPH = 1
+        SAVE_ARTICLE = 2
+
+        saving_labels = {
+            self.DONT_SAVE: "Don't save",
+            self.SAVE_PARAGRAPH: "Save paragraph",
+            self.SAVE_ARTICLE: "Save whole article",
+        }
 
         self.searcher = searcher
         self.connection = connection
@@ -402,14 +413,43 @@ class SearchWidget(widgets.VBox):
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     radio_button = self.create_radio_buttons(article_infos, article_metadata)
+                    saving_selector = self._create_saving_selector(*article_infos)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
                     display(radio_button)
+                    display(saving_selector)
                 display(HTML(formatted_output))
 
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
+
+    def _on_article_saving_change(self, change, article_id=None, paragraph_id=None):
+        with self.my_widgets['out']:
+            print(f"Toggled: {article_id}, {paragraph_id}")
+            print(f"Change: {change}")
+
+    def _create_saving_selector(self, article_id, paragraph_id):
+        if self.article_saver.has_item(article_id):
+            initial_value = self.SAVE_ARTICLE
+        elif self.article_saver.has_item(article_id, paragraph_id):
+            initial_value = self.SAVE_PARAGRAPH
+        else:
+            initial_value = self.DONT_SAVE
+
+        toggle_buttons = widgets.ToggleButtons(
+            options=[label for i, label in sorted(self.saving_labels.items())],
+            value=initial_value,
+            description='Saving: ',
+            button_style='info',
+            style={'description_width': 'initial', 'button_width': '200px'})
+        callback = functools.partial(
+            self._on_article_saving_change,
+            article_id=article_id,
+            paragraph_id=paragraph_id)
+        toggle_buttons.observe(callback, names='value')
+
+        return toggle_buttons
 
     def status_article_retrieve(self, article_infos):
         """Return information about the saving choice of this article."""
