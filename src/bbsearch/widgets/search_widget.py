@@ -438,11 +438,9 @@ class SearchWidget(widgets.VBox):
             initial_value = self.DONT_SAVE
 
         toggle_buttons = widgets.ToggleButtons(
-            options=[label for i, label in sorted(self.saving_labels.items())],
+            options=[(label, i) for i, label in sorted(self.saving_labels.items())],
             value=initial_value,
-            description='Saving: ',
-            button_style='info',
-            style={'description_width': 'initial', 'button_width': '200px'})
+            description='Saving:')
         callback = functools.partial(
             self._on_article_saving_change,
             article_id=article_id,
