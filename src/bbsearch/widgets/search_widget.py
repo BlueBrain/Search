@@ -48,16 +48,6 @@ class SearchWidget(widgets.VBox):
                  results_per_page=10):
         super().__init__()
 
-        self.DONT_SAVE = 0
-        self.SAVE_PARAGRAPH = 1
-        self.SAVE_ARTICLE = 2
-
-        self.saving_labels = {
-            self.DONT_SAVE: "Don't save",
-            self.SAVE_PARAGRAPH: "Save paragraph",
-            self.SAVE_ARTICLE: "Save article",
-        }
-
         self.searcher = searcher
         self.connection = connection
         self.article_saver = article_saver
@@ -423,32 +413,23 @@ class SearchWidget(widgets.VBox):
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
 
-    def _on_article_saving_change(self, change, article_id=None, paragraph_id=None):
-        with self.my_widgets['out']:
-            print(f"Toggled: {article_id}, {paragraph_id}")
-            print(f"Change: {change}")
-
-        old_state = change["old"]
-        new_state = change["new"]
-        if new_state == self.SAVE_ARTICLE:
-            self.article_saver.add_article(article_id)
-        elif new_state == self.SAVE_PARAGRAPH:
-            self.article_saver.add_paragraph(article_id, paragraph_id)
-        elif new_state == self.DONT_SAVE:
-            if old_state == self.SAVE_ARTICLE:
-                self.article_saver.remove_article(article_id)
-            elif old_state == self.SAVE_PARAGRAPH:
-                self.article_saver.remove_paragraph(article_id, paragraph_id)
-
     def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
         with self.my_widgets['out']:
             print(f"Toggled: {article_id}, {paragraph_id}")
             print(f"Change: {change}")
+        if change["new"] is True:
+            self.article_saver.add_paragraph(article_id, paragraph_id)
+        else:
+            self.article_saver.remove_paragraph(article_id, paragraph_id)
 
     def _on_save_article_change(self, change, article_id=None):
         with self.my_widgets['out']:
             print(f"Toggled: {article_id}")
             print(f"Change: {change}")
+        if change["new"] is True:
+            self.article_saver.add_article(article_id)
+        else:
+            self.article_saver.remove_article(article_id)
 
     def _create_saving_checkboxes(self, article_id, paragraph_id):
         chk_paragraph = widgets.Checkbox(
