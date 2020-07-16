@@ -45,6 +45,7 @@ class SearchWidget(widgets.VBox):
         self.report = ''
 
         self.radio_buttons = list()
+        self.current_results = []
         self.article_saver = article_saver
         self.saving_options = list(SAVING_OPTIONS.values())
 
@@ -299,37 +300,12 @@ class SearchWidget(widgets.VBox):
             style={'description_width': 'initial', 'button_width': '80px'},
             description='Deprioritization strength')
 
-    def investigate_on_click(self, change_dict):
-        """Investigate button."""
-        # Clear widget output + All the radio buttons
-        self.my_widgets['out'].clear_output()
+    def _update_results_display(self):
+        print_whole_paragraph = self.my_widgets['print_paragraph'].value
         self.radio_buttons = list()
 
         with self.my_widgets['out']:
-            sentence_embedder_name = self.my_widgets['sent_embedder'].value
-            k = self.my_widgets['top_results'].value
-            print_whole_paragraph = self.my_widgets['print_paragraph'].value
-            query_text = self.my_widgets['query_text'].value
-            deprioritize_text = self.my_widgets['deprioritize_text'].value
-            deprioritize_strength = self.my_widgets['deprioritize_strength'].value
-            exclusion_text = self.my_widgets['exclusion_text'].value \
-                if 'exclusion_text' in self.my_widgets.keys() else ''
-            has_journal = self.my_widgets['has_journal'].value
-            date_range = self.my_widgets['date_range'].value
-
-            sentence_ids, _, _ = self.searcher.query(
-                sentence_embedder_name,
-                k=k,
-                query_text=query_text,
-                has_journal=has_journal,
-                date_range=date_range,
-                deprioritize_strength=deprioritize_strength,
-                deprioritize_text=deprioritize_text,
-                exclusion_text=exclusion_text)
-
-            print(f'\nInvestigating: {query_text}\n')
-
-            for sentence_id in sentence_ids:
+            for sentence_id in self.current_results:
                 if self.article_saver:
                     article_metadata, formatted_output, article_infos = \
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
@@ -343,6 +319,39 @@ class SearchWidget(widgets.VBox):
 
                 print()
                 self.report += article_metadata + formatted_output + '<br>'
+
+    def investigate_on_click(self, change_dict):
+        """Investigate button callback."""
+
+        # Get user selection
+        which_model = self.my_widgets['sent_embedder'].value
+        k = self.my_widgets['top_results'].value
+        query_text = self.my_widgets['query_text'].value
+        deprioritize_text = self.my_widgets['deprioritize_text'].value
+        deprioritize_strength = self.my_widgets['deprioritize_strength'].value
+        exclusion_text = self.my_widgets['exclusion_text'].value \
+            if 'exclusion_text' in self.my_widgets.keys() else ''
+        has_journal = self.my_widgets['has_journal'].value
+        date_range = self.my_widgets['date_range'].value
+
+        # Clear output and show waiting message
+        self.my_widgets['out'].clear_output()
+        with self.my_widgets['out']:
+            print(f'Processing query \"{query_text}\"...')
+
+        # Perform search query
+        self.current_results, *_ = self.searcher.query(
+            which_model=which_model,
+            k=k,
+            query_text=query_text,
+            has_journal=has_journal,
+            date_range=date_range,
+            deprioritize_strength=deprioritize_strength,
+            deprioritize_text=deprioritize_text,
+            exclusion_text=exclusion_text)
+
+        # Update the results display
+        self._update_results_display()
 
     def status_article_retrieve(self, article_infos):
         """Return information about the saving choice of this article."""
