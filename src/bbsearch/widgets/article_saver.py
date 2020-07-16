@@ -5,7 +5,7 @@ import textwrap
 
 import pandas as pd
 
-from .widgets.search_widget import SAVING_OPTIONS
+from .search_widget import SAVING_OPTIONS
 
 
 class ArticleSaver:
