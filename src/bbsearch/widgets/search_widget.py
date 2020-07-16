@@ -368,11 +368,11 @@ class SearchWidget(widgets.VBox):
                 len(self.current_results) / self.results_per_page)
 
         # Update the results display
-        self.set_page(0)
+        self.set_page(0, force=True)
 
-    def set_page(self, new_page):
+    def set_page(self, new_page, force=False):
         new_page = max(0, min(new_page, self.n_pages - 1))
-        if self.current_page != new_page:
+        if self.current_page != new_page or force:
             self.current_page = new_page
             self.my_widgets['page_label'].value = f'Page {self.current_page + 1} of {self.n_pages}'
             self._update_page_display()
