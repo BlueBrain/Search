@@ -158,7 +158,7 @@ class CORD19DatabaseCreation:
                                                        'paragraph_pos_in_article': paragraph_pos_in_article})]
                     paragraph_pos_in_article += 1
                 if article['abstract'] is not None:
-                    paragraphs += [(article['abstract'], {'section_name': 'Title', 'article_id': article_id,
+                    paragraphs += [(article['abstract'], {'section_name': 'Abstract', 'article_id': article_id,
                                                           'paragraph_pos_in_article': paragraph_pos_in_article})]
                     paragraph_pos_in_article += 1
 
