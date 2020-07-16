@@ -55,7 +55,7 @@ class SearchWidget(widgets.VBox):
         self.saving_labels = {
             self.DONT_SAVE: "Don't save",
             self.SAVE_PARAGRAPH: "Save paragraph",
-            self.SAVE_ARTICLE: "Save whole article",
+            self.SAVE_ARTICLE: "Save article",
         }
 
         self.searcher = searcher
@@ -68,7 +68,7 @@ class SearchWidget(widgets.VBox):
         self.report = ''
 
         self.radio_buttons = []
-        self.current_results = []
+        self.current_sentence_ids = []
         self.saving_options = list(SAVING_OPTIONS.values())
 
         self.my_widgets = dict()
@@ -283,10 +283,10 @@ class SearchWidget(widgets.VBox):
             Formatted string containing the metadata of the article.
         formatted_output: str
             Formatted output of the sentence.
-        article_infos : tuple
-            A tuple with two elements (article_id, paragraph_id) containing
-            the information about the article.
-
+        article_id : str
+            The article ID.
+        paragraph_id : int
+            The paragraph ID.
         """
         sql_query = f"""
         SELECT sha, section_name, text, paragraph_id
@@ -349,9 +349,7 @@ class SearchWidget(widgets.VBox):
             """
         article_metadata = textwrap.dedent(article_metadata)
 
-        article_infos = (article_id, paragraph_id)
-
-        return article_metadata, formatted_output, article_infos
+        return article_metadata, formatted_output, article_id, paragraph_id
 
     def investigate_on_click(self, change_dict):
         """Investigate button callback."""
@@ -374,7 +372,7 @@ class SearchWidget(widgets.VBox):
             print('Sending query to server...')
 
             # Perform search query
-            self.current_results, *_ = self.searcher.query(
+            self.current_sentence_ids, *_ = self.searcher.query(
                 which_model=which_model,
                 k=k,
                 query_text=query_text,
@@ -386,7 +384,7 @@ class SearchWidget(widgets.VBox):
 
             print('Updating the results display...')
             self.n_pages = math.ceil(
-                len(self.current_results) / self.results_per_page)
+                len(self.current_sentence_ids) / self.results_per_page)
 
         # Update the results display
         self.set_page(0, force=True)
@@ -407,18 +405,19 @@ class SearchWidget(widgets.VBox):
             self.my_widgets['out'].clear_output()
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
-            for sentence_id in self.current_results[start:end]:
+            for sentence_id in self.current_sentence_ids[start:end]:
                 if self.article_saver:
-                    article_metadata, formatted_output, article_infos = \
+                    article_metadata, formatted_output, article_id, paragraph_id = \
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
-                    radio_button = self.create_radio_buttons(article_infos, article_metadata)
-                    saving_selector = self._create_saving_selector(*article_infos)
+                    # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
+                    chk_article, chk_paragraph = self._create_saving_checkboxes(article_id, paragraph_id)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
-                    display(radio_button)
-                    display(saving_selector)
+                    # display(radio_button)
+                    display(chk_paragraph)
+                    display(chk_article)
                 display(HTML(formatted_output))
 
                 print()
@@ -429,25 +428,62 @@ class SearchWidget(widgets.VBox):
             print(f"Toggled: {article_id}, {paragraph_id}")
             print(f"Change: {change}")
 
-    def _create_saving_selector(self, article_id, paragraph_id):
-        if self.article_saver.has_item(article_id):
-            initial_value = self.SAVE_ARTICLE
-        elif self.article_saver.has_item(article_id, paragraph_id):
-            initial_value = self.SAVE_PARAGRAPH
+        old_state = change["old"]
+        new_state = change["new"]
+        if new_state == self.SAVE_ARTICLE:
+            self.article_saver.add_article(article_id)
+        elif new_state == self.SAVE_PARAGRAPH:
+            self.article_saver.add_paragraph(article_id, paragraph_id)
+        elif new_state == self.DONT_SAVE:
+            if old_state == self.SAVE_ARTICLE:
+                self.article_saver.remove_article(article_id)
+            elif old_state == self.SAVE_PARAGRAPH:
+                self.article_saver.remove_paragraph(article_id, paragraph_id)
+
+    def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
+        with self.my_widgets['out']:
+            print(f"Toggled: {article_id}, {paragraph_id}")
+            print(f"Change: {change}")
+
+    def _on_save_article_change(self, change, article_id=None):
+        with self.my_widgets['out']:
+            print(f"Toggled: {article_id}")
+            print(f"Change: {change}")
+
+    def _create_saving_checkboxes(self, article_id, paragraph_id):
+        chk_paragraph = widgets.Checkbox(
+            value=False,
+            description='Save Paragraph',
+            indent=False,
+            disabled=False,
+        )
+        chk_article = widgets.Checkbox(
+            value=False,
+            description='Save Article',
+            indent=False,
+            disabled=False,
+        )
+
+        chk_paragraph.observe(
+            handler=functools.partial(
+                self._on_save_paragraph_change,
+                article_id=article_id,
+                paragraph_id=paragraph_id),
+            names="value")
+        chk_article.observe(
+            handler=functools.partial(
+                self._on_save_article_change,
+                article_id=article_id),
+            names="value")
+
+        if self.article_saver is None:
+            chk_paragraph.disabled = True
+            chk_article.disabled = True
         else:
-            initial_value = self.DONT_SAVE
+            chk_paragraph.value = self.article_saver.has_paragraph(article_id, paragraph_id)
+            chk_article.value = self.article_saver.has_article(article_id)
 
-        toggle_buttons = widgets.ToggleButtons(
-            options=[(label, i) for i, label in sorted(self.saving_labels.items())],
-            value=initial_value,
-            description='Saving:')
-        callback = functools.partial(
-            self._on_article_saving_change,
-            article_id=article_id,
-            paragraph_id=paragraph_id)
-        toggle_buttons.observe(callback, names='value')
-
-        return toggle_buttons
+        return chk_article, chk_paragraph
 
     def status_article_retrieve(self, article_infos):
         """Return information about the saving choice of this article."""

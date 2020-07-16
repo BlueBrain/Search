@@ -44,15 +44,24 @@ class ArticleSaver:
 
         self.state = set()
 
-    def add_item(self, article_id, paragraph_id=None):
+    def add_article(self, article_id):
+        self.add_paragraph(article_id, None)
+
+    def add_paragraph(self, article_id, paragraph_id):
         self.state.add((article_id, paragraph_id))
 
-    def remove_item(self, article_id, paragraph_id=None):
-        if self.has_item(article_id, paragraph_id):
-            self.state.remove((article_id, paragraph_id))
+    def has_article(self, article_id):
+        return self.has_paragraph(article_id, None)
 
-    def has_item(self, article_id, paragraph_id=None):
+    def has_paragraph(self, article_id, paragraph_id):
         return (article_id, paragraph_id) in self.state
+
+    def remove_article(self, article_id):
+        self.remove_paragraph(article_id, None)
+
+    def remove_paragraph(self, article_id, paragraph_id):
+        if (article_id, paragraph_id) in self.state:
+            self.state.remove((article_id, paragraph_id))
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
