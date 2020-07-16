@@ -1,5 +1,5 @@
 """The Search widget."""
-from collections import OrderedDict
+import collections
 import datetime
 import logging
 import pdfkit
@@ -13,12 +13,14 @@ from ..sql import find_paragraph
 
 logger = logging.getLogger(__name__)
 
-SAVING_OPTIONS = OrderedDict([('nothing',  'Do not take this article'),
-                              ('paragraph', 'Extract the paragraph'),
-                              ('article', 'Extract the entire article')])
+SAVING_OPTIONS = collections.OrderedDict([
+    ('nothing',  'Do not take this article'),
+    ('paragraph', 'Extract the paragraph'),
+    ('article', 'Extract the entire article')
+])
 
 
-class SearchWidget:
+class SearchWidget(widgets.VBox):
     """Widget for search engine.
 
     Parameters
@@ -35,6 +37,7 @@ class SearchWidget:
     """
 
     def __init__(self, searcher, connection, article_saver=None):
+        super().__init__()
 
         self.searcher = searcher
         self.connection = connection
@@ -45,9 +48,10 @@ class SearchWidget:
         self.article_saver = article_saver
         self.saving_options = list(SAVING_OPTIONS.values())
 
-        self.my_widgets = OrderedDict()
-        self.initialize_widgets()
-        self.hide_from_user()
+        self.my_widgets = dict()
+        self._init_widgets()
+        self._adjust_widgets()
+        self._init_ui()
 
     @staticmethod
     def highlight_in_paragraph(paragraph, sentence):
@@ -167,7 +171,7 @@ class SearchWidget:
 
         return article_metadata, formatted_output, article_infos
 
-    def initialize_widgets(self):
+    def _init_widgets(self):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.my_widgets['sent_embedder'] = widgets.ToggleButtons(
@@ -261,7 +265,25 @@ class SearchWidget:
         self.my_widgets['report_button'].on_click(self.report_on_click)
         self.my_widgets['articles_button'].on_click(self.article_report_on_click)
 
-    def hide_from_user(self):
+    def _init_ui(self):
+        self.children = [
+            self.my_widgets['sent_embedder'],
+            self.my_widgets['top_results'],
+            self.my_widgets['print_paragraph'],
+            self.my_widgets['query_text'],
+            self.my_widgets['has_journal'],
+            self.my_widgets['date_range'],
+            self.my_widgets['deprioritize_text'],
+            self.my_widgets['deprioritize_strength'],
+            self.my_widgets['exclusion_text'],
+            self.my_widgets['default_value_article_saver'],
+            self.my_widgets['investigate_button'],
+            self.my_widgets['report_button'],
+            self.my_widgets['articles_button'],
+            self.my_widgets['out'],
+        ]
+
+    def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
         self.my_widgets['exclusion_text'].layout.display = 'none'
         # Remove some models (USE and SBERT)
@@ -386,9 +408,3 @@ class SearchWidget:
         results_section = f"<h1> Results </h1> {self.report}"
         pdfkit.from_string(hyperparameters_section + results_section,
                            f"report_{datetime.datetime.now()}.pdf")
-
-    def display(self):
-        """Display the widget."""
-        ordered_widgets = list(self.my_widgets.values())
-        main_widget = widgets.VBox(ordered_widgets)
-        display(main_widget)
