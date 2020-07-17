@@ -67,6 +67,7 @@ class ArticleSaver:
              article_id_2_sha a
              ON a.sha = p.sha;
         """
+        # SQL_rf: Reconstruct articles/paragraphs from a sentence_id
         df_extractions_full = pd.read_sql(sql_query, self.connection)
 
         df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
@@ -86,7 +87,7 @@ class ArticleSaver:
              ON p.sha = a.sha;
         """
         df_extractions_pars = pd.read_sql(sql_query, self.connection)
-
+        # SQL_rf: Reconstruct articles/paragraphs from a sentence_id
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
 
     def report(self):

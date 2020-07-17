@@ -100,6 +100,7 @@ class MiningServer:
                 FROM paragraphs
                 WHERE paragraph_id IN ({paragraph_ids_joined})
                 """
+                #SQL_rf: Retrieve articles or paragraphs depending '????' sentence_id
 
                 texts_df = pd.read_sql(sql_query, self.connection)
                 texts = [(row['text'],

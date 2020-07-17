@@ -293,6 +293,7 @@ def compute_database_embeddings(connection, model):
         )
     )
     """
+    #SQL_rf: Retrieve sentences with a given section name
     all_embeddings = list()
     all_ids = list()
     query_execution = pd.read_sql(sql=query, con=connection, chunksize=1)

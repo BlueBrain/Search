@@ -107,6 +107,7 @@ class Widget:
         FROM sentences
         WHERE sentence_id = "{sentence_id}"
         """
+        #SQL_rf: from sentence_id --> text and metadata
         sentence = pd.read_sql(sql_query, self.connection)
         article_sha, section_name, text, paragraph_id = \
             sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
@@ -126,7 +127,7 @@ class Widget:
         article = pd.read_sql(sql_query, self.connection)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
-
+        #SQL_rf: From sentence_id --> article metadata
         try:
             article_auth = article_auth.split(';')[0] + ' et al.'
         except AttributeError:
