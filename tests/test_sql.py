@@ -1,5 +1,34 @@
 """Collection of tests regarding the Database creation. """
-from bbsearch.sql import find_paragraph, get_paragraph_ids
+from importlib import import_module
+import inspect
+import pytest
+
+from bbsearch.sql import find_paragraph
+
+
+class TestNoSQL:
+
+    @pytest.mark.parametrize('module_name', ['article_saver', 'embedding_models',
+                                             # 'entrypoints.database_entrypoint',
+                                             # 'entrypoints.embedding_server_entrypoint',
+                                             # 'entrypoints.embeddings_entrypoint',
+                                             # 'entrypoints.mining_server_entrypoint',
+                                             # 'entrypoints.search_server_entrypoint',
+                                             'mining.attributes',
+                                             'mining.eval',
+                                             'mining.pipeline',
+                                             'mining.relation',
+                                             'remote_searcher',
+                                             'search',
+                                             'server.embedding_server',
+                                             'server.mining_server',
+                                             'server.search_server',
+                                             'utils',
+                                             'widget'])
+    def test_sql_queries(self, module_name):
+        module = import_module(f'bbsearch.{module_name}')
+        source_code = inspect.getsource(module)
+        assert 'SELECT' not in source_code
 
 
 class TestSQLQueries:
@@ -13,15 +42,3 @@ class TestSQLQueries:
         assert sentence_text in paragraph_text
         paragraph_text = find_paragraph(sentence_id, fake_sqlalchemy_cnxn)
         assert sentence_text in paragraph_text
-
-    def test_get_paragraph_ids(self, test_parameters, fake_db_cnxn, fake_sqlalchemy_cnxn):
-        article_ids = ['w8579f54', '4vo7n6nh', 'agmr7s98', 'i1t9ruf6', 'hnm54k4r', 'tyun4zlh']
-        res = get_paragraph_ids(article_ids, fake_db_cnxn)
-
-        assert set(res.unique()) == set(article_ids)
-        assert len(res) == len(article_ids) * test_parameters['n_sections_per_article']
-
-        res = get_paragraph_ids(article_ids, fake_sqlalchemy_cnxn)
-
-        assert set(res.unique()) == set(article_ids)
-        assert len(res) == len(article_ids) * test_parameters['n_sections_per_article']
