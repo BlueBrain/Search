@@ -1,6 +1,5 @@
 """Configuration of pytest."""
 from pathlib import Path
-import sqlite3
 
 import numpy as np
 import pandas as pd
@@ -19,142 +18,74 @@ def test_parameters():
             'embedding_size': 2}
 
 
-@pytest.fixture(scope='session')
-def fake_db_cnxn(tmp_path_factory, metadata_path, test_parameters):
-    """Connection object (sqlite)."""
-    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19.db'
-    with sqlite3.connect(str(db_path)) as cnxn:
-        fill_db_data(cnxn, metadata_path, test_parameters)
-        yield cnxn
-
-
-@pytest.fixture(scope='session')
-def fake_db_cursor(fake_db_cnxn):
-    """Database object (sqlite)."""
-    cursor = fake_db_cnxn.cursor()
-    yield cursor
-    cursor.close()
-
-
 def fill_db_data(connection, metadata_path, test_parameters):
-    # create
-    articles_schema = {'article_id': 'TEXT PRIMARY KEY',
-                       'publisher': 'TEXT',
+    articles_schema = {'article_id': 'INTEGER PRIMARY KEY',
+                       'cord_uid': 'VARCHAR(8)',
+                       'sha': 'TEXT',
+                       'source_x': 'TEXT',
                        'title': 'TEXT',
                        'doi': 'TEXT',
-                       'pmc_id': 'TEXT',
-                       'pm_id': 'INTEGER',
-                       'licence': 'TEXT',
+                       'pmcid': 'TEXT',
+                       'pubmed_id': 'TEXT',
+                       'license': 'TEXT',
                        'abstract': 'TEXT',
-                       'date': 'DATETIME',
+                       'publish_time': 'DATE',
                        'authors': 'TEXT',
                        'journal': 'TEXT',
-                       'microsoft_id': 'INTEGER',
-                       'covidence_id': 'TEXT',
-                       'has_pdf_parse': 'BOOLEAN',
-                       'has_pmc_xml_parse': 'BOOLEAN',
-                       'has_covid19_tag': 'BOOLEAN DEFAULT 1',
-                       'fulltext_directory': 'TEXT',
-                       'url': 'TEXT'}
-
-    article_id_2_sha_schema = {'article_id': 'TEXT',
-                               'sha': 'TEXT'}
-
-    paragraphs_schema = {'paragraph_id': 'INTEGER PRIMARY KEY',
-                         'sha': 'TEXT',
-                         'section_name': 'TEXT',
-                         'text': 'TEXT',
-                         'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
+                       'mag_id': 'TEXT',
+                       'who_covidence_id': 'TEXT',
+                       'arxiv_id': 'TEXT',
+                       'pdf_json_files': 'TEXT',
+                       'pmc_json_files': 'TEXT',
+                       'url': 'TEXT',
+                       's2_id': 'TEXT'}
 
     sentences_schema = {'sentence_id': 'INTEGER PRIMARY KEY',
-                        'sha': 'TEXT',
                         'section_name': 'TEXT',
+                        'article_id': 'INTEGER',
                         'text': 'TEXT',
-                        'paragraph_id': 'INTEGER',
-                        'FOREIGN': 'KEY(sha) REFERENCES article_id_2_sha(sha)'}
+                        'paragraph_pos_in_article': 'INTEGER',
+                        'sentence_pos_in_paragraph': 'INTEGER',
+                        'FOREIGN': 'KEY(article_id) REFERENCES articles(article_id)'}
 
     stmt_create_articles = "CREATE TABLE articles ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in articles_schema.items()]))
-
-    stmt_create_id_2_sha = "CREATE TABLE article_id_2_sha ({})".format(
-        ', '.join(['{} {}'.format(k, v) for k, v in article_id_2_sha_schema.items()]))
-
-    stmt_create_paragraphs = "CREATE TABLE paragraphs ({})".format(
-        ', '.join(['{} {}'.format(k, v) for k, v in paragraphs_schema.items()]))
 
     stmt_create_sentences = "CREATE TABLE sentences ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
 
     connection.execute(stmt_create_articles)
-    connection.execute(stmt_create_id_2_sha)
-    connection.execute(stmt_create_paragraphs)
     connection.execute(stmt_create_sentences)
 
-    # Populate
-    name_mapping = {
-        'cord_uid': 'article_id',
-        'sha': 'sha',
-        'source_x': 'publisher',
-        'title': 'title',
-        'doi': 'doi',
-        'pmcid': 'pmc_id',
-        'pubmed_id': 'pm_id',
-        'license': 'licence',
-        'abstract': 'abstract',
-        'publish_time': 'date',
-        'authors': 'authors',
-        'journal': 'journal',
-        'Microsoft Academic Paper ID': 'microsoft_id',
-        'WHO #Covidence': 'covidence_id',
-        'has_pdf_parse': 'has_pdf_parse',
-        'has_pmc_xml_parse': 'has_pmc_xml_parse',
-        'full_text_file': 'fulltext_directory',
-        'url': 'url'
-    }
-
-    metadata_df = pd.read_csv(str(metadata_path)).rename(columns=name_mapping).set_index('article_id')
-
-    article_id_2_content = metadata_df['sha']
-    article_id_2_content.to_sql(name='article_id_2_sha', con=connection, index=True, if_exists='append')
-
-    articles_content = metadata_df.drop(columns=['sha'])
-    articles_content.to_sql(name='articles', con=connection, index=True, if_exists='append')
+    metadata_df = pd.read_csv(str(metadata_path))
+    metadata_df['article_id'] = metadata_df.index
+    metadata_df.to_sql(name='articles', con=connection, index=False, if_exists='append')
 
     temp_s = []
-    temp_p = []
-    paragraph_id = 0
-    for sha in article_id_2_content[article_id_2_content.notna()].unique():
+    for article_id in set(metadata_df[metadata_df['article_id'].notna()]['article_id'].to_list()):
         for sec_ix in range(test_parameters['n_sections_per_article']):
-            paragraph_text = ''
             for sen_ix in range(test_parameters['n_sentences_per_section']):
-                s = pd.Series({'text': 'I am a sentence {} in section {} in article {}.'.format(sen_ix, sec_ix, sha),
+                s = pd.Series({'text': 'I am a sentence {} in section {} '
+                                       'in article {}.'.format(sen_ix, sec_ix, article_id),
                                'section_name': 'section_{}'.format(sec_ix),
-                               'sha': sha,
-                               'paragraph_id': paragraph_id
+                               'article_id': article_id,
+                               'paragraph_pos_in_article': sec_ix,
+                               'sentence_pos_in_paragraph': sen_ix,
                                })
                 temp_s.append(s)
-                paragraph_text += s['text']
-
-            p = pd.Series({'text': paragraph_text,
-                           'section_name': 'section_{}'.format(sec_ix),
-                           'sha': sha})
-            temp_p.append(p)
-            paragraph_id += 1
 
     sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
-    sentences_content.to_sql(name='sentences', con=connection, index=True, if_exists='append')
-
-    paragraphs_content = pd.DataFrame(temp_p)
-    paragraphs_content.index.name = 'paragraph_id'
-    paragraphs_content.to_sql(name='paragraphs', con=connection, index=True, if_exists='append')
+    sentences_content.to_sql(name='sentences', con=connection, index=False, if_exists='append')
 
 
 @pytest.fixture(scope='session')
-def fake_sqlalchemy_engine(fake_db_cnxn):
+def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters):
     """Connection object (sqlite)."""
-    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
-    engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19_test.db'
+    Path(db_path).touch()
+    engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
+    fill_db_data(engine, metadata_path, test_parameters)
 
     return engine
 
@@ -169,7 +100,7 @@ def fake_sqlalchemy_cnxn(fake_sqlalchemy_engine):
 @pytest.fixture(scope='session')
 def jsons_path():
     """Path to a directory where jsons are stored."""
-    jsons_path = ROOT_PATH / 'tests' / 'data' / 'CORD19_samples'
+    jsons_path = ROOT_PATH / 'tests' / 'data' / 'cord19_v35'
     assert jsons_path.exists()
 
     return jsons_path
@@ -178,20 +109,20 @@ def jsons_path():
 @pytest.fixture(scope='session')
 def metadata_path():
     """Path to metadata.csv."""
-    metadata_path = ROOT_PATH / 'tests' / 'data' / 'CORD19_samples' / 'metadata.csv'
+    metadata_path = ROOT_PATH / 'tests' / 'data' / 'cord19_v35' / 'metadata.csv'
     assert metadata_path.exists()
 
     return metadata_path
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
+def embeddings_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
     """Path to a directory where embeddings stored."""
     random_state = 3
     np.random.seed(random_state)
     models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
 
-    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences', fake_sqlalchemy_engine).iloc[0, 0]
     embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
 
     for model in models:

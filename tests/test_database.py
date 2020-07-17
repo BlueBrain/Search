@@ -1,100 +1,85 @@
 from pathlib import Path
 import pytest
-import sqlite3
 
 import pandas as pd
+import sqlalchemy
 
 from bbsearch.database import CORD19DatabaseCreation
 
 
 @pytest.fixture(scope='module')
-def real_db_cnxn(tmp_path_factory, jsons_path):
+def real_sqlalchemy_engine(tmp_path_factory, jsons_path):
     version = 'test'
     saving_directory = tmp_path_factory.mktemp('real_db', numbered=False)
+    Path(f'{saving_directory}/cord19_{version}.db').touch()
+
+    engine = sqlalchemy.create_engine(f'sqlite:///{saving_directory}/cord19_{version}.db')
     db = CORD19DatabaseCreation(data_path=jsons_path,
-                                saving_directory=saving_directory,
-                                version=version)
+                                engine=engine)
     db.construct()
 
-    database_path = saving_directory / f'cord19_{version}.db'
-    cnxn = sqlite3.connect(str(database_path))
-
-    return cnxn
+    return engine
 
 
 class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
-    def test_tables(self, real_db_cnxn):
+    def test_tables(self, fake_sqlalchemy_engine):
         """Tests that the three tables expected has been created. """
-        curs = real_db_cnxn.cursor()
-        tables_names = curs.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-        tables_names = [table_name for (table_name, ) in tables_names]
-        assert 'article_id_2_sha' in tables_names
+        inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
+        tables_names = [table_name for table_name in inspector.get_table_names()]
         assert 'sentences' in tables_names
-        assert 'paragraphs' in tables_names
         assert 'articles' in tables_names
 
-    def test_tables_content(self, real_db_cnxn):
+    def test_tables_content(self, fake_sqlalchemy_engine):
         """Tests that the tables are correctly filled. """
-        df = pd.read_sql("SELECT * FROM articles", real_db_cnxn)
-        assert df.shape[0] == 11
-        df2 = pd.read_sql("SELECT * FROM article_id_2_sha", real_db_cnxn)
-        assert df2.shape[0] == 11
-        df3 = df2[df2['sha'].notnull()]
-        assert df3.shape[0] == 6
-        df4 = pd.read_sql("SELECT DISTINCT sha FROM sentences WHERE sha is NOT NULL", real_db_cnxn)
-        assert df4.shape[0] == 6
+        df = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
+        assert df.shape[0] == 4
+        df1 = pd.read_sql("SELECT DISTINCT article_id FROM sentences", fake_sqlalchemy_engine)
+        assert df1.shape[0] == 4
 
-    def test_tables_columns(self, real_db_cnxn):
+    def test_tables_columns(self, fake_sqlalchemy_engine):
         """Tests that the tables columns are the ones expected. """
-        columns_expected = {"article_id", "publisher", "title", "doi", "pmc_id", "pm_id", "licence", "abstract",
-                            "date", "authors", "journal", "microsoft_id", "covidence_id", "has_pdf_parse",
-                            "has_pmc_xml_parse", "has_covid19_tag", "fulltext_directory", "url"}
-        articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1", real_db_cnxn).columns)
+        columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
+                            "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
+                            "mag_id", "arxiv_id", "pdf_json_files",
+                            "pmc_json_files", "who_covidence_id", "s2_id", "url"}
+        articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1",
+                                           fake_sqlalchemy_engine).columns)
         assert columns_expected == articles_columns
-        article_id_to_sha_expected = {"article_id", "sha"}
-        article_id_to_sha_columns = set(pd.read_sql("SELECT * FROM article_id_2_sha LIMIT 1", real_db_cnxn).columns)
-        assert article_id_to_sha_expected == article_id_to_sha_columns
-        sentences_expected = {"sentence_id", "sha", "section_name", "text", "paragraph_id"}
-        sentences_columns = set(pd.read_sql("SELECT * FROM sentences LIMIT 1", real_db_cnxn).columns)
+        sentences_expected = {"sentence_id", "article_id", "section_name",
+                              "text", "paragraph_pos_in_article", "sentence_pos_in_paragraph"}
+        sentences_columns = set(pd.read_sql("SELECT * FROM sentences LIMIT 1",
+                                            fake_sqlalchemy_engine).columns)
         assert sentences_expected == sentences_columns
-        paragraphs_expected = {"paragraph_id", "sha", "section_name", "text"}
-        paragraphs_columns = set(pd.read_sql("SELECT * FROM paragraphs LIMIT 1", real_db_cnxn).columns)
-        assert paragraphs_expected == paragraphs_columns
 
     def test_errors(self, tmpdir, jsons_path):
         fake_dir = Path(str(tmpdir)) / 'fake'
+        Path(f'{tmpdir}/cord19_test.db').touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_test.db')
+
         with pytest.raises(NotADirectoryError):
             CORD19DatabaseCreation(data_path=fake_dir,
-                                   saving_directory=jsons_path,
-                                   version='v0')
-        with pytest.raises(NotADirectoryError):
-            CORD19DatabaseCreation(data_path=jsons_path,
-                                   saving_directory=fake_dir,
-                                   version='v0')
+                                   engine=engine)
         with pytest.raises(ValueError):
-            version = 'test'
-            saving_directory = Path(str(tmpdir))
-            (saving_directory / f'cord19_{version}.db').touch()
             db = CORD19DatabaseCreation(data_path=jsons_path,
-                                        saving_directory=saving_directory,
-                                        version='test')
+                                        engine=engine)
+            db.construct()
             db.construct()
 
-    def test_real_equals_fake_db(self, real_db_cnxn, fake_db_cursor):
+    def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Tests that the schema of the fake database is always the same as the real one. """
-        real_db_cursor = real_db_cnxn.cursor()
-        real_tables_names = real_db_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
-        real_tables_names = {table_name for (table_name, ) in real_tables_names if table_name != 'sqlite_sequence'}
-        fake_tables_names = fake_db_cursor.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
+        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
+        real_tables_names = {table_name for table_name in inspector.get_table_names()}
+        fake_tables_names = fake_sqlalchemy_engine.execute("SELECT name FROM "
+                                                           "sqlite_master WHERE type='table';").fetchall()
         fake_tables_names = {table_name for (table_name, ) in fake_tables_names}
         assert real_tables_names
         assert real_tables_names == fake_tables_names
 
         for table_name in real_tables_names:
-            fake_db_schema = fake_db_cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
-            real_db_schema = real_db_cursor.execute(f"PRAGMA table_info({table_name})").fetchall()
+            fake_db_schema = fake_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})").fetchall()
+            real_db_schema = real_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})")
             assert real_db_schema
             assert fake_db_schema
             fake_db_set = set(map(lambda x: x[1:3], fake_db_schema))

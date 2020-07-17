@@ -6,27 +6,26 @@ The internals of fixtures might vary based on how conftest.py sets them up. The 
 tests is to run simple sanity checks rather than detailed bookkeeping.
 
 """
-from sqlite3 import OperationalError
-
 import numpy as np
 import pandas as pd
 import pytest
+from sqlalchemy.exc import OperationalError
 
 
-def test_database(fake_db_cursor):
+def test_database(fake_sqlalchemy_engine):
     """Make sure database tables setup correctly."""
-    for table_name in ['articles', 'article_id_2_sha', 'sentences']:
-        res = fake_db_cursor.execute('SELECT * FROM {}'.format(table_name)).fetchall()
+    for table_name in ['articles', 'sentences']:
+        res = pd.read_sql('SELECT * FROM {}'.format(table_name), fake_sqlalchemy_engine)
 
         assert len(res) > 0
 
     with pytest.raises(OperationalError):
-        fake_db_cursor.execute('SELECT * FROM fake_table').fetchall()
+        fake_sqlalchemy_engine.execute('SELECT * FROM fake_table').all()
 
 
-def test_embeddings(embeddings_path, fake_db_cursor):
+def test_embeddings(embeddings_path, fake_sqlalchemy_engine):
     """Make sure all sentences are embedded."""
-    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences', fake_sqlalchemy_engine).iloc[0, 0]
 
     for p in embeddings_path.iterdir():
         a = np.load(str(p))
