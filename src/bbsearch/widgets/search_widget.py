@@ -243,15 +243,15 @@ class SearchWidget(widgets.VBox):
         ]
 
         with self.widgets['status']:
-            init_text = """
-              ____  ____   _____ 
+            init_text = r"""
+              ____  ____   _____
              |  _ \|  _ \ / ____|
-             | |_) | |_) | (___  
-             |  _ <|  _ < \___ \ 
+             | |_) | |_) | (___
+             |  _ <|  _ < \___ \
              | |_) | |_) |____) |
-             |____/|____/|_____/ 
-                                               
-            Click \"Investiage\" to display some results.
+             |____/|____/|_____/
+
+            Click "Investiage" to display some results.
             """
             print(textwrap.dedent(init_text))
 
