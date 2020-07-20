@@ -232,12 +232,12 @@ class SearchWidget(widgets.VBox):
             # self.widgets['default_saving_paragraph'],
             # self.widgets['default_saving_article'],
             self.widgets['investigate_button'],
-            widgets.HBox(children=(
-                self.widgets['status'],
-                self.widgets['status_clear'])),
             page_selection,
             self.widgets['out'],
             page_selection,
+            widgets.HBox(children=(
+                self.widgets['status'],
+                self.widgets['status_clear'])),
             self.widgets['report_button'],
             self.widgets['articles_button'],
         ]
@@ -641,7 +641,7 @@ class SearchWidget(widgets.VBox):
 
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
-        with self.widgets['out']:
+        with self.widgets['status']:
             self.article_saver.report()
             print('The PDF report has been created.')
 
