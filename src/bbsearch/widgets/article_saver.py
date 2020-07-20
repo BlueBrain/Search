@@ -43,14 +43,17 @@ class ArticleSaver:
         self.articles_metadata = dict()
 
         self.state = set()
+        self.articles_metadata = {}
         self.resolved_state = None
         self.resolved_state_hash = None
 
-    def add_article(self, article_id):
-        self.add_paragraph(article_id, -1)
+    def add_article(self, article_id, metadata=None):
+        self.add_paragraph(article_id, -1, metadata=metadata)
 
-    def add_paragraph(self, article_id, paragraph_id):
+    def add_paragraph(self, article_id, paragraph_id, metadata=None):
         self.state.add((article_id, paragraph_id))
+        if metadata is not None:
+            self.articles_metadata[article_id] = metadata
 
     def has_article(self, article_id):
         return self.has_paragraph(article_id, -1)
@@ -143,6 +146,18 @@ class ArticleSaver:
 
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
 
+    def _fetch_article_info(self, article_id):
+        sql_query = f"""
+        SELECT authors, title, url
+        FROM articles
+        WHERE article_id = "{article_id}"
+        """
+        article = pd.read_sql(sql_query, self.connection)
+        article_authors, article_title, ref = \
+            article.iloc[0][['authors', 'title', 'url']]
+
+        return ref, article_title, article_authors
+
     def report(self):
         """Create the saved articles report.
 
@@ -155,16 +170,33 @@ class ArticleSaver:
         width = 80
 
         self.retrieve_text()
+        color_title = '#1A0DAB'
+        color_metadata = '#006621'
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
-                article_report += self.articles_metadata[article_id]
+                # article_report += article_metadata
+                section_name = df_article['section_name'][0]
             else:
-                substring = '&#183;'
-                article_report += self.articles_metadata[article_id].split(substring)[0] + '&#183;'
-                article_report += f'{len(df_article["section_name"].unique())} different ' \
-                                  f'sections are selected for this article.'
-                article_report += '</p>'
+                # substring = '&#183;'
+                # article_report += article_metadata.split(substring)[0] + '&#183;'
+                # article_report += f'{len(df_article["section_name"].unique())} different ' \
+                #                   f'sections are selected for this article.'
+                # article_report += '</p>'
+                section_name = f'{len(df_article["section_name"].unique())} different ' \
+                               f'sections are selected for this article.'
+            ref, article_title, article_authors = self._fetch_article_info(article_id)
+            article_metadata = f"""
+            <a href="{ref}" style="color:{color_title}; font-size:17px">
+                {article_title}
+            </a>
+            <br>
+            <p style="color:{color_metadata}; font-size:13px">
+                {article_authors} &#183; {section_name.lower().title()}
+            </p>
+            """
+            article_report += article_metadata
+
             article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
             article_report += '<br/>' * 2
 

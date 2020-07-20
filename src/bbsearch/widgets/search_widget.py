@@ -287,26 +287,28 @@ class SearchWidget(widgets.VBox):
 
         return highlighted_paragraph
 
-    def print_single_result(self, sentence_id, print_whole_paragraph):
-        """Retrieve metadata and complete the report with HTML string given sentence_id.
+    def _fetch_result_info(self, sentence_id):
+        """Fetch information for a sentence ID from the database.
 
         Parameters
         ----------
-        sentence_id: int
-            Sentence ID of the article needed to retrieve
-        print_whole_paragraph: bool
-            If true, the whole paragraph will be displayed in the results of the widget.
+        sentence_id : int
+            The sentence_id for a search result.
 
         Returns
         -------
-        article_metadata: str
-            Formatted string containing the metadata of the article.
-        formatted_output: str
-            Formatted output of the sentence.
-        article_id : str
-            The article ID.
-        paragraph_id : int
-            The paragraph ID.
+        result_info : dict
+            A dictionary containing the following fields:
+
+                "sentence_id"
+                "paragraph_id"
+                "article_id"
+                "article_sha"
+                "article_title"
+                "article_auth"
+                "ref"
+                "section_name"
+                "text"
         """
         sql_query = f"""
         SELECT sha, section_name, text, paragraph_id
@@ -341,6 +343,47 @@ class SearchWidget(widgets.VBox):
         ref = ref or ""
         section_name = section_name or ""
 
+        result_info = {
+            "sentence_id": sentence_id,
+            "paragraph_id": int(paragraph_id),
+            "article_id": article_id,
+            "article_sha": article_sha,
+            "article_title": article_title,
+            "article_auth": article_auth,
+            "ref": ref,
+            "section_name": section_name,
+            "text": text
+        }
+
+        return result_info
+
+    def print_single_result(self, result_info, print_whole_paragraph):
+        """Retrieve metadata and complete the report with HTML string given sentence_id.
+
+        Parameters
+        ----------
+        result_info: dict
+            The information for a single result obtained by calling
+            `_fetch_result_info`.
+
+        print_whole_paragraph: bool
+            If true, the whole paragraph will be displayed in the results of the widget.
+
+        Returns
+        -------
+        article_metadata: str
+            Formatted string containing the metadata of the article.
+        formatted_output: str
+            Formatted output of the sentence.
+        """
+
+        sentence_id = result_info["sentence_id"]
+        text = result_info["text"]
+        ref = result_info["ref"]
+        article_title = result_info["article_title"]
+        article_auth = result_info["article_auth"]
+        section_name = result_info["section_name"]
+
         width = 80
         if print_whole_paragraph:
             try:
@@ -369,7 +412,7 @@ class SearchWidget(widgets.VBox):
             """
         article_metadata = textwrap.dedent(article_metadata)
 
-        return article_metadata, formatted_output, article_id, paragraph_id
+        return article_metadata, formatted_output
 
     def investigate_on_click(self, change_dict):
         """Investigate button callback."""
@@ -493,12 +536,15 @@ class SearchWidget(widgets.VBox):
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
             for sentence_id in self.current_sentence_ids[start:end]:
-                article_metadata, formatted_output, article_id, paragraph_id = \
-                    self.print_single_result(int(sentence_id), print_whole_paragraph)
+                result_info = self._fetch_result_info(sentence_id)
+                article_metadata, formatted_output = \
+                    self.print_single_result(result_info, print_whole_paragraph)
                 if self.article_saver:
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(
-                        article_id, int(paragraph_id), sentence_id)
+                        result_info["article_id"],
+                        result_info["paragraph_id"],
+                        sentence_id)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
