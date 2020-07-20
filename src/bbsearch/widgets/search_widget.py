@@ -406,25 +406,25 @@ class SearchWidget(widgets.VBox):
                     deprioritize_strength=deprioritize_strength,
                     deprioritize_text=deprioritize_text,
                     exclusion_text=exclusion_text)
-            print(f'{timer["server query"]:5.2f} seconds')
+            print(f'{timer["server query"]:7.2f} seconds')
 
             print('Resolving articles...'.ljust(50), end='', flush=True)
             with timer("id resolution"):
                 self.current_article_ids, self.current_paragraph_ids = \
                     self.resolve_ids(self.current_sentence_ids)
-            print(f'{timer["id resolution"]:5.2f} seconds')
+            print(f'{timer["id resolution"]:7.2f} seconds')
 
             print('Applying default saving...'.ljust(50), end='', flush=True)
             with timer("default saving"):
                 self.apply_default_saving()
-            print(f'{timer["default saving"]:5.2f} seconds')
+            print(f'{timer["default saving"]:7.2f} seconds')
 
             print('Updating the results display...'.ljust(50), end='', flush=True)
             with timer("update page"):
                 self.n_pages = math.ceil(
                     len(self.current_sentence_ids) / self.results_per_page)
                 self.set_page(0, force=True)
-            print(f'{timer["update page"]:5.2f} seconds')
+            print(f'{timer["update page"]:7.2f} seconds')
 
             print('Done.')
 
