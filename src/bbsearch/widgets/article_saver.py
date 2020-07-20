@@ -47,19 +47,19 @@ class ArticleSaver:
         self.resolved_state_hash = None
 
     def add_article(self, article_id):
-        self.add_paragraph(article_id, None)
+        self.add_paragraph(article_id, -1)
 
     def add_paragraph(self, article_id, paragraph_id):
         self.state.add((article_id, paragraph_id))
 
     def has_article(self, article_id):
-        return self.has_paragraph(article_id, None)
+        return self.has_paragraph(article_id, -1)
 
     def has_paragraph(self, article_id, paragraph_id):
         return (article_id, paragraph_id) in self.state
 
     def remove_article(self, article_id):
-        self.remove_paragraph(article_id, None)
+        self.remove_paragraph(article_id, -1)
 
     def remove_paragraph(self, article_id, paragraph_id):
         if (article_id, paragraph_id) in self.state:
