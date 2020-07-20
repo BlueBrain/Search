@@ -82,7 +82,7 @@ class ArticleSaver:
         if state_hash != self.resolved_state_hash:
             resolved_state = set()
             for article_id, paragraph_id in self.state:
-                if paragraph_id is None:
+                if paragraph_id == -1:
                     for paragraph_id in self._iter_paragraph_ids(article_id):
                         resolved_state.add((article_id, paragraph_id))
                 else:
