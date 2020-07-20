@@ -642,37 +642,42 @@ class SearchWidget(widgets.VBox):
     def article_report_on_click(self, change_dict):
         """Create the saved articles report."""
         with self.widgets['status']:
+            print()
+            print('Creating the saved results PDF report... ', end='', flush=True)
             self.article_saver.report()
-            print('The PDF report has been created.')
+            print('Done.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
-        with self.widgets['out']:
-            print('The PDF report has been created.')
+        with self.widgets['status']:
+            print()
+            print('Creating the search results PDF report... ', end='', flush=True)
 
-        color_hyperparameters = '#222222'
+            color_hyperparameters = '#222222'
 
-        hyperparameters_section = f"""
-        <h1> Search Parameters </h1>
-        <ul style="font-size:13; color:{color_hyperparameters}">
-        <li> {'</li> <li>'.join([
-            '<b>' +
-            ' '.join(k.split('_')).title() +
-            '</b>' +
-            f': {repr(v.value)}'
-            for k, v in self.widgets.items()
-            if hasattr(v, 'value')])}
-        </li>
-        </ul>
-        """
+            hyperparameters_section = f"""
+            <h1> Search Parameters </h1>
+            <ul style="font-size:13; color:{color_hyperparameters}">
+            <li> {'</li> <li>'.join([
+                '<b>' +
+                ' '.join(k.split('_')).title() +
+                '</b>' +
+                f': {repr(v.value)}'
+                for k, v in self.widgets.items()
+                if hasattr(v, 'value')])}
+            </li>
+            </ul>
+            """
 
-        print_whole_paragraph = self.widgets['print_paragraph'].value
-        report = ""
-        for sentence_id in self.current_sentence_ids:
-            article_metadata, formatted_output, *_ = \
-                self.print_single_result(sentence_id, print_whole_paragraph)
-            report += article_metadata + formatted_output + '<br>'
+            print_whole_paragraph = self.widgets['print_paragraph'].value
+            report = ""
+            for sentence_id in self.current_sentence_ids:
+                article_metadata, formatted_output, *_ = \
+                    self.print_single_result(sentence_id, print_whole_paragraph)
+                report += article_metadata + formatted_output + '<br>'
 
-        results_section = f"<h1> Results </h1> {report}"
-        pdfkit.from_string(hyperparameters_section + results_section,
-                           f"report_{datetime.datetime.now()}.pdf")
+            results_section = f"<h1> Results </h1> {report}"
+            pdfkit.from_string(hyperparameters_section + results_section,
+                               f"report_{datetime.datetime.now()}.pdf")
+
+            print('Done.')
