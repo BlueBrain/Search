@@ -464,7 +464,7 @@ class SearchWidget(widgets.VBox):
             print_whole_paragraph = self.widgets['print_paragraph'].value
             self.radio_buttons = list()
 
-            self.widgets['out'].clear_output()
+            # self.widgets['out'].clear_output()
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
             for sentence_id in self.current_sentence_ids[start:end]:
