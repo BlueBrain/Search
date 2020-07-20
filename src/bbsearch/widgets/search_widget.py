@@ -173,10 +173,13 @@ class SearchWidget(widgets.VBox):
         self.widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
         # Status Area
-        self.widgets['status'] = widgets.Output(layout={'border': '1px solid black'})
-        self.widgets['status_clear'] = widgets.Button(description="Clear")
+        self.widgets['status'] = widgets.Output(
+            layout={'border': '1px solid black', 'flex': '1'})
+        self.widgets['status_clear'] = widgets.Button(
+            description="Clear",
+            layout={'max_width': '100px'})
         self.widgets['status_clear'].on_click(
-            lambda b: self.widgets['status_clear'].clear_output())
+            lambda b: self.widgets['status'].clear_output())
 
         # Page buttons
         self.widgets['page_back'] = widgets.Button(
@@ -388,7 +391,9 @@ class SearchWidget(widgets.VBox):
         timer = Timer()
         self.widgets['status'].clear_output()
         with self.widgets['status']:
-            print(f'Processing query \"{query_text}\"...')
+            header = f'Query: \"{query_text}\"'
+            print(header)
+            print('-' * len(header))
 
             print('Sending query to server... ', end='', flush=True)
             with timer("server query"):
