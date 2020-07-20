@@ -170,6 +170,7 @@ class ArticleSaver:
         width = 80
 
         self.retrieve_text()
+
         color_title = '#1A0DAB'
         color_metadata = '#006621'
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
@@ -214,7 +215,7 @@ class ArticleSaver:
         """
         rows = []
         for article_id, paragraph_id in self.state:
-            if paragraph_id is None:
+            if paragraph_id == -1:
                 option = SAVING_OPTIONS["article"]
             else:
                 option = SAVING_OPTIONS["paragraph"]
