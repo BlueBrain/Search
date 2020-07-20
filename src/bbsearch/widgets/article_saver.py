@@ -174,7 +174,7 @@ class ArticleSaver:
             DataFrame containing all the paragraphs seen and choice made for it.
         """
         rows = []
-        for article_id, paragraph_id in sorted(self.state):
+        for article_id, paragraph_id in self.state:
             if paragraph_id is None:
                 option = "Save article"
             else:
@@ -186,5 +186,6 @@ class ArticleSaver:
         table = pd.DataFrame(
             data=rows,
             columns=['article_id', 'paragraph_id', 'option'])
+        table.sort_values(by=['article_id', 'paragraph_id'], inplace=True)
 
         return table
