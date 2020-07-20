@@ -129,7 +129,7 @@ class SearchWidget(widgets.VBox):
             description='Substring Exclusion (newline separated): ')
 
         self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
-            options=zip(SAVING_OPTIONS.values(), SAVING_OPTIONS.keys()),
+            options=list(zip(SAVING_OPTIONS.values(), SAVING_OPTIONS.keys())),
             value='nothing',
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
