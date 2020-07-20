@@ -672,8 +672,9 @@ class SearchWidget(widgets.VBox):
             print_whole_paragraph = self.widgets['print_paragraph'].value
             report = ""
             for sentence_id in self.current_sentence_ids:
-                article_metadata, formatted_output, *_ = \
-                    self.print_single_result(sentence_id, print_whole_paragraph)
+                result_info = self._fetch_result_info(sentence_id)
+                article_metadata, formatted_output = \
+                    self.print_single_result(result_info, print_whole_paragraph)
                 report += article_metadata + formatted_output + '<br>'
 
             results_section = f"<h1> Results </h1> {report}"
