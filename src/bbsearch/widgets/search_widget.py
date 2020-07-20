@@ -401,7 +401,7 @@ class SearchWidget(widgets.VBox):
         default_save_paragraph = self.widgets["default_saving_paragraph"].value
         default_save_article = self.widgets["default_saving_article"].value
 
-        if any(default_save_article, default_save_paragraph):
+        if any([default_save_article, default_save_paragraph]):
             for article_id, paragraph_id in zip(self.current_article_ids, self.current_paragraph_ids):
                 if default_save_article:
                     self.article_saver.add_article(article_id)
@@ -448,8 +448,6 @@ class SearchWidget(widgets.VBox):
             paragraph_ids.append(paragraph_id)
 
         return article_ids, paragraph_ids
-
-
 
     def set_page(self, new_page, force=False):
         new_page = max(0, min(new_page, self.n_pages - 1))
