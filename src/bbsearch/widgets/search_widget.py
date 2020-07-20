@@ -61,8 +61,6 @@ class SearchWidget(widgets.VBox):
         self.current_sentence_ids = []
         self.current_paragraph_ids = []
         self.current_article_ids = []
-        self.seen_sentence_ids = set()
-        self.saving_options = list(SAVING_OPTIONS.values())
 
         self.widgets = dict()
         self._init_widgets()
@@ -131,27 +129,29 @@ class SearchWidget(widgets.VBox):
             description='Substring Exclusion (newline separated): ')
 
         self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
-            options=self.saving_options,
+            options=zip(SAVING_OPTIONS.values(), SAVING_OPTIONS.keys()),
+            value='nothing',
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
-            description='Default saving: ', )
-        self.widgets['default_saving_paragraph'] = widgets.Checkbox(
-            description="Save paragraph",
-            value=False,
-            indent=False)
-        self.widgets['default_saving_article'] = widgets.Checkbox(
-            description="Save article",
-            value=False,
-            indent=False)
+            description='Default saving: ')
 
-        def default_value_article_saver_change(change):
-            if self.radio_buttons:
-                for article_infos, button in self.radio_buttons:
-                    button.value = change['new']
-                return change['new']
+        # self.widgets['default_saving_paragraph'] = widgets.Checkbox(
+        #     description="Save paragraph",
+        #     value=False,
+        #     indent=False)
+        # self.widgets['default_saving_article'] = widgets.Checkbox(
+        #     description="Save article",
+        #     value=False,
+        #     indent=False)
 
-        self.widgets['default_value_article_saver'].observe(default_value_article_saver_change,
-                                                            names='value')
+        # def default_value_article_saver_change(change):
+        #     if self.radio_buttons:
+        #         for article_infos, button in self.radio_buttons:
+        #             button.value = change['new']
+        #         return change['new']
+
+        # self.widgets['default_value_article_saver'].observe(default_value_article_saver_change,
+        #                                                     names='value')
 
         # Click to run Information Retrieval!
         self.widgets['investigate_button'] = widgets.Button(description='Investigate!',
@@ -398,14 +398,12 @@ class SearchWidget(widgets.VBox):
         self.set_page(0, force=True)
 
     def apply_default_saving(self):
-        default_save_paragraph = self.widgets["default_saving_paragraph"].value
-        default_save_article = self.widgets["default_saving_article"].value
-
-        if any([default_save_article, default_save_paragraph]):
+        default_saving_value = self.widgets["default_value_article_saver"].value
+        if default_saving_value != "nothing":
             for article_id, paragraph_id in zip(self.current_article_ids, self.current_paragraph_ids):
-                if default_save_article:
+                if default_saving_value == "article":
                     self.article_saver.add_article(article_id)
-                if default_save_paragraph:
+                elif default_saving_value == "paragraph":
                     self.article_saver.add_paragraph(article_id, paragraph_id)
 
     def resolve_ids(self, sentence_ids):
@@ -462,7 +460,7 @@ class SearchWidget(widgets.VBox):
             print_whole_paragraph = self.widgets['print_paragraph'].value
             self.radio_buttons = list()
 
-            # self.widgets['out'].clear_output()
+            self.widgets['out'].clear_output()
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
             for sentence_id in self.current_sentence_ids[start:end]:
