@@ -39,19 +39,24 @@ class SearchWidget(widgets.VBox):
 
     results_per_page : int, optional
         The number of results to display per results page.
+
+    top_n_max : int, optional
+        The upper bound of the top N results slider.
     """
 
     def __init__(self,
                  searcher,
                  connection,
                  article_saver=None,
-                 results_per_page=10):
+                 results_per_page=10,
+                 top_n_max=100):
         super().__init__()
 
         self.searcher = searcher
         self.connection = connection
         self.article_saver = article_saver
         self.results_per_page = max(1, results_per_page)
+        self.top_n_max = top_n_max
         self.n_pages = 1
         self.current_page = -1
 
@@ -78,9 +83,9 @@ class SearchWidget(widgets.VBox):
 
         # Select n. of top results to return
         self.widgets['top_results'] = widgets.widgets.IntSlider(
-            value=10,
+            value=min(10, self.top_n_max),
             min=0,
-            max=100,
+            max=self.top_n_max,
             description='Top N results')
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
