@@ -101,9 +101,9 @@ class Widget:
             the information about the article.
 
         """
-        sentence = retrieve_sentences_from_sentence_id(sentence_id=[sentence_id, ],
-                                                        engine=self.connection)
-        section_name, text, paragraph = \
+        sentence = retrieve_sentences_from_sentence_id(sentence_id=[sentence_id],
+                                                       engine=self.connection)
+        section_name, text, paragraph_pos = \
             sentence.iloc[0][['section_name', 'text', 'paragraph_pos_in_article']]
         article = retrieve_article_metadata(sentence_id=sentence_id,
                                             engine=self.connection)
@@ -145,7 +145,7 @@ class Widget:
                         """
         article_metadata = textwrap.dedent(article_metadata)
 
-        article_infos = (article_id, paragraph)
+        article_infos = (article_id, paragraph_pos)
 
         return article_metadata, formatted_output, article_infos
 

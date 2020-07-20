@@ -49,10 +49,11 @@ class TestEmbeddingModels:
         auto_tokenizer.from_pretrained().tokenize.assert_called_once()
         auto_tokenizer.from_pretrained().convert_tokens_to_ids.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbiobert)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbiobert,
+                                                 section_names=['section_0', 'section_1'])
         assert embeddings.shape == (n_sentences, 769)
 
     def test_bsv_embedding(self, monkeypatch, tmpdir, fake_sqlalchemy_engine, test_parameters, metadata_path):
@@ -80,10 +81,11 @@ class TestEmbeddingModels:
         assert embedding.shape == (700,)
         bsv_model.embed_sentences.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, bsv)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, bsv,
+                                                 section_names=['section_0', 'section_1'])
         assert embeddings.shape == (n_sentences, 701)
 
     def test_sbert_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
@@ -105,10 +107,11 @@ class TestEmbeddingModels:
         assert embedding.shape == (768,)
         sbert_model.encode.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbert)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbert,
+                                                 section_names=['section_0', 'section_1'])
         assert embeddings.shape == (n_sentences, 769)
 
     def test_use_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
@@ -130,8 +133,9 @@ class TestEmbeddingModels:
         assert embedding.shape == (512,)
         use_model.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, use)
+        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, use,
+                                                 section_names=['section_0', 'section_1'])
         assert embeddings.shape == (n_sentences, 513)

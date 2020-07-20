@@ -2,7 +2,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition, get_shas_from_ids
+from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition
 from .utils import Timer
 
 
@@ -113,21 +113,16 @@ def filter_sentences(connection,
         List of the sentences ids after the filtration related to the criteria specified by the user.
     """
     # Apply article conditions
-    article_conditions = []
+    article_conditions = list()
     if date_range is not None:
         article_conditions.append(ArticleConditioner.get_date_range_condition(date_range))
     if has_journal:
         article_conditions.append(ArticleConditioner.get_has_journal_condition())
-    article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
-
     restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', connection)
 
-    # Articles ID to SHA
-    all_article_shas_str = ', '.join([f"'{sha}'"
-                                      for sha in get_shas_from_ids(restricted_article_ids, connection)])
-    sentence_conditions = [f"sha IN ({all_article_shas_str})"]
-
     # Apply sentence conditions
+    sentence_conditions = list()
+    sentence_conditions.append(SentenceConditioner.get_article_id_condition(restricted_article_ids))
     if exclusion_text is not None:
         excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
         sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)

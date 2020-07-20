@@ -12,6 +12,8 @@ import tensorflow_hub as hub
 import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
+from .sql import retrieve_sentences_from_section_name
+
 
 class EmbeddingModel(ABC):
     """Abstract interface for the Sentences Embeddings Models."""
@@ -263,7 +265,7 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(connection, model):
+def compute_database_embeddings(connection, model, section_names=['Title', 'Abstract']):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
@@ -274,32 +276,23 @@ def compute_database_embeddings(connection, model):
     model: EmbeddingModel
         Instance of the EmbeddingModel of choice.
 
+    section_names: list of str
+        Section name of the sentences to keep for the embeddings.
+
     Returns
     -------
     final_embeddings: np.array
         Huge numpy array with all sentences embeddings for the given models.
         Format: (sentence_id, embeddings).
     """
-    query = """
-    SELECT sentence_id, text
-    FROM sentences
-    WHERE sha IN (
-        SELECT sha
-        FROM article_id_2_sha
-        WHERE article_id IN (
-            SELECT article_id
-            FROM articles
-            WHERE has_covid19_tag = 1
-        )
-    )
-    """
-    #SQL_rf: Retrieve sentences with a given section name
+    sentences = retrieve_sentences_from_section_name(section_name=section_names, engine=connection)
+
     all_embeddings = list()
     all_ids = list()
-    query_execution = pd.read_sql(sql=query, con=connection, chunksize=1)
     num_errors = 0
 
-    for i_sentence, (sentence_id, sentence_text) in enumerate(query_execution):
+    for index, row in sentences.iterrows():
+        sentence_text, sentence_id = row['text'], row['sentence_id']
         try:
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
@@ -308,8 +301,8 @@ def compute_database_embeddings(connection, model):
             num_errors += 1
         all_ids.append(sentence_id)
         all_embeddings.append(embedding)
-        if i_sentence % 1000 == 0:
-            print(f'Embedded {i_sentence} with {num_errors} errors')
+        if index % 1000 == 0:
+            print(f'Embedded {index} with {num_errors} errors')
 
     all_embeddings = np.array(all_embeddings)
     all_ids = np.array(all_ids).reshape((-1, 1))

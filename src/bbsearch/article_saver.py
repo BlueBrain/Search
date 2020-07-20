@@ -5,6 +5,7 @@ import textwrap
 
 import pandas as pd
 
+from .sql import retrieve_paragraph
 from .widget import SAVING_OPTIONS
 
 
@@ -39,56 +40,44 @@ class ArticleSaver:
     def __init__(self, connection):
         self.connection = connection
         self.saved_articles = dict()
-        self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
+        self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name',
+                                                     'paragraph_pos_in_article', 'text'])
         self.articles_metadata = dict()
+
+    def clean_saved_texts(self):
+        """Clean the saved_articles list."""
+        df_all_options = pd.DataFrame.from_records(data=[(*k, v) for k, v in self.saved_articles.items()],
+                                                   columns=['article_id', 'paragraph_pos_in_article', 'option'])
+        full_articles = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id'].to_list()
+
+        df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(full_articles)]
+        specific_paragraphs = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph'],
+                                                    ['article_id', 'paragraph_pos_in_article']].to_dict('index')
+
+        paragraphs = list()
+        for row, paragraph in specific_paragraphs.items:
+            identifier = (paragraph['article_id'], paragraph['paragraph_pos_in_article'])
+            paragraphs += identifier
+
+        return full_articles, paragraphs
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        df_all_options = pd.DataFrame.from_records(data=[(*k, v) for k, v in self.saved_articles.items()],
-                                                   columns=['article_id', 'paragraph_id', 'option'])
+        full_articles, paragraphs = self.clean_saved_texts()
 
-        article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
-        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
+        all_paragraphs = []
+        for paragraph in paragraphs:
+            section_name, paragraph_text = retrieve_paragraph(paragraph, self.connection)
+            all_paragraphs += [{'article_id': paragraph['article_id'],
+                                'section_name': section_name,
+                                'paragraph_pos_in_article': paragraph['paragraph_pos_in_article'],
+                                'text': paragraph_text}]
 
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE sha IN (
-                     SELECT sha
-                     FROM article_id_2_sha
-                     WHERE article_id IN ({article_ids_full_list})
-                 )
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON a.sha = p.sha;
-        """
-        # SQL_rf: Reconstruct articles/paragraphs from a sentence_id
-        df_extractions_full = pd.read_sql(sql_query, self.connection)
-
-        df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
-        df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
-
-        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id'])
-
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE paragraph_id IN ({paragraph_ids_list})
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON p.sha = a.sha;
-        """
-        df_extractions_pars = pd.read_sql(sql_query, self.connection)
-        # SQL_rf: Reconstruct articles/paragraphs from a sentence_id
-        self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
+        specific_paragraphs = pd.DataFrame(all_paragraphs, columns=['article_id', 'section_name',
+                                                                    'paragraph_pos_in_article', 'text'])
+        self.df_chosen_texts.append(specific_paragraphs)
 
     def report(self):
         """Create the saved articles report.
@@ -103,7 +92,7 @@ class ArticleSaver:
 
         self.retrieve_text()
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
-            df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
+            df_article = df_article.sort_values(by='paragraph_pos_in_article', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
                 article_report += self.articles_metadata[article_id]
             else:
@@ -130,10 +119,10 @@ class ArticleSaver:
         articles = []
         for article_infos, option in self.saved_articles.items():
             articles += [{'article_id': article_infos[0],
-                          'paragraph_id': article_infos[1],
+                          'paragraph_pos_in_article': article_infos[1],
                           'option': option
                           }]
         table = pd.DataFrame(data=articles,
-                             columns=['article_id', 'paragraph_id', 'option'])
+                             columns=['article_id', 'paragraph_pos_in_article', 'option'])
         table.sort_values(by=['article_id'])
         return table

@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import pandas as pd
 
 from bbsearch.article_saver import ArticleSaver
@@ -6,7 +8,7 @@ from bbsearch.widget import SAVING_OPTIONS
 
 class TestArticleSaver:
 
-    def test_article_saver(self, fake_db_cursor, fake_sqlalchemy_engine):
+    def test_article_saver(self, fake_sqlalchemy_engine):
         """Test that article_saver is good. """
 
         article_saver = ArticleSaver(connection=fake_sqlalchemy_engine)
@@ -14,15 +16,14 @@ class TestArticleSaver:
         # Check the possible article_id, paragraphs_id of the fake database
         # Create a fake article_saver.saved_articles dictionary
         # (Which should be the output of the widget)
-        results = fake_db_cursor.execute(
-            """SELECT sha, article_id FROM article_id_2_sha
-            WHERE sha is NOT NULL""").fetchall()
-        all_articles_paragraphs_id = dict()
-        for sha, article_id in results:
-            all_paragraphs_id = fake_db_cursor.execute(
-                """SELECT paragraph_id FROM paragraphs
-                WHERE sha is ?""", [sha]).fetchall()
-            all_articles_paragraphs_id[article_id] = [paragraph_id for (paragraph_id,) in all_paragraphs_id]
+        article_ids = pd.read_sql('SELECT article_id FROM articles', fake_sqlalchemy_engine)['article_id'].to_list()
+        all_articles_paragraphs_id = defaultdict(list)
+        for article_id in article_ids:
+            sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article) 
+                            FROM sentences 
+                            WHERE article_id = {article_id} """
+            all_paragraphs = pd.read_sql(sql_query, fake_sqlalchemy_engine)['paragraph_pos_in_article'].to_list()
+            all_articles_paragraphs_id[article_id] = all_paragraphs
             # For all articles extract only the first of their paragraphs
             article_saver.saved_articles[article_id,
                                          all_articles_paragraphs_id[article_id][0]] = SAVING_OPTIONS['paragraph']
@@ -30,12 +31,13 @@ class TestArticleSaver:
         # For the last article extract all its paragraphs
         article_saver.saved_articles[article_id,
                                      all_articles_paragraphs_id[article_id][0]] = SAVING_OPTIONS['article']
-        n_paragraphs_full_article = len(all_paragraphs_id)
+        n_paragraphs_full_article = len(all_paragraphs)
 
         # Check that the retrieving of the different text is working
         article_saver.retrieve_text()
         assert isinstance(article_saver.df_chosen_texts, pd.DataFrame)
-        assert article_saver.df_chosen_texts.columns.to_list() == ['article_id', 'section_name', 'paragraph_id', 'text']
+        assert article_saver.df_chosen_texts.columns.to_list() == \
+               ['article_id', 'section_name', 'paragraph_pos_in_article', 'text']
         assert len(article_saver.df_chosen_texts) == len(all_articles_paragraphs_id) + n_paragraphs_full_article - 1
 
         # Check summary table

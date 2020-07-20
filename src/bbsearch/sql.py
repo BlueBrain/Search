@@ -50,68 +50,13 @@ def retrieve_sentences_from_section_name(section_name, engine):
     return sentences
 
 
-def retrieve_article_metadata(sentence_id, engine):
-    """Retrieve article metadata given one sentence id.
-
-    Parameters
-    ----------
-    sentence_id: int
-        Sentence id for which need to retrieve the article metadat.
-    engine: sqlalchemy.Engine
-        SQLAlchemy Engine connected to the database.
-
-    Returns
-    -------
-    article: pd.DataFrame
-        DataFrame containing the article metadata from
-        which the sentence is coming.
-    """
-    sql_query = f"""SELECT * 
-                    FROM articles 
-                    WHERE article_id = 
-                        (SELECT article_id 
-                        FROM sentences
-                        WHERE sentence_id = {sentence_id})"""
-    article = pd.read_sql(sql_query, engine)
-    return article
-
-
-def retrieve_article(sentence_id, engine):
-    """Retrieve article given one sentence id.
-
-    Parameters
-    ----------
-    sentence_id: int
-        Sentence id for which need to retrieve the article metadat.
-    engine: sqlalchemy.Engine
-        SQLAlchemy Engine connected to the database.
-
-    Returns
-    -------
-    article: str
-        Article containing the sentence of the given sentence_id.
-    """
-    sql_query = f"""SELECT text 
-                    FROM sentences
-                    WHERE article_id = 
-                        (SELECT article_id 
-                        FROM sentences 
-                        WHERE sentence_id = {sentence_id})
-                    ORDER BY paragraph_pos_in_article ASC, 
-                    sentence_pos_in_paragraph ASC"""
-
-    all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
-    article = ' '.join(all_sentences)
-    return article
-
-
-def retrieve_paragraph(sentence_id, engine):
+def retrieve_paragraph_from_sentence_id(sentence_id, engine):
     """Retrieve paragraph given one sentence id.
 
     Parameters
     ----------
     sentence_id: int
-        Sentence id for which need to retrieve the article metadat.
+        Sentence id for which need to retrieve the paragraph.
     engine: sqlalchemy.Engine
         SQLAlchemy Engine connected to the database.
 
@@ -137,27 +82,131 @@ def retrieve_paragraph(sentence_id, engine):
     return paragraph
 
 
-def get_shas_from_ids(articles_ids, db_cnxn):
-    """Find articles SHA given article IDs.
+def retrieve_paragraph(identifier, engine):
+    """Retrieve paragraph given one identifier (article_id, paragraph_pos_in_article).
 
     Parameters
     ----------
-    articles_ids : list
-        A list of strings representing article IDs.
-    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        A SQL database for querying the SHAs. Should contain
-        a table named "article_id_2_sha".
+    identifier: tuple of int
+        Tuple with form: (Article_id, paragraph_pos_in_article)
+    engine: sqlalchemy.Engine
+        SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    results : list
-        A list of sentence SHAs.
+    section_name: str
+        Section Name where the paragraph is located.
+    paragraph: str
+        Paragraph containing the sentence of the given sentence_id.
     """
-    all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
-    sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
-    results = pd.read_sql(sql_query, db_cnxn)['sha'].tolist()
+    sql_query = f"""SELECT section_name, text 
+                    FROM sentences
+                    WHERE article_id = {identifier[0]}
+                    AND paragraph_pos_in_article = {identifier[1]}
+                    ORDER BY sentence_pos_in_paragraph ASC"""
 
-    return results
+    sentences = pd.read_sql(sql_query, engine)
+    sentences_text = sentences['text'].to_list()
+    section_name = sentences['section_name'].iloc[0]
+    paragraph = ' '.join(sentences_text)
+    return section_name, paragraph
+
+
+def retrieve_article_metadata(sentence_id, engine):
+    """Retrieve article metadata given one sentence id.
+
+    Parameters
+    ----------
+    sentence_id: int
+        Sentence id for which need to retrieve the article metadata.
+    engine: sqlalchemy.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article: pd.DataFrame
+        DataFrame containing the article metadata from
+        which the sentence is coming.
+    """
+    sql_query = f"""SELECT * 
+                    FROM articles 
+                    WHERE article_id = 
+                        (SELECT article_id 
+                        FROM sentences
+                        WHERE sentence_id = {sentence_id})"""
+    article = pd.read_sql(sql_query, engine)
+    return article
+
+
+def retrieve_article_from_sentence_id(sentence_id, engine):
+    """Retrieve article given one sentence id.
+
+    Parameters
+    ----------
+    sentence_id: int
+        Sentence id for which need to retrieve the entire text article.
+    engine: sqlalchemy.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article: str
+        Article containing the sentence of the given sentence_id.
+    """
+    sql_query = f"""SELECT text 
+                    FROM sentences
+                    WHERE article_id = 
+                        (SELECT article_id 
+                        FROM sentences 
+                        WHERE sentence_id = {sentence_id})
+                    ORDER BY paragraph_pos_in_article ASC, 
+                    sentence_pos_in_paragraph ASC"""
+
+    all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
+    article = ' '.join(all_sentences)
+    return article
+
+
+def retrieve_article(article_id, engine):
+    """Retrieve article given one article id.
+
+    Parameters
+    ----------
+    article_id: int
+        Article id for which need to retrieve the entire text article.
+    engine: sqlalchemy.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article: pd.DataFrame
+        DataFrame containing the Article dividing into paragraphs.
+    """
+    all_paragraphs = []
+    sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article)
+                    FROM sentences
+                    WHERE article_id = {article_id}"""
+    all_paragraph_pos = pd.read_sql(sql_query, engine)['paragraph_pos_in_article'].to_list()
+
+    for paragraph_pos in all_paragraph_pos:
+        sql_query = f"""SELECT article_id, section_name, text, paragraph_pos_in_article
+                        FROM sentences
+                        WHERE article_id = {article_id}
+                        AND paragraph_pos_in_article = {paragraph_pos}
+                        ORDER BY paragraph_pos_in_article ASC, 
+                        sentence_pos_in_paragraph ASC"""
+        sentences = pd.read_sql(sql_query, engine)
+        sentences_list = sentences['text'].to_list
+        paragraph = ' '.join(sentences_list)
+        all_paragraphs += [{
+            'article_id': article_id,
+            'section_name': sentences['section_name'].iloc[0],
+            'paragraph_pos_in_article': paragraph_pos,
+            'text': paragraph
+        }]
+
+    article = pd.DataFrame(all_paragraphs)
+    return article
 
 
 def get_ids_by_condition(conditions, table, db_cnxn):
@@ -219,7 +268,7 @@ class ArticleConditioner:
             The SQL condition
         """
         date_from, date_to = date_range
-        condition = f"date BETWEEN '{date_from}-01-01' and '{date_to}-12-31'"
+        condition = f"publish_time BETWEEN '{date_from}-01-01' and '{date_to}-12-31'"
 
         return condition
 
@@ -237,7 +286,7 @@ class ArticleConditioner:
         return condition
 
     @staticmethod
-    def get_restrict_to_tag_condition(tag='has_covid19_tag'):
+    def get_restrict_to_tag_condition(tag):
         """Construct a condition for restricting to a given tag.
 
         Parameters
@@ -256,6 +305,22 @@ class ArticleConditioner:
 
 class SentenceConditioner:
     """Sentence conditioner."""
+
+    @staticmethod
+    def get_article_id_condition(article_id):
+        """Construct condition for specific article_id.
+
+        Parameters
+        ----------
+        article_id: list
+
+        Returns
+        -------
+        condition
+        """
+        articles = ', '.join(str(id_) for id_ in article_id)
+        condition = f"article_id IN ({articles})"
+        return condition
 
     @staticmethod
     def get_word_exclusion_condition(word):

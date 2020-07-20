@@ -8,7 +8,7 @@ import pandas as pd
 
 from bbsearch.sql import retrieve_sentences_from_sentence_id, \
     retrieve_sentences_from_section_name, retrieve_article_metadata, retrieve_article, \
-    retrieve_paragraph
+    retrieve_paragraph, retrieve_paragraph_from_sentence_id, retrieve_article_from_sentence_id
 
 
 class TestNoSQL:
@@ -20,7 +20,6 @@ class TestNoSQL:
                                              # 'entrypoints.mining_server_entrypoint',
                                              # 'entrypoints.search_server_entrypoint',
                                              'mining.attributes',
-                                             'mining.eval',
                                              'mining.pipeline',
                                              'mining.relation',
                                              'remote_searcher',
@@ -76,16 +75,30 @@ class TestSQLQueries:
                                           'who_covidence_id', 'arxiv_id', 'pdf_json_files',
                                           'pmc_json_files', 'url', 's2_id'])
 
-    def test_retrieve_article(self, fake_sqlalchemy_engine):
+    def test_retrieve_article_from_sentence_id(self, fake_sqlalchemy_engine):
         """Test that retrieve article text from sentence_id is working."""
         sentence_id = 1
-        article = retrieve_article(sentence_id=sentence_id,
+        article = retrieve_article_from_sentence_id(sentence_id=sentence_id,
+                                                    engine=fake_sqlalchemy_engine)
+        assert isinstance(article, str)
+
+    def test_retrieve_article(self, fake_sqlalchemy_engine):
+        """Test that retrieve paragraph text from sentence_id is working."""
+        article_id = 1
+        article = retrieve_article(article_id=article_id,
                                    engine=fake_sqlalchemy_engine)
+        assert isinstance(article, pd.DataFrame)
+
+    def test_retrieve_paragraph_from_sentence_id(self, fake_sqlalchemy_engine):
+        """Test that retrieve article text from sentence_id is working."""
+        sentence_id = 1
+        article = retrieve_paragraph_from_sentence_id(sentence_id=sentence_id,
+                                                      engine=fake_sqlalchemy_engine)
         assert isinstance(article, str)
 
     def test_retrieve_paragraph(self, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from sentence_id is working."""
-        sentence_id = 1
-        paragraph = retrieve_paragraph(sentence_id=sentence_id,
+        article_id, paragraph_pos = 1, 0
+        paragraph = retrieve_paragraph(identifier=(article_id, paragraph_pos),
                                        engine=fake_sqlalchemy_engine)
         assert isinstance(paragraph, str)
