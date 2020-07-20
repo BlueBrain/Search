@@ -59,6 +59,8 @@ class SearchWidget(widgets.VBox):
 
         self.radio_buttons = []
         self.current_sentence_ids = []
+        self.current_paragraph_ids = []
+        self.current_article_ids = []
         self.seen_sentence_ids = set()
         self.saving_options = list(SAVING_OPTIONS.values())
 
@@ -384,12 +386,70 @@ class SearchWidget(widgets.VBox):
                 deprioritize_text=deprioritize_text,
                 exclusion_text=exclusion_text)
 
+            print('Applying default saving...')
+            self.current_article_ids, self.current_paragraph_ids = self.resolve_ids(self.current_sentence_ids)
+            self.apply_default_saving()
+
             print('Updating the results display...')
             self.n_pages = math.ceil(
                 len(self.current_sentence_ids) / self.results_per_page)
 
         # Update the results display
         self.set_page(0, force=True)
+
+    def apply_default_saving(self):
+        default_save_paragraph = self.widgets["default_saving_paragraph"].value
+        default_save_article = self.widgets["default_saving_article"].value
+
+        if any(default_save_article, default_save_paragraph):
+            for article_id, paragraph_id in zip(self.current_article_ids, self.current_paragraph_ids):
+                if default_save_article:
+                    self.article_saver.add_article(article_id)
+                if default_save_paragraph:
+                    self.article_saver.add_paragraph(article_id, paragraph_id)
+
+    def resolve_ids(self, sentence_ids):
+        """Resolve sentence IDs into article and paragraph IDs
+
+        Parameters
+        ----------
+        sentence_ids : list_like
+            A list of sentence IDs to be resolved
+
+        Returns
+        -------
+        article_ids : list_like
+            The article IDs corresponding to the sentence IDs
+        paragraph_ids : list_like
+            The paragraph IDs corresponding to the sentence IDs
+        """
+
+        article_ids = []
+        paragraph_ids = []
+
+        for sentence_id in sentence_ids:
+            sql_query = f"""
+            SELECT sha, paragraph_id
+            FROM sentences
+            WHERE sentence_id = "{sentence_id}"
+            """
+            sentence = pd.read_sql(sql_query, self.connection)
+            article_sha, paragraph_id = \
+                sentence.iloc[0][['sha', 'paragraph_id']]
+
+            sql_query = f"""
+            SELECT article_id
+            FROM article_id_2_sha
+            WHERE sha = "{article_sha}"
+            """
+            article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
+
+            article_ids.append(article_id)
+            paragraph_ids.append(paragraph_id)
+
+        return article_ids, paragraph_ids
+
+
 
     def set_page(self, new_page, force=False):
         new_page = max(0, min(new_page, self.n_pages - 1))
@@ -467,12 +527,6 @@ class SearchWidget(widgets.VBox):
             chk_paragraph.disabled = True
             chk_article.disabled = True
         else:
-            # Seeing this result for the first time - set the default values.
-            if sentence_id not in self.seen_sentence_ids:
-                chk_paragraph.value = self.widgets["default_saving_paragraph"].value
-                chk_article.value = self.widgets["default_saving_article"].value
-                self.seen_sentence_ids.add(sentence_id)
-
             # Check if this article/paragraph has been saved before
             if self.article_saver.has_paragraph(article_id, paragraph_id):
                 chk_paragraph.value = True
