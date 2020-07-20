@@ -75,14 +75,20 @@ class ArticleSaver:
         paragraphs = pd.read_sql(query, con=self.connection)
         yield from paragraphs["paragraph_id"]
 
-    def get_saved(self):
-        to_mine = set()
+    def _resolve_paragraphs(self):
+        resolved_state = set()
         for article_id, paragraph_id in self.state:
             if paragraph_id is None:
                 for paragraph_id in self._iter_paragraph_ids(article_id):
-                    to_mine.add((article_id, paragraph_id))
+                    resolved_state.add((article_id, paragraph_id))
             else:
-                to_mine.add((article_id, paragraph_id))
+                resolved_state.add((article_id, paragraph_id))
+
+        self.state = resolved_state
+
+    def get_saved(self):
+        self._resolve_paragraphs()
+        return set(self.state)
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
