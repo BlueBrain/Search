@@ -20,7 +20,9 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
         Pandas DataFrame containing sentence_id and corresponding text.
     """
     sentences_id = ', '.join(str(id_) for id_ in sentence_id)
-    sql_query = f'SELECT sentence_id, text FROM sentences WHERE sentence_id IN ({sentences_id})'
+    sql_query = f"""SELECT sentence_id, section_name, text, paragraph_pos_in_article
+                    FROM sentences 
+                    WHERE sentence_id IN ({sentences_id})"""
     sentences = pd.read_sql(sql_query, engine)
 
     return sentences
@@ -132,29 +134,6 @@ def retrieve_paragraph(sentence_id, engine):
 
     all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
     paragraph = ' '.join(all_sentences)
-    return paragraph
-
-
-def find_paragraph(sentence_id, db_cnxn):
-    """Find the paragraph corresponding to the given sentence.
-
-    Parameters
-    ----------
-    sentence_id : int
-        The identifier of the given sentence
-    db_cnxn: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database
-
-    Returns
-    -------
-    paragraph : str
-        The paragraph containing `sentence`
-    """
-    sql_query = f'SELECT paragraph_id FROM sentences WHERE sentence_id = {sentence_id}'
-    paragraph_id = pd.read_sql(sql_query, db_cnxn).iloc[0]['paragraph_id']
-    sql_query = f'SELECT text FROM paragraphs WHERE paragraph_id = {paragraph_id}'
-    paragraph = pd.read_sql(sql_query, db_cnxn).iloc[0]['text']
-
     return paragraph
 
 

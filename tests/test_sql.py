@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from bbsearch.sql import find_paragraph, retrieve_sentences_from_sentence_id, \
+from bbsearch.sql import retrieve_sentences_from_sentence_id, \
     retrieve_sentences_from_section_name, retrieve_article_metadata, retrieve_article, \
     retrieve_paragraph
 
@@ -48,7 +48,8 @@ class TestSQLQueries:
             assert sentence_text.shape[0] == 0
         else:
             assert sentence_text.shape[0] == len(set(sentence_id))
-        assert np.all(sentence_text.columns == ['sentence_id', 'text'])
+        assert np.all(sentence_text.columns == \
+                      ['sentence_id', 'section_name', 'text', 'paragraph_pos_in_article'])
 
     def test_from_section_name(self, fake_sqlalchemy_engine, test_parameters):
         """Test that retrieve sentences from section_name is working."""
