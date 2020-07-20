@@ -104,13 +104,19 @@ class MiningWidget(widgets.VBox):
             return
 
         with self.widgets['out']:
-            timer = Timer(verbose=True)
+            timer = Timer()
 
-            with timer('Collecting saved items...'):
+            print("Collecting saved items...".ljust(50), end='', flush=True)
+            with timer("collect items"):
                 to_mine = self.article_saver.get_saved()
-            with timer('Running the mining pipeline...'):
+            print(f'{timer["collect items"]:7.2f} seconds')
+
+            print("Running the mining pipeline...".ljust(50), end='', flush=True)
+            with timer("pipeline"):
                 self.table_extractions = self.textmining_pipeline(
                     information=list(to_mine))
+            print(f'{timer["pipeline"]:7.2f} seconds')
+
             display(self.table_extractions)
 
             # with timer('text retrieve'):
