@@ -500,7 +500,8 @@ class SearchWidget(widgets.VBox):
                         self.print_single_result(int(sentence_id), print_whole_paragraph)
 
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
-                    chk_article, chk_paragraph = self._create_saving_checkboxes(article_id, paragraph_id, sentence_id)
+                    chk_article, chk_paragraph = self._create_saving_checkboxes(
+                        article_id, int(paragraph_id), sentence_id)
 
                 display(HTML(article_metadata))
                 if self.article_saver:
