@@ -61,8 +61,6 @@ class SearchWidget(widgets.VBox):
         self.n_pages = 1
         self.current_page = -1
 
-        self.report = ''
-
         self.radio_buttons = []
         self.current_sentence_ids = []
         self.current_paragraph_ids = []
@@ -495,10 +493,9 @@ class SearchWidget(widgets.VBox):
             start = self.current_page * self.results_per_page
             end = start + self.results_per_page
             for sentence_id in self.current_sentence_ids[start:end]:
+                article_metadata, formatted_output, article_id, paragraph_id = \
+                    self.print_single_result(int(sentence_id), print_whole_paragraph)
                 if self.article_saver:
-                    article_metadata, formatted_output, article_id, paragraph_id = \
-                        self.print_single_result(int(sentence_id), print_whole_paragraph)
-
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(
                         article_id, int(paragraph_id), sentence_id)
@@ -511,7 +508,6 @@ class SearchWidget(widgets.VBox):
                 display(HTML(formatted_output))
 
                 print()
-                self.report += article_metadata + formatted_output + '<br>'
 
     def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
         if change["new"] is True:
@@ -624,6 +620,13 @@ class SearchWidget(widgets.VBox):
         </ul>
         """
 
-        results_section = f"<h1> Results </h1> {self.report}"
+        print_whole_paragraph = self.widgets['print_paragraph'].value
+        report = ""
+        for sentence_id in self.current_sentence_ids:
+            article_metadata, formatted_output, *_ = \
+                self.print_single_result(sentence_id, print_whole_paragraph)
+            report += article_metadata + formatted_output + '<br>'
+
+        results_section = f"<h1> Results </h1> {report}"
         pdfkit.from_string(hyperparameters_section + results_section,
                            f"report_{datetime.datetime.now()}.pdf")
