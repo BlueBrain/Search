@@ -5,7 +5,7 @@ import pytest
 
 import pandas as pd
 
-from bbsearch.sql import find_paragraph
+from bbsearch.sql import find_paragraph, retrieve_sentences_from_sentence_id
 
 
 class TestNoSQL:
@@ -34,6 +34,19 @@ class TestNoSQL:
 
 
 class TestSQLQueries:
+
+    @pytest.mark.parametrize('sentence_id', [[7], [7, 9], [-1], [9, 9]])
+    def test_retrieve_sentence_from_sentence_id(self, sentence_id, fake_sqlalchemy_engine):
+        """Test that the find paragraph method is working."""
+        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=sentence_id,
+                                                            engine=fake_sqlalchemy_engine)
+        assert isinstance(sentence_text, pd.DataFrame)
+        if sentence_id == [-1]:
+            assert sentence_text.shape[0] == 0
+        else:
+            assert sentence_text.shape[0] == len(set(sentence_id))
+
+    # def test_retrieve_sentences_from_section_name(self):
 
     def test_find_paragraph(self, fake_sqlalchemy_engine):
         """Test that the find paragraph method is working."""
