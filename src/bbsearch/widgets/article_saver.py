@@ -43,6 +43,8 @@ class ArticleSaver:
         self.articles_metadata = dict()
 
         self.state = set()
+        self.resolved_state = None
+        self.resolved_state_hash = None
 
     def add_article(self, article_id):
         self.add_paragraph(article_id, None)
@@ -75,19 +77,21 @@ class ArticleSaver:
         paragraphs = pd.read_sql(query, con=self.connection)
         yield from paragraphs["paragraph_id"]
 
-    def _resolve_paragraphs(self):
-        resolved_state = set()
-        for article_id, paragraph_id in self.state:
-            if paragraph_id is None:
-                for paragraph_id in self._iter_paragraph_ids(article_id):
-                    resolved_state.add((article_id, paragraph_id))
-            else:
-                resolved_state.add((article_id, paragraph_id))
-
-        return resolved_state
-
     def get_saved(self):
-        return self._resolve_paragraphs()
+        state_hash = hash(tuple(sorted(self.state)))
+        if state_hash != self.resolved_state_hash:
+            resolved_state = set()
+            for article_id, paragraph_id in self.state:
+                if paragraph_id is None:
+                    for paragraph_id in self._iter_paragraph_ids(article_id):
+                        resolved_state.add((article_id, paragraph_id))
+                else:
+                    resolved_state.add((article_id, paragraph_id))
+
+            self.resolved_state = resolved_state
+            self.resolved_state_hash = state_hash
+
+        return set(self.resolved_state)
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
