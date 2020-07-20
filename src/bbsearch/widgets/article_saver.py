@@ -97,8 +97,11 @@ class ArticleSaver:
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        df_all_options = pd.DataFrame.from_records(data=[(*k, v) for k, v in self.saved_articles.items()],
-                                                   columns=['article_id', 'paragraph_id', 'option'])
+        # df_all_options = pd.DataFrame.from_records(
+        #     data=[(*k, v) for k, v in self.saved_articles.items()],
+        #     columns=['article_id', 'paragraph_id', 'option'])
+
+        df_all_options = self.summary_table()
 
         article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
         article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
@@ -180,9 +183,9 @@ class ArticleSaver:
         rows = []
         for article_id, paragraph_id in self.state:
             if paragraph_id is None:
-                option = "Save article"
+                option = SAVING_OPTIONS["article"]
             else:
-                option = "Save paragraph"
+                option = SAVING_OPTIONS["paragraph"]
             rows.append({
                 'article_id': article_id,
                 'paragraph_id': paragraph_id,
