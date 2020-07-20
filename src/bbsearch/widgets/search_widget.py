@@ -12,6 +12,7 @@ import ipywidgets as widgets
 import pandas as pd
 
 from ..sql import find_paragraph
+from ..utils import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -375,25 +376,34 @@ class SearchWidget(widgets.VBox):
         date_range = self.widgets['date_range'].value
 
         # Clear output and show waiting message
+        timer = Timer()
         self.widgets['out'].clear_output()
         with self.widgets['out']:
             print(f'Processing query \"{query_text}\"...')
-            print('Sending query to server...')
 
-            # Perform search query
-            self.current_sentence_ids, *_ = self.searcher.query(
-                which_model=which_model,
-                k=k,
-                query_text=query_text,
-                has_journal=has_journal,
-                date_range=date_range,
-                deprioritize_strength=deprioritize_strength,
-                deprioritize_text=deprioritize_text,
-                exclusion_text=exclusion_text)
+            print('Sending query to server... ', end='', flush=True)
+            with timer("server query"):
+                self.current_sentence_ids, *_ = self.searcher.query(
+                    which_model=which_model,
+                    k=k,
+                    query_text=query_text,
+                    has_journal=has_journal,
+                    date_range=date_range,
+                    deprioritize_strength=deprioritize_strength,
+                    deprioritize_text=deprioritize_text,
+                    exclusion_text=exclusion_text)
+            print(f'{timer["server query"]:.2f} seconds.')
 
-            print('Applying default saving...')
-            self.current_article_ids, self.current_paragraph_ids = self.resolve_ids(self.current_sentence_ids)
-            self.apply_default_saving()
+            print('Resolving articles... ', end='', flush=True)
+            with timer("id resolution"):
+                self.current_article_ids, self.current_paragraph_ids = \
+                    self.resolve_ids(self.current_sentence_ids)
+            print(f'{timer["id resolution"]:.2f} seconds.')
+
+            print('Applying default saving... ', end='', flush=True)
+            with timer("default saving"):
+                self.apply_default_saving()
+            print(f'{timer["default saving"]:.2f} seconds.')
 
             print('Updating the results display...')
             self.n_pages = math.ceil(
