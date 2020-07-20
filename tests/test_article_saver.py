@@ -24,12 +24,13 @@ class TestArticleSaver:
                 WHERE sha is ?""", [sha]).fetchall()
             all_articles_paragraphs_id[article_id] = [paragraph_id for (paragraph_id,) in all_paragraphs_id]
             # For all articles extract only the first of their paragraphs
-            article_saver.saved_articles[article_id,
-                                         all_articles_paragraphs_id[article_id][0]] = SAVING_OPTIONS['paragraph']
+            paragraph_id = all_articles_paragraphs_id[article_id][0]
+            # article_saver.saved_articles[article_id, paragraph_id] = SAVING_OPTIONS['paragraph']
+            article_saver.add_paragraph(article_id, paragraph_id)
 
         # For the last article extract all its paragraphs
-        article_saver.saved_articles[article_id,
-                                     all_articles_paragraphs_id[article_id][0]] = SAVING_OPTIONS['article']
+        # article_saver.saved_articles[article_id, paragraph_id] = SAVING_OPTIONS['article']
+        article_saver.add_article(article_id)
         n_paragraphs_full_article = len(all_paragraphs_id)
 
         # Check that the retrieving of the different text is working
@@ -41,27 +42,3 @@ class TestArticleSaver:
         # Check summary table
         summary_table = article_saver.summary_table()
         assert isinstance(summary_table, pd.DataFrame)
-
-        ARTICLE_ID = 'w8579f54'
-        # Check that the cleaning part is working
-        # Only 'Do not take this article option'
-        for i in range(2):
-            article_saver.saved_articles[(ARTICLE_ID, i)] = SAVING_OPTIONS['nothing']
-
-        all_articles = article_saver.saved_articles.keys()
-        article_saver.retrieve_text()
-        for i in range(2):
-            assert (ARTICLE_ID, i) in all_articles
-            assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == ARTICLE_ID) &
-                                                     (article_saver.df_chosen_texts.paragraph_id == i)].empty
-
-        # 'Do not take this article option' and 'Extract the paragraph' options
-        ARTICLE_ID = '4vo7n6nh'
-        for i in range(2, 4):
-            article_saver.saved_articles[(ARTICLE_ID, i)] = SAVING_OPTIONS['paragraph']
-        all_articles = article_saver.saved_articles.keys()
-        article_saver.retrieve_text()
-        for i in range(2, 4):
-            assert (ARTICLE_ID, i) in all_articles
-            assert not article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == ARTICLE_ID) &
-                                                         (article_saver.df_chosen_texts.paragraph_id == i)].empty
