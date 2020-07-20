@@ -172,6 +172,12 @@ class SearchWidget(widgets.VBox):
         # Output Area
         self.widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
 
+        # Status Area
+        self.widgets['status'] = widgets.Output(layout={'border': '1px solid black'})
+        self.widgets['status_clear'] = widgets.Button(description="Clear")
+        self.widgets['status_clear'].on_click(
+            lambda b: self.widgets['status_clear'].clear_output())
+
         # Page buttons
         self.widgets['page_back'] = widgets.Button(
             description="←", layout={'width': 'auto'})
@@ -225,6 +231,9 @@ class SearchWidget(widgets.VBox):
             # self.widgets['default_saving_paragraph'],
             # self.widgets['default_saving_article'],
             self.widgets['investigate_button'],
+            widgets.HBox(children=(
+                self.widgets['status'],
+                self.widgets['status_clear'])),
             page_selection,
             self.widgets['out'],
             page_selection,
@@ -232,7 +241,7 @@ class SearchWidget(widgets.VBox):
             self.widgets['articles_button'],
         ]
 
-        with self.widgets['out']:
+        with self.widgets['status']:
             init_text = """
               ____  ____   _____ 
              |  _ \|  _ \ / ____|
@@ -377,8 +386,8 @@ class SearchWidget(widgets.VBox):
 
         # Clear output and show waiting message
         timer = Timer()
-        self.widgets['out'].clear_output()
-        with self.widgets['out']:
+        self.widgets['status'].clear_output()
+        with self.widgets['status']:
             print(f'Processing query \"{query_text}\"...')
 
             print('Sending query to server... ', end='', flush=True)
@@ -392,25 +401,27 @@ class SearchWidget(widgets.VBox):
                     deprioritize_strength=deprioritize_strength,
                     deprioritize_text=deprioritize_text,
                     exclusion_text=exclusion_text)
-            print(f'{timer["server query"]:.2f} seconds.')
+            print(f'{timer["server query"]:.2f} seconds')
 
             print('Resolving articles... ', end='', flush=True)
             with timer("id resolution"):
                 self.current_article_ids, self.current_paragraph_ids = \
                     self.resolve_ids(self.current_sentence_ids)
-            print(f'{timer["id resolution"]:.2f} seconds.')
+            print(f'{timer["id resolution"]:.2f} seconds')
 
             print('Applying default saving... ', end='', flush=True)
             with timer("default saving"):
                 self.apply_default_saving()
-            print(f'{timer["default saving"]:.2f} seconds.')
+            print(f'{timer["default saving"]:.2f} seconds')
 
-            print('Updating the results display...')
-            self.n_pages = math.ceil(
-                len(self.current_sentence_ids) / self.results_per_page)
+            print('Updating the results display...', end='', flush=True)
+            with timer("update page"):
+                self.n_pages = math.ceil(
+                    len(self.current_sentence_ids) / self.results_per_page)
+                self.set_page(0, force=True)
+            print(f'{timer["update page"]:.2f} seconds')
 
-        # Update the results display
-        self.set_page(0, force=True)
+            print('Done.')
 
     def apply_default_saving(self):
         default_saving_value = self.widgets["default_value_article_saver"].value
