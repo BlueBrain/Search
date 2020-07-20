@@ -177,7 +177,7 @@ class ArticleSaver:
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
                 # article_report += article_metadata
-                section_name = df_article['section_name'][0]
+                section_name = df_article['section_name'].iloc[0]
             else:
                 # substring = '&#183;'
                 # article_report += article_metadata.split(substring)[0] + '&#183;'
