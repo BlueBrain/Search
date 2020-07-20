@@ -1,3 +1,4 @@
+"""Module for the mining widget."""
 import io
 
 from IPython.display import display
@@ -9,6 +10,17 @@ from ..utils import Timer
 
 
 class MiningWidget(widgets.VBox):
+    """The mining widget.
+
+    Parameters
+    ----------
+    mining_server_url : str
+        The URL of the mining server.
+    article_saver : bbsearch.widgets.ArticleSaver
+        An instance of the article saver.
+    default_text : string, optional
+        The default text assign to the text area.
+    """
 
     def __init__(self, mining_server_url, article_saver=None, default_text=''):
         super().__init__()
@@ -35,13 +47,13 @@ class MiningWidget(widgets.VBox):
         self.widgets['mine_text'] = widgets.Button(
             description='Mine This Text!',
             layout=widgets.Layout(width='auto'))
-        self.widgets['mine_text'].on_click(self.mine_text_clicked)
+        self.widgets['mine_text'].on_click(self._mine_text_clicked)
 
         # "Mine Selected Articles" button
         self.widgets['mine_articles'] = widgets.Button(
             description='Mine Selected Articles!',
             layout=widgets.Layout(width='auto'))
-        self.widgets['mine_articles'].on_click(self.mine_articles_clicked)
+        self.widgets['mine_articles'].on_click(self._mine_articles_clicked)
 
         # "Output Area" Widget
         self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
@@ -95,7 +107,7 @@ class MiningWidget(widgets.VBox):
 
         return table_extractions
 
-    def mine_articles_clicked(self, b):
+    def _mine_articles_clicked(self, b):
         self.widgets['out'].clear_output()
 
         if self.article_saver is None:
@@ -130,7 +142,7 @@ class MiningWidget(widgets.VBox):
             #     self.table_extractions = self.textmining_pipeline(information=identifiers)
             #     display(self.table_extractions)
 
-    def mine_text_clicked(self, b):
+    def _mine_text_clicked(self, b):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
             text = self.widgets['input_text'].value
@@ -138,7 +150,16 @@ class MiningWidget(widgets.VBox):
             display(self.table_extractions)
 
     def get_extracted_table(self):
+        """Retrieve the table with the mining results.
+
+        Returns
+        -------
+        results_table : pandas.DataFrame
+            The table with the mining results.
+        """
         if self.table_extractions is not None:
-            return self.table_extractions.copy()
+            results_table = self.table_extractions.copy()
         else:
-            return pd.DataFrame()
+            results_table = pd.DataFrame()
+
+        return results_table

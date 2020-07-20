@@ -38,33 +38,86 @@ class ArticleSaver:
 
     def __init__(self, connection):
         self.connection = connection
-        self.saved_articles = dict()
         self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
-        self.articles_metadata = dict()
 
         self.state = set()
-        self.articles_metadata = {}
         self.resolved_state = None
         self.resolved_state_hash = None
 
-    def add_article(self, article_id, metadata=None):
-        self.add_paragraph(article_id, -1, metadata=metadata)
+    def add_article(self, article_id):
+        """Save an article.
 
-    def add_paragraph(self, article_id, paragraph_id, metadata=None):
+        Parameters
+        ----------
+        article_id : str
+            The article ID.
+        """
+        self.add_paragraph(article_id, -1)
+
+    def add_paragraph(self, article_id, paragraph_id):
+        """Save a paragraph.
+
+        Parameters
+        ----------
+        article_id : str
+            The article ID.
+        paragraph_id : int
+            The paragraph ID.
+        """
         self.state.add((article_id, paragraph_id))
-        if metadata is not None:
-            self.articles_metadata[article_id] = metadata
 
     def has_article(self, article_id):
+        """Check if an article has been saved.
+
+        Parameters
+        ----------
+        article_id :
+            The article ID.
+
+        Returns
+        -------
+        result : bool
+            Whether or not the given article has been saved.
+        """
         return self.has_paragraph(article_id, -1)
 
     def has_paragraph(self, article_id, paragraph_id):
+        """Check if a paragraph has been saved.
+
+        Parameters
+        ----------
+        article_id : str
+            The article ID.
+        paragraph_id : int
+            The paragraph ID.
+
+        Returns
+        -------
+        result : bool
+            Whether or not the given paragraph has been saved.
+        """
         return (article_id, paragraph_id) in self.state
 
     def remove_article(self, article_id):
+        """Remove an article from saved.
+
+        Parameters
+        ----------
+        article_id : str
+            The article ID.
+        """
         self.remove_paragraph(article_id, -1)
 
     def remove_paragraph(self, article_id, paragraph_id):
+        """Remova a paragraph from saved.
+
+        Parameters
+        ----------
+        article_id : str
+            The article ID.
+        paragraph_id : int
+            The paragraph ID.
+        """
         if (article_id, paragraph_id) in self.state:
             self.state.remove((article_id, paragraph_id))
 
@@ -81,6 +134,18 @@ class ArticleSaver:
         yield from paragraphs["paragraph_id"]
 
     def get_saved(self):
+        """Retrieve the currently saved items.
+
+        For all entire articles that are saved the corresponding
+        paragraphs are resolved first.
+
+        Returns
+        -------
+        state : set
+            A set of `(article_id, paragraph_id)` tuples representing
+            the saved articles and paragraphs. `paragraph_id = -1` means
+            that the whole article was saved.
+        """
         state_hash = hash(tuple(sorted(self.state)))
         if state_hash != self.resolved_state_hash:
             resolved_state = set()

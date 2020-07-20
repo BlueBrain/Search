@@ -376,7 +376,6 @@ class SearchWidget(widgets.VBox):
         formatted_output: str
             Formatted output of the sentence.
         """
-
         sentence_id = result_info["sentence_id"]
         text = result_info["text"]
         ref = result_info["ref"]
@@ -416,7 +415,6 @@ class SearchWidget(widgets.VBox):
 
     def investigate_on_click(self, change_dict):
         """Investigate button callback."""
-
         # Get user selection
         which_model = self.widgets['sent_embedder'].value
         k = self.widgets['top_results'].value
@@ -457,7 +455,7 @@ class SearchWidget(widgets.VBox):
 
             print('Applying default saving...'.ljust(50), end='', flush=True)
             with timer("default saving"):
-                self.apply_default_saving()
+                self._apply_default_saving()
             print(f'{timer["default saving"]:7.2f} seconds')
 
             print('Updating the results display...'.ljust(50), end='', flush=True)
@@ -469,7 +467,7 @@ class SearchWidget(widgets.VBox):
 
             print('Done.')
 
-    def apply_default_saving(self):
+    def _apply_default_saving(self):
         default_saving_value = self.widgets["default_value_article_saver"].value
         if default_saving_value != "nothing":
             for article_id, paragraph_id in zip(self.current_article_ids, self.current_paragraph_ids):
@@ -479,7 +477,7 @@ class SearchWidget(widgets.VBox):
                     self.article_saver.add_paragraph(article_id, paragraph_id)
 
     def resolve_ids(self, sentence_ids):
-        """Resolve sentence IDs into article and paragraph IDs
+        """Resolve sentence IDs into article and paragraph IDs.
 
         Parameters
         ----------
@@ -493,7 +491,6 @@ class SearchWidget(widgets.VBox):
         paragraph_ids : list_like
             The paragraph IDs corresponding to the sentence IDs
         """
-
         article_ids = []
         paragraph_ids = []
 
@@ -520,6 +517,19 @@ class SearchWidget(widgets.VBox):
         return article_ids, paragraph_ids
 
     def set_page(self, new_page, force=False):
+        """Go to a given page in the results view.
+
+        Parameters
+        ----------
+        new_page : int
+            The new page number to go to.
+        force : bool
+            By default, if `new_page` is the same one as the one
+            currently viewed, the the page is not reloaded. To reload
+            the page set this parameter to True. This is ueful when
+            new results have been fetched and so the view needs to
+            be updated.
+        """
         new_page = max(0, min(new_page, self.n_pages - 1))
         if self.current_page != new_page or force:
             self.current_page = new_page
