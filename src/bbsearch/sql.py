@@ -31,7 +31,7 @@ def retrieve_sentences_from_section_name(section_name, engine):
 
     Parameters
     ----------
-    section_name: str or list of str
+    section_name: list of str
         Sentences id for which need to retrieve the text.
     engine: sqlalchemy.Engine
         SQLAlchemy Engine connected to the database.
@@ -42,13 +42,9 @@ def retrieve_sentences_from_section_name(section_name, engine):
         DataFrame containing the sentences and their sentence_id
         coming from the given section name.
     """
-    if isinstance(section_name, str):
-        end_query = f'= "{section_name}"'
-    else:
-        end_query = f'IN {tuple(section_name)}'
-
-    sql_query = f'SELECT sentence_id, text FROM sentences WHERE section_name {end_query}'
-    sentences = pd.read_sql(sql_query, engine)[['sentence_id', 'text']]
+    section_names = ' ,'.join(f"'{name}'" for name in section_name)
+    sql_query = f'SELECT sentence_id, section_name, text FROM sentences WHERE section_name IN ({section_names})'
+    sentences = pd.read_sql(sql_query, engine)
     return sentences
 
 
@@ -64,8 +60,8 @@ def retrieve_article_metadata(sentence_id, engine):
 
     Returns
     -------
-    article: pd.Series
-        Series containing the article metadata from
+    article: pd.DataFrame
+        DataFrame containing the article metadata from
         which the sentence is coming.
     """
     sql_query = f"""SELECT * 
@@ -74,7 +70,7 @@ def retrieve_article_metadata(sentence_id, engine):
                         (SELECT article_id 
                         FROM sentences
                         WHERE sentence_id = {sentence_id})"""
-    article = pd.read_sql(sql_query, engine).iloc[0]
+    article = pd.read_sql(sql_query, engine)
     return article
 
 
