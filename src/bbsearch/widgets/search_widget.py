@@ -395,7 +395,7 @@ class SearchWidget(widgets.VBox):
             print(header)
             print('-' * len(header))
 
-            print('Sending query to server... ', end='', flush=True)
+            print('Sending query to server...'.ljust(50), end='', flush=True)
             with timer("server query"):
                 self.current_sentence_ids, *_ = self.searcher.query(
                     which_model=which_model,
@@ -408,18 +408,18 @@ class SearchWidget(widgets.VBox):
                     exclusion_text=exclusion_text)
             print(f'{timer["server query"]:.2f} seconds')
 
-            print('Resolving articles... ', end='', flush=True)
+            print('Resolving articles...'.ljust(50), end='', flush=True)
             with timer("id resolution"):
                 self.current_article_ids, self.current_paragraph_ids = \
                     self.resolve_ids(self.current_sentence_ids)
             print(f'{timer["id resolution"]:.2f} seconds')
 
-            print('Applying default saving... ', end='', flush=True)
+            print('Applying default saving...'.ljust(50), end='', flush=True)
             with timer("default saving"):
                 self.apply_default_saving()
             print(f'{timer["default saving"]:.2f} seconds')
 
-            print('Updating the results display...', end='', flush=True)
+            print('Updating the results display...'.ljust(50), end='', flush=True)
             with timer("update page"):
                 self.n_pages = math.ceil(
                     len(self.current_sentence_ids) / self.results_per_page)
