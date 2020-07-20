@@ -84,11 +84,10 @@ class ArticleSaver:
             else:
                 resolved_state.add((article_id, paragraph_id))
 
-        self.state = resolved_state
+        return resolved_state
 
     def get_saved(self):
-        self._resolve_paragraphs()
-        return set(self.state)
+        return self._resolve_paragraphs()
 
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
@@ -174,13 +173,18 @@ class ArticleSaver:
         table: pd.DataFrame
             DataFrame containing all the paragraphs seen and choice made for it.
         """
-        articles = []
-        for article_infos, option in self.saved_articles.items():
-            articles += [{'article_id': article_infos[0],
-                          'paragraph_id': article_infos[1],
-                          'option': option
-                          }]
-        table = pd.DataFrame(data=articles,
-                             columns=['article_id', 'paragraph_id', 'option'])
-        table.sort_values(by=['article_id'])
+        rows = []
+        for article_id, paragraph_id in sorted(self.state):
+            if paragraph_id is None:
+                option = "Save article"
+            else:
+                option = "Save paragraph"
+            rows.append({
+                'article_id': article_id,
+                'paragraph_id': paragraph_id,
+                'option': option})
+        table = pd.DataFrame(
+            data=rows,
+            columns=['article_id', 'paragraph_id', 'option'])
+
         return table
