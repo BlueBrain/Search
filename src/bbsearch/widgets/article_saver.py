@@ -63,6 +63,27 @@ class ArticleSaver:
         if (article_id, paragraph_id) in self.state:
             self.state.remove((article_id, paragraph_id))
 
+    def _iter_paragraph_ids(self, article_id):
+        query = f"""
+        SELECT paragraphs.paragraph_id FROM paragraphs
+        WHERE sha IN (
+            SELECT article_id_2_sha.sha
+            FROM article_id_2_sha
+            WHERE article_id = "{article_id}"
+        );
+        """
+        paragraphs = pd.read_sql(query, con=self.connection)
+        yield from paragraphs["paragraph_id"]
+
+    def get_saved(self):
+        to_mine = set()
+        for article_id, paragraph_id in self.state:
+            if paragraph_id is None:
+                for paragraph_id in self._iter_paragraph_ids(article_id):
+                    to_mine.add((article_id, paragraph_id))
+            else:
+                to_mine.add((article_id, paragraph_id))
+
     def retrieve_text(self):
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]
