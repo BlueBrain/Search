@@ -643,15 +643,14 @@ class SearchWidget(widgets.VBox):
         """Create the saved articles report."""
         with self.widgets['status']:
             print()
-            print('Creating the saved results PDF report... ', end='', flush=True)
+            print('Creating the saved results PDF report... ')
             self.article_saver.report()
-            print('Done.')
 
     def report_on_click(self, change_dict):
         """Create the report of the search."""
         with self.widgets['status']:
             print()
-            print('Creating the search results PDF report... ', end='', flush=True)
+            print('Creating the search results PDF report... ')
 
             color_hyperparameters = '#222222'
 
@@ -680,5 +679,3 @@ class SearchWidget(widgets.VBox):
             results_section = f"<h1> Results </h1> {report}"
             pdfkit.from_string(hyperparameters_section + results_section,
                                f"report_{datetime.datetime.now()}.pdf")
-
-            print('Done.')
