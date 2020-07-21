@@ -48,7 +48,6 @@ def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
 
 def main():
     """Parse arguments and run Flask application."""
-
     # Configure logging
     log_dir = os.getenv("LOG_DIR", "/")
     log_name = os.getenv("LOG_NAME", "bbs_embedding.log")

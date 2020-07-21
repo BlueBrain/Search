@@ -26,7 +26,7 @@ class EmbeddingServer:
         self.name = 'EmbeddingServer'
         self.version = "1.0"
 
-        self.logger.info(f"Initializing the server...")
+        self.logger.info("Initializing the server...")
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
 
@@ -148,7 +148,7 @@ class EmbeddingServer:
             An unhandled error occurred. You may want to contact the
             developers and provide them the model name and the text
             of the query that caused this error.
-            
+
             "model": "{model}"
             "text": "{text}"
             """
