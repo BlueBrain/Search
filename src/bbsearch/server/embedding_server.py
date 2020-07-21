@@ -8,8 +8,6 @@ from flask import request, jsonify, make_response
 
 from .invalid_usage_exception import InvalidUsage
 
-logger = logging.getLogger(__name__)
-
 
 class EmbeddingServer:
     """Wrapper class representing the embedding server.
@@ -24,8 +22,13 @@ class EmbeddingServer:
     """
 
     def __init__(self, app, embedding_models):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.name = 'EmbeddingServer'
         self.version = "1.0"
+
+        self.logger.info("Initializing the server...")
+        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Version: {self.version}")
 
         self.app = app
         self.app.route("/")(self.request_welcome)
@@ -48,6 +51,8 @@ class EmbeddingServer:
             'json': self.make_json_response,
         }
 
+        self.logger.info("Initialization done.")
+
     @staticmethod
     def handle_invalid_usage(error):
         """Handle invalid usage."""
@@ -58,6 +63,8 @@ class EmbeddingServer:
 
     def help(self):
         """Help the user by sending information about the server."""
+        self.logger.info("Got query to help on /help")
+
         response = {
             "name": self.name,
             "version": self.version,
@@ -88,7 +95,7 @@ class EmbeddingServer:
 
     def request_welcome(self):
         """Generate a welcome page."""
-        logger.info("Welcome page requested")
+        self.logger.info("Got query for welcome page on /")
         html = """
         <h1>Welcome to the BBSearch Embedding REST API Server</h1>
         To receive a sentence embedding proceed as follows:
@@ -136,6 +143,16 @@ class EmbeddingServer:
             return embedding
         except KeyError:
             raise InvalidUsage(f"Model {model} is not available.")
+        except RuntimeError:
+            msg = f"""
+            An unhandled error occurred. You may want to contact the
+            developers and provide them the model name and the text
+            of the query that caused this error.
+
+            "model": "{model}"
+            "text": "{text}"
+            """
+            raise InvalidUsage(textwrap.dedent(msg).strip())
 
     @staticmethod
     def make_csv_response(embedding):
@@ -160,7 +177,7 @@ class EmbeddingServer:
 
     def request_embedding(self, output_type):
         """Request embedding."""
-        logger.info("Requested Embedding")
+        self.logger.info(f"Got query for embedding on /v1/embed/{output_type}")
 
         if output_type.lower() not in self.output_fn:
             raise InvalidUsage(f"Output type not recognized: {output_type}")
@@ -172,7 +189,12 @@ class EmbeddingServer:
             self._check_request_validity(json_request)
             model = json_request["model"]
             text = json_request["text"]
+            self.logger.info("Embedding query parameters:")
+            self.logger.info(f"model: {model}")
+            self.logger.info(f"text: {text}")
+            self.logger.info("Calling embed_text...")
             text_embedding = self.embed_text(model, text)
+            self.logger.info("Embedding computed successfully.")
             return output_fn(text_embedding)
         else:
             raise InvalidUsage("Expected a JSON file")

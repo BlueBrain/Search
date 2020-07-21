@@ -42,6 +42,8 @@ EXPOSE 8080
 ENV MODELS_PATH="/raid/bbs_data/trained_models"
 ENV EMBEDDINGS_PATH="/raid/bbs_data/cord19_v7/embeddings"
 ENV DATABASE_PATH="/raid/bbs_data/cord19_v7/databases/cord19.db"
+ENV LOG_DIR="/raid/projects/bbs/logs"
+ENV LOG_NAME="bbs_search.log"
 
 ENTRYPOINT exec search_server \
     --host=0.0.0.0 \

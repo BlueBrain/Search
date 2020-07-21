@@ -1,5 +1,9 @@
 """Entrypoint for launching an embedding server."""
 import argparse
+import os
+
+from ._helper import configure_logging
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
@@ -19,6 +23,12 @@ args = parser.parse_args()
 
 def main():
     """Parse arguments and run Flask application."""
+    # Configure logging
+    log_dir = os.getenv("LOG_DIR", "/")
+    log_name = os.getenv("LOG_NAME", "bbs_embedding.log")
+    configure_logging(log_dir, log_name)
+
+    # Start server
     import pathlib
     from flask import Flask
     from ..server.embedding_server import EmbeddingServer
