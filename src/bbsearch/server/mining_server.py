@@ -1,7 +1,6 @@
 """The mining server."""
 import io
 import logging
-import pathlib
 
 from flask import jsonify, make_response, request
 import pandas as pd
@@ -17,17 +16,22 @@ class MiningServer:
     ----------
     app : flask.Flask
         The Flask app wrapping the server.
-    models_path : str or pathlib.Path
-        The folder containing pre-trained models.
+    models_libs : dict of str
+        Dictionary mapping each type of extraction ('ee' for entities, 're' for relations, 'ae' for
+        attributes) to the csv file with the information on which model to use for the extraction
+        of each entity, relation, or attribute type, respectively.
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
     """
 
-    def __init__(self, app, models_path, connection):
+    def __init__(self, app, models_libs, connection):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = "1.0"
         self.name = "MiningServer"
-        self.models_path = pathlib.Path(models_path)
+        self.models_libs = {k: pd.read_csv(v)
+                            for k, v in models_libs.items()}
+        self.ee_models = {model_name: spacy.load(model_name)
+                          for model_name in self.models_libs['ee']}
         self.connection = connection
 
         self.logger.info("Initializing the server...")
@@ -38,12 +42,6 @@ class MiningServer:
         self.app.route("/text", methods=["POST"])(self.pipeline_text)
         self.app.route("/database", methods=["POST"])(self.pipeline_database)
         self.app.route("/help", methods=["POST"])(self.help)
-
-        # Entities Extractors (EE)
-        self.ee_model = spacy.load("en_ner_craft_md")
-
-        # Relations Extractors (RE)
-        self.re_models = {}
 
         self.logger.info("Initialization done.")
 
@@ -61,21 +59,23 @@ class MiningServer:
                     "response_content_type": "application/json"
                 },
                 "/text": {
-                    "description": "Extract entities and relations from a given text.",
+                    "description": "Mine a given text according to a given schema.",
                     "response_content_type": "text/csv",
                     "required_fields": {
-                        "text": []
+                        "text": [],
+                        "schema": []
                     },
                     "accepted_fields": {
                         "debug": [True, False]
                     }
                 },
                 "/database": {
-                    "description": "Extract entities and relations for given paragraph ids from "
-                                   "the database",
+                    "description": "Mine given paragraph ids from the database according to a given"
+                                   "schema.",
                     "response_content_type": "text/csv",
                     "required_fields": {
                         "identifiers": [('article_id_1', 'paragraph_id_1'), ],
+                        "schema": []
                     },
                     "accepted_fields": {
                         "debug": [True, False]
@@ -87,6 +87,11 @@ class MiningServer:
 
         return jsonify(response)
 
+    def ee_models_from_request_schema(self, schema_request):
+        schema_request = schema_request[~schema_request['property'].isna()]
+        return schema_request.merge(self.models_libs['ee'], on='entity_type', how='left')[
+            ['entity_type', 'model', 'entity_type_name', 'ontology_source']]
+
     def pipeline_database(self):
         """Respond to a query on specific paragraphs in the database."""
         self.logger.info("Query for mining of articles received")
@@ -94,39 +99,38 @@ class MiningServer:
         if request.is_json:
             json_request = request.get_json()
             identifiers = json_request.get("identifiers")
+            schema = json_request.get("schema")
             debug = json_request.get("debug", False)
 
             self.logger.info("Mining parameters:")
             self.logger.info(f"identifiers : {identifiers}")
+            self.logger.info(f"schema      : {schema}")
             self.logger.info(f"debug       : {debug}")
 
-            if identifiers is None:
-                self.logger.info("No identifiers were provided. Stopping.")
-                response = self.make_error_response("The request identifiers is missing.")
-                return response
-            else:
-                self.logger.info("Parsing identifiers...")
-                tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
-                paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
+            args_err_response = self.check_args_not_null(identifiers=identifiers, schema=schema)
+            if args_err_response:
+                return args_err_response
 
-                sql_query = f"""
-                SELECT paragraph_id, section_name, text
-                FROM paragraphs
-                WHERE paragraph_id IN ({paragraph_ids_joined})
-                """
+            self.logger.info("Parsing identifiers...")
+            tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
+            paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
 
-                self.logger.info("Retrieving article texts from the database...")
-                texts_df = pd.read_sql(sql_query, self.connection)
-                texts = [(row['text'],
-                          {'paper_id':
-                           f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
-                         for _, row in texts_df.iterrows()]
+            sql_query = f"""
+            SELECT paragraph_id, section_name, text
+            FROM paragraphs
+            WHERE paragraph_id IN ({paragraph_ids_joined})
+            """
 
-                self.logger.info("Running the mining pipeline...")
-                df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
-                self.logger.info(f"Mining completed. Mined {len(df)} items.")
+            self.logger.info("Retrieving article texts from the database...")
+            texts_df = pd.read_sql(sql_query, self.connection)
+            texts = \
+                [(row['text'],
+                  {'paper_id':
+                    f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
+                    for _, row in texts_df.iterrows()]
 
-                response = self.create_response(df)
+            df_all = self.mine_texts(texts=texts, schema_request=schema, debug=debug)
+            response = self.create_response(df_all)
         else:
             self.logger.info("Request is not JSON. Not processing.")
             response = self.make_error_response("The request has to be a JSON object.")
@@ -141,26 +145,54 @@ class MiningServer:
 
             json_request = request.get_json()
             text = json_request.get("text")
+            schema = json_request.get("schema")
             debug = json_request.get("debug", False)
 
             self.logger.info("Mining parameters:")
-            self.logger.info(f"text  : {text}")
-            self.logger.info(f"debug : {debug}")
+            self.logger.info(f"text        : {text}")
+            self.logger.info(f"schema      : {schema}")
+            self.logger.info(f"debug       : {debug}")
 
-            if text is None:
-                self.logger.info("No text received. Stopping.")
-                response = self.make_error_response("The request text is missing.")
-            else:
-                self.logger.info("Running the mining pipeline...")
-                df = run_pipeline([(text, {})], self.ee_model, self.re_models, debug=debug)
-                self.logger.info(f"Mining completed. Mined {len(df)} items.")
+            args_err_response = self.check_args_not_null(text=text, schema=schema)
+            if args_err_response:
+                return args_err_response
 
-                response = self.create_response(df)
+            texts = [(text, {})]
+            df_all = self.mine_texts(texts=texts, schema_request=schema, debug=debug)
+            response = self.create_response(df_all)
         else:
             self.logger.info("Request is not JSON. Not processing.")
             response = self.make_error_response("The request has to be a JSON object.")
 
         return response
+
+    def mine_texts(self, texts, schema_request, debug):
+        """Rune mining pipeline on a list of texts, using models implied by the schema request."""
+        self.logger.info("Running the mining pipeline...")
+        ee_models_info = self.ee_models_from_request_schema(schema_request)
+        ee_models_info = ee_models_info[~ee_models_info.model.isna()]
+
+        df_all = pd.DataFrame()
+        for model_name, info_slice in ee_models_info.groupby('model_name'):
+            ee_model = self.ee_models[model_name]
+            df = run_pipeline(texts=texts,
+                              model_entities=ee_model,
+                              models_relations={},
+                              debug=debug)
+            df_all.append(
+                df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
+                                                    info_slice['entity_type']))}))
+
+        self.logger.info(f"Mining completed. Mined {len(df_all)} items.")
+        return df_all.sort_values(by=['paper_id', 'start_char'], ignore_index=True)
+
+    def check_args_not_null(self, **kwargs):
+        """Sanity check that arguments provided are not null. Returns False if all is good."""
+        for k, v in kwargs.items():
+            if v is None:
+                self.logger.info(f"No \"{k}\" was provided. Stopping.")
+                return self.make_error_response(f"The request \"{k}\" is missing.")
+        return False
 
     @staticmethod
     def make_error_response(error_message):
