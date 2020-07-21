@@ -281,6 +281,5 @@ class ArticleSaver:
         table = pd.DataFrame(
             data=rows,
             columns=['article_id', 'paragraph_id', 'option'])
-        table.sort_values(by=['article_id', 'paragraph_id'], inplace=True)
 
         return table
