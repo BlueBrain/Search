@@ -165,10 +165,6 @@ class ArticleSaver:
         """Retrieve text of every article given the option chosen by the user."""
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        # df_all_options = pd.DataFrame.from_records(
-        #     data=[(*k, v) for k, v in self.saved_articles.items()],
-        #     columns=['article_id', 'paragraph_id', 'option'])
-
         df_all_options = self.summary_table()
 
         article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
@@ -241,14 +237,8 @@ class ArticleSaver:
         for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
-                # article_report += article_metadata
                 section_name = df_article['section_name'].iloc[0]
             else:
-                # substring = '&#183;'
-                # article_report += article_metadata.split(substring)[0] + '&#183;'
-                # article_report += f'{len(df_article["section_name"].unique())} different ' \
-                #                   f'sections are selected for this article.'
-                # article_report += '</p>'
                 section_name = f'{len(df_article["section_name"].unique())} different ' \
                                f'sections are selected for this article.'
             ref, article_title, article_authors = self._fetch_article_info(article_id)

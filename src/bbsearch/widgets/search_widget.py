@@ -139,24 +139,6 @@ class SearchWidget(widgets.VBox):
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: ')
 
-        # self.widgets['default_saving_paragraph'] = widgets.Checkbox(
-        #     description="Save paragraph",
-        #     value=False,
-        #     indent=False)
-        # self.widgets['default_saving_article'] = widgets.Checkbox(
-        #     description="Save article",
-        #     value=False,
-        #     indent=False)
-
-        # def default_value_article_saver_change(change):
-        #     if self.radio_buttons:
-        #         for article_infos, button in self.radio_buttons:
-        #             button.value = change['new']
-        #         return change['new']
-
-        # self.widgets['default_value_article_saver'].observe(default_value_article_saver_change,
-        #                                                     names='value')
-
         # Click to run Information Retrieval!
         self.widgets['investigate_button'] = widgets.Button(description='Investigate!',
                                                             layout=widgets.Layout(width='50%'))

@@ -131,17 +131,6 @@ class MiningWidget(widgets.VBox):
 
             display(self.table_extractions)
 
-            # with timer('text retrieve'):
-            #     self.article_saver.retrieve_text()
-            # with timer('casting to list'):
-            #     chosen_text = self.article_saver.df_chosen_texts
-            #     identifiers = [(row['article_id'], row['paragraph_id'])
-            #                    for _, row in chosen_text.iterrows()]
-            #     print(len(identifiers))
-            # with timer('server part'):
-            #     self.table_extractions = self.textmining_pipeline(information=identifiers)
-            #     display(self.table_extractions)
-
     def _mine_text_clicked(self, b):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
