@@ -9,40 +9,58 @@ from .search_widget import SAVING_OPTIONS
 
 
 class ArticleSaver:
-    """Articles saved used to link Search Engine and Entities/Relation Extraction.
+    """Keeps track of selected articles.
+
+    This class can be used to save a number of articles and paragraphs
+    for a later use. A typical use case is to keep track of the items
+    selected in the search widget, and to retrieve them later in the
+    mining widget.
+
+    Furthermore this class allows to print a summary of all selected
+    items using the `summary_table` method, to resolve all items into
+    paragraphs with the corresponding section name and to summarize
+    them in a pandas data frame using the method `get_chosen_texts`,
+    and to export a PDF report of all saved items using the method
+    `report`.
 
     Parameters
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection: SQLAlchemy connectable (engine/connection) or
+                database str URI or
+                DBAPI2 connection (fallback mode)
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
-    saved_articles : dict
-        The keys are a tuple where the first element is the article_id and the second
-        is the paragraph_id. The values are one of the 3 options below:
-        - 'Do not take this article'
-        - 'Extract the paragraph'
-        - 'Extract the entire article'
+    connection: SQLAlchemy connectable (engine/connection) or
+                database str URI or
+                DBAPI2 connection (fallback mode)
+        An SQL database connectable compatible with `pandas.read_sql`.
+        The database is supposed to have paragraphs and articles tables.
+
+    state : set
+        The state that keeps track of saved items. It is a set of tuples
+        of the form `(article_id, paragraph_id)` each representing one
+        saved item. The items with `paragraph_id = -1` indicate that the
+        whole article should be saved.
+
+    state_hash : int or None
+        A hash uniquely identifying a certain state. This is used to
+        cache `df_chosen_texts` and avoid recomputing it if the state
+        has not changed.
 
     df_chosen_texts : pd.DataFrame
-        The rows represent different paragraphs and the columns are 'article_id', 'section_name',
-        'paragraph_id', 'text'.
-
-    articles_metadata : dict
-        The keys are article_ids and the value is a string (HTML formatting) with title,
-        authors, etc.
-
+        The rows represent different paragraphs and the columns are
+        'article_id', 'section_name', 'paragraph_id', 'text'.
     """
 
     def __init__(self, connection):
         self.connection = connection
-        self.df_chosen_texts = pd.DataFrame(columns=['article_id', 'section_name', 'paragraph_id', 'text'])
-
         self.state = set()
-        self.resolved_state = None
-        self.resolved_state_hash = None
+        self.state_hash = None
+        self.df_chosen_texts = pd.DataFrame(columns=[
+            'article_id', 'section_name', 'paragraph_id', 'text'])
 
     def add_article(self, article_id):
         """Save an article.
@@ -121,55 +139,19 @@ class ArticleSaver:
         if (article_id, paragraph_id) in self.state:
             self.state.remove((article_id, paragraph_id))
 
-    def _iter_paragraph_ids(self, article_id):
-        query = f"""
-        SELECT paragraphs.paragraph_id FROM paragraphs
-        WHERE sha IN (
-            SELECT article_id_2_sha.sha
-            FROM article_id_2_sha
-            WHERE article_id = "{article_id}"
-        );
-        """
-        paragraphs = pd.read_sql(query, con=self.connection)
-        yield from paragraphs["paragraph_id"]
-
-    def get_saved(self):
-        """Retrieve the currently saved items.
-
-        For all entire articles that are saved the corresponding
-        paragraphs are resolved first.
-
-        Returns
-        -------
-        state : set
-            A set of `(article_id, paragraph_id)` tuples representing
-            the saved articles and paragraphs. `paragraph_id = -1` means
-            that the whole article was saved.
-        """
-        state_hash = hash(tuple(sorted(self.state)))
-        if state_hash != self.resolved_state_hash:
-            resolved_state = set()
-            for article_id, paragraph_id in self.state:
-                if paragraph_id == -1:
-                    for paragraph_id in self._iter_paragraph_ids(article_id):
-                        resolved_state.add((article_id, paragraph_id))
-                else:
-                    resolved_state.add((article_id, paragraph_id))
-
-            self.resolved_state = resolved_state
-            self.resolved_state_hash = state_hash
-
-        return set(self.resolved_state)
-
-    def retrieve_text(self):
-        """Retrieve text of every article given the option chosen by the user."""
+    def _update_chosen_texts(self):
+        """Recompute the chosen texts."""
+        # empty all rows
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        df_all_options = self.summary_table()
+        full_articles = [article_id
+                         for article_id, paragraph_id in self.state
+                         if paragraph_id == -1]
+        just_paragraphs = [paragraph_id
+                           for article_id, paragraph_id in self.state
+                           if paragraph_id != -1]
 
-        article_ids_full = df_all_options.loc[df_all_options['option'] == SAVING_OPTIONS['article'], 'article_id']
-        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in article_ids_full)
-
+        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in full_articles)
         sql_query = f"""
         SELECT article_id, section_name, paragraph_id, text
         FROM (
@@ -187,11 +169,7 @@ class ArticleSaver:
         """
         df_extractions_full = pd.read_sql(sql_query, self.connection)
 
-        df_only_paragraph = df_all_options.loc[~df_all_options['article_id'].isin(article_ids_full)]
-        df_only_paragraph = df_only_paragraph.loc[df_only_paragraph['option'] == SAVING_OPTIONS['paragraph']]
-
-        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in df_only_paragraph['paragraph_id'])
-
+        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in just_paragraphs)
         sql_query = f"""
         SELECT article_id, section_name, paragraph_id, text
         FROM (
@@ -206,6 +184,23 @@ class ArticleSaver:
         df_extractions_pars = pd.read_sql(sql_query, self.connection)
 
         self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
+
+    def get_chosen_texts(self):
+        """Retrieve the currently saved items.
+
+        For all entire articles that are saved the corresponding
+        paragraphs are resolved first.
+
+        Returns
+        -------
+        df_chosen_texts : pandas.DataFrame
+        """
+        state_hash = hash(tuple(sorted(self.state)))
+        if state_hash != self.state_hash:
+            self._update_chosen_texts()
+            self.state_hash = state_hash
+
+        return self.df_chosen_texts
 
     def _fetch_article_info(self, article_id):
         sql_query = f"""
@@ -230,11 +225,11 @@ class ArticleSaver:
         article_report = ''
         width = 80
 
-        self.retrieve_text()
+        df_chosen_texts = self.get_chosen_texts()
 
         color_title = '#1A0DAB'
         color_metadata = '#006621'
-        for article_id, df_article in self.df_chosen_texts.groupby('article_id'):
+        for article_id, df_article in df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
                 section_name = df_article['section_name'].iloc[0]
