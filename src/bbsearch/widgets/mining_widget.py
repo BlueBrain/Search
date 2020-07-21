@@ -120,13 +120,15 @@ class MiningWidget(widgets.VBox):
 
             print("Collecting saved items...".ljust(50), end='', flush=True)
             with timer("collect items"):
-                to_mine = self.article_saver.get_saved()
+                df_chosen_texts = self.article_saver.get_chosen_texts()
             print(f'{timer["collect items"]:7.2f} seconds')
 
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
+                information = [(row['article_id'], row['paragraph_id'])
+                               for i, row in df_chosen_texts.iterrows()]
                 self.table_extractions = self.textmining_pipeline(
-                    information=list(to_mine))
+                    information=information)
             print(f'{timer["pipeline"]:7.2f} seconds')
 
             display(self.table_extractions)
