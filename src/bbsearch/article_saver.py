@@ -5,7 +5,7 @@ import textwrap
 
 import pandas as pd
 
-from .sql import retrieve_paragraph
+from .sql import retrieve_paragraph, retrieve_article
 from .widget import SAVING_OPTIONS
 
 
@@ -55,9 +55,9 @@ class ArticleSaver:
                                                     ['article_id', 'paragraph_pos_in_article']].to_dict('index')
 
         paragraphs = list()
-        for row, paragraph in specific_paragraphs.items:
+        for row, paragraph in specific_paragraphs.items():
             identifier = (paragraph['article_id'], paragraph['paragraph_pos_in_article'])
-            paragraphs += identifier
+            paragraphs += [identifier]
 
         return full_articles, paragraphs
 
@@ -66,18 +66,21 @@ class ArticleSaver:
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
         full_articles, paragraphs = self.clean_saved_texts()
+        for article in full_articles:
+            article_table = retrieve_article(article, self.connection)
+            self.df_chosen_texts = self.df_chosen_texts.append(article_table)
 
         all_paragraphs = []
         for paragraph in paragraphs:
             section_name, paragraph_text = retrieve_paragraph(paragraph, self.connection)
-            all_paragraphs += [{'article_id': paragraph['article_id'],
+            all_paragraphs += [{'article_id': paragraph[0],
                                 'section_name': section_name,
-                                'paragraph_pos_in_article': paragraph['paragraph_pos_in_article'],
+                                'paragraph_pos_in_article': paragraph[1],
                                 'text': paragraph_text}]
 
         specific_paragraphs = pd.DataFrame(all_paragraphs, columns=['article_id', 'section_name',
                                                                     'paragraph_pos_in_article', 'text'])
-        self.df_chosen_texts.append(specific_paragraphs)
+        self.df_chosen_texts = self.df_chosen_texts.append(specific_paragraphs)
 
     def report(self):
         """Create the saved articles report.

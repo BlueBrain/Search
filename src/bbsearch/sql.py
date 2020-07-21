@@ -196,7 +196,7 @@ def retrieve_article(article_id, engine):
                         ORDER BY paragraph_pos_in_article ASC, 
                         sentence_pos_in_paragraph ASC"""
         sentences = pd.read_sql(sql_query, engine)
-        sentences_list = sentences['text'].to_list
+        sentences_list = sentences['text'].to_list()
         paragraph = ' '.join(sentences_list)
         all_paragraphs += [{
             'article_id': article_id,

@@ -18,7 +18,7 @@ class TestArticleSaver:
         # (Which should be the output of the widget)
         article_ids = pd.read_sql('SELECT article_id FROM articles', fake_sqlalchemy_engine)['article_id'].to_list()
         all_articles_paragraphs_id = defaultdict(list)
-        for article_id in article_ids:
+        for article_id in article_ids[:-1]:
             sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article) 
                             FROM sentences 
                             WHERE article_id = {article_id} """
@@ -44,7 +44,7 @@ class TestArticleSaver:
         summary_table = article_saver.summary_table()
         assert isinstance(summary_table, pd.DataFrame)
 
-        ARTICLE_ID = 'w8579f54'
+        ARTICLE_ID = 1
         # Check that the cleaning part is working
         # Only 'Do not take this article option'
         for i in range(2):
@@ -55,15 +55,15 @@ class TestArticleSaver:
         for i in range(2):
             assert (ARTICLE_ID, i) in all_articles
             assert article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == ARTICLE_ID) &
-                                                     (article_saver.df_chosen_texts.paragraph_id == i)].empty
+                                                     (article_saver.df_chosen_texts.paragraph_pos_in_article == i)].empty
 
         # 'Do not take this article option' and 'Extract the paragraph' options
-        ARTICLE_ID = '4vo7n6nh'
-        for i in range(2, 4):
+        ARTICLE_ID = 3
+        for i in range(0, 2):
             article_saver.saved_articles[(ARTICLE_ID, i)] = SAVING_OPTIONS['paragraph']
         all_articles = article_saver.saved_articles.keys()
         article_saver.retrieve_text()
-        for i in range(2, 4):
+        for i in range(0, 2):
             assert (ARTICLE_ID, i) in all_articles
             assert not article_saver.df_chosen_texts.loc[(article_saver.df_chosen_texts.article_id == ARTICLE_ID) &
-                                                         (article_saver.df_chosen_texts.paragraph_id == i)].empty
+                                                         (article_saver.df_chosen_texts.paragraph_pos_in_article == i)].empty

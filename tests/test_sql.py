@@ -90,15 +90,18 @@ class TestSQLQueries:
         assert isinstance(article, pd.DataFrame)
 
     def test_retrieve_paragraph_from_sentence_id(self, fake_sqlalchemy_engine):
-        """Test that retrieve article text from sentence_id is working."""
+        """Test that retrieve paragraph text from sentence_id is working."""
         sentence_id = 1
-        article = retrieve_paragraph_from_sentence_id(sentence_id=sentence_id,
-                                                      engine=fake_sqlalchemy_engine)
-        assert isinstance(article, str)
+        paragraph = retrieve_paragraph_from_sentence_id(sentence_id=sentence_id,
+                                                        engine=fake_sqlalchemy_engine)
+        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=(sentence_id),
+                                                            engine=fake_sqlalchemy_engine)
+        assert isinstance(paragraph, str)
+        assert sentence_text in paragraph
 
     def test_retrieve_paragraph(self, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from sentence_id is working."""
         article_id, paragraph_pos = 1, 0
-        paragraph = retrieve_paragraph(identifier=(article_id, paragraph_pos),
+        paragraph = retrieve_paragraph(identifier=[(article_id, paragraph_pos)],
                                        engine=fake_sqlalchemy_engine)
         assert isinstance(paragraph, str)
