@@ -1,9 +1,9 @@
 """Entrypoint for launching an embedding server."""
 import argparse
-import logging
 import os
 import pathlib
-import sys
+
+from ._helper import configure_logging
 
 
 parser = argparse.ArgumentParser()
@@ -22,43 +22,12 @@ parser.add_argument("--bsv_checkpoints",
 args = parser.parse_args()
 
 
-def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
-    """Exception handler for logging.
-
-    For more information about the parameters see
-    https://docs.python.org/3/library/sys.html#sys.exc_info
-
-    Parameters
-    ----------
-    exc_type
-        Type of the exception.
-    exc_value
-        Exception instance.
-    exc_traceback
-        Traceback option.
-
-    Note
-    ----
-    Credit: https://stackoverflow.com/a/16993115/2804645
-    """
-    logging.error(
-        "Uncaught exception",
-        exc_info=(exc_type, exc_value, exc_traceback))
-
-
 def main():
     """Parse arguments and run Flask application."""
     # Configure logging
     log_dir = os.getenv("LOG_DIR", "/")
     log_name = os.getenv("LOG_NAME", "bbs_embedding.log")
-    log_path = pathlib.Path(log_dir) / log_name
-    log_path = log_path.resolve()
-
-    logging.basicConfig(
-        filename=log_path,
-        level=logging.INFO,
-        format='%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s')
-    sys.excepthook = handle_uncaught_exception
+    configure_logging(log_dir, log_name)
 
     # Start server
     from flask import Flask
