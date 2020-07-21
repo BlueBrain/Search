@@ -1,7 +1,6 @@
 """Entrypoint for launching an embedding server."""
 import argparse
 import os
-import pathlib
 
 from ._helper import configure_logging
 
@@ -30,6 +29,7 @@ def main():
     configure_logging(log_dir, log_name)
 
     # Start server
+    import pathlib
     from flask import Flask
     from ..server.embedding_server import EmbeddingServer
     from ..embedding_models import USE, SBERT, SBioBERT, BSV
