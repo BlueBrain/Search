@@ -2,7 +2,6 @@
 import io
 import logging
 import pathlib
-import sqlite3
 
 from flask import jsonify, make_response, request
 import pandas as pd
@@ -22,15 +21,15 @@ class MiningServer:
         The Flask app wrapping the server.
     models_path : str or pathlib.Path
         The folder containing pre-trained models.
-    database_path : str or pathlib.Path
-        Path to the sql database.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        The database connection.
     """
 
-    def __init__(self, app, models_path, database_path):
+    def __init__(self, app, models_path, connection):
         self.version = "1.0"
         self.name = "MiningServer"
         self.models_path = pathlib.Path(models_path)
-        self.database_path = pathlib.Path(database_path)
+        self.connection = connection
 
         self.app = app
         self.app.route("/text", methods=["POST"])(self.pipeline_text)
@@ -96,15 +95,17 @@ class MiningServer:
                 tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
                 paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
 
-                with sqlite3.connect(str(self.database_path)) as db_cnxn:
-                    sql_query = f"SELECT paragraph_id, section_name, text FROM paragraphs WHERE" \
-                                f" paragraph_id IN ({paragraph_ids_joined})"
+                sql_query = f"""
+                SELECT paragraph_id, section_name, text
+                FROM paragraphs
+                WHERE paragraph_id IN ({paragraph_ids_joined})
+                """
 
-                    texts_df = pd.read_sql(sql_query, db_cnxn)
-                    texts = [(row['text'],
-                              {'paper_id':
-                               f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
-                             for _, row in texts_df.iterrows()]
+                texts_df = pd.read_sql(sql_query, self.connection)
+                texts = [(row['text'],
+                          {'paper_id':
+                           f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
+                         for _, row in texts_df.iterrows()]
 
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
 

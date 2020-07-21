@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import spacy
+import sqlalchemy
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 
@@ -19,21 +20,24 @@ def test_parameters():
 
 
 @pytest.fixture(scope='session')
-def fake_db_cnxn(tmp_path_factory):
+def fake_db_cnxn(tmp_path_factory, metadata_path, test_parameters):
     """Connection object (sqlite)."""
     db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19.db'
-    cnxn = sqlite3.connect(str(db_path))
-    yield cnxn
-
-    cnxn.close()  # disconnect
+    with sqlite3.connect(str(db_path)) as cnxn:
+        fill_db_data(cnxn, metadata_path, test_parameters)
+        yield cnxn
 
 
 @pytest.fixture(scope='session')
-def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
+def fake_db_cursor(fake_db_cnxn):
     """Database object (sqlite)."""
     cursor = fake_db_cnxn.cursor()
-    # create
+    yield cursor
+    cursor.close()
 
+
+def fill_db_data(connection, metadata_path, test_parameters):
+    # create
     articles_schema = {'article_id': 'TEXT PRIMARY KEY',
                        'publisher': 'TEXT',
                        'title': 'TEXT',
@@ -81,10 +85,10 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
     stmt_create_sentences = "CREATE TABLE sentences ({})".format(
         ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
 
-    cursor.execute(stmt_create_articles)
-    cursor.execute(stmt_create_id_2_sha)
-    cursor.execute(stmt_create_paragraphs)
-    cursor.execute(stmt_create_sentences)
+    connection.execute(stmt_create_articles)
+    connection.execute(stmt_create_id_2_sha)
+    connection.execute(stmt_create_paragraphs)
+    connection.execute(stmt_create_sentences)
 
     # Populate
     name_mapping = {
@@ -111,10 +115,10 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
     metadata_df = pd.read_csv(str(metadata_path)).rename(columns=name_mapping).set_index('article_id')
 
     article_id_2_content = metadata_df['sha']
-    article_id_2_content.to_sql(name='article_id_2_sha', con=fake_db_cnxn, index=True, if_exists='append')
+    article_id_2_content.to_sql(name='article_id_2_sha', con=connection, index=True, if_exists='append')
 
     articles_content = metadata_df.drop(columns=['sha'])
-    articles_content.to_sql(name='articles', con=fake_db_cnxn, index=True, if_exists='append')
+    articles_content.to_sql(name='articles', con=connection, index=True, if_exists='append')
 
     temp_s = []
     temp_p = []
@@ -139,15 +143,27 @@ def fake_db_cursor(fake_db_cnxn, jsons_path, metadata_path, test_parameters):
 
     sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
-    sentences_content.to_sql(name='sentences', con=fake_db_cnxn, index=True, if_exists='append')
+    sentences_content.to_sql(name='sentences', con=connection, index=True, if_exists='append')
 
     paragraphs_content = pd.DataFrame(temp_p)
     paragraphs_content.index.name = 'paragraph_id'
-    paragraphs_content.to_sql(name='paragraphs', con=fake_db_cnxn, index=True, if_exists='append')
+    paragraphs_content.to_sql(name='paragraphs', con=connection, index=True, if_exists='append')
 
-    yield cursor
 
-    fake_db_cnxn.rollback()  # undo uncommited changes -> after tests are run all changes are deleted INVESTIGATE
+@pytest.fixture(scope='session')
+def fake_sqlalchemy_engine(fake_db_cnxn):
+    """Connection object (sqlite)."""
+    database_path = fake_db_cnxn.execute("""PRAGMA database_list""").fetchall()[0][2]
+    engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+
+    return engine
+
+
+@pytest.fixture(scope='session')
+def fake_sqlalchemy_cnxn(fake_sqlalchemy_engine):
+    """Connection object (sqlite)."""
+    sqlalchemy_cnxn = fake_sqlalchemy_engine.connect()
+    return sqlalchemy_cnxn
 
 
 @pytest.fixture(scope='session')
@@ -198,3 +214,27 @@ def model_entities():
     https://spacy.io/api/annotation#named-entities
     """
     return spacy.load("en_core_web_sm")
+
+
+@pytest.fixture(scope='session')
+def ner_annotations():
+    csv_filename = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval' / 'ner_iob_sample.csv'
+
+    return {
+        'bio':
+            pd.read_csv(csv_filename),
+        'sample':
+            pd.DataFrame(data={
+                'annotator_1': ['B-a', 'B-a', 'B-b', 'B-a', 'O', 'B-a', 'I-a', 'O', 'B-b', 'I-b',
+                                'O', 'O', 'B-d', 'B-b'],
+                'annotator_2': ['B-c', 'B-c', 'I-c', 'B-c', 'O', 'B-c', 'O', 'B-b', 'I-b', 'I-b',
+                                'B-c', 'I-c', 'B-c', 'B-b']
+            })
+    }
+
+
+@pytest.fixture(scope='session')
+def punctuation_annotations():
+    files_location = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval'
+    return {mode: pd.read_csv(files_location / f'iob_punctuation_{mode}.csv')
+            for mode in ('before', 'after')}

@@ -5,6 +5,7 @@ import string
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import numpy as np
+import pandas as pd
 import sent2vec
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
@@ -262,13 +263,14 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(database, model):
+def compute_database_embeddings(connection, model):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
     ----------
-    database: sqlite3.Cursor
-        Cursor to the database with 'sentences' table.
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the database.
+
     model: EmbeddingModel
         Instance of the EmbeddingModel of choice.
 
@@ -278,33 +280,35 @@ def compute_database_embeddings(database, model):
         Huge numpy array with all sentences embeddings for the given models.
         Format: (sentence_id, embeddings).
     """
-    query = """SELECT sentence_id, text FROM sentences
-            WHERE sha IN (SELECT sha FROM article_id_2_sha WHERE article_id IN
-            (SELECT article_id FROM articles WHERE has_covid19_tag = 1))"""
+    query = """
+    SELECT sentence_id, text
+    FROM sentences
+    WHERE sha IN (
+        SELECT sha
+        FROM article_id_2_sha
+        WHERE article_id IN (
+            SELECT article_id
+            FROM articles
+            WHERE has_covid19_tag = 1
+        )
+    )
+    """
     all_embeddings = list()
     all_ids = list()
-    query_execution = database.execute(query)
-    query_end = False
-    num_sentences = 0
+    query_execution = pd.read_sql(sql=query, con=connection, chunksize=1)
     num_errors = 0
 
-    while not query_end:
-        results = query_execution.fetchone()
-        if results is not None:
-            sentence_id, sentence_text = results
-            try:
-                preprocessed_sentence = model.preprocess(sentence_text)
-                embedding = model.embed(preprocessed_sentence)
-            except IndexError:
-                embedding = np.zeros((model.dim,))
-                num_errors += 1
-            all_ids.append(sentence_id)
-            all_embeddings.append(embedding)
-            num_sentences += 1
-            if num_sentences % 1000 == 0:
-                print(f'Embedded {num_sentences} with {num_errors} errors')
-        else:
-            query_end = True
+    for i_sentence, (sentence_id, sentence_text) in enumerate(query_execution):
+        try:
+            preprocessed_sentence = model.preprocess(sentence_text)
+            embedding = model.embed(preprocessed_sentence)
+        except IndexError:
+            embedding = np.zeros((model.dim,))
+            num_errors += 1
+        all_ids.append(sentence_id)
+        all_embeddings.append(embedding)
+        if i_sentence % 1000 == 0:
+            print(f'Embedded {i_sentence} with {num_errors} errors')
 
     all_embeddings = np.array(all_embeddings)
     all_ids = np.array(all_ids).reshape((-1, 1))

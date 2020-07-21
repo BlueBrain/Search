@@ -26,11 +26,16 @@ args = parser.parse_args()
 
 def main():
     """Execute the entry point."""
+    import pathlib
     from flask import Flask
+    import sqlalchemy
     from ..server.mining_server import MiningServer
 
-    app = Flask("BBSearch Server")
-    MiningServer(app, args.models_path, args.database_path)
+    app = Flask("BBS Mining Server")
+    models_path = pathlib.Path(args.models_path)
+    engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
+
+    MiningServer(app, models_path, engine)
     app.run(
         host=args.host,
         port=args.port,

@@ -5,8 +5,9 @@ import logging
 import pdfkit
 import textwrap
 
-import ipywidgets as widgets
 from IPython.display import display, HTML
+import ipywidgets as widgets
+import pandas as pd
 
 from .sql import find_paragraph
 
@@ -25,18 +26,18 @@ class Widget:
     searcher : bbsearch.search.LocalSearcher or bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the SQL database
+
     article_saver: ArticleSaver
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
     """
 
-    def __init__(self,
-                 searcher,
-                 database,
-                 article_saver=None):
+    def __init__(self, searcher, connection, article_saver=None):
 
         self.searcher = searcher
-        self.database = database
+        self.connection = connection
 
         self.report = ''
 
@@ -101,28 +102,43 @@ class Widget:
             the information about the article.
 
         """
+        sql_query = f"""
+        SELECT sha, section_name, text, paragraph_id
+        FROM sentences
+        WHERE sentence_id = "{sentence_id}"
+        """
+        sentence = pd.read_sql(sql_query, self.connection)
         article_sha, section_name, text, paragraph_id = \
-            self.database.execute(
-                'SELECT sha, section_name, text, paragraph_id FROM sentences WHERE sentence_id = ?',
-                [sentence_id]).fetchall()[0]
-        (article_id,) = self.database.execute(
-            'SELECT article_id FROM article_id_2_sha WHERE sha = ?',
-            [article_sha]).fetchall()[0]
-        article_auth, article_title, date, ref = self.database.execute(
-            'SELECT authors, title, date, url FROM articles WHERE article_id = ?',
-            [article_id]).fetchall()[0]
+            sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
+
+        sql_query = f"""
+        SELECT article_id
+        FROM article_id_2_sha
+        WHERE sha = "{article_sha}"
+        """
+        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
+
+        sql_query = f"""
+        SELECT authors, title, url
+        FROM articles
+        WHERE article_id = "{article_id}"
+        """
+        article = pd.read_sql(sql_query, self.connection)
+        article_auth, article_title, ref = \
+            article.iloc[0][['authors', 'title', 'url']]
+
         try:
             article_auth = article_auth.split(';')[0] + ' et al.'
         except AttributeError:
             article_auth = ''
 
-        ref = ref if ref else ''
-        section_name = section_name if section_name else ''
+        ref = ref or ""
+        section_name = section_name or ""
 
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.database)
+                paragraph = find_paragraph(sentence_id, self.connection)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:
