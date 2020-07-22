@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 import pandas as pd
 
 from bbsearch.widgets import ArticleSaver
@@ -53,14 +51,15 @@ class TestArticleSaver:
         # Check the possible article_id, paragraphs_id of the fake database
         # Create a fake article_saver.saved_articles dictionary
         # (Which should be the output of the widget)
-        article_ids = pd.read_sql('SELECT article_id FROM articles', fake_sqlalchemy_engine)['article_id'].to_list()
-        all_articles_paragraphs_id = defaultdict(list)
-        for article_id in article_ids[:-1]:
-            sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article) 
-                            FROM sentences 
-                            WHERE article_id = {article_id} """
-            all_paragraphs = pd.read_sql(sql_query, fake_sqlalchemy_engine)['paragraph_pos_in_article'].to_list()
-            all_articles_paragraphs_id[article_id] = all_paragraphs
+        results = fake_db_cursor.execute(
+            """SELECT sha, article_id FROM article_id_2_sha
+            WHERE sha is NOT NULL""").fetchall()
+        all_articles_paragraphs_id = dict()
+        for sha, article_id in results:
+            all_paragraphs_id = fake_db_cursor.execute(
+                """SELECT paragraph_id FROM paragraphs
+                WHERE sha is ?""", [sha]).fetchall()
+            all_articles_paragraphs_id[article_id] = [paragraph_id for (paragraph_id,) in all_paragraphs_id]
             # For all articles extract only the first of their paragraphs
             paragraph_id = all_articles_paragraphs_id[article_id][0]
             article_saver.add_paragraph(article_id, paragraph_id)
