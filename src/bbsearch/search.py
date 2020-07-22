@@ -22,13 +22,17 @@ class LocalSearcher:
         The pre-trained models.
     precomputed_embeddings : dict
         The pre-computed embeddings.
+    indices : np.ndarray
+        1D array containing sentence_ids corresponding to the rows of each of the
+        values of precomputed_embeddings.
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
     """
 
-    def __init__(self, embedding_models, precomputed_embeddings, connection):
+    def __init__(self, embedding_models, precomputed_embeddings, indices, connection):
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
+        self.indices = indices
         self.connection = connection
 
     def query(self,
@@ -74,6 +78,7 @@ class LocalSearcher:
         results = run_search(
             self.embedding_models[which_model],
             self.precomputed_embeddings[which_model],
+            self.indices,
             self.connection,
             k,
             query_text,
@@ -137,7 +142,7 @@ def filter_sentences(connection,
     return restricted_sentence_ids
 
 
-def run_search(embedding_model, precomputed_embeddings, connection, k, query_text, has_journal=False, date_range=None,
+def run_search(embedding_model, precomputed_embeddings, indices, connection, k, query_text, has_journal=False, date_range=None,
                deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
     """Generate search results.
 
@@ -147,9 +152,11 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
         Instance of EmbeddingModel of the model we want to use.
 
     precomputed_embeddings : np.ndarray
-        Embeddings of the model corresponding of embedding_model.
-        The first column has to be the corresponding index of the sentence in the database.
-        The others columns have to be the embeddings, so need to have the same size as the model specified requires.
+        2D array containing embeddings of the model corresponding of embedding_model. Rows are
+        sentences and columns are different dimensions.
+
+    indices : np.ndarray
+        1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
 
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database.
@@ -210,18 +217,16 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
                                                    date_range=date_range,
                                                    exclusion_text=exclusion_text)
 
-    # Apply date-range and has-journal filtering to arr
-    idx_col = precomputed_embeddings[:, 0]
-
     with timer('considered_embeddings_lookup'):
-        mask = np.isin(idx_col, restricted_sentence_ids)
+        mask = np.isin(indices, restricted_sentence_ids)
 
-    precomputed_embeddings = precomputed_embeddings[mask]
-    if len(precomputed_embeddings) == 0:
+    embeddings_corpus = precomputed_embeddings[mask]
+    sentence_ids = indices[mask]
+
+    if len(sentence_ids) == 0:
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
-    sentence_ids, embeddings_corpus = precomputed_embeddings[:, 0], precomputed_embeddings[:, 1:]
     with timer('query_similarity'):
         similarities_query = cosine_similarity(X=embedding_query[None, :],
                                                Y=embeddings_corpus).squeeze()
@@ -245,6 +250,6 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
     with timer('sorting'):
-        indices = np.argsort(-similarities)[:k]
+        top_indices = np.argsort(-similarities)[:k]
 
-    return sentence_ids[indices], similarities[indices], timer.stats
+    return sentence_ids[top_indices], similarities[top_indices], timer.stats
