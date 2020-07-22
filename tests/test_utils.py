@@ -74,7 +74,7 @@ class TestTimer:
 class TestH5:
     @pytest.mark.parametrize('verbose', [True, False])
     @pytest.mark.parametrize('batch_size', [1, 2, 5])
-    @pytest.mark.parametrize('model', ['SBERT', 'SBioBERT', 'USE', 'BSV'])
+    @pytest.mark.parametrize('model', ['SBERT'])
     def test_find_unpopulated_rows(self, h5_path, model, verbose, batch_size):
         unpop_rows_computed = H5.find_unpopulated_rows(h5_path,
                                                        model,
@@ -89,17 +89,20 @@ class TestH5:
 
     @pytest.mark.parametrize('verbose', [True, False])
     @pytest.mark.parametrize('batch_size', [1, 2, 5])
-    @pytest.mark.parametrize('model', ['SBERT', 'SBioBERT', 'USE', 'BSV'])
-    def test_load(self, h5_path, model, verbose, batch_size):
+    @pytest.mark.parametrize('model', ['SBERT'])
+    @pytest.mark.parametrize('indices', [
+        [10, 1, 0, 4, 6, 2, 12, 5],
+        [1],
+        [1, 2],
+        [6, 5, 4, 3, 2, 1, 0],
+        [1, 5, 2, 6, 11, 12, 14]])
+    def test_load(self, h5_path, model, verbose, batch_size, indices):
         with h5py.File(h5_path, 'r') as f:
-            # n_sentences = len(f[model])
             dset_np = f[model][:]
-
-        indices = np.array([10, 1, 0, 4, 6, 2, 12, 5])
 
         res_loaded = H5.load(h5_path,
                              model,
-                             indices=indices,
+                             indices=np.array(indices),
                              verbose=verbose,
                              batch_size=batch_size)
 
@@ -114,3 +117,7 @@ class TestH5:
         # Check nonnan entries
         nonnan_mask = ~np.isnan(res_loaded)
         assert np.allclose(res_loaded[nonnan_mask], res_true[nonnan_mask])
+
+    def test_load_duplicates(self, h5_path):
+        with pytest.raises(ValueError):
+            H5.load(h5_path, 'SBERT', indices=np.array([1, 2, 2]))

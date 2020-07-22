@@ -123,7 +123,7 @@ class H5:
 
     @staticmethod
     def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
-        """Identify rows that are unpopulated (= zero vectors).
+        """Identify rows that are unpopulated (= nan vectors).
 
         Parameters
         ----------
