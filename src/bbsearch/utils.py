@@ -122,8 +122,27 @@ class Timer:
 class H5:
 
     @staticmethod
-    def clear():
-        pass
+    def clear(h5_path, dataset_name, indices):
+        """Set selected rows to the fillvalue.
+
+        Parameters
+        ----------
+        h5_path : pathlib.Path
+            Path to the h5 file.
+
+        dataset_name : str
+            Name of the dataset.
+
+        indices : np.ndarray
+            1D array that determines the rows to be set to fillvalue.
+        """
+        with h5py.File(h5_path, 'a') as f:
+            h5_dset = f[dataset_name]
+            fillvalue = h5_dset.fillvalue
+            dim = h5_dset.shape[1]
+
+            argsort = indices.argsort()
+            h5_dset[indices[argsort]] = np.ones((len(argsort), dim)) * fillvalue
 
     @staticmethod
     def create(h5_path, dataset_name, shape, dtype='f4', fillvalue=np.nan):

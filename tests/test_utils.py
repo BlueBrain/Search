@@ -75,6 +75,33 @@ class TestTimer:
 
 class TestH5:
 
+    @pytest.mark.parametrize('fillvalue', [1.1, np.nan])
+    @pytest.mark.parametrize('indices', [[0, 1], [0], [3, 2, 1]])
+    def test_clear(self, tmpdir, fillvalue, indices):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (4, 2)
+        data = np.random.random(shape)
+        indices = np.array(indices)
+
+        with h5py.File(h5_path, 'w') as f:
+            dset = f.create_dataset('a',
+                                    shape=shape,
+                                    fillvalue=fillvalue)
+
+            dset[:, :] = data
+
+        # Truth
+        data[indices] = fillvalue
+
+        # Run
+        H5.clear(h5_path, 'a', indices)
+
+        with h5py.File(h5_path, 'r') as ff:
+            res = ff['a'][:]
+
+        assert np.allclose(res, data, equal_nan=True)
+
     def test_create(self, tmpdir):
         h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
 
