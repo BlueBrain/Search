@@ -90,6 +90,21 @@ class TestH5:
     @pytest.mark.parametrize('verbose', [True, False])
     @pytest.mark.parametrize('batch_size', [1, 2, 5])
     @pytest.mark.parametrize('model', ['SBERT'])
+    def test_find_populated_rows(self, embeddings_h5_path, model, verbose, batch_size):
+        unpop_rows_computed = H5.find_populated_rows(embeddings_h5_path,
+                                                       model,
+                                                       verbose=verbose,
+                                                       batch_size=batch_size)
+
+        with h5py.File(embeddings_h5_path, 'r') as f:
+            dset_np = f[model][:]
+            unpop_rows_true = np.where(~np.isnan(dset_np.sum(axis=1)))[0]
+
+        assert np.all(unpop_rows_computed == unpop_rows_true)
+
+    @pytest.mark.parametrize('verbose', [True, False])
+    @pytest.mark.parametrize('batch_size', [1, 2, 5])
+    @pytest.mark.parametrize('model', ['SBERT'])
     @pytest.mark.parametrize('indices', [
         [10, 1, 0, 4, 6, 2, 12, 5],
         [1],

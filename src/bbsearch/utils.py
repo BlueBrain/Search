@@ -141,8 +141,8 @@ class H5:
 
         Returns
         -------
-        zero_rows : np.ndarray
-            1D numpy array of ints representing row indices of zero (unpopulated) rows.
+        unpop_rows : np.ndarray
+            1D numpy array of ints representing row indices of unpopulated rows (nan).
 
         """
 
@@ -163,6 +163,43 @@ class H5:
                 unpop_rows.extend(list(np.where(is_unpop)[0] + i))
 
         return np.array(unpop_rows)
+
+    @staticmethod
+    def find_populated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
+        """Identify rows that are populated (= not nan vectors).
+
+        Parameters
+        ----------
+        h5_path : pathlib.Path
+            Path to the h5 file.
+
+        dataset_name : str
+            Name of the dataset.
+
+        batch_size : int
+            Number of rows to be loaded at a time.
+
+        verbose : bool
+            Controls verbosity.
+
+        Returns
+        -------
+        pop_rows : np.ndarray
+            1D numpy array of ints representing row indices of populated rows (not nan).
+
+        """
+        with h5py.File(h5_path, 'r') as f:
+            dset = f[dataset_name]
+            n_rows = len(dset)  # 7
+
+        unpop_rows = H5.find_unpopulated_rows(h5_path,
+                                              dataset_name,
+                                              batch_size=batch_size,
+                                              verbose=verbose)  # [2, 3, 6]
+
+        pop_rows = np.setdiff1d(np.arange(n_rows), unpop_rows)  # [0, 1, 4, 5]
+
+        return pop_rows
 
     @staticmethod
     def load(h5_path, dataset_name, batch_size=500, indices=None, verbose=False):
