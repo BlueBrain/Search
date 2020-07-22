@@ -184,13 +184,14 @@ class MiningServer:
                               model_entities=ee_model,
                               models_relations={},
                               debug=debug)
-            print(f'Extractions {model_name}: ')
-            print(df)
-            print(df.columns)
-            print()
-            df_all = df_all.append(
-                df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
-                                                    info_slice['entity_type']))}))
+            # Select only entity types for which this model is responsible
+            df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
+
+            # Rename entity types using the model library info, so that we match the schema request
+            df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
+                                                     info_slice['entity_type']))})
+
+            df_all = df_all.append(df)
 
         self.logger.info(f"Mining completed. Mined {len(df_all)} items.")
         return df_all.sort_values(by=['paper_id', 'start_char'], ignore_index=True)
