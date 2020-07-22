@@ -5,8 +5,6 @@ import textwrap
 
 import pandas as pd
 
-from .search_widget import SAVING_OPTIONS
-
 
 class ArticleSaver:
     """Keeps track of selected articles.
@@ -144,12 +142,13 @@ class ArticleSaver:
         # empty all rows
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        full_articles = [article_id
-                         for article_id, paragraph_id in self.state
-                         if paragraph_id == -1]
-        just_paragraphs = [paragraph_id
-                           for article_id, paragraph_id in self.state
-                           if paragraph_id != -1]
+        full_articles = set(article_id
+                            for article_id, paragraph_id in self.state
+                            if paragraph_id == -1)
+        just_paragraphs = set(paragraph_id
+                              for article_id, paragraph_id in self.state
+                              if paragraph_id != -1 and
+                              article_id not in full_articles)
 
         article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in full_articles)
         sql_query = f"""
@@ -266,9 +265,9 @@ class ArticleSaver:
         rows = []
         for article_id, paragraph_id in self.state:
             if paragraph_id == -1:
-                option = SAVING_OPTIONS["article"]
+                option = "Save full article"
             else:
-                option = SAVING_OPTIONS["paragraph"]
+                option = "Save paragraph"
             rows.append({
                 'article_id': article_id,
                 'paragraph_id': paragraph_id,

@@ -33,10 +33,10 @@ class TestArticleSaver:
         n_paragraphs_full_article = len(all_paragraphs_id)
 
         # Check that the retrieving of the different text is working
-        article_saver.retrieve_text()
-        assert isinstance(article_saver.df_chosen_texts, pd.DataFrame)
-        assert article_saver.df_chosen_texts.columns.to_list() == ['article_id', 'section_name', 'paragraph_id', 'text']
-        assert len(article_saver.df_chosen_texts) == len(all_articles_paragraphs_id) + n_paragraphs_full_article - 1
+        df_chosen_texts = article_saver.get_chosen_texts()
+        assert isinstance(df_chosen_texts, pd.DataFrame)
+        assert df_chosen_texts.columns.to_list() == ['article_id', 'section_name', 'paragraph_id', 'text']
+        assert len(df_chosen_texts) == len(all_articles_paragraphs_id) + n_paragraphs_full_article - 1
 
         # Check summary table
         summary_table = article_saver.summary_table()

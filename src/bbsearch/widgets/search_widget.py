@@ -1,6 +1,6 @@
 """The Search widget."""
-import collections
 import datetime
+import enum
 import functools
 import logging
 import math
@@ -16,11 +16,11 @@ from ..utils import Timer
 
 logger = logging.getLogger(__name__)
 
-SAVING_OPTIONS = collections.OrderedDict([
-    ('nothing', 'Do not take this article'),
-    ('paragraph', 'Extract the paragraph'),
-    ('article', 'Extract the entire article')
-])
+
+class _Save(enum.Enum):
+    NOTHING = enum.auto()
+    PARAGRAPH = enum.auto()
+    ARTICLE = enum.auto()
 
 
 class SearchWidget(widgets.VBox):
@@ -28,10 +28,13 @@ class SearchWidget(widgets.VBox):
 
     Parameters
     ----------
-    searcher : bbsearch.search.LocalSearcher or bbsearch.remote_searcher.RemoteSearcher
+    searcher : bbsearch.search.LocalSearcher or
+               bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : SQLAlchemy connectable (engine/connection) or
+                 database str URI or
+                 DBAPI2 connection (fallback mode)
         Connection to the SQL database
 
     article_saver: ArticleSaver, optional
@@ -60,6 +63,11 @@ class SearchWidget(widgets.VBox):
         self.top_n_max = top_n_max
         self.n_pages = 1
         self.current_page = -1
+
+        self.saving_labels = {
+            _Save.NOTHING: 'Do not take this article',
+            _Save.PARAGRAPH: 'Extract the paragraph',
+            _Save.ARTICLE: 'Extract the entire article'}
 
         self.radio_buttons = []
         self.current_sentence_ids = []
@@ -133,24 +141,32 @@ class SearchWidget(widgets.VBox):
             description='Substring Exclusion (newline separated): ')
 
         self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
-            options=list(zip(SAVING_OPTIONS.values(), SAVING_OPTIONS.keys())),
-            value='nothing',
+            options=[
+                (self.saving_labels[_Save.NOTHING], _Save.NOTHING),
+                (self.saving_labels[_Save.PARAGRAPH], _Save.PARAGRAPH),
+                (self.saving_labels[_Save.ARTICLE], _Save.ARTICLE)],
+            value=_Save.NOTHING,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: ')
 
         # Click to run Information Retrieval!
-        self.widgets['investigate_button'] = widgets.Button(description='Investigate!',
-                                                            layout=widgets.Layout(width='50%'))
+        self.widgets['investigate_button'] = widgets.Button(
+            description='Investigate!',
+            layout=widgets.Layout(width='50%'))
 
         # Click to run Generate Report!
-        self.widgets['report_button'] = widgets.Button(description='Generate Report of Search Results',
-                                                       layout=widgets.Layout(width='50%'))
+        self.widgets['report_button'] = widgets.Button(
+            description='Generate Report of Search Results',
+            layout=widgets.Layout(width='50%'))
 
-        self.widgets['articles_button'] = widgets.Button(description='Generate Report of Selected Articles',
-                                                         layout=widgets.Layout(width='50%'))
+        self.widgets['articles_button'] = widgets.Button(
+            description='Generate Report of Selected Articles',
+            layout=widgets.Layout(width='50%'))
+
         # Output Area
-        self.widgets['out'] = widgets.Output(layout={'border': '1px solid black'})
+        self.widgets['out'] = widgets.Output(
+            layout={'border': '1px solid black'})
 
         # Status Area
         self.widgets['status'] = widgets.Output(
@@ -173,9 +189,9 @@ class SearchWidget(widgets.VBox):
             lambda b: self.set_page(self.current_page + 1))
 
         # Callbacks
-        self.widgets['investigate_button'].on_click(self.investigate_on_click)
-        self.widgets['report_button'].on_click(self.report_on_click)
-        self.widgets['articles_button'].on_click(self.article_report_on_click)
+        self.widgets['investigate_button'].on_click(self._cb_bt_investigate)
+        self.widgets['report_button'].on_click(self._cb_bt_pdf_report_search)
+        self.widgets['articles_button'].on_click(self._cb_bt_pdf_report_article_saver)
 
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
@@ -210,9 +226,6 @@ class SearchWidget(widgets.VBox):
             self.widgets['deprioritize_strength'],
             self.widgets['exclusion_text'],
             self.widgets['default_value_article_saver'],
-            # widgets.Label("Default saving (applied when a given result is displayed):"),
-            # self.widgets['default_saving_paragraph'],
-            # self.widgets['default_saving_article'],
             self.widgets['investigate_button'],
             page_selection,
             self.widgets['out'],
@@ -395,7 +408,7 @@ class SearchWidget(widgets.VBox):
 
         return article_metadata, formatted_output
 
-    def investigate_on_click(self, change_dict):
+    def _cb_bt_investigate(self, change_dict):
         """Investigate button callback."""
         # Get user selection
         which_model = self.widgets['sent_embedder'].value
@@ -451,11 +464,11 @@ class SearchWidget(widgets.VBox):
 
     def _apply_default_saving(self):
         default_saving_value = self.widgets["default_value_article_saver"].value
-        if default_saving_value != "nothing":
+        if default_saving_value != _Save.NOTHING:
             for article_id, paragraph_id in zip(self.current_article_ids, self.current_paragraph_ids):
-                if default_saving_value == "article":
+                if default_saving_value == _Save.ARTICLE:
                     self.article_saver.add_article(article_id)
-                elif default_saving_value == "paragraph":
+                elif default_saving_value == _Save.PARAGRAPH:
                     self.article_saver.add_paragraph(article_id, paragraph_id)
 
     def resolve_ids(self, sentence_ids):
@@ -535,8 +548,7 @@ class SearchWidget(widgets.VBox):
                     # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(
                         result_info["article_id"],
-                        result_info["paragraph_id"],
-                        sentence_id)
+                        result_info["paragraph_id"])
 
                 display(HTML(article_metadata))
                 if self.article_saver:
@@ -547,41 +559,41 @@ class SearchWidget(widgets.VBox):
 
                 print()
 
-    def _on_save_paragraph_change(self, change, article_id=None, paragraph_id=None):
+    def _cb_chkb_save_paragraph(self, change, article_id=None, paragraph_id=None):
         if change["new"] is True:
             self.article_saver.add_paragraph(article_id, paragraph_id)
         else:
             self.article_saver.remove_paragraph(article_id, paragraph_id)
 
-    def _on_save_article_change(self, change, article_id=None):
+    def _cb_chkb_save_article(self, change, article_id=None):
         if change["new"] is True:
             self.article_saver.add_article(article_id)
         else:
             self.article_saver.remove_article(article_id)
 
-    def _create_saving_checkboxes(self, article_id, paragraph_id, sentence_id):
+    def _create_saving_checkboxes(self, article_id, paragraph_id):
         chk_paragraph = widgets.Checkbox(
             value=False,
-            description='Save Paragraph',
+            description=self.saving_labels[_Save.PARAGRAPH],
             indent=False,
             disabled=False,
         )
         chk_article = widgets.Checkbox(
             value=False,
-            description='Save Article',
+            description=self.saving_labels[_Save.ARTICLE],
             indent=False,
             disabled=False,
         )
 
         chk_paragraph.observe(
             handler=functools.partial(
-                self._on_save_paragraph_change,
+                self._cb_chkb_save_paragraph,
                 article_id=article_id,
                 paragraph_id=paragraph_id),
             names="value")
         chk_article.observe(
             handler=functools.partial(
-                self._on_save_article_change,
+                self._cb_chkb_save_article,
                 article_id=article_id),
             names="value")
 
@@ -597,48 +609,14 @@ class SearchWidget(widgets.VBox):
 
         return chk_article, chk_paragraph
 
-    def status_article_retrieve(self, article_infos):
-        """Return information about the saving choice of this article."""
-        color_text = '#bdbdbd'
-        status = self.article_saver.status_on_article_retrieve(article_infos)
-        status = f"""<p style="font-size:13px; color:{color_text}"> {status} </p>"""
-        return status
-
-    def create_radio_buttons(self, article_infos, articles_metadata):
-        """Create radio button."""
-        default_value = self.article_saver.saved_articles[article_infos] \
-            if article_infos in self.article_saver.saved_articles.keys() \
-            else self.widgets['default_value_article_saver'].value
-
-        def on_value_change(change):
-            for infos, button in self.radio_buttons:
-                self.article_saver.saved_articles[infos] = button.value
-            return change['new']
-
-        radio_button = widgets.ToggleButtons(
-            options=self.saving_options,
-            value=default_value,
-            description='Saving: ',
-            style={'description_width': 'initial', 'button_width': '200px'},
-            disabled=False)
-        radio_button.observe(on_value_change, names='value')
-
-        if radio_button.value != SAVING_OPTIONS['nothing']:
-            self.article_saver.saved_articles[article_infos] = radio_button.value
-
-        self.article_saver.articles_metadata[article_infos[0]] = articles_metadata
-        self.radio_buttons.append((article_infos, radio_button))
-
-        return radio_button
-
-    def article_report_on_click(self, change_dict):
+    def _cb_bt_pdf_report_article_saver(self, change_dict):
         """Create the saved articles report."""
         with self.widgets['status']:
             print()
             print('Creating the saved results PDF report... ')
             self.article_saver.report()
 
-    def report_on_click(self, change_dict):
+    def _cb_bt_pdf_report_search(self, change_dict):
         """Create the report of the search."""
         with self.widgets['status']:
             print()
