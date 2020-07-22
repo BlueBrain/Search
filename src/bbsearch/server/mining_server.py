@@ -88,6 +88,7 @@ class MiningServer:
         return jsonify(response)
 
     def ee_models_from_request_schema(self, schema_request):
+        """Return info on which model to use to mine each of the required entity types in schema."""
         schema_request = schema_request[~schema_request['property'].isna()]
         return schema_request.merge(self.models_libs['ee'], on='entity_type', how='left')[
             ['entity_type', 'model', 'entity_type_name', 'ontology_source']]
