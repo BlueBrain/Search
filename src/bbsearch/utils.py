@@ -182,10 +182,6 @@ class H5:
                 f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
 
     @staticmethod
-    def delete():
-        pass
-
-    @staticmethod
     def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
         """Identify rows that are unpopulated (= nan vectors).
 
