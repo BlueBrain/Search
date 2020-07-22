@@ -87,10 +87,10 @@ class MiningServer:
 
         return jsonify(response)
 
-    def ee_models_from_request_schema(self, schema_request):
+    def ee_models_from_request_schema(self, schema_df):
         """Return info on which model to use to mine each of the required entity types in schema."""
-        schema_request = schema_request[~schema_request['property'].isna()]
-        return schema_request.merge(self.models_libs['ee'], on='entity_type', how='left')[
+        schema_df = schema_df[schema_df['property'].isna()]
+        return schema_df.merge(self.models_libs['ee'], on='entity_type', how='left')[
             ['entity_type', 'model', 'entity_type_name', 'ontology_source']]
 
     def pipeline_database(self):
@@ -100,19 +100,19 @@ class MiningServer:
         if request.is_json:
             json_request = request.get_json()
             identifiers = json_request.get("identifiers")
-            schema = json_request.get("schema")
+            schema_str = json_request.get("schema")
             debug = json_request.get("debug", False)
 
             self.logger.info("Mining parameters:")
             self.logger.info(f"identifiers : {identifiers}")
-            self.logger.info(f"schema      : {schema}")
+            self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
 
-            args_err_response = self.check_args_not_null(identifiers=identifiers, schema=schema)
+            args_err_response = self.check_args_not_null(identifiers=identifiers, schema=schema_str)
             if args_err_response:
                 return args_err_response
 
-            schema = pd.read_csv(io.StringIO(schema))
+            schema_df = pd.read_csv(io.StringIO(schema_str))
 
             self.logger.info("Parsing identifiers...")
             tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
@@ -132,7 +132,7 @@ class MiningServer:
                     f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
                     for _, row in texts_df.iterrows()]
 
-            df_all = self.mine_texts(texts=texts, schema_request=schema, debug=debug)
+            df_all = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
             response = self.create_response(df_all)
         else:
             self.logger.info("Request is not JSON. Not processing.")
@@ -148,22 +148,22 @@ class MiningServer:
 
             json_request = request.get_json()
             text = json_request.get("text")
-            schema = json_request.get("schema")
+            schema_str = json_request.get("schema")
             debug = json_request.get("debug", False)
 
             self.logger.info("Mining parameters:")
             self.logger.info(f"text        : {text}")
-            self.logger.info(f"schema      : {schema}")
+            self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
 
-            args_err_response = self.check_args_not_null(text=text, schema=schema)
+            args_err_response = self.check_args_not_null(text=text, schema=schema_str)
             if args_err_response:
                 return args_err_response
 
-            schema = pd.read_csv(io.StringIO(schema))
+            schema_df = pd.read_csv(io.StringIO(schema_str))
 
             texts = [(text, {})]
-            df_all = self.mine_texts(texts=texts, schema_request=schema, debug=debug)
+            df_all = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
             response = self.create_response(df_all)
         else:
             self.logger.info("Request is not JSON. Not processing.")
@@ -184,6 +184,10 @@ class MiningServer:
                               model_entities=ee_model,
                               models_relations={},
                               debug=debug)
+            print(f'Extractions {model_name}: ')
+            print(df)
+            print(df.columns)
+            print()
             df_all = df_all.append(
                 df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                     info_slice['entity_type']))}))
