@@ -162,3 +162,26 @@ class TestH5:
     def test_load_duplicates(self, embeddings_h5_path):
         with pytest.raises(ValueError):
             H5.load(embeddings_h5_path, 'SBERT', indices=np.array([1, 2, 2]))
+
+    def test_write(self, tmpdir):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (20, 3)
+        dtype_h5 = 'f4'
+        dtype_np = 'float32'
+
+        with h5py.File(h5_path, 'w') as f:
+            f.create_dataset('a', shape=shape, dtype=dtype_h5, fillvalue=np.nan)
+
+        data = np.random.random((10, 3)).astype(dtype_np)
+        indices = np.arange(0, 20, 2)
+        indices_complement = np.setdiff1d(np.arange(shape[0]), indices)
+
+        H5.write(h5_path, 'a', data, indices)
+
+        with h5py.File(h5_path, 'r') as f:
+            res_np = f['a'][:]
+
+        assert res_np.shape == shape
+        assert np.allclose(res_np[indices], data)
+        assert np.all(np.isnan(res_np[indices_complement]))

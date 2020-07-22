@@ -305,5 +305,27 @@ class H5:
             return final_res[unargsort]
 
     @staticmethod
-    def write():
-        pass
+    def write(h5_path, dataset_name, data, indices):
+        """Write a numpy array into an h5 file.
+
+        Parameters
+        ----------
+        h5_path : pathlib.Path
+            Path to the h5 file.
+
+        dataset_name : str
+            Name of the dataset.
+
+        data : np.ndarray
+            2D numpy array to be written into the h5 file.
+
+        indices : np.ndarray
+            1D numpy array that determines row indices whre the `data` pasted.
+
+        """
+
+        with h5py.File(h5_path, 'a') as f:
+            h5_dset = f[dataset_name]
+
+            argsort = indices.argsort()
+            h5_dset[indices[argsort]] = data[argsort]
