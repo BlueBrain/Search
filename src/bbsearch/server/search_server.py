@@ -8,8 +8,6 @@ import numpy as np
 from ..embedding_models import BSV, SBioBERT
 from ..search import LocalSearcher
 
-logger = logging.getLogger(__name__)
-
 
 class SearchServer:
     """The BBS search server.
@@ -31,16 +29,20 @@ class SearchServer:
                  trained_models_path,
                  embeddings_path,
                  connection):
-
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.version = "1.0"
         self.name = "SearchServer"
         self.app = app
         self.connection = connection
 
+        self.logger.info("Initializing the server...")
+        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Version: {self.version}")
+
         trained_models_path = pathlib.Path(trained_models_path)
         embeddings_path = pathlib.Path(embeddings_path)
 
-        logger.info("Initializing embedding models...")
+        self.logger.info("Initializing embedding models...")
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
         bsv_model_path = trained_models_path / bsv_model_name
         embedding_models = {
@@ -48,7 +50,7 @@ class SearchServer:
             "SBioBERT": SBioBERT()
         }
 
-        logger.info("Loading precomputed embeddings...")
+        self.logger.info("Loading precomputed embeddings...")
         precomputed_embeddings = {
             model_name: np.load(embeddings_path / f"{model_name}.npy").astype(np.float32)
             for model_name in embedding_models
@@ -59,10 +61,13 @@ class SearchServer:
 
         app.route("/help", methods=["POST"])(self.help)
         app.route("/", methods=["POST"])(self.query)
-        logger.info("Server initialization done.")
+
+        self.logger.info("Initialization done.")
 
     def help(self):
         """Help the user by sending information about the server."""
+        self.logger.info("Help called")
+
         response = {
             "name": self.name,
             "version": self.version,
@@ -105,24 +110,35 @@ class SearchServer:
         response_json : flask.Response
             The JSON response to the query.
         """
+        self.logger.info("Search query received")
         if request.is_json:
+            self.logger.info("Search query is JSON. Processing.")
             json_request = request.get_json()
 
             which_model = json_request.pop("which_model")
             k = json_request.pop("k")
             query_text = json_request.pop("query_text")
 
+            self.logger.info("Search parameters:")
+            self.logger.info(f"which_model: {which_model}")
+            self.logger.info(f"k          : {k}")
+            self.logger.info(f"query_text : {query_text}")
+
+            self.logger.info("Starting the search...")
             sentence_ids, similarities, stats = self.local_searcher.query(
                 which_model,
                 k,
                 query_text,
                 **json_request)
 
+            self.logger.info(f"Search completed, got {len(sentence_ids)} results.")
+
             response = dict(
                 sentence_ids=sentence_ids.tolist(),
                 similarities=similarities.tolist(),
                 stats=stats)
         else:
+            self.logger.info("Search query is not JSON. Not processing.")
             response = dict(
                 sentence_ids=None,
                 similarities=None,

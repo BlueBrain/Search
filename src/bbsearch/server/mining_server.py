@@ -9,8 +9,6 @@ import spacy
 
 from ..mining import run_pipeline
 
-logger = logging.getLogger(__name__)
-
 
 class MiningServer:
     """The BBS mining server.
@@ -26,10 +24,15 @@ class MiningServer:
     """
 
     def __init__(self, app, models_path, connection):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.version = "1.0"
         self.name = "MiningServer"
         self.models_path = pathlib.Path(models_path)
         self.connection = connection
+
+        self.logger.info("Initializing the server...")
+        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Version: {self.version}")
 
         self.app = app
         self.app.route("/text", methods=["POST"])(self.pipeline_text)
@@ -42,8 +45,12 @@ class MiningServer:
         # Relations Extractors (RE)
         self.re_models = {}
 
+        self.logger.info("Initialization done.")
+
     def help(self):
         """Respond to the help."""
+        self.logger.info("Help called")
+
         response = {
             "name": self.name,
             "version": self.version,
@@ -82,16 +89,23 @@ class MiningServer:
 
     def pipeline_database(self):
         """Respond to a query on specific paragraphs in the database."""
+        self.logger.info("Query for mining of articles received")
+
         if request.is_json:
             json_request = request.get_json()
             identifiers = json_request.get("identifiers")
             debug = json_request.get("debug", False)
 
+            self.logger.info("Mining parameters:")
+            self.logger.info(f"identifiers : {identifiers}")
+            self.logger.info(f"debug       : {debug}")
+
             if identifiers is None:
+                self.logger.info("No identifiers were provided. Stopping.")
                 response = self.make_error_response("The request identifiers is missing.")
                 return response
-
             else:
+                self.logger.info("Parsing identifiers...")
                 tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
                 paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
 
@@ -102,36 +116,49 @@ class MiningServer:
                 """
                 #SQL_rf: Retrieve articles or paragraphs depending '????' sentence_id
 
+                self.logger.info("Retrieving article texts from the database...")
                 texts_df = pd.read_sql(sql_query, self.connection)
                 texts = [(row['text'],
                           {'paper_id':
                            f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
                          for _, row in texts_df.iterrows()]
 
+                self.logger.info("Running the mining pipeline...")
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
+                self.logger.info(f"Mining completed. Mined {len(df)} items.")
 
                 response = self.create_response(df)
-
         else:
+            self.logger.info("Request is not JSON. Not processing.")
             response = self.make_error_response("The request has to be a JSON object.")
 
         return response
 
     def pipeline_text(self):
         """Respond to a custom text query."""
+        self.logger.info("Query for mining of raw text received")
         if request.is_json:
+            self.logger.info("Request is JSON. Processing.")
+
             json_request = request.get_json()
             text = json_request.get("text")
             debug = json_request.get("debug", False)
 
+            self.logger.info("Mining parameters:")
+            self.logger.info(f"text  : {text}")
+            self.logger.info(f"debug : {debug}")
+
             if text is None:
+                self.logger.info("No text received. Stopping.")
                 response = self.make_error_response("The request text is missing.")
             else:
+                self.logger.info("Running the mining pipeline...")
                 df = run_pipeline([(text, {})], self.ee_model, self.re_models, debug=debug)
+                self.logger.info(f"Mining completed. Mined {len(df)} items.")
 
                 response = self.create_response(df)
-
         else:
+            self.logger.info("Request is not JSON. Not processing.")
             response = self.make_error_response("The request has to be a JSON object.")
 
         return response
