@@ -218,7 +218,7 @@ class ArticleSaver:
 
         return ref, article_title, article_authors
 
-    def pdf_report(self, output_dir):
+    def pdf_report(self, output_dir=None):
         """Create the saved articles report.
 
         Parameters
