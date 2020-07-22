@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 from bbsearch.server.mining_server import MiningServer
 
-ROOT_PATH = Path(__file__).resolve().parent.parent.parent  # root of the repository
+TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
 
 @pytest.fixture
@@ -20,9 +20,9 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
     monkeypatch.setattr('bbsearch.server.mining_server.spacy', spacy_mock)
 
     app = Flask("BBSearch Test Mining Server")
-    models_libs = ROOT_PATH / 'data' / 'mining' / 'request' / 'ee_models_library.csv'
+    models_libs = TESTS_PATH / 'data' / 'mining' / 'request' / 'ee_models_library.csv'
     mining_server = MiningServer(app=app,
-                                 models_libs={'ee': models_libs},
+                                 models_libs={'ee': str(models_libs)},
                                  connection=fake_sqlalchemy_engine)
     mining_server.app.config['TESTING'] = True
     with mining_server.app.test_client() as client:
@@ -30,13 +30,16 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
 
 
 class TestMiningServer:
-
     def test_mining_server_help(self, mining_client):
         response = mining_client.post('/help')
         assert response.json['name'] == 'MiningServer'
 
     def test_mining_server_pipeline(self, mining_client):
-        request_json = {"text": 'hello'}
+        schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
+        with open(schema_file, 'r') as f:
+            schema_request = f.read()
+
+        request_json = {"text": 'hello', 'schema': schema_request}
         response = mining_client.post('/text', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
         assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
@@ -47,23 +50,32 @@ class TestMiningServer:
         request_json = {}
         response = mining_client.post('/text', json=request_json)
         assert list(response.json.keys()) == ["error"]
-        assert response.json == {"error": "The request text is missing."}
+        assert response.json == {"error": "The request \"text\" is missing."}
+
+        request_json = {"text": 'hello'}
+        response = mining_client.post('/text', json=request_json)
+        assert list(response.json.keys()) == ["error"]
+        assert response.json == {"error": "The request \"schema\" is missing."}
+
         request_json = "text"
         response = mining_client.post('/text', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
 
     def test_mining_server_database(self, mining_client):
+        schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
+        with open(schema_file, 'r') as f:
+            schema_request = f.read()
         request_json = {}
         response = mining_client.post('/database', json=request_json)
         assert list(response.json.keys()) == ["error"]
-        assert response.json == {"error": "The request identifiers is missing."}
+        assert response.json == {"error": "The request \"identifiers\" is missing."}
 
         request_json = "text"
         response = mining_client.post('/database', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
 
         identifiers = [('w8579f54', 4)]
-        request_json = {"identifiers": identifiers}
+        request_json = {"identifiers": identifiers, 'schema': schema_request}
         response = mining_client.post('/database', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
         assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \

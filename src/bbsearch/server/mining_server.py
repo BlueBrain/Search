@@ -31,7 +31,7 @@ class MiningServer:
         self.models_libs = {k: pd.read_csv(v)
                             for k, v in models_libs.items()}
         self.ee_models = {model_name: spacy.load(model_name)
-                          for model_name in self.models_libs['ee']}
+                          for model_name in self.models_libs['ee'].model}
         self.connection = connection
 
         self.logger.info("Initializing the server...")
@@ -112,6 +112,8 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
+            schema = pd.read_csv(io.StringIO(schema))
+
             self.logger.info("Parsing identifiers...")
             tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
             paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
@@ -158,6 +160,8 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
+            schema = pd.read_csv(io.StringIO(schema))
+
             texts = [(text, {})]
             df_all = self.mine_texts(texts=texts, schema_request=schema, debug=debug)
             response = self.create_response(df_all)
@@ -174,13 +178,13 @@ class MiningServer:
         ee_models_info = ee_models_info[~ee_models_info.model.isna()]
 
         df_all = pd.DataFrame()
-        for model_name, info_slice in ee_models_info.groupby('model_name'):
+        for model_name, info_slice in ee_models_info.groupby('model'):
             ee_model = self.ee_models[model_name]
             df = run_pipeline(texts=texts,
                               model_entities=ee_model,
                               models_relations={},
                               debug=debug)
-            df_all.append(
+            df_all = df_all.append(
                 df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                     info_slice['entity_type']))}))
 

@@ -94,9 +94,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                                               **metadata
                                               ))
 
-    df_all = pd.DataFrame(lines)
-
-    if debug:
-        return df_all
+    if not lines or not debug:  # enforce columns if there are no extractions or we are in prod mode
+        return pd.DataFrame(lines, columns=specs)
     else:
-        return pd.DataFrame(df_all, columns=specs)
+        return pd.DataFrame(lines)

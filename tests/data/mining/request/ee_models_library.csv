@@ -1,4 +1,3 @@
 entity_type,model,entity_type_name
 CHEMICAL,en_ner_craft_md,CHEBI
 ORGANISM,en_ner_craft_md,TAXON
-DISEASE,fake_models/modelXX_bc5cdr_annotationsXX_spacy23,DISEASE
