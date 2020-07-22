@@ -1,6 +1,8 @@
 """The entrypoint script for the search server."""
 import argparse
 
+from bbsearch.utils import H5
+
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -18,9 +20,9 @@ parser.add_argument("--models_path",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/bbs_data/cord19_v7/embeddings",
+                    default="/raid/bbs_data/cord19_v7/embeddings/embeddings.h5",
                     type=str,
-                    help="The folder with the precomputed embeddings")
+                    help="The path to an h5 file with the precomputed embeddings")
 parser.add_argument("--database_path",
                     default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
@@ -38,9 +40,12 @@ def main():
     app = Flask("BBSearch Server")
     models_path = pathlib.Path(args.models_path)
     embeddings_path = pathlib.Path(args.embeddings_path)
+
+    indices = H5.find_populated_rows(embeddings_path, 'BSV')
+
     engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
 
-    SearchServer(app, models_path, embeddings_path, engine)
+    SearchServer(app, models_path, embeddings_path, indices, engine)
     app.run(
         host=args.host,
         port=args.port,
