@@ -1,9 +1,10 @@
 """Module for the article_saver."""
 import datetime
-import pdfkit
+import pathlib
 import textwrap
 
 import pandas as pd
+import pdfkit
 
 
 class ArticleSaver:
@@ -203,7 +204,7 @@ class ArticleSaver:
             self._update_chosen_texts()
             self.state_hash = state_hash
 
-        return self.df_chosen_texts
+        return self.df_chosen_texts.copy()
 
     def _fetch_article_info(self, article_id):
         sql_query = f"""
@@ -217,13 +218,18 @@ class ArticleSaver:
 
         return ref, article_title, article_authors
 
-    def report(self):
+    def pdf_report(self, output_dir):
         """Create the saved articles report.
+
+        Parameters
+        ----------
+        output_dir : str or pathlib.Path
+            The directory for writing the report.
 
         Returns
         -------
-        path: str
-            Path where the report is generated
+        output_file_path : str
+            The file to which the report was written.
         """
         article_report = ''
         width = 80
@@ -254,9 +260,18 @@ class ArticleSaver:
             article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
             article_report += '<br/>' * 2
 
-        path = f"report_{datetime.datetime.now()}.pdf"
-        pdfkit.from_string(article_report, path)
-        return path
+        if output_dir is None:
+            output_dir = pathlib.Path.cwd()
+        else:
+            output_dir = pathlib.Path(output_dir)
+            if not output_dir.exists():
+                msg = f"The output directory {output_dir} does not exist."
+                raise ValueError(msg)
+        filename = f"article_saver_report_{datetime.datetime.now()}.pdf"
+        output_file_path = str(output_dir / filename)
+        pdfkit.from_string(article_report, output_file_path)
+
+        return output_file_path
 
     def summary_table(self):
         """Create a dataframe table with saved articles.

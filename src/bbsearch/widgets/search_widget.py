@@ -614,7 +614,7 @@ class SearchWidget(widgets.VBox):
         with self.widgets['status']:
             print()
             print('Creating the saved results PDF report... ')
-            self.article_saver.report()
+            self.article_saver.pdf_report()
 
     def _cb_bt_pdf_report_search(self, change_dict):
         """Create the report of the search."""
