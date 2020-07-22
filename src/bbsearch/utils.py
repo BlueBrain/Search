@@ -247,6 +247,24 @@ class H5:
         return pop_rows
 
     @staticmethod
+    def get_shape(h5_path, dataset_name):
+        """Get shape of a dataset.
+
+        Parameters
+        ----------
+        h5_path : pathlib.Path
+            Path to the h5 file.
+
+        dataset_name : str
+            Name of the dataset.
+        """
+
+        with h5py.File(h5_path, 'r') as f:
+            shape = f[dataset_name].shape
+
+        return shape
+
+    @staticmethod
     def load(h5_path, dataset_name, batch_size=500, indices=None, verbose=False):
         """Load an h5 file in memory.
 

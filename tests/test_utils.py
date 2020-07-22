@@ -128,6 +128,16 @@ class TestH5:
 
         assert np.all(unpop_rows_computed == unpop_rows_true)
 
+    def test_get_shape(self, tmpdir):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (22, 3)
+
+        with h5py.File(h5_path, 'w') as f:
+            f.create_dataset('a', shape=shape)
+
+        assert H5.get_shape(h5_path, 'a') == shape
+
     @pytest.mark.parametrize('verbose', [True, False])
     @pytest.mark.parametrize('batch_size', [1, 2, 5])
     @pytest.mark.parametrize('model', ['SBERT'])
