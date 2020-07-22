@@ -24,18 +24,6 @@ def test_database(fake_db_cursor):
         fake_db_cursor.execute('SELECT * FROM fake_table').fetchall()
 
 
-def test_embeddings(embeddings_path, fake_db_cursor):
-    """Make sure all sentences are embedded."""
-    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
-
-    for p in embeddings_path.iterdir():
-        a = np.load(str(p))
-
-        assert isinstance(a, np.ndarray)
-        assert a.shape[0] == n_sentences
-        assert a.shape[1] > 0
-
-
 def test_h5(embeddings_h5_path):
     assert embeddings_h5_path.is_file()
 

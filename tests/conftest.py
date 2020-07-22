@@ -186,27 +186,6 @@ def metadata_path():
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
-    """Path to a directory where embeddings stored."""
-    random_state = 3
-    np.random.seed(random_state)
-    models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
-
-    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
-    embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
-
-    for model in models:
-        model_path = embeddings_path / '{}.npy'.format(model)
-        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
-                            np.random.random((n_sentences, test_parameters['embedding_size']))],
-                           axis=1)
-
-        np.save(str(model_path), a)
-
-    return embeddings_path
-
-
-@pytest.fixture(scope='session')
 def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
     random_state = 3
     np.random.seed(random_state)
