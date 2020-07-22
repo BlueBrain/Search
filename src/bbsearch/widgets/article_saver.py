@@ -125,7 +125,7 @@ class ArticleSaver:
         self.remove_paragraph(article_id, -1)
 
     def remove_paragraph(self, article_id, paragraph_id):
-        """Remova a paragraph from saved.
+        """Remove a paragraph from saved.
 
         Parameters
         ----------
@@ -136,6 +136,10 @@ class ArticleSaver:
         """
         if (article_id, paragraph_id) in self.state:
             self.state.remove((article_id, paragraph_id))
+
+    def remove_all(self):
+        """Remove all saved items."""
+        self.state.clear()
 
     def _update_chosen_texts(self):
         """Recompute the chosen texts."""
