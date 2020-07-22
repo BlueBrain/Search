@@ -122,6 +122,51 @@ class Timer:
 class H5:
 
     @staticmethod
+    def clear():
+        pass
+
+    @staticmethod
+    def create(h5_path, dataset_name, shape, dtype='f4', fillvalue=np.nan):
+        """Create a dataset (and potentially also a h5 file).
+
+        Parameters
+        ----------
+        h5_path : pathlib.Path
+            Path to the h5 file.
+
+        dataset_name : str
+            Name of the dataset.
+
+        shape : tuple
+            Two element tuple representing rows and columns.
+
+        dtype : str
+            Dtype of the h5 array. See references for all the details.
+
+        fillvalue : float
+            How to fill unpopulated rows.
+
+        References
+        ----------
+        [1] http://docs.h5py.org/en/stable/faq.html#faq
+        """
+
+        if h5_path.is_file():
+            with h5py.File(h5_path, 'a') as f:
+                if dataset_name in f.keys():
+                    raise ValueError('The {} dataset already exists.'.format(dataset_name))
+
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+
+        else:
+            with h5py.File(h5_path, 'w') as f:
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+
+    @staticmethod
+    def delete():
+        pass
+
+    @staticmethod
     def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
         """Identify rows that are unpopulated (= nan vectors).
 
@@ -258,3 +303,7 @@ class H5:
             final_res = np.concatenate(final_res_l, axis=0)
 
             return final_res[unargsort]
+
+    @staticmethod
+    def write():
+        pass

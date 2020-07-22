@@ -1,4 +1,6 @@
 """Collection of tests focused on the utils.py module."""
+import pathlib
+
 import h5py
 import numpy as np
 import pytest
@@ -72,6 +74,30 @@ class TestTimer:
 
 
 class TestH5:
+
+    def test_create(self, tmpdir):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        # New h5 file and new dataset
+        H5.create(h5_path, 'a', (20, 10), dtype='f2')
+
+        with h5py.File(h5_path, 'r') as f:
+            assert 'a' in f.keys()
+            assert f['a'].shape == (20, 10)
+            assert f['a'].dtype == 'f2'
+
+        # Old h5 file and new dataset
+        H5.create(h5_path, 'b', (40, 2), dtype='f4')
+
+        with h5py.File(h5_path, 'r') as f:
+            assert 'b' in f.keys()
+            assert f['b'].shape == (40, 2)
+            assert f['b'].dtype == 'f4'
+
+        # Check errors
+        with pytest.raises(ValueError):
+            H5.create(h5_path, 'a', (20, 10))
+
     @pytest.mark.parametrize('verbose', [True, False])
     @pytest.mark.parametrize('batch_size', [1, 2, 5])
     @pytest.mark.parametrize('model', ['SBERT'])
@@ -92,9 +118,9 @@ class TestH5:
     @pytest.mark.parametrize('model', ['SBERT'])
     def test_find_populated_rows(self, embeddings_h5_path, model, verbose, batch_size):
         unpop_rows_computed = H5.find_populated_rows(embeddings_h5_path,
-                                                       model,
-                                                       verbose=verbose,
-                                                       batch_size=batch_size)
+                                                     model,
+                                                     verbose=verbose,
+                                                     batch_size=batch_size)
 
         with h5py.File(embeddings_h5_path, 'r') as f:
             dset_np = f[model][:]
