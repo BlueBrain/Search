@@ -35,8 +35,9 @@ def test_embeddings(embeddings_path, fake_db_cursor):
         assert a.shape[0] == n_sentences
         assert a.shape[1] > 0
 
-def test_h5(h5_path):
-    assert h5_path.is_file()
+
+def test_h5(embeddings_h5_path):
+    assert embeddings_h5_path.is_file()
 
 
 def test_metadata(metadata_path):

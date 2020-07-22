@@ -207,14 +207,14 @@ def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
 
 
 @pytest.fixture(scope='session')
-def h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
+def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
     random_state = 3
     np.random.seed(random_state)
     models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
     dim = test_parameters['embedding_size']
 
     n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
-    file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'all.h5'
+    file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
 
     with h5py.File(file_path) as f:
         for model in models:
