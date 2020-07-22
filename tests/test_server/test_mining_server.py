@@ -1,8 +1,13 @@
 """Test for the mining server."""
+from pathlib import Path
+
 from flask import Flask
 import pytest
 from unittest.mock import Mock
+
 from bbsearch.server.mining_server import MiningServer
+
+ROOT_PATH = Path(__file__).resolve().parent.parent.parent  # root of the repository
 
 
 @pytest.fixture
@@ -15,8 +20,9 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
     monkeypatch.setattr('bbsearch.server.mining_server.spacy', spacy_mock)
 
     app = Flask("BBSearch Test Mining Server")
+    models_libs = ROOT_PATH / 'data' / 'mining' / 'request' / 'ee_models_library.csv'
     mining_server = MiningServer(app=app,
-                                 models_path='',
+                                 models_libs={'ee': models_libs},
                                  connection=fake_sqlalchemy_engine)
     mining_server.app.config['TESTING'] = True
     with mining_server.app.test_client() as client:
