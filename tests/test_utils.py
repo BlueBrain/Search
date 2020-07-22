@@ -163,7 +163,8 @@ class TestH5:
         with pytest.raises(ValueError):
             H5.load(embeddings_h5_path, 'SBERT', indices=np.array([1, 2, 2]))
 
-    def test_write(self, tmpdir):
+    @pytest.mark.parametrize('flip', [True, False])
+    def test_write(self, tmpdir, flip):
         h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
 
         shape = (20, 3)
@@ -175,6 +176,9 @@ class TestH5:
 
         data = np.random.random((10, 3)).astype(dtype_np)
         indices = np.arange(0, 20, 2)
+        if flip:
+            indices = np.flip(indices)
+
         indices_complement = np.setdiff1d(np.arange(shape[0]), indices)
 
         H5.write(h5_path, 'a', data, indices)
