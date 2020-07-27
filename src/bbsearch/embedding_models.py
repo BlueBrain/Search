@@ -315,4 +315,6 @@ def compute_database_embeddings(connection, model, indices):
     final_embeddings = np.array(all_embeddings)
     retrieved_indices = np.array(all_ids)
 
+    print(f'Embedded {i_sentence} with {num_errors} errors')
+
     return final_embeddings, retrieved_indices
