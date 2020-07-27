@@ -12,7 +12,7 @@ import tensorflow_hub as hub
 import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
-from .sql import retrieve_sentences_from_section_name
+from .sql import retrieve_sentences_from_sentence_id
 
 
 class EmbeddingModel(ABC):
@@ -265,7 +265,7 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(connection, model, section_names=['Title', 'Abstract']):
+def compute_database_embeddings(connection, model, indices):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
@@ -276,16 +276,20 @@ def compute_database_embeddings(connection, model, section_names=['Title', 'Abst
     model: EmbeddingModel
         Instance of the EmbeddingModel of choice.
 
-    section_names: list of str
-        Section name of the sentences to keep for the embeddings.
+    indices : np.ndarray
+        1D array storing the sentence_ids for which we want to perform the embedding.
 
     Returns
     -------
     final_embeddings: np.array
         Huge numpy array with all sentences embeddings for the given models.
         Format: (sentence_id, embeddings).
+
+    retrieved_indices : np.ndarray
+        1D array of sentence_ids that we managed to embed. Note that the order corresponds
+        exactly to the rows in `final_embeddings`.
     """
-    sentences = retrieve_sentences_from_section_name(section_name=section_names, engine=connection)
+    sentences = retrieve_sentences_from_sentence_id(indices, connection)
 
     all_embeddings = list()
     all_ids = list()
@@ -297,15 +301,15 @@ def compute_database_embeddings(connection, model, section_names=['Title', 'Abst
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
         except IndexError:
-            embedding = np.zeros((model.dim,))
             num_errors += 1
+            continue
+
         all_ids.append(sentence_id)
         all_embeddings.append(embedding)
         if index % 1000 == 0:
             print(f'Embedded {index} with {num_errors} errors')
 
-    all_embeddings = np.array(all_embeddings)
-    all_ids = np.array(all_ids).reshape((-1, 1))
-    final_embeddings = np.concatenate((all_ids, all_embeddings), axis=1)
+    final_embeddings = np.array(all_embeddings)
+    retrieved_indices = np.array(all_ids)
 
-    return final_embeddings
+    return final_embeddings, retrieved_indices
