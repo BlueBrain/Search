@@ -45,7 +45,8 @@ def retrieve_sentences_from_section_name(section_name, engine):
         coming from the given section name.
     """
     section_names = ' ,'.join(f"'{name}'" for name in section_name)
-    sql_query = f'SELECT sentence_id, section_name, text FROM sentences WHERE section_name IN ({section_names})'
+    sql_query = f'SELECT sentence_id, section_name, text FROM sentences ' \
+                f'WHERE section_name IN ({section_names})'
     sentences = pd.read_sql(sql_query, engine)
     return sentences
 

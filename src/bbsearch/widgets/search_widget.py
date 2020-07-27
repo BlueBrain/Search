@@ -11,7 +11,7 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 
-from ..sql import find_paragraph
+from ..sql import retrieve_paragraph_from_sentence_id
 from ..utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -381,7 +381,8 @@ class SearchWidget(widgets.VBox):
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.connection)
+                paragraph = retrieve_paragraph_from_sentence_id(sentence_id,
+                                                                self.connection)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:

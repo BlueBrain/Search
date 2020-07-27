@@ -13,12 +13,7 @@ from bbsearch.sql import retrieve_sentences_from_sentence_id, \
 
 class TestNoSQL:
 
-    @pytest.mark.parametrize('module_name', ['article_saver', 'embedding_models',
-                                             # 'entrypoints.database_entrypoint',
-                                             # 'entrypoints.embedding_server_entrypoint',
-                                             # 'entrypoints.embeddings_entrypoint',
-                                             # 'entrypoints.mining_server_entrypoint',
-                                             # 'entrypoints.search_server_entrypoint',
+    @pytest.mark.parametrize('module_name', ['embedding_models',
                                              'mining.attributes',
                                              'mining.pipeline',
                                              'mining.relation',
@@ -28,7 +23,9 @@ class TestNoSQL:
                                              'server.mining_server',
                                              'server.search_server',
                                              'utils',
-                                             'widget'])
+                                             'widgets.article_saver',
+                                             'widgets.mining_widget',
+                                             'widgets.search_widget'])
     def test_sql_queries(self, module_name):
         module = import_module(f'bbsearch.{module_name}')
         source_code = inspect.getsource(module)
@@ -94,14 +91,15 @@ class TestSQLQueries:
         sentence_id = 1
         paragraph = retrieve_paragraph_from_sentence_id(sentence_id=sentence_id,
                                                         engine=fake_sqlalchemy_engine)
-        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=(sentence_id),
+        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=(sentence_id, ),
                                                             engine=fake_sqlalchemy_engine)
         assert isinstance(paragraph, str)
-        assert sentence_text in paragraph
+        assert sentence_text['text'].iloc[0] in paragraph
 
     def test_retrieve_paragraph(self, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from sentence_id is working."""
         article_id, paragraph_pos = 1, 0
-        paragraph = retrieve_paragraph(identifier=[(article_id, paragraph_pos)],
-                                       engine=fake_sqlalchemy_engine)
+        section_name, paragraph = retrieve_paragraph(identifier=(article_id, paragraph_pos),
+                                                     engine=fake_sqlalchemy_engine)
         assert isinstance(paragraph, str)
+        assert isinstance(section_name, str)
