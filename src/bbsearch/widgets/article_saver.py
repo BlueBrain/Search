@@ -6,6 +6,8 @@ import textwrap
 import pandas as pd
 import pdfkit
 
+from ..sql import retrieve_article, retrieve_paragraph, retrieve_article_metadata_from_article_id
+
 
 class ArticleSaver:
     """Keeps track of selected articles.
@@ -59,7 +61,7 @@ class ArticleSaver:
         self.state = set()
         self.state_hash = None
         self.df_chosen_texts = pd.DataFrame(columns=[
-            'article_id', 'section_name', 'paragraph_id', 'text'])
+            'article_id', 'section_name', 'paragraph_pos_in_article', 'text'])
 
     def add_article(self, article_id):
         """Save an article.
@@ -71,17 +73,17 @@ class ArticleSaver:
         """
         self.add_paragraph(article_id, -1)
 
-    def add_paragraph(self, article_id, paragraph_id):
+    def add_paragraph(self, article_id, paragraph_pos_in_article):
         """Save a paragraph.
 
         Parameters
         ----------
         article_id : str
             The article ID.
-        paragraph_id : int
+        paragraph_pos_in_article : int
             The paragraph ID.
         """
-        self.state.add((article_id, paragraph_id))
+        self.state.add((article_id, paragraph_pos_in_article))
 
     def has_article(self, article_id):
         """Check if an article has been saved.
@@ -98,14 +100,14 @@ class ArticleSaver:
         """
         return self.has_paragraph(article_id, -1)
 
-    def has_paragraph(self, article_id, paragraph_id):
+    def has_paragraph(self, article_id, paragraph_pos_in_article):
         """Check if a paragraph has been saved.
 
         Parameters
         ----------
         article_id : str
             The article ID.
-        paragraph_id : int
+        paragraph_pos_in_article : int
             The paragraph ID.
 
         Returns
@@ -113,7 +115,7 @@ class ArticleSaver:
         result : bool
             Whether or not the given paragraph has been saved.
         """
-        return (article_id, paragraph_id) in self.state
+        return (article_id, paragraph_pos_in_article) in self.state
 
     def remove_article(self, article_id):
         """Remove an article from saved.
@@ -125,69 +127,73 @@ class ArticleSaver:
         """
         self.remove_paragraph(article_id, -1)
 
-    def remove_paragraph(self, article_id, paragraph_id):
+    def remove_paragraph(self, article_id, paragraph_pos_in_article):
         """Remove a paragraph from saved.
 
         Parameters
         ----------
         article_id : str
             The article ID.
-        paragraph_id : int
+        paragraph_pos_in_article : int
             The paragraph ID.
         """
-        if (article_id, paragraph_id) in self.state:
-            self.state.remove((article_id, paragraph_id))
+        if (article_id, paragraph_pos_in_article) in self.state:
+            self.state.remove((article_id, paragraph_pos_in_article))
 
     def remove_all(self):
         """Remove all saved items."""
         self.state.clear()
+
+    def _clean_current_state(self):
+        """Clean the current state of the article saver
+
+        Returns
+        -------
+        full_articles: set of int
+            Set of the article ids chosen by the user.
+        just_paragraphs: set of tuple
+            Set of tuple (article_id, paragraph_pos_in_article) chosen by the user.
+        """
+        full_articles = set(article_id
+                            for article_id, paragraph_pos_in_article in self.state
+                            if paragraph_pos_in_article == -1)
+        just_paragraphs = set((article_id, paragraph_pos_in_article)
+                              for article_id, paragraph_pos_in_article in self.state
+                              if paragraph_pos_in_article != -1 and
+                              article_id not in full_articles)
+        return full_articles, just_paragraphs
+
+    def get_identifiers(self):
+        """Retrieve all the identifiers that summarize the choice of the users.
+
+        Returns
+        -------
+        identifier: list of tuple
+            Tuple (article_id, paragraph_pos_in_article) chosen by the user.
+        """
+        identifiers = []
+        full_articles, just_paragraphs = self._clean_current_state()
+        for article_id in full_articles:
+            identifiers += [(article_id, -1)]
+        identifiers += just_paragraphs
+        return identifiers
 
     def _update_chosen_texts(self):
         """Recompute the chosen texts."""
         # empty all rows
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        full_articles = set(article_id
-                            for article_id, paragraph_id in self.state
-                            if paragraph_id == -1)
-        just_paragraphs = set(paragraph_id
-                              for article_id, paragraph_id in self.state
-                              if paragraph_id != -1 and
-                              article_id not in full_articles)
+        full_articles, just_paragraphs = self._clean_current_state()
 
-        article_ids_full_list = ','.join(f"\"{id_}\"" for id_ in full_articles)
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE sha IN (
-                     SELECT sha
-                     FROM article_id_2_sha
-                     WHERE article_id IN ({article_ids_full_list})
-                 )
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON a.sha = p.sha;
-        """
-        df_extractions_full = pd.read_sql(sql_query, self.connection)
+        for article_id in full_articles:
+            article = retrieve_article(article_id=article_id,
+                                       engine=self.connection)
+            self.df_chosen_texts = self.df_chosen_texts.append(article)
 
-        paragraph_ids_list = ','.join(f"\"{id_}\"" for id_ in just_paragraphs)
-        sql_query = f"""
-        SELECT article_id, section_name, paragraph_id, text
-        FROM (
-                 SELECT *
-                 FROM paragraphs
-                 WHERE paragraph_id IN ({paragraph_ids_list})
-             ) p
-                 INNER JOIN
-             article_id_2_sha a
-             ON p.sha = a.sha;
-        """
-        df_extractions_pars = pd.read_sql(sql_query, self.connection)
-
-        self.df_chosen_texts = df_extractions_full.append(df_extractions_pars, ignore_index=True)
+        for identifier in just_paragraphs:
+            paragraph = retrieve_paragraph(identifier=identifier,
+                                           engine=self.connection)
+            self.df_chosen_texts = self.df_chosen_texts.append(paragraph)
 
     def get_chosen_texts(self):
         """Retrieve the currently saved items.
@@ -207,12 +213,8 @@ class ArticleSaver:
         return self.df_chosen_texts.copy()
 
     def _fetch_article_info(self, article_id):
-        sql_query = f"""
-        SELECT authors, title, url
-        FROM articles
-        WHERE article_id = "{article_id}"
-        """
-        article = pd.read_sql(sql_query, self.connection)
+        article = retrieve_article_metadata_from_article_id(article_id=article_id,
+                                                            engine=self.connection)
         article_authors, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -239,7 +241,7 @@ class ArticleSaver:
         color_title = '#1A0DAB'
         color_metadata = '#006621'
         for article_id, df_article in df_chosen_texts.groupby('article_id'):
-            df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
+            df_article = df_article.sort_values(by='paragraph_pos_in_article', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
                 section_name = df_article['section_name'].iloc[0]
             else:
@@ -282,17 +284,17 @@ class ArticleSaver:
             DataFrame containing all the paragraphs seen and choice made for it.
         """
         rows = []
-        for article_id, paragraph_id in self.state:
-            if paragraph_id == -1:
+        for article_id, paragraph_pos_in_article in self.state:
+            if paragraph_pos_in_article == -1:
                 option = "Save full article"
             else:
                 option = "Save paragraph"
             rows.append({
                 'article_id': article_id,
-                'paragraph_id': paragraph_id,
+                'paragraph_pos_in_article': paragraph_pos_in_article,
                 'option': option})
         table = pd.DataFrame(
             data=rows,
-            columns=['article_id', 'paragraph_id', 'option'])
+            columns=['article_id', 'paragraph_pos_in_article', 'option'])
 
         return table

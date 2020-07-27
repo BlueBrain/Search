@@ -95,12 +95,10 @@ def retrieve_paragraph(identifier, engine):
 
     Returns
     -------
-    section_name: str
-        Section Name where the paragraph is located.
-    paragraph: str
-        Paragraph containing the sentence of the given sentence_id.
+    paragraph: pd.DataFrame
+        pd.DataFrame with the paragraph and the metadata.
     """
-    sql_query = f"""SELECT section_name, text 
+    sql_query = f"""SELECT section_name, text
                     FROM sentences
                     WHERE article_id = {identifier[0]}
                     AND paragraph_pos_in_article = {identifier[1]}
@@ -109,11 +107,16 @@ def retrieve_paragraph(identifier, engine):
     sentences = pd.read_sql(sql_query, engine)
     sentences_text = sentences['text'].to_list()
     section_name = sentences['section_name'].iloc[0]
-    paragraph = ' '.join(sentences_text)
-    return section_name, paragraph
+    paragraph_text = ' '.join(sentences_text)
+
+    paragraph = pd.DataFrame([{'article_id': identifier[0],
+                               'text': paragraph_text,
+                               'section_name': section_name,
+                               'paragraph_pos_in_article': identifier[0]}, ])
+    return paragraph
 
 
-def retrieve_article_metadata(sentence_id, engine):
+def retrieve_article_metadata_from_sentence_id(sentence_id, engine):
     """Retrieve article metadata given one sentence id.
 
     Parameters
@@ -139,6 +142,29 @@ def retrieve_article_metadata(sentence_id, engine):
     return article
 
 
+def retrieve_article_metadata_from_article_id(article_id, engine):
+    """Retrieve article metadata given one sentence id.
+
+    Parameters
+    ----------
+    article_id: int
+        Sentence id for which need to retrieve the article metadata.
+    engine: sqlalchemy.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article: pd.DataFrame
+        DataFrame containing the article metadata from
+        which the sentence is coming.
+    """
+    sql_query = f"""SELECT * 
+                    FROM articles 
+                    WHERE article_id = {article_id}"""
+    article = pd.read_sql(sql_query, engine)
+    return article
+
+
 def retrieve_article(article_id, engine):
     """Retrieve article given one article id.
 
@@ -152,7 +178,7 @@ def retrieve_article(article_id, engine):
     Returns
     -------
     article: pd.DataFrame
-        DataFrame containing the Article dividing into paragraphs.
+        DataFrame containing the Article divided into paragraphs.
     """
     all_paragraphs = []
     sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article)

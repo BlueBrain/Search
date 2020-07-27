@@ -11,7 +11,7 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 
 from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_id, \
-    retrieve_article_metadata
+    retrieve_article_metadata_from_article_id
 from ..utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -310,8 +310,8 @@ class SearchWidget(widgets.VBox):
             sentence.iloc[0][['article_id', 'section_name',
                               'text', 'paragraph_pos_in_article']]
 
-        article = retrieve_article_metadata(sentence_id=sentence_id,
-                                            engine=self.connection)
+        article = retrieve_article_metadata_from_article_id(article_id=article_id,
+                                                            engine=self.connection)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
