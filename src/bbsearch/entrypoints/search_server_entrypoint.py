@@ -17,15 +17,15 @@ parser.add_argument("--port",
                     type=int,
                     help="The server port")
 parser.add_argument("--models_path",
-                    default="/raid/bbs_data/trained_models",
+                    default="/raid/sync/proj115/bbs_data/trained_models",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/bbs_data/cord19_v7/embeddings",
+                    default="/raid/sync/proj115/bbs_data/cord19_v7/embeddings",
                     type=str,
                     help="The folder with the precomputed embeddings")
 parser.add_argument("--database_path",
-                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
+                    default="/raid/sync/proj115/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="The path to the SQL database.")
 args = parser.parse_args()

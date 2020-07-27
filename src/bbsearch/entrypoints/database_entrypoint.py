@@ -8,7 +8,7 @@ parser.add_argument("--data_path",
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
 parser.add_argument("--out_dir",
-                    default='/raid/bbs_data/cord19_v7/databases/',
+                    default='/raid/sync/proj115/bbs_data/cord19_v7/databases/',
                     type=str,
                     help="The directory path where the database is saved")
 parser.add_argument("--version",

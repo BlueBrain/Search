@@ -4,14 +4,14 @@ import argparse
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--database_path",
-                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
+                    default="/raid/sync/proj115/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="Database containing at least 4 tables:  "
                          "articles, article_id_to_sha, paragraphs and sentences."
                          "This database is used to read all sentences "
                          "and compute the embeddings. ")
 parser.add_argument("--out_dir",
-                    default='/raid/bbs_data/cord19_v7/embeddings/',
+                    default='/raid/sync/proj115/bbs_data/cord19_v7/embeddings/',
                     type=str,
                     help="The directory path where the embeddings are saved.")
 parser.add_argument("--models",
@@ -20,7 +20,7 @@ parser.add_argument("--models",
                     help="Models for which we need to compute the embeddings. "
                          "Format should be comma separated list.")
 parser.add_argument("--bsv_checkpoints",
-                    default='/raid/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
+                    default='/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
                     type=str,
                     help="Path to file containing the checkpoints for the BSV model.")
 args = parser.parse_args()
