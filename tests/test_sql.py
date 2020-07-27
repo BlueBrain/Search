@@ -8,7 +8,7 @@ import pandas as pd
 
 from bbsearch.sql import retrieve_sentences_from_sentence_id, \
     retrieve_sentences_from_section_name, retrieve_article_metadata, retrieve_article, \
-    retrieve_paragraph, retrieve_paragraph_from_sentence_id, retrieve_article_from_sentence_id
+    retrieve_paragraph, retrieve_paragraph_from_sentence_id
 
 
 class TestNoSQL:
@@ -71,13 +71,6 @@ class TestSQLQueries:
                                           'publish_time', 'authors', 'journal', 'mag_id',
                                           'who_covidence_id', 'arxiv_id', 'pdf_json_files',
                                           'pmc_json_files', 'url', 's2_id'])
-
-    def test_retrieve_article_from_sentence_id(self, fake_sqlalchemy_engine):
-        """Test that retrieve article text from sentence_id is working."""
-        sentence_id = 1
-        article = retrieve_article_from_sentence_id(sentence_id=sentence_id,
-                                                    engine=fake_sqlalchemy_engine)
-        assert isinstance(article, str)
 
     def test_retrieve_article(self, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from sentence_id is working."""

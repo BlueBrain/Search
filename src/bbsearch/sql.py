@@ -139,35 +139,6 @@ def retrieve_article_metadata(sentence_id, engine):
     return article
 
 
-def retrieve_article_from_sentence_id(sentence_id, engine):
-    """Retrieve article given one sentence id.
-
-    Parameters
-    ----------
-    sentence_id: int
-        Sentence id for which need to retrieve the entire text article.
-    engine: sqlalchemy.Engine
-        SQLAlchemy Engine connected to the database.
-
-    Returns
-    -------
-    article: str
-        Article containing the sentence of the given sentence_id.
-    """
-    sql_query = f"""SELECT text 
-                    FROM sentences
-                    WHERE article_id = 
-                        (SELECT article_id 
-                        FROM sentences 
-                        WHERE sentence_id = {sentence_id})
-                    ORDER BY paragraph_pos_in_article ASC, 
-                    sentence_pos_in_paragraph ASC"""
-
-    all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
-    article = ' '.join(all_sentences)
-    return article
-
-
 def retrieve_article(article_id, engine):
     """Retrieve article given one article id.
 
