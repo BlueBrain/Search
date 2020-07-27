@@ -32,7 +32,8 @@ install_requires = [
     'jupyter_dash',
     'networkx',
     'dash-cytoscape',
-    'dash-table'
+    'dash-table',
+    'nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git'
 ]
 tests_require = [
     'flake8',
