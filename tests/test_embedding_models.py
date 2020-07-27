@@ -53,7 +53,7 @@ class TestEmbeddingModels:
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           sbiobert,
                                                                           indices)
@@ -90,7 +90,7 @@ class TestEmbeddingModels:
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           bsv,
                                                                           indices)
@@ -121,14 +121,13 @@ class TestEmbeddingModels:
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           sbert,
                                                                           indices)
 
         assert final_embeddings.shape == (n_sentences, 768)
         assert np.all(indices == retrieved_indices)
-
 
     def test_use_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
         hub_module = Mock()
@@ -153,7 +152,7 @@ class TestEmbeddingModels:
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           use,
                                                                           indices)
