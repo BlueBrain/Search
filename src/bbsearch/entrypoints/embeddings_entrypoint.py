@@ -64,7 +64,7 @@ def main():
 
     print('Sentences IDs retrieving....')
 
-    sql_query = """SELECT sentence_id 
+    sql_query = """SELECT sentence_id
                    FROM sentences
                    WHERE section_name IN ('Title', 'Abstract')"""
 
@@ -72,7 +72,7 @@ def main():
 
     print('Counting Number Total of sentences....')
 
-    sql_query = """SELECT COUNT(*) 
+    sql_query = """SELECT COUNT(*)
                    FROM sentences"""
 
     n_sentences = pd.read_sql(sql_query, engine).iloc[0, 0]

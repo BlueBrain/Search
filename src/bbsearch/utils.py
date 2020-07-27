@@ -120,6 +120,7 @@ class Timer:
 
 
 class H5:
+    """H5 utilities."""
 
     @staticmethod
     def clear(h5_path, dataset_name, indices):
@@ -169,7 +170,6 @@ class H5:
         ----------
         [1] http://docs.h5py.org/en/stable/faq.html#faq
         """
-
         if h5_path.is_file():
             with h5py.File(h5_path, 'a') as f:
                 if dataset_name in f.keys():
@@ -203,9 +203,7 @@ class H5:
         -------
         unpop_rows : np.ndarray
             1D numpy array of ints representing row indices of unpopulated rows (nan).
-
         """
-
         with h5py.File(h5_path, 'r') as f:
             dset = f[dataset_name]
             n_rows = len(dset)
@@ -246,7 +244,6 @@ class H5:
         -------
         pop_rows : np.ndarray
             1D numpy array of ints representing row indices of populated rows (not nan).
-
         """
         with h5py.File(h5_path, 'r') as f:
             dset = f[dataset_name]
@@ -273,7 +270,6 @@ class H5:
         dataset_name : str
             Name of the dataset.
         """
-
         with h5py.File(h5_path, 'r') as f:
             shape = f[dataset_name].shape
 
@@ -305,7 +301,6 @@ class H5:
         -------
         res : np.ndarray
             Numpy array of shape `(len(indices), ...)` holding the loaded rows.
-
         """
         with h5py.File(h5_path, 'r') as f:
             dset = f[dataset_name]
@@ -354,9 +349,7 @@ class H5:
 
         indices : np.ndarray
             1D numpy array that determines row indices whre the `data` pasted.
-
         """
-
         with h5py.File(h5_path, 'a') as f:
             h5_dset = f[dataset_name]
 

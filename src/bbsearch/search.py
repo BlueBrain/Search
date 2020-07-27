@@ -142,8 +142,9 @@ def filter_sentences(connection,
     return restricted_sentence_ids
 
 
-def run_search(embedding_model, precomputed_embeddings, indices, connection, k, query_text, has_journal=False, date_range=None,
-               deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
+def run_search(embedding_model, precomputed_embeddings, indices, connection, k, query_text,
+               has_journal=False, date_range=None, deprioritize_strength='None', exclusion_text=None,
+               deprioritize_text=None, verbose=True):
     """Generate search results.
 
     Parameters
