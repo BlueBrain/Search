@@ -46,7 +46,8 @@ class TestSQLQueries:
         else:
             assert sentence_text.shape[0] == len(set(sentence_id))
         assert np.all(sentence_text.columns == \
-                      ['sentence_id', 'section_name', 'text', 'paragraph_pos_in_article'])
+                      ['article_id', 'sentence_id', 'section_name', 'text',
+                       'paragraph_pos_in_article'])
 
     def test_from_section_name(self, fake_sqlalchemy_engine, test_parameters):
         """Test that retrieve sentences from section_name is working."""

@@ -180,30 +180,21 @@ def retrieve_article(article_id, engine):
     article: pd.DataFrame
         DataFrame containing the Article divided into paragraphs.
     """
-    all_paragraphs = []
-    sql_query = f"""SELECT DISTINCT(paragraph_pos_in_article)
+    sql_query = f"""SELECT *
                     FROM sentences
-                    WHERE article_id = {article_id}"""
-    all_paragraph_pos = pd.read_sql(sql_query, engine)['paragraph_pos_in_article'].to_list()
+                    WHERE article_id = {article_id}
+                    ORDER BY paragraph_pos_in_article ASC,
+                    sentence_pos_in_paragraph ASC"""
+    all_sentences = pd.read_sql(sql_query, engine)
 
-    for paragraph_pos in all_paragraph_pos:
-        sql_query = f"""SELECT article_id, section_name, text, paragraph_pos_in_article
-                        FROM sentences
-                        WHERE article_id = {article_id}
-                        AND paragraph_pos_in_article = {paragraph_pos}
-                        ORDER BY paragraph_pos_in_article ASC, 
-                        sentence_pos_in_paragraph ASC"""
-        sentences = pd.read_sql(sql_query, engine)
-        sentences_list = sentences['text'].to_list()
-        paragraph = ' '.join(sentences_list)
-        all_paragraphs += [{
-            'article_id': article_id,
-            'section_name': sentences['section_name'].iloc[0],
-            'paragraph_pos_in_article': paragraph_pos,
-            'text': paragraph
-        }]
+    groupby_var = all_sentences.groupby(by='paragraph_pos_in_article')
+    paragraphs = groupby_var['text'].apply(lambda x: ' '.join(x))
+    section_name = groupby_var['section_name'].unique().apply(lambda x: x[0])
 
-    article = pd.DataFrame(all_paragraphs)
+    article = pd.DataFrame({'text': paragraphs,
+                            'section_name': section_name,
+                            'article_id': article_id}).reset_index()
+
     return article
 
 
