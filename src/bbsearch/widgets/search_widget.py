@@ -43,24 +43,20 @@ class SearchWidget(widgets.VBox):
 
     results_per_page : int, optional
         The number of results to display per results page.
-
-    top_n_max : int, optional
-        The upper bound of the top N results slider.
     """
 
     def __init__(self,
                  searcher,
                  connection,
                  article_saver=None,
-                 results_per_page=10,
-                 top_n_max=100):
+                 results_per_page=10
+                 ):
         super().__init__()
 
         self.searcher = searcher
         self.connection = connection
         self.article_saver = article_saver
         self.results_per_page = max(1, results_per_page)
-        self.top_n_max = top_n_max
         self.n_pages = 1
         self.current_page = -1
 
@@ -74,6 +70,7 @@ class SearchWidget(widgets.VBox):
         self.current_paragraph_ids = []
         self.current_article_ids = []
 
+        self.widgets_style = {'description_width': 'initial'}
         self.widgets = dict()
         self._init_widgets()
         self._adjust_widgets()
@@ -86,30 +83,38 @@ class SearchWidget(widgets.VBox):
             options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT'], )
+                      'Sentence BioBERT'],
+            style=self.widgets_style
+            )
 
         # Select n. of top results to return
-        self.widgets['top_results'] = widgets.widgets.IntSlider(
-            value=min(10, self.top_n_max),
-            min=0,
-            max=self.top_n_max,
-            description='Top N results')
+        self.widgets['top_results'] = widgets.widgets.IntText(
+            value=20,
+            description='Top N results',
+            style=self.widgets_style
+            )
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
         # sentence
         self.widgets['print_paragraph'] = widgets.Checkbox(
             value=True,
-            description='Show whole paragraph')
+            description='Show whole paragraph',
+            style=self.widgets_style
+            )
 
         # Enter Query
         self.widgets['query_text'] = widgets.Textarea(
             value='Glucose is a risk factor for COVID-19',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Query')
+            description='Query',
+            style=self.widgets_style
+            )
 
         self.widgets['has_journal'] = widgets.Checkbox(
             description="Require Journal",
-            value=False)
+            value=False,
+            style=self.widgets_style
+            )
 
         self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
@@ -117,13 +122,16 @@ class SearchWidget(widgets.VBox):
             min=1900,
             max=2020,
             value=(1900, 2020),
-            layout=widgets.Layout(width='80ch'))
-
+            layout=widgets.Layout(width='80ch'),
+            style=self.widgets_style
+            )
         # Enter Deprioritization Query
         self.widgets['deprioritize_text'] = widgets.Textarea(
             value='',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Deprioritize')
+            description='Deprioritize',
+            style=self.widgets_style
+            )
 
         # Select Deprioritization Strength
         self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
@@ -131,14 +139,16 @@ class SearchWidget(widgets.VBox):
             disabled=False,
             button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength', )
+            description='Deprioritization strength',
+            )
 
         # Enter Substrings Exclusions
         self.widgets['exclusion_text'] = widgets.Textarea(
             layout=widgets.Layout(width='90%', height='80px'),
             value='',
-            style={'description_width': 'initial'},
-            description='Substring Exclusion (newline separated): ')
+            style=self.widgets_style,
+            description='Substring Exclusion (newline separated): '
+            )
 
         self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
             options=[
@@ -148,7 +158,8 @@ class SearchWidget(widgets.VBox):
             value=_Save.NOTHING,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
-            description='Default saving: ')
+            description='Default saving: '
+            )
 
         # Click to run Information Retrieval!
         self.widgets['investigate_button'] = widgets.Button(
@@ -200,7 +211,8 @@ class SearchWidget(widgets.VBox):
         self.widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'], )
+            tooltips=['BioSentVec', 'Sentence BioBERT'],
+            style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
             options=['None', 'Mild', 'Stronger'],
