@@ -142,8 +142,7 @@ class H5:
             fillvalue = h5_dset.fillvalue
             dim = h5_dset.shape[1]
 
-            argsort = indices.argsort()
-            h5_dset[indices[argsort]] = np.ones((len(argsort), dim)) * fillvalue
+            h5_dset[np.sort(indices)] = np.ones((len(indices), dim)) * fillvalue
 
     @staticmethod
     def create(h5_path, dataset_name, shape, dtype='f4', fillvalue=np.nan):
