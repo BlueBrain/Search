@@ -14,8 +14,8 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
 
     Returns
     -------
-    texts: pd.DataFrame
-        Pandas DataFrame containing sentence_id and corresponding text.
+    sentences: pd.DataFrame
+        Pandas DataFrame containing all sentences and their corresponding metadata.
     """
     sentences_id = ', '.join(str(id_) for id_ in sentence_id)
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
@@ -23,29 +23,6 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
                     WHERE sentence_id IN ({sentences_id})"""
     sentences = pd.read_sql(sql_query, engine)
 
-    return sentences
-
-
-def retrieve_sentences_from_section_name(section_name, engine):
-    """Retrieve sentences given section names.
-
-    Parameters
-    ----------
-    section_name: list of str
-        Sentences id for which need to retrieve the text.
-    engine: sqlalchemy.Engine
-        SQLAlchemy Engine connected to the database.
-
-    Returns
-    -------
-    sentences: pd.DataFrame
-        DataFrame containing the sentences and their sentence_id
-        coming from the given section name.
-    """
-    section_names = ' ,'.join(f"'{name}'" for name in section_name)
-    sql_query = f'SELECT sentence_id, section_name, text FROM sentences ' \
-                f'WHERE section_name IN ({section_names})'
-    sentences = pd.read_sql(sql_query, engine)
     return sentences
 
 
@@ -77,7 +54,10 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
                     ORDER BY sentence_pos_in_paragraph ASC"""
 
     all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
-    paragraph = ' '.join(all_sentences)
+    if not all_sentences:
+        paragraph = None
+    else:
+        paragraph = ' '.join(all_sentences)
     return paragraph
 
 
@@ -103,50 +83,28 @@ def retrieve_paragraph(identifier, engine):
                     ORDER BY sentence_pos_in_paragraph ASC"""
 
     sentences = pd.read_sql(sql_query, engine)
-    sentences_text = sentences['text'].to_list()
-    section_name = sentences['section_name'].iloc[0]
-    paragraph_text = ' '.join(sentences_text)
+    if sentences.empty:
+        paragraph = pd.DataFrame(columns=['article_id', 'text',
+                                          'section_name', 'paragraph_pos_in_article'])
+    else:
+        sentences_text = sentences['text'].to_list()
+        section_name = sentences['section_name'].iloc[0]
+        paragraph_text = ' '.join(sentences_text)
 
-    paragraph = pd.DataFrame([{'article_id': identifier[0],
-                               'text': paragraph_text,
-                               'section_name': section_name,
-                               'paragraph_pos_in_article': identifier[0]}, ])
+        paragraph = pd.DataFrame([{'article_id': identifier[0],
+                                   'text': paragraph_text,
+                                   'section_name': section_name,
+                                   'paragraph_pos_in_article': identifier[0]}, ])
     return paragraph
 
 
-def retrieve_article_metadata_from_sentence_id(sentence_id, engine):
-    """Retrieve article metadata given one sentence id.
-
-    Parameters
-    ----------
-    sentence_id: int
-        Sentence id for which need to retrieve the article metadata.
-    engine: sqlalchemy.Engine
-        SQLAlchemy Engine connected to the database.
-
-    Returns
-    -------
-    article: pd.DataFrame
-        DataFrame containing the article metadata from
-        which the sentence is coming.
-    """
-    sql_query = f"""SELECT *
-                    FROM articles
-                    WHERE article_id =
-                        (SELECT article_id
-                        FROM sentences
-                        WHERE sentence_id = {sentence_id})"""
-    article = pd.read_sql(sql_query, engine)
-    return article
-
-
 def retrieve_article_metadata_from_article_id(article_id, engine):
-    """Retrieve article metadata given one sentence id.
+    """Retrieve article metadata given one article id.
 
     Parameters
     ----------
     article_id: int
-        Sentence id for which need to retrieve the article metadata.
+        Article id for which need to retrieve the article metadata.
     engine: sqlalchemy.Engine
         SQLAlchemy Engine connected to the database.
 
