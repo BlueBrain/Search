@@ -157,7 +157,7 @@ class H5:
         dataset_name : str
             Name of the dataset.
 
-        shape : tuple
+        shape : tuple of int
             Two element tuple representing rows and columns.
 
         dtype : str
@@ -216,7 +216,7 @@ class H5:
 
             for i in iterable:
                 row = dset[i: i + batch_size]
-                is_unpop = np.isnan(row.sum(axis=1))  # (batch_size,)
+                is_unpop = np.isnan(row).any(axis=1)  # (batch_size,)
 
                 unpop_rows.extend(list(np.where(is_unpop)[0] + i))
 
@@ -306,7 +306,8 @@ class H5:
             dset = f[dataset_name]
             n_rows = len(dset)
 
-            indices = indices if indices is not None else np.arange(n_rows)  # [10, 9, 12, 1]
+            if indices is None:
+                indices = np.arange(n_rows)
 
             if len(set(indices)) != len(indices):
                 raise ValueError('There cannot be duplicates inside of the indices')
@@ -314,7 +315,8 @@ class H5:
             argsort = indices.argsort()  # [3, 1, 0, 2]
 
             sorted_indices = indices[argsort]  # [1, 9, 10, 12]
-            unargsort = argsort.argsort()  # [2, 1, 3, 0]
+            unargsort = np.empty_like(argsort);
+            unargsort[argsort] = np.arange(len(argsort)  # [2, 1, 3, 0]
 
             final_res_l = []
 
