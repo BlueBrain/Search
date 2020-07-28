@@ -145,7 +145,7 @@ class H5:
             h5_dset[np.sort(indices)] = np.ones((len(indices), dim)) * fillvalue
 
     @staticmethod
-    def create(h5_path, dataset_name, shape, dtype='f4', fillvalue=np.nan):
+    def create(h5_path, dataset_name, shape, dtype='f4'):
         """Create a dataset (and potentially also a h5 file).
 
         Parameters
@@ -162,8 +162,9 @@ class H5:
         dtype : str
             Dtype of the h5 array. See references for all the details.
 
-        fillvalue : float
-            How to fill unpopulated rows.
+        Notes
+        -----
+        Unpopulated rows will be filled with `np.nan`.
 
         References
         ----------
@@ -174,11 +175,11 @@ class H5:
                 if dataset_name in f.keys():
                     raise ValueError('The {} dataset already exists.'.format(dataset_name))
 
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
 
         else:
             with h5py.File(h5_path, 'w') as f:
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
 
     @staticmethod
     def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
