@@ -170,8 +170,8 @@ def retrieve_article(article_id, engine):
 
     Parameters
     ----------
-    article_id: int
-        Article id for which need to retrieve the entire text article.
+    article_id: list of int
+        List of Article id for which need to retrieve the entire text article.
     engine: sqlalchemy.Engine
         SQLAlchemy Engine connected to the database.
 
@@ -180,22 +180,23 @@ def retrieve_article(article_id, engine):
     article: pd.DataFrame
         DataFrame containing the Article divided into paragraphs.
     """
+    articles_str = ', '.join(str(id_) for id_ in article_id)
     sql_query = f"""SELECT *
                     FROM sentences
-                    WHERE article_id = {article_id}
-                    ORDER BY paragraph_pos_in_article ASC,
+                    WHERE article_id IN ({articles_str})
+                    ORDER BY article_id ASC,
+                    paragraph_pos_in_article ASC,
                     sentence_pos_in_paragraph ASC"""
     all_sentences = pd.read_sql(sql_query, engine)
 
-    groupby_var = all_sentences.groupby(by='paragraph_pos_in_article')
+    groupby_var = all_sentences.groupby(by=['article_id', 'paragraph_pos_in_article'])
     paragraphs = groupby_var['text'].apply(lambda x: ' '.join(x))
     section_name = groupby_var['section_name'].unique().apply(lambda x: x[0])
 
-    article = pd.DataFrame({'text': paragraphs,
-                            'section_name': section_name,
-                            'article_id': article_id}).reset_index()
+    articles = pd.DataFrame({'text': paragraphs,
+                             'section_name': section_name}).reset_index()
 
-    return article
+    return articles
 
 
 def get_ids_by_condition(conditions, table, db_cnxn):

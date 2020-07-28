@@ -88,7 +88,7 @@ class TestSQLQueries:
     def test_retrieve_article(self, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from sentence_id is working."""
         article_id = 1
-        article = retrieve_article(article_id=article_id,
+        article = retrieve_article(article_id=(article_id, ),
                                    engine=fake_sqlalchemy_engine)
         assert isinstance(article, pd.DataFrame)
 
