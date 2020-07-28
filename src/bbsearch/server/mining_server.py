@@ -108,16 +108,19 @@ class MiningServer:
             else:
                 self.logger.info("Retrieving article texts from the database...")
 
+                all_article_ids = []
                 all_paragraphs = pd.DataFrame()
                 for identifier in identifiers:
                     if identifier[1] == -1:
-                        article = retrieve_article(article_id=identifier[0],
-                                                   engine=self.connection)
-                        all_paragraphs = all_paragraphs.append(article)
+                        all_article_ids += [identifier[0]]
                     else:
                         paragraph = retrieve_paragraph(identifier=identifier,
                                                        engine=self.connection)
                         all_paragraphs = all_paragraphs.append(paragraph)
+
+                article = retrieve_article(article_id=all_article_ids,
+                                           engine=self.connection)
+                all_paragraphs = all_paragraphs.append(article)
 
                 texts = [(row['text'],
                           {'paper_id':

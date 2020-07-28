@@ -185,10 +185,9 @@ class ArticleSaver:
 
         full_articles, just_paragraphs = self._clean_current_state()
 
-        for article_id in full_articles:
-            article = retrieve_article(article_id=article_id,
-                                       engine=self.connection)
-            self.df_chosen_texts = self.df_chosen_texts.append(article)
+        article = retrieve_article(article_id=full_articles,
+                                   engine=self.connection)
+        self.df_chosen_texts = self.df_chosen_texts.append(article)
 
         for identifier in just_paragraphs:
             paragraph = retrieve_paragraph(identifier=identifier,

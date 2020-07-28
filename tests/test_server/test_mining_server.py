@@ -56,7 +56,7 @@ class TestMiningServer:
         response = mining_client.post('/database', data=request_json)
         assert response.json == {"error": "The request has to be a JSON object."}
 
-        identifiers = [(1, 0)]
+        identifiers = [(1, 0), (2, -1)]
         request_json = {"identifiers": identifiers}
         response = mining_client.post('/database', json=request_json)
         assert response.headers['Content-Type'] == 'text/csv'
