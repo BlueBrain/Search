@@ -20,7 +20,7 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
         Pandas DataFrame containing sentence_id and corresponding text.
     """
     sentences_id = ', '.join(str(id_) for id_ in sentence_id)
-    sql_query = f"""SELECT sentence_id, section_name, text, paragraph_pos_in_article
+    sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
                     FROM sentences 
                     WHERE sentence_id IN ({sentences_id})"""
     sentences = pd.read_sql(sql_query, engine)
