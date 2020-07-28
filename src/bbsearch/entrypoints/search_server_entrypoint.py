@@ -1,5 +1,8 @@
 """The entrypoint script for the search server."""
 import argparse
+import os
+
+from ._helper import configure_logging
 
 
 parser = argparse.ArgumentParser(
@@ -30,6 +33,12 @@ args = parser.parse_args()
 
 def main():
     """Execute the entry point."""
+    # Configure logging
+    log_dir = os.getenv("LOG_DIR", "/")
+    log_name = os.getenv("LOG_NAME", "bbs_search.log")
+    configure_logging(log_dir, log_name)
+
+    # Start server
     import pathlib
     from flask import Flask
     import sqlalchemy
