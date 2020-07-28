@@ -6,6 +6,7 @@ description = "Blue Brain Search"
 
 install_requires = [
     'Flask',
+    'ipython',
     'ipywidgets',
     'matplotlib',
     'numpy>=1.16.1',
