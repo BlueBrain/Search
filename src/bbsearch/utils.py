@@ -315,8 +315,8 @@ class H5:
             argsort = indices.argsort()  # [3, 1, 0, 2]
 
             sorted_indices = indices[argsort]  # [1, 9, 10, 12]
-            unargsort = np.empty_like(argsort);
-            unargsort[argsort] = np.arange(len(argsort)  # [2, 1, 3, 0]
+            unargsort = np.empty_like(argsort)
+            unargsort[argsort] = np.arange(len(argsort))  # [2, 1, 3, 0]
 
             final_res_l = []
 
