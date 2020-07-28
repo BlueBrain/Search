@@ -209,7 +209,7 @@ class TestH5:
         dtype_np = 'float32'
 
         with h5py.File(h5_path, 'w') as f:
-            f.create_dataset('a', shape=shape, dtype=dtype_h5)
+            f.create_dataset('a', shape=shape, dtype=dtype_h5, fillvalue=np.nan)
 
         data = np.random.random((10, 3)).astype(dtype_np)
         indices = np.arange(0, 20, 2)
