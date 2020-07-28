@@ -1,6 +1,4 @@
-"""
-SQL Related functions.
-"""
+"""SQL Related functions."""
 import pandas as pd
 
 
@@ -21,7 +19,7 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
     """
     sentences_id = ', '.join(str(id_) for id_ in sentence_id)
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
-                    FROM sentences 
+                    FROM sentences
                     WHERE sentence_id IN ({sentences_id})"""
     sentences = pd.read_sql(sql_query, engine)
 
@@ -66,15 +64,15 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
     paragraph: str
         Paragraph containing the sentence of the given sentence_id.
     """
-    sql_query = f"""SELECT text 
+    sql_query = f"""SELECT text
                     FROM sentences
-                    WHERE article_id = 
-                        (SELECT article_id 
-                        FROM sentences 
+                    WHERE article_id =
+                        (SELECT article_id
+                        FROM sentences
                         WHERE sentence_id = {sentence_id})
-                    AND paragraph_pos_in_article = 
-                        (SELECT paragraph_pos_in_article 
-                        FROM sentences 
+                    AND paragraph_pos_in_article =
+                        (SELECT paragraph_pos_in_article
+                        FROM sentences
                         WHERE sentence_id = {sentence_id})
                     ORDER BY sentence_pos_in_paragraph ASC"""
 
@@ -132,10 +130,10 @@ def retrieve_article_metadata_from_sentence_id(sentence_id, engine):
         DataFrame containing the article metadata from
         which the sentence is coming.
     """
-    sql_query = f"""SELECT * 
-                    FROM articles 
-                    WHERE article_id = 
-                        (SELECT article_id 
+    sql_query = f"""SELECT *
+                    FROM articles
+                    WHERE article_id =
+                        (SELECT article_id
                         FROM sentences
                         WHERE sentence_id = {sentence_id})"""
     article = pd.read_sql(sql_query, engine)
@@ -158,8 +156,8 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
         DataFrame containing the article metadata from
         which the sentence is coming.
     """
-    sql_query = f"""SELECT * 
-                    FROM articles 
+    sql_query = f"""SELECT *
+                    FROM articles
                     WHERE article_id = {article_id}"""
     article = pd.read_sql(sql_query, engine)
     return article

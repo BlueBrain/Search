@@ -5,7 +5,6 @@ import string
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import numpy as np
-import pandas as pd
 import sent2vec
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub

@@ -135,7 +135,7 @@ class CORD19DatabaseCreation:
         """
         nlp = spacy.load(model_name, disable=["tagger", "ner"])
 
-        articles_table = pd.read_sql("""SELECT article_id, title, abstract, pmc_json_files, pdf_json_files 
+        articles_table = pd.read_sql("""SELECT article_id, title, abstract, pmc_json_files, pdf_json_files
                                         FROM articles
                                         WHERE (abstract IS NOT NULL) OR (title IS NOT NULL)""",
                                      con=self.engine)

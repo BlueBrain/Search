@@ -145,7 +145,7 @@ class ArticleSaver:
         self.state.clear()
 
     def _clean_current_state(self):
-        """Clean the current state of the article saver
+        """Clean the current state of the article saver.
 
         Returns
         -------
