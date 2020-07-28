@@ -8,6 +8,7 @@ import pandas as pd
 import spacy
 
 from ..mining import run_pipeline
+from ..sql import retrieve_article, retrieve_paragraph
 
 
 class MiningServer:
@@ -105,23 +106,24 @@ class MiningServer:
                 response = self.make_error_response("The request identifiers is missing.")
                 return response
             else:
-                self.logger.info("Parsing identifiers...")
-                tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
-                paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
-
-                sql_query = f"""
-                SELECT paragraph_id, section_name, text
-                FROM paragraphs
-                WHERE paragraph_id IN ({paragraph_ids_joined})
-                """
-                #SQL_rf: Retrieve articles or paragraphs depending '????' sentence_id
-
                 self.logger.info("Retrieving article texts from the database...")
-                texts_df = pd.read_sql(sql_query, self.connection)
+
+                all_paragraphs = pd.DataFrame()
+                for identifier in identifiers:
+                    if identifier[1] == -1:
+                        article = retrieve_article(article_id=identifier[0],
+                                                   engine=self.connection)
+                        all_paragraphs = all_paragraphs.append(article)
+                    else:
+                        paragraph = retrieve_paragraph(identifier=identifier,
+                                                       engine=self.connection)
+                        all_paragraphs = all_paragraphs.append(paragraph)
+
                 texts = [(row['text'],
                           {'paper_id':
-                           f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
-                         for _, row in texts_df.iterrows()]
+                           f'{row["article_id"]}:{row["section_name"]}'
+                           f':{row["paragraph_pos_in_article"]}'})
+                         for _, row in all_paragraphs.iterrows()]
 
                 self.logger.info("Running the mining pipeline...")
                 df = run_pipeline(texts, self.ee_model, self.re_models, debug=debug)
