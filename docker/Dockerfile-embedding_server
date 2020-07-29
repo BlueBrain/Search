@@ -1,7 +1,6 @@
 FROM python:3.6-slim
 
-LABEL maintainer="Stanislav Schmidt <stanislav.schmidt@epfl.ch>"
-LABEL version="1.0"
+LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch"
 LABEL description="REST API Server for Text Embeddings"
 
 # ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -16,6 +15,12 @@ RUN apt-get update && apt-get install -y \
     g++ \
     build-essential \
     vim
+
+# Get sha of last git commit, to be used for versioning
+ENV GIT_COMMIT="$(git log -1 --format=%H)"
+
+# Set image version
+LABEL version=$GIT_COMMIT
 
 # Install sent2vec
 RUN true \
@@ -48,4 +53,7 @@ EXPOSE 8080
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_embedding.log"
 
-ENTRYPOINT ["embedding_server", "--host=0.0.0.0", "--port=8080"]
+ENTRYPOINT exec embedding_server \
+    --host=0.0.0.0 \
+    --port=8080 \
+    --version=$GIT_COMMIT

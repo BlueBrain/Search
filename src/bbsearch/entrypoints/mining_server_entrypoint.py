@@ -24,6 +24,9 @@ parser.add_argument("--database_path",
                     default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="The path to the database. ")
+parser.add_argument("--version",
+                    default=None,
+                    help="Version.")
 args = parser.parse_args()
 
 
@@ -44,7 +47,9 @@ def main():
 
     MiningServer(app=app,
                  models_libs={'ee': args.ee_models_lib},
-                 connection=engine)
+                 connection=engine,
+                 version=args.version
+                 )
     app.run(
         host=args.host,
         port=args.port,

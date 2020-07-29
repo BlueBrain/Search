@@ -26,11 +26,13 @@ class MiningServer:
          - 'entity_type_name': name of entity type, as called in 'model.labels'
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
+    version : str
+        Version.
     """
 
-    def __init__(self, app, models_libs, connection):
+    def __init__(self, app, models_libs, connection, version=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.version = "1.0"
+        self.version = version or "1.0"
         self.name = "MiningServer"
         self.models_libs = {k: pd.read_csv(v)
                             for k, v in models_libs.items()}

@@ -22,15 +22,18 @@ class SearchServer:
         The folder containing pre-computed embeddings.
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
+    version : str
+        Version.
     """
 
     def __init__(self,
                  app,
                  trained_models_path,
                  embeddings_path,
-                 connection):
+                 connection,
+                 version=None):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.version = "1.0"
+        self.version = version or "1.0"
         self.name = "SearchServer"
         self.app = app
         self.connection = connection

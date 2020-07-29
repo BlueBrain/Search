@@ -28,6 +28,9 @@ parser.add_argument("--database_path",
                     default="/raid/bbs_data/cord19_v7/databases/cord19.db",
                     type=str,
                     help="The path to the SQL database.")
+parser.add_argument("--version",
+                    default=None,
+                    help="Version.")
 args = parser.parse_args()
 
 
@@ -49,7 +52,11 @@ def main():
     embeddings_path = pathlib.Path(args.embeddings_path)
     engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
 
-    SearchServer(app, models_path, embeddings_path, engine)
+    SearchServer(app=app,
+                 models_path=models_path,
+                 embeddings_path=embeddings_path,
+                 engine=engine,
+                 version=args.version)
     app.run(
         host=args.host,
         port=args.port,

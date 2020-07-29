@@ -19,12 +19,14 @@ class EmbeddingServer:
     embedding_models: dict
         Dictionary whom keys are name of embedding_models
         and values are instance of the embedding models.
+    version : str
+        Version.
     """
 
-    def __init__(self, app, embedding_models):
+    def __init__(self, app, embedding_models, version=None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.name = 'EmbeddingServer'
-        self.version = "1.0"
+        self.version = version or "1.0"
 
         self.logger.info("Initializing the server...")
         self.logger.info(f"Name: {self.name}")

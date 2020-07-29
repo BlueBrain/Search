@@ -18,6 +18,9 @@ parser.add_argument("--bsv_checkpoints",
                     default='/raid/covid_data/assets/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
                     type=str,
                     help="Path to file containing the checkpoints for the BSV model.")
+parser.add_argument("--version",
+                    default=None,
+                    help="Version.")
 args = parser.parse_args()
 
 
@@ -42,7 +45,9 @@ def main():
 
     # Create Server app
     app = Flask("BBSearch Embedding Server")
-    EmbeddingServer(app, embedding_models)
+    EmbeddingServer(app=app,
+                    embedding_models=embedding_models,
+                    version=args.version)
     app.run(
         host=args.host,
         port=args.port,
