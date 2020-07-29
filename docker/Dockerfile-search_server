@@ -16,12 +16,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     vim
 
-# Get sha of last git commit, to be used for versioning
-ENV GIT_COMMIT="$(git log -1 --format=%H)"
-
-# Set image version
-LABEL version=$GIT_COMMIT
-
 # Install requirements manualy, this layer will be cached by docker
 COPY requirements.txt /tmp
 RUN true \
@@ -33,6 +27,9 @@ RUN true \
 ADD . /src
 WORKDIR /src
 RUN pip install .
+
+# Set image version
+LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
 RUN useradd --create-home serveruser
@@ -55,5 +52,4 @@ ENTRYPOINT exec search_server \
     --port=8080 \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
-    --database_path $DATABASE_PATH \
-    --version=$GIT_COMMIT
+    --database_path $DATABASE_PATH

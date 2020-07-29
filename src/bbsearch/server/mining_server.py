@@ -6,6 +6,7 @@ from flask import jsonify, make_response, request
 import pandas as pd
 import spacy
 
+import bbsearch
 from ..mining import run_pipeline
 
 
@@ -26,13 +27,11 @@ class MiningServer:
          - 'entity_type_name': name of entity type, as called in 'model.labels'
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
-    version : str
-        Version.
     """
 
-    def __init__(self, app, models_libs, connection, version=None):
+    def __init__(self, app, models_libs, connection):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.version = version or "1.0"
+        self.version = bbsearch.__version__
         self.name = "MiningServer"
         self.models_libs = {k: pd.read_csv(v)
                             for k, v in models_libs.items()}

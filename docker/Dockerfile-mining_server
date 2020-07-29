@@ -16,12 +16,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     vim
 
-# Get sha of last git commit, to be used for versioning
-ENV GIT_COMMIT="$(git log -1 --format=%H)"
-
-# Set image version
-LABEL version=$GIT_COMMIT
-
 # Install requirements manualy, this layer will be cached by docker
 COPY requirements.txt /tmp
 RUN true \
@@ -34,6 +28,9 @@ RUN true \
 ADD . /src
 WORKDIR /src
 RUN pip install .
+
+# Set image version
+LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
 RUN useradd --create-home serveruser
@@ -59,5 +56,4 @@ ENV LOG_NAME="bbs_mining.log"
 ENTRYPOINT exec mining_server \
     --host=0.0.0.0 \
     --port=8080 \
-    --ee_models_lib $EE_MODELS_LIBRARY \
-    --version=$GIT_COMMIT
+    --ee_models_lib $EE_MODELS_LIBRARY

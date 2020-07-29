@@ -16,12 +16,6 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     vim
 
-# Get sha of last git commit, to be used for versioning
-ENV GIT_COMMIT="$(git log -1 --format=%H)"
-
-# Set image version
-LABEL version=$GIT_COMMIT
-
 # Install sent2vec
 RUN true \
     && pip install \
@@ -35,10 +29,13 @@ RUN true \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
-# Install the app 
+# Install the app
 ADD . /src
 WORKDIR /src
 RUN pip install .
+
+# Set image version
+LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
 RUN useradd --create-home serveruser
@@ -55,5 +52,4 @@ ENV LOG_NAME="bbs_embedding.log"
 
 ENTRYPOINT exec embedding_server \
     --host=0.0.0.0 \
-    --port=8080 \
-    --version=$GIT_COMMIT
+    --port=8080
