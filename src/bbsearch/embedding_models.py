@@ -280,8 +280,8 @@ def compute_database_embeddings(connection, model, indices):
     Returns
     -------
     final_embeddings: np.array
-        Huge numpy array with all sentences embeddings for the given models.
-        Format: (sentence_id, embeddings).
+        2D numpy array with all sentences embeddings for the given models. Its shape is
+        `(len(retrieved_indices), dim)`.
 
     retrieved_indices : np.ndarray
         1D array of sentence_ids that we managed to embed. Note that the order corresponds
