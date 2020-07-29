@@ -2,6 +2,7 @@
 from pathlib import Path
 import sqlite3
 
+import h5py
 import numpy as np
 import pandas as pd
 import pytest
@@ -185,24 +186,26 @@ def metadata_path():
 
 
 @pytest.fixture(scope='session')
-def embeddings_path(tmp_path_factory, fake_db_cursor, test_parameters):
-    """Path to a directory where embeddings stored."""
+def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
     random_state = 3
     np.random.seed(random_state)
     models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
+    dim = test_parameters['embedding_size']
 
-    n_sentences = fake_db_cursor.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
-    embeddings_path = tmp_path_factory.mktemp('embeddings', numbered=False)
+    n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
 
-    for model in models:
-        model_path = embeddings_path / '{}.npy'.format(model)
-        a = np.concatenate([np.arange(n_sentences).reshape(-1, 1),
-                            np.random.random((n_sentences, test_parameters['embedding_size']))],
-                           axis=1)
+    with h5py.File(file_path) as f:
+        for model in models:
+            dset = f.create_dataset(f"{model}",
+                                    (n_sentences, dim),
+                                    dtype='f4',
+                                    fillvalue=np.nan)
 
-        np.save(str(model_path), a)
+            for i in range(0, n_sentences, 2):
+                dset[i] = np.random.random(dim).astype('float32')
 
-    return embeddings_path
+    return file_path
 
 
 @pytest.fixture(scope='session')

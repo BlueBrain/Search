@@ -7,6 +7,7 @@ description = "Blue Brain Search"
 install_requires = [
     'Flask',
     'ipywidgets',
+    'h5py',
     'matplotlib',
     'numpy>=1.16.1',
     'pandas',
@@ -25,6 +26,7 @@ install_requires = [
     'tensorflow',
     'tensorflow_hub',
     'torch',
+    'tqdm',
     'transformers',
     'rdflib-jsonld',
     'faiss-cpu',

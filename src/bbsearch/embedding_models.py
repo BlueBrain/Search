@@ -263,7 +263,7 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(connection, model):
+def compute_database_embeddings(connection, model, indices):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
@@ -274,44 +274,48 @@ def compute_database_embeddings(connection, model):
     model: EmbeddingModel
         Instance of the EmbeddingModel of choice.
 
+    indices : np.ndarray
+        1D array storing the sentence_ids for which we want to perform the embedding.
+
     Returns
     -------
     final_embeddings: np.array
-        Huge numpy array with all sentences embeddings for the given models.
-        Format: (sentence_id, embeddings).
+        2D numpy array with all sentences embeddings for the given models. Its shape is
+        `(len(retrieved_indices), dim)`.
+
+    retrieved_indices : np.ndarray
+        1D array of sentence_ids that we managed to embed. Note that the order corresponds
+        exactly to the rows in `final_embeddings`.
     """
-    query = """
-    SELECT sentence_id, text
-    FROM sentences
-    WHERE sha IN (
-        SELECT sha
-        FROM article_id_2_sha
-        WHERE article_id IN (
-            SELECT article_id
-            FROM articles
-            WHERE has_covid19_tag = 1
-        )
-    )
-    """
+    indices_str = ", ".join([str(x) for x in indices])
+
+    query = f"SELECT sentence_id, text FROM sentences WHERE sentence_id IN ({indices_str})"
+
     all_embeddings = list()
     all_ids = list()
     query_execution = pd.read_sql(sql=query, con=connection, chunksize=1)
     num_errors = 0
 
-    for i_sentence, (sentence_id, sentence_text) in enumerate(query_execution):
+    for i_sentence, row_df in enumerate(query_execution):
+        sentence_text = row_df['text'].iloc[0]
+        sentence_id = row_df['sentence_id'].iloc[0]
         try:
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
         except IndexError:
-            embedding = np.zeros((model.dim,))
+            # This could happen when the sentence is too long for example
             num_errors += 1
+            continue
+
         all_ids.append(sentence_id)
         all_embeddings.append(embedding)
+
         if i_sentence % 1000 == 0:
             print(f'Embedded {i_sentence} with {num_errors} errors')
 
-    all_embeddings = np.array(all_embeddings)
-    all_ids = np.array(all_ids).reshape((-1, 1))
-    final_embeddings = np.concatenate((all_ids, all_embeddings), axis=1)
+    final_embeddings = np.array(all_embeddings)
+    retrieved_indices = np.array(all_ids)
 
-    return final_embeddings
+    print(f'Embedded {i_sentence} with {num_errors} errors')
+
+    return final_embeddings, retrieved_indices

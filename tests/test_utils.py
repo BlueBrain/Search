@@ -1,7 +1,11 @@
 """Collection of tests focused on the utils.py module."""
+import pathlib
+
+import h5py
+import numpy as np
 import pytest
 
-from bbsearch.utils import Timer
+from bbsearch.utils import Timer, H5
 
 
 class TestTimer:
@@ -67,3 +71,158 @@ class TestTimer:
 
         captured = capsys.readouterr()
         assert captured.out
+
+
+class TestH5:
+
+    @pytest.mark.parametrize('fillvalue', [1.1, np.nan])
+    @pytest.mark.parametrize('indices', [[0, 1], [0], [3, 2, 1]])
+    def test_clear(self, tmpdir, fillvalue, indices):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (4, 2)
+        data = np.random.random(shape)
+        indices = np.array(indices)
+
+        with h5py.File(h5_path, 'w') as f:
+            dset = f.create_dataset('a',
+                                    shape=shape,
+                                    fillvalue=fillvalue)
+
+            dset[:, :] = data
+
+        # Truth
+        data[indices] = fillvalue
+
+        # Run
+        H5.clear(h5_path, 'a', indices)
+
+        with h5py.File(h5_path, 'r') as ff:
+            res = ff['a'][:]
+
+        assert np.allclose(res, data, equal_nan=True)
+
+    def test_create(self, tmpdir):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        # New h5 file and new dataset
+        H5.create(h5_path, 'a', (20, 10), dtype='f2')
+
+        with h5py.File(h5_path, 'r') as f:
+            assert 'a' in f.keys()
+            assert f['a'].shape == (20, 10)
+            assert f['a'].dtype == 'f2'
+
+        # Old h5 file and new dataset
+        H5.create(h5_path, 'b', (40, 2), dtype='f4')
+
+        with h5py.File(h5_path, 'r') as f:
+            assert 'b' in f.keys()
+            assert f['b'].shape == (40, 2)
+            assert f['b'].dtype == 'f4'
+
+        # Check errors
+        with pytest.raises(ValueError):
+            H5.create(h5_path, 'a', (20, 10))
+
+    @pytest.mark.parametrize('verbose', [True, False])
+    @pytest.mark.parametrize('batch_size', [1, 2, 5])
+    @pytest.mark.parametrize('model', ['SBERT'])
+    def test_find_unpopulated_rows(self, embeddings_h5_path, model, verbose, batch_size):
+        unpop_rows_computed = H5.find_unpopulated_rows(embeddings_h5_path,
+                                                       model,
+                                                       verbose=verbose,
+                                                       batch_size=batch_size)
+
+        with h5py.File(embeddings_h5_path, 'r') as f:
+            dset_np = f[model][:]
+            unpop_rows_true = np.where(np.isnan(dset_np.sum(axis=1)))[0]
+
+        assert np.all(unpop_rows_computed == unpop_rows_true)
+
+    @pytest.mark.parametrize('verbose', [True, False])
+    @pytest.mark.parametrize('batch_size', [1, 2, 5])
+    @pytest.mark.parametrize('model', ['SBERT'])
+    def test_find_populated_rows(self, embeddings_h5_path, model, verbose, batch_size):
+        unpop_rows_computed = H5.find_populated_rows(embeddings_h5_path,
+                                                     model,
+                                                     verbose=verbose,
+                                                     batch_size=batch_size)
+
+        with h5py.File(embeddings_h5_path, 'r') as f:
+            dset_np = f[model][:]
+            unpop_rows_true = np.where(~np.isnan(dset_np.sum(axis=1)))[0]
+
+        assert np.all(unpop_rows_computed == unpop_rows_true)
+
+    def test_get_shape(self, tmpdir):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (22, 3)
+
+        with h5py.File(h5_path, 'w') as f:
+            f.create_dataset('a', shape=shape)
+
+        assert H5.get_shape(h5_path, 'a') == shape
+
+    @pytest.mark.parametrize('verbose', [True, False])
+    @pytest.mark.parametrize('batch_size', [1, 2, 5])
+    @pytest.mark.parametrize('model', ['SBERT'])
+    @pytest.mark.parametrize('indices', [
+        [10, 1, 0, 4, 6, 2, 12, 5],
+        [1],
+        [1, 2],
+        [6, 5, 4, 3, 2, 1, 0],
+        [1, 5, 2, 6, 11, 12, 14]])
+    def test_load(self, embeddings_h5_path, model, verbose, batch_size, indices):
+        with h5py.File(embeddings_h5_path, 'r') as f:
+            dset_np = f[model][:]
+
+        res_loaded = H5.load(embeddings_h5_path,
+                             model,
+                             indices=np.array(indices),
+                             verbose=verbose,
+                             batch_size=batch_size)
+
+        res_true = dset_np[indices]
+
+        assert isinstance(res_loaded, np.ndarray)
+        assert res_loaded.shape == res_true.shape
+
+        # Check nans are identical
+        assert np.all(np.isnan(res_loaded) == np.isnan(res_true))
+
+        # Check nonnan entries
+        nonnan_mask = ~np.isnan(res_loaded)
+        assert np.allclose(res_loaded[nonnan_mask], res_true[nonnan_mask])
+
+    def test_load_duplicates(self, embeddings_h5_path):
+        with pytest.raises(ValueError):
+            H5.load(embeddings_h5_path, 'SBERT', indices=np.array([1, 2, 2]))
+
+    @pytest.mark.parametrize('flip', [True, False])
+    def test_write(self, tmpdir, flip):
+        h5_path = pathlib.Path(str(tmpdir)) / 'to_be_created.h5'
+
+        shape = (20, 3)
+        dtype_h5 = 'f4'
+        dtype_np = 'float32'
+
+        with h5py.File(h5_path, 'w') as f:
+            f.create_dataset('a', shape=shape, dtype=dtype_h5, fillvalue=np.nan)
+
+        data = np.random.random((10, 3)).astype(dtype_np)
+        indices = np.arange(0, 20, 2)
+        if flip:
+            indices = np.flip(indices)
+
+        indices_complement = np.setdiff1d(np.arange(shape[0]), indices)
+
+        H5.write(h5_path, 'a', data, indices)
+
+        with h5py.File(h5_path, 'r') as f:
+            res_np = f['a'][:]
+
+        assert res_np.shape == shape
+        assert np.allclose(res_np[indices], data)
+        assert np.all(np.isnan(res_np[indices_complement]))

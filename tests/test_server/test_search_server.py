@@ -5,10 +5,11 @@ from unittest.mock import Mock
 import numpy as np
 
 from bbsearch.server.search_server import SearchServer
+from bbsearch.utils import H5
 
 
 @pytest.fixture
-def search_client(monkeypatch, embeddings_path, fake_sqlalchemy_engine, test_parameters):
+def search_client(monkeypatch, embeddings_h5_path, fake_sqlalchemy_engine, test_parameters):
     """Fixture to create a client for mining_server."""
 
     bsv_model_inst = Mock()
@@ -28,9 +29,12 @@ def search_client(monkeypatch, embeddings_path, fake_sqlalchemy_engine, test_par
 
     app = Flask("BBSearch Test Search Server")
 
+    indices = H5.find_populated_rows(embeddings_h5_path, 'BSV')
+
     search_server = SearchServer(app=app,
                                  trained_models_path='',
-                                 embeddings_path=embeddings_path,
+                                 embeddings_h5_path=embeddings_h5_path,
+                                 indices=indices,
                                  connection=fake_sqlalchemy_engine)
     search_server.app.config['TESTING'] = True
     with search_server.app.test_client() as client:
@@ -40,7 +44,6 @@ def search_client(monkeypatch, embeddings_path, fake_sqlalchemy_engine, test_par
 class TestSearchServer:
 
     def test_search_server(self, search_client):
-
         response = search_client.post('/help')
         assert response.status_code == 200
         assert response.json['name'] == 'SearchServer'
