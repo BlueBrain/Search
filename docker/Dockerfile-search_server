@@ -50,4 +50,4 @@ ENTRYPOINT exec search_server \
     --port=8080 \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
-    --database_uri $DATABASE_PATH
+    --database_uri $DATABASE_URI
