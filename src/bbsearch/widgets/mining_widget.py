@@ -13,6 +13,7 @@ from ..utils import Timer
 @dataclass
 class SchemaRequest:
     """Class for keeping track of request schema in a mutable way."""
+
     schema: pd.DataFrame = pd.DataFrame()
 
 
