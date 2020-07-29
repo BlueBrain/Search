@@ -303,6 +303,7 @@ def compute_database_embeddings(connection, model, indices):
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
         except IndexError:
+            # This could happen when the sentence is too long for example
             num_errors += 1
             continue
 
