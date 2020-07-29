@@ -182,7 +182,7 @@ class H5:
                 f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
 
     @staticmethod
-    def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
+    def find_unpopulated_rows(h5_path, dataset_name, batch_size=2000, verbose=False):
         """Return the indices of rows that are unpopulated.
 
         Parameters
@@ -223,7 +223,7 @@ class H5:
         return np.array(unpop_rows)
 
     @staticmethod
-    def find_populated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
+    def find_populated_rows(h5_path, dataset_name, batch_size=2000, verbose=False):
         """Identify rows that are populated (= not nan vectors).
 
         Parameters
