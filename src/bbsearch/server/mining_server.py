@@ -194,12 +194,15 @@ class MiningServer:
             df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
             df.reset_index()
 
+            # Set ontology source as specified in the request
+            for _, row in info_slice.iterrows():
+                ont_src = row['ontology_source']
+                etype_name = row['entity_type_name']
+                df.loc[df['entity_type'] == etype_name, 'ontology_source'] = ont_src
+
             # Rename entity types using the model library info, so that we match the schema request
             df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                      info_slice['entity_type']))})
-
-            # Set ontology source as specified in the request
-            df['ontology_source'] = pd.Series(np.full(shape=len(df), fill_value=info_slice['ontology_source']))
 
             df_all = df_all.append(df)
 
