@@ -40,8 +40,8 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 # Expose a port
 EXPOSE 8080
 ENV MODELS_PATH="/raid/bbs_data/trained_models"
-ENV EMBEDDINGS_PATH="/raid/bbs_data/cord19_v7/embeddings"
-ENV DATABASE_PATH="/raid/bbs_data/cord19_v7/databases/cord19.db"
+ENV EMBEDDINGS_PATH="/raid/bbs_data/cord19_v35/embeddings"
+ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v35"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_search.log"
 
@@ -50,4 +50,4 @@ ENTRYPOINT exec search_server \
     --port=8080 \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
-    --database_path $DATABASE_PATH
+    --database_uri $DATABASE_PATH
