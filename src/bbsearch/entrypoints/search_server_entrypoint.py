@@ -26,10 +26,10 @@ parser.add_argument("--embeddings_path",
                     default="/raid/bbs_data/cord19_v7/embeddings/embeddings.h5",
                     type=str,
                     help="The path to an h5 file with the precomputed embeddings")
-parser.add_argument("--database_path",
-                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
+parser.add_argument("--database_uri",
+                    default="dgx1.bbp.epfl.ch:8853/cord19_v35",
                     type=str,
-                    help="The path to the SQL database.")
+                    help="The URI to the MySQL database.")
 args = parser.parse_args()
 
 
@@ -52,7 +52,7 @@ def main():
 
     indices = H5.find_populated_rows(embeddings_path, 'BSV')
 
-    engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
+    engine = sqlalchemy.create_engine(f"mysql+pymysql://guest:guest@{args.database_uri}")
 
     SearchServer(app, models_path, embeddings_path, indices, engine)
     app.run(
