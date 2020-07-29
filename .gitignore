@@ -6,6 +6,9 @@
 /.idea/
 .DS_Store
 
+# Version file
+/src/_bbsearch_version.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

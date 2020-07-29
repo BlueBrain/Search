@@ -1,6 +1,4 @@
-from setuptools import setup, find_packages
-
-VERSION = '0.1'
+from setuptools import find_packages, setup
 
 description = "Blue Brain Search"
 
@@ -49,9 +47,9 @@ setup(
     name="BBSearch",
     description=description,
     author='Blue Brain Project',
-    version=VERSION,
     package_dir={'': 'src'},
     packages=find_packages("./src"),
+    py_modules="_bbsearch_version",
     python_requires='>=3.6',
     install_requires=install_requires,
     extras_require=extras_require,
