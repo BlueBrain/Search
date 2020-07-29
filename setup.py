@@ -1,6 +1,5 @@
 from setuptools import find_packages, setup
 
-description = "Blue Brain Search"
 
 install_requires = [
     'Flask',
@@ -44,13 +43,18 @@ tests_require = [
 extras_require = {'dev': ['flake8', 'pydocstyle', 'pytest>=4.6', 'pytest-cov']}
 
 setup(
-    name="BBSearch",
-    description=description,
+    name='BBSearch',
+    description='Blue Brain Search',
     author='Blue Brain Project',
+    use_scm_version={
+        'write_to': 'src/bbsearch/_version.py',
+        'write_to_template': '__version__ = "{version}"\n',
+        # 'local_scheme': "no-local-version",
+    },
     package_dir={'': 'src'},
     packages=find_packages("./src"),
-    py_modules=["_bbsearch_version"],
     python_requires='>=3.6',
+    setup_requires=['setuptools_scm'],
     install_requires=install_requires,
     extras_require=extras_require,
     tests_require=tests_require,

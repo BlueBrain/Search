@@ -4,7 +4,3 @@ requires = [
     "wheel",
     "setuptools_scm[toml]>=3.4"
 ]
-
-[tool.setuptools_scm]
-write_to = "src/_bbsearch_version.py"
-write_to_template = "__version__ = \"{version}\"\n"
