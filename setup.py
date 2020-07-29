@@ -47,7 +47,7 @@ setup(
     description="Blue Brain Search",
     author="Blue Brain Project",
     use_scm_version={
-        "write_to": "src/bbsearch/_version.py",
+        "write_to": "src/bbsearch/version.py",
         "write_to_template": '__version__ = "{version}"\n',
         # "local_scheme": "no-local-version",
     },

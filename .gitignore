@@ -7,7 +7,7 @@
 .DS_Store
 
 # Version file
-/src/bbsearch/_version.py
+/src/bbsearch/version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
