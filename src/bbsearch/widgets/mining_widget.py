@@ -1,4 +1,5 @@
 """Module for the mining widget."""
+from dataclasses import dataclass
 import io
 
 from IPython.display import display
@@ -9,6 +10,12 @@ import requests
 from ..utils import Timer
 
 
+@dataclass
+class SchemaRequest:
+    """Class for keeping track of request schema in a mutable way."""
+    schema: pd.DataFrame = pd.DataFrame()
+
+
 class MiningWidget(widgets.VBox):
     """The mining widget.
 
@@ -16,8 +23,8 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    schema_request : pd.DataFrame
-        A dataframe with the requested schema (entity, relation, attribute types) for mining.
+    schema_request : SchemaRequest
+        An object holding a dataframe with the requested mining schema (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.
     default_text : string, optional
@@ -29,7 +36,7 @@ class MiningWidget(widgets.VBox):
 
         self.mining_server_url = mining_server_url
         self.article_saver = article_saver
-        self.schema_str = schema_request.to_csv(path_or_buf=None, index=False)
+        self.schema_request = schema_request
 
         # This is the output: csv table of extracted entities/relations.
         self.table_extractions = None
@@ -70,7 +77,7 @@ class MiningWidget(widgets.VBox):
             self.widgets['out'],
         ]
 
-    def textmining_pipeline(self, information, debug=False):
+    def textmining_pipeline(self, information, schema_df, debug=False):
         """Handle text mining server requests depending on the type of information.
 
         Parameters
@@ -78,6 +85,8 @@ class MiningWidget(widgets.VBox):
         information: str or list.
             Information can be either a raw string text, either a list of tuples
             (article_id, paragraph_id) related to the database.
+        schema_df : pd.DataFrame
+            A dataframe with the requested mining schema (entity, relation, attribute types).
         debug : bool
             If True, columns are not necessarily matching the specification. However, they
             contain debugging information. If False, then matching exactly the specification.
@@ -88,18 +97,19 @@ class MiningWidget(widgets.VBox):
             The final table. If `debug=True` then it contains all the metadata. If False then it
             only contains columns in the official specification.
         """
+        schema_str = schema_df.to_csv(path_or_buf=None, index=False)
         if isinstance(information, list):
             response = requests.post(
                 self.mining_server_url + '/database',
                 json={"identifiers": information,
-                      "schema": self.schema_str,
+                      "schema": schema_str,
                       }
             )
         elif isinstance(information, str):
             response = requests.post(
                 self.mining_server_url + '/text',
                 json={"text": information,
-                      "schema": self.schema_str,
+                      "schema": schema_str,
                       "debug": debug
                       }
             )
@@ -132,13 +142,16 @@ class MiningWidget(widgets.VBox):
             with timer("collect items"):
                 df_chosen_texts = self.article_saver.get_chosen_texts()
             print(f'{timer["collect items"]:7.2f} seconds')
-
+            print('Mining request schema:')
+            display(self.schema_request.schema)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
                 information = [(row['article_id'], row['paragraph_id'])
                                for i, row in df_chosen_texts.iterrows()]
                 self.table_extractions = self.textmining_pipeline(
-                    information=information)
+                    information=information,
+                    schema_df=self.schema_request.schema
+                )
             print(f'{timer["pipeline"]:7.2f} seconds')
 
             display(self.table_extractions)
@@ -147,7 +160,10 @@ class MiningWidget(widgets.VBox):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
             text = self.widgets['input_text'].value
-            self.table_extractions = self.textmining_pipeline(text)
+            self.table_extractions = self.textmining_pipeline(
+                information=text,
+                schema_df=self.schema_request.schema
+            )
             display(self.table_extractions)
 
     def get_extracted_table(self):
