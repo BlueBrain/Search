@@ -107,7 +107,8 @@ def main():
                                                                  sentence_ids[
                                                                      index:index+args.step])
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
-            except BaseException as e:
+
+            except Exception as e:
                 print(f'Issues raised for sentence_ids[{index}'
                       f':{index+args.step}]')
                 print(e)

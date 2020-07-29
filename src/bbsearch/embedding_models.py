@@ -68,7 +68,6 @@ class SBioBERT(EmbeddingModel):
 
     def __init__(self,
                  device=None):
-
         self.device = device or torch.device('cpu')
         self.sbiobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
@@ -143,7 +142,6 @@ class BSV(EmbeddingModel):
 
     def __init__(self,
                  checkpoint_model_path):
-
         self.checkpoint_model_path = checkpoint_model_path
         if not self.checkpoint_model_path.is_file():
             raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
@@ -204,7 +202,6 @@ class SBERT(EmbeddingModel):
     """
 
     def __init__(self):
-
         self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
     @property
@@ -238,7 +235,6 @@ class USE(EmbeddingModel):
     """
 
     def __init__(self):
-
         self.use_version = 5
         self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
 
@@ -281,8 +277,8 @@ def compute_database_embeddings(connection, model, indices):
     Returns
     -------
     final_embeddings: np.array
-        Huge numpy array with all sentences embeddings for the given models.
-        Format: (sentence_id, embeddings).
+        2D numpy array with all sentences embeddings for the given models. Its shape is
+        `(len(retrieved_indices), dim)`.
 
     retrieved_indices : np.ndarray
         1D array of sentence_ids that we managed to embed. Note that the order corresponds
@@ -300,11 +296,13 @@ def compute_database_embeddings(connection, model, indices):
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
         except IndexError:
+            # This could happen when the sentence is too long for example
             num_errors += 1
             continue
 
         all_ids.append(sentence_id)
         all_embeddings.append(embedding)
+
         if index % 1000 == 0:
             print(f'Embedded {index} with {num_errors} errors')
 

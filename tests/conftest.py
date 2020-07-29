@@ -118,13 +118,10 @@ def metadata_path():
 
 @pytest.fixture(scope='session')
 def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
-
     random_state = 3
     np.random.seed(random_state)
     models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
     dim = test_parameters['embedding_size']
-
-
     n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences', fake_sqlalchemy_engine).iloc[0, 0]
     file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
 

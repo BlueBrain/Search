@@ -142,11 +142,10 @@ class H5:
             fillvalue = h5_dset.fillvalue
             dim = h5_dset.shape[1]
 
-            argsort = indices.argsort()
-            h5_dset[indices[argsort]] = np.ones((len(argsort), dim)) * fillvalue
+            h5_dset[np.sort(indices)] = np.ones((len(indices), dim)) * fillvalue
 
     @staticmethod
-    def create(h5_path, dataset_name, shape, dtype='f4', fillvalue=np.nan):
+    def create(h5_path, dataset_name, shape, dtype='f4'):
         """Create a dataset (and potentially also a h5 file).
 
         Parameters
@@ -157,14 +156,15 @@ class H5:
         dataset_name : str
             Name of the dataset.
 
-        shape : tuple
+        shape : tuple of int
             Two element tuple representing rows and columns.
 
         dtype : str
             Dtype of the h5 array. See references for all the details.
 
-        fillvalue : float
-            How to fill unpopulated rows.
+        Notes
+        -----
+        Unpopulated rows will be filled with `np.nan`.
 
         References
         ----------
@@ -175,15 +175,15 @@ class H5:
                 if dataset_name in f.keys():
                     raise ValueError('The {} dataset already exists.'.format(dataset_name))
 
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
 
         else:
             with h5py.File(h5_path, 'w') as f:
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=fillvalue)
+                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
 
     @staticmethod
-    def find_unpopulated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
-        """Identify rows that are unpopulated (= nan vectors).
+    def find_unpopulated_rows(h5_path, dataset_name, batch_size=2000, verbose=False):
+        """Return the indices of rows that are unpopulated.
 
         Parameters
         ----------
@@ -216,14 +216,14 @@ class H5:
 
             for i in iterable:
                 row = dset[i: i + batch_size]
-                is_unpop = np.isnan(row.sum(axis=1))  # (batch_size,)
+                is_unpop = np.isnan(row).any(axis=1)  # (batch_size,)
 
                 unpop_rows.extend(list(np.where(is_unpop)[0] + i))
 
         return np.array(unpop_rows)
 
     @staticmethod
-    def find_populated_rows(h5_path, dataset_name, batch_size=100, verbose=False):
+    def find_populated_rows(h5_path, dataset_name, batch_size=2000, verbose=False):
         """Identify rows that are populated (= not nan vectors).
 
         Parameters
@@ -306,7 +306,8 @@ class H5:
             dset = f[dataset_name]
             n_rows = len(dset)
 
-            indices = indices if indices is not None else np.arange(n_rows)  # [10, 9, 12, 1]
+            if indices is None:
+                indices = np.arange(n_rows)
 
             if len(set(indices)) != len(indices):
                 raise ValueError('There cannot be duplicates inside of the indices')
@@ -314,7 +315,8 @@ class H5:
             argsort = indices.argsort()  # [3, 1, 0, 2]
 
             sorted_indices = indices[argsort]  # [1, 9, 10, 12]
-            unargsort = argsort.argsort()  # [2, 1, 3, 0]
+            unargsort = np.empty_like(argsort)
+            unargsort[argsort] = np.arange(len(argsort))  # [2, 1, 3, 0]
 
             final_res_l = []
 

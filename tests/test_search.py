@@ -47,7 +47,6 @@ class TestLocalSearcher:
 
 
 def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
-
     model = 'SBERT'
     query_text = 'I want to know everything about the universe.'
     k = 5
