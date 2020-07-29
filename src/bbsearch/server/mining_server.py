@@ -3,7 +3,6 @@ import io
 import logging
 
 from flask import jsonify, make_response, request
-import numpy as np
 import pandas as pd
 import spacy
 
