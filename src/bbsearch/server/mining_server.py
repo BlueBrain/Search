@@ -3,6 +3,7 @@ import io
 import logging
 
 from flask import jsonify, make_response, request
+import numpy as np
 import pandas as pd
 import spacy
 
@@ -191,10 +192,14 @@ class MiningServer:
                               debug=debug)
             # Select only entity types for which this model is responsible
             df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
+            df.reset_index()
 
             # Rename entity types using the model library info, so that we match the schema request
             df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                      info_slice['entity_type']))})
+
+            # Set ontology source as specified in the request
+            df['ontology_source'] = pd.Series(np.full(shape=len(df), fill_value=info_slice['ontology_source']))
 
             df_all = df_all.append(df)
 
