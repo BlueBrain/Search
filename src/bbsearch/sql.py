@@ -192,6 +192,49 @@ def get_ids_by_condition(conditions, table, db_cnxn):
     return results
 
 
+def get_sentence_ids_by_condition(conditions, db_cnxn, sentence_ids=None):
+    """Get ids of all sentences satisfying a set of conditions.
+
+    Parameters
+    ----------
+    conditions : list
+        A list strings representing SQL query conditions. They should be
+        formatted so that they can be used in an SQL WHERE statement,
+        for example:
+            SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
+
+    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        A SQL database for querying the article IDs. Should contain
+        a table named "sentences"
+
+    sentence_ids : list or None
+        Initial preselection of sentence_ids to considered. It can speed up the search
+        drastically. If None then not considered.
+
+    Returns
+    -------
+    results : list
+        A list of sentence ids.
+    """
+    if sentence_ids is not None:
+        sentence_ids_s = ', '.join([str(x) for x in sentence_ids])
+        subtable = f"""(SELECT * from sentences WHERE sentence_id IN ({sentence_ids_s}))"""
+    else:
+        subtable = "sentences"
+
+    condition = ' and '.join(conditions)
+
+    if condition:
+        condition = ' and '.join(conditions)
+        sql_query = f"SELECT sentence_id FROM {subtable} WHERE {condition}"
+    else:
+        sql_query = f"SELECT sentence_id FROM {subtable}"
+
+    results = pd.read_sql(sql_query, db_cnxn)['sentence_id'].tolist()
+
+    return results
+
+
 class ArticleConditioner:
     """Article conditioner."""
 

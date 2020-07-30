@@ -2,7 +2,8 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition
+from .sql import (ArticleConditioner, SentenceConditioner, get_ids_by_condition,
+                  get_sentence_ids_by_condition)
 from .utils import Timer
 
 
@@ -95,7 +96,8 @@ class LocalSearcher:
 def filter_sentences(connection,
                      has_journal=False,
                      date_range=None,
-                     exclusion_text=None):
+                     exclusion_text=None,
+                     indices=None):
     """Filter sentences based on specified conditions.
 
     Parameters
@@ -111,6 +113,10 @@ def filter_sentences(connection,
 
     exclusion_text : str
         New line separated collection of strings that are automatically used to exclude a given sentence.
+
+    indices : np.ndarray or None
+        If 1D array then it contains sentence_ids that we consider. If None then we consider
+        all sentences in the database. Note that providing this can lead to speedups.
 
     Returns
     -------
@@ -132,7 +138,10 @@ def filter_sentences(connection,
         excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
         sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
                                 for word in excluded_words]
-    restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', connection)
+
+    restricted_sentence_ids = get_sentence_ids_by_condition(sentence_conditions,
+                                                            connection,
+                                                            sentence_ids=indices)
 
     return restricted_sentence_ids
 
@@ -211,7 +220,8 @@ def run_search(embedding_model, precomputed_embeddings, indices, connection, k, 
         restricted_sentence_ids = filter_sentences(connection,
                                                    has_journal=has_journal,
                                                    date_range=date_range,
-                                                   exclusion_text=exclusion_text)
+                                                   exclusion_text=exclusion_text,
+                                                   indices=indices)
 
     with timer('considered_embeddings_lookup'):
         mask = np.isin(indices, restricted_sentence_ids)
