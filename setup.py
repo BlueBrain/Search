@@ -48,7 +48,7 @@ setup(
     author="Blue Brain Project",
     use_scm_version={
         "write_to": "src/bbsearch/version.py",
-        "write_to_template": '__version__ = "{version}"\n',
+        "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
         # "local_scheme": "no-local-version",
     },
     package_dir={"": "src"},
