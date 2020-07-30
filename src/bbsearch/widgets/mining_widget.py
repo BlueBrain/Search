@@ -1,8 +1,9 @@
 """Module for the mining widget."""
 from dataclasses import dataclass
 import io
+from warnings import warn
 
-from IPython.display import display
+from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 import requests
@@ -118,11 +119,14 @@ class MiningWidget(widgets.VBox):
             raise TypeError('Wrong type for the information!')
 
         table_extractions = None
-        if response.headers["Content-Type"] == "text/csv":
-            with io.StringIO(response.text) as f:
+        if response.status_code == 200:
+            response_dict = response.json()
+            for warning_msg in response_dict['warnings']:
+                display(HTML(f'<div style="color:#BA4A00"> <b>WARNING!</b> {warning_msg} </div>'))
+            with io.StringIO(response_dict['csv_extractions']) as f:
                 table_extractions = pd.read_csv(f)
         else:
-            print("Response content type is not text/csv.")
+            print("Server response is ERROR!")
             print(response.headers)
             print(response.text)
 
@@ -160,6 +164,9 @@ class MiningWidget(widgets.VBox):
     def _mine_text_clicked(self, b):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
+            print('Mining request schema:')
+            display(self.schema_request.schema)
+            print("Running the mining pipeline...".ljust(50), end='', flush=True)
             text = self.widgets['input_text'].value
             self.table_extractions = self.textmining_pipeline(
                 information=text,

@@ -2,7 +2,7 @@
 import io
 import logging
 
-from flask import jsonify, make_response, request
+from flask import jsonify, request
 import pandas as pd
 import spacy
 
@@ -65,7 +65,7 @@ class MiningServer:
                 },
                 "/text": {
                     "description": "Mine a given text according to a given schema.",
-                    "response_content_type": "text/csv",
+                    "response_content_type": "application/json",
                     "required_fields": {
                         "text": [],
                         "schema": []
@@ -77,7 +77,7 @@ class MiningServer:
                 "/database": {
                     "description": "Mine given paragraph ids from the database according to a given"
                                    "schema.",
-                    "response_content_type": "text/csv",
+                    "response_content_type": "application/json",
                     "required_fields": {
                         "identifiers": [('article_id_1', 'paragraph_id_1'), ],
                         "schema": []
@@ -117,7 +117,7 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
-            schema_df = pd.read_csv(io.StringIO(schema_str))
+            schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
 
             self.logger.info("Parsing identifiers...")
             tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
@@ -137,11 +137,11 @@ class MiningServer:
                     f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
                     for _, row in texts_df.iterrows()]
 
-            df_all = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
-            response = self.create_response(df_all)
+            df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
+            response = self.create_response(df_all, etypes_na)
         else:
             self.logger.info("Request is not JSON. Not processing.")
-            response = self.make_error_response("The request has to be a JSON object.")
+            response = self.create_error_response("The request has to be a JSON object.")
 
         return response
 
@@ -165,21 +165,23 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
-            schema_df = pd.read_csv(io.StringIO(schema_str))
+            schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
 
             texts = [(text, {})]
-            df_all = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
-            response = self.create_response(df_all)
+            df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
+            response = self.create_response(df_all, etypes_na)
         else:
             self.logger.info("Request is not JSON. Not processing.")
-            response = self.make_error_response("The request has to be a JSON object.")
+            response = self.create_error_response("The request has to be a JSON object.")
 
         return response
 
     def mine_texts(self, texts, schema_request, debug):
-        """Rune mining pipeline on a list of texts, using models implied by the schema request."""
+        """Run mining pipeline on a list of texts, using models implied by the schema request."""
         self.logger.info("Running the mining pipeline...")
+
         ee_models_info = self.ee_models_from_request_schema(schema_request)
+        etypes_na = ee_models_info[ee_models_info.model.isna()]['entity_type']
         ee_models_info = ee_models_info[~ee_models_info.model.isna()]
 
         df_all = pd.DataFrame()
@@ -206,18 +208,27 @@ class MiningServer:
             df_all = df_all.append(df)
 
         self.logger.info(f"Mining completed. Mined {len(df_all)} items.")
-        return df_all.sort_values(by=['paper_id', 'start_char'], ignore_index=True)
+        return df_all.sort_values(by=['paper_id', 'start_char'], ignore_index=True), etypes_na
 
     def check_args_not_null(self, **kwargs):
         """Sanity check that arguments provided are not null. Returns False if all is good."""
         for k, v in kwargs.items():
             if v is None:
                 self.logger.info(f"No \"{k}\" was provided. Stopping.")
-                return self.make_error_response(f"The request \"{k}\" is missing.")
+                return self.create_error_response(f"The request \"{k}\" is missing.")
         return False
 
     @staticmethod
-    def make_error_response(error_message):
+    def read_df_from_str(df_str, drop_duplicates=True):
+        """Read a csv file from a string into a pd.DataFrame."""
+        with io.StringIO(df_str) as sio:
+            schema_df = pd.read_csv(sio)
+        if drop_duplicates:
+            schema_df = schema_df.drop_duplicates(keep='first', ignore_index=True)
+        return schema_df
+
+    @staticmethod
+    def create_error_response(error_message):
         """Create response if there is an error during the process.
 
         Parameters
@@ -230,27 +241,28 @@ class MiningServer:
         response: str
             Response to send with the error_message in a json format.
         """
-        response = jsonify({"error": error_message})
+        response = jsonify(error=error_message)
 
-        return response
+        return response, 400
 
     @staticmethod
-    def create_response(dataframe):
+    def create_response(df_extractions, etypes_na):
         """Create the response thanks to dataframe.
 
         Parameters
         ----------
-        dataframe: pd.DataFrame
-            DataFrame containing all the data.
+        df_extractions: pd.DataFrame
+            DataFrame containing all the elements extracted by text mining.
+
+        etypes_na : list[str]
+            Etypes found in the request CSV file for which no available model was found in the library.
 
         Returns
         -------
         response: requests.response
             Response containing the dataframe converted in csv table.
         """
-        with io.StringIO() as csv_file_buffer:
-            dataframe.to_csv(csv_file_buffer, index=False)
-            response = make_response(csv_file_buffer.getvalue())
-        response.headers["Content-Type"] = "text/csv"
-        response.headers["Content-Disposition"] = "attachment; filename=bbs_mining_results.csv"
-        return response
+        csv_extractions = df_extractions.to_csv(path_or_buf=None, index=False)
+        warnings = [f'No text mining model was found in the library for \"{etype}\".' for etype in etypes_na]
+
+        return jsonify(csv_extractions=csv_extractions, warnings=warnings), 200

@@ -41,24 +41,32 @@ class TestMiningServer:
 
         request_json = {"text": 'hello', 'schema': schema_request}
         response = mining_client.post('/text', json=request_json)
-        assert response.headers['Content-Type'] == 'text/csv'
-        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
-                                                               'property_value,property_type,' \
-                                                               'property_value_type,' \
-                                                               'ontology_source,paper_id,' \
-                                                               'start_char,end_char'
+        assert response.headers['Content-Type'] == 'application/json'
+        assert response.status_code == 200
+        response_json = response.json
+        missing_etypes = ['DISEASE', 'CELL_TYPE', 'PROTEIN', 'ORGAN']
+        assert response_json['warnings'] == [f'No text mining model was found in the library for \"{etype}\".'
+                                             for etype in missing_etypes]
+        assert response_json['csv_extractions'].split('\n')[0] == 'entity,entity_type,property,' \
+                                                                  'property_value,property_type,' \
+                                                                  'property_value_type,' \
+                                                                  'ontology_source,paper_id,' \
+                                                                  'start_char,end_char'
         request_json = {}
         response = mining_client.post('/text', json=request_json)
+        assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": "The request \"text\" is missing."}
 
         request_json = {"text": 'hello'}
         response = mining_client.post('/text', json=request_json)
+        assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": "The request \"schema\" is missing."}
 
         request_json = "text"
         response = mining_client.post('/text', data=request_json)
+        assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
     def test_mining_server_database(self, mining_client):
@@ -68,18 +76,25 @@ class TestMiningServer:
         request_json = {}
         response = mining_client.post('/database', json=request_json)
         assert list(response.json.keys()) == ["error"]
+        assert response.status_code == 400
         assert response.json == {"error": "The request \"identifiers\" is missing."}
 
         request_json = "text"
         response = mining_client.post('/database', data=request_json)
+        assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
         identifiers = [('w8579f54', 4)]
         request_json = {"identifiers": identifiers, 'schema': schema_request}
         response = mining_client.post('/database', json=request_json)
-        assert response.headers['Content-Type'] == 'text/csv'
-        assert response.data.decode('utf-8').split('\n')[0] == 'entity,entity_type,property,' \
-                                                               'property_value,property_type,' \
-                                                               'property_value_type,' \
-                                                               'ontology_source,paper_id,' \
-                                                               'start_char,end_char'
+        response_json = response.json
+        assert response.status_code == 200
+        assert response.headers['Content-Type'] == 'application/json'
+        missing_etypes = ['DISEASE', 'CELL_TYPE', 'PROTEIN', 'ORGAN']
+        assert response_json['warnings'] == [f'No text mining model was found in the library for \"{etype}\".'
+                                             for etype in missing_etypes]
+        assert response_json['csv_extractions'].split('\n')[0] == 'entity,entity_type,property,' \
+                                                                                  'property_value,property_type,' \
+                                                                                  'property_value_type,' \
+                                                                                  'ontology_source,paper_id,' \
+                                                                                  'start_char,end_char'
