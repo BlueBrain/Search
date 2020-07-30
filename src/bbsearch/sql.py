@@ -218,7 +218,7 @@ def get_sentence_ids_by_condition(conditions, db_cnxn, sentence_ids=None):
     """
     if sentence_ids is not None:
         sentence_ids_s = ', '.join([str(x) for x in sentence_ids])
-        subtable = f"""(SELECT * from sentences WHERE sentence_id IN ({sentence_ids_s}))"""
+        subtable = f"""(SELECT * from sentences WHERE sentence_id IN ({sentence_ids_s})) AS t1"""
     else:
         subtable = "sentences"
 
