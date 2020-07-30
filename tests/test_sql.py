@@ -103,7 +103,7 @@ class TestSQLQueries:
                    test_parameters['n_sections_per_article']
 
     @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])
-    @pytest.mark.parametrize('conditions', [[], ['TRUE']])
+    @pytest.mark.parametrize('conditions', [[], ['1']])
     def test_get_sentence_ids_by_condition(self, fake_sqlalchemy_engine, sentence_ids, conditions):
 
         n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences',
