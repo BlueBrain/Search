@@ -1,7 +1,6 @@
 """Module for the mining widget."""
 from dataclasses import dataclass
 import io
-from warnings import warn
 
 from IPython.display import display, HTML
 import ipywidgets as widgets
