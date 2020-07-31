@@ -4,6 +4,7 @@ import enum
 import functools
 import logging
 import math
+import pathlib
 import pdfkit
 import textwrap
 
@@ -11,7 +12,6 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 
-from ._css_styles import CSS_STYLES
 from ..sql import find_paragraph
 from ..utils import Timer
 
@@ -222,7 +222,10 @@ class SearchWidget(widgets.VBox):
             description='Deprioritization strength')
 
     def _init_ui(self):
-        display(HTML(CSS_STYLES))
+        css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
+        with open(css_file, 'r') as f:
+            css_style = f.read()
+        display(HTML(f'<style> {css_style} </style>'))
 
         page_selection = widgets.HBox(children=[
             self.widgets['page_back'],
@@ -286,7 +289,7 @@ class SearchWidget(widgets.VBox):
         highlighted_paragraph = \
             f"""
             <div class="paragraph">
-                {paragraph[:start]} <b> {paragraph[start:end]} </b> {paragraph[end:]}
+                {paragraph[:start]} <div class="paragraph_emph"> {paragraph[start:end]} </div> {paragraph[end:]}
             </div>
             """
 
@@ -635,9 +638,9 @@ class SearchWidget(widgets.VBox):
 
             hyperparameters_section = f"""
             <h1> Search Parameters </h1>
-            <ul class=search_params>
+            <ul class="paragraph">
             <li> {'</li> <li>'.join([
-                '<b>' +
+                '<div class="paragraph_emph">' +
                 ' '.join(k.split('_')).title() +
                 '</b>' +
                 f': {repr(v.value)}'
@@ -656,5 +659,12 @@ class SearchWidget(widgets.VBox):
                 report += article_metadata + formatted_output + '<br>'
 
             results_section = f"<h1> Results </h1> {report}"
-            pdfkit.from_string(CSS_STYLES + hyperparameters_section + results_section,
+
+            css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
+            with open(css_file, 'r') as f:
+                css_style = f.read()
+
+            pdfkit.from_string(f"<style> {css_style} </style>" +
+                               hyperparameters_section +
+                               results_section,
                                f"report_{datetime.datetime.now()}.pdf")

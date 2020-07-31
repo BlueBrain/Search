@@ -1,12 +1,12 @@
 """Module for the mining widget."""
 import io
+import pathlib
 
 from IPython.display import HTML, display
 import ipywidgets as widgets
 import pandas as pd
 import requests
 
-from ._css_styles import CSS_STYLES
 from ..utils import Timer
 
 
@@ -62,7 +62,11 @@ class MiningWidget(widgets.VBox):
         self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
 
     def _init_ui(self):
-        display(HTML(CSS_STYLES))
+        css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
+        with open(css_file, 'r') as f:
+            css_style = f.read()
+        display(HTML(f'<style> {css_style} </style>'))
+
         self.children = [
             self.widgets['input_text'],
             widgets.HBox(children=[

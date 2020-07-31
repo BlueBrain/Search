@@ -231,7 +231,10 @@ class ArticleSaver:
         output_file_path : str
             The file to which the report was written.
         """
-        article_report = ''
+        css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
+        with open(css_file, 'r') as f:
+            css_style = f.read()
+        article_report = f'<style> {css_style} </style>'
         width = 80
 
         df_chosen_texts = self.get_chosen_texts()
@@ -247,13 +250,14 @@ class ArticleSaver:
                                f'sections are selected for this article.'
             ref, article_title, article_authors = self._fetch_article_info(article_id)
             article_metadata = f"""
-            <a href="{ref}" style="color:{color_title}; font-size:17px">
-                {article_title}
-            </a>
-            <br>
-            <p style="color:{color_metadata}; font-size:13px">
+            <a href="{ref}">
+                <div class="article_title">
+                    {article_title}
+                </div>
+            </a>            
+            <div class="metadata">
                 {article_authors} &#183; {section_name.lower().title()}
-            </p>
+            </div>
             """
             article_report += article_metadata
 

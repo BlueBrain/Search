@@ -6,6 +6,7 @@ The main workhorse is the class `AttributeExtraction`.
 import collections
 import json
 import logging
+import pathlib
 import textwrap
 import warnings
 
@@ -15,7 +16,6 @@ import ipywidgets as widgets
 from spacy import displacy
 from IPython.display import display, HTML
 
-from ..widgets._css_styles import CSS_STYLES
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,7 @@ class AttributeExtractor:
         return measurements
 
     @staticmethod
-    def annotate_quantities(text, measurements, width):
+    def annotate_quantities(text, measurements):
         """Annotate measurements in text using HTML/CSS styles.
 
         Parameters
@@ -165,8 +165,6 @@ class AttributeExtractor:
             The Grobid measurements for the text. It is assumed
             that these measurements were obtained by calling
             `get_grobid_measurements(text)`.
-        width : int
-            The width of the output <div> in characters.
 
         Returns
         -------
@@ -203,7 +201,16 @@ class AttributeExtractor:
                 annotated_text += text[last_idx:start] + quantity
                 last_idx = end
         annotated_text += text[last_idx:]
-        html = CSS_STYLES + "<div class=\"fixedWidth\">" + annotated_text + "</div>"
+
+        css_file = pathlib.Path(__file__).parents[1] / 'widgets' / 'stylesheet.css'
+        with open(css_file, 'r') as f:
+            css_style = f.read()
+        html = f""""<style> 
+                        {css_style}
+                    </style>
+                    <div class=\"fixedWidth\"> 
+                        {annotated_text} 
+                    </div>"""
 
         output = HTML(html)
 
