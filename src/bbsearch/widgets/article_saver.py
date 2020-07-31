@@ -6,6 +6,8 @@ import textwrap
 import pandas as pd
 import pdfkit
 
+from .._css import style
+
 
 class ArticleSaver:
     """Keeps track of selected articles.
@@ -231,16 +233,12 @@ class ArticleSaver:
         output_file_path : str
             The file to which the report was written.
         """
-        css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
-        with open(css_file, 'r') as f:
-            css_style = f.read()
+        css_style = style.get_css_style()
         article_report = f'<style> {css_style} </style>'
         width = 80
 
         df_chosen_texts = self.get_chosen_texts()
 
-        color_title = '#1A0DAB'
-        color_metadata = '#006621'
         for article_id, df_article in df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_id', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
@@ -254,7 +252,7 @@ class ArticleSaver:
                 <div class="article_title">
                     {article_title}
                 </div>
-            </a>            
+            </a>
             <div class="metadata">
                 {article_authors} &#183; {section_name.lower().title()}
             </div>

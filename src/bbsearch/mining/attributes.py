@@ -6,7 +6,6 @@ The main workhorse is the class `AttributeExtraction`.
 import collections
 import json
 import logging
-import pathlib
 import textwrap
 import warnings
 
@@ -15,6 +14,8 @@ import requests
 import ipywidgets as widgets
 from spacy import displacy
 from IPython.display import display, HTML
+
+from .._css import style
 
 
 logger = logging.getLogger(__name__)
@@ -202,14 +203,12 @@ class AttributeExtractor:
                 last_idx = end
         annotated_text += text[last_idx:]
 
-        css_file = pathlib.Path(__file__).parents[1] / 'widgets' / 'stylesheet.css'
-        with open(css_file, 'r') as f:
-            css_style = f.read()
-        html = f""""<style> 
+        css_style = style.get_css_style()
+        html = f""""<style>
                         {css_style}
                     </style>
-                    <div class=\"fixedWidth\"> 
-                        {annotated_text} 
+                    <div class=\"fixedWidth\">
+                        {annotated_text}
                     </div>"""
 
         output = HTML(html)

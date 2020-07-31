@@ -4,7 +4,6 @@ import enum
 import functools
 import logging
 import math
-import pathlib
 import pdfkit
 import textwrap
 
@@ -12,6 +11,7 @@ from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 
+from .._css import style
 from ..sql import find_paragraph
 from ..utils import Timer
 
@@ -222,9 +222,7 @@ class SearchWidget(widgets.VBox):
             description='Deprioritization strength')
 
     def _init_ui(self):
-        css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
-        with open(css_file, 'r') as f:
-            css_style = f.read()
+        css_style = style.get_css_style()
         display(HTML(f'<style> {css_style} </style>'))
 
         page_selection = widgets.HBox(children=[
@@ -660,9 +658,7 @@ class SearchWidget(widgets.VBox):
 
             results_section = f"<h1> Results </h1> {report}"
 
-            css_file = pathlib.Path(__file__).parents[0] / 'stylesheet.css'
-            with open(css_file, 'r') as f:
-                css_style = f.read()
+            css_style = style.get_css_style()
 
             pdfkit.from_string(f"<style> {css_style} </style>" +
                                hyperparameters_section +
