@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from bbsearch.widgets import ArticleSaver
@@ -8,11 +9,11 @@ class TestArticleSaver:
     def test_adding_removing(self):
         article_saver = ArticleSaver(connection=None)
 
-        full_articles = ["article_1", "article_2", "article_3"]
-        just_paragraphs = [
-            ("article_1", 0),
-            ("article_3", 2),
-            ("article_3", 5)]
+        full_articles = np.array([101, 102, 103])
+        just_paragraphs = np.array([
+            (101, 0),
+            (103, 2),
+            (103, 5)])
 
         # Adding items
         for article_id in full_articles:
@@ -25,6 +26,11 @@ class TestArticleSaver:
             assert article_saver.has_article(article_id)
         for article_id, paragraph_id in just_paragraphs:
             assert article_saver.has_paragraph(article_id, paragraph_id)
+
+        # Test type of IDs in article saver state
+        for article_id, paragraph_id in article_saver.state:
+            assert type(article_id) == int
+            assert type(paragraph_id) == int
 
         # Removing items
         article_to_remove = full_articles[0]

@@ -68,7 +68,7 @@ class ArticleSaver:
 
         Parameters
         ----------
-        article_id : str
+        article_id : int
             The article ID.
         """
         self.add_paragraph(article_id, -1)
@@ -78,19 +78,19 @@ class ArticleSaver:
 
         Parameters
         ----------
-        article_id : str
+        article_id : int
             The article ID.
         paragraph_pos_in_article : int
             The paragraph ID.
         """
-        self.state.add((article_id, paragraph_pos_in_article))
+        self.state.add((int(article_id), int(paragraph_pos_in_article)))
 
     def has_article(self, article_id):
         """Check if an article has been saved.
 
         Parameters
         ----------
-        article_id :
+        article_id : int
             The article ID.
 
         Returns
@@ -105,7 +105,7 @@ class ArticleSaver:
 
         Parameters
         ----------
-        article_id : str
+        article_id : int
             The article ID.
         paragraph_pos_in_article : int
             The paragraph ID.
@@ -115,14 +115,14 @@ class ArticleSaver:
         result : bool
             Whether or not the given paragraph has been saved.
         """
-        return (article_id, paragraph_pos_in_article) in self.state
+        return (int(article_id), int(paragraph_pos_in_article)) in self.state
 
     def remove_article(self, article_id):
         """Remove an article from saved.
 
         Parameters
         ----------
-        article_id : str
+        article_id : int
             The article ID.
         """
         self.remove_paragraph(article_id, -1)
@@ -132,7 +132,7 @@ class ArticleSaver:
 
         Parameters
         ----------
-        article_id : str
+        article_id : int
             The article ID.
         paragraph_pos_in_article : int
             The paragraph ID.
