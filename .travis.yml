@@ -12,7 +12,7 @@ before_install:
   - pydocstyle src/
 # command to install dependencies
 install:
-  - pip install --upgrade pip wheel pytest
+  - pip install --upgrade pip wheel pytest setuptools setuptools-scm
   - pip install --upgrade .[dev]
   - python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 before_script:
