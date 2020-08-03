@@ -47,6 +47,7 @@ class SearchWidgetBot:
 @pytest.mark.parametrize('k', [3, 5])
 @pytest.mark.parametrize('results_per_page', [1, 2, 3])
 def test_dummy(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
+    """"""
     n_dim = 3
     n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
 
@@ -67,7 +68,7 @@ def test_dummy(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resul
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
     # Initial state
-    assert 'Click "Investiage" to display some results.' in bot.stdout_cached
+    assert 'Click "Investigate" to display some results.' in bot.stdout_cached
     assert not bot.display_cached
 
     bot.set_value('top_results', k)

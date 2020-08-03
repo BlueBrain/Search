@@ -258,7 +258,7 @@ class SearchWidget(widgets.VBox):
              | |_) | |_) |____) |
              |____/|____/|_____/
 
-            Click "Investiage" to display some results.
+            Click "Investigate" to display some results.
             """
             print(textwrap.dedent(init_text))
 
