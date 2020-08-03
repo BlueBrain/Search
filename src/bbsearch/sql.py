@@ -39,8 +39,9 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
 
     Returns
     -------
-    paragraph: str
-        Paragraph containing the sentence of the given sentence_id.
+    paragraph: str or None
+        If ``str`` then a paragraph containing the sentence of the given sentence_id. If None
+        then the `sentence_id` was not found in the sentences table.
     """
     sql_query = f"""SELECT text
                     FROM sentences
