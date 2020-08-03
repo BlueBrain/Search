@@ -181,6 +181,7 @@ class SentenceFilter:
         Connection to the database that contains the `articles`
         and `sentences` tables.
     """
+
     def __init__(self, connection):
         self.connection = connection
         self.only_with_journal_flag = False
@@ -207,13 +208,14 @@ class SentenceFilter:
         self.only_with_journal_flag = flag
         return self
 
-    def date_range(self, date_range):
+    def date_range(self, date_range=None):
         """Restrict to articles in a given date range.
 
         Parameters
         ----------
-        date_range : tuple
+        date_range : tuple or None
             A tuple with two elements of the form `(start_year, end_year)`.
+            If None then nothing no date range is applied.
 
         Returns
         -------
@@ -313,7 +315,7 @@ class SentenceFilter:
             The size of the batches of sentence IDs that are yielded.
 
         Yields
-        -------
+        ------
         result_arr : np.ndarray
             A 1-dimensional numpy array with the filtered sentence IDs.
             Its length will be at most equal to `chunk_size`.

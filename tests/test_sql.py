@@ -1,14 +1,19 @@
 """Collection of tests regarding the Database creation. """
-from importlib import import_module
 import inspect
-import pytest
+from importlib import import_module
 
 import numpy as np
 import pandas as pd
+import pytest
 
-from bbsearch.sql import (retrieve_sentences_from_sentence_ids,
-                          retrieve_articles, retrieve_paragraph, retrieve_paragraph_from_sentence_id,
-                          retrieve_article_metadata_from_article_id)
+from bbsearch.sql import (
+    SentenceFilter,
+    retrieve_article_metadata_from_article_id,
+    retrieve_articles,
+    retrieve_paragraph,
+    retrieve_paragraph_from_sentence_id,
+    retrieve_sentences_from_sentence_ids,
+)
 
 
 class TestNoSQL:
@@ -119,3 +124,49 @@ class TestSQLQueries:
     #
     #     assert isinstance(retrieved_sentences, list)
     #     assert len(retrieved_sentences) == expected_length
+
+
+class TestSentenceFilter:
+
+    def test_no_filter(self, fake_sqlalchemy_engine):
+        all_ids = pd.read_sql(
+            "SELECT sentence_id FROM sentences",
+            fake_sqlalchemy_engine)["sentence_id"]
+        no_filter_ids = SentenceFilter(fake_sqlalchemy_engine).run()
+
+        assert len(all_ids) == len(no_filter_ids)
+        assert set(all_ids) == set(no_filter_ids)
+
+    @pytest.mark.parametrize("has_journal", [True, False])
+    @pytest.mark.parametrize("indices", [[], [1], [1, 2, 3]])
+    @pytest.mark.parametrize("date_range", [None, (1960, 2020), (0, 0)])
+    @pytest.mark.parametrize("exclusion_text", ["", "virus", "virus\n\ndisease"])
+    def test_sentence_filter(
+            self,
+            fake_sqlalchemy_engine,
+            has_journal,
+            indices,
+            date_range,
+            exclusion_text
+    ):
+        # Construct filter with various conditions
+        sentence_filter = (
+            SentenceFilter(fake_sqlalchemy_engine)
+            .only_with_journal(has_journal)
+            .restrict_sentences_ids_to(indices)
+            .date_range(date_range)
+            .exclude_strings(exclusion_text.split())
+        )
+
+        # Get filtered ids in a single run
+        ids_from_run = sentence_filter.run()
+
+        # Get filtered IDs by iteration
+        ids_from_iterate = []
+        for ids in sentence_filter.iterate(chunk_size=4):
+            assert len(ids) <= 4
+            ids_from_iterate += list(ids)
+
+        # Running and iterating should give the same results
+        assert len(ids_from_run) == len(ids_from_iterate)
+        assert set(ids_from_run) == set(ids_from_iterate)
