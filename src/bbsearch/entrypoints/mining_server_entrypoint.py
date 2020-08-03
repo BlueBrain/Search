@@ -38,7 +38,6 @@ def main():
     # Start server
     import pathlib
     from flask import Flask
-    import getpass
     import sqlalchemy
     from ..server.mining_server import MiningServer
 
@@ -51,9 +50,9 @@ def main():
             pathlib.Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
     elif args.db_type == 'mysql':
-        password = getpass.getpass('Password:')
-        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:{password}'
-                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v35')
+        mysql_uri = input('MySQL URI:')
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:guest'
+                                          f'@{mysql_uri}/cord19_v35')
 
     MiningServer(app, models_path, engine)
     app.run(
