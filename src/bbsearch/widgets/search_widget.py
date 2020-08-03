@@ -10,7 +10,7 @@ import textwrap
 from IPython.display import display, HTML
 import ipywidgets as widgets
 
-from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_id, \
+from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_ids, \
     retrieve_article_metadata_from_article_id
 from ..utils import Timer
 
@@ -316,8 +316,8 @@ class SearchWidget(widgets.VBox):
                 "section_name"
                 "text"
         """
-        sentence = retrieve_sentences_from_sentence_id(sentence_id=(sentence_id, ),
-                                                       engine=self.connection)
+        sentence = retrieve_sentences_from_sentence_ids(sentence_ids=(sentence_id,),
+                                                        engine=self.connection)
         article_id, section_name, text, paragraph_id = \
             sentence.iloc[0][['article_id', 'section_name',
                               'text', 'paragraph_pos_in_article']]
@@ -483,8 +483,8 @@ class SearchWidget(widgets.VBox):
         paragraph_ids : list_like
             The paragraph IDs corresponding to the sentence IDs
         """
-        sentences = retrieve_sentences_from_sentence_id(sentence_id=sentence_ids,
-                                                        engine=self.connection)
+        sentences = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_ids,
+                                                         engine=self.connection)
         article_ids = sentences['article_id'].to_list()
         paragraph_ids = sentences['paragraph_pos_in_article'].to_list()
 

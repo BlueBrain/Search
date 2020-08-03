@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from bbsearch.sql import (get_sentence_ids_by_condition, retrieve_sentences_from_sentence_id,
+from bbsearch.sql import (get_sentence_ids_by_condition, retrieve_sentences_from_sentence_ids,
                           retrieve_articles, retrieve_paragraph, retrieve_paragraph_from_sentence_id,
                           retrieve_article_metadata_from_article_id)
 
@@ -35,10 +35,10 @@ class TestNoSQL:
 class TestSQLQueries:
 
     @pytest.mark.parametrize('sentence_id', [[7], [7, 9], [-1], [9, 9]])
-    def test_retrieve_sentence_from_sentence_id(self, sentence_id, fake_sqlalchemy_engine):
+    def test_retrieve_sentence_from_sentence_ids(self, sentence_id, fake_sqlalchemy_engine):
         """Test that retrieve sentences from sentence_id is working."""
-        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=sentence_id,
-                                                            engine=fake_sqlalchemy_engine)
+        sentence_text = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_id,
+                                                             engine=fake_sqlalchemy_engine)
         assert isinstance(sentence_text, pd.DataFrame)
         if sentence_id == [-1]:  # invalid sentence_id
             assert sentence_text.shape[0] == 0
@@ -54,8 +54,8 @@ class TestSQLQueries:
         """Test that retrieve paragraph text from sentence_id is working."""
         paragraph = retrieve_paragraph_from_sentence_id(sentence_id=sentence_id,
                                                         engine=fake_sqlalchemy_engine)
-        sentence_text = retrieve_sentences_from_sentence_id(sentence_id=(sentence_id,),
-                                                            engine=fake_sqlalchemy_engine)
+        sentence_text = retrieve_sentences_from_sentence_ids(sentence_ids=(sentence_id,),
+                                                             engine=fake_sqlalchemy_engine)
         if sentence_id == 0 or sentence_id == -100:  # invalid sentence_id
             assert paragraph is None
         else:

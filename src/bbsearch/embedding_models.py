@@ -11,7 +11,7 @@ import tensorflow_hub as hub
 import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
 
-from .sql import retrieve_sentences_from_sentence_id
+from .sql import retrieve_sentences_from_sentence_ids
 
 
 class EmbeddingModel(ABC):
@@ -284,7 +284,7 @@ def compute_database_embeddings(connection, model, indices):
         1D array of sentence_ids that we managed to embed. Note that the order corresponds
         exactly to the rows in `final_embeddings`.
     """
-    sentences = retrieve_sentences_from_sentence_id(indices, connection)
+    sentences = retrieve_sentences_from_sentence_ids(indices, connection)
 
     all_embeddings = list()
     all_ids = list()

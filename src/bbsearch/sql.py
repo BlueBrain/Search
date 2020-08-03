@@ -2,13 +2,13 @@
 import pandas as pd
 
 
-def retrieve_sentences_from_sentence_id(sentence_id, engine):
+def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
     """Retrieve sentences given sentence ids.
 
     Parameters
     ----------
-    sentence_id: list of int
-        Sentences id for which need to retrieve the text.
+    sentence_ids: list of int
+        Sentence ids for which need to retrieve the text.
     engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
@@ -18,10 +18,10 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
-    sentences_id = ', '.join(str(id_) for id_ in sentence_id)
+    sentence_ids_s = ', '.join(str(id_) for id_ in sentence_ids)
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
                     FROM sentences
-                    WHERE sentence_id IN ({sentences_id})"""
+                    WHERE sentence_id IN ({sentence_ids_s})"""
     sentences = pd.read_sql(sql_query, engine)
 
     return sentences
