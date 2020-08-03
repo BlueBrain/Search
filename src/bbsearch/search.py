@@ -2,8 +2,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import (ArticleConditioner, SentenceConditioner, get_ids_by_condition,
-                  get_sentence_ids_by_condition)
+from .sql import SentenceFilter
 from .utils import Timer
 
 
@@ -43,9 +42,10 @@ class LocalSearcher:
               has_journal=False,
               date_range=None,
               deprioritize_strength='None',
-              exclusion_text=None,
+              exclusion_text="",
               deprioritize_text=None,
-              verbose=True):
+              verbose=True,
+              ):
         """Do the search.
 
         Parameters
@@ -93,62 +93,20 @@ class LocalSearcher:
         return results
 
 
-def filter_sentences(connection,
-                     has_journal=False,
-                     date_range=None,
-                     exclusion_text=None,
-                     indices=None):
-    """Filter sentences based on specified conditions.
-
-    Parameters
-    ----------
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database.
-
-    has_journal : bool
-        If True, only consider papers that have a journal information.
-
-    date_range : tuple
-        Tuple of form (start_year, end_year) representing the considered time range.
-
-    exclusion_text : str
-        New line separated collection of strings that are automatically used to exclude a given sentence.
-
-    indices : np.ndarray or None
-        If 1D array then it contains sentence_ids that we consider. If None then we consider
-        all sentences in the database. Note that providing this can lead to speedups.
-
-    Returns
-    -------
-    restricted_sentence_ids: list
-        List of the sentences ids after the filtration related to the criteria specified by the user.
-    """
-    # Apply article conditions
-    article_conditions = list()
-    if date_range is not None:
-        article_conditions.append(ArticleConditioner.get_date_range_condition(date_range))
-    if has_journal:
-        article_conditions.append(ArticleConditioner.get_has_journal_condition())
-    restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', connection)
-
-    # Apply sentence conditions
-    sentence_conditions = list()
-    sentence_conditions.append(SentenceConditioner.get_article_id_condition(restricted_article_ids))
-    if exclusion_text is not None:
-        excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
-        sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
-                                for word in excluded_words]
-
-    restricted_sentence_ids = get_sentence_ids_by_condition(sentence_conditions,
-                                                            connection,
-                                                            sentence_ids=indices)
-
-    return restricted_sentence_ids
-
-
-def run_search(embedding_model, precomputed_embeddings, indices, connection, k, query_text,
-               has_journal=False, date_range=None, deprioritize_strength='None', exclusion_text=None,
-               deprioritize_text=None, verbose=True):
+def run_search(
+        embedding_model,
+        precomputed_embeddings,
+        indices,
+        connection,
+        k,
+        query_text,
+        has_journal=False,
+        date_range=None,
+        deprioritize_strength='None',
+        exclusion_text="",
+        deprioritize_text=None,
+        verbose=True
+):
     """Generate search results.
 
     Parameters
@@ -217,11 +175,14 @@ def run_search(embedding_model, precomputed_embeddings, indices, connection, k, 
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
     with timer('sentences_conditioning'):
-        restricted_sentence_ids = filter_sentences(connection,
-                                                   has_journal=has_journal,
-                                                   date_range=date_range,
-                                                   exclusion_text=exclusion_text,
-                                                   indices=indices)
+        restricted_sentence_ids = (
+            SentenceFilter(connection)
+            .only_with_journal(has_journal)
+            .restrict_sentences_ids_to(indices)
+            .date_range(date_range)
+            .exclude_strings(exclusion_text.split())
+            .run()
+        )
 
     with timer('considered_embeddings_lookup'):
         mask = np.isin(indices, restricted_sentence_ids)

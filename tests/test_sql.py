@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from bbsearch.sql import (get_sentence_ids_by_condition, retrieve_sentences_from_sentence_ids,
+from bbsearch.sql import (retrieve_sentences_from_sentence_ids,
                           retrieve_articles, retrieve_paragraph, retrieve_paragraph_from_sentence_id,
                           retrieve_article_metadata_from_article_id)
 
@@ -104,18 +104,18 @@ class TestSQLQueries:
             assert articles.shape[0] == len(set(article_id)) * \
                    test_parameters['n_sections_per_article']
 
-    @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])
-    @pytest.mark.parametrize('conditions', [[], ['1']])
-    def test_get_sentence_ids_by_condition(self, fake_sqlalchemy_engine, sentence_ids, conditions):
-
-        n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences',
-                                  fake_sqlalchemy_engine).iloc[0, 0]
-
-        retrieved_sentences = get_sentence_ids_by_condition(conditions,
-                                                            fake_sqlalchemy_engine,
-                                                            sentence_ids=sentence_ids)
-
-        expected_length = len(sentence_ids) if sentence_ids is not None else n_sentences
-
-        assert isinstance(retrieved_sentences, list)
-        assert len(retrieved_sentences) == expected_length
+    # @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])
+    # @pytest.mark.parametrize('conditions', [[], ['1']])
+    # def test_get_sentence_ids_by_condition(self, fake_sqlalchemy_engine, sentence_ids, conditions):
+    #
+    #     n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences',
+    #                               fake_sqlalchemy_engine).iloc[0, 0]
+    #
+    #     retrieved_sentences = get_sentence_ids_by_condition(conditions,
+    #                                                         fake_sqlalchemy_engine,
+    #                                                         sentence_ids=sentence_ids)
+    #
+    #     expected_length = len(sentence_ids) if sentence_ids is not None else n_sentences
+    #
+    #     assert isinstance(retrieved_sentences, list)
+    #     assert len(retrieved_sentences) == expected_length
