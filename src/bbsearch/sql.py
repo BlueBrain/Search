@@ -9,7 +9,7 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
     ----------
     sentence_id: list of int
         Sentences id for which need to retrieve the text.
-    engine: sqlalchemy.Engine
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -33,7 +33,7 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
     ----------
     sentence_id: int
         Sentence id for which need to retrieve the paragraph.
-    engine: sqlalchemy.Engine
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -68,7 +68,7 @@ def retrieve_paragraph(identifier, engine):
     ----------
     identifier: tuple of int
         Tuple with form: (Article_id, paragraph_pos_in_article)
-    engine: sqlalchemy.Engine
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -105,7 +105,7 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
     ----------
     article_id: int
         Article id for which need to retrieve the article metadata.
-    engine: sqlalchemy.Engine
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -128,7 +128,7 @@ def retrieve_article(article_id, engine):
     ----------
     article_id: list of int
         List of Article id for which need to retrieve the entire text article.
-    engine: sqlalchemy.Engine
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
