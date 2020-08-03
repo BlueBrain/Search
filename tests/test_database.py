@@ -24,33 +24,33 @@ def real_sqlalchemy_engine(tmp_path_factory, jsons_path):
 class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
-    def test_tables(self, fake_sqlalchemy_engine):
+    def test_tables(self, real_sqlalchemy_engine):
         """Tests that the three tables expected has been created. """
-        inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
+        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
         tables_names = [table_name for table_name in inspector.get_table_names()]
         assert 'sentences' in tables_names
         assert 'articles' in tables_names
 
-    def test_tables_content(self, fake_sqlalchemy_engine):
+    def test_tables_content(self, real_sqlalchemy_engine):
         """Tests that the tables are correctly filled. """
-        df = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
+        df = pd.read_sql("SELECT * FROM articles", real_sqlalchemy_engine)
         assert df.shape[0] == 4
-        df1 = pd.read_sql("SELECT DISTINCT article_id FROM sentences", fake_sqlalchemy_engine)
+        df1 = pd.read_sql("SELECT DISTINCT article_id FROM sentences", real_sqlalchemy_engine)
         assert df1.shape[0] == 4
 
-    def test_tables_columns(self, fake_sqlalchemy_engine):
+    def test_tables_columns(self, real_sqlalchemy_engine):
         """Tests that the tables columns are the ones expected. """
         columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
                             "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
                             "mag_id", "arxiv_id", "pdf_json_files",
                             "pmc_json_files", "who_covidence_id", "s2_id", "url"}
         articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1",
-                                           fake_sqlalchemy_engine).columns)
+                                           real_sqlalchemy_engine).columns)
         assert columns_expected == articles_columns
         sentences_expected = {"sentence_id", "article_id", "section_name",
                               "text", "paragraph_pos_in_article", "sentence_pos_in_paragraph"}
         sentences_columns = set(pd.read_sql("SELECT * FROM sentences LIMIT 1",
-                                            fake_sqlalchemy_engine).columns)
+                                            real_sqlalchemy_engine).columns)
         assert sentences_expected == sentences_columns
 
     def test_errors(self, tmpdir, jsons_path):
@@ -73,7 +73,7 @@ class TestDatabaseCreation:
         real_tables_names = {table_name for table_name in inspector.get_table_names()}
         fake_tables_names = fake_sqlalchemy_engine.execute("SELECT name FROM "
                                                            "sqlite_master WHERE type='table';").fetchall()
-        fake_tables_names = {table_name for (table_name, ) in fake_tables_names}
+        fake_tables_names = {table_name for (table_name,) in fake_tables_names}
         assert real_tables_names
         assert real_tables_names == fake_tables_names
 
@@ -85,3 +85,12 @@ class TestDatabaseCreation:
             fake_db_set = set(map(lambda x: x[1:3], fake_db_schema))
             real_db_set = set(map(lambda x: x[1:3], real_db_schema))
             assert fake_db_set == real_db_set
+
+    def test_index_on_article_id(self, real_sqlalchemy_engine):
+        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
+        indexes_articles = inspector.get_indexes('articles')
+        indexes_sentences = inspector.get_indexes('sentences')
+
+        assert not indexes_articles
+        assert len(indexes_sentences) == 1
+        assert indexes_sentences[0]['column_names'][0] == 'article_id'

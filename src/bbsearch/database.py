@@ -90,6 +90,9 @@ class CORD19DatabaseCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
+        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
+        mymodel_url_index.create(bind=self.engine)
+
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
 
