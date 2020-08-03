@@ -9,10 +9,38 @@ from bbsearch.widgets import ArticleSaver, SearchWidget
 
 
 class SearchWidgetBot:
-    def __init__(self, search_widget, capsys, monkeypatch):
+    """Bot that interacts with the SearchWidget.
+
+    Attributes
+    ----------
+    search_widget : SearchWidget
+        Instance of the SearchWidget.
+
+    capsys : pytest.fixture
+        Captures standard output. It will enable us to capture print statements done by the
+        search widget.
+
+    monkeypatch : pytest.fixture
+        Allows for easy patching. Note that we patch the `display` function of IPython.
+        This way we are going to be able to capture all the objects the
+        `search_widget.widgets['out']` holds.
+
+    n_displays_per_article : int
+        Number of displayed objects for each article in the top results. Note that
+        currently it is 4 since we are outputing:
+
+            - Article metadata : ``IPython.core.display.HTML``
+            - Store paragraph checkbox : ``widgets.Checkbox``
+            - Store article checkbox : ``widgets.Checkbox``
+            - Formatted output of type ``IPython.core.display.HTML``
+
+    """
+
+    def __init__(self, search_widget, capsys, monkeypatch, n_displays_per_article=4):
         self.search_widget = search_widget
         self._display_cached = []
         self._capsys = capsys
+        self.n_displays_per_article = n_displays_per_article
 
         monkeypatch.setattr('bbsearch.widgets.search_widget.display',
                             lambda x: self._display_cached.append(x))
@@ -74,7 +102,7 @@ def test_dummy(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resul
     bot.set_value('top_results', k)
     bot.set_value('query_text', query_text)
     bot.click('investigate_button')
-    assert len(bot.display_cached) == min(results_per_page, k) * 4
+    assert len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_article
 
     articles_left = k - min(results_per_page, k)
 
@@ -83,6 +111,6 @@ def test_dummy(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resul
         bot.click('page_forward')
         displayed_articles = min(results_per_page, articles_left)
 
-        assert len(bot.display_cached) == 4 * displayed_articles
+        assert len(bot.display_cached) == displayed_articles * bot.n_displays_per_article
 
         articles_left -= displayed_articles
