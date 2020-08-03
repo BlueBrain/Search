@@ -126,8 +126,8 @@ class MiningServer:
 
                 texts = [(row['text'],
                           {'paper_id':
-                               f'{row["article_id"]}:{row["section_name"]}'
-                               f':{row["paragraph_pos_in_article"]}'})
+                           f'{row["article_id"]}:{row["section_name"]}'
+                           f':{row["paragraph_pos_in_article"]}'})
                          for _, row in all_paragraphs.iterrows()]
 
                 self.logger.info("Running the mining pipeline...")
