@@ -70,6 +70,21 @@ class SearchWidgetBot:
         """
         self.search_widget.widgets[widget_name].click()
 
+    def get_value(self, widget_name):
+        """Get a value of a chosen widget.
+
+        Parameters
+        ----------
+        widget_name : str
+            Name of the widget.
+
+        Returns
+        -------
+        value : Any
+            Current value of the widget.
+        """
+        return self.search_widget.widgets[widget_name].value
+
     def set_value(self, widget_name, value):
         """Set a value of a chosen widget.
 
@@ -140,8 +155,52 @@ def test_correct_results_order():
     """Check that the most relevant sentence is the first result."""
 
 
-def test_article_saver_gets_updated():
+@pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
+def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
+    searcher = create_searcher(fake_sqlalchemy_engine)
+    k = 10
+    result_to_take = 3
+
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine),
+                          results_per_page=k)
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('top_results', k)
+    bot.set_value('default_value_article_saver', _Save.NOTHING)
+    bot.click('investigate_button')
+
+    captured_display_objects = bot.display_cached
+
+    assert len(captured_display_objects) == k * bot.n_displays_per_article
+    assert bot.get_value('default_value_article_saver') == _Save.NOTHING
+
+    start = result_to_take * bot.n_displays_per_article
+    end = (result_to_take + 1) * bot.n_displays_per_article
+    meta, chb_paragraph, chb_article, out = captured_display_objects[start: end]
+
+    # Check the checkbox
+    if saving_mode == _Save.NOTHING:
+
+        assert not widget.article_saver.state
+
+    elif saving_mode == _Save.PARAGRAPH:
+        chb_paragraph.value = True
+
+        assert len(widget.article_saver.state) == 1  # actual len is 0
+        assert list(widget.article_saver.state)[0][1] != -1
+
+    elif saving_mode == _Save.ARTICLE:
+        chb_article.value = True
+
+        assert len(widget.article_saver.state) == 1
+        assert list(widget.article_saver.state)[0][1] == -1  # actual value 4
+
+    else:
+        raise ValueError(f'Unrecognized saving mode: {saving_mode}')
 
 
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
@@ -149,31 +208,32 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
     """Make sure that default saving buttons result in correct checkboxes."""
 
     searcher = create_searcher(fake_sqlalchemy_engine)
+    k = 10
 
     widget = SearchWidget(searcher,
                           fake_sqlalchemy_engine,
                           ArticleSaver(fake_sqlalchemy_engine),
-                          results_per_page=10)
+                          results_per_page=k)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', 10)
+    bot.set_value('top_results', k)
     bot.set_value('default_value_article_saver', saving_mode)
     bot.click('investigate_button')
 
     captured_display_objects = bot.display_cached
 
-    assert len(captured_display_objects) == 10 * bot.n_displays_per_article
+    assert len(captured_display_objects) == k * bot.n_displays_per_article
 
     if saving_mode == _Save.NOTHING:
         assert not widget.article_saver.state
 
     elif saving_mode == _Save.PARAGRAPH:
-        assert 0 < len(widget.article_saver.state) <= 10
+        assert 0 < len(widget.article_saver.state) <= k
         assert all(x[1] != -1 for x in widget.article_saver.state)
 
     elif saving_mode == _Save.ARTICLE:
-        assert 0 < len(widget.article_saver.state) <= 10
+        assert 0 < len(widget.article_saver.state) <= k
         assert all(x[1] == -1 for x in widget.article_saver.state)
     else:
         raise ValueError(f'Unrecognized saving mode: {saving_mode}')
