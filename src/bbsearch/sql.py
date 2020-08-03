@@ -15,7 +15,8 @@ def retrieve_sentences_from_sentence_id(sentence_id, engine):
     Returns
     -------
     sentences: pd.DataFrame
-        Pandas DataFrame containing all sentences and their corresponding metadata.
+        Pandas DataFrame containing all sentences and their corresponding metadata:
+        article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
     sentences_id = ', '.join(str(id_) for id_ in sentence_id)
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
@@ -74,7 +75,8 @@ def retrieve_paragraph(identifier, engine):
     Returns
     -------
     paragraph: pd.DataFrame
-        pd.DataFrame with the paragraph and the metadata.
+        pd.DataFrame with the paragraph and its metadata:
+        article_id, text, section_name, paragraph_pos_in_article.
     """
     sql_query = f"""SELECT section_name, text
                     FROM sentences
@@ -301,11 +303,13 @@ class SentenceConditioner:
 
         Parameters
         ----------
-        article_id: list
+        article_id: list of str
+            Articled ids to include in the condition.
 
         Returns
         -------
-        condition
+        condition: str
+            Condition of the form `article_id IN (article_id)1, article_id_2, ...)`
         """
         articles = ', '.join(str(id_) for id_ in article_id)
         condition = f"article_id IN ({articles})"
