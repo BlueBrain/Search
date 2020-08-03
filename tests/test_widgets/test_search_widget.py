@@ -68,6 +68,18 @@ class SearchWidgetBot:
         self.search_widget.widgets[widget_name].click()
 
     def set_value(self, widget_name, value):
+        """Set a value of a chosen widget.
+
+        Note that this works with multiple different widgets like sliders, dropdowns, ...
+
+        Parameters
+        ----------
+        widget_name : str
+            Name of the widget.
+
+        value : Any
+            Value to set the widget to. The type depends on the widget.
+        """
         self.search_widget.widgets[widget_name].value = value
 
 
