@@ -120,7 +120,7 @@ class MiningWidget(widgets.VBox):
 
             print("Collecting saved items...".ljust(50), end='', flush=True)
             with timer("collect items"):
-                identifiers = self.article_saver.get_identifiers()
+                identifiers = self.article_saver.get_saved_items()
 
             print(f'{timer["collect items"]:7.2f} seconds')
 

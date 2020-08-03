@@ -144,8 +144,8 @@ class ArticleSaver:
         """Remove all saved items."""
         self.state.clear()
 
-    def _clean_current_state(self):
-        """Clean the current state of the article saver.
+    def _get_clean_state(self):
+        """Get a clean state of the article saver.
 
         Returns
         -------
@@ -163,27 +163,27 @@ class ArticleSaver:
                               article_id not in full_articles)
         return full_articles, just_paragraphs
 
-    def get_identifiers(self):
-        """Retrieve all the identifiers that summarize the choice of the users.
+    def get_saved_items(self):
+        """Retrieve the saved items that summarize the choice of the users.
 
         Returns
         -------
-        identifier: list of tuple
+        identifiers: list of tuple
             Tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
-        identifiers = []
-        full_articles, just_paragraphs = self._clean_current_state()
+        saved_items = []
+        full_articles, just_paragraphs = self._get_clean_state()
         for article_id in full_articles:
-            identifiers += [(article_id, -1)]
-        identifiers += just_paragraphs
-        return identifiers
+            saved_items += [(article_id, -1)]
+        saved_items += just_paragraphs
+        return saved_items
 
     def _update_chosen_texts(self):
         """Recompute the chosen texts."""
         # empty all rows
         self.df_chosen_texts = self.df_chosen_texts[0:0]
 
-        full_articles, just_paragraphs = self._clean_current_state()
+        full_articles, just_paragraphs = self._get_clean_state()
 
         articles = retrieve_articles(article_ids=full_articles,
                                      engine=self.connection)
