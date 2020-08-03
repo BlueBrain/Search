@@ -110,17 +110,18 @@ class MiningServer:
 
                 all_article_ids = []
                 all_paragraphs = pd.DataFrame()
-                for identifier in identifiers:
-                    if identifier[1] == -1:
-                        all_article_ids += [identifier[0]]
+                for (article_id, paragraph_pos) in identifiers:
+                    if paragraph_pos == -1:
+                        all_article_ids += [article_id]
                     else:
-                        paragraph = retrieve_paragraph(identifier=identifier,
+                        paragraph = retrieve_paragraph(identifier=(article_id, paragraph_pos),
                                                        engine=self.connection)
                         all_paragraphs = all_paragraphs.append(paragraph)
 
-                articles = retrieve_articles(article_ids=all_article_ids,
-                                             engine=self.connection)
-                all_paragraphs = all_paragraphs.append(articles)
+                if all_article_ids:
+                    articles = retrieve_articles(article_ids=all_article_ids,
+                                                 engine=self.connection)
+                    all_paragraphs = all_paragraphs.append(articles)
 
                 texts = [(row['text'],
                           {'paper_id':
