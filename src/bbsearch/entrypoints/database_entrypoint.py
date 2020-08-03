@@ -3,7 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
-                    default="/raid/covid_data/data/v7/CORD-19-research-challenge/",
+                    default="/raid/bbs_data/cord19_v35",
                     type=str,
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
@@ -27,11 +27,13 @@ def main():
             Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
     elif args.db_type == 'mysql':
+        # We assume the database `cord19_v35` already exists
+        mysql_uri = input('MySQL URI:')
         password = getpass.getpass('Password:')
         engine = sqlalchemy.create_engine(f'mysql+pymysql://root:{password}'
-                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v35')
+                                          f'@{mysql_uri}/cord19_v35')
     else:
-        raise ValueError('This is not an handled db_type.')
+        raise ValueError(f'\"{args.db_type}" is not supported as a db_type.')
 
     db = CORD19DatabaseCreation(
         data_path=Path(args.data_path),
