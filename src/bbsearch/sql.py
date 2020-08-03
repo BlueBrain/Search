@@ -118,8 +118,7 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
     Returns
     -------
     article: pd.DataFrame
-        DataFrame containing the article metadata from
-        which the sentence is coming.
+        DataFrame containing the article metadata.
     """
     sql_query = f"""SELECT *
                     FROM articles
