@@ -124,7 +124,7 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        model_name: str
+        model_name: str, optional
             SpaCy model used to parse the text into sentences.
 
         Returns
