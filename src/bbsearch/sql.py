@@ -118,7 +118,10 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
     Returns
     -------
     article: pd.DataFrame
-        DataFrame containing the article metadata.
+        DataFrame containing the article metadata. The columns are 'article_id', 'cord_uid', 'sha',
+        'source_x', 'title', 'doi', 'pmcid', 'pubmed_id', 'license', 'abstract',
+        'publish_time', 'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
+        'pdf_json_files', 'pmc_json_files', 'url', 's2_id'.
     """
     sql_query = f"""SELECT *
                     FROM articles
