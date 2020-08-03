@@ -1,11 +1,14 @@
 from copy import copy
 from unittest.mock import Mock
 
+from IPython.display import HTML
+import ipywidgets
 import numpy as np
 import pytest
 
 from bbsearch.search import LocalSearcher
 from bbsearch.widgets import ArticleSaver, SearchWidget
+from bbsearch.widgets.search_widget import _Save
 
 
 class SearchWidgetBot:
@@ -25,8 +28,8 @@ class SearchWidgetBot:
         This way we are going to be able to capture all the objects the
         `search_widget.widgets['out']` holds.
 
-    n_displays_per_article : int
-        Number of displayed objects for each article in the top results. Note that
+    n_displays_per_result : int
+        Number of displayed objects for each result in the top results. Note that
         currently it is 4 since we are outputing:
 
             - Article metadata : ``IPython.core.display.HTML``
@@ -36,11 +39,11 @@ class SearchWidgetBot:
 
     """
 
-    def __init__(self, search_widget, capsys, monkeypatch, n_displays_per_article=4):
+    def __init__(self, search_widget, capsys, monkeypatch, n_displays_per_result=4):
         self.search_widget = search_widget
         self._display_cached = []
         self._capsys = capsys
-        self.n_displays_per_article = n_displays_per_article
+        self.n_displays_per_article = n_displays_per_result
 
         monkeypatch.setattr('bbsearch.widgets.search_widget.display',
                             lambda x: self._display_cached.append(x))
@@ -83,13 +86,9 @@ class SearchWidgetBot:
         self.search_widget.widgets[widget_name].value = value
 
 
-@pytest.mark.parametrize('query_text', ['HELLO'])
-@pytest.mark.parametrize('k', [3, 5])
-@pytest.mark.parametrize('results_per_page', [1, 2, 3])
-def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
-    """Test that paging is displaying the right number results"""
-    n_dim = 3
-    n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+def create_searcher(engine, n_dim=2):
+    """Create a LocalSearcher in some reasonable way."""
+    n_sentences = engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
 
     embedding_model = Mock()
     embedding_model.embed.return_value = np.random.random(n_dim)
@@ -98,8 +97,17 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     precomputed_embeddings = {'BSV': np.random.random((n_sentences, n_dim))}
     indices = np.arange(1, n_sentences + 1)
 
-    searcher = LocalSearcher(embedding_models, precomputed_embeddings, indices, connection=fake_sqlalchemy_engine)
+    searcher = LocalSearcher(embedding_models, precomputed_embeddings, indices, connection=engine)
+    return searcher
 
+
+@pytest.mark.parametrize('query_text', ['HELLO'])
+@pytest.mark.parametrize('k', [3, 5])
+@pytest.mark.parametrize('results_per_page', [1, 2, 3])
+def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
+    """Test that paging is displaying the right number results"""
+
+    searcher = create_searcher(fake_sqlalchemy_engine)
     widget = SearchWidget(searcher,
                           fake_sqlalchemy_engine,
                           ArticleSaver(fake_sqlalchemy_engine),
@@ -116,13 +124,73 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     bot.click('investigate_button')
     assert len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_article
 
-    articles_left = k - min(results_per_page, k)
+    results_left = k - min(results_per_page, k)
 
     # Make sure paging works
-    while articles_left > 0:
+    while results_left > 0:
         bot.click('page_forward')
-        displayed_articles = min(results_per_page, articles_left)
+        displayed_results = min(results_per_page, results_left)
 
-        assert len(bot.display_cached) == displayed_articles * bot.n_displays_per_article
+        assert len(bot.display_cached) == displayed_results * bot.n_displays_per_article
 
-        articles_left -= displayed_articles
+        results_left -= displayed_results
+
+
+def test_correct_results_order():
+    """Check that the most relevant sentence is the first result."""
+
+
+def test_article_saver_gets_updated():
+    """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
+
+
+@pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
+def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
+    """Make sure that default saving buttons result in correct checkboxes."""
+
+    searcher = create_searcher(fake_sqlalchemy_engine)
+
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine),
+                          results_per_page=10)
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('top_results', 10)
+    bot.set_value('default_value_article_saver', saving_mode)
+    bot.click('investigate_button')
+
+    captured_display_objects = bot.display_cached
+
+    assert len(captured_display_objects) == 10 * bot.n_displays_per_article
+
+    if saving_mode == _Save.NOTHING:
+        assert not widget.article_saver.state
+
+    elif saving_mode == _Save.PARAGRAPH:
+        assert 0 < len(widget.article_saver.state) <= 10
+        assert all(x[1] != -1 for x in widget.article_saver.state)
+
+    elif saving_mode == _Save.ARTICLE:
+        assert 0 < len(widget.article_saver.state) <= 10
+        assert all(x[1] == -1 for x in widget.article_saver.state)
+    else:
+        raise ValueError(f'Unrecognized saving mode: {saving_mode}')
+
+    for i, display_obj in enumerate(captured_display_objects):
+        if isinstance(display_obj, ipywidgets.Checkbox):
+            if display_obj.description == 'Extract the paragraph':
+                assert display_obj.value == (saving_mode == _Save.PARAGRAPH)
+
+            elif display_obj.description == 'Extract the entire article':
+                assert display_obj.value == (saving_mode == _Save.ARTICLE)
+
+            else:
+                raise ValueError(f'Unrecognized checkbox, {i}')
+
+        elif isinstance(display_obj, HTML):
+            pass
+
+        else:
+            raise TypeError(f'Unrecognized type: {type(display_obj)}')
