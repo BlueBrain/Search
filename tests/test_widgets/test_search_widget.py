@@ -86,8 +86,8 @@ class SearchWidgetBot:
 @pytest.mark.parametrize('query_text', ['HELLO'])
 @pytest.mark.parametrize('k', [3, 5])
 @pytest.mark.parametrize('results_per_page', [1, 2, 3])
-def test_dummy(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
-    """"""
+def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
+    """Test that paging is displaying the right number results"""
     n_dim = 3
     n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
 
