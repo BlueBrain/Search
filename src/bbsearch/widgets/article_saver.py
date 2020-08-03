@@ -6,7 +6,7 @@ import textwrap
 import pandas as pd
 import pdfkit
 
-from ..sql import retrieve_article, retrieve_paragraph, retrieve_article_metadata_from_article_id
+from ..sql import retrieve_articles, retrieve_paragraph, retrieve_article_metadata_from_article_id
 
 
 class ArticleSaver:
@@ -185,9 +185,9 @@ class ArticleSaver:
 
         full_articles, just_paragraphs = self._clean_current_state()
 
-        article = retrieve_article(article_id=full_articles,
-                                   engine=self.connection)
-        self.df_chosen_texts = self.df_chosen_texts.append(article)
+        articles = retrieve_articles(article_ids=full_articles,
+                                     engine=self.connection)
+        self.df_chosen_texts = self.df_chosen_texts.append(articles)
 
         for identifier in just_paragraphs:
             paragraph = retrieve_paragraph(identifier=identifier,

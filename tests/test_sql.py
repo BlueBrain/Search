@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from bbsearch.sql import (get_sentence_ids_by_condition, retrieve_sentences_from_sentence_id,
-                          retrieve_article, retrieve_paragraph, retrieve_paragraph_from_sentence_id,
+                          retrieve_articles, retrieve_paragraph, retrieve_paragraph_from_sentence_id,
                           retrieve_article_metadata_from_article_id)
 
 
@@ -94,12 +94,12 @@ class TestSQLQueries:
     @pytest.mark.parametrize('article_id', [[1], [1, 2], [0], [-100]])
     def test_retrieve_article(self, article_id, fake_sqlalchemy_engine, test_parameters):
         """Test that retrieve article from article_id is working."""
-        article = retrieve_article(article_id=article_id,
-                                   engine=fake_sqlalchemy_engine)
-        assert isinstance(article, pd.DataFrame)
+        articles = retrieve_articles(article_ids=article_id,
+                                     engine=fake_sqlalchemy_engine)
+        assert isinstance(articles, pd.DataFrame)
         if min(article_id) >= 0:  # valid article_id
-            assert set(article['article_id'].to_list()) == set(article_id)
-            assert article.shape[0] == len(set(article_id)) * \
+            assert set(articles['article_id'].to_list()) == set(article_id)
+            assert articles.shape[0] == len(set(article_id)) * \
                    test_parameters['n_sections_per_article']
 
     @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])

@@ -8,7 +8,7 @@ import pandas as pd
 import spacy
 
 from ..mining import run_pipeline
-from ..sql import retrieve_article, retrieve_paragraph
+from ..sql import retrieve_articles, retrieve_paragraph
 
 
 class MiningServer:
@@ -118,14 +118,14 @@ class MiningServer:
                                                        engine=self.connection)
                         all_paragraphs = all_paragraphs.append(paragraph)
 
-                article = retrieve_article(article_id=all_article_ids,
-                                           engine=self.connection)
-                all_paragraphs = all_paragraphs.append(article)
+                articles = retrieve_articles(article_ids=all_article_ids,
+                                             engine=self.connection)
+                all_paragraphs = all_paragraphs.append(articles)
 
                 texts = [(row['text'],
                           {'paper_id':
-                           f'{row["article_id"]}:{row["section_name"]}'
-                           f':{row["paragraph_pos_in_article"]}'})
+                               f'{row["article_id"]}:{row["section_name"]}'
+                               f':{row["paragraph_pos_in_article"]}'})
                          for _, row in all_paragraphs.iterrows()]
 
                 self.logger.info("Running the mining pipeline...")

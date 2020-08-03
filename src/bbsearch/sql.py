@@ -123,22 +123,23 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
     return article
 
 
-def retrieve_article(article_id, engine):
-    """Retrieve article given one article id.
+def retrieve_articles(article_ids, engine):
+    """Retrieve article given multiple article ids.
 
     Parameters
     ----------
-    article_id: list of int
+    article_ids: list of int
         List of Article id for which need to retrieve the entire text article.
     engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    article: pd.DataFrame
-        DataFrame containing the Article divided into paragraphs.
+    articles: pd.DataFrame
+        DataFrame containing the articles divided into paragraphs. The columns are
+        'article_id', 'paragraph_pos_in_article', 'text', 'section_name'.
     """
-    articles_str = ', '.join(str(id_) for id_ in article_id)
+    articles_str = ', '.join(str(id_) for id_ in article_ids)
     sql_query = f"""SELECT *
                     FROM sentences
                     WHERE article_id IN ({articles_str})
