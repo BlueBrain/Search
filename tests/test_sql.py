@@ -65,7 +65,9 @@ class TestSQLQueries:
     @pytest.mark.parametrize('identifier', [(1, 0), (-2, 0), (1, -100)])
     def test_retrieve_paragraph(self, identifier, fake_sqlalchemy_engine):
         """Test that retrieve paragraph text from identifier is working."""
-        paragraph = retrieve_paragraph(identifier=identifier,
+        article_id, paragraph_pos_in_article = identifier
+        paragraph = retrieve_paragraph(article_id,
+                                       paragraph_pos_in_article,
                                        engine=fake_sqlalchemy_engine)
         assert isinstance(paragraph, pd.DataFrame)
         assert np.all(paragraph.columns == ['article_id', 'text',

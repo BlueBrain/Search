@@ -63,13 +63,17 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
     return paragraph
 
 
-def retrieve_paragraph(identifier, engine):
+def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
     """Retrieve paragraph given one identifier (article_id, paragraph_pos_in_article).
 
     Parameters
     ----------
-    identifier: tuple of int
-        Tuple with form: (Article_id, paragraph_pos_in_article)
+    article_id : int
+        Article id.
+
+    paragraph_pos_in_article : int
+        Relative position of a paragraph in an article. Note that the numbering starts from 0.
+
     engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
 
@@ -81,8 +85,8 @@ def retrieve_paragraph(identifier, engine):
     """
     sql_query = f"""SELECT section_name, text
                     FROM sentences
-                    WHERE article_id = {identifier[0]}
-                    AND paragraph_pos_in_article = {identifier[1]}
+                    WHERE article_id = {article_id}
+                    AND paragraph_pos_in_article = {paragraph_pos_in_article}
                     ORDER BY sentence_pos_in_paragraph ASC"""
 
     sentences = pd.read_sql(sql_query, engine)
@@ -94,10 +98,10 @@ def retrieve_paragraph(identifier, engine):
         section_name = sentences['section_name'].iloc[0]
         paragraph_text = ' '.join(sentences_text)
 
-        paragraph = pd.DataFrame([{'article_id': identifier[0],
+        paragraph = pd.DataFrame([{'article_id': article_id,
                                    'text': paragraph_text,
                                    'section_name': section_name,
-                                   'paragraph_pos_in_article': identifier[0]}, ])
+                                   'paragraph_pos_in_article': paragraph_pos_in_article}, ])
     return paragraph
 
 

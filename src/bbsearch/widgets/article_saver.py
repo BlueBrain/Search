@@ -189,8 +189,9 @@ class ArticleSaver:
                                      engine=self.connection)
         self.df_chosen_texts = self.df_chosen_texts.append(articles)
 
-        for identifier in just_paragraphs:
-            paragraph = retrieve_paragraph(identifier=identifier,
+        for (article_id, paragraph_pos_in_article) in just_paragraphs:
+            paragraph = retrieve_paragraph(article_id,
+                                           paragraph_pos_in_article,
                                            engine=self.connection)
             self.df_chosen_texts = self.df_chosen_texts.append(paragraph)
 

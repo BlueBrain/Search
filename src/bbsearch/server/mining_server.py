@@ -114,7 +114,8 @@ class MiningServer:
                     if paragraph_pos == -1:
                         all_article_ids += [article_id]
                     else:
-                        paragraph = retrieve_paragraph(identifier=(article_id, paragraph_pos),
+                        paragraph = retrieve_paragraph(article_id,
+                                                       paragraph_pos,
                                                        engine=self.connection)
                         all_paragraphs = all_paragraphs.append(paragraph)
 
