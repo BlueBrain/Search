@@ -127,8 +127,8 @@ class TestSQLQueries:
 
 
 class TestSentenceFilter:
-
-    def test_no_filter(self, fake_sqlalchemy_engine):
+    @pytest.mark.parametrize("has_journal", [True, False])
+    def test_no_filter(self, fake_sqlalchemy_engine, has_journal):
         all_ids = pd.read_sql(
             "SELECT sentence_id FROM sentences",
             fake_sqlalchemy_engine)["sentence_id"]
@@ -139,8 +139,8 @@ class TestSentenceFilter:
 
     @pytest.mark.parametrize("has_journal", [True, False])
     @pytest.mark.parametrize("indices", [[], [1], [1, 2, 3]])
-    @pytest.mark.parametrize("date_range", [None, (1960, 2020), (0, 0)])
-    @pytest.mark.parametrize("exclusion_text", ["", "virus", "virus\n\ndisease"])
+    @pytest.mark.parametrize("date_range", [None, (1960, 2010), (0, 0)])
+    @pytest.mark.parametrize("exclusion_text", ["", "virus", "VIRus\n\nease"])
     def test_sentence_filter(
             self,
             fake_sqlalchemy_engine,
@@ -149,6 +149,33 @@ class TestSentenceFilter:
             date_range,
             exclusion_text
     ):
+        # Recreate filtering in pandas for comparison
+        df_all_articles = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
+        df_all_sentences = pd.read_sql("SELECT * FROM sentences", fake_sqlalchemy_engine)
+
+        # has journal
+        if has_journal:
+            df_all_articles = df_all_articles[~df_all_articles["journal"].isna()]
+        # date range
+        if date_range is not None:
+            year_from, year_to = date_range
+            all_dates = pd.to_datetime(df_all_articles["publish_time"])
+            df_all_articles = df_all_articles[all_dates.dt.year.between(year_from, year_to)]
+        # selected sentences that correspond to filtered articles
+        df_all_sentences = df_all_sentences[
+            df_all_sentences["article_id"].isin(df_all_articles["article_id"])]
+        # indices
+        df_all_sentences = df_all_sentences[
+            df_all_sentences["sentence_id"].isin(indices)]
+        # text exclusions
+        exclusion_strings = exclusion_text.split()
+        exclusion_strings = map(lambda s: s.lower(), exclusion_strings)
+        exclusion_strings = filter(lambda s: len(s) > 0, exclusion_strings)
+        pattern = "|".join(exclusion_strings)
+        if len(pattern) > 0:
+            df_all_sentences = df_all_sentences[~df_all_sentences["text"].str.contains(pattern)]
+        ids_from_pandas = df_all_sentences["sentence_id"].tolist()
+
         # Construct filter with various conditions
         sentence_filter = (
             SentenceFilter(fake_sqlalchemy_engine)
@@ -168,5 +195,5 @@ class TestSentenceFilter:
             ids_from_iterate += list(ids)
 
         # Running and iterating should give the same results
-        assert len(ids_from_run) == len(ids_from_iterate)
-        assert set(ids_from_run) == set(ids_from_iterate)
+        assert len(ids_from_run) == len(ids_from_iterate) == len(ids_from_pandas)
+        assert set(ids_from_run) == set(ids_from_iterate) == set(ids_from_pandas)

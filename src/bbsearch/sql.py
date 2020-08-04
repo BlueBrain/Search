@@ -173,6 +173,20 @@ class SentenceFilter:
     call either the `run()` or the `stream()` method to obtain
     the filtered sentence IDs.
 
+    Example
+    -------
+
+    >>> import sqlalchemy
+    >>> connection = sqlalchemy.create_engine("...")
+    >>> filtered_sentence_ids = (
+    ...     SentenceFilter(connection)
+    ...     .only_with_journal()
+    ...     .restrict_sentences_ids_to([1, 2, 3, 4, 5])
+    ...     .date_range((2010, 2020))
+    ...     .exclude_strings(["virus", "disease"])
+    ...     .run()
+    ... )
+
     Parameters
     ----------
     connection : SQLAlchemy connectable (engine/connection) or
@@ -188,7 +202,7 @@ class SentenceFilter:
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
-        self.restricted_sentence_ids = []
+        self.restricted_sentence_ids = None
 
     def only_with_journal(self, flag=True):
         """Only select articles with a journal.
@@ -273,8 +287,8 @@ class SentenceFilter:
 
         # Date range condition
         if self.year_from is not None and self.year_to is not None:
-            from_date = f"{self.year_from}-01-01"
-            to_date = f"{self.year_to}-12-31"
+            from_date = f"{self.year_from:04d}-01-01"
+            to_date = f"{self.year_to:04d}-12-31"
             article_conditions.append(
                 f"publish_time BETWEEN '{from_date}' AND '{to_date}'"
             )
@@ -291,7 +305,7 @@ class SentenceFilter:
             sentence_conditions.append(article_condition_query)
 
         # Restricted sentence IDs
-        if len(self.restricted_sentence_ids) > 0:
+        if self.restricted_sentence_ids is not None:
             sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
