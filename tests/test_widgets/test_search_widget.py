@@ -43,7 +43,7 @@ class SearchWidgetBot:
         self.search_widget = search_widget
         self._display_cached = []
         self._capsys = capsys
-        self.n_displays_per_article = n_displays_per_result
+        self.n_displays_per_result = n_displays_per_result
 
         monkeypatch.setattr('bbsearch.widgets.search_widget.display',
                             lambda x: self._display_cached.append(x))
@@ -137,7 +137,7 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     bot.set_value('top_results', k)
     bot.set_value('query_text', query_text)
     bot.click('investigate_button')
-    assert len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_article
+    assert len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_result
 
     results_left = k - min(results_per_page, k)
 
@@ -146,7 +146,7 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
         bot.click('page_forward')
         displayed_results = min(results_per_page, results_left)
 
-        assert len(bot.display_cached) == displayed_results * bot.n_displays_per_article
+        assert len(bot.display_cached) == displayed_results * bot.n_displays_per_result
 
         results_left -= displayed_results
 
@@ -175,11 +175,11 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
 
     captured_display_objects = bot.display_cached
 
-    assert len(captured_display_objects) == k * bot.n_displays_per_article
+    assert len(captured_display_objects) == k * bot.n_displays_per_result
     assert bot.get_value('default_value_article_saver') == _Save.NOTHING
 
-    start = result_to_take * bot.n_displays_per_article
-    end = (result_to_take + 1) * bot.n_displays_per_article
+    start = result_to_take * bot.n_displays_per_result
+    end = (result_to_take + 1) * bot.n_displays_per_result
     meta, chb_paragraph, chb_article, out = captured_display_objects[start: end]
 
     # Check the checkbox
@@ -223,7 +223,7 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
 
     captured_display_objects = bot.display_cached
 
-    assert len(captured_display_objects) == k * bot.n_displays_per_article
+    assert len(captured_display_objects) == k * bot.n_displays_per_result
 
     if saving_mode == _Save.NOTHING:
         assert not widget.article_saver.state
