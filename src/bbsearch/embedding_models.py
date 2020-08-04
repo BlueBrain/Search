@@ -5,12 +5,13 @@ import string
 from nltk.corpus import stopwords
 from nltk import word_tokenize
 import numpy as np
-import pandas as pd
 import sent2vec
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
 import torch
 from transformers import AutoTokenizer, AutoModelWithLMHead
+
+from .sql import retrieve_sentences_from_sentence_ids
 
 
 class EmbeddingModel(ABC):
@@ -67,7 +68,6 @@ class SBioBERT(EmbeddingModel):
 
     def __init__(self,
                  device=None):
-
         self.device = device or torch.device('cpu')
         self.sbiobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
@@ -142,7 +142,6 @@ class BSV(EmbeddingModel):
 
     def __init__(self,
                  checkpoint_model_path):
-
         self.checkpoint_model_path = checkpoint_model_path
         if not self.checkpoint_model_path.is_file():
             raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
@@ -203,7 +202,6 @@ class SBERT(EmbeddingModel):
     """
 
     def __init__(self):
-
         self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
 
     @property
@@ -237,7 +235,6 @@ class USE(EmbeddingModel):
     """
 
     def __init__(self):
-
         self.use_version = 5
         self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
 
@@ -287,18 +284,14 @@ def compute_database_embeddings(connection, model, indices):
         1D array of sentence_ids that we managed to embed. Note that the order corresponds
         exactly to the rows in `final_embeddings`.
     """
-    indices_str = ", ".join([str(x) for x in indices])
-
-    query = f"SELECT sentence_id, text FROM sentences WHERE sentence_id IN ({indices_str})"
+    sentences = retrieve_sentences_from_sentence_ids(indices, connection)
 
     all_embeddings = list()
     all_ids = list()
-    query_execution = pd.read_sql(sql=query, con=connection, chunksize=1)
     num_errors = 0
 
-    for i_sentence, row_df in enumerate(query_execution):
-        sentence_text = row_df['text'].iloc[0]
-        sentence_id = row_df['sentence_id'].iloc[0]
+    for index, row in sentences.iterrows():
+        sentence_text, sentence_id = row['text'], row['sentence_id']
         try:
             preprocessed_sentence = model.preprocess(sentence_text)
             embedding = model.embed(preprocessed_sentence)
@@ -310,12 +303,10 @@ def compute_database_embeddings(connection, model, indices):
         all_ids.append(sentence_id)
         all_embeddings.append(embedding)
 
-        if i_sentence % 1000 == 0:
-            print(f'Embedded {i_sentence} with {num_errors} errors')
+        if index % 1000 == 0:
+            print(f'Embedded {index} with {num_errors} errors')
 
     final_embeddings = np.array(all_embeddings)
     retrieved_indices = np.array(all_ids)
-
-    print(f'Embedded {i_sentence} with {num_errors} errors')
 
     return final_embeddings, retrieved_indices

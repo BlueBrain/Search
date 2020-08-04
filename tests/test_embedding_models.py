@@ -49,11 +49,11 @@ class TestEmbeddingModels:
         auto_tokenizer.from_pretrained().tokenize.assert_called_once()
         auto_tokenizer.from_pretrained().convert_tokens_to_ids.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           sbiobert,
                                                                           indices)
@@ -86,11 +86,11 @@ class TestEmbeddingModels:
         assert embedding.shape == (700,)
         bsv_model.embed_sentences.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           bsv,
                                                                           indices)
@@ -117,11 +117,11 @@ class TestEmbeddingModels:
         assert embedding.shape == (768,)
         sbert_model.encode.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           sbert,
                                                                           indices)
@@ -148,11 +148,11 @@ class TestEmbeddingModels:
         assert embedding.shape == (512,)
         use_model.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
 
-        indices = np.arange(n_sentences)
+        indices = np.arange(1, n_sentences+1)
         final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                           use,
                                                                           indices)

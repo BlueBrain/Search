@@ -1,0 +1,49 @@
+{
+    "paper_id": "PMC7186928",
+    "metadata": {
+        "title": "Will we see protection or reinfection in COVID-19?",
+        "authors": [
+            {
+                "first": "Miyo",
+                "middle": [],
+                "last": "Ota",
+                "suffix": "",
+                "email": "sinai.immunology@gmail.com",
+                "affiliation": {}
+            }
+        ]
+    },
+    "body_text": [
+        {
+            "text": "There is rising concern that patients who recover from COVID-19 may be at risk of reinfection. In this preprint, Bao et al. investigated acquired immunity to SARS-CoV-2 in rhesus macaques. Four rhesus monkeys were infected with SARS-CoV-2 and two were reinfected after confirmed recovery. After primary infection, viral replication was detected in the nose, pharynx, lungs and gut, with histopathological evidence of lung damage. Sera collected from recovered monkeys before reinfection exhibited neutralizing activity against SARS-CoV-2. Upon reinfection, viral replication was not detected in nasopharyngeal or anal swabs, and reinfected monkeys did not show any signs of COVID-19 disease recurrence. This suggests that immunity acquired following primary infection with SARS-CoV-2 may protect upon subsequent exposure to the virus.",
+            "cite_spans": [],
+            "section": "",
+            "ref_spans": []
+        }
+    ],
+    "ref_entries": {},
+    "back_matter": [],
+    "bib_entries": {
+        "BIBREF0": {
+            "title": "Reinfection could not occur in SARS-CoV-2 infected rhesus macaques",
+            "authors": [
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Bao",
+                    "suffix": ""
+                }
+            ],
+            "year": 2020,
+            "venue": "bioRxiv",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.1101/2020.03.13.990226"
+                ]
+            }
+        }
+    }
+}
