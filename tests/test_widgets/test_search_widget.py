@@ -3,6 +3,7 @@ from copy import copy
 from unittest.mock import Mock
 import os
 from pathlib import Path
+import textwrap
 
 from IPython.display import HTML
 import ipywidgets
@@ -171,8 +172,67 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
         results_left -= displayed_results
 
 
-def test_correct_results_order():
+def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     """Check that the most relevant sentence is the first result."""
+    n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+
+    most_relevant_bsv_id = 7
+    query_bsv = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_bsv_id}'
+    most_relevant_bsv_text = fake_sqlalchemy_engine.execute(query_bsv).fetchone()[0]
+
+    most_relevant_sbiobert_id = 3
+    query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
+    most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
+
+    embedding_model_bsv = Mock()
+    embedding_model_bsv.embed.return_value = np.array([0, 1])  # 90 degrees
+    embedding_model_sbiobert = Mock()
+    embedding_model_sbiobert.embed.return_value = np.array([0, -1])  # 270 degrees
+
+    embedding_models = {'BSV': embedding_model_bsv,
+                        'SBioBERT': embedding_model_sbiobert}
+
+    precomputed_embeddings = {'BSV': np.ones((n_sentences, 2)),  # 45 degrees
+                              'SBioBERT': np.ones((n_sentences, 2))}  # 45 degrees
+
+    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1] = np.array([0.1, 0.9])  # ~90 degrees
+    precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
+
+    indices = np.arange(1, n_sentences + 1)
+
+    searcher = LocalSearcher(embedding_models,
+                             precomputed_embeddings,
+                             indices,
+                             connection=fake_sqlalchemy_engine)
+
+    k = 1
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine),
+                          results_per_page=k)
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('top_results', k)
+    bot.set_value('print_paragraph', False)
+
+    # BSV
+    bot.set_value('sent_embedder', 'BSV')
+    bot.click('investigate_button')
+
+    captured_display_objects = bot.display_cached
+
+    assert len(captured_display_objects) == k * bot.n_displays_per_result
+    assert textwrap.fill(most_relevant_bsv_text, width=80) in captured_display_objects[-1].data
+
+    # SBioBERT
+    bot.set_value('sent_embedder', 'SBioBERT')
+    bot.click('investigate_button')
+
+    captured_display_objects = bot.display_cached
+
+    assert len(captured_display_objects) == k * bot.n_displays_per_result
+    assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
 
 
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
