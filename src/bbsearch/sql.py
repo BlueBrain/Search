@@ -209,7 +209,9 @@ class SentenceFilter:
 
     Parameters
     ----------
-    connection : SQLAlchemy connectable (engine/connection)
+    connection : SQLAlchemy connectable (engine/connection) or
+                 database str URI or
+                 DBAPI2 connection (fallback mode)
         Connection to the database that contains the `articles`
         and `sentences` tables.
     """
@@ -369,6 +371,7 @@ class SentenceFilter:
         self.logger.info(f"Iterating filtering with chunk size {chunk_size}")
 
         query = self._build_query()
+        self.logger.info(f"Query: {query}")
         for df_results in pd.read_sql(query, self.connection, chunksize=chunk_size):
             result_arr = df_results["sentence_id"].to_numpy()
             yield result_arr
@@ -378,16 +381,20 @@ class SentenceFilter:
 
         Returns
         -------
-        result_arr : list
-            A list with the filtered sentence IDs.
+        result_arr : np.ndarray
+            A 1-dimensional numpy array with the filtered sentence IDs.
         """
         self.logger.info("Running the filtering query")
 
         query = self._build_query()
+        self.logger.info(f"Query: {query}")
 
-        self.logger.debug("Running the query")
-        results = [row["sentence_id"] for row in self.connection.execute(query)]
+        self.logger.debug("Running pd.read_sql")
+        df_results = pd.read_sql(query, self.connection)
 
-        self.logger.info(f"Filtering gave {len(results)} results")
+        self.logger.debug("Converting results from pd.Series to numpy")
+        result_arr = df_results["sentence_id"].to_numpy()
 
-        return results
+        self.logger.info(f"Filtering gave {len(result_arr)} results")
+
+        return result_arr
