@@ -32,6 +32,7 @@ parser.add_argument("--database_uri",
                     type=str,
                     help="The URI to the MySQL database.")
 parser.add_argument("--debug",
+                    action="store_true",
                     default=False,
                     type=bool,
                     help="Enable debug logging messages")
