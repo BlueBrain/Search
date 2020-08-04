@@ -1,5 +1,8 @@
+import contextlib
 from copy import copy
 from unittest.mock import Mock
+import os
+from pathlib import Path
 
 from IPython.display import HTML
 import ipywidgets
@@ -99,6 +102,23 @@ class SearchWidgetBot:
             Value to set the widget to. The type depends on the widget.
         """
         self.search_widget.widgets[widget_name].value = value
+
+
+@contextlib.contextmanager
+def cd_temp(path):
+    """Change working directory and return to previous on exit.
+
+    Parameters
+    ----------
+    path : str or Path
+        Path to the directory.
+    """
+    prev_cwd = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(prev_cwd)
 
 
 def create_searcher(engine, n_dim=2):
@@ -254,3 +274,27 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
 
         else:
             raise TypeError(f'Unrecognized type: {type(display_obj)}')
+
+
+def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    """Make sure creation of PDF works."""
+    tmpdir = Path(tmpdir)
+    searcher = create_searcher(fake_sqlalchemy_engine)
+
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine))
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('top_results', 2)
+    bot.click('investigate_button')
+
+    bot.stdout_cached  # clear standard output
+
+    with cd_temp(tmpdir):
+        bot.click('report_button')
+
+    assert 'Creating the search results PDF report...' in bot.stdout_cached
+
+    assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
