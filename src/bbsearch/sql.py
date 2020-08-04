@@ -187,6 +187,24 @@ class SentenceFilter:
     ...     .run()
     ... )
 
+    When the `run()` or the `stream()` method is called an SQL
+    query is constructed and executed internally. For the example
+    above it would have approximately the following form::
+
+        SELECT sentence_id
+        FROM sentences
+        WHERE
+            article_id IN (
+                SELECT article_id
+                FROM articles
+                WHERE
+                    publish_time BETWEEN '2010-01-01' AND '2020-12-31' AND
+                    journal IS NOT NULL
+            ) AND
+            sentence_id IN ('1', '2', '3', '4', '5') AND
+            text NOT LIKE '%virus%' AND
+            text NOT LIKE '%disease%'
+
     Parameters
     ----------
     connection : SQLAlchemy connectable (engine/connection) or
