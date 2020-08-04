@@ -1,8 +1,5 @@
 FROM python:3.6-slim
 
-LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch"
-LABEL description="REST API Server for BBSearch Mining"
-
 # ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV http_proxy='http://bbpproxy.epfl.ch:80/'
@@ -30,6 +27,8 @@ WORKDIR /src
 RUN pip install .
 
 # Set image version
+LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
+LABEL description="REST API Server for BBSearch Mining"
 LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
