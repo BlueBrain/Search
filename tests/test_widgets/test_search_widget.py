@@ -3,6 +3,7 @@ from copy import copy
 from unittest.mock import Mock
 import os
 from pathlib import Path
+import sys
 import textwrap
 
 from IPython.display import HTML
@@ -336,6 +337,7 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
             raise TypeError(f'Unrecognized type: {type(display_obj)}')
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
     tmpdir = Path(tmpdir)
@@ -360,6 +362,7 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF article saver state works."""
     tmpdir = Path(tmpdir)
