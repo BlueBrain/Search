@@ -371,7 +371,7 @@ class SentenceFilter:
         self.logger.info(f"Iterating filtering with chunk size {chunk_size}")
 
         query = self._build_query()
-        self.logger.info(f"Query: {query}")
+        # self.logger.info(f"Query: {query}")
         for df_results in pd.read_sql(query, self.connection, chunksize=chunk_size):
             result_arr = df_results["sentence_id"].to_numpy()
             yield result_arr
@@ -387,7 +387,7 @@ class SentenceFilter:
         self.logger.info("Running the filtering query")
 
         query = self._build_query()
-        self.logger.info(f"Query: {query}")
+        # self.logger.info(f"Query: {query}")
 
         self.logger.debug("Running pd.read_sql")
         df_results = pd.read_sql(query, self.connection)
