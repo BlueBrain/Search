@@ -1,11 +1,12 @@
 """Module for the mining widget."""
 import io
 
-from IPython.display import display
+from IPython.display import HTML, display
 import ipywidgets as widgets
 import pandas as pd
 import requests
 
+from .._css import style
 from ..utils import Timer
 
 
@@ -45,20 +46,25 @@ class MiningWidget(widgets.VBox):
 
         # "Mine This Text" button
         self.widgets['mine_text'] = widgets.Button(
-            description='Mine This Text!',
-            layout=widgets.Layout(width='auto'))
+            description='⚒️  Mine This Text!',
+            layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_text'].on_click(self._mine_text_clicked)
+        self.widgets['mine_text'].add_class('bbs_button')
 
         # "Mine Selected Articles" button
         self.widgets['mine_articles'] = widgets.Button(
-            description='Mine Selected Articles!',
-            layout=widgets.Layout(width='auto'))
+            description='⚒️  Mine Selected Articles!',
+            layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_articles'].on_click(self._mine_articles_clicked)
+        self.widgets['mine_articles'].add_class('bbs_button')
 
         # "Output Area" Widget
         self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
 
     def _init_ui(self):
+        css_style = style.get_css_style()
+        display(HTML(f'<style> {css_style} </style>'))
+
         self.children = [
             self.widgets['input_text'],
             widgets.HBox(children=[

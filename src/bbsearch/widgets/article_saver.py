@@ -6,6 +6,7 @@ import textwrap
 import pandas as pd
 import pdfkit
 
+from .._css import style
 from ..sql import retrieve_articles, retrieve_paragraph, retrieve_article_metadata_from_article_id
 
 
@@ -233,13 +234,12 @@ class ArticleSaver:
         output_file_path : str
             The file to which the report was written.
         """
-        article_report = ''
+        css_style = style.get_css_style()
+        article_report = f'<style> {css_style} </style>'
         width = 80
 
         df_chosen_texts = self.get_chosen_texts()
 
-        color_title = '#1A0DAB'
-        color_metadata = '#006621'
         for article_id, df_article in df_chosen_texts.groupby('article_id'):
             df_article = df_article.sort_values(by='paragraph_pos_in_article', ascending=True, axis=0)
             if len(df_article['section_name'].unique()) == 1:
@@ -249,13 +249,14 @@ class ArticleSaver:
                                f'sections are selected for this article.'
             ref, article_title, article_authors = self._fetch_article_info(article_id)
             article_metadata = f"""
-            <a href="{ref}" style="color:{color_title}; font-size:17px">
-                {article_title}
+            <a href="{ref}">
+                <div class="article_title">
+                    {article_title}
+                </div>
             </a>
-            <br>
-            <p style="color:{color_metadata}; font-size:13px">
+            <div class="metadata">
                 {article_authors} &#183; {section_name.lower().title()}
-            </p>
+            </div>
             """
             article_report += article_metadata
 
