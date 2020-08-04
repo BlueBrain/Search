@@ -168,6 +168,11 @@ def run_search(
         -
     """
     logger.info("Starting run_search")
+
+    # Replace empty `deprioritize_text` by None
+    if deprioritize_text is not None and len(deprioritize_text.strip()) == 0:
+        deprioritize_text = None
+
     timer = Timer(verbose=verbose)
 
     with timer('query_embed'):
