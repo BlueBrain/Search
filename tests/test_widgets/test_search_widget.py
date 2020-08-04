@@ -337,7 +337,7 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
 
 
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
-    """Make sure creation of PDF works."""
+    """Make sure creation of PDF report works."""
     tmpdir = Path(tmpdir)
     searcher = create_searcher(fake_sqlalchemy_engine)
 
@@ -356,5 +356,30 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
         bot.click('report_button')
 
     assert 'Creating the search results PDF report...' in bot.stdout_cached
+
+    assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
+
+
+def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    """Make sure creation of PDF article saver state works."""
+    tmpdir = Path(tmpdir)
+    searcher = create_searcher(fake_sqlalchemy_engine)
+
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine))
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('top_results', 2)
+    bot.set_value('default_value_article_saver', _Save.ARTICLE)
+    bot.click('investigate_button')
+
+    bot.stdout_cached  # clear standard output
+
+    with cd_temp(tmpdir):
+        bot.click('articles_button')
+
+    assert 'Creating the saved results PDF report... ' in bot.stdout_cached
 
     assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
