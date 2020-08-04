@@ -9,9 +9,9 @@ import textwrap
 
 from IPython.display import display, HTML
 import ipywidgets as widgets
-import pandas as pd
 
-from ..sql import find_paragraph
+from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_ids, \
+    retrieve_article_metadata_from_article_id
 from ..utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -310,35 +310,20 @@ class SearchWidget(widgets.VBox):
                 "sentence_id"
                 "paragraph_id"
                 "article_id"
-                "article_sha"
                 "article_title"
                 "article_auth"
                 "ref"
                 "section_name"
                 "text"
         """
-        sql_query = f"""
-        SELECT sha, section_name, text, paragraph_id
-        FROM sentences
-        WHERE sentence_id = "{sentence_id}"
-        """
-        sentence = pd.read_sql(sql_query, self.connection)
-        article_sha, section_name, text, paragraph_id = \
-            sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
+        sentence = retrieve_sentences_from_sentence_ids(sentence_ids=(sentence_id,),
+                                                        engine=self.connection)
+        article_id, section_name, text, paragraph_id = \
+            sentence.iloc[0][['article_id', 'section_name',
+                              'text', 'paragraph_pos_in_article']]
 
-        sql_query = f"""
-        SELECT article_id
-        FROM article_id_2_sha
-        WHERE sha = "{article_sha}"
-        """
-        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
-
-        sql_query = f"""
-        SELECT authors, title, url
-        FROM articles
-        WHERE article_id = "{article_id}"
-        """
-        article = pd.read_sql(sql_query, self.connection)
+        article = retrieve_article_metadata_from_article_id(article_id=article_id,
+                                                            engine=self.connection)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -354,7 +339,6 @@ class SearchWidget(widgets.VBox):
             "sentence_id": sentence_id,
             "paragraph_id": int(paragraph_id),
             "article_id": article_id,
-            "article_sha": article_sha,
             "article_title": article_title,
             "article_auth": article_auth,
             "ref": ref,
@@ -393,7 +377,8 @@ class SearchWidget(widgets.VBox):
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.connection)
+                paragraph = retrieve_paragraph_from_sentence_id(sentence_id,
+                                                                self.connection)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:
@@ -498,28 +483,10 @@ class SearchWidget(widgets.VBox):
         paragraph_ids : list_like
             The paragraph IDs corresponding to the sentence IDs
         """
-        article_ids = []
-        paragraph_ids = []
-
-        for sentence_id in sentence_ids:
-            sql_query = f"""
-            SELECT sha, paragraph_id
-            FROM sentences
-            WHERE sentence_id = "{sentence_id}"
-            """
-            sentence = pd.read_sql(sql_query, self.connection)
-            article_sha, paragraph_id = \
-                sentence.iloc[0][['sha', 'paragraph_id']]
-
-            sql_query = f"""
-            SELECT article_id
-            FROM article_id_2_sha
-            WHERE sha = "{article_sha}"
-            """
-            article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
-
-            article_ids.append(article_id)
-            paragraph_ids.append(paragraph_id)
+        sentences = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_ids,
+                                                         engine=self.connection)
+        article_ids = sentences['article_id'].to_list()
+        paragraph_ids = sentences['paragraph_pos_in_article'].to_list()
 
         return article_ids, paragraph_ids
 
@@ -557,7 +524,6 @@ class SearchWidget(widgets.VBox):
                 article_metadata, formatted_output = \
                     self.print_single_result(result_info, print_whole_paragraph)
                 if self.article_saver:
-                    # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(
                         result_info["article_id"],
                         result_info["paragraph_id"])
