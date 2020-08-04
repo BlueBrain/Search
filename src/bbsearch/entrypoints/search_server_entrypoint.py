@@ -34,7 +34,6 @@ parser.add_argument("--database_uri",
 parser.add_argument("--debug",
                     action="store_true",
                     default=False,
-                    type=bool,
                     help="Enable debug logging messages")
 args = parser.parse_args()
 
