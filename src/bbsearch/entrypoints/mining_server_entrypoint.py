@@ -20,10 +20,11 @@ parser.add_argument("--models_path",
                     default="/raid/sync/proj115/bbs_data/trained_models",
                     type=str,
                     help="The folder with pretrained models")
-parser.add_argument("--database_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v7/databases/cord19.db",
+parser.add_argument("--db_type",
+                    default="mysql",
                     type=str,
-                    help="The path to the database. ")
+                    help="Type of the database. Possible values: (sqlite, "
+                         "mysql)")
 args = parser.parse_args()
 
 
@@ -42,7 +43,16 @@ def main():
 
     app = Flask("BBS Mining Server")
     models_path = pathlib.Path(args.models_path)
-    engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
+
+    if args.db_type == 'sqlite':
+        database_path = '/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db'
+        if not pathlib.Path(database_path).exists():
+            pathlib.Path(database_path).touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+    elif args.db_type == 'mysql':
+        mysql_uri = input('MySQL URI:')
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:guest'
+                                          f'@{mysql_uri}/cord19_v35')
 
     MiningServer(app, models_path, engine)
     app.run(

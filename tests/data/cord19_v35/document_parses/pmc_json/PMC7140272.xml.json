@@ -1,0 +1,1344 @@
+{
+    "paper_id": "PMC7140272",
+    "metadata": {
+        "title": "Aspectos b\u00e1sicos de la transmisibilidad",
+        "authors": [
+            {
+                "first": "J.",
+                "middle": [],
+                "last": "Gil Cuesta",
+                "suffix": "",
+                "email": "jgil@vhebron.net",
+                "affiliation": {}
+            },
+            {
+                "first": "J.",
+                "middle": [],
+                "last": "Vaqu\u00e9 Rafart",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            }
+        ]
+    },
+    "body_text": [
+        {
+            "text": "Las principales propiedades que caracterizan los efectos del agente etiol\u00f3gico sobre el hu\u00e9sped son las siguientes4., 5., 6., 7., 8., 9.:1.La transmisibilidad o capacidad del agente para propagarse de un hu\u00e9sped a otro causando enfermedad. Depende de la infectividad y de la patogenicidad, adem\u00e1s de la frecuencia de contactos que el hu\u00e9sped infectivo mantenga con sujetos susceptibles, del tiempo durante el cual ese hu\u00e9sped elimina el microorganismo y de otros factores. Se puede medir mediante el R0, que constituye un par\u00e1metro fundamental en la epidemiolog\u00eda de las enfermedades transmisibles.2.La infectividad o capacidad del microorganismo para invadir y multiplicarse en un hu\u00e9sped susceptible. En general, se mide mediante el n\u00famero m\u00ednimo de part\u00edculas infecciosas necesarias para producir una infecci\u00f3n. En las enfermedades que se propagan de persona a persona se cuantifica mediante una tasa de ataque secundaria. La infectividad es elevada en el sarampi\u00f3n y la varicela, y baja en la lepra.3.La patogenicidad es la capacidad para inducir enfermedad en los infectados. Aparece cuando el da\u00f1o producido por el agente perturba la homeostasis. Se mide mediante el porcentaje de sujetos infectados que desarrollan cl\u00ednica. Var\u00eda desde el 5-31% de la gripe (tabla 1\n) al 90% del paludismo o la tos ferina. Muchas infecciones se transmiten de forma asintom\u00e1tica en la comunidad, hasta que resulta infectada alguna persona especialmente susceptible que expresa s\u00edntomas cl\u00ednicos, como sucede en la poliomielitis, en la que, por tanto, la patogenicidad es baja.4.La virulencia o capacidad relativa de un microorganismo para causar da\u00f1o grave en los infectados. Es una propiedad del pat\u00f3geno pero modulada por la resistencia del hu\u00e9sped. Se ha identificado con la dosis letal 50, determinaci\u00f3n que s\u00f3lo se realiza en trabajos de investigaci\u00f3n y queda fuera de la microbiolog\u00eda asistencial. Se cuantifica mediante la letalidad o proporci\u00f3n de casos mortales con respecto al total de enfermos. Por ejemplo, en la segunda ola de la pandemia gripal de 1918-1919, la letalidad fue del 3,25% (tabla 1).5.La inmunogenicidad o capacidad para inducir en el hu\u00e9sped una respuesta inmunitaria espec\u00edfica y duradera. Se cuantifica mediante la proporci\u00f3n de individuos que desarrollan inmunidad (expresada por P), esto es, realizan seroconversi\u00f3n con un valor elevado de anticuerpos neutralizantes, y generan memoria inmunol\u00f3gica. Algunas infecciones, como la hepatitis A, inducen inmunidad de por vida y otras, como la fiebre tifoidea o la gripe, la pierden con el tiempo. Ante nuevos virus de la influenza causantes de pandemias de gripe es habitual que la poblaci\u00f3n general no posea ning\u00fan grado de inmunidad (tabla 1). Se entiende por susceptibilidad la ausencia de capacidad inmun\u00f3gena por parte del individuo, o la posesi\u00f3n de un grado muy bajo, frente a un determinado agente pat\u00f3geno. Se mide mediante la proporci\u00f3n de sujetos que se halla en esta situaci\u00f3n respecto al total de la poblaci\u00f3n (expresada por 1-P). Es muy frecuente su uso en los estudios cl\u00ednicos y de seroprevalencia, y en especial en los ensayos de vacunas, pues su administraci\u00f3n produce una disminuci\u00f3n de la susceptibilidad de los individuos ante la infecci\u00f3n. El objetivo de los programas vacunales poblacionales es reducir la susceptibilidad de los individuos frente a las infecciones m\u00e1s relevantes, pues pretenden aumentar la inmunogenicidad media poblacional. En este sentido, Riley et al10, ante la previsible escasez de vacunas prepand\u00e9micas y la necesidad de aprovechar al m\u00e1ximo las dosis disponibles en el caso de emergencia de una pandemia de gripe A (H5N1), han demostrado que la administraci\u00f3n de una fracci\u00f3n del 25% de la dosis recomendada de cualquiera de las tres vacunas en investigaci\u00f3n11., 12., 13. producir\u00eda en los vacunados una reducci\u00f3n media de la susceptibilidad a la infecci\u00f3n del 20 al 30%, y que, en caso de administrar la dosis completa, la reducci\u00f3n m\u00e1xima de la susceptibilidad, es decir la eficacia global de la vacuna, ser\u00eda del 50-60% (fig. 1\n).\n",
+            "cite_spans": [
+                {
+                    "start": 114,
+                    "end": 116,
+                    "mention": "4.",
+                    "ref_id": "BIBREF3"
+                },
+                {
+                    "start": 118,
+                    "end": 120,
+                    "mention": "5.",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 122,
+                    "end": 124,
+                    "mention": "6.",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 126,
+                    "end": 128,
+                    "mention": "7.",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 130,
+                    "end": 132,
+                    "mention": "8.",
+                    "ref_id": "BIBREF7"
+                },
+                {
+                    "start": 134,
+                    "end": 136,
+                    "mention": "9.",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 3461,
+                    "end": 3463,
+                    "mention": "10",
+                    "ref_id": "BIBREF9"
+                },
+                {
+                    "start": 3773,
+                    "end": 3776,
+                    "mention": "11.",
+                    "ref_id": "BIBREF10"
+                },
+                {
+                    "start": 3778,
+                    "end": 3781,
+                    "mention": "12.",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 3783,
+                    "end": 3786,
+                    "mention": "13.",
+                    "ref_id": "BIBREF12"
+                }
+            ],
+            "section": "Efectos del agente etiol\u00f3gico",
+            "ref_spans": [
+                {
+                    "start": 4039,
+                    "end": 4045,
+                    "mention": "fig. 1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 1265,
+                    "end": 1272,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                },
+                {
+                    "start": 2090,
+                    "end": 2097,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                },
+                {
+                    "start": 2703,
+                    "end": 2710,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                }
+            ]
+        },
+        {
+            "text": "Desde el momento inicial de exposici\u00f3n al agente infectivo, una enfermedad transmisible sigue 2 l\u00edneas evolutivas en el hu\u00e9sped que acontecen de forma paralela: las l\u00edneas de la infectividad y de la patogenicidad. La l\u00ednea de la infectividad consta de los per\u00edodos de latencia y de transmisibilidad, y la de la patogenicidad consta de los per\u00edodos de incubaci\u00f3n y de manifestaciones cl\u00ednicas (fig. 2\n). La primera l\u00ednea evolutiva tiene gran inter\u00e9s para la salud p\u00fablica y la segunda para la atenci\u00f3n sanitaria del paciente.1.El per\u00edodo de latencia es el intervalo transcurrido entre el momento de la exposici\u00f3n y el inicio de la transmisibilidad. En este per\u00edodo, el individuo no tiene capacidad para infectar. Es corto en algunas enfermedades, como en el VIH, lo que implica que los sujetos infectados r\u00e1pidamente se tornan transmisibles, y puede llegar a ser largo en otras, como algunos tipos de malaria.2.El per\u00edodo de transmisibilidad es el intervalo (d\u00edas, semanas o meses) durante el cual un individuo puede transmitir la infecci\u00f3n, de manera directa o indirecta (de una persona infectada a otra, de un animal infectado a los seres humanos, o de una persona infectada a los animales o a los artr\u00f3podos)14. En muchas enfermedades, como el sarampi\u00f3n, la gripe y el VIH, el comienzo de la transmisibilidad es anterior al inicio de los s\u00edntomas. Fraser et al3 han introducido un par\u00e1metro para valorar este inicio adelantado de la propagaci\u00f3n: se trata del par\u00e1metro theta (\u03b8) o proporci\u00f3n de transmisiones que durante el per\u00edodo de transmisibilidad se produce antes de que se inicien los s\u00edntomas o bien de forma asintom\u00e1tica. Es del 20-35% en el sarampi\u00f3n y del 35-45% en la gripe; estas infecciones son de dif\u00edcil control, pues cuando el paciente es aislado ya se ha producido gran parte de la propagaci\u00f3n. Determina el potencial de las medidas de salud p\u00fablica para reducir el n\u00famero de infecciones. Un aspecto clave es su estimaci\u00f3n a partir del momento de inicio de un brote, mediante el seguimiento o trazabilidad de los contactos, cuantificando la proporci\u00f3n de casos que aparecen tras la exposici\u00f3n a un sujeto infectante presintom\u00e1tico o asintom\u00e1tico3., 15.. La importancia pr\u00e1ctica del par\u00e1metro \u03b8 se ha observado por ejemplo en el SARS, donde no se han confirmado casos de transmisi\u00f3n de pacientes asintom\u00e1ticos, lo que significa que para esta enfermedad, despu\u00e9s del comienzo de la cl\u00ednica, se dispone de un tiempo efectivo para realizar el aislamiento del paciente antes de que la infectividad sea m\u00e1xima.3.El per\u00edodo de incubaci\u00f3n es el intervalo transcurrido entre la exposici\u00f3n inicial y efectiva al agente infeccioso y el inicio de la sintomatolog\u00eda de la enfermedad, es decir, el tiempo para que la cantidad de microorganismos alcance el umbral necesario para generar s\u00edntomas. Durante este per\u00edodo el hu\u00e9sped puede transmitir la infecci\u00f3n. Puede variar desde 1 a 3 d\u00edas, como sucede en la gripe, hasta meses o a\u00f1os, como en el VIH. Es caracter\u00edstico de cada enfermedad y puede variar en funci\u00f3n de la puerta de entrada, de la respuesta del individuo y de la dosis infectiva. En general, una dosis elevada implica un per\u00edodo de incubaci\u00f3n corto.4.El per\u00edodo de manifestaciones cl\u00ednicas es el lapso en que el hu\u00e9sped presenta signos y s\u00edntomas cl\u00ednicos de la enfermedad. Incluye diferentes fases, desde el per\u00edodo prodr\u00f3mico, la enfermedad cl\u00ednica, el declive y, por \u00faltimo, la convalecencia.5.El TG es el per\u00edodo transcurrido en la aparici\u00f3n de signos o s\u00edntomas similares de la enfermedad (p. ej., fiebre, tos) entre un caso y el siguiente, infectado por el anterior caso, o sea, entre un caso primario y uno secundario (fig. 2). Es caracter\u00edstico de las infecciones transmitidas de persona a persona. Su apreciaci\u00f3n es totalmente cl\u00ednica. Se denomina tambi\u00e9n intervalo de serie, pues es la media de tiempo que transcurre entre las series o generaciones sucesivas de casos. Tambi\u00e9n recibe el nombre de par\u00e1metro ni (v). Para la gripe, Wu et al15 han estimado que es de 3,2 d\u00edas, y seg\u00fan Fraser16 es de 2,85 d\u00edas. Se compone de fracciones de tiempo durante los per\u00edodos de latencia e infectividad17. Este per\u00edodo, junto con el R0, permite valorar la escala de tiempo o rapidez de la propagaci\u00f3n de una infecci\u00f3n y se\u00f1ala, a su vez, la velocidad con que las medidas de salud p\u00fablica deben aplicarse para evitar una epidemia.\n",
+            "cite_spans": [
+                {
+                    "start": 1210,
+                    "end": 1212,
+                    "mention": "14",
+                    "ref_id": "BIBREF13"
+                },
+                {
+                    "start": 1362,
+                    "end": 1363,
+                    "mention": "3",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 2164,
+                    "end": 2166,
+                    "mention": "3.",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 2168,
+                    "end": 2171,
+                    "mention": "15.",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 3967,
+                    "end": 3969,
+                    "mention": "15",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 4017,
+                    "end": 4019,
+                    "mention": "16",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 4119,
+                    "end": 4121,
+                    "mention": "17",
+                    "ref_id": "BIBREF16"
+                }
+            ],
+            "section": "Per\u00edodos",
+            "ref_spans": [
+                {
+                    "start": 393,
+                    "end": 399,
+                    "mention": "fig. 2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 3645,
+                    "end": 3651,
+                    "mention": "fig. 2",
+                    "ref_id": "FIGREF1"
+                }
+            ]
+        },
+        {
+            "text": "Por caso primario o \u00edndice se entiende aquel que introduce la infecci\u00f3n en la comunidad. Este caso puede haberse debido al contacto con una persona enferma, o a una transmisi\u00f3n desde un animal, desde un vector o por el consumo de alimentos, entre otras posibles fuentes. Por ejemplo, el paciente o caso inicial de SARS que, procedente de China en 2003, introdujo la infecci\u00f3n en Hong Kong ocasion\u00f3 13 casos que en 24 h distribuyeron la infecci\u00f3n por m\u00faltiples pa\u00edses. Estos casos, en sus respectivos pa\u00edses, constituyeron los casos primarios que diseminaron la infecci\u00f3n. Los casos secundarios son los infectados por los primarios y los terciarios los infectados por los secundarios. Los casos coprimarios son los considerados de la misma generaci\u00f3n que el \u00edndice, ya que se producen durante el per\u00edodo de incubaci\u00f3n m\u00ednimo de \u00e9ste (por lo que no han podido ser infectados por \u00e9ste).",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Por su poder ejemplificador, es interesante considerar la situaci\u00f3n en relaci\u00f3n con los actuales casos humanos por gripe aviar A (H5N1), en los que cabe diferenciar la transmisi\u00f3n primaria de persona a persona, debida a humanos que fueron infectados por animales (aves infectadas o enfermas), y la transmisi\u00f3n secundaria de persona a persona, debida a humanos que fueron infectados, a su vez, por humanos. La primera permite valorar la intensidad de la transmisi\u00f3n directamente asociada a las aves y la segunda, la intensidad de la transmisi\u00f3n interhumana. Es decir, para conocer la posible existencia de diseminaci\u00f3n humana de una infecci\u00f3n en una comunidad, m\u00e1s que obtener tasas de transmisi\u00f3n primaria, nos interesa obtener tasas de transmisi\u00f3n secundaria.",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Una tasa de ataque se define como la frecuencia de casos nuevos de una enfermedad en una poblaci\u00f3n determinada sometida a un riesgo infeccioso durante un per\u00edodo6. Se calcula dividiendo el n\u00famero de casos detectados de la enfermedad por el n\u00famero total de personas expuestas, que se multiplica por 100 para poder expresarlo en porcentaje:",
+            "cite_spans": [
+                {
+                    "start": 161,
+                    "end": 162,
+                    "mention": "6",
+                    "ref_id": "BIBREF5"
+                }
+            ],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "\nTasa de ataque,%=N.\u00b0 de nuevos casos de la enfermedadN.\u00b0total de personas expuestas en una infecci\u00f3n,brote o epidemia\u00d7100\n",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Se utiliza en las epidemias y los brotes en que la poblaci\u00f3n suele hallarse sometida a riesgo de infecci\u00f3n durante un per\u00edodo corto, que va de minutos a meses, y permite estimar la intensidad de ese riesgo. Es la incidencia acumulada o proporci\u00f3n de personas que han enfermado entre las expuestas. En puridad, al estimar una incidencia acumulada, en el denominador se deber\u00eda incluir solamente a las personas sometidas realmente a riesgo, es decir, las susceptibles a la infecci\u00f3n que no poseen inmunidad natural ni adquirida, por no haber padecido el proceso o no estar vacunadas. Como muchas veces no se dispone de esta informaci\u00f3n, es habitual calcular la tasa de ataque global en la poblaci\u00f3n; si existiera informaci\u00f3n sobre la poblaci\u00f3n vacunada, entonces podr\u00edan calcularse las tasas en vacunados y no vacunados. Adem\u00e1s, es com\u00fan calcular las tasas por edad y sexo. Cuando se describen epidemias que se han producido en grandes poblaciones, o en ensayos cl\u00ednicos en que se comparan los resultados de enfermedad entre un gran n\u00famero de vacunados y no vacunados, es habitual expresar las tasas de ataque por 100.000 o por un mill\u00f3n de habitantes.",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Denominamos tasa de ataque cl\u00ednica a la proporci\u00f3n de casos que desarrollan manifestaciones cl\u00ednicas, y tasa de ataque serol\u00f3gica a la de los que presentan seroconversi\u00f3n. La tasa de ataque cl\u00ednica es un indicador de la patogenicidad de infecci\u00f3n y la tasa de ataque serol\u00f3gica es un indicador de la infectividad global. Cuando, por ejemplo, en una familia, una persona presenta gripe, entre el 20 y el 65% de los convivientes expuestos muestran evidencia viral o serol\u00f3gica de la infecci\u00f3n, la mitad de los que presentar\u00e1n s\u00edntomas. Gani et al9 han estimado para la gripe interepid\u00e9mica o estacional las siguientes cifras basales: tasa de ataque cl\u00ednica, 25%, y tasa de ataque serol\u00f3gica, 50% (tabla 1). Como se muestra en la tabla 1, en la pandemia de 1918-1919 la tasa de ataque serol\u00f3gica fue muy elevada y la de ataque cl\u00ednica, baja; ello indica que si bien la diseminaci\u00f3n de la infecci\u00f3n fue muy extensa, la morbilidad cl\u00ednica fue limitada y pod\u00eda haber sido muy superior. Esta pandemia se distingui\u00f3 por la elevada letalidad en los j\u00f3venes adultos, m\u00e1s que por las tasas de ataque o los par\u00e1metros de transmisibilidad17. En la pandemia de gripe de 1957, el 46% de una muestra de m\u00e9dicos ingleses de atenci\u00f3n primaria con serolog\u00eda positiva present\u00f3 s\u00edntomas9.",
+            "cite_spans": [
+                {
+                    "start": 544,
+                    "end": 545,
+                    "mention": "9",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 1125,
+                    "end": 1127,
+                    "mention": "17",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 1265,
+                    "end": 1266,
+                    "mention": "9",
+                    "ref_id": "BIBREF8"
+                }
+            ],
+            "section": "Tasas de ataque",
+            "ref_spans": [
+                {
+                    "start": 695,
+                    "end": 702,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                },
+                {
+                    "start": 727,
+                    "end": 734,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                }
+            ]
+        },
+        {
+            "text": "En un proceso infectivo, ya sea de evoluci\u00f3n r\u00e1pida o lenta, se puede definir la tasa de ataque primaria como la proporci\u00f3n de casos primarios entre los expuestos y la tasa de ataque secundaria como la proporci\u00f3n de contactos de un caso primario que enferman; su formulaci\u00f3n es la siguiente:",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "\nTasa de ataque secundaria,%=N.\u00b0de personas que han presentado la enfermedad\u2212los casos primariosN.\u00b0total de personas susceptibles expuestas\u2212los casos primarios\u00d7100\n",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Ambas tasas informan sobre la transmisibilidad casocontacto de la infecci\u00f3n. La primera informa sobre la intensidad de la introducci\u00f3n de la infecci\u00f3n en la comunidad, y la segunda sobre su capacidad de diseminaci\u00f3n interhumana. Para su c\u00e1lculo es necesario identificar los casos infecciosos y los susceptibles que han mantenido contacto con ellos durante su per\u00edodo de transmisibilidad. Su \u00e1mbito de aplicaci\u00f3n ideal son los espacios o lugares peque\u00f1os, como escuelas, viviendas o pueblos, donde se presupone que el patr\u00f3n de exposici\u00f3n entre individuos es homog\u00e9neo.",
+            "cite_spans": [],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "La tasa de ataque intrafamiliar o en el hogar es la proporci\u00f3n de casos que aparecen entre los miembros de un hogar durante un per\u00edodo al ser expuestos al contacto con un familiar que presenta la infecci\u00f3n. Es una tasa de ataque secundaria. Es una buena medida de la infectividad general y, en especial, de la infectividad en el hogar. Es elevada en la gripe, el sarampi\u00f3n y la varicela, y baja en la meningitis meningoc\u00f3cica, neumon\u00eda neumoc\u00f3cica y lepra. Hope Simpson18, en un trabajo pionero, publicado en 1952, determin\u00f3 que la tasa de ataque intrafamiliar del sarampi\u00f3n era del 80%, la de la varicela del 72% y la de la parotiditis del 38%. A pesar de que el sujeto enfermo es la fuente de infecci\u00f3n m\u00e1s importante, el papel de las infecciones subcl\u00ednicas y de los portadores en la diseminaci\u00f3n de una infecci\u00f3n constituye un apartado destacado en la epidemiolog\u00eda de las enfermedades transmisibles, pues es una transmisi\u00f3n larvada y silente que puede ser muy extensa, y que hasta los a\u00f1os sesenta y setenta no fue estudiada6., 7.. Cuando Hope Simpson18 calcul\u00f3, en los a\u00f1os cincuenta, las tasas de ataque para sarampi\u00f3n, varicela y parotiditis no dispon\u00eda de serolog\u00edas para determinar las infecciones subcl\u00ednicas de los ni\u00f1os. En el caso del sarampi\u00f3n, los casos subcl\u00ednicos son escasos, pero en la parotiditis, donde se da un n\u00famero considerable de casos asintom\u00e1ticos, pudo sobrestimar el n\u00famero de ni\u00f1os susceptibles. Esto pudo causar, a su vez, una subestimaci\u00f3n de la tasa de ataque para esta enfermedad8.",
+            "cite_spans": [
+                {
+                    "start": 469,
+                    "end": 471,
+                    "mention": "18",
+                    "ref_id": "BIBREF17"
+                },
+                {
+                    "start": 1029,
+                    "end": 1031,
+                    "mention": "6.",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 1033,
+                    "end": 1035,
+                    "mention": "7.",
+                    "ref_id": "BIBREF6"
+                },
+                {
+                    "start": 1056,
+                    "end": 1058,
+                    "mention": "18",
+                    "ref_id": "BIBREF17"
+                },
+                {
+                    "start": 1515,
+                    "end": 1516,
+                    "mention": "8",
+                    "ref_id": "BIBREF7"
+                }
+            ],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Recientemente, Yang et al19 han estudiado la tasa de transmisi\u00f3n en el hogar o intrafamiliar del virus de la gripe aviar A (H5N1) en un cluster de casos ocurridos en Sumatra. El valor estimado fue del 29%, que se\u00f1ala la existencia de propagaci\u00f3n interhumana, producida ocasionalmente en aquel brote que, cuando eclosion\u00f3 en abril de 2006, gener\u00f3 una notable alarma. Adem\u00e1s, intentaron calcular, sin \u00e9xito, la tasa de transmisi\u00f3n intrafamiliar externa o en otros hogares, pues el caso \u00edndice infect\u00f3 a sujetos de su hogar y de otros19.",
+            "cite_spans": [
+                {
+                    "start": 25,
+                    "end": 27,
+                    "mention": "19",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 531,
+                    "end": 533,
+                    "mention": "19",
+                    "ref_id": "BIBREF18"
+                }
+            ],
+            "section": "Tasas de ataque",
+            "ref_spans": []
+        },
+        {
+            "text": "Los fen\u00f3menos transmisibles, singularmente las epidemias, se pueden caracterizar mediante el n\u00famero de reproducci\u00f3n (R) o n\u00famero de casos secundarios producido por cada caso en un determinado estadio de la epidemia. R es m\u00e1ximo al inicio de la epidemia, cuando la poblaci\u00f3n es totalmente susceptible (R = R0) y disminuye a medida que se genera inmunidad en la poblaci\u00f3n. En la actualidad, los n\u00fameros de reproducci\u00f3n (R) ejercen un papel fundamental en el an\u00e1lisis epidemiol\u00f3gico de las enfermedades transmisibles20. Se llama n\u00famero b\u00e1sico de reproducci\u00f3n R0 a la cifra media de casos secundarios generados por un caso primario en una poblaci\u00f3n completamente susceptible; no incluye los producidos por los casos secundarios y sucesivos. Por ejemplo, en la \u00e9poca prevacunal en Europa occidental, el sarampi\u00f3n pose\u00eda un R de entre 15 y 17, que significa que cada caso produc\u00eda una media de 15 a 17 casos secundarios antes de resolverse la infecci\u00f3n. Los valores respectivos descritos para la parotiditis eran de 10-12; para la rub\u00e9ola, de 7-8; de 16-17 para la tos ferina, y de 5-6 para la difteria y la poliomielitis. Todo ello permite observar la elevada transmisibilidad del sarampi\u00f3n y de la tos ferina en relaci\u00f3n con otras infecciones vacunables, y se\u00f1ala la dificultad que todav\u00eda existe en la actualidad para su control, pues exigen elevados porcentajes de cobertura vacunal6.",
+            "cite_spans": [
+                {
+                    "start": 513,
+                    "end": 515,
+                    "mention": "20",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 1380,
+                    "end": 1381,
+                    "mention": "6",
+                    "ref_id": "BIBREF5"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "R0 es una medida de la transmisibilidad intr\u00ednseca de un proceso infectivo. Es un par\u00e1metro adimensional y no es espec\u00edfico para un agente infeccioso, pero s\u00ed para un microorganismo en una poblaci\u00f3n y un tiempo determinados. As\u00ed, por ejemplo, es esperable que el R0 del paludismo sea bajo durante la estaci\u00f3n en la que la densidad del mosquito es baja y viceversa, as\u00ed como que el R del VIH sea mucho m\u00e1s alto en poblaci\u00f3n promiscua y viceversa. Los valores de R0 no son directamente observables; se calculan mediante modelos matem\u00e1ticos a partir de los datos recogidos en los eventos transmisibles. Los supuestos de estos modelos y las variables que incorporan pueden ser muy diferentes entre autores.",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "El n\u00famero R0 tiene tres componentes: la tasa de ataque (b), que depende de la enfermedad y del tipo de contacto; la duraci\u00f3n de la transmisibilidad (d), y el n\u00famero de contactos potencialmente infecciosos por unidad de tiempo, de una persona promedio (c), que depende, sobre todo, de factores personales, sociales y del tipo de infecci\u00f3n.",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "\nR0=b\u00d7d\u00d7c\n",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "En general, cuando en una poblaci\u00f3n susceptible el n\u00famero R es > 1 puede ocurrir una epidemia en cualquier momento. En cambio, cuando es igual a 1, el nivel es end\u00e9mico, pues cada caso genera otro caso y la infecci\u00f3n se automantiene en la poblaci\u00f3n. Cuando R0 es < 1 se ha alcanzado una situaci\u00f3n de bloqueo o control de la infecci\u00f3n, puesto que cada caso no llega a generar uno nuevo6., 21..",
+            "cite_spans": [
+                {
+                    "start": 384,
+                    "end": 386,
+                    "mention": "6.",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 388,
+                    "end": 391,
+                    "mention": "21.",
+                    "ref_id": "BIBREF20"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "El objetivo de las acciones de salud p\u00fablica frente a la enfermedades transmisibles es que los valores de R0 sean < 1. En las infecciones que inducen inmunidad espec\u00edfica y existe una vacunaci\u00f3n efectiva, este objetivo se desarrolla mediante los programas de vacunaci\u00f3n sistem\u00e1tica de la poblaci\u00f3n21, si bien pueden utilizarse todas las actividades de prevenci\u00f3n y control de las infecciones: cuarentena de los contactos, aislamiento de pacientes, trazabilidad de los contactos, administraci\u00f3n de antivirales y otros medicamentos, barreras sanitarias y otras.",
+            "cite_spans": [
+                {
+                    "start": 297,
+                    "end": 299,
+                    "mention": "21",
+                    "ref_id": "BIBREF20"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "El valor de R0 se ve afectado por algunas limitaciones de sus componentes, como es la heterogeneidad en las tasas de ataque, en los per\u00edodos infectivos y en la media de contactos, que puede ser muy elevada en condiciones de mayor hacinamiento, como colegios y campos de refugiados. Especialmente cuando la transmisi\u00f3n es d\u00e9bil o cercana a la eliminaci\u00f3n, estas heterogeneidades pueden desempe\u00f1ar un papel importante en determinar si el agente infectivo persistir\u00e1 en una poblaci\u00f3n.",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Por otro lado, se ha observado que entre individuos infectivos existe gran hetereogeneidad en la emergencia o generaci\u00f3n de una infecci\u00f3n. A trav\u00e9s de la trazabilidad de los contactos, Lloyd-Smith et al20 han estudiado la distribuci\u00f3n de la infecciosidad individual en 8 enfermedades transmisibles por v\u00eda directa y mostrado que el n\u00famero R0 es una cifra media que posee notable sesgo. En la mayor\u00eda de las infecciones existen sujetos con una transmisibilidad escasa y otros, pocos, en que es muy elevada. Este hecho se observ\u00f3 claramente en la epidemia de SARS de 2003, en que algunos sujetos superdiseminadores ocasionaron una transmisi\u00f3n explosiva de la infecci\u00f3n, fen\u00f3meno ya descrito en la rub\u00e9ola y la fiebre de Ebola, entre otras. Habitualmente, las formas cl\u00ednicas graves suelen ser m\u00e1s transmisibles que las subcl\u00ednicas y leves; sin embargo, en el SARS se describi\u00f3 que pacientes con un cuadro no especialmente grave pod\u00edan generar una intensa diseminaci\u00f3n. En la figura 3\n, referida a la transmisi\u00f3n del SARS en Singapur, puede observarse que la diseminaci\u00f3n media habitual para cada caso fue de 1 a 3 casos secundarios, mientras que en los sujetos superdiseminadores fue francamente superior: de 6 a 1622. Nishiura23, en su estudio sobre la heterogeneidad de R en la gripe de 1918-1919, ha diferenciado la R0 relacionada con la edad, pues en ciertos grupos etarios la infecciosidad suele ser m\u00e1s elevada, de la social debida a los patrones geogr\u00e1ficos de diseminaci\u00f3n.",
+            "cite_spans": [
+                {
+                    "start": 202,
+                    "end": 204,
+                    "mention": "20",
+                    "ref_id": "BIBREF19"
+                },
+                {
+                    "start": 1213,
+                    "end": 1215,
+                    "mention": "22",
+                    "ref_id": "BIBREF21"
+                },
+                {
+                    "start": 1225,
+                    "end": 1227,
+                    "mention": "23",
+                    "ref_id": "BIBREF22"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": [
+                {
+                    "start": 973,
+                    "end": 981,
+                    "mention": "figura 3",
+                    "ref_id": "FIGREF2"
+                }
+            ]
+        },
+        {
+            "text": "En la gripe estacional el valor de R0 muestra un amplio recorrido, con cifras que van de 1 a 203., 23.. En brotes producidos en lugares cerrados se han obtenido valores elevados (superiores a 15), por ejemplo en escuelas, debido a que en ellas la susceptibilidad de los ni\u00f1os es elevada y la transmisi\u00f3n tambi\u00e9n debido a la proximidad y facilidad de los contactos. El valor de R0 en la pandemia de gripe de 1918-1919 fue objeto de diversos an\u00e1lisis y existen muchas estimaciones que ofrecen valores entre 1,4 y 4, que sorprenden por lo bajos a pesar de la gran diseminaci\u00f3n que tuvo. En la tabla 1 se muestran las estimaciones realizadas por Gani et al9. Mills et al17 han se\u00f1alado que esta pandemia tuvo una propagaci\u00f3n muy r\u00e1pida debido a que el tiempo de generaci\u00f3n fue muy corto; adem\u00e1s, por su R, la consideran de reducida transmisibilidad en relaci\u00f3n con otros subtipos de virus influenza y otros agentes, de manera que si ahora apareciera un subtipo viral de caracter\u00edsticas similares, en teor\u00eda su diseminaci\u00f3n podr\u00eda controlarse.",
+            "cite_spans": [
+                {
+                    "start": 95,
+                    "end": 97,
+                    "mention": "3.",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 99,
+                    "end": 102,
+                    "mention": "23.",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 652,
+                    "end": 653,
+                    "mention": "9",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 666,
+                    "end": 668,
+                    "mention": "17",
+                    "ref_id": "BIBREF16"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": [
+                {
+                    "start": 590,
+                    "end": 597,
+                    "mention": "tabla 1",
+                    "ref_id": "TABREF0"
+                }
+            ]
+        },
+        {
+            "text": "La definici\u00f3n de R0 asume que todos los contactos son susceptibles, aunque la realidad es que en toda poblaci\u00f3n existe un cierto porcentaje de individuos inmunes (por infecci\u00f3n natural o vacunaci\u00f3n), por lo que se hace ineludible la definici\u00f3n del n\u00famero efectivo de reproducci\u00f3n (Re), que equivale a:",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "\nR0b\u00e1sico\u00d7proporci\u00f3n de susceptibles en la poblaci\u00f3n1\u2212P,es decir,Re=R0b\u00e1sico\u00d7(1\u2212P).\n",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "El n\u00famero R0 de una enfermedad indica su transmisibilidad en \u00e9poca prevacunal o cuando las intervenciones sanitarias de control han sido muy limitadas. Expresa la transmisibilidad primaria, intr\u00ednseca o caracter\u00edstica de un agente pat\u00f3geno en un tipo de sociedad con determinadas pautas de relaci\u00f3n y contacto. El n\u00famero Re se\u00f1ala su transmisibilidad cuando se han aplicado medidas de control, ya sea de forma adecuada o no, en especial, los programas vacunales sistem\u00e1ticos infantiles.",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Si pretendemos evitar los valores epid\u00e9micos, donde un caso primario genera otros casos, Re debe ser inferior a 1, es decir:",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "\nRe=R0b\u00e1sico\u00d7(1\u2212P)<1y de esta f\u00f3rmula se obtiene que,P\u22651\u2212(1/R0).\n",
+            "cite_spans": [],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Este valor de P es la proporci\u00f3n de poblaci\u00f3n que deber\u00eda recibir medidas de salud p\u00fablica para prevenir la transmisi\u00f3n de la infecci\u00f3n. Como la medida preventiva m\u00e1s efectiva en las infecciones comunes de la infancia es la vacunaci\u00f3n, P recibe el nombre de proporci\u00f3n cr\u00edtica de vacunados Pc (%). Esta Pc es de gran ayuda para definir los grados de cobertura vacunal efectiva a alcanzar en una regi\u00f3n o pa\u00eds mediante los programas de vacunaci\u00f3n. Para lograr que la Re sea < 1, las enfermedades con un valor elevado de R0 requieren valores elevados de vacunaci\u00f3n. Por ejemplo, en el sarampi\u00f3n, con un R de 15, se requiere una Pc del 94%, es decir, el 94% de la poblaci\u00f3n susceptible debe ser vacunada de forma efectiva para evitar la enfermedad; en la rub\u00e9ola, con un R0 de 8, la Pc necesaria es del 87,5%22.",
+            "cite_spans": [
+                {
+                    "start": 805,
+                    "end": 807,
+                    "mention": "22",
+                    "ref_id": "BIBREF21"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Mediante modelos de simulaci\u00f3n matem\u00e1tica, Fraser16 ha introducido recientemente los conceptos de n\u00famero de reproducci\u00f3n intrafamiliar (R*) y n\u00famero de reproducci\u00f3n fuera del hogar o extrafamiliar (RG), que son componentes del n\u00famero b\u00e1sico de reproducci\u00f3n de la poblaci\u00f3n (R0). Para estos par\u00e1metros ha estimado los siguientes valores en la pandemia de gripe de 1918-1919: R* = 2,26; RG= 1,21 y R = 1,74, que permiten apreciar que en los hogares pr\u00e1cticamente se registr\u00f3 el doble de transmisibilidad que fuera16. El valor R* = 2,26 implica que el porcentaje: 1 (1/R*) = 56% deb\u00eda haber sido el objetivo global de las acciones de control (cuarentena, aislamiento y otras) para evitar la diseminaci\u00f3n epid\u00e9mica intrafamiliar. Como este valor de R* no fue muy elevado, el porcentaje de actuaciones que se deb\u00eda desarrollar tampoco lo deb\u00eda ser, por lo que si se hubieran aplicado de forma sistem\u00e1tica ciertas medidas de control de la transmisi\u00f3n en todos los hogares, con gran seguridad se habr\u00eda mitigado la extensi\u00f3n y gravedad de la epidemia.",
+            "cite_spans": [
+                {
+                    "start": 49,
+                    "end": 51,
+                    "mention": "16",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 511,
+                    "end": 513,
+                    "mention": "16",
+                    "ref_id": "BIBREF15"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Es muy \u00fatil comprender R0 y sus componentes para poder comparar estrategias de intervenci\u00f3n y as\u00ed valorar cu\u00e1l tiene una mayor capacidad de reducci\u00f3n del par\u00e1metro R. As\u00ed, Longini et al24., 25. han determinado que si un brote de gripe aviar A (H5N1) tuviera una propagaci\u00f3n interhumana de R0 = 1,6, con gran probabilidad podr\u00eda ser controlado mediante la administraci\u00f3n extensiva de antivirales, y si la transmisi\u00f3n fuera m\u00e1s intensa, con R0 = 2,1, podr\u00eda ser igualmente controlado mediante la administraci\u00f3n de una vacuna prepand\u00e9mica.",
+            "cite_spans": [
+                {
+                    "start": 185,
+                    "end": 188,
+                    "mention": "24.",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 190,
+                    "end": 193,
+                    "mention": "25.",
+                    "ref_id": "BIBREF24"
+                }
+            ],
+            "section": "N\u00fameros de reproducci\u00f3n",
+            "ref_spans": []
+        },
+        {
+            "text": "Nishiura23 ha expresado la importancia del TG o intervalo de serie en el c\u00e1lculo de R0, pues \u00e9ste var\u00eda sustancialmente seg\u00fan el valor de TG que se utilice en las asunciones de los modelos matem\u00e1ticos para su obtenci\u00f3n. Unos TG elevados comportan unos estimados elevados de R^, a pesar de que existen excepciones, pues al analizar la pandemia de gripe de 1918-1919, ha se\u00f1alado que si la diseminaci\u00f3n epid\u00e9mica se produc\u00eda en una comunidad con un estrecho contacto entre individuos, como por ejemplo en un campamento militar, el valor de R0 ser\u00eda elevado, a pesar de que el TG fuera bajo. As\u00ed, en un campamento de Nueva Zelanda, los valores de TG en 3 observaciones diferenciadas fueron 1,6; 1,1 y 0,9 d\u00edas, y los respectivos de valores de R fueron de 3,1; 1,8 y 1,3. Comparativamente, el valor de R0 estimado para la pandemia en Inglaterra y Gales fue de 1,6 para un TG de 6 d\u00edas, y en 45 ciudades de los EE. UU. fue de 2,7 para un TG de 6 d\u00edas23. Todo ello viene a se\u00f1alar que, efectivamente, si el TG es elevado, tambi\u00e9n suele serlo el R, aunque existen excepciones.",
+            "cite_spans": [
+                {
+                    "start": 8,
+                    "end": 10,
+                    "mention": "23",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 945,
+                    "end": 947,
+                    "mention": "23",
+                    "ref_id": "BIBREF22"
+                }
+            ],
+            "section": "Relaci\u00f3n de R&!start&0&!end& con otros par\u00e1metros",
+            "ref_spans": []
+        },
+        {
+            "text": "Fraser et al3 relacionaron el par\u00e1metro \u03b8, o proporci\u00f3n de la transmisi\u00f3n que ocurre previamente a la aparici\u00f3n de la sintomatolog\u00eda, ya comentado, con los valores de R0 para se\u00f1alar los factores que favorecen o dificultan el control de una infecci\u00f3n. El valor \u03b8 aumentar\u00e1 en el caso de retrasos en la aplicaci\u00f3n de las medidas de aislamiento (desde el comienzo de los s\u00edntomas hasta el ingreso hospitalario), cuarentena y trazabilidad de los contactos. Este retraso en las medidas de salud p\u00fablica suele ser m\u00e1s com\u00fan en el comienzo de un brote, como en el caso del SARS en Hong-Kong. Existen modelos matem\u00e1ticos en los que se determina que en las enfermedades en las que \u03b8 es muy elevado, por ejemplo en el VIH, puede llegar al 100%, ninguna de las medidas asegurar\u00e1 el control del brote, mientras que en aquellas en que el valor es bajo, la epidemia podr\u00e1 controlarse con s\u00f3lo el aislamiento de los sujetos sintom\u00e1ticos.",
+            "cite_spans": [
+                {
+                    "start": 12,
+                    "end": 13,
+                    "mention": "3",
+                    "ref_id": "BIBREF2"
+                }
+            ],
+            "section": "Relaci\u00f3n de R&!start&0&!end& con otros par\u00e1metros",
+            "ref_spans": []
+        },
+        {
+            "text": "Seg\u00fan Fraser et al3, la relaci\u00f3n entre los valores de R0 y \u03b8 permite evaluar la efectividad de las medidas de salud p\u00fablica para el control de un brote. Estas intervenciones ser\u00e1n suficientes si las combinaciones entre los valores de \u03b8 y R0 se sit\u00faan por debajo de una l\u00ednea cr\u00edtica espec\u00edfica para cada intervenci\u00f3n. En la figura 4\nse muestra la l\u00ednea cr\u00edtica de 3 intervenciones: aislamiento de los enfermos, cuarentena de los contactos y trazabilidad de los contactos. Se estima un 100% de efectividad en la aplicaci\u00f3n de cada medida. El aislamiento permitir\u00eda controlar un brote de viruela o de SARS, pero no de gripe o VIH. La trazabilidad permitir\u00eda intervenir favorablemente en el control de la pandemia de gripe de 1918-1919, la viruela y el SARS. La cuarentena facilitar\u00eda el control de una epidemia de gripe, as\u00ed como de viruela o de SARS.",
+            "cite_spans": [
+                {
+                    "start": 18,
+                    "end": 19,
+                    "mention": "3",
+                    "ref_id": "BIBREF2"
+                }
+            ],
+            "section": "Relaci\u00f3n de R&!start&0&!end& con otros par\u00e1metros",
+            "ref_spans": [
+                {
+                    "start": 324,
+                    "end": 332,
+                    "mention": "figura 4",
+                    "ref_id": "FIGREF3"
+                }
+            ]
+        },
+        {
+            "text": "El c\u00e1lculo de las estimaciones de \u03b8 y R0 puede realizarse con los primeros casos de un brote, de forma que permite determinar de forma temprana el \u00e9xito o fracaso de las medidas de control. As\u00ed, por ejemplo, en el caso del SARS el \u00e9xito se debi\u00f3 a la efectividad de las medidas en unos valores bajos de R0 y \u03b8, en especial el inmediato aislamiento de los pacientes al iniciarse los s\u00edntomas, que propici\u00f3 el efectivo control de la epidemia.",
+            "cite_spans": [],
+            "section": "Relaci\u00f3n de R&!start&0&!end& con otros par\u00e1metros",
+            "ref_spans": []
+        },
+        {
+            "text": "El conocimiento de los aspectos b\u00e1sicos de la transmisibilidad es muy \u00fatil para valorar la capacidad infectiva propia de un proceso, detectar y analizar los cambios en la frecuencia y la distribuci\u00f3n de las enfermedades transmisibles, as\u00ed como para optimizar la utilizaci\u00f3n de los recursos preventivos, ya sean medidas de aislamiento, cuarentena, trazabilidad, vacunaci\u00f3n o tratamiento.",
+            "cite_spans": [],
+            "section": "Conclusiones",
+            "ref_spans": []
+        },
+        {
+            "text": "Los par\u00e1metros fundamentales para cuantificar la transmisibilidad de un proceso infeccioso y se\u00f1alar la factibilidad y rapidez con que deben introducirse las medidas de control son el n\u00famero b\u00e1sico de reproducci\u00f3n, el tiempo de generaci\u00f3n de casos y la proporci\u00f3n de la transmisi\u00f3n que ocurre antes de que aparezcan los s\u00edntomas. Por otro lado, para el estudio de los factores que han propiciado un brote, son muy adecuadas las tasas de ataque cl\u00ednicas, serol\u00f3gicas e intrafamiliares.",
+            "cite_spans": [],
+            "section": "Conclusiones",
+            "ref_spans": []
+        },
+        {
+            "text": "En resumen, el conocimiento de los par\u00e1metros que rigen la transmisibilidad nos sit\u00faa en posici\u00f3n privilegiada para hacer frente a los brotes epid\u00e9micos, en especial los brotes de procesos emergentes. Asimismo, nos facilita herramientas para valorar las intervenciones aplicadas frente a los procesos transmisibles.",
+            "cite_spans": [],
+            "section": "Conclusiones",
+            "ref_spans": []
+        }
+    ],
+    "ref_entries": {
+        "TABREF0": {
+            "text": "Tabla 1: Par\u00e1metros de transmisibilidad del virus influenza A en diferentes escenarios: situaci\u00f3n basal interepid\u00e9mica y pandemias de 1957, 1968 y 1918-1919*\n",
+            "type": "table"
+        },
+        "FIGREF0": {
+            "text": "Figura 1: Reducci\u00f3n esperada de la susceptibilidad despu\u00e9s de la administraci\u00f3n de vacunas prepand\u00e9micas A (H5N1) con dosis parciales de la vacuna. Las vacunas candidatas son las propuestas por Bresson et al11, Lin et al12 y Treanor et al13, seg\u00fan Riley et al10.",
+            "type": "figure"
+        },
+        "FIGREF1": {
+            "text": "Figura 2: Per\u00edodos en las enfermedades transmisibles. L\u00ednea de la infectividad: PL (per\u00edodo de latencia) y PT (per\u00edodo de transmisibilidad). L\u00ednea de la patogenicidad: PI (per\u00edodo de incubaci\u00f3n) y PC (per\u00edodo de manifestaciones cl\u00ednicas). TG: tiempo de generaci\u00f3n, llamado tambi\u00e9n intervalo de serie, o valor \u03bd (ni). Modificado de Giesecke8.",
+            "type": "figure"
+        },
+        "FIGREF2": {
+            "text": "Figura 3: S\u00edndrome de dificultad respiratoria del adulto (SARS): R0 b\u00e1sico y R0 de superdiseminadores. Diseminaci\u00f3n de la enfermedad emergente: SARS en Singapur del 25 de febrero al 30 de abril de 2003. Brote de 201 casos probables y 722 sospechosos en el que intervinieron 5 sujetos superdiseminadores (casos probables n.\u00b0 1, 6, 35, 130 y 127). Cada caso de la enfermedad, representado por un c\u00edrculo oscuro, genera 1-3 casos secundarios. El R0 b\u00e1sico es de 1-3. El superdiseminador n.\u00b0 1 gener\u00f3 16 casos secundarios; el 6, de 10-12; el 35, de 6-8; el 130, de 9-10, y el 127, unos 7, por lo que puede considerarse que el R0 de superdiseminadores est\u00e1 entre 6 y 16, seg\u00fan CDC2.",
+            "type": "figure"
+        },
+        "FIGREF3": {
+            "text": "Figura 4: Relaci\u00f3n entre 0 y R0 y medidas para el control de un brote. La viruela y el s\u00edndrome de dificultad respiratoria del adulto (SARS) poseen un valor bajo (< 15%) del par\u00e1metro q y pudieron controlarse a pesar de que el valor de R0 de la viruela en algunas zonas geogr\u00e1ficas era elevado (> 8). Las estimaciones de R0 de la pandemia gripal de 1918-1919 fueron bajas (entre 1,4 y 4). En algunos brotes, la R0 de la gripe es especialmente elevada (de 8 a 15). VIH: virus de la inmunodeficiencia humana. Datos de Fraser et al3, 2004.",
+            "type": "figure"
+        }
+    },
+    "back_matter": [],
+    "bib_entries": {
+        "BIBREF0": {
+            "title": "",
+            "authors": [],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF1": {
+            "title": "",
+            "authors": [],
+            "year": null,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF2": {
+            "title": "Factors that make an infectious disease outbreak controllable",
+            "authors": [
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Fraser",
+                    "suffix": ""
+                },
+                {
+                    "first": "S.",
+                    "middle": [],
+                    "last": "Riley",
+                    "suffix": ""
+                },
+                {
+                    "first": "R.M.",
+                    "middle": [],
+                    "last": "Anderson",
+                    "suffix": ""
+                },
+                {
+                    "first": "M.",
+                    "middle": [],
+                    "last": "Ferguson",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Proc Natl Acad Sci USA",
+            "volume": "101",
+            "issn": "",
+            "pages": "6146-6151",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF3": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Romero Vivas",
+                    "suffix": ""
+                },
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Rodr\u00edguez",
+                    "suffix": ""
+                },
+                {
+                    "first": "E.",
+                    "middle": [],
+                    "last": "Gonz\u00e1lez",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Tratado de Medicina Interna",
+            "volume": "",
+            "issn": "",
+            "pages": "2869-2879",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF4": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Vaqu\u00e9",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "Farreras Medicina interna",
+            "volume": "",
+            "issn": "",
+            "pages": "2196-2200",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF5": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Vaqu\u00e9",
+                    "suffix": ""
+                }
+            ],
+            "year": 2001,
+            "venue": "Medicina preventiva y salud p\u00fablica",
+            "volume": "",
+            "issn": "",
+            "pages": "387-400",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF6": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "ME.",
+                    "middle": [],
+                    "last": "Halloran",
+                    "suffix": ""
+                }
+            ],
+            "year": 2001,
+            "venue": "Epidemiologic methods for the study of infectious diseases",
+            "volume": "",
+            "issn": "",
+            "pages": "56-85",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF7": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Giesecke",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF8": {
+            "title": "Potential impact of antiviral drug use during influenza pandemic",
+            "authors": [
+                {
+                    "first": "R.",
+                    "middle": [],
+                    "last": "Gani",
+                    "suffix": ""
+                },
+                {
+                    "first": "H.",
+                    "middle": [],
+                    "last": "Hughes",
+                    "suffix": ""
+                },
+                {
+                    "first": "D.",
+                    "middle": [],
+                    "last": "Fleming",
+                    "suffix": ""
+                },
+                {
+                    "first": "T.",
+                    "middle": [],
+                    "last": "Griffin",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Medlock",
+                    "suffix": ""
+                },
+                {
+                    "first": "S.",
+                    "middle": [],
+                    "last": "Leach",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Emerg Infect Dis",
+            "volume": "11",
+            "issn": "",
+            "pages": "1355-1361",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF9": {
+            "title": "Optimizing the dose of pre-pandemic influenza vaccines to reduce the infection attack rate",
+            "authors": [
+                {
+                    "first": "S.",
+                    "middle": [],
+                    "last": "Riley",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.T.",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "G.M.",
+                    "middle": [],
+                    "last": "Leung",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "PLoS Med",
+            "volume": "4",
+            "issn": "",
+            "pages": "1032-1040",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF10": {
+            "title": "Safety and immunogenicity of an inactivated split-virion influenza A/Vietnam/ 1194/2004 (H5N1) vaccine: Phase I randomised trial",
+            "authors": [
+                {
+                    "first": "J.L.",
+                    "middle": [],
+                    "last": "Bresson",
+                    "suffix": ""
+                },
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Perronne",
+                    "suffix": ""
+                },
+                {
+                    "first": "O.",
+                    "middle": [],
+                    "last": "Launay",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "Lancet",
+            "volume": "367",
+            "issn": "",
+            "pages": "1657-1664",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF11": {
+            "title": "Safety and immunogenicity of an inactivated adjuvanted whole-virion influenza A (H5N1) vaccine: A phase I randomized controlled trial",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Lin",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Zhang",
+                    "suffix": ""
+                },
+                {
+                    "first": "X.",
+                    "middle": [],
+                    "last": "Dong",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "Lancet",
+            "volume": "368",
+            "issn": "",
+            "pages": "991-997",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF12": {
+            "title": "Safety and immunogenicity of an inactivated subvirion influenza A (H5N1) vaccine",
+            "authors": [
+                {
+                    "first": "J.J.",
+                    "middle": [],
+                    "last": "Treanor",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.D.",
+                    "middle": [],
+                    "last": "Campbell",
+                    "suffix": ""
+                },
+                {
+                    "first": "K.M.",
+                    "middle": [],
+                    "last": "Zangwill",
+                    "suffix": ""
+                },
+                {
+                    "first": "T.",
+                    "middle": [],
+                    "last": "Rowe",
+                    "suffix": ""
+                },
+                {
+                    "first": "M.",
+                    "middle": [],
+                    "last": "Wolff",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "N Engl J Med",
+            "volume": "354",
+            "issn": "",
+            "pages": "1343-1351",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF13": {
+            "title": "",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Chin",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF14": {
+            "title": "Reducing the impact of the next influenza pandemic using household-based public health interventions",
+            "authors": [
+                {
+                    "first": "J.T.",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S.",
+                    "middle": [],
+                    "last": "Riley",
+                    "suffix": ""
+                },
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Fraser",
+                    "suffix": ""
+                },
+                {
+                    "first": "G.M.",
+                    "middle": [],
+                    "last": "Leung",
+                    "suffix": ""
+                }
+            ],
+            "year": 2006,
+            "venue": "PLoS Med",
+            "volume": "3",
+            "issn": "",
+            "pages": "1532-1540",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF15": {
+            "title": "Estimating individual and household reproduction numbers in an emerging epidemic",
+            "authors": [
+                {
+                    "first": "C.",
+                    "middle": [],
+                    "last": "Fraser",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "PloS ONE",
+            "volume": "8",
+            "issn": "",
+            "pages": "1-12",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF16": {
+            "title": "Transmissibility of 1918 pandemic influenza",
+            "authors": [
+                {
+                    "first": "C.E.",
+                    "middle": [],
+                    "last": "Mills",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.M.",
+                    "middle": [],
+                    "last": "Robins",
+                    "suffix": ""
+                },
+                {
+                    "first": "M.",
+                    "middle": [],
+                    "last": "Lipsitch",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Nature",
+            "volume": "432",
+            "issn": "",
+            "pages": "904-906",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF17": {
+            "title": "Infectiousness of communicable diseases in the household (measles, chickenpox and mumps)",
+            "authors": [
+                {
+                    "first": "R.E.",
+                    "middle": [],
+                    "last": "Hope Simpson",
+                    "suffix": ""
+                }
+            ],
+            "year": 1952,
+            "venue": "Lancet",
+            "volume": "2",
+            "issn": "",
+            "pages": "549-554",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF18": {
+            "title": "Detecting human-tohuman transmission of avian influenza A (H5N1)",
+            "authors": [
+                {
+                    "first": "Y.",
+                    "middle": [],
+                    "last": "Yan",
+                    "suffix": ""
+                },
+                {
+                    "first": "M.E.",
+                    "middle": [],
+                    "last": "Halloran",
+                    "suffix": ""
+                },
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Sugimoto",
+                    "suffix": ""
+                },
+                {
+                    "first": "I.M.",
+                    "middle": [],
+                    "last": "Longini",
+                    "suffix": "Jr"
+                }
+            ],
+            "year": 2007,
+            "venue": "Emerg Infect Dis",
+            "volume": "13",
+            "issn": "",
+            "pages": "1348-1353",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF19": {
+            "title": "Superspreading and the effect of individual variation on disease emergence",
+            "authors": [
+                {
+                    "first": "J.O.",
+                    "middle": [],
+                    "last": "Lloyd-Smith",
+                    "suffix": ""
+                },
+                {
+                    "first": "S.J.",
+                    "middle": [],
+                    "last": "Schreiber",
+                    "suffix": ""
+                },
+                {
+                    "first": "P.E.",
+                    "middle": [],
+                    "last": "Kopp",
+                    "suffix": ""
+                },
+                {
+                    "first": "W.M.",
+                    "middle": [],
+                    "last": "Getz",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Nature",
+            "volume": "438",
+            "issn": "",
+            "pages": "355-359",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF20": {
+            "title": "La importancia de la inmunidad colectiva",
+            "authors": [
+                {
+                    "first": "J.",
+                    "middle": [],
+                    "last": "Vaqu\u00e9",
+                    "suffix": ""
+                }
+            ],
+            "year": 2002,
+            "venue": "Vacunas",
+            "volume": "3",
+            "issn": "Supl 2",
+            "pages": "19-25",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF21": {
+            "title": "Severe acute respiratory syndrome-Singapore, 2003",
+            "authors": [],
+            "year": 2003,
+            "venue": "MMWR",
+            "volume": "52",
+            "issn": "",
+            "pages": "405-410",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF22": {
+            "title": "Time variations in the transmissibility of pandemic influenza in Prussia, Germany, from 1918-1919",
+            "authors": [
+                {
+                    "first": "H.",
+                    "middle": [],
+                    "last": "Nishiura",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "Theor Biol Med Model",
+            "volume": "4",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF23": {
+            "title": "Containing pandemic influenza with antiviral agents",
+            "authors": [
+                {
+                    "first": "I.M.",
+                    "middle": [],
+                    "last": "Longini",
+                    "suffix": ""
+                },
+                {
+                    "first": "M.E.",
+                    "middle": [],
+                    "last": "Halloran",
+                    "suffix": ""
+                },
+                {
+                    "first": "A.",
+                    "middle": [],
+                    "last": "Nizam",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y.",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Am J Epidemiol",
+            "volume": "159",
+            "issn": "",
+            "pages": "623-633",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF24": {
+            "title": "Containing pandemic influenza at the source",
+            "authors": [
+                {
+                    "first": "I.M.",
+                    "middle": [],
+                    "last": "Longini",
+                    "suffix": ""
+                },
+                {
+                    "first": "A.",
+                    "middle": [],
+                    "last": "Nizam",
+                    "suffix": ""
+                },
+                {
+                    "first": "S.",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "K.",
+                    "middle": [],
+                    "last": "Ungchusak",
+                    "suffix": ""
+                },
+                {
+                    "first": "W.",
+                    "middle": [],
+                    "last": "Hanshaoworakul",
+                    "suffix": ""
+                },
+                {
+                    "first": "D.A.T.",
+                    "middle": [],
+                    "last": "Cummings",
+                    "suffix": ""
+                }
+            ],
+            "year": 2005,
+            "venue": "Science",
+            "volume": "303",
+            "issn": "",
+            "pages": "1083-1087",
+            "other_ids": {
+                "DOI": []
+            }
+        }
+    }
+}

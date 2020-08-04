@@ -9,9 +9,9 @@ import textwrap
 
 from IPython.display import display, HTML
 import ipywidgets as widgets
-import pandas as pd
 
-from ..sql import find_paragraph
+from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_ids, \
+    retrieve_article_metadata_from_article_id
 from ..utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -43,24 +43,20 @@ class SearchWidget(widgets.VBox):
 
     results_per_page : int, optional
         The number of results to display per results page.
-
-    top_n_max : int, optional
-        The upper bound of the top N results slider.
     """
 
     def __init__(self,
                  searcher,
                  connection,
                  article_saver=None,
-                 results_per_page=10,
-                 top_n_max=100):
+                 results_per_page=10
+                 ):
         super().__init__()
 
         self.searcher = searcher
         self.connection = connection
         self.article_saver = article_saver
         self.results_per_page = max(1, results_per_page)
-        self.top_n_max = top_n_max
         self.n_pages = 1
         self.current_page = -1
 
@@ -74,6 +70,7 @@ class SearchWidget(widgets.VBox):
         self.current_paragraph_ids = []
         self.current_article_ids = []
 
+        self.widgets_style = {'description_width': 'initial'}
         self.widgets = dict()
         self._init_widgets()
         self._adjust_widgets()
@@ -86,30 +83,38 @@ class SearchWidget(widgets.VBox):
             options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT'], )
+                      'Sentence BioBERT'],
+            style=self.widgets_style
+            )
 
         # Select n. of top results to return
-        self.widgets['top_results'] = widgets.widgets.IntSlider(
-            value=min(10, self.top_n_max),
-            min=0,
-            max=self.top_n_max,
-            description='Top N results')
+        self.widgets['top_results'] = widgets.widgets.IntText(
+            value=20,
+            description='Top N results',
+            style=self.widgets_style
+            )
 
         # Choose whether to print whole paragraph containing sentence highlighted, or just the
         # sentence
         self.widgets['print_paragraph'] = widgets.Checkbox(
             value=True,
-            description='Show whole paragraph')
+            description='Show whole paragraph',
+            style=self.widgets_style
+            )
 
         # Enter Query
         self.widgets['query_text'] = widgets.Textarea(
             value='Glucose is a risk factor for COVID-19',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Query')
+            description='Query',
+            style=self.widgets_style
+            )
 
         self.widgets['has_journal'] = widgets.Checkbox(
             description="Require Journal",
-            value=False)
+            value=False,
+            style=self.widgets_style
+            )
 
         self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
@@ -117,13 +122,16 @@ class SearchWidget(widgets.VBox):
             min=1900,
             max=2020,
             value=(1900, 2020),
-            layout=widgets.Layout(width='80ch'))
-
+            layout=widgets.Layout(width='80ch'),
+            style=self.widgets_style
+            )
         # Enter Deprioritization Query
         self.widgets['deprioritize_text'] = widgets.Textarea(
             value='',
             layout=widgets.Layout(width='90%', height='80px'),
-            description='Deprioritize')
+            description='Deprioritize',
+            style=self.widgets_style
+            )
 
         # Select Deprioritization Strength
         self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
@@ -131,14 +139,16 @@ class SearchWidget(widgets.VBox):
             disabled=False,
             button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength', )
+            description='Deprioritization strength',
+            )
 
         # Enter Substrings Exclusions
         self.widgets['exclusion_text'] = widgets.Textarea(
             layout=widgets.Layout(width='90%', height='80px'),
             value='',
-            style={'description_width': 'initial'},
-            description='Substring Exclusion (newline separated): ')
+            style=self.widgets_style,
+            description='Substring Exclusion (newline separated): '
+            )
 
         self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
             options=[
@@ -148,7 +158,8 @@ class SearchWidget(widgets.VBox):
             value=_Save.NOTHING,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
-            description='Default saving: ')
+            description='Default saving: '
+            )
 
         # Click to run Information Retrieval!
         self.widgets['investigate_button'] = widgets.Button(
@@ -200,7 +211,8 @@ class SearchWidget(widgets.VBox):
         self.widgets['sent_embedder'] = widgets.ToggleButtons(
             options=['BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'], )
+            tooltips=['BioSentVec', 'Sentence BioBERT'],
+            style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
             options=['None', 'Mild', 'Stronger'],
@@ -298,35 +310,20 @@ class SearchWidget(widgets.VBox):
                 "sentence_id"
                 "paragraph_id"
                 "article_id"
-                "article_sha"
                 "article_title"
                 "article_auth"
                 "ref"
                 "section_name"
                 "text"
         """
-        sql_query = f"""
-        SELECT sha, section_name, text, paragraph_id
-        FROM sentences
-        WHERE sentence_id = "{sentence_id}"
-        """
-        sentence = pd.read_sql(sql_query, self.connection)
-        article_sha, section_name, text, paragraph_id = \
-            sentence.iloc[0][['sha', 'section_name', 'text', 'paragraph_id']]
+        sentence = retrieve_sentences_from_sentence_ids(sentence_ids=(sentence_id,),
+                                                        engine=self.connection)
+        article_id, section_name, text, paragraph_id = \
+            sentence.iloc[0][['article_id', 'section_name',
+                              'text', 'paragraph_pos_in_article']]
 
-        sql_query = f"""
-        SELECT article_id
-        FROM article_id_2_sha
-        WHERE sha = "{article_sha}"
-        """
-        article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
-
-        sql_query = f"""
-        SELECT authors, title, url
-        FROM articles
-        WHERE article_id = "{article_id}"
-        """
-        article = pd.read_sql(sql_query, self.connection)
+        article = retrieve_article_metadata_from_article_id(article_id=article_id,
+                                                            engine=self.connection)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -342,7 +339,6 @@ class SearchWidget(widgets.VBox):
             "sentence_id": sentence_id,
             "paragraph_id": int(paragraph_id),
             "article_id": article_id,
-            "article_sha": article_sha,
             "article_title": article_title,
             "article_auth": article_auth,
             "ref": ref,
@@ -381,7 +377,8 @@ class SearchWidget(widgets.VBox):
         width = 80
         if print_whole_paragraph:
             try:
-                paragraph = find_paragraph(sentence_id, self.connection)
+                paragraph = retrieve_paragraph_from_sentence_id(sentence_id,
+                                                                self.connection)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:
@@ -486,28 +483,10 @@ class SearchWidget(widgets.VBox):
         paragraph_ids : list_like
             The paragraph IDs corresponding to the sentence IDs
         """
-        article_ids = []
-        paragraph_ids = []
-
-        for sentence_id in sentence_ids:
-            sql_query = f"""
-            SELECT sha, paragraph_id
-            FROM sentences
-            WHERE sentence_id = "{sentence_id}"
-            """
-            sentence = pd.read_sql(sql_query, self.connection)
-            article_sha, paragraph_id = \
-                sentence.iloc[0][['sha', 'paragraph_id']]
-
-            sql_query = f"""
-            SELECT article_id
-            FROM article_id_2_sha
-            WHERE sha = "{article_sha}"
-            """
-            article_id = pd.read_sql(sql_query, self.connection).iloc[0]['article_id']
-
-            article_ids.append(article_id)
-            paragraph_ids.append(paragraph_id)
+        sentences = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_ids,
+                                                         engine=self.connection)
+        article_ids = sentences['article_id'].to_list()
+        paragraph_ids = sentences['paragraph_pos_in_article'].to_list()
 
         return article_ids, paragraph_ids
 
@@ -545,7 +524,6 @@ class SearchWidget(widgets.VBox):
                 article_metadata, formatted_output = \
                     self.print_single_result(result_info, print_whole_paragraph)
                 if self.article_saver:
-                    # radio_button = self.create_radio_buttons((article_id, paragraph_id), article_metadata)
                     chk_article, chk_paragraph = self._create_saving_checkboxes(
                         result_info["article_id"],
                         result_info["paragraph_id"])

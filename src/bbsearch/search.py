@@ -1,9 +1,13 @@
 """Collection of functions focused on searching."""
+import logging
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .sql import ArticleConditioner, SentenceConditioner, get_ids_by_condition, get_shas_from_ids
+from .sql import SentenceFilter
 from .utils import Timer
+
+logger = logging.getLogger(__name__)
 
 
 class LocalSearcher:
@@ -22,13 +26,17 @@ class LocalSearcher:
         The pre-trained models.
     precomputed_embeddings : dict
         The pre-computed embeddings.
+    indices : np.ndarray
+        1D array containing sentence_ids corresponding to the rows of each of the
+        values of precomputed_embeddings.
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
     """
 
-    def __init__(self, embedding_models, precomputed_embeddings, connection):
+    def __init__(self, embedding_models, precomputed_embeddings, indices, connection):
         self.embedding_models = embedding_models
         self.precomputed_embeddings = precomputed_embeddings
+        self.indices = indices
         self.connection = connection
 
     def query(self,
@@ -38,9 +46,10 @@ class LocalSearcher:
               has_journal=False,
               date_range=None,
               deprioritize_strength='None',
-              exclusion_text=None,
+              exclusion_text="",
               deprioritize_text=None,
-              verbose=True):
+              verbose=True,
+              ):
         """Do the search.
 
         Parameters
@@ -74,6 +83,7 @@ class LocalSearcher:
         results = run_search(
             self.embedding_models[which_model],
             self.precomputed_embeddings[which_model],
+            self.indices,
             self.connection,
             k,
             query_text,
@@ -87,58 +97,20 @@ class LocalSearcher:
         return results
 
 
-def filter_sentences(connection,
-                     has_journal=False,
-                     date_range=None,
-                     exclusion_text=None):
-    """Filter sentences based on specified conditions.
-
-    Parameters
-    ----------
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database.
-
-    has_journal : bool
-        If True, only consider papers that have a journal information.
-
-    date_range : tuple
-        Tuple of form (start_year, end_year) representing the considered time range.
-
-    exclusion_text : str
-        New line separated collection of strings that are automatically used to exclude a given sentence.
-
-    Returns
-    -------
-    restricted_sentence_ids: list
-        List of the sentences ids after the filtration related to the criteria specified by the user.
-    """
-    # Apply article conditions
-    article_conditions = []
-    if date_range is not None:
-        article_conditions.append(ArticleConditioner.get_date_range_condition(date_range))
-    if has_journal:
-        article_conditions.append(ArticleConditioner.get_has_journal_condition())
-    article_conditions.append(ArticleConditioner.get_restrict_to_tag_condition('has_covid19_tag'))
-
-    restricted_article_ids = get_ids_by_condition(article_conditions, 'articles', connection)
-
-    # Articles ID to SHA
-    all_article_shas_str = ', '.join([f"'{sha}'"
-                                      for sha in get_shas_from_ids(restricted_article_ids, connection)])
-    sentence_conditions = [f"sha IN ({all_article_shas_str})"]
-
-    # Apply sentence conditions
-    if exclusion_text is not None:
-        excluded_words = filter(lambda word: len(word) > 0, exclusion_text.lower().split('\n'))
-        sentence_conditions += [SentenceConditioner.get_word_exclusion_condition(word)
-                                for word in excluded_words]
-    restricted_sentence_ids = get_ids_by_condition(sentence_conditions, 'sentences', connection)
-
-    return restricted_sentence_ids
-
-
-def run_search(embedding_model, precomputed_embeddings, connection, k, query_text, has_journal=False, date_range=None,
-               deprioritize_strength='None', exclusion_text=None, deprioritize_text=None, verbose=True):
+def run_search(
+        embedding_model,
+        precomputed_embeddings,
+        indices,
+        connection,
+        k,
+        query_text,
+        has_journal=False,
+        date_range=None,
+        deprioritize_strength='None',
+        exclusion_text="",
+        deprioritize_text=None,
+        verbose=True
+):
     """Generate search results.
 
     Parameters
@@ -147,9 +119,11 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
         Instance of EmbeddingModel of the model we want to use.
 
     precomputed_embeddings : np.ndarray
-        Embeddings of the model corresponding of embedding_model.
-        The first column has to be the corresponding index of the sentence in the database.
-        The others columns have to be the embeddings, so need to have the same size as the model specified requires.
+        2D array containing embeddings of the model corresponding of embedding_model. Rows are
+        sentences and columns are different dimensions.
+
+    indices : np.ndarray
+        1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
 
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database.
@@ -193,41 +167,56 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
         - 'deprioritize_embed_time' - how much time it took to embed the `deprioritize_text` in seconds
         -
     """
+    logger.info("Starting run_search")
+
+    # Replace empty `deprioritize_text` by None
+    if deprioritize_text is not None and len(deprioritize_text.strip()) == 0:
+        deprioritize_text = None
+
     timer = Timer(verbose=verbose)
 
     with timer('query_embed'):
+        logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
 
     if deprioritize_text is not None:
         with timer('deprioritize_embed'):
+            logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
-    with timer('sentences_conditioning'):
-        restricted_sentence_ids = filter_sentences(connection,
-                                                   has_journal=has_journal,
-                                                   date_range=date_range,
-                                                   exclusion_text=exclusion_text)
-
-    # Apply date-range and has-journal filtering to arr
-    idx_col = precomputed_embeddings[:, 0]
+    with timer('sentences_filtering'):
+        logger.info("Applying sentence filtering")
+        restricted_sentence_ids = (
+            SentenceFilter(connection)
+            .only_with_journal(has_journal)
+            .restrict_sentences_ids_to(indices)
+            .date_range(date_range)
+            .exclude_strings(exclusion_text.split())
+            .run()
+        )
 
     with timer('considered_embeddings_lookup'):
-        mask = np.isin(idx_col, restricted_sentence_ids)
+        logger.info("Constructing mask based on indices and sentence filtering")
+        mask = np.isin(indices, restricted_sentence_ids)
 
-    precomputed_embeddings = precomputed_embeddings[mask]
-    if len(precomputed_embeddings) == 0:
+    logger.info("Applying the mask")
+    embeddings_corpus = precomputed_embeddings[mask]
+    sentence_ids = indices[mask]
+
+    if len(sentence_ids) == 0:
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
-    sentence_ids, embeddings_corpus = precomputed_embeddings[:, 0], precomputed_embeddings[:, 1:]
     with timer('query_similarity'):
+        logger.info("Computing cosine similarities for the query text")
         similarities_query = cosine_similarity(X=embedding_query[None, :],
                                                Y=embeddings_corpus).squeeze()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
+            logger.info("Computing cosine similarity for the deprioritization text")
             similarities_deprio = cosine_similarity(X=embedding_deprioritize[None, :],
                                                     Y=embeddings_corpus).squeeze()
     else:
@@ -241,10 +230,14 @@ def run_search(embedding_model, precomputed_embeddings, connection, k, query_tex
         'Stronger': (0.5, 0.7),
     }
     # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
+    logger.info("Combining query and deprioritizations")
     alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
     with timer('sorting'):
-        indices = np.argsort(-similarities)[:k]
+        logger.info(f"Sorting the similarities and getting the top {k} results")
+        top_indices = np.argsort(-similarities)[:k]
 
-    return sentence_ids[indices], similarities[indices], timer.stats
+    logger.info("run_search finished")
+
+    return sentence_ids[top_indices], similarities[top_indices], timer.stats
