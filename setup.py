@@ -47,6 +47,7 @@ setup(
     description="Blue Brain Search",
     author="Blue Brain Project (EPFL) - ML Team",
     author_email="bbp-ou-machinelearning@groupes.epfl.ch",
+    url="https://github.com/BlueBrain/BlueBrainSearch",
     use_scm_version={
         "write_to": "src/bbsearch/version.py",
         "write_to_template": '__version__ = "{version}"\n',
