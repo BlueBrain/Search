@@ -1,9 +1,13 @@
 """Collection of functions focused on searching."""
+import logging
+
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
 from .sql import SentenceFilter
 from .utils import Timer
+
+logger = logging.getLogger(__name__)
 
 
 class LocalSearcher:
@@ -163,18 +167,22 @@ def run_search(
         - 'deprioritize_embed_time' - how much time it took to embed the `deprioritize_text` in seconds
         -
     """
+    logger.info("Starting run_search")
     timer = Timer(verbose=verbose)
 
     with timer('query_embed'):
+        logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
 
     if deprioritize_text is not None:
         with timer('deprioritize_embed'):
+            logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
-    with timer('sentences_conditioning'):
+    with timer('sentences_filtering'):
+        logger.info("Applying sentence filtering")
         restricted_sentence_ids = (
             SentenceFilter(connection)
             .only_with_journal(has_journal)
@@ -185,8 +193,10 @@ def run_search(
         )
 
     with timer('considered_embeddings_lookup'):
+        logger.info("Constructing mask based on indices and sentence filtering")
         mask = np.isin(indices, restricted_sentence_ids)
 
+    logger.info("Applying the mask")
     embeddings_corpus = precomputed_embeddings[mask]
     sentence_ids = indices[mask]
 
@@ -195,11 +205,13 @@ def run_search(
 
     # Compute similarities
     with timer('query_similarity'):
+        logger.info("Computing cosine similarities for the query text")
         similarities_query = cosine_similarity(X=embedding_query[None, :],
                                                Y=embeddings_corpus).squeeze()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
+            logger.info("Computing cosine similarity for the deprioritization text")
             similarities_deprio = cosine_similarity(X=embedding_deprioritize[None, :],
                                                     Y=embeddings_corpus).squeeze()
     else:
@@ -213,10 +225,14 @@ def run_search(
         'Stronger': (0.5, 0.7),
     }
     # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
+    logger.info("Combining query and deprioritizations")
     alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
     with timer('sorting'):
+        logger.info(f"Sorting the similarities and getting to top {k}")
         top_indices = np.argsort(-similarities)[:k]
+
+    logger.info("run_search finished")
 
     return sentence_ids[top_indices], similarities[top_indices], timer.stats
