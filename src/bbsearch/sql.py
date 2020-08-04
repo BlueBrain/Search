@@ -1,4 +1,6 @@
 """SQL Related functions."""
+import logging
+
 import pandas as pd
 
 
@@ -216,6 +218,8 @@ class SentenceFilter:
 
     def __init__(self, connection):
         self.connection = connection
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         self.only_with_journal_flag = False
         self.year_from = None
         self.year_to = None
@@ -237,6 +241,7 @@ class SentenceFilter:
             The instance of `SentenceFilter` itself. Useful for
             chained applications of filters.
         """
+        self.logger.info(f"Only with journal: {flag}")
         self.only_with_journal_flag = flag
         return self
 
@@ -255,6 +260,7 @@ class SentenceFilter:
             The instance of `SentenceFilter` itself. Useful for
             chained applications of filters.
         """
+        self.logger.info(f"Date range: {date_range}")
         if date_range is not None:
             self.year_from, self.year_to = date_range
         return self
@@ -273,6 +279,7 @@ class SentenceFilter:
             The instance of `SentenceFilter` itself. Useful for
             chained applications of filters.
         """
+        self.logger.info(f"Exclude strings: {strings}")
         strings = map(lambda s: s.lower(), strings)
         strings = filter(lambda s: len(s) > 0, strings)
         self.string_exclusions.extend(strings)
@@ -292,7 +299,16 @@ class SentenceFilter:
             The instance of `SentenceFilter` itself. Useful for
             chained applications of filters.
         """
+        # For logging
+        if len(sentence_ids) > 5:
+            ids_str = f"[{', '.join(map(str, sentence_ids[:5]))} ..."
+        else:
+            ids_str = str(sentence_ids)
+        self.logger.info(f"Restricting to sentencs IDs: {ids_str}")
+
+        # The actual restriction
         self.restricted_sentence_ids = tuple(sentence_ids)
+
         return self
 
     def _build_query(self):
@@ -352,7 +368,10 @@ class SentenceFilter:
             A 1-dimensional numpy array with the filtered sentence IDs.
             Its length will be at most equal to `chunk_size`.
         """
+        self.logger.info(f"Iterating filtering with chunk size {chunk_size}")
+
         query = self._build_query()
+        self.logger.info(f"Query: {query}")
         for df_results in pd.read_sql(query, self.connection, chunksize=chunk_size):
             result_arr = df_results["sentence_id"].to_numpy()
             yield result_arr
@@ -365,8 +384,17 @@ class SentenceFilter:
         result_arr : np.ndarray
             A 1-dimensional numpy array with the filtered sentence IDs.
         """
+        self.logger.info("Running the filtering query")
+
         query = self._build_query()
+        self.logger.info(f"Query: {query}")
+
+        self.logger.debug("Running pd.read_sql")
         df_results = pd.read_sql(query, self.connection)
+
+        self.logger.debug("Converting results from pd.Series to numpy")
         result_arr = df_results["sentence_id"].to_numpy()
+
+        self.logger.info(f"Filtering gave {len(result_arr)} results")
 
         return result_arr

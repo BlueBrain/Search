@@ -235,7 +235,7 @@ def run_search(
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
     with timer('sorting'):
-        logger.info(f"Sorting the similarities and getting to top {k}")
+        logger.info(f"Sorting the similarities and getting the top {k} results")
         top_indices = np.argsort(-similarities)[:k]
 
     logger.info("run_search finished")

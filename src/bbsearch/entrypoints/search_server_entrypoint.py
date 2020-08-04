@@ -1,5 +1,6 @@
 """The entrypoint script for the search server."""
 import argparse
+import logging
 import os
 
 from ._helper import configure_logging
@@ -30,6 +31,10 @@ parser.add_argument("--database_uri",
                     default="dgx1.bbp.epfl.ch:8853/cord19_v35",
                     type=str,
                     help="The URI to the MySQL database.")
+parser.add_argument("--debug",
+                    default=False,
+                    type=bool,
+                    help="Enable debug logging messages")
 args = parser.parse_args()
 
 
@@ -38,7 +43,11 @@ def main():
     # Configure logging
     log_dir = os.getenv("LOG_DIR", "/")
     log_name = os.getenv("LOG_NAME", "bbs_search.log")
-    configure_logging(log_dir, log_name)
+    if args.debug:
+        log_level = logging.DEBUG
+    else:
+        log_level = logging.INFO
+    configure_logging(log_dir, log_name, log_level)
 
     # Start server
     import pathlib
