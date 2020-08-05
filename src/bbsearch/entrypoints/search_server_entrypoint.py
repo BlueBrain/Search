@@ -64,6 +64,7 @@ def main():
     engine = sqlalchemy.create_engine(f"mysql+pymysql://guest:guest@{args.database_uri}")
 
     SearchServer(app, models_path, embeddings_path, indices, engine)
+
     app.run(
         host=args.host,
         port=args.port,

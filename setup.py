@@ -11,6 +11,7 @@ install_requires = [
     "en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz",
     "faiss-cpu",
     "h5py",
+    "ipython",
     "ipywidgets",
     "jupyter_dash",
     "jupyter_server_proxy",
@@ -47,7 +48,9 @@ extras_require = {"dev": ["flake8", "pydocstyle", "pytest>=4.6", "pytest-cov"]}
 setup(
     name="BBSearch",
     description="Blue Brain Search",
-    author="Blue Brain Project",
+    author="Blue Brain Project (EPFL) - ML Team",
+    author_email="bbp-ou-machinelearning@groupes.epfl.ch",
+    url="https://github.com/BlueBrain/BlueBrainSearch",
     use_scm_version={
         "write_to": "src/bbsearch/version.py",
         "write_to_template": '__version__ = "{version}"\n',
@@ -55,6 +58,7 @@ setup(
     },
     package_dir={"": "src"},
     packages=find_packages("./src"),
+    package_data={"bbsearch": ["_css/stylesheet.css"]},
     python_requires=">=3.6",
     setup_requires=["setuptools_scm"],
     install_requires=install_requires,

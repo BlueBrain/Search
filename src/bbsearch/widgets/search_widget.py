@@ -4,14 +4,18 @@ import enum
 import functools
 import logging
 import math
-import pdfkit
 import textwrap
 
-from IPython.display import display, HTML
 import ipywidgets as widgets
+import pdfkit
+from IPython.display import HTML, display
 
-from ..sql import retrieve_paragraph_from_sentence_id, retrieve_sentences_from_sentence_ids, \
-    retrieve_article_metadata_from_article_id
+from .._css import style
+from ..sql import (
+    retrieve_article_metadata_from_article_id,
+    retrieve_paragraph_from_sentence_id,
+    retrieve_sentences_from_sentence_ids,
+)
 from ..utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -79,7 +83,7 @@ class SearchWidget(widgets.VBox):
     def _init_widgets(self):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
-        self.widgets['sent_embedder'] = widgets.ToggleButtons(
+        self.widgets['sent_embedder'] = widgets.RadioButtons(
             options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
@@ -134,10 +138,9 @@ class SearchWidget(widgets.VBox):
             )
 
         # Select Deprioritization Strength
-        self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
+        self.widgets['deprioritize_strength'] = widgets.RadioButtons(
             options=['None', 'Weak', 'Mild', 'Strong', 'Stronger'],
             disabled=False,
-            button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
             description='Deprioritization strength',
             )
@@ -150,7 +153,7 @@ class SearchWidget(widgets.VBox):
             description='Substring Exclusion (newline separated): '
             )
 
-        self.widgets['default_value_article_saver'] = widgets.ToggleButtons(
+        self.widgets['default_value_article_saver'] = widgets.RadioButtons(
             options=[
                 (self.saving_labels[_Save.NOTHING], _Save.NOTHING),
                 (self.saving_labels[_Save.PARAGRAPH], _Save.PARAGRAPH),
@@ -163,8 +166,9 @@ class SearchWidget(widgets.VBox):
 
         # Click to run Information Retrieval!
         self.widgets['investigate_button'] = widgets.Button(
-            description='Investigate!',
-            layout=widgets.Layout(width='50%'))
+            description='📚 Search Literature!',
+            layout=widgets.Layout(width='350px', height='50px'))
+        self.widgets['investigate_button'].add_class('bbs_button')
 
         # Click to run Generate Report!
         self.widgets['report_button'] = widgets.Button(
@@ -208,20 +212,22 @@ class SearchWidget(widgets.VBox):
         """Hide from the user not used functionalities in the widgets."""
         self.widgets['exclusion_text'].layout.display = 'none'
         # Remove some models (USE and SBERT)
-        self.widgets['sent_embedder'] = widgets.ToggleButtons(
+        self.widgets['sent_embedder'] = widgets.RadioButtons(
             options=['BSV', 'SBioBERT'],
             description='Model for Sentence Embedding',
             tooltips=['BioSentVec', 'Sentence BioBERT'],
             style=self.widgets_style)
         # Remove some deprioritization strength
-        self.widgets['deprioritize_strength'] = widgets.ToggleButtons(
+        self.widgets['deprioritize_strength'] = widgets.RadioButtons(
             options=['None', 'Mild', 'Stronger'],
             disabled=False,
-            button_style='info',
             style={'description_width': 'initial', 'button_width': '80px'},
             description='Deprioritization strength')
 
     def _init_ui(self):
+        css_style = style.get_css_style()
+        display(HTML(f'<style> {css_style} </style>'))
+
         page_selection = widgets.HBox(children=[
             self.widgets['page_back'],
             self.widgets['page_label'],
@@ -258,7 +264,7 @@ class SearchWidget(widgets.VBox):
              | |_) | |_) |____) |
              |____/|____/|_____/
 
-            Click "Investiage" to display some results.
+            Click on "Search Literature!" button to display some results.
             """
             print(textwrap.dedent(init_text))
 
@@ -279,17 +285,13 @@ class SearchWidget(widgets.VBox):
             The paragraph containing `sentence` with the sentence highlighted
             in color
         """
-        color_text = '#222222'
-        color_highlight = '#000000'
-
         start = paragraph.index(sentence)
         end = start + len(sentence)
-        highlighted_paragraph = f"""
-            <p style="font-size:13px; color:{color_text}">
-            {paragraph[:start]}
-            <b style="color:{color_highlight}"> {paragraph[start:end]} </b>
-            {paragraph[end:]}
-            </p>
+        highlighted_paragraph = \
+            f"""
+            <div class="paragraph">
+                {paragraph[:start]} <div class="paragraph_emph"> {paragraph[start:end]} </div> {paragraph[end:]}
+            </div>
             """
 
         return highlighted_paragraph
@@ -390,16 +392,17 @@ class SearchWidget(widgets.VBox):
         else:
             formatted_output = textwrap.fill(text, width=width)
 
-        color_title = '#1A0DAB'
-        color_metadata = '#006621'
+        # color_title = '#1A0DAB'
+        # color_metadata = '#006621'
         article_metadata = f"""
-            <a href="{ref}" style="color:{color_title}; font-size:17px">
-                {article_title}
+            <a href="{ref}">
+                <div class="article_title">
+                    {article_title}
+                </div>
             </a>
-            <br>
-            <p style="color:{color_metadata}; font-size:13px">
+            <div class="metadata">
                 {article_auth} &#183; {section_name.lower().title()}
-            </p>
+            </div>
             """
         article_metadata = textwrap.dedent(article_metadata)
 
@@ -600,13 +603,11 @@ class SearchWidget(widgets.VBox):
             print()
             print('Creating the search results PDF report... ')
 
-            color_hyperparameters = '#222222'
-
             hyperparameters_section = f"""
             <h1> Search Parameters </h1>
-            <ul style="font-size:13; color:{color_hyperparameters}">
+            <ul class="paragraph">
             <li> {'</li> <li>'.join([
-                '<b>' +
+                '<div class="paragraph_emph">' +
                 ' '.join(k.split('_')).title() +
                 '</b>' +
                 f': {repr(v.value)}'
@@ -625,5 +626,10 @@ class SearchWidget(widgets.VBox):
                 report += article_metadata + formatted_output + '<br>'
 
             results_section = f"<h1> Results </h1> {report}"
-            pdfkit.from_string(hyperparameters_section + results_section,
+
+            css_style = style.get_css_style()
+
+            pdfkit.from_string(f"<style> {css_style} </style>" +
+                               hyperparameters_section +
+                               results_section,
                                f"report_{datetime.datetime.now()}.pdf")
