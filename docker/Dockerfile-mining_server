@@ -48,7 +48,7 @@ RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2
 
 # Expose a port
 EXPOSE 8080
-ENV EE_MODELS_LIBRARY="/raid/bbs_data/models_libraries/ee_models_library.csv"
+ENV EE_MODELS_LIBRARY="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_mining.log"
 
