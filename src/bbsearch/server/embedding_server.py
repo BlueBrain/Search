@@ -6,6 +6,7 @@ import textwrap
 
 from flask import request, jsonify, make_response
 
+import bbsearch
 from .invalid_usage_exception import InvalidUsage
 
 
@@ -24,7 +25,7 @@ class EmbeddingServer:
     def __init__(self, app, embedding_models):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.name = 'EmbeddingServer'
-        self.version = "1.0"
+        self.version = bbsearch.__version__
 
         self.logger.info("Initializing the server...")
         self.logger.info(f"Name: {self.name}")

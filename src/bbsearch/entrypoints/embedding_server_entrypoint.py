@@ -42,7 +42,9 @@ def main():
 
     # Create Server app
     app = Flask("BBSearch Embedding Server")
-    EmbeddingServer(app, embedding_models)
+    EmbeddingServer(app=app,
+                    embedding_models=embedding_models
+                    )
     app.run(
         host=args.host,
         port=args.port,
