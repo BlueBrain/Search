@@ -1,6 +1,8 @@
 """Configuration of pytest."""
 from pathlib import Path
+import time
 
+import docker
 import h5py
 import numpy as np
 import pandas as pd
@@ -80,15 +82,45 @@ def fill_db_data(connection, metadata_path, test_parameters):
     sentences_content.to_sql(name='sentences', con=connection, index=False, if_exists='append')
 
 
-@pytest.fixture(scope='session')
-def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters):
+@pytest.fixture(scope='session', params=['sqlite', 'mysql'])
+def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, request):
     """Connection object (sqlite)."""
-    db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19_test.db'
-    Path(db_path).touch()
-    engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
-    fill_db_data(engine, metadata_path, test_parameters)
+    if request.param == 'sqlite':
+        db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19_test.db'
+        Path(db_path).touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
+        fill_db_data(engine, metadata_path, test_parameters)
+        yield engine
 
-    return engine
+    else:
+        client = docker.from_env()
+        container = client.containers.run('mysql:latest',
+                                          environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
+                                          ports={'3306/tcp': 3306},
+                                          detach=True)
+
+        docker_ready = False
+
+        max_waiting_time = 2 * 60
+        start = time.perf_counter()
+
+        while not docker_ready and (time.perf_counter() - start) < max_waiting_time:
+            try:
+                engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw@127.0.0.1:3306/')
+                engine.execute('show databases')
+            except sqlalchemy.exc.OperationalError:
+                time.sleep(5)
+
+                continue
+            docker_ready = True
+
+        engine.execute("create database test")
+        engine.execute("use test")
+        fill_db_data(engine, metadata_path, test_parameters)
+
+        yield engine
+
+        container.kill()
 
 
 @pytest.fixture(scope='session')

@@ -7,7 +7,7 @@ import sqlalchemy
 from bbsearch.database import CORD19DatabaseCreation
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='session')
 def real_sqlalchemy_engine(tmp_path_factory, jsons_path):
     version = 'test'
     saving_directory = tmp_path_factory.mktemp('real_db', numbered=False)
