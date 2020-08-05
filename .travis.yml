@@ -7,7 +7,6 @@ cache:
   pip: true
 
 before_install:
-  - sudo apt-get install -y wkhtmltopdf
   - pip install flake8 pydocstyle
   - flake8 src/
   - pydocstyle src/
