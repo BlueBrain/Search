@@ -1,9 +1,12 @@
 from copy import copy
+import json
+from pathlib import Path
 
+from IPython.display import HTML
 import pandas as pd
 import responses
 
-from bbsearch.widgets import MiningWidget, ArticleSaver
+from bbsearch.widgets import MiningWidget, ArticleSaver, SchemaRequest
 
 
 class MiningWidgetBot:
@@ -88,13 +91,22 @@ class MiningWidgetBot:
 columns = {'name': pd.Series(['John Smith', 'Erica Meyers']),
            'department': pd.Series(['Accounting', 'IT']),
            'birthday': pd.Series(['November', 'March'])}
-df = pd.DataFrame(columns)
+table_extractions = pd.DataFrame(columns)
+
+TESTS_PATH = Path(__file__).resolve().parent.parent
+
+schema_request = SchemaRequest()
+schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
+df_schema = pd.read_csv(schema_file)
+schema_request.schema = df_schema
 
 
 def request_callback(request):
-    resp_body = df.to_csv(index=False)
-    headers = {'request-id': '1234abcdeABCDE', 'Content-Type': "text/csv"}
-    response = (200, headers, resp_body)
+    dataframe = table_extractions.to_csv(index=False)
+    resp_body = {'warnings': ['This is a test warning'],
+                 'csv_extractions': dataframe}
+    headers = {'request-id': '1234abcdeABCDE'}
+    response = (200, headers, json.dumps(resp_body))
     return response
 
 
@@ -104,10 +116,11 @@ def test_mining_text(monkeypatch, capsys):
     responses.add_callback(
         responses.POST, 'http://test/text',
         callback=request_callback,
-        content_type="text/csv"
+        content_type="application/json"
     )
 
-    mining_widget = MiningWidget(mining_server_url='http://test')
+    mining_widget = MiningWidget(mining_server_url='http://test',
+                                 schema_request=schema_request)
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
     bot.set_value('input_text', 'HELLO')
@@ -116,10 +129,12 @@ def test_mining_text(monkeypatch, capsys):
     assert len(responses.calls) == 1
 
     display_objs = bot.display_cached
-    assert len(display_objs) == 1
+    assert len(display_objs) == 3  # 1 schema + 1 warning + 1 table_extractions
     assert isinstance(display_objs[0], pd.DataFrame)
 
-    assert display_objs[0].equals(df)
+    assert display_objs[0].equals(df_schema)
+    assert isinstance(display_objs[1], HTML)
+    assert display_objs[2].equals(table_extractions)
 
 
 @responses.activate
@@ -131,7 +146,8 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
         content_type="text/csv"
     )
 
-    mining_widget = MiningWidget(mining_server_url='http://test')
+    mining_widget = MiningWidget(mining_server_url='http://test',
+                                 schema_request=schema_request)
     empty_dataframe = pd.DataFrame()
     assert empty_dataframe.equals(mining_widget.get_extracted_table())
 
@@ -147,6 +163,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
         article_saver.add_article(article_id=i)
 
     mining_widget = MiningWidget(mining_server_url='http://test',
+                                 schema_request=schema_request,
                                  article_saver=article_saver)
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
@@ -158,7 +175,10 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     assert isinstance(mining_widget.get_extracted_table(), pd.DataFrame)
 
     display_objs = bot.display_cached
-    assert len(display_objs) == 1
+    assert len(display_objs) == 3  # 1 schema + 1 warning + 1 table_extractions
     assert isinstance(display_objs[0], pd.DataFrame)
+    assert isinstance(display_objs[2], pd.DataFrame)
 
-    assert display_objs[0].equals(df)
+    assert display_objs[0].equals(df_schema)
+    assert isinstance(display_objs[1], HTML)
+    assert display_objs[2].equals(table_extractions)
