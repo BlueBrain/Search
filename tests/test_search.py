@@ -46,7 +46,7 @@ class TestLocalSearcher:
         assert emb_mod.embed.call_count == 1
 
 
-def test_run_search(fake_db_cnxn, embeddings_h5_path):
+def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
     model = 'SBERT'
     query_text = 'I want to know everything about the universe.'
     k = 5
@@ -69,7 +69,7 @@ def test_run_search(fake_db_cnxn, embeddings_h5_path):
     top_indices, similarities, stats = run_search(embedding_model=emb_mod,
                                                   precomputed_embeddings=precomputed_embeddings,
                                                   indices=indices,
-                                                  connection=fake_db_cnxn,
+                                                  connection=fake_sqlalchemy_engine,
                                                   query_text=query_text,
                                                   deprioritize_text=None,
                                                   deprioritize_strength=deprioritized_strength,
@@ -87,7 +87,7 @@ def test_run_search(fake_db_cnxn, embeddings_h5_path):
     top_indices, similarities, stats = run_search(embedding_model=emb_mod,
                                                   precomputed_embeddings=precomputed_embeddings,
                                                   indices=indices,
-                                                  connection=fake_db_cnxn,
+                                                  connection=fake_sqlalchemy_engine,
                                                   query_text=query_text,
                                                   deprioritize_text=deprioritized_text,
                                                   date_range=(3000, 3001),
@@ -102,7 +102,7 @@ def test_run_search(fake_db_cnxn, embeddings_h5_path):
     top_indices, similarities, stats = run_search(embedding_model=emb_mod,
                                                   precomputed_embeddings=precomputed_embeddings,
                                                   indices=indices,
-                                                  connection=fake_db_cnxn,
+                                                  connection=fake_sqlalchemy_engine,
                                                   query_text=query_text,
                                                   deprioritize_text=deprioritized_text,
                                                   k=k)

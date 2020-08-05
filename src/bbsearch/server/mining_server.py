@@ -8,6 +8,7 @@ import spacy
 
 import bbsearch
 from ..mining import run_pipeline
+from ..sql import retrieve_articles, retrieve_paragraph
 
 
 class MiningServer:
@@ -119,23 +120,27 @@ class MiningServer:
 
             schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
 
-            self.logger.info("Parsing identifiers...")
-            tmp_dict = {paragraph_id: article_id for article_id, paragraph_id in identifiers}
-            paragraph_ids_joined = ','.join(f"\"{id_}\"" for id_ in tmp_dict.keys())
+            all_article_ids = []
+            all_paragraphs = pd.DataFrame()
+            for (article_id, paragraph_pos) in identifiers:
+                if paragraph_pos == -1:
+                    all_article_ids += [article_id]
+                else:
+                    paragraph = retrieve_paragraph(article_id,
+                                                   paragraph_pos,
+                                                   engine=self.connection)
+                    all_paragraphs = all_paragraphs.append(paragraph)
 
-            sql_query = f"""
-            SELECT paragraph_id, section_name, text
-            FROM paragraphs
-            WHERE paragraph_id IN ({paragraph_ids_joined})
-            """
+            if all_article_ids:
+                articles = retrieve_articles(article_ids=all_article_ids,
+                                             engine=self.connection)
+                all_paragraphs = all_paragraphs.append(articles)
 
-            self.logger.info("Retrieving article texts from the database...")
-            texts_df = pd.read_sql(sql_query, self.connection)
-            texts = \
-                [(row['text'],
-                  {'paper_id':
-                    f'{tmp_dict[row["paragraph_id"]]}:{row["section_name"]}:{row["paragraph_id"]}'})
-                    for _, row in texts_df.iterrows()]
+            texts = [(row['text'],
+                      {'paper_id':
+                       f'{row["article_id"]}:{row["section_name"]}'
+                       f':{row["paragraph_pos_in_article"]}'})
+                     for _, row in all_paragraphs.iterrows()]
 
             df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
             response = self.create_response(df_all, etypes_na)

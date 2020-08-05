@@ -1,0 +1,3458 @@
+{
+    "paper_id": "PMC7223769",
+    "metadata": {
+        "title": "Therapeutic ISCOMATRIX\u2122 adjuvant vaccine elicits effective anti-tumor immunity in the TRAMP-C1 mouse model of prostate cancer",
+        "authors": [
+            {
+                "first": "Adele",
+                "middle": [
+                    "M."
+                ],
+                "last": "Barr",
+                "suffix": "",
+                "email": "adele.barr@csl.com.au",
+                "affiliation": {}
+            },
+            {
+                "first": "Anabel",
+                "middle": [],
+                "last": "Silva",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Sandro",
+                "middle": [],
+                "last": "Prato",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Gabrielle",
+                "middle": [
+                    "T."
+                ],
+                "last": "Belz",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Eugene",
+                "middle": [],
+                "last": "Maraskovsky",
+                "suffix": "",
+                "email": null,
+                "affiliation": {}
+            },
+            {
+                "first": "Adriana",
+                "middle": [],
+                "last": "Baz Morelli",
+                "suffix": "",
+                "email": "adriana.bazmorellli@csl.com.au",
+                "affiliation": {}
+            }
+        ]
+    },
+    "body_text": [
+        {
+            "text": "Evidence suggests that it is possible to vaccinate against cancer, at least in the case of virally induced cancers. In these instances, the vaccine targets the viral causative agent and not the cancer itself. Indirect evidence to support the possibility of using host immunity in the fight against non-virally induced cancers comes in the form of the success story that are the checkpoint inhibitors. These immunotherapies show us that an anti-tumor T cell response is mounted but becomes impaired along the way by the immunosuppressive microenvironment. \u2018Taking the brakes off the system\u2019 with these checkpoint inhibitors reveals just how effective an anti-tumor immune response can be [1].",
+            "cite_spans": [
+                {
+                    "start": 688,
+                    "end": 689,
+                    "mention": "1",
+                    "ref_id": "BIBREF0"
+                }
+            ],
+            "section": "Introduction",
+            "ref_spans": []
+        },
+        {
+            "text": "Prostate cancer continues to present a significant unmet medical need with approximately 30,000 men dying from the disease each year in the USA alone, second only to lung cancer [2]. Active surveillance, radiation and radical prostatectomy are the most common treatment options in the management of early stages of prostate cancer. Although these treatments have very good 5-year survival rates (approaching 100%), albeit with a range of potential side effects, it is estimated that 20\u201330% of patients will show signs of disease recurrence after the 5-year follow-up period (www.pcf.org). Priming the immune system so that it may be able to assist in \u2018mopping up\u2019 cancerous cells that remain following radiation or surgery, reveals a window of opportunity for adjunctive vaccination in the treatment/management of prostate cancer. A challenge to this opportunity is the immunologically \u2018cold\u2019 nature of prostate cancer and this challenge is clear when you consider that only one prostate cancer vaccine has been approved since 2010. Patients vaccinated with the FDA approved PROVENGE\u00ae-PAP-GM-CSF loaded antigen presenting cells, an autologous cellular cancer immunotherapy for the treatment of asymptomatic or minimally symptomatic metastatic castrate-resistant prostate cancer (mCRPC), experienced median survival benefits of 4.1 months [3]. The phase III PROSPECT trial for the prostate vaccine development by Bavarian Nordic, PROSTVAC, failed to show an overall survival benefit as a monotherapy [4] but clinical trials exploring its potential in combination strategies are ongoing.",
+            "cite_spans": [
+                {
+                    "start": 179,
+                    "end": 180,
+                    "mention": "2",
+                    "ref_id": "BIBREF11"
+                },
+                {
+                    "start": 1339,
+                    "end": 1340,
+                    "mention": "3",
+                    "ref_id": "BIBREF22"
+                },
+                {
+                    "start": 1500,
+                    "end": 1501,
+                    "mention": "4",
+                    "ref_id": "BIBREF33"
+                }
+            ],
+            "section": "Introduction",
+            "ref_spans": []
+        },
+        {
+            "text": "Currently, it is well accepted that cancer treatment will require multiple therapy combinations, including for instance, multi-adjuvanted vaccines and check point inhibitors [1, 5\u20137]. Combination strategies aim to elicit anti-tumor immune responses of greater magnitude and quality capable of overcoming tumor immunosuppression or resistance mechanisms. Most immunomodulatory strategies have focussed on reactivating T cells but there is scope to expand on these strategies to boost innate immune responses. NK cells have long been recognized for their potential to kill cancer cells and have been exploited in a range of therapeutic approaches such as autologous cell transfer, monoclonal antibodies engineered for increased ADCC (antibody-dependent cellular cytotoxicity) activity, chimeric antigen receptors [8\u201310] and are potential targets for checkpoint inhibitors [11\u201313]. Designing immunotherapies that stimulate NK cells in addition to effector T cells could result in more effective therapies by harnessing the full complement of NK-driven anti-tumor effector mechanisms [14, 15].",
+            "cite_spans": [
+                {
+                    "start": 175,
+                    "end": 176,
+                    "mention": "1",
+                    "ref_id": "BIBREF0"
+                },
+                {
+                    "start": 178,
+                    "end": 179,
+                    "mention": "5",
+                    "ref_id": "BIBREF42"
+                },
+                {
+                    "start": 180,
+                    "end": 181,
+                    "mention": "7",
+                    "ref_id": "BIBREF44"
+                },
+                {
+                    "start": 812,
+                    "end": 813,
+                    "mention": "8",
+                    "ref_id": "BIBREF45"
+                },
+                {
+                    "start": 814,
+                    "end": 816,
+                    "mention": "10",
+                    "ref_id": "BIBREF1"
+                },
+                {
+                    "start": 871,
+                    "end": 873,
+                    "mention": "11",
+                    "ref_id": "BIBREF2"
+                },
+                {
+                    "start": 874,
+                    "end": 876,
+                    "mention": "13",
+                    "ref_id": "BIBREF4"
+                },
+                {
+                    "start": 1081,
+                    "end": 1083,
+                    "mention": "14",
+                    "ref_id": "BIBREF5"
+                },
+                {
+                    "start": 1085,
+                    "end": 1087,
+                    "mention": "15",
+                    "ref_id": "BIBREF6"
+                }
+            ],
+            "section": "Introduction",
+            "ref_spans": []
+        },
+        {
+            "text": "In the last years, we have investigated the use of the saponin-based adjuvant, ISCOMATRIX\u2122 adjuvant, in cancer vaccines due to its ability to induce both tumor Ag-specific cellular and Ab responses, as well as, NK cell activation. Initial studies in cancer models demonstrated that ISCOMATRIX\u2122 adjuvanted vaccines, comprising tumor antigen and adjuvant, were efficacious in the prophylactic setting [16, 17] but for effectiveness in the therapeutic setting, it is likely that additional vaccine components would be required. Recently, we and others have sought to combine multiple adjuvants in an effort to improve the efficacy of vaccines containing poorly immunogenic antigens and cancer vaccines [18\u201322]. The addition of PolyI:C and CpG Oligodeoxynucleotides (CpG) and a tumor antigen revealed the potential of an ISCOMATRIX\u2122 adjuvant and TLR agonist combination cancer vaccine [22]. In this present study, we examine the effectiveness of a prostate cancer vaccine that combines the ISCOMATRIX\u2122 adjuvant and the tumor antigen mPAP with the TLR3 agonist, Poly I:C, and the immunostimulatory cytokine Flt3L. The goal of this study was to identify a vaccine that could provide therapeutic protection against a poorly immunogenic tumor. Moreover, the mechanism of action (MoA) of this combination therapeutic prostate cancer vaccine was probed. These studies revealed that NK cells and CD4+ T cells, optimally stimulated by this vaccine combination, can drive an effective anti-tumor immune response that can overcome the need for CD8+ T cells that were found to acquire an exhausted phenotype over time. The vaccine revealed striking effects on NK cell activation and function and induced a robust protective memory response. Importantly, the vaccine showed impact on prostate weight in the pre-metastatic phase in a model of spontaneous prostate cancer that more closely reflects the human disease. In addition, the vaccine has potential for broader application as we demonstrated significant efficacy in the melanoma (B16-OVA) and lymphoma (E\u00b5-myc-OVA) mouse models.",
+            "cite_spans": [
+                {
+                    "start": 400,
+                    "end": 402,
+                    "mention": "16",
+                    "ref_id": "BIBREF7"
+                },
+                {
+                    "start": 404,
+                    "end": 406,
+                    "mention": "17",
+                    "ref_id": "BIBREF8"
+                },
+                {
+                    "start": 700,
+                    "end": 702,
+                    "mention": "18",
+                    "ref_id": "BIBREF9"
+                },
+                {
+                    "start": 703,
+                    "end": 705,
+                    "mention": "22",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 882,
+                    "end": 884,
+                    "mention": "22",
+                    "ref_id": "BIBREF14"
+                }
+            ],
+            "section": "Introduction",
+            "ref_spans": []
+        },
+        {
+            "text": "TRAMP-C1 cells [23, 24] were grown in TRAMP tissue culture medium (Dulbecco\u2019s Modified Eagle Medium (DMEM, Sigma Aldrich, St Louis, MO, USA) supplemented with 10% (w/v) FBS (Sigma Aldrich), 5 \u00b5g/ml insulin, cell-culture grade 0.01 nM dihydrotestosterone (Sigma) and 100 U/ml penicillin/100 \u00b5g/ml streptomycin) in a 37 \u00b0C, 5% CO2 incubator and were harvested by trypsinization when cells were ~ 80\u201390% confluent. B16-OVA cells were grown in RPMI-1640 complete media [10% (w/v)] FBS (Sigma Aldrich St Louis, MO, USA), 100 U/ml penicillin/100 \u00b5g/ml streptomycin supplemented with 0.4 mg/ml of G418/Geneticin selection in a 37 \u00b0C, 10% CO2 incubator and were harvested with Accutase (Sigma Aldrich, St Louis, MO, USA) when cells were ~ 80\u201390% confluent. Thawed E\u00b5-myc-OVA [25], B cell lymphoma, cells were injected directly into mice. C57BL/6J (CD45.2), B6.SJL/J-PTPRCa (CD45.1), C57BL/6-Tg(TRAMP)8247Ng/J (TRAMP Transgenic-Tg) and B6.129S7-Ifngtm1Ts/J (IFN\u03b3 KO) mice were used in experiments. In all cases, sex matched mice at 7\u201312 weeks of age were used except in memory experiments where control mice were aged to match memory mice.",
+            "cite_spans": [
+                {
+                    "start": 16,
+                    "end": 18,
+                    "mention": "23",
+                    "ref_id": "BIBREF15"
+                },
+                {
+                    "start": 20,
+                    "end": 22,
+                    "mention": "24",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 768,
+                    "end": 770,
+                    "mention": "25",
+                    "ref_id": "BIBREF17"
+                }
+            ],
+            "section": "Animals and cell lines ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "ISCOMATRIX\u2122 adjuvant (CSL Biotherapies, King of Prussia, PA; ISCOMATRIX is a registered trademark of ISCOTEC Ab a CSL company; ISCO is a registered trademark of CSL) was prepared as described previously and used at 3.8 ISCO units/dose [26]. Poly I:C (InvivoGen, San Diego, CA, USA) was used at 5 \u00b5g/dose and low-endotoxin chicken OVA (Hyglos, Germany) was used at 30 \u00b5g/dose. mPAP was produced as previously described [22] and was used at 300 \u00b5g/dose.",
+            "cite_spans": [
+                {
+                    "start": 236,
+                    "end": 238,
+                    "mention": "26",
+                    "ref_id": "BIBREF18"
+                },
+                {
+                    "start": 419,
+                    "end": 421,
+                    "mention": "22",
+                    "ref_id": "BIBREF14"
+                }
+            ],
+            "section": "Antigens and adjuvants ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "For therapeutic tumor experiments anesthetized mice were injected s.c. with 5 \u00d7 105 B16-OVA and 3 \u00d7 106 TRAMP-C1 cells on the right flank. Vaccinations were performed on days 2 and 9. 10 \u00b5g of Flt3L (BioXCell, West Lebanon, NH, USA) was injected s.c. at the scruff of the neck, daily for 9 days from the day of tumor inoculation. Tumor size (subcutaneous tumor area) was estimated by measuring two bisecting diameters of the tumor. Mice were euthanized when the tumor mass reached 100 mm2. The percentage of survival and tumor-free mice were also determined. For memory experiments, mice were rechallenged ~ 100 days after complete regression of primary tumors with 3 \u00d7 106 TRAMP-C1 cells on the right flank. For E\u00b5-myc B cell lymphoma experiments, PtpRCa mice (CD45.1+) were injected i.v. with 1 \u00d7 103 E\u00b5-myc-GFP-OVA lymphoma cells (CD45.2+). Mice were prime-boosted as described above. Tumor mice were monitored daily for signs of illness and euthanized when advanced ill-health was observed. Spleens were harvested for analysis of tumor burdens that were determined by the number of CD45.2+CD19+ cells per spleen. For analysis of TRAMP Tg mice and littermate controls, animals were primed at 6 weeks of age and boosted a week later. Mice received Flt3L for 9 consecutive days from the day of prime. At week 15 or weeks 21\u201324 mice were weighed and prostates, ampullary glands and seminal vesicles were collected, weighed and fixed for his histological analysis. Histological analysis was performed by VepaLabs (Rowville, Australia).",
+            "cite_spans": [],
+            "section": "Vaccination and tumor challenge protocols ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "On day 0, C57BL/6 mice were inoculated with B16-OVA tumor cells as described previously. For NK cell depletion, mice were injected with 100 \u00b5g i.p. anti-NK1.1 mAb (PK136; BioXCell, West Lebanon, NH, USA) or isotype control on days 1, 2, and 6 and then every 5 days thereafter for the duration of the experiment. For depletion of CD4+ T cells, mice were injected with 100 \u00b5g i.p. anti-GK1.5 mAb (GK1.5; Walter and Eliza Hall Institute, Melbourne, Victoria Australia) or isotype control 1 day prior to tumor implantation and then daily for 3 days. For maintenance of CD4+ T cell depletion mice were injected weekly for the duration of the experiment. For depletion of CD8+ T cells, mice were injected with 100 \u00b5g per mouse rat anti-CD8\u03b2 mAb (53-5.8; Walter and Eliza Hall Institute, Melbourne, Victoria, Australia) or isotype control, i.p., 1 day prior to tumor implantation and then for the following 2 days. Blood was sampled 4 days later to check for CD8+ T cell depletion using anti-CD8\u03b1 Ab (53-6.7, BD Biosciences, Franklin Lakes, NJ, USA). Depletion efficiency was > 95%. For maintenance of CD8+ T cell depletion mice were injected weekly for the duration of the experiment.",
+            "cite_spans": [],
+            "section": "In vivo NK cell, CD4+ and CD8+ T cell depletions ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "Tumors were excised from mice and minced finely using a scalpel blade. Minced tumors were placed in 5 ml of RPMI 1640:DMEM media (1:1), containing collagenase type 4 (1 mg/ml, Sigma St Louis, MO, USA) and DNase I (20 \u03bcg/ml, Roche, Basel, Switzerland). Tumors were digested at 37 \u00b0C for 45 min, rotating and rolling gently using a MACSmix Tube rotator (Miltenyi Biotec, Germany). Tumor suspensions were then passed through a 40-\u03bcm cell strainer and washed twice in RPMI 1640 complete media. Isolated TILs were then stained with anti-CD45 (30-F11), anti-CD11b (M1/70), anti-CD8 (53-6.7), anti-CD4 (RM4-5), anti-NK1.1 (PK136), anti-PD1 (EH12.1) and anti-TIM3 (5D12) (all BD Pharmingen, San Diego, CA, USA). TILs were analyzed by flow cytometry using a FACS Canto instrument or Fortessa (BD Biosciences, Franklin Lakes, NJ, USA).",
+            "cite_spans": [],
+            "section": "Isolation and staining of TILs ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "Mice were vaccinated as described above. Twenty-four hours after priming draining axial/brachial LN was harvested and the number of CD3+NK1.1+ NK cells was enumerated. NK cells were stained with anti-CD3 (17A2) and anti-NK1.1 (PK136) (both from BD Biosciences, Franklin Lakes, NJ, USA). NK cell activation was determined by surface staining using anti-CD69 (H1.2F3, Biolegend, San Diego, CA, USA). Eight hours after priming, NK cells from single-cell-suspensions of the draining axial/brachial LN were stained for intracellular IFN\u03b3. Cells were cultured ex vivo for 4 h in the presence of brefeldin A1 (1000x, eBioscience, San Diego, CA, USA). Cells were stained with anti\u2013CD3 (17A2) and anti\u2013NK1.1 (PK136) (both from BD Biosciences, Franklin Lakes, NJ, USA) washed, fixed, and permeabilized (Perm/Wash; BD Biosciences, Franklin Lakes, NJ, USA). Cells were then stained with anti\u2013IFN-g (XMG1.2; BD Biosciences, Franklin Lakes, NJ, USA). Similarly, 24 h after vaccination NK cells from single-cell-suspensions of the spleen were stained for intracellular Granzyme B (GzmB). GzmB was detected using anti-human GzmB (GB12; Invitrogen, Waltham, MA, USA) using a Cytofix/Cytoperm kit (eBioscience, San Diego, CA, USA). Direct killing of TRAMP-C1 cells by NK cells was assessed using an in vitro killing assay. MACS purified NK cells (NK cell isolation kit II, Miltenyi Biotec, Germany) isolated 24 h post-prime or stimulated in vitro for 4 days with IL-15 and IL-18 were cultured with 5000 TRAMP-C1 cells for ~ 21 h. The remaining viable cells were enumerated by flow cytometry using 7-AAD exclusion. All flow cytometric analysis was carried out using a FACSCanto or Fortessa instrument (BD Biosciences, Franklin Lakes, NJ, USA) and data were analyzed using FlowJo flow cytometry analysis software.",
+            "cite_spans": [],
+            "section": "Analysis of NK cell phenotype and function ::: Materials and methods",
+            "ref_spans": []
+        },
+        {
+            "text": "As prostate cancer is considered an immunologically \u2018cold\u2019 tumor, we speculated that adaptive immune responses to TRAMP-C1 tumors could be poor. In considering how we could boost innate immune responses and/or stimulate more robust adaptive immune responses, we devised a combination of adjuvant (ISCOMATRIX\u2122), TLR ligand (Poly I:C) and a hematopoietin (Flt3L). Belonging to different classes of immunomodulators, we speculated these molecules could synergise to stimulate a broad anti-tumor immune response in TRAMP-C1 tumor-bearing mice.",
+            "cite_spans": [],
+            "section": "ISCOMATRIX\u2122 adjuvant formulated with mPAP, Poly I:C and Flt3L provides therapeutic protection against TRAMP-C1 tumors ::: Results",
+            "ref_spans": []
+        },
+        {
+            "text": "Prime-Boost vaccination with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L induced significant protection in mice bearing TRAMP-C1 tumors compared to animals receiving only some of the vaccine components (Fig. 1a). The vaccine improved survival (Fig. 1b) and impaired tumor growth and remarkably was also capable of inducing complete responses against TRAMP-C1 tumors in 60% of vaccinated mice (Fig. 1c). The vaccine response was very durable with survival advantages maintained out to over 75 days. Therapeutic efficacy was also observed when mice were subjected to a delayed vaccination schedule (prime-boost vaccination on days six and thirteen, respectively) also resulted in excellent control of tumor growth, overall survival and percentage tumor-free mice over an extended time frame (Supplementary Fig. 1). Comparable results led to the selection of day two and day nine prime-boost vaccinations for all subsequent experiments.",
+            "cite_spans": [],
+            "section": "ISCOMATRIX\u2122 adjuvant formulated with mPAP, Poly I:C and Flt3L provides therapeutic protection against TRAMP-C1 tumors ::: Results",
+            "ref_spans": [
+                {
+                    "start": 196,
+                    "end": 197,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 237,
+                    "end": 238,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 386,
+                    "end": 387,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                }
+            ]
+        },
+        {
+            "text": "Antigen specificity and memory immune responses upon rechallenge are hallmarks of vaccination. To show that the effectiveness of this vaccine was at least in part due to antigen-specific mechanisms, TRAMP-C1 tumor growth in animals vaccinated with the full ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L combination were compared to animals vaccinated with the combination of ISCOMATRIX\u2122\u2013Poly I:C\u2013Flt3L, lacking the mPAP tumor antigen. When the tumor antigen mPAP was absent from the vaccine combination, tumor growth proceeded unchecked, whereas when mPAP was included, tumor growth was better controlled (Fig. 1d) and animals experienced improved survival (Fig. 1e). To assess the potential of the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine to induce memory, vaccinated mice previously challenged with TRAMP-C1 tumors that had become tumor-free and had remained so for ~ 100 days, were rechallenged with TRAMP-C1 tumors. Vaccinated animals were protected from rechallenge with TRAMP-C1 tumors (Fig. 1f), with 80% of animals remaining free of tumor (Fig. 1g). As expected all age-matched unvaccinated animals receiving a primary TRAMP-C1 challenge succumbed to their tumor burdens. The resistance to rechallenge with TRAMP-C1 tumors indicates that the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine is indeed able to induce a robust and persistent protective memory response.",
+            "cite_spans": [],
+            "section": "ISCOMATRIX\u2122 adjuvant formulated with mPAP, Poly I:C and Flt3L provides therapeutic protection against TRAMP-C1 tumors ::: Results",
+            "ref_spans": [
+                {
+                    "start": 597,
+                    "end": 598,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 649,
+                    "end": 650,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 983,
+                    "end": 984,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                },
+                {
+                    "start": 1038,
+                    "end": 1039,
+                    "mention": "1",
+                    "ref_id": "FIGREF0"
+                }
+            ]
+        },
+        {
+            "text": "To understand the underlying immunological mechanisms contributing to the effectiveness of the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine we focused on the major immune effector cells that mediate tumor-killing responses; CD4+ and CD8+ T cells and NK cells. Analysis of TRAMPC1 tumor infiltrating lymphocytes (TILs) by staining of dissociated tumors identified that CD4+ T cells, CD8+ T cells and NK cells all infiltrate TRAMP-C1 tumors (Fig. 2a) TRAMP-C1 tumor growth was monitored in vaccinated animals that had been depleted of NK cells, CD4+ T cells or CD8+ T cells. In the absence of both NK cells (Fig. 2, left panel) and CD4+ T cells (Fig. 2, middle panel), the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine was no longer able to control TRAMP-C1 tumor growth. All animals lacking NK cells or CD4+ T cells were euthanized with maximal tumor burdens, and the tumor grew with kinetics similar to that of untreated animals. This observation indicates that both NK and CD4 T+ cell-mediated mechanisms contributed to the anti-tumor response induced by this vaccine. Surprisingly vaccinated animals depleted of CD8+ T cells were not impaired in their capacity to control tumor growth (Fig. 2, right panel). CD8+ T cells were shown to infiltrate TRAMPC1 tumors (Fig. 2a) but a time-course analysis of CD8+ TILs from unvaccinated animals revealed that these cells acquired an exhausted PD1+TIM3+ phenotype [27] overtime (Fig. 2d) limiting their ability to participate in the anti-tumor immune response. While CD8+ T cells may not contribute significantly to reducing the volume of tumor material as measured in these experiments, CD8+ T cells that have been instructed by the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine are likely responsible for the robust and persistent memory responses observed. ",
+            "cite_spans": [
+                {
+                    "start": 1397,
+                    "end": 1399,
+                    "mention": "27",
+                    "ref_id": "BIBREF19"
+                }
+            ],
+            "section": "Vaccine stimulated NK cells and CD4+ T cells drive anti-tumor immune responses as tumor-infiltrating CD8+ T cells are disabled by exhaustion ::: Results",
+            "ref_spans": [
+                {
+                    "start": 440,
+                    "end": 441,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 606,
+                    "end": 607,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 644,
+                    "end": 645,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 1182,
+                    "end": 1183,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 1258,
+                    "end": 1259,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 1416,
+                    "end": 1417,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                }
+            ]
+        },
+        {
+            "text": "NK cells were first identified for their ability to kill tumor cells [28\u201330] and have since been implicated in the elimination of many murine and human cancers. With such a well described role in the anti-tumor immune response and a clear indication that NK cells contribute significantly to TRAMP-C1 tumor control following vaccination with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L (Fig. 2b, left panel), we further investigated how these critical innate cells responded to our combination vaccine. The ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine induced the greatest numbers of NK cells (Fig. 3a) compared to animals vaccinated with simplified vaccine combinations or Poly I:C/Flt3L alone. NK cell expansion is not unexpected given repeat administration of soluble human Flt3L has been shown to expand NK cell numbers [31]. Administration of Flt3L alone does indeed increase NK cell numbers as seen post-boost in the spleen (after which mice have received 10ug of Flt3L over 9 days) (Supplementary Fig. 2) but the increase of the NK cell numbers with the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine is even greater. NK cells displayed higher levels of the early activation marker CD69 when exposed to the full vaccine combination (Fig. 3b). Poly I:C itself is a strong stimulus for CD69 expression on NK cells [32] and we did find that CD69 expression went up on cells treated with Poly I:C alone or the vaccine combination ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C (Fig. 3b). These findings suggest that the components of our vaccine synergise to stimulate NK cells of greater magnitude and superior activation than can be attributed to Poly I:C alone.",
+            "cite_spans": [
+                {
+                    "start": 70,
+                    "end": 72,
+                    "mention": "28",
+                    "ref_id": "BIBREF20"
+                },
+                {
+                    "start": 73,
+                    "end": 75,
+                    "mention": "30",
+                    "ref_id": "BIBREF23"
+                },
+                {
+                    "start": 808,
+                    "end": 810,
+                    "mention": "31",
+                    "ref_id": "BIBREF24"
+                },
+                {
+                    "start": 1296,
+                    "end": 1298,
+                    "mention": "32",
+                    "ref_id": "BIBREF25"
+                }
+            ],
+            "section": "ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine induces strong phenotypic and functional activation of NK cells ::: Results",
+            "ref_spans": [
+                {
+                    "start": 380,
+                    "end": 381,
+                    "mention": "2",
+                    "ref_id": "FIGREF1"
+                },
+                {
+                    "start": 582,
+                    "end": 583,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                },
+                {
+                    "start": 1221,
+                    "end": 1222,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                },
+                {
+                    "start": 1441,
+                    "end": 1442,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                }
+            ]
+        },
+        {
+            "text": "We explored further the effect of the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine on the function of NK cells. NK cells secrete cytokines, such as IFN-\u03b3, that participate in the shaping of the adaptive immune response [33]. Following vaccination, NK cells express more IFN-\u03b3 (Fig. 3c, d) than animals having received ISCOMATRIX\u2122\u2013mPAP or ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C. Poly I:C alone can directly stimulate NK cells to produce IFN-\u03b3 [32]. We detected IFN-\u03b3 production by NK cells following Poly I:C stimulation alone but IFN-\u03b3 levels were lower in this group as compared to animals vaccinated with the full combination vaccine (Fig. 3c). As another measure of NK function we assessed the expression of the cytotoxic mediator GzmB. As was the case for NK cell expansion, CD69 and IFN-\u03b3 expression, GzmB levels were greatest in animals vaccinated with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L (Fig. 3e, f). Taking together these findings indicate that vaccination with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L generates NK cells that are phenotypically and functionally primed for elimination of TRAMP-C1 tumors. Dissecting NK cell responsiveness after exposure to individual vaccine components in ISCOMATRIX\u2122\u2013mPAP, PolyI:C and Flt3L, compared to the full vaccine combination, highlights that the immunogenicity of the combination is greater than just the sum of its parts.",
+            "cite_spans": [
+                {
+                    "start": 215,
+                    "end": 217,
+                    "mention": "33",
+                    "ref_id": "BIBREF26"
+                },
+                {
+                    "start": 425,
+                    "end": 427,
+                    "mention": "32",
+                    "ref_id": "BIBREF25"
+                }
+            ],
+            "section": "ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine induces strong phenotypic and functional activation of NK cells ::: Results",
+            "ref_spans": [
+                {
+                    "start": 277,
+                    "end": 278,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                },
+                {
+                    "start": 624,
+                    "end": 625,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                },
+                {
+                    "start": 879,
+                    "end": 880,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                }
+            ]
+        },
+        {
+            "text": "Given the numerical, phenotypic and functional activation of NK cells by the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine, we asked if NK cells were capable of directly killing TRAMP-C1 tumor cells? To test this, we purified NK cells from mice that had been vaccinated with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L and cultured these with TRAMP-C1 cells in vitro and measured TRAMP-C1 cell death. Ex vivo, NK cells from ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccinated animals were able to directly kill TRAMP-C1 cells (Fig. 3g). Overall, the data strongly support that NK cell mediated killing of TRAMP-C1 tumor cells contributes to the MoA of the ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine.",
+            "cite_spans": [],
+            "section": "ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L vaccine induces strong phenotypic and functional activation of NK cells ::: Results",
+            "ref_spans": [
+                {
+                    "start": 505,
+                    "end": 506,
+                    "mention": "3",
+                    "ref_id": "FIGREF2"
+                }
+            ]
+        },
+        {
+            "text": "The critical role NK cells and CD4+ T cells play in the anti-tumor response led us to investigate the role of IFN-\u03b3, as a key cytokine produced by both of these cells. We took mice deficient in IFN-\u03b3 (IFN-\u03b3 KO) and monitored TRAMP-C1 tumor growth following vaccination with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L. Vaccinated IFN-\u03b3 KO mice were severely impaired in their ability to control tumor growth compared to their vaccined WT controls (Fig. 4a). This was also reflected in the poor overall survival (Fig. 4b). These data indicate that IFN-\u03b3 produced following vaccination with ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L is important for TRAMP-C1 tumor control and contributes significantly to the MoA of this therapeutic combination vaccine.",
+            "cite_spans": [],
+            "section": "Interferon-gamma is critical for tumor control following vaccination ::: Results",
+            "ref_spans": [
+                {
+                    "start": 441,
+                    "end": 442,
+                    "mention": "4",
+                    "ref_id": "FIGREF3"
+                },
+                {
+                    "start": 505,
+                    "end": 506,
+                    "mention": "4",
+                    "ref_id": "FIGREF3"
+                }
+            ]
+        },
+        {
+            "text": "Having demonstrated good efficacy for the ISCOMATRIX\u2122\u2013mPAP + Poly I:C + Flt3L vaccine against the transplantable TRAMP-C1 cell line, we wanted to test the vaccines potential to suppress denovo prostate tumor growth in a spontaneous model that more closely reflects the human disease. To do this we moved to the TRAMP Tg mice, from which the TRAMP-C1 cell line was derived. These mice express the SV40 large T antigen oncogene under transcriptional control of the prostate-specific rat probasin promoter. Orthotopic prostate tumors spontaneously develop from the age of 10 weeks, which histologically resemble human prostate cancer [24]. TRAMP Tg mice were vaccinated with a prime at 6 weeks and 1 week later were boosted with ISCOMATRIX\u2122\u2013mPAP + Poly I:C + Flt3L. Mice received nine consecutive doses of Flt3L from the day of prime. At week 15 (well-moderately differentiated carcinomas) or weeks 21\u201324 (poorly differentiated adenocarcinoma) [34] mice were weighed and prostates, ampullary glands and seminal vesicles were collected, weighed and fixed for histological analysis. These time points were selected for analysis as they represented primary disease and not metastatic disease. Metastatic disease is a setting in which the disease burden would likely be too great to be impacted by adjunctive vaccination as is the concept presented in this study. At week 15 there was no difference in prostate weights, an indicator of disease burden, compared to littermate controls, however by 21\u201324 weeks, mice vaccinated with ISCOMATRIX\u2122\u2013mPAP + Poly I:C + Flt3L showed a reduction in prostate + seminal vesicle weight compared to littermate controls (Fig. 5a). Although a reduction in prostate/seminal vesicle wet weight indicates an impact of macroscopic disease burden, histological analysis indicated differentiation to adenocarcinoma was not interrupted (data not shown) by vaccination with ISCOMATRIX\u2122\u2013mPAP + Poly I:C + Flt3L.",
+            "cite_spans": [
+                {
+                    "start": 632,
+                    "end": 634,
+                    "mention": "24",
+                    "ref_id": "BIBREF16"
+                },
+                {
+                    "start": 942,
+                    "end": 944,
+                    "mention": "34",
+                    "ref_id": "BIBREF27"
+                }
+            ],
+            "section": "Vaccination with ISCOMATRIX\u2122\u2013mPAP\u2009+\u2009Poly I:C\u2009+\u2009Flt3L leads to reduced prostate weight in a model of spontaneous prostate cancer ::: Results",
+            "ref_spans": [
+                {
+                    "start": 1653,
+                    "end": 1654,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                }
+            ]
+        },
+        {
+            "text": "To further extend the significance of these studies we examined the therapeutic efficacy of the ISCOMATRIX\u2122\u2013tumor Ag\u2013Poly I:C\u2013Flt3L vaccine in two additional mouse models of cancer; B16-OVA melanoma and the B cell lymphoma model E\u00b5-myc-GFP-OVA that models human Burkitt\u2019s lymphoma. In these tumor models, the surrogate tumor antigen OVA was used as the vaccine antigen. B16-OVA challenged animals that had received the ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L vaccine were better able to control tumor growth (Fig. 5b) and demonstrated excellent overall survival (Fig. 5c). Lymphoma-bearing mice that were left untreated developed advanced illness on day 13 post-lymphoma inoculation (Fig. 5d). In contrast, mice vaccinated with ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L did not develop signs of advanced illness until day 21 (Fig. 5d), a 60% extension of lifespan over unvaccinated littermates. To confirm tumor elimination in vaccinated mice, spleens were analyzed for tumor burden (CD45.2+CD19+ cells) 13 days post-lymphoma inoculation. ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L vaccinated animals showed a significant reduction in lymphoma burden compared to untreated mice or mice vaccinated with ISCOMATRIX\u2122\u2013OVA (Fig. 5e). These results highlight the potential broad application for this cancer vaccine.",
+            "cite_spans": [],
+            "section": "ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L vaccination can also protect against B16-OVA melanoma and E\u00b5-myc-GFP-OVA B cell lymphoma ::: Results",
+            "ref_spans": [
+                {
+                    "start": 505,
+                    "end": 506,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                },
+                {
+                    "start": 559,
+                    "end": 560,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                },
+                {
+                    "start": 680,
+                    "end": 681,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                },
+                {
+                    "start": 811,
+                    "end": 812,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                },
+                {
+                    "start": 1192,
+                    "end": 1193,
+                    "mention": "5",
+                    "ref_id": "FIGREF4"
+                }
+            ]
+        },
+        {
+            "text": "We have previously shown that a multi-adjuvanted vaccine strategy combining the self-Ag PAP and ISCOMATRIX\u2122 adjuvant, with Poly I:C and CpG can provide some therapeutic efficacy against TRAMP-C1 tumors [22]. This Poly I:C and CpG containing vaccine combined multiple TLR ligands that are well known for their adjuvant-like properties, however, the more restricted expression of TLR9 to pDCs and B cells in humans [35] may limit the effectiveness of CpG for inducing T cell immunity when used in patients [36]. We speculated that by combining immunomodulators from different classes, not just TLR ligands, a more protective vaccine response could be induced with better translational potential. With this aim we identified the vaccine combination ISCOMATRIX\u2122\u2013mPAP\u2013Poly I:C\u2013Flt3L. This therapeutic combination vaccine shows efficacy in the TRAMP-C1 model of prostate cancer when delivered in a prime-boost regime. This vaccine: (1) is effective against a high tumor burden, as a function of either a large tumour inoculum or a delayed vaccine schedule (2) generates a memory response that can protect against rechallenge (3) can limit prostate tumor burden in a model in which progression to adenocarcinoma is genetically predetermined and (4) demonstrates effectiveness in solid tumors and a model of B cell lymphoma.",
+            "cite_spans": [
+                {
+                    "start": 203,
+                    "end": 205,
+                    "mention": "22",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 414,
+                    "end": 416,
+                    "mention": "35",
+                    "ref_id": "BIBREF28"
+                },
+                {
+                    "start": 505,
+                    "end": 507,
+                    "mention": "36",
+                    "ref_id": "BIBREF29"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "We demonstrate the effectiveness of a combination approach that contains, in addition to an adjuvant and tumor antigen, the TLR3 agonist, Poly I:C and the hemopoietic cytokine, Flt3L. Direct stimulation of TRAMP-C1 cells with Poly I:C has been shown to have no direct effect on tumor cell growth but TRAMP tumor growth in TLR3-/- animals implicates signalling through TLR3 on immune and or stromal cells in anti-tumor immunity [37]. Others have shown administration of Poly I:C to suppress the growth of TRAMP tumors and lead to the recruitment of T cells and NK cells to the tumor site. Orthotopic prostate tumors from Poly I:C treated TRAMP mice were also found to be impaired histologically in their state of adenocarcinoma progression [37]. It is important to note that these results were achieved using serial doses of fifty times more Poly I:C than used in this present study. Although we were unable to prevent the programmed progression of adenocarcinoma in TRAMP-Tg mice we have potentially impacted the number of tumor cells undergoing these changes. Our vaccinated animals showed reduced prostate weight, a surrogate indicator of disease burden. Ciavarra et al. [38] demonstrated that TRAMP-C1 tumor growth could be slowed by 21 or 35 days of systemic administration of Flt3L protein given at an equivalent dose as used in this current study. This effect was lost upon withdrawal of treatment indicating that Flt3L administration alone does not elicit persistent protective immunity against the TRAMP-C1 tumors. Flt3L is a potent hemopoietic cytokine which in addition to enhancing antitumor priming by promoting host dendritic cell expansion [39, 40], promotes expansion of NK cell progenitors [31]. In the setting of vaccination specifically, elevated serum Flt3L levels are known to be detected soon after s.c. immunization with adjuvant (TLR ligands) and protein antigen and the ensuing Flt3 signalling is required for optimal immunity. In this study, Flt3L dosed for nine consecutive days did expand NK cell numbers and combined with the other vaccine components was able to synergistically enhance NK cell activation.",
+            "cite_spans": [
+                {
+                    "start": 428,
+                    "end": 430,
+                    "mention": "37",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 740,
+                    "end": 742,
+                    "mention": "37",
+                    "ref_id": "BIBREF30"
+                },
+                {
+                    "start": 1174,
+                    "end": 1176,
+                    "mention": "38",
+                    "ref_id": "BIBREF31"
+                },
+                {
+                    "start": 1655,
+                    "end": 1657,
+                    "mention": "39",
+                    "ref_id": "BIBREF32"
+                },
+                {
+                    "start": 1659,
+                    "end": 1661,
+                    "mention": "40",
+                    "ref_id": "BIBREF34"
+                },
+                {
+                    "start": 1707,
+                    "end": 1709,
+                    "mention": "31",
+                    "ref_id": "BIBREF24"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "In exploring the immune mechanisms contributing to this vaccine efficacy, we found that animals lacking NK cells and CD4+ T cells lost their capacity to control tumor growth but this was not the case in animals depleted of CD8+ T cells. NK cells are thought to play a role in the TRAMP prostate cancer mouse model with NKG2D-deficient TRAMP mice exhibiting a higher incidence of early-arising prostate adenocarcinomas, suggesting a role for early NKG2D-driven NK cell immune-surveillance in these mice [41]. Similarly, humanized transgenic TRAMP mice expressing the soluble NKG2G ligand\u2014MICB\u2014exhibited increased incidence of progressed carcinomas and metastasis [42]. A study investigating NK cells that infiltrate human prostate cancer showed NK cells to have an immature phenotype with low cytotoxic potential. This study also found that the balance between activatory and inhibitory receptors on prostate tumor infiltrating NK cells was altered and this tip towards increased expression of inhibitory receptors was more pronounced with metastatic progression [43]. These findings highlight that an immunotherapy able to improve NK cell anti-tumor activity, such as our vaccine, could contribute to overcoming this prostate-driven NK cell immunosuppression observed in humans.",
+            "cite_spans": [
+                {
+                    "start": 503,
+                    "end": 505,
+                    "mention": "41",
+                    "ref_id": "BIBREF35"
+                },
+                {
+                    "start": 663,
+                    "end": 665,
+                    "mention": "42",
+                    "ref_id": "BIBREF36"
+                },
+                {
+                    "start": 1063,
+                    "end": 1065,
+                    "mention": "43",
+                    "ref_id": "BIBREF37"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "The non-essential role for CD8+ T cells in control of tumor growth was unexpected given previous in vivo studies formulating ISCOMATRIX with a surrogate tumor antigen, OVA\u2014B16-OVA melanoma, have shown enhanced CD8+ T-cell cross-priming enabling prophylactic and therapeutic tumoricidal activity [44]. In addition, using an ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013CpG vaccine in B16-OVA tumor-bearing animals, found CD8+ T cells to be essential to the effectiveness of this vaccine [22]. We have three lines of evidence to support a limited role for CD8+ T cells in the primary immune response, paving the way for greater contributions by CD4+ T cells and NK cells as we have shown. Firstly, primary human prostate cancers have been shown to have low HLA class I expression, with 85% of primary tumors displaying HLA class I downregulation. This level of MHC class I downregulation is greater than that observed in other tumor types [45]. Secondly, TRAMPC1 tumors have low MHC class I expression and that this expression can be improved with exposure to IFN-\u03b3 [38] limiting the ability of CD8+ T cells to directly engage with tumors. Thirdly, CD8+ T cells infiltrating TRAMPC1 tumors were found to acquire an exhausted phenotype suggesting they are unable to participate in the anti-tumor immune response to their fullest potential. Our vaccine combination was unable to overcome this exhaustion and engage CD8+ T cells drawing them into the response. It would be interesting to see if the addition of anti-PD1 to the combination would release CD8+ T cell from their supressed state and allow them to contribute to the response.",
+            "cite_spans": [
+                {
+                    "start": 296,
+                    "end": 298,
+                    "mention": "44",
+                    "ref_id": "BIBREF38"
+                },
+                {
+                    "start": 467,
+                    "end": 469,
+                    "mention": "22",
+                    "ref_id": "BIBREF14"
+                },
+                {
+                    "start": 918,
+                    "end": 920,
+                    "mention": "45",
+                    "ref_id": "BIBREF39"
+                },
+                {
+                    "start": 1045,
+                    "end": 1047,
+                    "mention": "38",
+                    "ref_id": "BIBREF31"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "Upon rechallenge with tumors animals demonstrated the presence of a robust and persistent memory response. The ability to mount a protective memory response suggests that antigen-specific memory CD8+ T cells are generated during the primary tumor challenge and these cells are successfully recalled upon rechallenge. This does not exclude that memory CD4+ T cells are also recalled or the possibility that NK cells are again activated following rechallenge. A study by Cheadle et al. [46] investigating the potential of TLR7 agonism in improving anti-tumor efficacy of Obinutuzumab (glygoengineered \u03b1-CD20) in murine lymphoma models demonstrated that primary anti-tumor immunity was dependent on both NK cells an CD4+ T cells but not CD8+ T cells. The improved response observed is thought to reflect the ability of R848 to potentiate Obinutuzumab\u2019s effector mechanism, in particular Ab-dependent cell-mediated cytotoxicity by NK cells. Similarly, the anti-tumor immune response generated by our combination vaccine produces NK cells with enhanced effector function. Despite the observed non-participation of CD8+ T cells in the primary anti-lymphoma response, the conclusion was reached that both CD4+ and CD8+ T cells were necessary for the generation of long-term immunological memory.",
+            "cite_spans": [
+                {
+                    "start": 485,
+                    "end": 487,
+                    "mention": "46",
+                    "ref_id": "BIBREF40"
+                }
+            ],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "This current study shows effectiveness of the ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L vaccine in two additional models of cancer\u2014B16-OVA melanoma and E\u00b5-myc-GFP-OVA lymphoma. It is likely that vaccine-induced tumor control in these models, where the vaccine antigen stimulates an immunodominant CD8+ T cell response, may be CD8+ T cell-dependent. In support of this are immunogenicity studies conducted in the absence of tumor that show strong induction of OVA-specific CD8+ T cells (using OVA-tetramer) and numerous CD8+IFN\u03b3+ cells (data not shown) following prime-boost vaccination with ISCOMATRIX\u2122\u2013OVA\u2013Poly I:C\u2013Flt3L. Differential requirement for CD8+ T cells in control of tumor growth across different tumor models may reflect the difference between highly immunogenic tumor antigens like OVA and less immunogenic tumor antigens like PAP. We also demonstrate the impact of the tumor environment on the spectrum of anti-tumor immune response. We show here that CD8+ T cells are present in TRAMP tumors but they accumulate an exhausted phenotype overtime. It is likely that CD8+ TILs isolated from B16-OVA tumors would not show such a phenotype.",
+            "cite_spans": [],
+            "section": "Discussion",
+            "ref_spans": []
+        },
+        {
+            "text": "We show that with the appropriate NK cell stimulation, provided by our combination vaccine, NK cells can be very efficacious against a poorly immunogenic tumor. These results highlight the potential for harnessing NK cells in the solid tumor setting where CD8+ T cells are either exhausted or fail to \u2018see\u2019 tumor antigen. The efficacy of this vaccine is also reliant on CD4+ T cells. It is possible that CD4+ T cells provide critical help that allow NK cells to perform optimally and potentially maintain long-term anti-tumor activity. From these studies where both the immunogenicity of the tumor is known and the immune mechanisms behind a particular vaccine combination is largely understood, we can begin to tailor future vaccine combinations to trigger the immune responses that are likely to be most effective against a given tumor. In the setting of a limited tumor burden, i.e., minimal residual disease following medical interventions such as radiation or surgery or in the setting where disease is slow-growing and non-progressive, there is a significant opportunity for the application of an immune-stimulating vaccine.",
+            "cite_spans": [],
+            "section": "Discussion",
+            "ref_spans": []
+        }
+    ],
+    "ref_entries": {
+        "FIGREF0": {
+            "text": "Fig. 1: ISCOMATRIX\u2122 adjuvant formulated with mPAP, Poly I:C and Flt3L provides therapeutic protection against TRAMP-C1 tumors. Animals that were untreated were compared to animals that were vaccinated with either, IMX\u2013mPAP, IMX\u2013mPAP + pIC or IMX\u2013mPAP + pIC + Flt3. Day 2 prime and day 9 boost (a\u2013c). a Tumor growth. b Percent survival. c Tumor free mice at conclusion of experiment. d, e Mice vaccinated with IMX + pIC + Flt3 plus or minus antigen-mPAP were compared for d growth of TRAMP-C1 tumor and e percent survival. f, g Mice previously challenged with TRAMP-C1 tumors that had received the combination vaccine IMX\u2013mPAP + pIC + Flt3L, that had become tumor free and had remained so for at least 90 days, were rechallenged with TRAMP-C1 cells. f Tumor growth in protected animals was compared to age-matched na\u00efve mice inoculated with TRAMP-C1 g Tumor free mice. Data are presented as mean \u00b1 SEM where n = 10 mice/group from one representative experiment of three equivalent experiments (a\u2013e) or where n = 10 (Untreated) and 18 (memory) (f, g) mice/group from one representative experiment of two equivalent experiments. Statistical significance in tumor growth (a, d, f) was determined using a two-way ANOVA with Tukey\u2019s multiple comparisons test. Percent survival (b, e) was plotted as a Kaplan\u2013Meier curve and the log-rank (Mantel\u2013Cox) test was used to calculate statistical significance. p < 0.05*, p < 0.01**, p < 0.001*** and p < 0.0001****. IMX = ISCOMATRIX\u00ae adjuvant",
+            "type": "figure"
+        },
+        "FIGREF1": {
+            "text": "Fig. 2: Vaccine stimulated NK cells and CD4+ T cells control tumor burden while an immunosuppressive tumor microenvironment drives CD8+ TIL exhaustion. a CD4+ T cells, CD8+ T cells and NK cells infiltrate TRAMP-C1 tumors, b mice were depleted of either NK cells, CD4+ T cells or CD8+ T cells. Tumor growth in NK depleted mice (left panel), CD4+ T cell depleted mice (middle panel) and CD8+ T cell depleted mice (right panel), c time-course of representative CD8+PD1+TIM3+ TIL profiles d Proportion of PD1+TIM3+ TILs (open squares) as a function of time and tumor size (filled circles). Data are presented as mean \u00b1 SEM where n = 9\u201310 mice/group from one representative experiment of two equivalent experiments. Statistical significance in tumor growth was determined using a two-way ANOVA. p < 0.01** and p < 0.001***. IMX = ISCOMATRIX\u00ae adjuvant",
+            "type": "figure"
+        },
+        "FIGREF2": {
+            "text": "Fig. 3: Vaccination induces strong phenotypic and functional activation of NK cells that are prepared for tumor elimination. a Enumeration of NK cells. b NK cell activation was assessed using the early activation marker CD69. Representative histograms showing the geometric mean fluorescence intensity of CD69 staining. c Representative profiles of NK cells producing IFN\u03b3 (ex vivo) 8 h after priming. d Enumeration of IFN\u03b3-producing NK cells. e Representative profiles of NK cells producing Granzyme B (ex vivo), 24 h after boosting, detected by ICS. f Granzyme B-producing NK cells were enumerated. g in vitro TRAMP-C1 killing assay. n, indicates the number of replicate wells. Data are presented as mean \u00b1 SEM where n = 3\u20135 mice/group from one representative experiment of two equivalent experiments. a, d, f, g Statistical significance was determined using a one-way ANOVA with Tukey\u2019s multiple comparisons test. p < 0.05*, p < 0.01**, p < 0.001*** and p < 0.0001****. IMX = ISCOMATRIX\u00ae adjuvant",
+            "type": "figure"
+        },
+        "FIGREF3": {
+            "text": "Fig. 4: Interferon-gamma is critical for tumor control following vaccination. a Tumor growth in IFN\u03b3-/- mice and b percent survival were monitored for the duration of the experiment. Data are presented as mean \u00b1 SEM where n = 10 mice/group from one representative experiment of two equivalent experiments. Statistical significance in tumor growth a was determined using a two-way ANOVA with Tukey\u2019s multiple comparisons test. Percent survival b was plotted as a Kaplan\u2013Meier curve and the log-rank (Mantel\u2013Cox) test was used to calculate statistical significance. p < 0.05*, p < 0.01**, p < 0.001*** and p < 0.0001****. IMX = ISCOMATRIX\u00ae adjuvant",
+            "type": "figure"
+        },
+        "FIGREF4": {
+            "text": "Fig. 5: IMX\u2013mPAP + Poly I:C\u2013Flt3 vaccine protects against both solid and non-solid cancers. a Prostates and seminal vesicles weights of vaccinated TRAMP Tg mice and littermate controls at week 15 or weeks 21\u201324. Data are presented as mean \u00b1 SEM where n = 22\u201330 mice/group pooled from eleven experiments. Statistical significance was determined using a one-way ANOVA using Tukey\u2019s multiple comparisons test. p < 0.01**. b B16-OVA tumor growth and c Percent survival d E\u00b5-myc-GFP-OA lymphoma growth and e percent survival. Statistical significance was determined using a one-way ANOVA using Tukey\u2019s multiple comparisons test. Data are presented as mean \u00b1 SEM where n = 10 (b, c) or n = 5 (d, e) mice/group from one representative experiment of three equivalent experiments. Statistical significance in tumor growth b was determined using a two-way ANOVA with Tukey\u2019s multiple comparisons test. Percent survival c, d) was plotted as a Kaplan\u2013Meier curve and the log-rank (Mantel\u2013Cox) test was used to calculate statistical significance. p < 0.05*, p < 0.01**, p < 0.001*** and p < 0.0001****. IMX = ISCOMATRIX\u00ae adjuvant",
+            "type": "figure"
+        }
+    },
+    "back_matter": [],
+    "bib_entries": {
+        "BIBREF0": {
+            "title": "Immune checkpoint targeting in cancer therapy: toward combination strategies with curative potential",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Sharma",
+                    "suffix": ""
+                },
+                {
+                    "first": "JP",
+                    "middle": [],
+                    "last": "Allison",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Cell",
+            "volume": "161",
+            "issn": "2",
+            "pages": "205-214",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.cell.2015.03.030"
+                ]
+            }
+        },
+        "BIBREF1": {
+            "title": "Chimeric antigen receptor expressing natural killer cells for the immunotherapy of cancer",
+            "authors": [
+                {
+                    "first": "RS",
+                    "middle": [],
+                    "last": "Mehta",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Rezvani",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "Front Immunol",
+            "volume": "9",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.3389/fimmu.2018.00283"
+                ]
+            }
+        },
+        "BIBREF2": {
+            "title": "Natural killer cell immunomodulation: targeting activating, inhibitory, and co-stimulatory receptor signaling for cancer immunotherapy",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Chester",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Fritsch",
+                    "suffix": ""
+                },
+                {
+                    "first": "HE",
+                    "middle": [],
+                    "last": "Kohrt",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Front Immunol",
+            "volume": "6",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.3389/fimmu.2015.00601"
+                ]
+            }
+        },
+        "BIBREF3": {
+            "title": "Tricking the balance: NK cells in anti-cancer immunity",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Pahl",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Cerwenka",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Immunobiology",
+            "volume": "222",
+            "issn": "1",
+            "pages": "11-20",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.imbio.2015.07.012"
+                ]
+            }
+        },
+        "BIBREF4": {
+            "title": "Anti-NKG2A mAb is a checkpoint inhibitor that promotes anti-tumor immunity by unleashing both T and NK Cells",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Andre",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Denis",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Soulas",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Bourbon-Caillet",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Lopez",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Arnoux",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Blery",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Bonnafous",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Gauthier",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Morel",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Rossi",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Remark",
+                    "suffix": ""
+                },
+                {
+                    "first": "V",
+                    "middle": [],
+                    "last": "Breso",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Bonnet",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Habif",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Guia",
+                    "suffix": ""
+                },
+                {
+                    "first": "AI",
+                    "middle": [],
+                    "last": "Lalanne",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Hoffmann",
+                    "suffix": ""
+                },
+                {
+                    "first": "O",
+                    "middle": [],
+                    "last": "Lantz",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Fayette",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Boyer-Chammard",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Zerbib",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Dodion",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Ghadially",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Jure-Kunkel",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Morel",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Herbst",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Narni-Mancinelli",
+                    "suffix": ""
+                },
+                {
+                    "first": "RB",
+                    "middle": [],
+                    "last": "Cohen",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Vivier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "Cell",
+            "volume": "175",
+            "issn": "7",
+            "pages": "1731-1743",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.cell.2018.10.014"
+                ]
+            }
+        },
+        "BIBREF5": {
+            "title": "Natural killers join the fight against cancer",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Cerwenka",
+                    "suffix": ""
+                },
+                {
+                    "first": "LL",
+                    "middle": [],
+                    "last": "Lanier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "Science",
+            "volume": "359",
+            "issn": "6383",
+            "pages": "1460-1461",
+            "other_ids": {
+                "DOI": [
+                    "10.1126/science.aat2184"
+                ]
+            }
+        },
+        "BIBREF6": {
+            "title": "Molecular insight into targeting the NK cell immune response to cancer",
+            "authors": [
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Rautela",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Souza-Fonseca-Guimaraes",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Hediyeh-Zadeh",
+                    "suffix": ""
+                },
+                {
+                    "first": "RB",
+                    "middle": [],
+                    "last": "Delconte",
+                    "suffix": ""
+                },
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Davis",
+                    "suffix": ""
+                },
+                {
+                    "first": "ND",
+                    "middle": [],
+                    "last": "Huntington",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "Immunol Cell Biol",
+            "volume": "96",
+            "issn": "5",
+            "pages": "477-484",
+            "other_ids": {
+                "DOI": [
+                    "10.1111/imcb.12045"
+                ]
+            }
+        },
+        "BIBREF7": {
+            "title": "ISCOM based vaccines for cancer immunotherapy",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Lenarczyk",
+                    "suffix": ""
+                },
+                {
+                    "first": "TT",
+                    "middle": [],
+                    "last": "Le",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Drane",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Malliaros",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Pearse",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Hamilton",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Cox",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Luft",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Gardner",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Suhrbier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Vaccine",
+            "volume": "22",
+            "issn": "8",
+            "pages": "963-974",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.vaccine.2003.09.014"
+                ]
+            }
+        },
+        "BIBREF8": {
+            "title": "NY-ESO-1 protein formulated in ISCOMATRIX adjuvant is a potent anticancer vaccine inducing both humoral and CD8+ T-cell-mediated immunity and protection against NY-ESO-1+ tumors",
+            "authors": [
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Sjolander",
+                    "suffix": ""
+                },
+                {
+                    "first": "DP",
+                    "middle": [],
+                    "last": "Drane",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Schnurr",
+                    "suffix": ""
+                },
+                {
+                    "first": "TT",
+                    "middle": [],
+                    "last": "Le",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Mateo",
+                    "suffix": ""
+                },
+                {
+                    "first": "T",
+                    "middle": [],
+                    "last": "Luft",
+                    "suffix": ""
+                },
+                {
+                    "first": "KA",
+                    "middle": [],
+                    "last": "Masterman",
+                    "suffix": ""
+                },
+                {
+                    "first": "TY",
+                    "middle": [],
+                    "last": "Tai",
+                    "suffix": ""
+                },
+                {
+                    "first": "Q",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Green",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Sjolander",
+                    "suffix": ""
+                },
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Pearse",
+                    "suffix": ""
+                },
+                {
+                    "first": "FA",
+                    "middle": [],
+                    "last": "Lemonnier",
+                    "suffix": ""
+                },
+                {
+                    "first": "W",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Cebon",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Suhrbier",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Clin Cancer Res",
+            "volume": "10",
+            "issn": "8",
+            "pages": "2879-2890",
+            "other_ids": {
+                "DOI": [
+                    "10.1158/1078-0432.CCR-03-0245"
+                ]
+            }
+        },
+        "BIBREF9": {
+            "title": "TLR-adjuvanted nanoparticle vaccines differentially influence the quality and longevity of responses to malaria antigen Pfs25",
+            "authors": [
+                {
+                    "first": "EA",
+                    "middle": [],
+                    "last": "Thompson",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Ols",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Miura",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Rausch",
+                    "suffix": ""
+                },
+                {
+                    "first": "DL",
+                    "middle": [],
+                    "last": "Narum",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Spangberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Juraska",
+                    "suffix": ""
+                },
+                {
+                    "first": "U",
+                    "middle": [],
+                    "last": "Wille-Reece",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Weiner",
+                    "suffix": ""
+                },
+                {
+                    "first": "RF",
+                    "middle": [],
+                    "last": "Howard",
+                    "suffix": ""
+                },
+                {
+                    "first": "CA",
+                    "middle": [],
+                    "last": "Long",
+                    "suffix": ""
+                },
+                {
+                    "first": "PE",
+                    "middle": [],
+                    "last": "Duffy",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Johnston",
+                    "suffix": ""
+                },
+                {
+                    "first": "CP",
+                    "middle": [],
+                    "last": "O'Neil",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Lore",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "JCI Insight",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.1172/jci.insight.120692"
+                ]
+            }
+        },
+        "BIBREF10": {
+            "title": "Fibronectin EDA and CpG synergize to enhance antigen-specific Th1 and cytotoxic responses",
+            "authors": [
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Julier",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "de Titta",
+                    "suffix": ""
+                },
+                {
+                    "first": "AJ",
+                    "middle": [],
+                    "last": "Grimm",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Simeoni",
+                    "suffix": ""
+                },
+                {
+                    "first": "MA",
+                    "middle": [],
+                    "last": "Swartz",
+                    "suffix": ""
+                },
+                {
+                    "first": "JA",
+                    "middle": [],
+                    "last": "Hubbell",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "Vaccine",
+            "volume": "34",
+            "issn": "21",
+            "pages": "2453-2459",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.vaccine.2016.03.057"
+                ]
+            }
+        },
+        "BIBREF11": {
+            "title": "Jemal A (2019) Cancer statistics",
+            "authors": [
+                {
+                    "first": "RL",
+                    "middle": [],
+                    "last": "Siegel",
+                    "suffix": ""
+                },
+                {
+                    "first": "KD",
+                    "middle": [],
+                    "last": "Miller",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "CA Cancer J Clin",
+            "volume": "69",
+            "issn": "1",
+            "pages": "7-34",
+            "other_ids": {
+                "DOI": [
+                    "10.3322/caac.21551"
+                ]
+            }
+        },
+        "BIBREF12": {
+            "title": "Combination of adjuvants: the future of vaccine design",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Mount",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Koernig",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Silva",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Drane",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "AB",
+                    "middle": [],
+                    "last": "Morelli",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "Expert Rev Vaccines",
+            "volume": "12",
+            "issn": "7",
+            "pages": "733-746",
+            "other_ids": {
+                "DOI": [
+                    "10.1586/14760584.2013.811185"
+                ]
+            }
+        },
+        "BIBREF13": {
+            "title": "CpG Oligonucleotides as cancer vaccine adjuvants",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Shirota",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Tross",
+                    "suffix": ""
+                },
+                {
+                    "first": "DM",
+                    "middle": [],
+                    "last": "Klinman",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Vaccines (Basel)",
+            "volume": "3",
+            "issn": "2",
+            "pages": "390-407",
+            "other_ids": {
+                "DOI": [
+                    "10.3390/vaccines3020390"
+                ]
+            }
+        },
+        "BIBREF14": {
+            "title": "The combination of ISCOMATRIX adjuvant and TLR agonists induces regression of established solid tumors in vivo",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Silva",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Mount",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Krstevska",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Pejoski",
+                    "suffix": ""
+                },
+                {
+                    "first": "MP",
+                    "middle": [],
+                    "last": "Hardy",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Owczarek",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Scotney",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Baz Morelli",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "J Immunol",
+            "volume": "194",
+            "issn": "5",
+            "pages": "2199-2207",
+            "other_ids": {
+                "DOI": [
+                    "10.4049/jimmunol.1402228"
+                ]
+            }
+        },
+        "BIBREF15": {
+            "title": "Characterization of prostatic epithelial cell lines derived from transgenic adenocarcinoma of the mouse prostate (TRAMP) model",
+            "authors": [
+                {
+                    "first": "BA",
+                    "middle": [],
+                    "last": "Foster",
+                    "suffix": ""
+                },
+                {
+                    "first": "JR",
+                    "middle": [],
+                    "last": "Gingrich",
+                    "suffix": ""
+                },
+                {
+                    "first": "ED",
+                    "middle": [],
+                    "last": "Kwon",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Madias",
+                    "suffix": ""
+                },
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Greenberg",
+                    "suffix": ""
+                }
+            ],
+            "year": 1997,
+            "venue": "Cancer Res",
+            "volume": "57",
+            "issn": "16",
+            "pages": "3325-3330",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF16": {
+            "title": "Prostate cancer in a transgenic mouse",
+            "authors": [
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Greenberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "DeMayo",
+                    "suffix": ""
+                },
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Finegold",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Medina",
+                    "suffix": ""
+                },
+                {
+                    "first": "WD",
+                    "middle": [],
+                    "last": "Tilley",
+                    "suffix": ""
+                },
+                {
+                    "first": "JO",
+                    "middle": [],
+                    "last": "Aspinall",
+                    "suffix": ""
+                },
+                {
+                    "first": "GR",
+                    "middle": [],
+                    "last": "Cunha",
+                    "suffix": ""
+                },
+                {
+                    "first": "AA",
+                    "middle": [],
+                    "last": "Donjacour",
+                    "suffix": ""
+                },
+                {
+                    "first": "RJ",
+                    "middle": [],
+                    "last": "Matusik",
+                    "suffix": ""
+                },
+                {
+                    "first": "JM",
+                    "middle": [],
+                    "last": "Rosen",
+                    "suffix": ""
+                }
+            ],
+            "year": 1995,
+            "venue": "Proc Natl Acad Sci USA",
+            "volume": "92",
+            "issn": "8",
+            "pages": "3439-3443",
+            "other_ids": {
+                "DOI": [
+                    "10.1073/pnas.92.8.3439"
+                ]
+            }
+        },
+        "BIBREF17": {
+            "title": "Induction of antigen-specific effector-phase tolerance following vaccination against a previously ignored B-cell lymphoma",
+            "authors": [
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Prato",
+                    "suffix": ""
+                },
+                {
+                    "first": "JD",
+                    "middle": [],
+                    "last": "Mintern",
+                    "suffix": ""
+                },
+                {
+                    "first": "MH",
+                    "middle": [],
+                    "last": "Lahoud",
+                    "suffix": ""
+                },
+                {
+                    "first": "DC",
+                    "middle": [],
+                    "last": "Huang",
+                    "suffix": ""
+                },
+                {
+                    "first": "JA",
+                    "middle": [],
+                    "last": "Villadangos",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "Immunol Cell Biol",
+            "volume": "89",
+            "issn": "5",
+            "pages": "595-603",
+            "other_ids": {
+                "DOI": [
+                    "10.1038/icb.2010.131"
+                ]
+            }
+        },
+        "BIBREF18": {
+            "title": "ISCOMATRIX adjuvant for prophylactic and therapeutic vaccines",
+            "authors": [
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Drane",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Gittleson",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Boyle",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                }
+            ],
+            "year": 2007,
+            "venue": "Expert Rev Vaccines",
+            "volume": "6",
+            "issn": "5",
+            "pages": "761-772",
+            "other_ids": {
+                "DOI": [
+                    "10.1586/14760584.6.5.761"
+                ]
+            }
+        },
+        "BIBREF19": {
+            "title": "Targeting Tim-3 and PD-1 pathways to reverse T cell exhaustion and restore anti-tumor immunity",
+            "authors": [
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Sakuishi",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Apetoh",
+                    "suffix": ""
+                },
+                {
+                    "first": "JM",
+                    "middle": [],
+                    "last": "Sullivan",
+                    "suffix": ""
+                },
+                {
+                    "first": "BR",
+                    "middle": [],
+                    "last": "Blazar",
+                    "suffix": ""
+                },
+                {
+                    "first": "VK",
+                    "middle": [],
+                    "last": "Kuchroo",
+                    "suffix": ""
+                },
+                {
+                    "first": "AC",
+                    "middle": [],
+                    "last": "Anderson",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "J Exp Med",
+            "volume": "207",
+            "issn": "10",
+            "pages": "2187-2194",
+            "other_ids": {
+                "DOI": [
+                    "10.1084/jem.20100643"
+                ]
+            }
+        },
+        "BIBREF20": {
+            "title": "Natural cytotoxic reactivity of mouse lymphoid cells against syngeneic acid allogeneic tumors. I. Distribution of reactivity and specificity",
+            "authors": [
+                {
+                    "first": "RB",
+                    "middle": [],
+                    "last": "Herberman",
+                    "suffix": ""
+                },
+                {
+                    "first": "ME",
+                    "middle": [],
+                    "last": "Nunn",
+                    "suffix": ""
+                },
+                {
+                    "first": "DH",
+                    "middle": [],
+                    "last": "Lavrin",
+                    "suffix": ""
+                }
+            ],
+            "year": 1975,
+            "venue": "Int J Cancer",
+            "volume": "16",
+            "issn": "2",
+            "pages": "216-229",
+            "other_ids": {
+                "DOI": [
+                    "10.1002/ijc.2910160204"
+                ]
+            }
+        },
+        "BIBREF21": {
+            "title": "\"Natural\" killer cells in the mouse. I. Cytotoxic cells with specificity for mouse Moloney leukemia cells. Specificity and distribution according to genotype",
+            "authors": [
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Kiessling",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Klein",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Wigzell",
+                    "suffix": ""
+                }
+            ],
+            "year": 1975,
+            "venue": "Eur J Immunol",
+            "volume": "5",
+            "issn": "2",
+            "pages": "112-117",
+            "other_ids": {
+                "DOI": [
+                    "10.1002/eji.1830050208"
+                ]
+            }
+        },
+        "BIBREF22": {
+            "title": "Sipuleucel-T immunotherapy for castration-resistant prostate cancer",
+            "authors": [
+                {
+                    "first": "PW",
+                    "middle": [],
+                    "last": "Kantoff",
+                    "suffix": ""
+                },
+                {
+                    "first": "CS",
+                    "middle": [],
+                    "last": "Higano",
+                    "suffix": ""
+                },
+                {
+                    "first": "ND",
+                    "middle": [],
+                    "last": "Shore",
+                    "suffix": ""
+                },
+                {
+                    "first": "ER",
+                    "middle": [],
+                    "last": "Berger",
+                    "suffix": ""
+                },
+                {
+                    "first": "EJ",
+                    "middle": [],
+                    "last": "Small",
+                    "suffix": ""
+                },
+                {
+                    "first": "DF",
+                    "middle": [],
+                    "last": "Penson",
+                    "suffix": ""
+                },
+                {
+                    "first": "CH",
+                    "middle": [],
+                    "last": "Redfern",
+                    "suffix": ""
+                },
+                {
+                    "first": "AC",
+                    "middle": [],
+                    "last": "Ferrari",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Dreicer",
+                    "suffix": ""
+                },
+                {
+                    "first": "RB",
+                    "middle": [],
+                    "last": "Sims",
+                    "suffix": ""
+                },
+                {
+                    "first": "Y",
+                    "middle": [],
+                    "last": "Xu",
+                    "suffix": ""
+                },
+                {
+                    "first": "MW",
+                    "middle": [],
+                    "last": "Frohlich",
+                    "suffix": ""
+                },
+                {
+                    "first": "PF",
+                    "middle": [],
+                    "last": "Schellhammer",
+                    "suffix": ""
+                },
+                {
+                    "first": "IS",
+                    "middle": [],
+                    "last": "Investigators",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "N Engl J Med",
+            "volume": "363",
+            "issn": "5",
+            "pages": "411-422",
+            "other_ids": {
+                "DOI": [
+                    "10.1056/NEJMoa1001294"
+                ]
+            }
+        },
+        "BIBREF23": {
+            "title": "Evaluation of cell-mediated cytotoxic reactivity against tumor associated antigens with 125I-iododeoxyuridine labeled target cells",
+            "authors": [
+                {
+                    "first": "RK",
+                    "middle": [],
+                    "last": "Oldham",
+                    "suffix": ""
+                },
+                {
+                    "first": "RB",
+                    "middle": [],
+                    "last": "Herberman",
+                    "suffix": ""
+                }
+            ],
+            "year": 1973,
+            "venue": "J Immunol",
+            "volume": "111",
+            "issn": "6",
+            "pages": "862-871",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF24": {
+            "title": "Expansion of functional NK cells in multiple tissue compartments of mice treated with Flt3-ligand: implications for anti-cancer and anti-viral therapy",
+            "authors": [
+                {
+                    "first": "SG",
+                    "middle": [],
+                    "last": "Shaw",
+                    "suffix": ""
+                },
+                {
+                    "first": "AA",
+                    "middle": [],
+                    "last": "Maung",
+                    "suffix": ""
+                },
+                {
+                    "first": "RJ",
+                    "middle": [],
+                    "last": "Steptoe",
+                    "suffix": ""
+                },
+                {
+                    "first": "AW",
+                    "middle": [],
+                    "last": "Thomson",
+                    "suffix": ""
+                },
+                {
+                    "first": "NL",
+                    "middle": [],
+                    "last": "Vujanovic",
+                    "suffix": ""
+                }
+            ],
+            "year": 1998,
+            "venue": "J Immunol",
+            "volume": "161",
+            "issn": "6",
+            "pages": "2817-2824",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF25": {
+            "title": "APC-independent activation of NK cells by the Toll-like receptor 3 agonist double-stranded RNA",
+            "authors": [
+                {
+                    "first": "KN",
+                    "middle": [],
+                    "last": "Schmidt",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Leung",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Kwong",
+                    "suffix": ""
+                },
+                {
+                    "first": "KA",
+                    "middle": [],
+                    "last": "Zarember",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Satyal",
+                    "suffix": ""
+                },
+                {
+                    "first": "TA",
+                    "middle": [],
+                    "last": "Navas",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "PJ",
+                    "middle": [],
+                    "last": "Godowski",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "J Immunol",
+            "volume": "172",
+            "issn": "1",
+            "pages": "138-143",
+            "other_ids": {
+                "DOI": [
+                    "10.4049/jimmunol.172.1.138"
+                ]
+            }
+        },
+        "BIBREF26": {
+            "title": "Innate or adaptive immunity? The example of natural killer cells",
+            "authors": [
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Vivier",
+                    "suffix": ""
+                },
+                {
+                    "first": "DH",
+                    "middle": [],
+                    "last": "Raulet",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Moretta",
+                    "suffix": ""
+                },
+                {
+                    "first": "MA",
+                    "middle": [],
+                    "last": "Caligiuri",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Zitvogel",
+                    "suffix": ""
+                },
+                {
+                    "first": "LL",
+                    "middle": [],
+                    "last": "Lanier",
+                    "suffix": ""
+                },
+                {
+                    "first": "WM",
+                    "middle": [],
+                    "last": "Yokoyama",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Ugolini",
+                    "suffix": ""
+                }
+            ],
+            "year": 2011,
+            "venue": "Science",
+            "volume": "331",
+            "issn": "6013",
+            "pages": "44-49",
+            "other_ids": {
+                "DOI": [
+                    "10.1126/science.1198687"
+                ]
+            }
+        },
+        "BIBREF27": {
+            "title": "Androgen-independent prostate cancer progression in the TRAMP model",
+            "authors": [
+                {
+                    "first": "JR",
+                    "middle": [],
+                    "last": "Gingrich",
+                    "suffix": ""
+                },
+                {
+                    "first": "RJ",
+                    "middle": [],
+                    "last": "Barrios",
+                    "suffix": ""
+                },
+                {
+                    "first": "MW",
+                    "middle": [],
+                    "last": "Kattan",
+                    "suffix": ""
+                },
+                {
+                    "first": "HS",
+                    "middle": [],
+                    "last": "Nahm",
+                    "suffix": ""
+                },
+                {
+                    "first": "MJ",
+                    "middle": [],
+                    "last": "Finegold",
+                    "suffix": ""
+                },
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Greenberg",
+                    "suffix": ""
+                }
+            ],
+            "year": 1997,
+            "venue": "Cancer Res",
+            "volume": "57",
+            "issn": "21",
+            "pages": "4687-4691",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF28": {
+            "title": "Toll-like receptor control of the adaptive immune responses",
+            "authors": [
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Iwasaki",
+                    "suffix": ""
+                },
+                {
+                    "first": "R",
+                    "middle": [],
+                    "last": "Medzhitov",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Nat Immunol",
+            "volume": "5",
+            "issn": "10",
+            "pages": "987-995",
+            "other_ids": {
+                "DOI": [
+                    "10.1038/ni1112"
+                ]
+            }
+        },
+        "BIBREF29": {
+            "title": "Of men, mice and pigs: looking at their plasmacytoid dendritic cells [corrected]",
+            "authors": [
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Hochrein",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Wagner",
+                    "suffix": ""
+                }
+            ],
+            "year": 2004,
+            "venue": "Immunology",
+            "volume": "112",
+            "issn": "1",
+            "pages": "26-27",
+            "other_ids": {
+                "DOI": [
+                    "10.1111/j.1365-2567.2004.01878.x"
+                ]
+            }
+        },
+        "BIBREF30": {
+            "title": "Toll-like receptor 3-mediated suppression of TRAMP prostate cancer shows the critical role of type I interferons in tumor immune surveillance",
+            "authors": [
+                {
+                    "first": "AI",
+                    "middle": [],
+                    "last": "Chin",
+                    "suffix": ""
+                },
+                {
+                    "first": "AK",
+                    "middle": [],
+                    "last": "Miyahira",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Covarrubias",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Teague",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Guo",
+                    "suffix": ""
+                },
+                {
+                    "first": "PW",
+                    "middle": [],
+                    "last": "Dempsey",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Cheng",
+                    "suffix": ""
+                }
+            ],
+            "year": 2010,
+            "venue": "Cancer Res",
+            "volume": "70",
+            "issn": "7",
+            "pages": "2595-2603",
+            "other_ids": {
+                "DOI": [
+                    "10.1158/0008-5472.CAN-09-1162"
+                ]
+            }
+        },
+        "BIBREF31": {
+            "title": "Flt3-ligand induces transient tumor regression in an ectopic treatment model of major histocompatibility complex-negative prostate cancer",
+            "authors": [
+                {
+                    "first": "RP",
+                    "middle": [],
+                    "last": "Ciavarra",
+                    "suffix": ""
+                },
+                {
+                    "first": "KD",
+                    "middle": [],
+                    "last": "Somers",
+                    "suffix": ""
+                },
+                {
+                    "first": "RR",
+                    "middle": [],
+                    "last": "Brown",
+                    "suffix": ""
+                },
+                {
+                    "first": "WF",
+                    "middle": [],
+                    "last": "Glass",
+                    "suffix": ""
+                },
+                {
+                    "first": "PJ",
+                    "middle": [],
+                    "last": "Consolvo",
+                    "suffix": ""
+                },
+                {
+                    "first": "GL",
+                    "middle": [],
+                    "last": "Wright",
+                    "suffix": ""
+                },
+                {
+                    "first": "PF",
+                    "middle": [],
+                    "last": "Schellhammer",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "Cancer Res",
+            "volume": "60",
+            "issn": "8",
+            "pages": "2081-2084",
+            "other_ids": {
+                "DOI": []
+            }
+        },
+        "BIBREF32": {
+            "title": "Dramatic increase in the numbers of functionally mature dendritic cells in Flt3 ligand-treated mice: multiple dendritic cell subpopulations identified",
+            "authors": [
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Brasel",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Teepe",
+                    "suffix": ""
+                },
+                {
+                    "first": "ER",
+                    "middle": [],
+                    "last": "Roux",
+                    "suffix": ""
+                },
+                {
+                    "first": "SD",
+                    "middle": [],
+                    "last": "Lyman",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Shortman",
+                    "suffix": ""
+                },
+                {
+                    "first": "HJ",
+                    "middle": [],
+                    "last": "McKenna",
+                    "suffix": ""
+                }
+            ],
+            "year": 1996,
+            "venue": "J Exp Med",
+            "volume": "184",
+            "issn": "5",
+            "pages": "1953-1962",
+            "other_ids": {
+                "DOI": [
+                    "10.1084/jem.184.5.1953"
+                ]
+            }
+        },
+        "BIBREF33": {
+            "title": "Phase III trial of PROSTVAC in asymptomatic or minimally symptomatic metastatic castration-resistant prostate cancer",
+            "authors": [
+                {
+                    "first": "JL",
+                    "middle": [],
+                    "last": "Gulley",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Borre",
+                    "suffix": ""
+                },
+                {
+                    "first": "NJ",
+                    "middle": [],
+                    "last": "Vogelzang",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Ng",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Agarwal",
+                    "suffix": ""
+                },
+                {
+                    "first": "CC",
+                    "middle": [],
+                    "last": "Parker",
+                    "suffix": ""
+                },
+                {
+                    "first": "DW",
+                    "middle": [],
+                    "last": "Pook",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Rathenborg",
+                    "suffix": ""
+                },
+                {
+                    "first": "TW",
+                    "middle": [],
+                    "last": "Flaig",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Carles",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Saad",
+                    "suffix": ""
+                },
+                {
+                    "first": "ND",
+                    "middle": [],
+                    "last": "Shore",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Chen",
+                    "suffix": ""
+                },
+                {
+                    "first": "CR",
+                    "middle": [],
+                    "last": "Heery",
+                    "suffix": ""
+                },
+                {
+                    "first": "WR",
+                    "middle": [],
+                    "last": "Gerritsen",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Priou",
+                    "suffix": ""
+                },
+                {
+                    "first": "NC",
+                    "middle": [],
+                    "last": "Langkilde",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Novikov",
+                    "suffix": ""
+                },
+                {
+                    "first": "PW",
+                    "middle": [],
+                    "last": "Kantoff",
+                    "suffix": ""
+                }
+            ],
+            "year": 2019,
+            "venue": "J Clin Oncol",
+            "volume": "37",
+            "issn": "13",
+            "pages": "1051-1061",
+            "other_ids": {
+                "DOI": [
+                    "10.1200/JCO.18.02031"
+                ]
+            }
+        },
+        "BIBREF34": {
+            "title": "In vivo generation of human dendritic cell subsets by Flt3 ligand",
+            "authors": [
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Daro",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Roux",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Teepe",
+                    "suffix": ""
+                },
+                {
+                    "first": "CR",
+                    "middle": [],
+                    "last": "Maliszewski",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Hoek",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Caron",
+                    "suffix": ""
+                },
+                {
+                    "first": "ME",
+                    "middle": [],
+                    "last": "Lebsack",
+                    "suffix": ""
+                },
+                {
+                    "first": "HJ",
+                    "middle": [],
+                    "last": "McKenna",
+                    "suffix": ""
+                }
+            ],
+            "year": 2000,
+            "venue": "Blood",
+            "volume": "96",
+            "issn": "3",
+            "pages": "878-884",
+            "other_ids": {
+                "DOI": [
+                    "10.1182/blood.V96.3.878"
+                ]
+            }
+        },
+        "BIBREF35": {
+            "title": "NKG2D-deficient mice are defective in tumor surveillance in models of spontaneous malignancy",
+            "authors": [
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Guerra",
+                    "suffix": ""
+                },
+                {
+                    "first": "YX",
+                    "middle": [],
+                    "last": "Tan",
+                    "suffix": ""
+                },
+                {
+                    "first": "NT",
+                    "middle": [],
+                    "last": "Joncker",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Choy",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Gallardo",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Xiong",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Knoblaugh",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Cado",
+                    "suffix": ""
+                },
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Greenberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "DH",
+                    "middle": [],
+                    "last": "Raulet",
+                    "suffix": ""
+                }
+            ],
+            "year": 2008,
+            "venue": "Immunity",
+            "volume": "28",
+            "issn": "4",
+            "pages": "571-580",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/j.immuni.2008.02.016"
+                ]
+            }
+        },
+        "BIBREF36": {
+            "title": "Perturbation of NK cell peripheral homeostasis accelerates prostate carcinoma metastasis",
+            "authors": [
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Liu",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Lu",
+                    "suffix": ""
+                },
+                {
+                    "first": "X",
+                    "middle": [],
+                    "last": "Wang",
+                    "suffix": ""
+                },
+                {
+                    "first": "ST",
+                    "middle": [],
+                    "last": "Page",
+                    "suffix": ""
+                },
+                {
+                    "first": "CS",
+                    "middle": [],
+                    "last": "Higano",
+                    "suffix": ""
+                },
+                {
+                    "first": "SR",
+                    "middle": [],
+                    "last": "Plymate",
+                    "suffix": ""
+                },
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Greenberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Sun",
+                    "suffix": ""
+                },
+                {
+                    "first": "Z",
+                    "middle": [],
+                    "last": "Li",
+                    "suffix": ""
+                },
+                {
+                    "first": "JD",
+                    "middle": [],
+                    "last": "Wu",
+                    "suffix": ""
+                }
+            ],
+            "year": 2013,
+            "venue": "J Clin Investig",
+            "volume": "123",
+            "issn": "10",
+            "pages": "4410-4422",
+            "other_ids": {
+                "DOI": [
+                    "10.1172/JCI69369"
+                ]
+            }
+        },
+        "BIBREF37": {
+            "title": "Inherent and tumor-driven immune tolerance in the prostate microenvironment impairs natural killer cell antitumor activity",
+            "authors": [
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Pasero",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Gravis",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Guerin",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Granjeaud",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Thomassin-Piana",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Rocchi",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Paciencia-Gros",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Poizat",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Bentobji",
+                    "suffix": ""
+                },
+                {
+                    "first": "F",
+                    "middle": [],
+                    "last": "Azario-Cheillan",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Walz",
+                    "suffix": ""
+                },
+                {
+                    "first": "N",
+                    "middle": [],
+                    "last": "Salem",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Brunelle",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Moretta",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Olive",
+                    "suffix": ""
+                }
+            ],
+            "year": 2016,
+            "venue": "Cancer Res",
+            "volume": "76",
+            "issn": "8",
+            "pages": "2153-2165",
+            "other_ids": {
+                "DOI": [
+                    "10.1158/0008-5472.CAN-15-1965"
+                ]
+            }
+        },
+        "BIBREF38": {
+            "title": "ISCOMATRIX vaccines mediate CD8+ T-cell cross-priming by a MyD88-dependent signaling pathway",
+            "authors": [
+                {
+                    "first": "NS",
+                    "middle": [],
+                    "last": "Wilson",
+                    "suffix": ""
+                },
+                {
+                    "first": "B",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "AB",
+                    "middle": [],
+                    "last": "Morelli",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Koernig",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Yang",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Loeser",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Airey",
+                    "suffix": ""
+                },
+                {
+                    "first": "L",
+                    "middle": [],
+                    "last": "Provan",
+                    "suffix": ""
+                },
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Hass",
+                    "suffix": ""
+                },
+                {
+                    "first": "H",
+                    "middle": [],
+                    "last": "Braley",
+                    "suffix": ""
+                },
+                {
+                    "first": "S",
+                    "middle": [],
+                    "last": "Couto",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Drane",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Boyle",
+                    "suffix": ""
+                },
+                {
+                    "first": "GT",
+                    "middle": [],
+                    "last": "Belz",
+                    "suffix": ""
+                },
+                {
+                    "first": "A",
+                    "middle": [],
+                    "last": "Ashkenazi",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Maraskovsky",
+                    "suffix": ""
+                }
+            ],
+            "year": 2012,
+            "venue": "Immunol Cell Biol",
+            "volume": "90",
+            "issn": "5",
+            "pages": "540-552",
+            "other_ids": {
+                "DOI": [
+                    "10.1038/icb.2011.71"
+                ]
+            }
+        },
+        "BIBREF39": {
+            "title": "Loss of HLA class I expression in prostate cancer: implications for immunotherapy",
+            "authors": [
+                {
+                    "first": "RA",
+                    "middle": [],
+                    "last": "Blades",
+                    "suffix": ""
+                },
+                {
+                    "first": "PJ",
+                    "middle": [],
+                    "last": "Keating",
+                    "suffix": ""
+                },
+                {
+                    "first": "LJ",
+                    "middle": [],
+                    "last": "McWilliam",
+                    "suffix": ""
+                },
+                {
+                    "first": "NJ",
+                    "middle": [],
+                    "last": "George",
+                    "suffix": ""
+                },
+                {
+                    "first": "PL",
+                    "middle": [],
+                    "last": "Stern",
+                    "suffix": ""
+                }
+            ],
+            "year": 1995,
+            "venue": "Urology",
+            "volume": "46",
+            "issn": "5",
+            "pages": "681-686",
+            "other_ids": {
+                "DOI": [
+                    "10.1016/S0090-4295(99)80301-X"
+                ]
+            }
+        },
+        "BIBREF40": {
+            "title": "A TLR7 agonist enhances the antitumor efficacy of obinutuzumab in murine lymphoma models via NK cells and CD4 T cells",
+            "authors": [
+                {
+                    "first": "EJ",
+                    "middle": [],
+                    "last": "Cheadle",
+                    "suffix": ""
+                },
+                {
+                    "first": "G",
+                    "middle": [],
+                    "last": "Lipowska-Bhalla",
+                    "suffix": ""
+                },
+                {
+                    "first": "SJ",
+                    "middle": [],
+                    "last": "Dovedi",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Fagnano",
+                    "suffix": ""
+                },
+                {
+                    "first": "C",
+                    "middle": [],
+                    "last": "Klein",
+                    "suffix": ""
+                },
+                {
+                    "first": "J",
+                    "middle": [],
+                    "last": "Honeychurch",
+                    "suffix": ""
+                },
+                {
+                    "first": "TM",
+                    "middle": [],
+                    "last": "Illidge",
+                    "suffix": ""
+                }
+            ],
+            "year": 2017,
+            "venue": "Leukemia",
+            "volume": "",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.1038/leu.2016.352"
+                ]
+            }
+        },
+        "BIBREF41": {
+            "title": "Targeting antigen into the phagocytic pathway in vivo induces protective tumour immunity",
+            "authors": [
+                {
+                    "first": "LD",
+                    "middle": [],
+                    "last": "Falo",
+                    "suffix": "Jr"
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Kovacsovics-Bankowski",
+                    "suffix": ""
+                },
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Thompson",
+                    "suffix": ""
+                },
+                {
+                    "first": "KL",
+                    "middle": [],
+                    "last": "Rock",
+                    "suffix": ""
+                }
+            ],
+            "year": 1995,
+            "venue": "Nat Med",
+            "volume": "1",
+            "issn": "7",
+            "pages": "649-653",
+            "other_ids": {
+                "DOI": [
+                    "10.1038/nm0795-649"
+                ]
+            }
+        },
+        "BIBREF42": {
+            "title": "The future of immune checkpoint therapy",
+            "authors": [
+                {
+                    "first": "P",
+                    "middle": [],
+                    "last": "Sharma",
+                    "suffix": ""
+                },
+                {
+                    "first": "JP",
+                    "middle": [],
+                    "last": "Allison",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Science",
+            "volume": "348",
+            "issn": "6230",
+            "pages": "56-61",
+            "other_ids": {
+                "DOI": [
+                    "10.1126/science.aaa8172"
+                ]
+            }
+        },
+        "BIBREF43": {
+            "title": "Combining vaccines and immune checkpoint inhibitors to prime, expand, and facilitate effective tumor immunotherapy",
+            "authors": [
+                {
+                    "first": "JM",
+                    "middle": [],
+                    "last": "Collins",
+                    "suffix": ""
+                },
+                {
+                    "first": "JM",
+                    "middle": [],
+                    "last": "Redman",
+                    "suffix": ""
+                },
+                {
+                    "first": "JL",
+                    "middle": [],
+                    "last": "Gulley",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "Expert Rev Vaccines",
+            "volume": "17",
+            "issn": "8",
+            "pages": "697-705",
+            "other_ids": {
+                "DOI": [
+                    "10.1080/14760584.2018.1506332"
+                ]
+            }
+        },
+        "BIBREF44": {
+            "title": "Synthetic vaccine particles for durable cytolytic T lymphocyte responses and anti-tumor immunotherapy",
+            "authors": [
+                {
+                    "first": "PO",
+                    "middle": [],
+                    "last": "Ilyinskii",
+                    "suffix": ""
+                },
+                {
+                    "first": "GI",
+                    "middle": [],
+                    "last": "Kovalev",
+                    "suffix": ""
+                },
+                {
+                    "first": "CP",
+                    "middle": [],
+                    "last": "O'Neil",
+                    "suffix": ""
+                },
+                {
+                    "first": "CJ",
+                    "middle": [],
+                    "last": "Roy",
+                    "suffix": ""
+                },
+                {
+                    "first": "AM",
+                    "middle": [],
+                    "last": "Michaud",
+                    "suffix": ""
+                },
+                {
+                    "first": "NM",
+                    "middle": [],
+                    "last": "Drefs",
+                    "suffix": ""
+                },
+                {
+                    "first": "MA",
+                    "middle": [],
+                    "last": "Pechenkin",
+                    "suffix": ""
+                },
+                {
+                    "first": "FN",
+                    "middle": [],
+                    "last": "Fu",
+                    "suffix": ""
+                },
+                {
+                    "first": "LPM",
+                    "middle": [],
+                    "last": "Johnston",
+                    "suffix": ""
+                },
+                {
+                    "first": "DA",
+                    "middle": [],
+                    "last": "Ovchinnikov",
+                    "suffix": ""
+                },
+                {
+                    "first": "TK",
+                    "middle": [],
+                    "last": "Kishimoto",
+                    "suffix": ""
+                }
+            ],
+            "year": 2018,
+            "venue": "PLoS ONE",
+            "volume": "13",
+            "issn": "6",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.1371/journal.pone.0197694"
+                ]
+            }
+        },
+        "BIBREF45": {
+            "title": "Natural killer cell-based therapies targeting cancer: possible strategies to gain and sustain anti-tumor activity",
+            "authors": [
+                {
+                    "first": "CI",
+                    "middle": [],
+                    "last": "Dahlberg",
+                    "suffix": ""
+                },
+                {
+                    "first": "D",
+                    "middle": [],
+                    "last": "Sarhan",
+                    "suffix": ""
+                },
+                {
+                    "first": "M",
+                    "middle": [],
+                    "last": "Chrobok",
+                    "suffix": ""
+                },
+                {
+                    "first": "AD",
+                    "middle": [],
+                    "last": "Duru",
+                    "suffix": ""
+                },
+                {
+                    "first": "E",
+                    "middle": [],
+                    "last": "Alici",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Front Immunol",
+            "volume": "6",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.3389/fimmu.2015.00605"
+                ]
+            }
+        },
+        "BIBREF46": {
+            "title": "The application of natural killer cell immunotherapy for the treatment of cancer",
+            "authors": [
+                {
+                    "first": "K",
+                    "middle": [],
+                    "last": "Rezvani",
+                    "suffix": ""
+                },
+                {
+                    "first": "RH",
+                    "middle": [],
+                    "last": "Rouce",
+                    "suffix": ""
+                }
+            ],
+            "year": 2015,
+            "venue": "Front Immunol",
+            "volume": "6",
+            "issn": "",
+            "pages": null,
+            "other_ids": {
+                "DOI": [
+                    "10.3389/fimmu.2015.00578"
+                ]
+            }
+        }
+    }
+}

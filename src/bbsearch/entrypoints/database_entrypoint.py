@@ -3,30 +3,41 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
-                    default="/raid/covid_data/data/v7/CORD-19-research-challenge/",
+                    default="/raid/bbs_data/cord19_v35",
                     type=str,
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
-parser.add_argument("--out_dir",
-                    default='/raid/bbs_data/cord19_v7/databases/',
+parser.add_argument("--db_type",
+                    default="sqlite",
                     type=str,
-                    help="The directory path where the database is saved")
-parser.add_argument("--version",
-                    default='v1',
-                    type=str,
-                    help="The version of the database")
+                    help="Type of database. Possible values: (sqlite, mysql)")
 args = parser.parse_args()
 
 
 def main():
     """Run database construction."""
     from pathlib import Path
+    import getpass
+    import sqlalchemy
     from ..database import CORD19DatabaseCreation
+
+    if args.db_type == 'sqlite':
+        database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
+        if not Path(database_path).exists():
+            Path(database_path).touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+    elif args.db_type == 'mysql':
+        # We assume the database `cord19_v35` already exists
+        mysql_uri = input('MySQL URI:')
+        password = getpass.getpass('Password:')
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://root:{password}'
+                                          f'@{mysql_uri}/cord19_v35')
+    else:
+        raise ValueError(f'\"{args.db_type}" is not supported as a db_type.')
 
     db = CORD19DatabaseCreation(
         data_path=Path(args.data_path),
-        version=args.version,
-        saving_directory=Path(args.out_dir))
+        engine=engine)
     db.construct()
 
 

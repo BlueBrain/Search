@@ -84,7 +84,7 @@ class TestMiningServer:
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
-        identifiers = [('w8579f54', 4)]
+        identifiers = [(1, 0), (2, -1)]
         request_json = {"identifiers": identifiers, 'schema': schema_request}
         response = mining_client.post('/database', json=request_json)
         response_json = response.json

@@ -711,7 +711,7 @@ class TestAttributeExtraction:
                           'offsetStart': 16,
                           'offsetEnd': 17}}]
 
-        annotated_text = extractor.annotate_quantities(text, measurements, width=70)
+        annotated_text = extractor.annotate_quantities(text, measurements)
         assert isinstance(annotated_text, HTML)
 
     def test_get_quantity_tokens(self, extractor: AttributeExtractor):

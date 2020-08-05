@@ -9,7 +9,7 @@ parser.add_argument("--db_type",
                     help="Type of the database. Possible values: (sqlite, "
                          "mysql)")
 parser.add_argument("--out_dir",
-                    default='/raid/bbs_data/cord19_v7/embeddings/',
+                    default='/raid/bbs_data/cord19_v35/embeddings/',
                     type=str,
                     help="The directory path where the embeddings are saved.")
 parser.add_argument("--models",
@@ -107,6 +107,7 @@ def main():
                                                                  sentence_ids[
                                                                      index:index+args.step])
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
+
             except Exception as e:
                 print(f'Issues raised for sentence_ids[{index}'
                       f':{index+args.step}]')

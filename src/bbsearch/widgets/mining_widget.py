@@ -7,6 +7,7 @@ import ipywidgets as widgets
 import pandas as pd
 import requests
 
+from .._css import style
 from ..utils import Timer
 
 
@@ -56,20 +57,25 @@ class MiningWidget(widgets.VBox):
 
         # "Mine This Text" button
         self.widgets['mine_text'] = widgets.Button(
-            description='Mine This Text!',
-            layout=widgets.Layout(width='auto'))
+            description='⚒️  Mine This Text!',
+            layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_text'].on_click(self._mine_text_clicked)
+        self.widgets['mine_text'].add_class('bbs_button')
 
         # "Mine Selected Articles" button
         self.widgets['mine_articles'] = widgets.Button(
-            description='Mine Selected Articles!',
-            layout=widgets.Layout(width='auto'))
+            description='⚒️  Mine Selected Articles!',
+            layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_articles'].on_click(self._mine_articles_clicked)
+        self.widgets['mine_articles'].add_class('bbs_button')
 
         # "Output Area" Widget
         self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
 
     def _init_ui(self):
+        css_style = style.get_css_style()
+        display(HTML(f'<style> {css_style} </style>'))
+
         self.children = [
             self.widgets['input_text'],
             widgets.HBox(children=[
@@ -144,16 +150,15 @@ class MiningWidget(widgets.VBox):
 
             print("Collecting saved items...".ljust(50), end='', flush=True)
             with timer("collect items"):
-                df_chosen_texts = self.article_saver.get_chosen_texts()
+                identifiers = self.article_saver.get_saved_items()
+
             print(f'{timer["collect items"]:7.2f} seconds')
             print('Mining request schema:')
             display(self.schema_request.schema)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
-                information = [(row['article_id'], row['paragraph_id'])
-                               for i, row in df_chosen_texts.iterrows()]
                 self.table_extractions = self.textmining_pipeline(
-                    information=information,
+                    information=identifiers,
                     schema_df=self.schema_request.schema
                 )
             print(f'{timer["pipeline"]:7.2f} seconds')

@@ -20,10 +20,11 @@ parser.add_argument("--ee_models_lib",
                     default="/raid/bbs_data/models_libraries/ee_models_library.csv",
                     type=str,
                     help="The csv file with info on which model to use to mine which entity type.")
-parser.add_argument("--database_path",
-                    default="/raid/bbs_data/cord19_v7/databases/cord19.db",
+parser.add_argument("--db_type",
+                    default="mysql",
                     type=str,
-                    help="The path to the database. ")
+                    help="Type of the database. Possible values: (sqlite, "
+                         "mysql)")
 args = parser.parse_args()
 
 
@@ -35,12 +36,24 @@ def main():
     configure_logging(log_dir, log_name)
 
     # Start server
+    import pathlib
     from flask import Flask
     import sqlalchemy
     from ..server.mining_server import MiningServer
 
     app = Flask("BBS Mining Server")
-    engine = sqlalchemy.create_engine(f"sqlite:///{args.database_path}")
+
+    if args.db_type == 'sqlite':
+        database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
+        if not pathlib.Path(database_path).exists():
+            pathlib.Path(database_path).touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
+    elif args.db_type == 'mysql':
+        mysql_uri = input('MySQL URI:')
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:guest'
+                                          f'@{mysql_uri}/cord19_v35')
+    else:
+        raise ValueError('This is not an handled db_type.')
 
     MiningServer(app=app,
                  models_libs={'ee': args.ee_models_lib},
