@@ -85,20 +85,25 @@ class MiningWidgetBot:
         self.mining_widget.widgets[widget_name].value = value
 
 
+columns = {'name': pd.Series(['John Smith', 'Erica Meyers']),
+           'department': pd.Series(['Accounting', 'IT']),
+           'birthday': pd.Series(['November', 'March'])}
+df = pd.DataFrame(columns)
+
+
+def request_callback(request):
+    resp_body = df.to_csv(index=False)
+    headers = {'request-id': '1234abcdeABCDE', 'Content-Type': "text/csv"}
+    response = (200, headers, resp_body)
+    return response
+
+
 @responses.activate
 def test_mining_text(monkeypatch, capsys):
 
-    def request_text_callback(request):
-        resp_body = """name,department,birthday month
-                        John Smith,Accounting,November
-                        Erica Meyers,IT,March"""
-        headers = {'request-id': '1234abcdeABCDE', 'Content-Type': "text/csv"}
-        response = (200, headers, resp_body)
-        return response
-
     responses.add_callback(
         responses.POST, 'http://test/text',
-        callback=request_text_callback,
+        callback=request_callback,
         content_type="text/csv"
     )
 
@@ -110,21 +115,19 @@ def test_mining_text(monkeypatch, capsys):
 
     assert len(responses.calls) == 1
 
+    display_objs = bot.display_cached
+    assert len(display_objs) == 1
+    assert isinstance(display_objs[0], pd.DataFrame)
+
+    assert display_objs[0].equals(df)
+
 
 @responses.activate
 def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
 
-    def request_database_callback(request):
-        resp_body = """name,department,birthday month
-                        John Smith,Accounting,November
-                        Erica Meyers,IT,March"""
-        headers = {'request-id': '1234abcdeABCDE', 'Content-Type': "text/csv"}
-        response = (200, headers, resp_body)
-        return response
-
     responses.add_callback(
         responses.POST, 'http://test/database',
-        callback=request_database_callback,
+        callback=request_callback,
         content_type="text/csv"
     )
 
@@ -153,3 +156,9 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     assert len(responses.calls) == 1
     assert "Collecting saved items..." in bot.stdout_cached
     assert isinstance(mining_widget.get_extracted_table(), pd.DataFrame)
+
+    display_objs = bot.display_cached
+    assert len(display_objs) == 1
+    assert isinstance(display_objs[0], pd.DataFrame)
+
+    assert display_objs[0].equals(df)
