@@ -19,7 +19,7 @@ install_requires = [
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "numpy>=1.16.1",
-    "pandas",
+    "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "rdflib-jsonld",
