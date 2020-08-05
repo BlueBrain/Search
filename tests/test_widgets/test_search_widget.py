@@ -153,7 +153,7 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
     # Initial state
-    assert 'Click "Investigate" to display some results.' in bot.stdout_cached
+    assert 'Click on "Search Literature!" button to display some results.' in bot.stdout_cached
     assert not bot.display_cached
 
     bot.set_value('top_results', k)
