@@ -16,10 +16,10 @@ parser.add_argument("--port",
                     default=8080,
                     type=int,
                     help="The server port")
-parser.add_argument("--models_path",
-                    default="/raid/bbs_data/trained_models",
+parser.add_argument("--ee_models_lib",
+                    default="/raid/bbs_data/models_libraries/ee_models_library.csv",
                     type=str,
-                    help="The folder with pretrained models")
+                    help="The csv file with info on which model to use to mine which entity type.")
 parser.add_argument("--db_type",
                     default="mysql",
                     type=str,
@@ -42,7 +42,6 @@ def main():
     from ..server.mining_server import MiningServer
 
     app = Flask("BBS Mining Server")
-    models_path = pathlib.Path(args.models_path)
 
     if args.db_type == 'sqlite':
         database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
@@ -53,8 +52,13 @@ def main():
         mysql_uri = input('MySQL URI:')
         engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:guest'
                                           f'@{mysql_uri}/cord19_v35')
+    else:
+        raise ValueError('This is not an handled db_type.')
 
-    MiningServer(app, models_path, engine)
+    MiningServer(app=app,
+                 models_libs={'ee': args.ee_models_lib},
+                 connection=engine
+                 )
     app.run(
         host=args.host,
         port=args.port,

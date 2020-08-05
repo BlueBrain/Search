@@ -1,9 +1,5 @@
 FROM python:3.6-slim
 
-LABEL maintainer="Stanislav Schmidt <stanislav.schmidt@epfl.ch>"
-LABEL version="1.0"
-LABEL description="REST API Server for Text Embeddings"
-
 # ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV http_proxy='http://bbpproxy.epfl.ch:80/'
@@ -30,10 +26,15 @@ RUN true \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
-# Install the app 
+# Install the app
 ADD . /src
 WORKDIR /src
 RUN pip install .
+
+# Set image version
+LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
+LABEL description="REST API Server for Text Embeddings"
+LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
 RUN useradd --create-home serveruser
@@ -48,4 +49,6 @@ EXPOSE 8080
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_embedding.log"
 
-ENTRYPOINT ["embedding_server", "--host=0.0.0.0", "--port=8080"]
+ENTRYPOINT exec embedding_server \
+    --host=0.0.0.0 \
+    --port=8080

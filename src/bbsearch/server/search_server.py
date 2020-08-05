@@ -5,6 +5,7 @@ import pathlib
 from flask import request, jsonify
 import numpy as np
 
+import bbsearch
 from ..embedding_models import BSV, SBioBERT
 from ..search import LocalSearcher
 from ..utils import H5
@@ -36,7 +37,7 @@ class SearchServer:
                  ):
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.version = "1.0"
+        self.version = bbsearch.__version__
         self.name = "SearchServer"
         self.app = app
         self.connection = connection

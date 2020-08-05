@@ -48,7 +48,9 @@ extras_require = {"dev": ["flake8", "pydocstyle", "pytest>=4.6", "pytest-cov"]}
 setup(
     name="BBSearch",
     description="Blue Brain Search",
-    author="Blue Brain Project",
+    author="Blue Brain Project (EPFL) - ML Team",
+    author_email="bbp-ou-machinelearning@groupes.epfl.ch",
+    url="https://github.com/BlueBrain/BlueBrainSearch",
     use_scm_version={
         "write_to": "src/bbsearch/version.py",
         "write_to_template": '__version__ = "{version}"\n',
