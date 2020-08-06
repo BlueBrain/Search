@@ -347,10 +347,10 @@ class SentenceFilter:
 
         # Exclusion text
         for text in self.string_exclusions:
-            if self.connection.url.drivername == 'sqlite':
-                sentence_conditions.append(f"text NOT LIKE '%{text}%'")
-            else:
+            if self.connection.url.drivername == 'mysql+pymysql':
                 sentence_conditions.append(f"INSTR(text, '{text}') = 0")
+            else:
+                sentence_conditions.append(f"text NOT LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"
