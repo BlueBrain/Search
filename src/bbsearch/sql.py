@@ -178,20 +178,24 @@ class SentenceFilter:
     Example
     -------
 
-    >>> import sqlalchemy
-    >>> connection = sqlalchemy.create_engine("...")
-    >>> filtered_sentence_ids = (
-    ...     SentenceFilter(connection)
-    ...     .only_with_journal()
-    ...     .restrict_sentences_ids_to([1, 2, 3, 4, 5])
-    ...     .date_range((2010, 2020))
-    ...     .exclude_strings(["virus", "disease"])
-    ...     .run()
-    ... )
+    .. code-block:: python
+
+        import sqlalchemy
+        connection = sqlalchemy.create_engine("...")
+        filtered_sentence_ids = (
+            SentenceFilter(connection)
+            .only_with_journal()
+            .restrict_sentences_ids_to([1, 2, 3, 4, 5])
+            .date_range((2010, 2020))
+            .exclude_strings(["virus", "disease"])
+            .run()
+        )
 
     When the `run()` or the `stream()` method is called an SQL
     query is constructed and executed internally. For the example
-    above it would have approximately the following form::
+    above it would have approximately the following form
+
+    .. code-block:: SQL
 
         SELECT sentence_id
         FROM sentences
