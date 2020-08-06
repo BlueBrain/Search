@@ -221,7 +221,7 @@ class AttributeExtractor:
 
         CoreNLP breaks a given text down into sentences, and
         each sentence is broken down into tokens. These can
-        be accessed by `response['sentences'][sentence_id]['tokens'].
+        be accessed by `response['sentences'][sentence_id]['tokens']`.
 
         Each token corresponds to a position in the original text.
         This method determines which tokens would intersect a

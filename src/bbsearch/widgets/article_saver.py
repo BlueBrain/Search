@@ -27,17 +27,13 @@ class ArticleSaver:
 
     Parameters
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or
-                database str URI or
-                DBAPI2 connection (fallback mode)
+    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or
-                database str URI or
-                DBAPI2 connection (fallback mode)
+    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 

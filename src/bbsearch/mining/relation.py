@@ -66,8 +66,7 @@ class REModel(ABC):
         """Generate dictionary mapping the two entity types to their annotation symbols.
 
         General structure: {'ENTITY_TYPE': ('SYMBOL_LEFT', 'SYMBOL_RIGHT')}
-        Specific example: {'GGP': ('[[ ', ' ]]'),
-                           'CHEBI': ('<< ', ' >>')}
+        Specific example: {'GGP': ('[[ ', ' ]]'), 'CHEBI': ('<< ', ' >>')}
 
         Make sure that left and right symbols are not identical.
         """
