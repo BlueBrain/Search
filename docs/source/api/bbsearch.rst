@@ -9,6 +9,7 @@ Subpackages
 
    bbsearch.mining
    bbsearch.server
+   bbsearch.widgets
 
 Submodules
 ----------
@@ -16,14 +17,12 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   bbsearch.article_saver
    bbsearch.database
    bbsearch.embedding_models
    bbsearch.remote_searcher
    bbsearch.search
    bbsearch.sql
    bbsearch.utils
-   bbsearch.widget
 
 Module contents
 ---------------

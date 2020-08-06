@@ -36,12 +36,10 @@ class SearchWidget(widgets.VBox):
                bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
-    connection : SQLAlchemy connectable (engine/connection) or
-                 database str URI or
-                 DBAPI2 connection (fallback mode)
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the SQL database
 
-    article_saver: ArticleSaver, optional
+    article_saver: bbsearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
 

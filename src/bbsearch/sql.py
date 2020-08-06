@@ -209,9 +209,7 @@ class SentenceFilter:
 
     Parameters
     ----------
-    connection : SQLAlchemy connectable (engine/connection) or
-                 database str URI or
-                 DBAPI2 connection (fallback mode)
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database that contains the `articles`
         and `sentences` tables.
     """
