@@ -1,0 +1,42 @@
+FROM python:3.6-slim
+
+# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
+# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
+
+# Install system packages
+RUN apt-get update && apt-get install -y \
+    git \
+    gcc \
+    g++ \
+    build-essential \
+    vim \
+    nodejs \
+    libfontconfig1 \
+    wkhtmltopdf
+
+# Upgrade pip
+RUN pip install --upgrade pip
+
+# Install Jupyter & IPython
+RUN true \
+    && pip install ipython jupyter jupyterlab ipywidgets \
+    && jupyter nbextension enable --py widgetsnbextension
+    && jupyter labextension install @jupyter-widgets/jupyterlab-manager
+    && jupyter labextension install @jupyterlab/toc
+EXPOSE 8888
+
+# Install BBS requirements
+COPY requirements.txt /tmp
+RUN true \
+    && pip install Cython numpy \
+    && pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm /tmp/requirements.txt
+
+RUN groupadd -g 999 docker
+RUN useradd --create-home --uid 1000 --gid docker bbsuser
+USER bbsuser
+WORKDIR /home/bbsuser
+
+ENTRYPOINT exec /bin/bash
