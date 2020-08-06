@@ -421,6 +421,7 @@ class SearchWidget(widgets.VBox):
 
         # Clear output and show waiting message
         timer = Timer()
+        self.widgets['out'].clear_output()
         self.widgets['status'].clear_output()
         with self.widgets['status']:
             header = f'Query: \"{query_text}\"'
