@@ -86,19 +86,20 @@ class TestDatabaseCreation:
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Tests that the schema of the fake database is always the same as the real one. """
-        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
-        real_tables_names = {table_name for table_name in inspector.get_table_names()}
-        fake_tables_names = fake_sqlalchemy_engine.execute("SELECT name FROM "
-                                                           "sqlite_master WHERE type='table';").fetchall()
-        fake_tables_names = {table_name for (table_name,) in fake_tables_names}
+        real_tables_names = {table_name for table_name in real_sqlalchemy_engine.table_names()}
+        fake_tables_names = {table_name for table_name in fake_sqlalchemy_engine.table_names()}
+
         assert real_tables_names
         assert real_tables_names == fake_tables_names
 
+        real_inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
+        fake_inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
+
         for table_name in real_tables_names:
-            fake_db_schema = fake_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})").fetchall()
-            real_db_schema = real_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})")
-            assert real_db_schema
-            assert fake_db_schema
-            fake_db_set = set(map(lambda x: x[1:3], fake_db_schema))
-            real_db_set = set(map(lambda x: x[1:3], real_db_schema))
-            assert fake_db_set == real_db_set
+            real_columns = real_inspector.get_columns(table_name)
+            fake_columns = fake_inspector.get_columns(table_name)
+            assert real_columns
+            assert fake_columns
+            for x, y in zip(real_columns, fake_columns):
+                assert str(x['type']) == str(y['type'])
+                assert x['name'] == y['name']

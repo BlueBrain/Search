@@ -21,51 +21,62 @@ def test_parameters():
             'embedding_size': 2}
 
 
-def fill_db_data(connection, metadata_path, test_parameters):
-    articles_schema = {'article_id': 'INTEGER PRIMARY KEY',
-                       'cord_uid': 'VARCHAR(8)',
-                       'sha': 'TEXT',
-                       'source_x': 'TEXT',
-                       'title': 'TEXT',
-                       'doi': 'TEXT',
-                       'pmcid': 'TEXT',
-                       'pubmed_id': 'TEXT',
-                       'license': 'TEXT',
-                       'abstract': 'TEXT',
-                       'publish_time': 'DATE',
-                       'authors': 'TEXT',
-                       'journal': 'TEXT',
-                       'mag_id': 'TEXT',
-                       'who_covidence_id': 'TEXT',
-                       'arxiv_id': 'TEXT',
-                       'pdf_json_files': 'TEXT',
-                       'pmc_json_files': 'TEXT',
-                       'url': 'TEXT',
-                       's2_id': 'TEXT'}
+def fill_db_data(engine, metadata_path, test_parameters):
+    metadata = sqlalchemy.MetaData()
 
-    sentences_schema = {'sentence_id': 'INTEGER PRIMARY KEY',
-                        'section_name': 'TEXT',
-                        'article_id': 'INTEGER',
-                        'text': 'TEXT',
-                        'paragraph_pos_in_article': 'INTEGER',
-                        'sentence_pos_in_paragraph': 'INTEGER',
-                        'FOREIGN': 'KEY(article_id) REFERENCES articles(article_id)'}
+    articles_table = \
+        sqlalchemy.Table('articles', metadata,
+                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                           primary_key=True, autoincrement=True),
+                         sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
+                         sqlalchemy.Column('sha', sqlalchemy.Text()),
+                         sqlalchemy.Column('source_x', sqlalchemy.Text()),
+                         sqlalchemy.Column('title', sqlalchemy.Text()),
+                         sqlalchemy.Column('doi', sqlalchemy.Text()),
+                         sqlalchemy.Column('pmcid', sqlalchemy.Text()),
+                         sqlalchemy.Column('pubmed_id', sqlalchemy.Text()),
+                         sqlalchemy.Column('license', sqlalchemy.Text()),
+                         sqlalchemy.Column('abstract', sqlalchemy.Text()),
+                         sqlalchemy.Column('publish_time', sqlalchemy.Date()),
+                         sqlalchemy.Column('authors', sqlalchemy.Text()),
+                         sqlalchemy.Column('journal', sqlalchemy.Text()),
+                         sqlalchemy.Column('mag_id', sqlalchemy.Text()),
+                         sqlalchemy.Column('who_covidence_id', sqlalchemy.Text()),
+                         sqlalchemy.Column('arxiv_id', sqlalchemy.Text()),
+                         sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
+                         sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
+                         sqlalchemy.Column('url', sqlalchemy.Text()),
+                         sqlalchemy.Column('s2_id', sqlalchemy.Text())
+                         )
 
-    stmt_create_articles = "CREATE TABLE articles ({})".format(
-        ', '.join(['{} {}'.format(k, v) for k, v in articles_schema.items()]))
+    sentences_table = \
+        sqlalchemy.Table('sentences', metadata,
+                         sqlalchemy.Column('sentence_id', sqlalchemy.Integer(),
+                                           primary_key=True, autoincrement=True),
+                         sqlalchemy.Column('section_name', sqlalchemy.Text()),
+                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                           sqlalchemy.ForeignKey("articles.article_id"),
+                                           nullable=False),
+                         sqlalchemy.Column('text', sqlalchemy.Text()),
+                         sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
+                                           nullable=False),
+                         sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
+                                           nullable=False)
+                         )
 
-    stmt_create_sentences = "CREATE TABLE sentences ({})".format(
-        ', '.join(['{} {}'.format(k, v) for k, v in sentences_schema.items()]))
+    with engine.begin() as connection:
+        metadata.create_all(connection)
 
-    connection.execute(stmt_create_articles)
-    connection.execute(stmt_create_sentences)
+    mymodel_url_index = sqlalchemy.Index('article_id_index', sentences_table.c.article_id)
+    mymodel_url_index.create(bind=engine)
 
     metadata_df = pd.read_csv(str(metadata_path))
-    metadata_df['article_id'] = metadata_df.index
-    metadata_df.to_sql(name='articles', con=connection, index=False, if_exists='append')
+    metadata_df.index.name = 'article_id'
+    metadata_df.index += 1
+    metadata_df.to_sql(name='articles', con=engine, index=True, if_exists='append')
 
     temp_s = []
-    for article_id in set(metadata_df[metadata_df['article_id'].notna()]['article_id'].to_list()):
+    for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
         for sec_ix in range(test_parameters['n_sections_per_article']):
             for sen_ix in range(test_parameters['n_sentences_per_section']):
                 s = pd.Series({'text': 'I am a sentence {} in section {} '
@@ -80,13 +91,19 @@ def fill_db_data(connection, metadata_path, test_parameters):
     sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
     sentences_content.index += 1
-    sentences_content.to_sql(name='sentences', con=connection, index=True, if_exists='append')
+    sentences_content.to_sql(name='sentences', con=engine, index=True, if_exists='append')
 
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
-def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, request):
+def backend_database(request):
+
+    return request.param
+
+
+@pytest.fixture(scope='session')
+def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, backend_database):
     """Connection object (sqlite)."""
-    if request.param == 'sqlite':
+    if backend_database == 'sqlite':
         db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19_test.db'
         Path(db_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
@@ -99,7 +116,6 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, req
                                           environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
                                           ports={'3306/tcp': 3306},
                                           detach=True)
-
         docker_ready = False
 
         max_waiting_time = 2 * 60
@@ -117,7 +133,9 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, req
             docker_ready = True
 
         engine.execute("create database test")
-        engine.execute("use test")
+        engine.dispose()
+        engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw'
+                                          '@127.0.0.1:3306/test')
         fill_db_data(engine, metadata_path, test_parameters)
 
         yield engine
@@ -157,17 +175,20 @@ def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters
     models = ['SBERT', 'SBioBERT', 'USE', 'BSV']
     dim = test_parameters['embedding_size']
     n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences', fake_sqlalchemy_engine).iloc[0, 0]
-    file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
+    if not (tmp_path_factory.getbasetemp() / 'h5_embeddings').is_dir():
+        file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
 
-    with h5py.File(file_path) as f:
-        for model in models:
-            dset = f.create_dataset(f"{model}",
-                                    (n_sentences, dim),
-                                    dtype='f4',
-                                    fillvalue=np.nan)
+        with h5py.File(file_path) as f:
+            for model in models:
+                dset = f.create_dataset(f"{model}",
+                                        (n_sentences, dim),
+                                        dtype='f4',
+                                        fillvalue=np.nan)
 
-            for i in range(0, n_sentences, 2):
-                dset[i] = np.random.random(dim).astype('float32')
+                for i in range(0, n_sentences, 2):
+                    dset[i] = np.random.random(dim).astype('float32')
+    else:
+        file_path = tmp_path_factory.getbasetemp() / 'h5_embeddings' / 'embeddings.h5'
 
     return file_path
 

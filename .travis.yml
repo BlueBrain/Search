@@ -6,6 +6,8 @@ python:
 cache:
   pip: true
 
+services:
+  - docker
 before_install:
   - pip install flake8 pydocstyle
   - flake8 src/
