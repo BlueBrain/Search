@@ -1,204 +1,400 @@
-"""
-SQL Related functions.
+"""SQL Related functions."""
+import logging
 
-whatever
-"""
 import pandas as pd
 
 
-def get_paragraph_ids(article_ids, db_cnxn):
-    """Given a list of article ids find all the corresponding paragraph ids.
+def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
+    """Retrieve sentences given sentence ids.
 
     Parameters
     ----------
-    article_ids : list
-        List of article ids. Note that they are the primary keys in the `articles` table.
-
-    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database.
+    sentence_ids: list of int
+        Sentence ids for which need to retrieve the text.
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    pd.Series
-        The unique index represents the paragraph ids and the values represent the article ids.
+    sentences: pd.DataFrame
+        Pandas DataFrame containing all sentences and their corresponding metadata:
+        article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
-    article_ids_joined = ','.join(f"\"{id_}\"" for id_ in set(article_ids))
+    sentence_ids_s = ', '.join(str(id_) for id_ in sentence_ids)
+    sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
+                    FROM sentences
+                    WHERE sentence_id IN ({sentence_ids_s})"""
+    sentences = pd.read_sql(sql_query, engine)
 
-    sql_query = f"""
-    SELECT article_id, paragraph_id
-    FROM (
-             SELECT paragraph_id, sha
-             FROM paragraphs
-             WHERE sha IN (
-                 SELECT sha
-                 FROM article_id_2_sha
-                 WHERE article_id IN ({article_ids_joined})
-             )
-         ) p
-             INNER JOIN
-         article_id_2_sha a
-         ON a.sha = p.sha;
-    """
-    results = pd.read_sql(sql_query, db_cnxn)
-
-    return pd.Series(results['article_id'].tolist(), index=results['paragraph_id'])
+    return sentences
 
 
-def find_paragraph(sentence_id, db_cnxn):
-    """Find the paragraph corresponding to the given sentence.
+def retrieve_paragraph_from_sentence_id(sentence_id, engine):
+    """Retrieve paragraph given one sentence id.
 
     Parameters
     ----------
-    sentence_id : int
-        The identifier of the given sentence
-    db_cnxn: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database
+    sentence_id: int
+        Sentence id for which need to retrieve the paragraph.
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    paragraph : str
-        The paragraph containing `sentence`
+    paragraph: str or None
+        If ``str`` then a paragraph containing the sentence of the given sentence_id. If None
+        then the `sentence_id` was not found in the sentences table.
     """
-    sql_query = f'SELECT paragraph_id FROM sentences WHERE sentence_id = {sentence_id}'
-    paragraph_id = pd.read_sql(sql_query, db_cnxn).iloc[0]['paragraph_id']
-    sql_query = f'SELECT text FROM paragraphs WHERE paragraph_id = {paragraph_id}'
-    paragraph = pd.read_sql(sql_query, db_cnxn).iloc[0]['text']
+    sql_query = f"""SELECT text
+                    FROM sentences
+                    WHERE article_id =
+                        (SELECT article_id
+                        FROM sentences
+                        WHERE sentence_id = {sentence_id})
+                    AND paragraph_pos_in_article =
+                        (SELECT paragraph_pos_in_article
+                        FROM sentences
+                        WHERE sentence_id = {sentence_id})
+                    ORDER BY sentence_pos_in_paragraph ASC"""
 
+    all_sentences = pd.read_sql(sql_query, engine)['text'].to_list()
+    if not all_sentences:
+        paragraph = None
+    else:
+        paragraph = ' '.join(all_sentences)
     return paragraph
 
 
-def get_shas_from_ids(articles_ids, db_cnxn):
-    """Find articles SHA given article IDs.
+def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
+    """Retrieve paragraph given one identifier (article_id, paragraph_pos_in_article).
 
     Parameters
     ----------
-    articles_ids : list
-        A list of strings representing article IDs.
-    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        A SQL database for querying the SHAs. Should contain
-        a table named "article_id_2_sha".
+    article_id : int
+        Article id.
+
+    paragraph_pos_in_article : int
+        Relative position of a paragraph in an article. Note that the numbering starts from 0.
+
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    results : list
-        A list of sentence SHAs.
+    paragraph: pd.DataFrame
+        pd.DataFrame with the paragraph and its metadata:
+        article_id, text, section_name, paragraph_pos_in_article.
     """
-    all_ids_str = ', '.join([f"'{id_}'" for id_ in articles_ids])
-    sql_query = f"SELECT sha FROM article_id_2_sha WHERE article_id IN ({all_ids_str})"
-    results = pd.read_sql(sql_query, db_cnxn)['sha'].tolist()
+    sql_query = f"""SELECT section_name, text
+                    FROM sentences
+                    WHERE article_id = {article_id}
+                    AND paragraph_pos_in_article = {paragraph_pos_in_article}
+                    ORDER BY sentence_pos_in_paragraph ASC"""
 
-    return results
-
-
-def get_ids_by_condition(conditions, table, db_cnxn):
-    """Find entry IDs given a number of search conditions.
-
-    Notes
-    -----
-    In the database 'cord19', tables are named with plural noun (e.g sentences, articles)
-    However, column id are named in singular form (e.g. sentence, article)
-
-    Parameters
-    ----------
-    conditions : list
-        A list strings representing SQL query conditions. They should be
-        formatted so that they can be used in an SQL WHERE statement,
-        for example:
-
-            - SELECT * FROM {table} WHERE <condition_1> and <condition_2>"
-    table : str
-        The name of the table in `db`.
-    db_cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        A SQL database for querying the article IDs. Should contain
-        a table named "articles".
-
-    Returns
-    -------
-    results : list
-        A list of article IDs (=SHAs) represented as strings.
-    """
-    if conditions:
-        condition = ' and '.join(conditions)
-        sql_query = f"SELECT {table[:-1]}_id FROM {table} WHERE {condition}"
+    sentences = pd.read_sql(sql_query, engine)
+    if sentences.empty:
+        paragraph = pd.DataFrame(columns=['article_id', 'text',
+                                          'section_name', 'paragraph_pos_in_article'])
     else:
-        sql_query = f"SELECT {table[:-1]}_id FROM {table}"
+        sentences_text = sentences['text'].to_list()
+        section_name = sentences['section_name'].iloc[0]
+        paragraph_text = ' '.join(sentences_text)
 
-    results = pd.read_sql(sql_query, db_cnxn)[f'{table[:-1]}_id'].tolist()
+        paragraph = pd.DataFrame([{'article_id': article_id,
+                                   'text': paragraph_text,
+                                   'section_name': section_name,
+                                   'paragraph_pos_in_article': paragraph_pos_in_article}, ])
+    return paragraph
 
-    return results
+
+def retrieve_article_metadata_from_article_id(article_id, engine):
+    """Retrieve article metadata given one article id.
+
+    Parameters
+    ----------
+    article_id: int
+        Article id for which need to retrieve the article metadata.
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article: pd.DataFrame
+        DataFrame containing the article metadata. The columns are 'article_id', 'cord_uid', 'sha',
+        'source_x', 'title', 'doi', 'pmcid', 'pubmed_id', 'license', 'abstract',
+        'publish_time', 'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
+        'pdf_json_files', 'pmc_json_files', 'url', 's2_id'.
+    """
+    sql_query = f"""SELECT *
+                    FROM articles
+                    WHERE article_id = {article_id}"""
+    article = pd.read_sql(sql_query, engine)
+    return article
 
 
-class ArticleConditioner:
-    """Article conditioner."""
+def retrieve_articles(article_ids, engine):
+    """Retrieve article given multiple article ids.
 
-    @staticmethod
-    def get_date_range_condition(date_range):
-        """Construct a date range condition.
+    Parameters
+    ----------
+    article_ids: list of int
+        List of Article id for which need to retrieve the entire text article.
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
 
-        Notes
-        -----
-        Rows without a date entry will never be selected (to be checked)
+    Returns
+    -------
+    articles: pd.DataFrame
+        DataFrame containing the articles divided into paragraphs. The columns are
+        'article_id', 'paragraph_pos_in_article', 'text', 'section_name'.
+    """
+    articles_str = ', '.join(str(id_) for id_ in article_ids)
+    sql_query = f"""SELECT *
+                    FROM sentences
+                    WHERE article_id IN ({articles_str})
+                    ORDER BY article_id ASC,
+                    paragraph_pos_in_article ASC,
+                    sentence_pos_in_paragraph ASC"""
+    all_sentences = pd.read_sql(sql_query, engine)
+
+    groupby_var = all_sentences.groupby(by=['article_id', 'paragraph_pos_in_article'])
+    paragraphs = groupby_var['text'].apply(lambda x: ' '.join(x))
+    section_name = groupby_var['section_name'].unique().apply(lambda x: x[0])
+
+    articles = pd.DataFrame({'text': paragraphs,
+                             'section_name': section_name}).reset_index()
+
+    return articles
+
+
+class SentenceFilter:
+    """Filter sentence IDs by applying conditions.
+
+    Instantiate this class and apply different filters by calling
+    the corresponding filtering methods in any order. Finally,
+    call either the `run()` or the `stream()` method to obtain
+    the filtered sentence IDs.
+
+    Example
+    -------
+
+    >>> import sqlalchemy
+    >>> connection = sqlalchemy.create_engine("...")
+    >>> filtered_sentence_ids = (
+    ...     SentenceFilter(connection)
+    ...     .only_with_journal()
+    ...     .restrict_sentences_ids_to([1, 2, 3, 4, 5])
+    ...     .date_range((2010, 2020))
+    ...     .exclude_strings(["virus", "disease"])
+    ...     .run()
+    ... )
+
+    When the `run()` or the `stream()` method is called an SQL
+    query is constructed and executed internally. For the example
+    above it would have approximately the following form::
+
+        SELECT sentence_id
+        FROM sentences
+        WHERE
+            article_id IN (
+                SELECT article_id
+                FROM articles
+                WHERE
+                    publish_time BETWEEN '2010-01-01' AND '2020-12-31' AND
+                    journal IS NOT NULL
+            ) AND
+            sentence_id IN ('1', '2', '3', '4', '5') AND
+            text NOT LIKE '%virus%' AND
+            text NOT LIKE '%disease%'
+
+    Parameters
+    ----------
+    connection : SQLAlchemy connectable (engine/connection) or
+                 database str URI or
+                 DBAPI2 connection (fallback mode)
+        Connection to the database that contains the `articles`
+        and `sentences` tables.
+    """
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+        self.only_with_journal_flag = False
+        self.year_from = None
+        self.year_to = None
+        self.string_exclusions = []
+        self.restricted_sentence_ids = None
+
+    def only_with_journal(self, flag=True):
+        """Only select articles with a journal.
 
         Parameters
         ----------
-        date_range : tuple
-            A tuple of the form (date_from, date_to)
+        flag : bool
+            If True, then only articles for which a journal was
+            specified will be selected.
 
         Returns
         -------
-        condition : str
-            The SQL condition
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
         """
-        date_from, date_to = date_range
-        condition = f"date BETWEEN '{date_from}-01-01' and '{date_to}-12-31'"
+        self.logger.info(f"Only with journal: {flag}")
+        self.only_with_journal_flag = flag
+        return self
 
-        return condition
-
-    @staticmethod
-    def get_has_journal_condition():
-        """Construct a has-journal condition.
-
-        Returns
-        -------
-        condition : str
-            The SQL condition
-        """
-        condition = "journal IS NOT NULL"
-
-        return condition
-
-    @staticmethod
-    def get_restrict_to_tag_condition(tag='has_covid19_tag'):
-        """Construct a condition for restricting to a given tag.
+    def date_range(self, date_range=None):
+        """Restrict to articles in a given date range.
 
         Parameters
         ----------
-        tag : str
-            The tag to constrain on
+        date_range : tuple or None
+            A tuple with two elements of the form `(start_year, end_year)`.
+            If None then nothing no date range is applied.
 
         Returns
         -------
-        condition : str
-            The SQL condition
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
         """
-        condition = f"{tag} = 1"
-        return condition
+        self.logger.info(f"Date range: {date_range}")
+        if date_range is not None:
+            self.year_from, self.year_to = date_range
+        return self
 
-
-class SentenceConditioner:
-    """Sentence conditioner."""
-
-    @staticmethod
-    def get_word_exclusion_condition(word):
-        """Construct condition for exclusion containing a given word.
+    def exclude_strings(self, strings):
+        """Exclude sentences containing any of the given strings.
 
         Parameters
         ----------
-        word
+        strings : list_like
+            The strings to exclude.
 
         Returns
         -------
-        condition
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
         """
-        condition = f"text NOT LIKE '%{word}%'"
-        return condition
+        self.logger.info(f"Exclude strings: {strings}")
+        strings = map(lambda s: s.lower(), strings)
+        strings = filter(lambda s: len(s) > 0, strings)
+        self.string_exclusions.extend(strings)
+        return self
+
+    def restrict_sentences_ids_to(self, sentence_ids):
+        """Restrict sentence IDs to the given ones.
+
+        Parameters
+        ----------
+        sentence_ids : list_like
+            The sentence IDs to restrict to.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
+        """
+        # For logging
+        if len(sentence_ids) > 5:
+            ids_str = f"[{', '.join(map(str, sentence_ids[:5]))} ..."
+        else:
+            ids_str = str(sentence_ids)
+        self.logger.info(f"Restricting to sentencs IDs: {ids_str}")
+
+        # The actual restriction
+        self.restricted_sentence_ids = tuple(sentence_ids)
+
+        return self
+
+    def _build_query(self):
+        article_conditions = []
+        sentence_conditions = []
+
+        # Journal condition
+        if self.only_with_journal_flag:
+            article_conditions.append("journal IS NOT NULL")
+
+        # Date range condition
+        if self.year_from is not None and self.year_to is not None:
+            from_date = f"{self.year_from:04d}-01-01"
+            to_date = f"{self.year_to:04d}-12-31"
+            article_conditions.append(
+                f"publish_time BETWEEN '{from_date}' AND '{to_date}'"
+            )
+
+        # Add article conditions to sentence conditions
+        if len(article_conditions) > 0:
+            article_condition_query = f"""
+            article_id IN (
+                SELECT article_id
+                FROM articles
+                WHERE {" AND ".join(article_conditions)}
+            )
+            """.strip()
+            sentence_conditions.append(article_condition_query)
+
+        # Restricted sentence IDs
+        if self.restricted_sentence_ids is not None:
+            sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
+            sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
+
+        # Exclusion text
+        for text in self.string_exclusions:
+            sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+
+        # Build and send query
+        query = "SELECT sentence_id FROM sentences"
+        if len(sentence_conditions) > 0:
+            query = f"{query} WHERE {' AND '.join(sentence_conditions)}"
+
+        return query
+
+    def iterate(self, chunk_size):
+        """Run the filtering query and iterate over restricted sentence IDs.
+
+        Parameters
+        ----------
+        chunk_size : int
+            The size of the batches of sentence IDs that are yielded.
+
+        Yields
+        ------
+        result_arr : np.ndarray
+            A 1-dimensional numpy array with the filtered sentence IDs.
+            Its length will be at most equal to `chunk_size`.
+        """
+        self.logger.info(f"Iterating filtering with chunk size {chunk_size}")
+
+        query = self._build_query()
+        # self.logger.info(f"Query: {query}")
+        for df_results in pd.read_sql(query, self.connection, chunksize=chunk_size):
+            result_arr = df_results["sentence_id"].to_numpy()
+            yield result_arr
+
+    def run(self):
+        """Run the filtering query to find restricted sentence IDs.
+
+        Returns
+        -------
+        result_arr : np.ndarray
+            A 1-dimensional numpy array with the filtered sentence IDs.
+        """
+        self.logger.info("Running the filtering query")
+
+        query = self._build_query()
+        # self.logger.info(f"Query: {query}")
+
+        self.logger.debug("Running pd.read_sql")
+        df_results = pd.read_sql(query, self.connection)
+
+        self.logger.debug("Converting results from pd.Series to numpy")
+        result_arr = df_results["sentence_id"].to_numpy()
+
+        self.logger.info(f"Filtering gave {len(result_arr)} results")
+
+        return result_arr

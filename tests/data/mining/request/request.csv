@@ -1,0 +1,13 @@
+entity_type,property,property_type,property_value_type,ontology_source
+DISEASE,,,,UMLS
+CELL_TYPE,,,,
+CHEMICAL,,,,UMLS
+PROTEIN,,,,UMLS
+ORGAN,,,,UMLS
+DISEASE,,,,UMLS
+CHEMICAL,agonist_of,relation,PROTEIN,UMLS
+CHEMICAL,inhibitor_of,relation,PROTEIN,UMLS
+CHEMICAL,product_of,relation,PROTEIN,UMLS
+ORGANISM,,,,UMLS
+CHEMICAL,concentration,attribute,QuantitativeValue,UMLS
+DISEASE,is_hereditary,attribute,Boolean,

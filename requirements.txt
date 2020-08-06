@@ -5,12 +5,14 @@ numpy==1.18.2
 sent2vec-prebuilt
 Flask==1.1.2
 requests==2.23.0
+ipython==7.16.1
 ipywidgets==7.5.1
 matplotlib==3.2.1
 nltk==3.4.5
 pandas==1.0.3
 pdfkit==0.6.1
 pillow==7.1.1
+pymysql==0.10.0
 sentence-transformers==0.2.5.1
 git+https://github.com/allenai/scibert
 scikit-learn==0.23.1
@@ -23,6 +25,7 @@ torch==1.5.0
 transformers==2.3.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 jupyter-dash==0.2.1.post1
 dash-table==4.6.2
 dash-cytoscape==0.0.5

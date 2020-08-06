@@ -5,8 +5,10 @@ import pathlib
 from flask import request, jsonify
 import numpy as np
 
+import bbsearch
 from ..embedding_models import BSV, SBioBERT
 from ..search import LocalSearcher
+from ..utils import H5
 
 
 class SearchServer:
@@ -18,29 +20,38 @@ class SearchServer:
         The Flask app wrapping the server.
     trained_models_path : str or pathlib.Path
         The folder containing pre-trained models.
-    embeddings_path : str or pathlib.Path
-        The folder containing pre-computed embeddings.
+    embeddings_h5_path : str or pathlib.Path
+        The path to the h5 file containing pre-computed embeddings.
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
+    indices : np.ndarray
+        1D array containing sentence_ids to be considered for precomputed embeddings.
     """
 
     def __init__(self,
                  app,
                  trained_models_path,
-                 embeddings_path,
-                 connection):
+                 embeddings_h5_path,
+                 indices,
+                 connection
+                 ):
+
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.version = "1.0"
+        self.version = bbsearch.__version__
         self.name = "SearchServer"
         self.app = app
         self.connection = connection
 
+        if indices is None:
+            raise ValueError('Please specify the indices.')
+
+        self.indices = indices
         self.logger.info("Initializing the server...")
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
 
         trained_models_path = pathlib.Path(trained_models_path)
-        embeddings_path = pathlib.Path(embeddings_path)
+        embeddings_h5_path = pathlib.Path(embeddings_h5_path)
 
         self.logger.info("Initializing embedding models...")
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
@@ -51,13 +62,14 @@ class SearchServer:
         }
 
         self.logger.info("Loading precomputed embeddings...")
-        precomputed_embeddings = {
-            model_name: np.load(embeddings_path / f"{model_name}.npy").astype(np.float32)
-            for model_name in embedding_models
-        }
+
+        precomputed_embeddings = {model_name: H5.load(embeddings_h5_path,
+                                                      model_name,
+                                                      indices=indices).astype(np.float32) for model_name in
+                                  embedding_models}
 
         self.local_searcher = LocalSearcher(
-            embedding_models, precomputed_embeddings, self.connection)
+            embedding_models, precomputed_embeddings, indices, self.connection)
 
         app.route("/help", methods=["POST"])(self.help)
         app.route("/", methods=["POST"])(self.query)

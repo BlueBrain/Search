@@ -49,11 +49,17 @@ class TestEmbeddingModels:
         auto_tokenizer.from_pretrained().tokenize.assert_called_once()
         auto_tokenizer.from_pretrained().convert_tokens_to_ids.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbiobert)
-        assert embeddings.shape == (n_sentences, 769)
+
+        indices = np.arange(1, n_sentences+1)
+        final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
+                                                                          sbiobert,
+                                                                          indices)
+
+        assert final_embeddings.shape == (n_sentences, 768)
+        assert np.all(indices == retrieved_indices)
 
     def test_bsv_embedding(self, monkeypatch, tmpdir, fake_sqlalchemy_engine, test_parameters, metadata_path):
         sent2vec_module = Mock()
@@ -80,11 +86,17 @@ class TestEmbeddingModels:
         assert embedding.shape == (700,)
         bsv_model.embed_sentences.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, bsv)
-        assert embeddings.shape == (n_sentences, 701)
+
+        indices = np.arange(1, n_sentences+1)
+        final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
+                                                                          bsv,
+                                                                          indices)
+
+        assert final_embeddings.shape == (n_sentences, 700)
+        assert np.all(indices == retrieved_indices)
 
     def test_sbert_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
         sentence_transormer_class = Mock()
@@ -105,11 +117,17 @@ class TestEmbeddingModels:
         assert embedding.shape == (768,)
         sbert_model.encode.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, sbert)
-        assert embeddings.shape == (n_sentences, 769)
+
+        indices = np.arange(1, n_sentences+1)
+        final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
+                                                                          sbert,
+                                                                          indices)
+
+        assert final_embeddings.shape == (n_sentences, 768)
+        assert np.all(indices == retrieved_indices)
 
     def test_use_embedding(self, monkeypatch, fake_sqlalchemy_engine, metadata_path, test_parameters):
         hub_module = Mock()
@@ -130,8 +148,14 @@ class TestEmbeddingModels:
         assert embedding.shape == (512,)
         use_model.assert_called_once()
 
-        n_articles = pd.read_csv(metadata_path)['sha'].notna().sum()
+        n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
             'n_sentences_per_section']
-        embeddings = compute_database_embeddings(fake_sqlalchemy_engine, use)
-        assert embeddings.shape == (n_sentences, 513)
+
+        indices = np.arange(1, n_sentences+1)
+        final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
+                                                                          use,
+                                                                          indices)
+
+        assert final_embeddings.shape == (n_sentences, 512)
+        assert np.all(indices == retrieved_indices)

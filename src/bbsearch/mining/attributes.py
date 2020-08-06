@@ -15,6 +15,8 @@ import ipywidgets as widgets
 from spacy import displacy
 from IPython.display import display, HTML
 
+from .._css import style
+
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +155,7 @@ class AttributeExtractor:
         return measurements
 
     @staticmethod
-    def annotate_quantities(text, measurements, width):
+    def annotate_quantities(text, measurements):
         """Annotate measurements in text using HTML/CSS styles.
 
         Parameters
@@ -164,42 +166,12 @@ class AttributeExtractor:
             The Grobid measurements for the text. It is assumed
             that these measurements were obtained by calling
             `get_grobid_measurements(text)`.
-        width : int
-            The width of the output <div> in characters.
 
         Returns
         -------
         output : IPython.core.display.HTML
             The annotated text.
         """
-        css_styles = f"""
-        <style>
-        .number  {{
-            display: inline-block;
-            background: lightgreen;
-            padding: 0.2em 0.5em;
-            border-radius: 7px;
-        }}
-        .unit {{
-            display: inline-block;
-            background: pink;
-            padding: 0.2em 0.5em;
-            border-radius: 7px;
-        }}
-        .quantityType {{
-            display: inline-block;
-            background: yellow;
-            font-variant:small-caps;
-            padding: 0.2em 0.5em;
-            border-radius: 7px;
-        }}
-        .fixedWidth {{
-            width: {width}ch;
-            text-align: justify;
-        }}
-        </style>
-        """
-
         def annotate_quantity(quantity):
             annotations = []
             start = quantity['offsetStart']
@@ -230,7 +202,14 @@ class AttributeExtractor:
                 annotated_text += text[last_idx:start] + quantity
                 last_idx = end
         annotated_text += text[last_idx:]
-        html = css_styles + "<div class=\"fixedWidth\">" + annotated_text + "</div>"
+
+        css_style = style.get_css_style()
+        html = f""""<style>
+                        {css_style}
+                    </style>
+                    <div class=\"fixedWidth\">
+                        {annotated_text}
+                    </div>"""
 
         output = HTML(html)
 

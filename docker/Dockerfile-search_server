@@ -1,9 +1,5 @@
 FROM python:3.6-slim
 
-LABEL maintainer="Stanislav Schmidt <stanislav.schmidt@epfl.ch>"
-LABEL version="1.0"
-LABEL description="REST API Server for BBSearch"
-
 # ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV http_proxy='http://bbpproxy.epfl.ch:80/'
@@ -29,6 +25,11 @@ ADD . /src
 WORKDIR /src
 RUN pip install .
 
+# Set image version
+LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
+LABEL description="REST API Server for BBSearch"
+LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
+
 # Add a user
 RUN useradd --create-home serveruser
 WORKDIR /home/serveruser
@@ -39,15 +40,17 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Expose a port
 EXPOSE 8080
-ENV MODELS_PATH="/raid/bbs_data/trained_models"
-ENV EMBEDDINGS_PATH="/raid/bbs_data/cord19_v7/embeddings"
-ENV DATABASE_PATH="/raid/bbs_data/cord19_v7/databases/cord19.db"
+
+ENV MODELS_PATH="/raid/sync/proj115/bbs_data/trained_models"
+ENV EMBEDDINGS_PATH="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings.h5"
+ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v35"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_search.log"
 
 ENTRYPOINT exec search_server \
     --host=0.0.0.0 \
     --port=8080 \
+#    --debug \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
-    --database_path $DATABASE_PATH
+    --database_uri $DATABASE_URI
