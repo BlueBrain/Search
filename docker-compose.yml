@@ -9,3 +9,12 @@ services:
       - "8850:8080"
     volumes:
       - /raid:/raid
+  mining:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-mining_server
+    image: bbs_mining
+    ports:
+      - "8852:8080"
+    volumes:
+      - /raid:/raid
