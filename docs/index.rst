@@ -11,6 +11,7 @@ Welcome to Blue Brain Search's documentation!
    :caption: Contents:
 
    source/instructions
+   source/servers
    source/example
 
 .. toctree::

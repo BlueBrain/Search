@@ -1,5 +1,5 @@
-Example
-=======
+Example section
+===============
 
 .. testcode::
 
