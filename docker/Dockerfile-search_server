@@ -8,10 +8,9 @@ FROM python:3.6-slim
 # Install git, gcc, and g++
 RUN apt-get update && apt-get install -y \
     git \
-    gcc \
-    g++ \
+    gcc g++ \
     build-essential \
-    default-libmysqlclient-dev \
+    libmysqlclient-dev libssl-dev \
     vim
 
 # Install requirements manualy, this layer will be cached by docker
