@@ -79,7 +79,8 @@ def fill_db_data(connection, metadata_path, test_parameters):
 
     sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
-    sentences_content.to_sql(name='sentences', con=connection, index=False, if_exists='append')
+    sentences_content.index += 1
+    sentences_content.to_sql(name='sentences', con=connection, index=True, if_exists='append')
 
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
@@ -106,7 +107,8 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, req
 
         while not docker_ready and (time.perf_counter() - start) < max_waiting_time:
             try:
-                engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw@127.0.0.1:3306/')
+                engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw'
+                                                  '@127.0.0.1:3306/')
                 engine.execute('show databases')
             except sqlalchemy.exc.OperationalError:
                 time.sleep(5)

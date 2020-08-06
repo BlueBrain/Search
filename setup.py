@@ -43,7 +43,8 @@ tests_require = [
     "pytest-cov",
 ]
 
-extras_require = {"dev": ["docker", "flake8", "pydocstyle", "pytest>=4.6", "pytest-cov"]}
+extras_require = {"dev": ["cryptography", "docker", "flake8", "pydocstyle", "pytest>=4.6",
+                          "pytest-cov"]}
 
 setup(
     name="BBSearch",
