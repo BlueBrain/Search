@@ -13,16 +13,11 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     vim
 
-# Install sent2vec
-RUN true \
-    && pip install \
-        Cython==0.29.13 \
-        numpy==1.18.2 \
-    && pip install git+https://github.com/epfml/sent2vec
-
 # Install requirements manualy, this layer will be cached by docker
 COPY requirements.txt /tmp
 RUN true \
+    && pip install --upgrade pip \
+    && pip install Cython numpy \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
