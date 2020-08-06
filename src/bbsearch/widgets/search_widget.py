@@ -113,17 +113,17 @@ class SearchWidget(widgets.VBox):
             )
 
         self.widgets['has_journal'] = widgets.Checkbox(
-            description="Require Journal",
-            value=False,
+            description="Only articles from journals",
+            value=True,
             style=self.widgets_style
             )
 
         self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
-            min=1900,
+            min=1850,
             max=2020,
-            value=(1900, 2020),
+            value=(2000, 2020),
             layout=widgets.Layout(width='80ch'),
             style=self.widgets_style
             )
@@ -156,7 +156,7 @@ class SearchWidget(widgets.VBox):
                 (self.saving_labels[_Save.NOTHING], _Save.NOTHING),
                 (self.saving_labels[_Save.PARAGRAPH], _Save.PARAGRAPH),
                 (self.saving_labels[_Save.ARTICLE], _Save.ARTICLE)],
-            value=_Save.NOTHING,
+            value=_Save.ARTICLE,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: '
