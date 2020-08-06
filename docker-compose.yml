@@ -1,0 +1,11 @@
+version: "3"
+services:
+  search:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile-search_server
+    image: bbs_search
+    ports:
+      - "8850:8080"
+    volumes:
+      - /raid:/raid
