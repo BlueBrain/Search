@@ -61,7 +61,7 @@ def main():
 
     indices = H5.find_populated_rows(embeddings_path, 'BSV')
 
-    engine = sqlalchemy.create_engine(f"mysql+pymysql://guest:guest@{args.database_uri}")
+    engine = sqlalchemy.create_engine(f"mysql+mysqldb://guest:guest@{args.database_uri}")
 
     SearchServer(app, models_path, embeddings_path, indices, engine)
 
