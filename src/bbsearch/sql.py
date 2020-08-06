@@ -1,6 +1,7 @@
 """SQL Related functions."""
 import logging
 
+import numpy as np
 import pandas as pd
 
 
@@ -392,11 +393,8 @@ class SentenceFilter:
         # self.logger.info(f"Query: {query}")
 
         self.logger.debug("Running pd.read_sql")
-        df_results = pd.read_sql(query, self.connection)
+        results = [row[0] for row in self.connection.execute(query).fetchall()]
 
-        self.logger.debug("Converting results from pd.Series to numpy")
-        result_arr = df_results["sentence_id"].to_numpy()
+        self.logger.info(f"Filtering gave {len(results)} results")
 
-        self.logger.info(f"Filtering gave {len(result_arr)} results")
-
-        return result_arr
+        return np.array(results)
