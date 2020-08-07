@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     git \
     gcc g++ \
     build-essential \
-    libmysqlclient-dev libssl-dev \
+    libmysqlclient-dev \
     vim
 
 # Install requirements manualy, this layer will be cached by docker
