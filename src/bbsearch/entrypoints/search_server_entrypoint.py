@@ -24,7 +24,7 @@ parser.add_argument("--models_path",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings.h5",
+                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings_bsv_full.h5",
                     type=str,
                     help="The path to an h5 file with the precomputed embeddings")
 parser.add_argument("--database_uri",
