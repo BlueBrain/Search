@@ -25,7 +25,7 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    schema_request : SchemaRequest
+    schema_request : bbsearch.widgets.SchemaRequest
         An object holding a dataframe with the requested mining schema (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.

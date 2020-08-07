@@ -19,7 +19,7 @@ install_requires = [
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "numpy>=1.16.1",
-    "pandas",
+    "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "rdflib-jsonld",
@@ -43,8 +43,14 @@ tests_require = [
     "pytest-cov",
 ]
 
-extras_require = {"dev": ["cryptography", "docker", "flake8", "pydocstyle", "pytest>=4.6",
-                          "pytest-cov"]}
+extras_require = {"dev": ["cryptography",
+                          "docker",
+                          "flake8",
+                          "pydocstyle",
+                          "pytest>=4.6",
+                          "pytest-cov",
+                          "sphinx",
+                          "sphinx-bluebrain-theme"]}
 
 setup(
     name="BBSearch",

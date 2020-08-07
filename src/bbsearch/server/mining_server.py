@@ -23,9 +23,11 @@ class MiningServer:
         attributes) to the csv file with the information on which model to use for the extraction
         of each entity, relation, or attribute type, respectively.
         For 'ee', the csv file should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
+
          - 'entity_type': name of entity type, as called in the request schema
          - 'model': name of a spaCy or scispaCy model (e.g. 'en_ner_craft_md') or path to a custom trained spaCy model
          - 'entity_type_name': name of entity type, as called in 'model.labels'
+
     connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         The database connection.
     """

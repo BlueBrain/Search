@@ -20,11 +20,11 @@ parser.add_argument("--port",
                     type=int,
                     help="The server port")
 parser.add_argument("--models_path",
-                    default="/raid/bbs_data/trained_models",
+                    default="/raid/sync/proj115/bbs_data/trained_models",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/bbs_data/cord19_v35/embeddings/embeddings.h5",
+                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings.h5",
                     type=str,
                     help="The path to an h5 file with the precomputed embeddings")
 parser.add_argument("--database_uri",

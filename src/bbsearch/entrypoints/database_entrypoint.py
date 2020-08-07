@@ -3,7 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_path",
-                    default="/raid/bbs_data/cord19_v35",
+                    default="/raid/sync/proj115/bbs_data/cord19_v35",
                     type=str,
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
@@ -22,7 +22,7 @@ def main():
     from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':
-        database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
+        database_path = '/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db'
         if not Path(database_path).exists():
             Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')

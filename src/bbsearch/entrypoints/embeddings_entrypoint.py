@@ -9,7 +9,7 @@ parser.add_argument("--db_type",
                     help="Type of the database. Possible values: (sqlite, "
                          "mysql)")
 parser.add_argument("--out_dir",
-                    default='/raid/bbs_data/cord19_v35/embeddings/',
+                    default='/raid/sync/proj115/bbs_data/cord19_v35/embeddings/',
                     type=str,
                     help="The directory path where the embeddings are saved.")
 parser.add_argument("--models",
@@ -18,7 +18,7 @@ parser.add_argument("--models",
                     help="Models for which we need to compute the embeddings. "
                          "Format should be comma separated list.")
 parser.add_argument("--bsv_checkpoints",
-                    default='/raid/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
+                    default='/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
                     type=str,
                     help="Path to file containing the checkpoints for the BSV model.")
 parser.add_argument("--step",
@@ -51,7 +51,7 @@ def main():
     print('SQL Alchemy Engine creation ....')
 
     if args.db_type == 'sqlite':
-        database_path = '/raid/bbs_data/cord19_v35/databases/cord19.db'
+        database_path = '/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db'
         if not pathlib.Path(database_path).exists():
             pathlib.Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')

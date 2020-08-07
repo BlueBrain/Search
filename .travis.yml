@@ -21,4 +21,5 @@ before_script:
   - pip freeze
 # command to run tests
 script:
+  - make -C docs doctest
   - pytest --color=yes --cov-report term-missing
