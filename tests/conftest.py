@@ -25,6 +25,7 @@ def test_parameters():
 def fill_db_data(engine, metadata_path, test_parameters):
     metadata = sqlalchemy.MetaData()
 
+    # Creation of the schema of the tables
     articles_table = \
         sqlalchemy.Table('articles', metadata,
                          sqlalchemy.Column('article_id', sqlalchemy.Integer(),
@@ -65,12 +66,15 @@ def fill_db_data(engine, metadata_path, test_parameters):
                                            nullable=False)
                          )
 
+    # Construction of the tables
     with engine.begin() as connection:
         metadata.create_all(connection)
 
+    # Construction of the index 'article_id_index'
     mymodel_url_index = sqlalchemy.Index('article_id_index', sentences_table.c.article_id)
     mymodel_url_index.create(bind=engine)
 
+    # Population of the tables 'sentences' and 'articles'
     metadata_df = pd.read_csv(str(metadata_path))
     metadata_df.index.name = 'article_id'
     metadata_df.index += 1
@@ -122,7 +126,7 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
         yield engine
 
     else:
-        port_number = 1234
+        port_number = 22345
         client = docker.from_env()
         container = client.containers.run('mysql:latest',
                                           environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
