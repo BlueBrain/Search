@@ -26,30 +26,29 @@ def fill_db_data(engine, metadata_path, test_parameters):
     metadata = sqlalchemy.MetaData()
 
     # Creation of the schema of the tables
-    articles_table = \
-        sqlalchemy.Table('articles', metadata,
-                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
-                                           primary_key=True, autoincrement=True),
-                         sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
-                         sqlalchemy.Column('sha', sqlalchemy.Text()),
-                         sqlalchemy.Column('source_x', sqlalchemy.Text()),
-                         sqlalchemy.Column('title', sqlalchemy.Text()),
-                         sqlalchemy.Column('doi', sqlalchemy.Text()),
-                         sqlalchemy.Column('pmcid', sqlalchemy.Text()),
-                         sqlalchemy.Column('pubmed_id', sqlalchemy.Text()),
-                         sqlalchemy.Column('license', sqlalchemy.Text()),
-                         sqlalchemy.Column('abstract', sqlalchemy.Text()),
-                         sqlalchemy.Column('publish_time', sqlalchemy.Date()),
-                         sqlalchemy.Column('authors', sqlalchemy.Text()),
-                         sqlalchemy.Column('journal', sqlalchemy.Text()),
-                         sqlalchemy.Column('mag_id', sqlalchemy.Text()),
-                         sqlalchemy.Column('who_covidence_id', sqlalchemy.Text()),
-                         sqlalchemy.Column('arxiv_id', sqlalchemy.Text()),
-                         sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
-                         sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
-                         sqlalchemy.Column('url', sqlalchemy.Text()),
-                         sqlalchemy.Column('s2_id', sqlalchemy.Text())
-                         )
+    sqlalchemy.Table('articles', metadata,
+                     sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                       primary_key=True, autoincrement=True),
+                     sqlalchemy.Column('cord_uid', sqlalchemy.String(8), nullable=False),
+                     sqlalchemy.Column('sha', sqlalchemy.Text()),
+                     sqlalchemy.Column('source_x', sqlalchemy.Text()),
+                     sqlalchemy.Column('title', sqlalchemy.Text()),
+                     sqlalchemy.Column('doi', sqlalchemy.Text()),
+                     sqlalchemy.Column('pmcid', sqlalchemy.Text()),
+                     sqlalchemy.Column('pubmed_id', sqlalchemy.Text()),
+                     sqlalchemy.Column('license', sqlalchemy.Text()),
+                     sqlalchemy.Column('abstract', sqlalchemy.Text()),
+                     sqlalchemy.Column('publish_time', sqlalchemy.Date()),
+                     sqlalchemy.Column('authors', sqlalchemy.Text()),
+                     sqlalchemy.Column('journal', sqlalchemy.Text()),
+                     sqlalchemy.Column('mag_id', sqlalchemy.Text()),
+                     sqlalchemy.Column('who_covidence_id', sqlalchemy.Text()),
+                     sqlalchemy.Column('arxiv_id', sqlalchemy.Text()),
+                     sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
+                     sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
+                     sqlalchemy.Column('url', sqlalchemy.Text()),
+                     sqlalchemy.Column('s2_id', sqlalchemy.Text())
+                     )
 
     sentences_table = \
         sqlalchemy.Table('sentences', metadata,
@@ -139,7 +138,7 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
         while time.perf_counter() - start < max_waiting_time:
             try:
                 engine = sqlalchemy.create_engine(
-                    f'mysql+pymysql://root:my-secret-pw@127.0.0.1:/{port_number}')
+                    f'mysql+pymysql://root:my-secret-pw@127.0.0.1:{port_number}/')
                 # Container ready?
                 engine.execute('show databases')
                 break
