@@ -96,8 +96,24 @@ def fill_db_data(engine, metadata_path, test_parameters):
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
 def backend_database(request):
+    """Check if different backends are available."""
+    backend = request.param
 
-    return request.param
+    if backend == 'mysql':
+        # check docker daemon running
+        client = docker.from_env()
+        try:
+            client.ping()
+
+        except Exception:
+            pytest.skip()
+            return backend
+
+        # check mysql:latest image exists
+        if not [x for x in client.images.list() if 'mysql:latest' in x.tags[0]]:
+            pytest.skip()
+
+    return backend
 
 
 @pytest.fixture(scope='session')
