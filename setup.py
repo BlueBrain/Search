@@ -43,12 +43,16 @@ tests_require = [
     "pytest-cov",
 ]
 
-extras_require = {"dev": ["flake8",
-                          "pydocstyle",
-                          "pytest>=4.6",
-                          "pytest-cov",
-                          "sphinx",
-                          "sphinx-bluebrain-theme"]}
+extras_require = {
+    "dev": [
+        "flake8",
+        "pydocstyle",
+        "pytest>=4.6",
+        "pytest-cov",
+        "sphinx",
+        "sphinx-bluebrain-theme",
+    ]
+}
 
 setup(
     name="BBSearch",
