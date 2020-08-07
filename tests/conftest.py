@@ -107,7 +107,6 @@ def backend_database(request):
 
         except Exception:
             pytest.skip()
-            return backend
 
     return backend
 
