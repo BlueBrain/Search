@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 import spacy
 import sqlalchemy
+from sqlalchemy.exc import OperationalError
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 
@@ -98,7 +99,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
 def backend_database(request):
     """Check if different backends are available."""
     backend = request.param
-
     if backend == 'mysql':
         # check docker daemon running
         client = docker.from_env()
@@ -108,10 +108,6 @@ def backend_database(request):
         except Exception:
             pytest.skip()
             return backend
-
-        # check mysql:latest image exists
-        if not [x for x in client.images.list() if 'mysql:latest' in x.tags[0]]:
-            pytest.skip()
 
     return backend
 
@@ -127,31 +123,35 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
         yield engine
 
     else:
+        port_number = 1234
         client = docker.from_env()
         container = client.containers.run('mysql:latest',
                                           environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
-                                          ports={'3306/tcp': 3306},
+                                          ports={'3306/tcp': port_number},
                                           detach=True)
-        docker_ready = False
 
         max_waiting_time = 2 * 60
         start = time.perf_counter()
 
-        while not docker_ready and (time.perf_counter() - start) < max_waiting_time:
+        while time.perf_counter() - start < max_waiting_time:
             try:
-                engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw'
-                                                  '@127.0.0.1:3306/')
+                engine = sqlalchemy.create_engine(
+                    f'mysql+pymysql://root:my-secret-pw@127.0.0.1:/{port_number}')
+                # Container ready?
                 engine.execute('show databases')
+                break
             except sqlalchemy.exc.OperationalError:
-                time.sleep(5)
-
+                # Container not ready, pause and then try again
+                time.sleep(2)
                 continue
-            docker_ready = True
+
+        else:
+            raise TimeoutError("Could not spawn the MySQL container.")
 
         engine.execute("create database test")
         engine.dispose()
-        engine = sqlalchemy.create_engine('mysql+pymysql://root:my-secret-pw'
-                                          '@127.0.0.1:3306/test')
+        engine = sqlalchemy.create_engine(f'mysql+pymysql://root:my-secret-pw'
+                                          f'@127.0.0.1:{port_number}/test')
         fill_db_data(engine, metadata_path, test_parameters)
 
         yield engine
