@@ -6,9 +6,33 @@ from flask import request, jsonify
 import numpy as np
 
 import bbsearch
-from ..embedding_models import BSV, SBioBERT
+from ..embedding_models import BSV, SBioBERT, USE, SBERT
 from ..search import LocalSearcher
 from ..utils import H5
+
+
+def get_model(model_name, bsv_model_path=None):
+    """Construct an embedding model from its name.
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model.
+    bsv_model_path : str
+        The path to the BSV model checkpoint.
+    Returns
+    -------
+    bbsearch.embedding_models.EmbeddingModel
+        The embedding model class.
+    """
+    models = {
+        "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
+        "SBioBERT": lambda: SBioBERT(),
+        "USE": lambda: USE(),
+        "SBERT": lambda: SBERT(),
+    }
+
+    return models[model_name]()
 
 
 class SearchServer:
@@ -26,6 +50,8 @@ class SearchServer:
         The database connection.
     indices : np.ndarray
         1D array containing sentence_ids to be considered for precomputed embeddings.
+    models : list_like
+        A list of model names of the embedding models to load.
     """
 
     def __init__(self,
@@ -33,7 +59,8 @@ class SearchServer:
                  trained_models_path,
                  embeddings_h5_path,
                  indices,
-                 connection
+                 connection,
+                 models,
                  ):
 
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -57,9 +84,8 @@ class SearchServer:
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
         bsv_model_path = trained_models_path / bsv_model_name
         embedding_models = {
-            "BSV": BSV(checkpoint_model_path=bsv_model_path),
-            "SBioBERT": SBioBERT()
-        }
+            model_name: get_model(model_name, bsv_model_path)
+            for model_name in models}
 
         self.logger.info("Loading precomputed embeddings...")
 
