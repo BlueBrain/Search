@@ -2,7 +2,7 @@
 import argparse
 import os
 
-from bbsearch.entrypoints._helper import configure_logging
+from ._helper import configure_logging
 
 
 parser = argparse.ArgumentParser(
@@ -33,13 +33,13 @@ def main():
     # Configure logging
     log_dir = os.getenv("LOG_DIR", "/")
     log_name = os.getenv("LOG_NAME", "bbs_mining.log")
-#    configure_logging(log_dir, log_name)
+    configure_logging(log_dir, log_name)
 
     # Start server
     import pathlib
     from flask import Flask
     import sqlalchemy
-    from bbsearch.server.mining_server import MiningServer
+    from ..server.mining_server import MiningServer
 
     app = Flask("BBS Mining Server")
 
