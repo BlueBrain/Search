@@ -8,18 +8,21 @@ tests is to run simple sanity checks rather than detailed bookkeeping.
 """
 import pandas as pd
 import pytest
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 
 
-def test_database(fake_sqlalchemy_engine):
+def test_database(fake_sqlalchemy_engine, backend_database):
     """Make sure database tables setup correctly."""
     for table_name in ['articles', 'sentences']:
         res = pd.read_sql('SELECT * FROM {}'.format(table_name), fake_sqlalchemy_engine)
 
         assert len(res) > 0
-
-    with pytest.raises(OperationalError):
-        fake_sqlalchemy_engine.execute('SELECT * FROM fake_table').all()
+    if backend_database == 'sqlite':
+        with pytest.raises(OperationalError):
+            fake_sqlalchemy_engine.execute('SELECT * FROM fake_table').all()
+    else:
+        with pytest.raises(ProgrammingError):
+            fake_sqlalchemy_engine.execute('SELECT * FROM fake_table').all()
 
 
 def test_h5(embeddings_h5_path):
