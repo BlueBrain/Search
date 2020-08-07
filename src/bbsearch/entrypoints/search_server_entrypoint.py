@@ -45,7 +45,7 @@ args = parser.parse_args()
 def main():
     """Execute the entry point."""
     # Configure logging
-    log_dir = os.getenv("LOG_DIR", "/")
+    log_dir = os.getenv("LOG_DIR", ".")
     log_name = os.getenv("LOG_NAME", "bbs_search.log")
     if args.debug:
         log_level = logging.DEBUG
