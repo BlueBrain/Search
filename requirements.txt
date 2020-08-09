@@ -1,5 +1,7 @@
 jupyterlab==1.0.4
 Cython==0.29.13
+docker==4.2.2
+h5py==2.10.0
 numpy==1.18.2
 # pytorch-pretrained-bert
 sent2vec-prebuilt

@@ -45,6 +45,8 @@ tests_require = [
 
 extras_require = {
     "dev": [
+        "cryptography",
+        "docker",
         "flake8",
         "pydocstyle",
         "pytest>=4.6",
