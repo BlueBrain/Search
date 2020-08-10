@@ -6,9 +6,9 @@ install_requires = [
     "dash-cytoscape",
     "dash-table",
     "dash_daq",
-    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz",
-    "en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz",
-    "en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz",
+    "en-core-web-sm",
+    "en-core-sci-lg",
+    "en-ner-craft-md",
     "faiss-cpu",
     "h5py",
     "ipython",
@@ -42,7 +42,13 @@ tests_require = [
     "pytest",
     "pytest-cov",
 ]
-
+dependency_links = ['https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2'
+                    '.3.1/en_core_web_sm-2.3.1.tar.gz',
+                    'https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5'
+                    '/en_core_sci_lg-0.2.5.tar.gz',
+                    'https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/'
+                    'en_ner_craft_md-0.2.5.tar.gz'
+                    ]
 extras_require = {
     "dev": [
         "cryptography",
@@ -51,6 +57,7 @@ extras_require = {
         "pydocstyle",
         "pytest>=4.6",
         "pytest-cov",
+        "responses",
         "sphinx",
         "sphinx-bluebrain-theme",
     ]
@@ -73,6 +80,7 @@ setup(
     python_requires=">=3.6",
     setup_requires=["setuptools_scm"],
     install_requires=install_requires,
+    dependency_links=dependency_links,
     extras_require=extras_require,
     tests_require=tests_require,
     entry_points={
