@@ -1,6 +1,5 @@
 jupyterlab==1.0.4
 Cython==0.29.13
-docker==4.2.2
 h5py==2.10.0
 numpy==1.18.2
 # pytorch-pretrained-bert
@@ -33,3 +32,12 @@ dash-table==4.6.2
 dash-cytoscape==0.0.5
 networkx==2.4
 jupyter-server-proxy==1.5.0
+cryptography==3.0
+docker==4.2.2
+flake8==3.8.3
+pycodestyle==2.6.0
+pytest==6.0.1
+pytest-cov==2.10.0
+responses==0.10.15
+Sphinx==3.2.0
+sphinx-bluebrain-theme==0.2.2
