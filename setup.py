@@ -16,6 +16,7 @@ install_requires = [
     "jupyter_dash",
     "jupyter_server_proxy",
     "matplotlib",
+    "mysqlclient",
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "numpy>=1.16.1",
