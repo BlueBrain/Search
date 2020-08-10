@@ -17,14 +17,14 @@ install_requires = [
     "jupyter_server_proxy",
     "matplotlib",
     "networkx",
-    "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
+    "nexusforge",
     "numpy>=1.16.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "rdflib-jsonld",
     "requests",
-    "scibert @ git+https://github.com/allenai/scibert",
+    "scibert",
     "scikit-learn",
     "scipy",
     "scispacy",
@@ -42,13 +42,16 @@ tests_require = [
     "pytest",
     "pytest-cov",
 ]
-dependency_links = ['https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2'
-                    '.3.1/en_core_web_sm-2.3.1.tar.gz',
-                    'https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5'
-                    '/en_core_sci_lg-0.2.5.tar.gz',
-                    'https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/'
-                    'en_ner_craft_md-0.2.5.tar.gz'
-                    ]
+dependency_links = [
+    "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2"
+    ".3.1/en_core_web_sm-2.3.1.tar.gz",
+    "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5"
+    "/en_core_sci_lg-0.2.5.tar.gz",
+    "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/"
+    "en_ner_craft_md-0.2.5.tar.gz",
+    "git+https://github.com/BlueBrain/nexus-forge.git",
+    "git+https://github.com/allenai/scibert",
+]
 extras_require = {
     "dev": [
         "cryptography",
