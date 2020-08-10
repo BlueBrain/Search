@@ -51,3 +51,4 @@ make clean && make html
 ```
 
 You can then open it in a browser by navigating to  `docs/_build/html/index.html`.
+
