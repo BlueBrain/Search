@@ -47,9 +47,5 @@ install:
 #  - pip install --upgrade .[dev]
 #  - python -c "import nltk; nltk.download('stopwords'); nltk.download('punkt')"
 
-before_script:
-  - pip install --upgrade pip setuptools
-  - pip freeze
-
 script:
   - tox
