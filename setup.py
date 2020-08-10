@@ -48,6 +48,7 @@ extras_require = {"dev": ["cryptography",
                           "flake8",
                           "pydocstyle",
                           "pytest>=4.6",
+                          "pytest-benchmark",
                           "pytest-cov",
                           "sphinx",
                           "sphinx-bluebrain-theme"]}
