@@ -11,30 +11,6 @@ from ..search import LocalSearcher
 from ..utils import H5
 
 
-def get_model(model_name, bsv_model_path=None):
-    """Construct an embedding model from its name.
-
-    Parameters
-    ----------
-    model_name : str
-        The name of the model.
-    bsv_model_path : str
-        The path to the BSV model checkpoint.
-    Returns
-    -------
-    bbsearch.embedding_models.EmbeddingModel
-        The embedding model class.
-    """
-    models = {
-        "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
-        "SBioBERT": lambda: SBioBERT(),
-        "USE": lambda: USE(),
-        "SBERT": lambda: SBERT(),
-    }
-
-    return models[model_name]()
-
-
 class SearchServer:
     """The BBS search server.
 
@@ -77,30 +53,66 @@ class SearchServer:
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
 
-        trained_models_path = pathlib.Path(trained_models_path)
-        embeddings_h5_path = pathlib.Path(embeddings_h5_path)
+        self.trained_models_path = pathlib.Path(trained_models_path)
+        self.embeddings_h5_path = pathlib.Path(embeddings_h5_path)
 
         self.logger.info("Initializing embedding models...")
-        bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-        bsv_model_path = trained_models_path / bsv_model_name
-        embedding_models = {
-            model_name: get_model(model_name, bsv_model_path)
-            for model_name in models}
+        self.embedding_models = {
+            model_name: self._get_model(model_name)
+            for model_name in models
+        }
 
         self.logger.info("Loading precomputed embeddings...")
+        self.precomputed_embeddings = {
+            model_name: H5.load(
+                self.embeddings_h5_path,
+                model_name,
+                indices=self.indices
+            ).astype(np.float32)
+            for model_name in self.embedding_models
+        }
 
-        precomputed_embeddings = {model_name: H5.load(embeddings_h5_path,
-                                                      model_name,
-                                                      indices=indices).astype(np.float32) for model_name in
-                                  embedding_models}
-
+        self.logger.info("Constructing the local searcher...")
         self.local_searcher = LocalSearcher(
-            embedding_models, precomputed_embeddings, indices, self.connection)
+            self.embedding_models,
+            self.precomputed_embeddings,
+            self.indices,
+            self.connection
+        )
 
         app.route("/help", methods=["POST"])(self.help)
         app.route("/", methods=["POST"])(self.query)
 
         self.logger.info("Initialization done.")
+
+    def _get_model(self, model_name):
+        """Construct an embedding model from its name.
+
+        Parameters
+        ----------
+        model_name : str
+            The name of the model.
+
+        Returns
+        -------
+        bbsearch.embedding_models.EmbeddingModel
+            The embedding model class.
+        """
+        bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
+        bsv_model_path = self.trained_models_path / bsv_model_name
+
+        model_factories = {
+            "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
+            "SBioBERT": lambda: SBioBERT(),
+            "USE": lambda: USE(),
+            "SBERT": lambda: SBERT(),
+        }
+
+        if model_name not in model_factories:
+            raise ValueError(f"Unknown model name: {model_name}")
+        selected_factory = model_factories[model_name]
+
+        return selected_factory()
 
     def help(self):
         """Help the user by sending information about the server."""
