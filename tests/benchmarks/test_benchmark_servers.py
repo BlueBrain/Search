@@ -1,9 +1,14 @@
+import pandas as pd
 import pytest
 import requests
 import sqlalchemy
 
 # Embedding
 EMBEDDING_MODELS = ["BSV", "SBioBERT", "SBERT", "USE"]
+
+# Mining
+ENTITY_TYPES = ['DISEASE', 'CELL_TYPE', 'CHEMICAL', 'PROTEIN', 'ORGAN']
+ARTICLE_IDS = [1234]
 
 # MySQL
 MYSQL_USER = 'guest'
@@ -41,6 +46,58 @@ class TestEmbedding:
 
         payload_json = {'text': 'Glucose is a risk factor for COVID-19',
                         'model': model}
+
+        response = benchmark(requests.post, url, json=payload_json)
+
+        assert response.ok
+
+
+class TestMining:
+    @pytest.mark.parametrize('entity_type', ENTITY_TYPES)
+    def test_mine_entity_text(self, benchmark, benchmark_parameters, entity_type):
+        """Send 100 sentences as raw text."""
+        mining_server = benchmark_parameters['mining_server']
+
+        if not mining_server:
+            pytest.skip('Mining server address not provided.')
+
+        url = f"{mining_server}/text"
+        text = "Glucose is mainly made by plants during" \
+               " photosynthesis from water and carbon dioxide."
+
+        text *= 100
+
+        header = ['entity_type', 'property', 'property_type', 'property_value_type',
+                  'ontology_source']
+
+        table = pd.Series({'entity_type': entity_type}, index=header).to_frame().transpose()
+        schema_request = table.to_csv(index=False)
+
+        payload_json = {"text": text, 'schema': schema_request}
+
+        response = benchmark(requests.post, url, json=payload_json)
+
+        assert response.ok
+
+    @pytest.mark.parametrize('entity_type', ENTITY_TYPES)
+    @pytest.mark.parametrize('article_id', ARTICLE_IDS)
+    def test_mine_entity_article(self, benchmark, benchmark_parameters, entity_type, article_id):
+        """Mine an entire article from the database."""
+        mining_server = benchmark_parameters['mining_server']
+
+        if not mining_server:
+            pytest.skip('Mining server address not provided.')
+
+        url = f"{mining_server}/database"
+        identifiers = [(article_id, -1)]
+
+        header = ['entity_type', 'property', 'property_type', 'property_value_type',
+                  'ontology_source']
+
+        table = pd.Series({'entity_type': entity_type}, index=header).to_frame().transpose()
+        schema_request = table.to_csv(index=False)
+
+        payload_json = {"identifiers": identifiers, 'schema': schema_request}
 
         response = benchmark(requests.post, url, json=payload_json)
 
