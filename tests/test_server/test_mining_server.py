@@ -93,8 +93,9 @@ class TestMiningServer:
         missing_etypes = ['DISEASE', 'CELL_TYPE', 'PROTEIN', 'ORGAN']
         assert response_json['warnings'] == [f'No text mining model was found in the library for \"{etype}\".'
                                              for etype in missing_etypes]
-        assert response_json['csv_extractions'].split('\n')[0] == 'entity,entity_type,property,' \
-                                                                                  'property_value,property_type,' \
-                                                                                  'property_value_type,' \
-                                                                                  'ontology_source,paper_id,' \
-                                                                                  'start_char,end_char'
+        assert response_json['csv_extractions'].split('\n')[0] == \
+               'entity,entity_type,property,' \
+               'property_value,property_type,' \
+               'property_value_type,' \
+               'ontology_source,paper_id,' \
+               'start_char,end_char'

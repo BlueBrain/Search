@@ -35,13 +35,17 @@ parser.add_argument("--debug",
                     action="store_true",
                     default=False,
                     help="Enable debug logging messages")
+parser.add_argument("--models",
+                    default="USE,SBERT,SBioBERT,BSV",
+                    type=str,
+                    help="Models to load in the search server.")
 args = parser.parse_args()
 
 
 def main():
     """Execute the entry point."""
     # Configure logging
-    log_dir = os.getenv("LOG_DIR", "/")
+    log_dir = os.getenv("LOG_DIR", ".")
     log_name = os.getenv("LOG_NAME", "bbs_search.log")
     if args.debug:
         log_level = logging.DEBUG
@@ -61,9 +65,11 @@ def main():
 
     indices = H5.find_populated_rows(embeddings_path, 'BSV')
 
-    engine = sqlalchemy.create_engine(f"mysql+pymysql://guest:guest@{args.database_uri}")
+    engine = sqlalchemy.create_engine(f"mysql+mysqldb://guest:guest@{args.database_uri}")
 
-    SearchServer(app, models_path, embeddings_path, indices, engine)
+    models = [model.strip() for model in args.models.split(",")]
+
+    SearchServer(app, models_path, embeddings_path, indices, engine, models)
 
     app.run(
         host=args.host,
