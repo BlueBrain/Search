@@ -37,11 +37,6 @@ install_requires = [
     "tqdm",
     "transformers",
 ]
-tests_require = [
-    "flake8",
-    "pytest",
-    "pytest-cov",
-]
 
 extras_require = {"dev": ["cryptography",
                           "docker",
@@ -49,6 +44,7 @@ extras_require = {"dev": ["cryptography",
                           "pydocstyle",
                           "pytest>=4.6",
                           "pytest-cov",
+                          "responses",
                           "sphinx",
                           "sphinx-bluebrain-theme"]}
 
@@ -70,7 +66,6 @@ setup(
     setup_requires=["setuptools_scm"],
     install_requires=install_requires,
     extras_require=extras_require,
-    tests_require=tests_require,
     entry_points={
         "console_scripts": [
             "embedding_server=bbsearch.entrypoints.embedding_server_entrypoint:main",
