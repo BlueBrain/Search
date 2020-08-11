@@ -16,6 +16,7 @@ install_requires = [
     "jupyter_dash",
     "jupyter_server_proxy",
     "matplotlib",
+    "mysqlclient",
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "numpy>=1.16.1",
@@ -45,10 +46,12 @@ extras_require = {
         "flake8",
         "pydocstyle",
         "pytest>=4.6",
+        "pytest-benchmark",
         "pytest-cov",
         "responses",
         "sphinx",
         "sphinx-bluebrain-theme",
+        "tox",
     ]
 }
 
