@@ -1,8 +1,8 @@
 from pathlib import Path
-import pytest
 from unittest.mock import Mock
 
 import pandas as pd
+import pytest
 import sqlalchemy
 
 from bbsearch.database import CORD19DatabaseCreation

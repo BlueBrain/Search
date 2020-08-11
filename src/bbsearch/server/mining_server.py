@@ -2,11 +2,12 @@
 import io
 import logging
 
-from flask import jsonify, request
 import pandas as pd
 import spacy
+from flask import jsonify, request
 
 import bbsearch
+
 from ..mining import run_pipeline
 from ..sql import retrieve_articles, retrieve_paragraph
 

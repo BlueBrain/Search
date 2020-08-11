@@ -1,10 +1,6 @@
 """Subpackage for text mining."""
 
-from .attributes import (
-    AttributeExtractor,
-    AttributeAnnotationTab,
-    TextCollectionWidget)
-
+from .attributes import AttributeAnnotationTab, AttributeExtractor, TextCollectionWidget
 from .eval import prodigy2df, spacy2df
 from .pipeline import run_pipeline
 from .relation import ChemProt, REModel, StartWithTheSameLetter, annotate

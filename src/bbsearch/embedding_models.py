@@ -1,15 +1,15 @@
 """Model handling sentences embeddings."""
-from abc import ABC, abstractmethod
 import string
+from abc import ABC, abstractmethod
 
-from nltk.corpus import stopwords
-from nltk import word_tokenize
 import numpy as np
 import sent2vec
-from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
 import torch
-from transformers import AutoTokenizer, AutoModelWithLMHead
+from nltk import word_tokenize
+from nltk.corpus import stopwords
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelWithLMHead, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
 

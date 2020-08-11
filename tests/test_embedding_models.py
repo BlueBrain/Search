@@ -1,15 +1,22 @@
 from pathlib import Path
-import pytest
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
 import numpy as np
 import pandas as pd
+import pytest
 import sent2vec
-from sentence_transformers import SentenceTransformer
 import tensorflow as tf
 import torch
+from sentence_transformers import SentenceTransformer
 
-from bbsearch.embedding_models import EmbeddingModel, SBioBERT, BSV, SBERT, USE, compute_database_embeddings
+from bbsearch.embedding_models import (
+    BSV,
+    SBERT,
+    USE,
+    EmbeddingModel,
+    SBioBERT,
+    compute_database_embeddings,
+)
 
 
 class TestEmbeddingModels:

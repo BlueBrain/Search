@@ -1,13 +1,13 @@
 import json
-import pytest
 from unittest.mock import Mock
 
-from IPython.display import HTML
 import pandas as pd
+import pytest
 import requests
 import spacy
+from IPython.display import HTML
 
-from bbsearch.mining import AttributeExtractor, AttributeAnnotationTab
+from bbsearch.mining import AttributeAnnotationTab, AttributeExtractor
 
 
 @pytest.fixture(scope="session")

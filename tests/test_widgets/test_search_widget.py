@@ -1,15 +1,15 @@
 import contextlib
-from copy import copy
-from unittest.mock import Mock
 import os
-from pathlib import Path
 import sys
 import textwrap
+from copy import copy
+from pathlib import Path
+from unittest.mock import Mock
 
-from IPython.display import HTML
 import ipywidgets
 import numpy as np
 import pytest
+from IPython.display import HTML
 
 from bbsearch.search import LocalSearcher
 from bbsearch.widgets import ArticleSaver, SearchWidget

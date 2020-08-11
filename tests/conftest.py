@@ -1,8 +1,7 @@
 """Configuration of pytest."""
-from pathlib import Path
 import time
+from pathlib import Path
 
-import docker
 import h5py
 import numpy as np
 import pandas as pd
@@ -10,6 +9,8 @@ import pytest
 import spacy
 import sqlalchemy
 from sqlalchemy.exc import OperationalError
+
+import docker
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 

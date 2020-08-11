@@ -4,7 +4,6 @@ import os
 
 from ._helper import configure_logging
 
-
 parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     default="0.0.0.0",
@@ -30,9 +29,11 @@ def main():
 
     # Start server
     import pathlib
+
     from flask import Flask
+
+    from ..embedding_models import BSV, SBERT, USE, SBioBERT
     from ..server.embedding_server import EmbeddingServer
-    from ..embedding_models import USE, SBERT, SBioBERT, BSV
 
     embedding_models = {
         'USE': USE(),

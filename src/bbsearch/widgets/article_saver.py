@@ -7,7 +7,11 @@ import pandas as pd
 import pdfkit
 
 from .._css import style
-from ..sql import retrieve_articles, retrieve_paragraph, retrieve_article_metadata_from_article_id
+from ..sql import (
+    retrieve_article_metadata_from_article_id,
+    retrieve_articles,
+    retrieve_paragraph,
+)
 
 
 class ArticleSaver:

@@ -1,12 +1,12 @@
-from copy import copy
 import json
+from copy import copy
 from pathlib import Path
 
-from IPython.display import HTML
 import pandas as pd
 import responses
+from IPython.display import HTML
 
-from bbsearch.widgets import MiningWidget, ArticleSaver, SchemaRequest
+from bbsearch.widgets import ArticleSaver, MiningWidget, SchemaRequest
 
 
 class MiningWidgetBot:

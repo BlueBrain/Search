@@ -1,8 +1,8 @@
-from flask import Flask
-import pytest
 from unittest.mock import Mock
 
 import numpy as np
+import pytest
+from flask import Flask
 
 from bbsearch.server.search_server import SearchServer
 from bbsearch.utils import H5

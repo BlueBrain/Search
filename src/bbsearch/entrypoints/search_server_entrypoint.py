@@ -3,10 +3,9 @@ import argparse
 import logging
 import os
 
-from ._helper import configure_logging
-
 from bbsearch.utils import H5
 
+from ._helper import configure_logging
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -55,8 +54,10 @@ def main():
 
     # Start server
     import pathlib
-    from flask import Flask
+
     import sqlalchemy
+    from flask import Flask
+
     from ..server.search_server import SearchServer
 
     app = Flask("BBSearch Server")

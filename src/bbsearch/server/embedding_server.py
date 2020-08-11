@@ -4,9 +4,10 @@ import io
 import logging
 import textwrap
 
-from flask import request, jsonify, make_response
+from flask import jsonify, make_response, request
 
 import bbsearch
+
 from .invalid_usage_exception import InvalidUsage
 
 
