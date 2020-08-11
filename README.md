@@ -51,3 +51,51 @@ make clean && make html
 ```
 
 You can then open it in a browser by navigating to  `docs/_build/html/index.html`.
+
+## Testing
+We use `tox` to run all our tests. Running `tox` in the terminal will execute the
+following environments:
+- `lint`: code style and documentation checks
+- `docs`: test doc build
+- `check-packaging`: test packaging
+- `py36`: run unit tests (using pytest) with python3.6
+- `py37`: run unit tests (using pytest) with python3.7
+- `py38`: run unit tests (using pytest) with python3.8
+
+Each of these environments can be run separately using the following syntax:
+```shell script
+$ tox -e lint
+```
+This will only run the `lint` environment.
+
+We provide several convenience tox environments that are not run automatically
+and have to be triggered by hand:
+- `format`
+- `benchmarks`
+
+The `format` environment will reformat all source code using `isort` and `black`.
+
+The `benchmark` environment will run pre-defined pytest benchmarks. Currently
+these benchmarks only test various servers and therefore need to know the server
+URL. These can be passed to `tox` via the following environment variables:
+```shell script
+export EMBEDDING_SERVER=http://<url>:<port>
+export MINING_SERVER=http://<url>:<port>
+export MYSQL_SERVER=<url>:<port>
+export SEARCH_SERVER=http://<url>:<port>
+```
+If a server URL is not defined, then the corresponding tests will be skipped.
+
+It is also possible to provide additional positional arguments to pytest using the
+following syntax:
+```shell script
+$ tox -e benchmarks -- <positional arguments>
+```
+for example:
+```shell script
+$ tox -e benchmarks -- \
+  --benchmark-histogram=my_histograms/benchmarks \
+  --benchmark-max-time=1.5 \
+  --benchmark-min-rounds=1
+```
+See `pytest --help` for additional options.
