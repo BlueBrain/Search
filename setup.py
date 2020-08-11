@@ -43,7 +43,9 @@ tests_require = [
     "pytest-cov",
 ]
 
-extras_require = {"dev": ["flake8",
+extras_require = {"dev": ["cryptography",
+                          "docker",
+                          "flake8",
                           "pydocstyle",
                           "pytest>=4.6",
                           "pytest-cov",

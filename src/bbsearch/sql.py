@@ -344,11 +344,16 @@ class SentenceFilter:
         # Restricted sentence IDs
         if self.restricted_sentence_ids is not None:
             sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
+            if not sentence_ids_s and self.connection.url.drivername == 'mysql+pymysql':
+                sentence_ids_s = 'NULL'
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
         # Exclusion text
         for text in self.string_exclusions:
-            sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+            if self.connection.url.drivername == 'mysql+pymysql':
+                sentence_conditions.append(f"INSTR(text, '{text}') = 0")
+            else:
+                sentence_conditions.append(f"text NOT LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"
