@@ -51,6 +51,7 @@ extras_require = {
         "responses",
         "sphinx",
         "sphinx-bluebrain-theme",
+        "tox",
     ]
 }
 
