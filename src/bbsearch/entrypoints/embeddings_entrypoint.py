@@ -1,7 +1,6 @@
 """EntryPoint for the computation and saving of the embeddings."""
 import argparse
 
-
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("--db_type",
                     default="mysql",
@@ -30,10 +29,12 @@ args = parser.parse_args()
 
 def main():
     """Compute Embeddings."""
-    import pathlib
     import getpass
+    import pathlib
+
     import pandas as pd
     import sqlalchemy
+
     from .. import embedding_models
     from ..utils import H5
 

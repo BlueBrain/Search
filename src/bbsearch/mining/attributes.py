@@ -9,14 +9,13 @@ import logging
 import textwrap
 import warnings
 
+import ipywidgets as widgets
 import pandas as pd
 import requests
-import ipywidgets as widgets
+from IPython.display import HTML, display
 from spacy import displacy
-from IPython.display import display, HTML
 
 from .._css import style
-
 
 logger = logging.getLogger(__name__)
 

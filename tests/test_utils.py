@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 import pytest
 
-from bbsearch.utils import Timer, H5
+from bbsearch.utils import H5, Timer
 
 
 class TestTimer:

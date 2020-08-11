@@ -2,8 +2,8 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
-from allennlp.predictors import Predictor
 import pandas as pd
+from allennlp.predictors import Predictor
 from scibert.models.text_classifier import TextClassifier  # noqa
 
 

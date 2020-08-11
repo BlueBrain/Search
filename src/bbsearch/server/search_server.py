@@ -2,11 +2,12 @@
 import logging
 import pathlib
 
-from flask import request, jsonify
 import numpy as np
+from flask import jsonify, request
 
 import bbsearch
-from ..embedding_models import BSV, SBioBERT, USE, SBERT
+
+from ..embedding_models import BSV, SBERT, USE, SBioBERT
 from ..search import LocalSearcher
 from ..utils import H5
 

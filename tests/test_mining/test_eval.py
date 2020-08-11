@@ -1,6 +1,6 @@
-from collections import OrderedDict
 import json
 import sqlite3
+from collections import OrderedDict
 from unittest.mock import Mock
 
 import numpy as np
@@ -8,9 +8,16 @@ import pandas as pd
 import pytest
 
 from bbsearch.mining import prodigy2df, spacy2df
-from bbsearch.mining.eval import (unique_etypes, iob2idx, idx2text, ner_report, ner_errors,
-                                  ner_confusion_matrix, plot_ner_confusion_matrix,
-                                  remove_punctuation)
+from bbsearch.mining.eval import (
+    idx2text,
+    iob2idx,
+    ner_confusion_matrix,
+    ner_errors,
+    ner_report,
+    plot_ner_confusion_matrix,
+    remove_punctuation,
+    unique_etypes,
+)
 
 
 class TestProdigy2df:

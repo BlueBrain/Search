@@ -1,11 +1,11 @@
 """Module for the mining widget."""
-from dataclasses import dataclass
 import io
+from dataclasses import dataclass
 
-from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 import requests
+from IPython.display import HTML, display
 
 from .._css import style
 from ..utils import Timer

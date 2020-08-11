@@ -1,9 +1,9 @@
 """Test for the mining server."""
 from pathlib import Path
-
-from flask import Flask
-import pytest
 from unittest.mock import Mock
+
+import pytest
+from flask import Flask
 
 from bbsearch.server.mining_server import MiningServer
 

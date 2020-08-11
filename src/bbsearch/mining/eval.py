@@ -1,13 +1,12 @@
 """Collection of functions for evaluation of NER models."""
-from collections import OrderedDict
 import json
 import string
+from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
-
 from spacy.tokens import Doc
 
 
