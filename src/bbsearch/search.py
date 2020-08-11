@@ -191,7 +191,6 @@ def run_search(
         restricted_sentence_ids = (
             SentenceFilter(connection)
             .only_with_journal(has_journal)
-            .restrict_sentences_ids_to(indices)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split())
             .run()

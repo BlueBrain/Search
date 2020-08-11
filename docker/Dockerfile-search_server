@@ -8,9 +8,9 @@ FROM python:3.6-slim
 # Install git, gcc, and g++
 RUN apt-get update && apt-get install -y \
     git \
-    gcc \
-    g++ \
+    gcc g++ \
     build-essential \
+    default-libmysqlclient-dev \
     vim
 
 # Install requirements manualy, this layer will be cached by docker
@@ -19,7 +19,8 @@ RUN true \
     && pip install --upgrade pip \
     && pip install Cython numpy \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+    && rm /tmp/requirements.txt \
+    && pip install mysqlclient
 
 # Install the app
 ADD . /src
@@ -47,6 +48,7 @@ ENV EMBEDDINGS_PATH="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embedding
 ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v35"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_search.log"
+ENV MODELS="BSV,SBioBERT"
 
 ENTRYPOINT exec search_server \
     --host=0.0.0.0 \
@@ -54,4 +56,5 @@ ENTRYPOINT exec search_server \
 #    --debug \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
-    --database_uri $DATABASE_URI
+    --database_uri $DATABASE_URI \
+    --models $MODELS

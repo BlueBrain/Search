@@ -1,11 +1,11 @@
 """Module for the mining widget."""
-from dataclasses import dataclass
 import io
+from dataclasses import dataclass
 
-from IPython.display import display, HTML
 import ipywidgets as widgets
 import pandas as pd
 import requests
+from IPython.display import HTML, display
 
 from .._css import style
 from ..utils import Timer
@@ -25,7 +25,7 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    schema_request : SchemaRequest
+    schema_request : bbsearch.widgets.SchemaRequest
         An object holding a dataframe with the requested mining schema (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.

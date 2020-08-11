@@ -23,9 +23,7 @@ def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
     ----
     Credit: https://stackoverflow.com/a/16993115/2804645
     """
-    logging.error(
-        "Uncaught exception",
-        exc_info=(exc_type, exc_value, exc_traceback))
+    logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 def configure_logging(log_dir, log_name, level=logging.INFO):
@@ -46,5 +44,6 @@ def configure_logging(log_dir, log_name, level=logging.INFO):
     logging.basicConfig(
         filename=log_path,
         level=level,
-        format='%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s')
+        format="%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s",
+    )
     sys.excepthook = handle_uncaught_exception

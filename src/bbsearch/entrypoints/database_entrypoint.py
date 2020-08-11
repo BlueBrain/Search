@@ -16,9 +16,11 @@ args = parser.parse_args()
 
 def main():
     """Run database construction."""
-    from pathlib import Path
     import getpass
+    from pathlib import Path
+
     import sqlalchemy
+
     from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':

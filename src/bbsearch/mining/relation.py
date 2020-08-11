@@ -2,8 +2,8 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
-from allennlp.predictors import Predictor
 import pandas as pd
+from allennlp.predictors import Predictor
 from scibert.models.text_classifier import TextClassifier  # noqa
 
 
@@ -66,8 +66,7 @@ class REModel(ABC):
         """Generate dictionary mapping the two entity types to their annotation symbols.
 
         General structure: {'ENTITY_TYPE': ('SYMBOL_LEFT', 'SYMBOL_RIGHT')}
-        Specific example: {'GGP': ('[[ ', ' ]]'),
-                           'CHEBI': ('<< ', ' >>')}
+        Specific example: {'GGP': ('[[ ', ' ]]'), 'CHEBI': ('<< ', ' >>')}
 
         Make sure that left and right symbols are not identical.
         """

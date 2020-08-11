@@ -7,7 +7,11 @@ import pandas as pd
 import pdfkit
 
 from .._css import style
-from ..sql import retrieve_articles, retrieve_paragraph, retrieve_article_metadata_from_article_id
+from ..sql import (
+    retrieve_article_metadata_from_article_id,
+    retrieve_articles,
+    retrieve_paragraph,
+)
 
 
 class ArticleSaver:
@@ -27,17 +31,13 @@ class ArticleSaver:
 
     Parameters
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or
-                database str URI or
-                DBAPI2 connection (fallback mode)
+    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or
-                database str URI or
-                DBAPI2 connection (fallback mode)
+    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 

@@ -1,13 +1,13 @@
 import json
-import pytest
 from unittest.mock import Mock
 
-from IPython.display import HTML
 import pandas as pd
+import pytest
 import requests
 import spacy
+from IPython.display import HTML
 
-from bbsearch.mining import AttributeExtractor, AttributeAnnotationTab
+from bbsearch.mining import AttributeAnnotationTab, AttributeExtractor
 
 
 @pytest.fixture(scope="session")
@@ -590,8 +590,11 @@ class TestAttributeExtraction:
 
         measurement = {}
         expected = set()
-        generated = set(extractor.iter_quantities(measurement))
+        with pytest.warns(UserWarning) as warning_records:
+            generated = set(extractor.iter_quantities(measurement))
         assert expected == generated
+        assert len(warning_records) == 1
+        assert warning_records[0].message.args[0] == "no quantity in measurement"
 
     def test_get_measurement_type(self, extractor: AttributeExtractor):
         measurement = {"quantity": {"rawUnit": {"type": "mass"}}}
@@ -677,13 +680,17 @@ class TestAttributeExtraction:
         fake_requests.post.return_value = response
 
         # Test 1
-        measurements = extractor.get_grobid_measurements(text)
+        _ = extractor.get_grobid_measurements(text)
         fake_requests.post.assert_called_once()
 
         # Test 2
         response.status_code = 500
-        measurements = extractor.get_grobid_measurements(text)
+        with pytest.warns(UserWarning) as warning_records:
+            measurements = extractor.get_grobid_measurements(text)
         assert len(measurements) == 0
+        assert len(warning_records) == 1
+        assert warning_records[0].message.args[0] == \
+               f"GROBID request problem. Code: {response.status_code}"
 
         # Test 3
         response.status_code = 200

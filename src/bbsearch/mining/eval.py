@@ -1,13 +1,12 @@
 """Collection of functions for evaluation of NER models."""
-from collections import OrderedDict
 import json
 import string
+from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
-
 from spacy.tokens import Doc
 
 
@@ -271,7 +270,10 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
     -------
     report : string / dict
         Text summary of the precision, recall, F1 score for each entity type.
-        Dictionary returned if output_dict is True. Dictionary has the following structure::
+        Dictionary returned if output_dict is True. Dictionary has the following structure
+
+        .. code-block:: python
+
             {'entity_type 1': {'precision':0.5,
                          'recall':1.0,
                          'f1-score':0.67,
@@ -356,9 +358,12 @@ def ner_errors(iob_true, iob_pred, tokens, mode='entity', etypes_map=None, retur
     -------
     report : string / dict
         Text summary of the precision, recall, F1 score for each entity type.
-        Dictionary returned if output_dict is True. Dictionary has the following structure::
+        Dictionary returned if output_dict is True. Dictionary has the following structure
+
+        .. code-block:: python
+
             {'entity_type 1': {'false_neg': [entity, entity, ...],
-                         'false_pos': [entity, entity, ...]},
+                               'false_pos': [entity, entity, ...]},
              'entity_type 2': { ... },
               ...
             }

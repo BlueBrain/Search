@@ -16,6 +16,7 @@ install_requires = [
     "jupyter_dash",
     "jupyter_server_proxy",
     "matplotlib",
+    "mysqlclient",
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "numpy>=1.16.1",
@@ -37,13 +38,22 @@ install_requires = [
     "tqdm",
     "transformers",
 ]
-tests_require = [
-    "flake8",
-    "pytest",
-    "pytest-cov",
-]
 
-extras_require = {"dev": ["flake8", "pydocstyle", "pytest>=4.6", "pytest-cov"]}
+extras_require = {
+    "dev": [
+        "cryptography",
+        "docker",
+        "flake8",
+        "pydocstyle",
+        "pytest>=4.6",
+        "pytest-benchmark",
+        "pytest-cov",
+        "responses",
+        "sphinx",
+        "sphinx-bluebrain-theme",
+        "tox",
+    ]
+}
 
 setup(
     name="BBSearch",
@@ -53,7 +63,7 @@ setup(
     url="https://github.com/BlueBrain/BlueBrainSearch",
     use_scm_version={
         "write_to": "src/bbsearch/version.py",
-        "write_to_template": '__version__ = "{version}"\n',
+        "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
         # "local_scheme": "no-local-version",
     },
     package_dir={"": "src"},
@@ -63,7 +73,6 @@ setup(
     setup_requires=["setuptools_scm"],
     install_requires=install_requires,
     extras_require=extras_require,
-    tests_require=tests_require,
     entry_points={
         "console_scripts": [
             "embedding_server=bbsearch.entrypoints.embedding_server_entrypoint:main",

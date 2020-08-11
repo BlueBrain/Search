@@ -9,14 +9,13 @@ import logging
 import textwrap
 import warnings
 
+import ipywidgets as widgets
 import pandas as pd
 import requests
-import ipywidgets as widgets
+from IPython.display import HTML, display
 from spacy import displacy
-from IPython.display import display, HTML
 
 from .._css import style
-
 
 logger = logging.getLogger(__name__)
 
@@ -221,7 +220,7 @@ class AttributeExtractor:
 
         CoreNLP breaks a given text down into sentences, and
         each sentence is broken down into tokens. These can
-        be accessed by `response['sentences'][sentence_id]['tokens'].
+        be accessed by `response['sentences'][sentence_id]['tokens']`.
 
         Each token corresponds to a position in the original text.
         This method determines which tokens would intersect a

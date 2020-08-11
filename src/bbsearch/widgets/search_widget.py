@@ -36,12 +36,10 @@ class SearchWidget(widgets.VBox):
                bbsearch.remote_searcher.RemoteSearcher
         The search engine.
 
-    connection : SQLAlchemy connectable (engine/connection) or
-                 database str URI or
-                 DBAPI2 connection (fallback mode)
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the SQL database
 
-    article_saver: ArticleSaver, optional
+    article_saver: bbsearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
 
@@ -115,17 +113,17 @@ class SearchWidget(widgets.VBox):
             )
 
         self.widgets['has_journal'] = widgets.Checkbox(
-            description="Require Journal",
-            value=False,
+            description="Only articles from journals",
+            value=True,
             style=self.widgets_style
             )
 
         self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
-            min=1900,
+            min=1850,
             max=2020,
-            value=(1900, 2020),
+            value=(2000, 2020),
             layout=widgets.Layout(width='80ch'),
             style=self.widgets_style
             )
@@ -158,7 +156,7 @@ class SearchWidget(widgets.VBox):
                 (self.saving_labels[_Save.NOTHING], _Save.NOTHING),
                 (self.saving_labels[_Save.PARAGRAPH], _Save.PARAGRAPH),
                 (self.saving_labels[_Save.ARTICLE], _Save.ARTICLE)],
-            value=_Save.NOTHING,
+            value=_Save.ARTICLE,
             disabled=False,
             style={'description_width': 'initial', 'button_width': '200px'},
             description='Default saving: '
@@ -423,6 +421,7 @@ class SearchWidget(widgets.VBox):
 
         # Clear output and show waiting message
         timer = Timer()
+        self.widgets['out'].clear_output()
         self.widgets['status'].clear_output()
         with self.widgets['status']:
             header = f'Query: \"{query_text}\"'

@@ -4,7 +4,6 @@ import os
 
 from ._helper import configure_logging
 
-
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter
 )
@@ -37,8 +36,10 @@ def main():
 
     # Start server
     import pathlib
-    from flask import Flask
+
     import sqlalchemy
+    from flask import Flask
+
     from ..server.mining_server import MiningServer
 
     app = Flask("BBS Mining Server")

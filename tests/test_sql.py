@@ -104,7 +104,7 @@ class TestSQLQueries:
         articles = retrieve_articles(article_ids=article_id,
                                      engine=fake_sqlalchemy_engine)
         assert isinstance(articles, pd.DataFrame)
-        if min(article_id) >= 0:  # valid article_id
+        if min(article_id) > 0:  # valid article_id
             assert set(articles['article_id'].to_list()) == set(article_id)
             assert articles.shape[0] == len(set(article_id)) * \
                    test_parameters['n_sections_per_article']

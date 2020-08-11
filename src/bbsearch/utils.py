@@ -1,7 +1,8 @@
 """Generic Utils."""
+import time
+
 import h5py
 import numpy as np
-import time
 import tqdm
 
 

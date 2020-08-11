@@ -14,16 +14,18 @@ class RemoteSearcher:
     def __init__(self, search_server_url):
         self.search_server_url = search_server_url
 
-    def query(self,
-              which_model,
-              k,
-              query_text,
-              has_journal=False,
-              date_range=None,
-              deprioritize_strength='None',
-              exclusion_text=None,
-              deprioritize_text=None,
-              verbose=True):
+    def query(
+        self,
+        which_model,
+        k,
+        query_text,
+        has_journal=False,
+        date_range=None,
+        deprioritize_strength="None",
+        exclusion_text=None,
+        deprioritize_text=None,
+        verbose=True,
+    ):
         """Do the search.
 
         Parameters

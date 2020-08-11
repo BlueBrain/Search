@@ -1,6 +1,7 @@
 """SQL Related functions."""
 import logging
 
+import numpy as np
 import pandas as pd
 
 
@@ -178,20 +179,24 @@ class SentenceFilter:
     Example
     -------
 
-    >>> import sqlalchemy
-    >>> connection = sqlalchemy.create_engine("...")
-    >>> filtered_sentence_ids = (
-    ...     SentenceFilter(connection)
-    ...     .only_with_journal()
-    ...     .restrict_sentences_ids_to([1, 2, 3, 4, 5])
-    ...     .date_range((2010, 2020))
-    ...     .exclude_strings(["virus", "disease"])
-    ...     .run()
-    ... )
+    .. code-block:: python
+
+        import sqlalchemy
+        connection = sqlalchemy.create_engine("...")
+        filtered_sentence_ids = (
+            SentenceFilter(connection)
+            .only_with_journal()
+            .restrict_sentences_ids_to([1, 2, 3, 4, 5])
+            .date_range((2010, 2020))
+            .exclude_strings(["virus", "disease"])
+            .run()
+        )
 
     When the `run()` or the `stream()` method is called an SQL
     query is constructed and executed internally. For the example
-    above it would have approximately the following form::
+    above it would have approximately the following form
+
+    .. code-block:: SQL
 
         SELECT sentence_id
         FROM sentences
@@ -209,9 +214,7 @@ class SentenceFilter:
 
     Parameters
     ----------
-    connection : SQLAlchemy connectable (engine/connection) or
-                 database str URI or
-                 DBAPI2 connection (fallback mode)
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         Connection to the database that contains the `articles`
         and `sentences` tables.
     """
@@ -341,11 +344,16 @@ class SentenceFilter:
         # Restricted sentence IDs
         if self.restricted_sentence_ids is not None:
             sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
+            if not sentence_ids_s and self.connection.url.drivername == 'mysql+pymysql':
+                sentence_ids_s = 'NULL'
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
         # Exclusion text
         for text in self.string_exclusions:
-            sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+            if self.connection.url.drivername == 'mysql+pymysql':
+                sentence_conditions.append(f"INSTR(text, '{text}') = 0")
+            else:
+                sentence_conditions.append(f"text NOT LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"
@@ -390,11 +398,8 @@ class SentenceFilter:
         # self.logger.info(f"Query: {query}")
 
         self.logger.debug("Running pd.read_sql")
-        df_results = pd.read_sql(query, self.connection)
+        results = [row[0] for row in self.connection.execute(query).fetchall()]
 
-        self.logger.debug("Converting results from pd.Series to numpy")
-        result_arr = df_results["sentence_id"].to_numpy()
+        self.logger.info(f"Filtering gave {len(results)} results")
 
-        self.logger.info(f"Filtering gave {len(result_arr)} results")
-
-        return result_arr
+        return np.array(results)

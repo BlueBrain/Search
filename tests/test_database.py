@@ -1,22 +1,29 @@
 from pathlib import Path
-import pytest
+from unittest.mock import Mock
 
 import pandas as pd
+import pytest
 import sqlalchemy
 
 from bbsearch.database import CORD19DatabaseCreation
 
 
-@pytest.fixture(scope='module')
-def real_sqlalchemy_engine(tmp_path_factory, jsons_path):
-    version = 'test'
-    saving_directory = tmp_path_factory.mktemp('real_db', numbered=False)
-    Path(f'{saving_directory}/cord19_{version}.db').touch()
+@pytest.fixture()
+def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, tmpdir):
 
-    engine = sqlalchemy.create_engine(f'sqlite:///{saving_directory}/cord19_{version}.db')
+    fake_load = Mock()
+    fake_load.return_value = model_entities
+
+    monkeypatch.setattr('bbsearch.database.spacy.load', fake_load)
+
+    version = 'test'
+    Path(f'{tmpdir}/cord19_{version}.db').touch()
+
+    engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_{version}.db')
     db = CORD19DatabaseCreation(data_path=jsons_path,
                                 engine=engine)
     db.construct()
+    fake_load.assert_called_once()
 
     return engine
 
@@ -24,22 +31,18 @@ def real_sqlalchemy_engine(tmp_path_factory, jsons_path):
 class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
-    def test_tables(self, real_sqlalchemy_engine):
-        """Tests that the three tables expected has been created. """
+    def test_database_content(self, real_sqlalchemy_engine):
+        """Tests that the two tables expected has been created. """
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
         tables_names = [table_name for table_name in inspector.get_table_names()]
         assert 'sentences' in tables_names
         assert 'articles' in tables_names
 
-    def test_tables_content(self, real_sqlalchemy_engine):
-        """Tests that the tables are correctly filled. """
         df = pd.read_sql("SELECT * FROM articles", real_sqlalchemy_engine)
         assert df.shape[0] == 4
         df1 = pd.read_sql("SELECT DISTINCT article_id FROM sentences", real_sqlalchemy_engine)
         assert df1.shape[0] == 4
 
-    def test_tables_columns(self, real_sqlalchemy_engine):
-        """Tests that the tables columns are the ones expected. """
         columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
                             "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
                             "mag_id", "arxiv_id", "pdf_json_files",
@@ -53,7 +56,21 @@ class TestDatabaseCreation:
                                             real_sqlalchemy_engine).columns)
         assert sentences_expected == sentences_columns
 
-    def test_errors(self, tmpdir, jsons_path):
+        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
+        indexes_articles = inspector.get_indexes('articles')
+        indexes_sentences = inspector.get_indexes('sentences')
+
+        assert not indexes_articles
+        assert len(indexes_sentences) == 1
+        assert indexes_sentences[0]['column_names'][0] == 'article_id'
+
+    def test_errors(self, tmpdir, jsons_path, monkeypatch, model_entities):
+
+        fake_load = Mock()
+        fake_load.return_value = model_entities
+
+        monkeypatch.setattr('bbsearch.database.spacy.load', fake_load)
+
         fake_dir = Path(str(tmpdir)) / 'fake'
         Path(f'{tmpdir}/cord19_test.db').touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_test.db')
@@ -69,28 +86,20 @@ class TestDatabaseCreation:
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Tests that the schema of the fake database is always the same as the real one. """
-        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
-        real_tables_names = {table_name for table_name in inspector.get_table_names()}
-        fake_tables_names = fake_sqlalchemy_engine.execute("SELECT name FROM "
-                                                           "sqlite_master WHERE type='table';").fetchall()
-        fake_tables_names = {table_name for (table_name,) in fake_tables_names}
+        real_tables_names = {table_name for table_name in real_sqlalchemy_engine.table_names()}
+        fake_tables_names = {table_name for table_name in fake_sqlalchemy_engine.table_names()}
+
         assert real_tables_names
         assert real_tables_names == fake_tables_names
 
+        real_inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
+        fake_inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
+
         for table_name in real_tables_names:
-            fake_db_schema = fake_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})").fetchall()
-            real_db_schema = real_sqlalchemy_engine.execute(f"PRAGMA table_info({table_name})")
-            assert real_db_schema
-            assert fake_db_schema
-            fake_db_set = set(map(lambda x: x[1:3], fake_db_schema))
-            real_db_set = set(map(lambda x: x[1:3], real_db_schema))
-            assert fake_db_set == real_db_set
-
-    def test_index_on_article_id(self, real_sqlalchemy_engine):
-        inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
-        indexes_articles = inspector.get_indexes('articles')
-        indexes_sentences = inspector.get_indexes('sentences')
-
-        assert not indexes_articles
-        assert len(indexes_sentences) == 1
-        assert indexes_sentences[0]['column_names'][0] == 'article_id'
+            real_columns = real_inspector.get_columns(table_name)
+            fake_columns = fake_inspector.get_columns(table_name)
+            assert real_columns
+            assert fake_columns
+            for x, y in zip(real_columns, fake_columns):
+                assert str(x['type']) == str(y['type'])
+                assert x['name'] == y['name']
