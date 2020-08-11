@@ -160,7 +160,7 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
                 # Container ready?
                 engine.execute('show databases')
                 break
-            except sqlalchemy.exc.OperationalError:
+            except OperationalError:
                 # Container not ready, pause and then try again
                 time.sleep(2)
                 continue

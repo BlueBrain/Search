@@ -111,7 +111,7 @@ class TestMySQL:
         """Ping the database."""
         mysql_server = benchmark_parameters["mysql_server"]
         if not mysql_server:
-            pytest.skip(f"MySQL server address not provided.")
+            pytest.skip("MySQL server address not provided.")
 
         connection_uri = f"{MYSQL_USER}:{MYSQL_PWD}@{mysql_server}/{DATABASE_NAME}"
         engine = sqlalchemy.create_engine(f"{driver}://{connection_uri}")
@@ -128,7 +128,7 @@ class TestMySQL:
 
         mysql_server = benchmark_parameters["mysql_server"]
         if not mysql_server:
-            pytest.skip(f"MySQL server address not provided.")
+            pytest.skip("MySQL server address not provided.")
 
         connection_uri = f"{MYSQL_USER}:{MYSQL_PWD}@{mysql_server}/{DATABASE_NAME}"
         engine = sqlalchemy.create_engine(f"{driver}://{connection_uri}")
