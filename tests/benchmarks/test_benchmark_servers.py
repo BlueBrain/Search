@@ -2,6 +2,10 @@ import pytest
 import requests
 import sqlalchemy
 
+# Embedding
+EMBEDDING_MODELS = ["BSV", "SBioBERT", "SBERT", "USE"]
+
+# MySQL
 MYSQL_USER = 'guest'
 MYSQL_PWD = 'guest'
 DATABASE_NAME = 'cord19_v35'
@@ -23,6 +27,24 @@ def test_flask_help(benchmark, benchmark_parameters, server_name):
     response = benchmark(requests.post, url)
 
     assert response.ok
+
+
+class TestEmbedding:
+    @pytest.mark.parametrize('model', EMBEDDING_MODELS)
+    def test_embed(self, benchmark, benchmark_parameters, model):
+        embedding_server = benchmark_parameters['embedding_server']
+
+        if not embedding_server:
+            pytest.skip('Embedding server address not provided.')
+
+        url = f"{embedding_server}/v1/embed/json"
+
+        payload_json = {'text': 'Glucose is a risk factor for COVID-19',
+                        'model': model}
+
+        response = benchmark(requests.post, url, json=payload_json)
+
+        assert response.ok
 
 
 class TestMySQL:
