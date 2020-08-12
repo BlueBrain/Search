@@ -1,9 +1,10 @@
 """Parallel mining of named entities."""
+import argparse
 import logging
 import pathlib
 import queue
 import time
-from multiprocessing import Process, Queue, Value
+from multiprocessing import Process, Queue, Value, cpu_count
 
 import numpy as np
 import spacy
@@ -170,9 +171,9 @@ def create_tasks(task_queues):
     result = engine.execute("select article_id from articles")
     all_article_ids = [row[0] for row in result.fetchall()]
 
-    # Pretend we're doing something else while the workers are working.
-    print("Waiting a bit...")
-    time.sleep(15)
+    # # Pretend we're doing something else while the workers are working.
+    # print("Waiting a bit...")
+    # time.sleep(15)
 
     # We got some new tasks, put them in the task queues.
     print("Adding new tasks...")
@@ -181,9 +182,9 @@ def create_tasks(task_queues):
             article_id = np.random.choice(all_article_ids)
             task_queues[model_path].put(article_id)
 
-    # Again pretend we're busy.
-    print("Wait again...")
-    time.sleep(15)
+    # # Again pretend we're busy.
+    # print("Wait again...")
+    # time.sleep(15)
 
 
 def do_mining(model_paths, workers_per_model):
@@ -242,16 +243,27 @@ def do_mining(model_paths, workers_per_model):
     print("Finished.")
 
 
-def main():
-    """Run main."""
+def main(n_workers):
+    """Run main.
+
+    Parameters
+    ----------
+    n_workers : int
+        The number of workers per model.
+    """
     logging.basicConfig()
 
     model_paths = {
         pathlib.Path("assets/model1_bc5cdr_annotations5_spacy23"),
     }
-    workers_per_model = 4
-    do_mining(model_paths, workers_per_model)
+    do_mining(model_paths, workers_per_model=n_workers)
 
 
+parser = argparse.ArgumentParser(description="Parallel mining.")
+parser.add_argument(
+    "--n_workers", type=int, default=cpu_count(),
+)
+args = parser.parse_args()
 if __name__ == "__main__":
-    main()
+    print(f"Running with {args.n_workers} workers.")
+    main(args.n_workers)
