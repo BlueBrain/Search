@@ -10,7 +10,7 @@ from bbsearch.sql import (
     SentenceFilter,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
-    retrieved_mining_cache,
+    retrieve_mining_cache,
     retrieve_paragraph,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
@@ -114,10 +114,10 @@ class TestSQLQueries:
 class TestMiningCache:
     def test_retrieve_all(self, fake_sqlalchemy_engine, test_parameters):
         identifiers = [(i + 1, -1) for i in range(test_parameters['n_articles'])]
-        expected_len = test_parameters['n_articles'] * \
-                       test_parameters['n_sections_per_article'] * test_parameters['n_entities_per_section']
+        expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] * test_parameters[
+            'n_entities_per_section']
 
-        res = retrieved_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
+        res = retrieve_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
@@ -125,11 +125,11 @@ class TestMiningCache:
     @pytest.mark.parametrize('mining_model', ['v1', 'wrong_model'])
     def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
         identifiers = [(1, -1), (2, 1)]
-        expected_len = 1 * (test_parameters['n_sections_per_article'] * test_parameters['n_entities_per_section']) + \
-                       1 * test_parameters['n_entities_per_section']
+        expected_len = 1 * (test_parameters['n_sections_per_article'] *
+                            test_parameters['n_entities_per_section']) + 1 * test_parameters['n_entities_per_section']
         expected_len *= int(mining_model == 'v1')
 
-        res = retrieved_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
+        res = retrieve_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
@@ -139,7 +139,7 @@ class TestMiningCache:
         identifiers = [(-12, -1)]
         expected_len = 0
 
-        res = retrieved_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
+        res = retrieve_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len

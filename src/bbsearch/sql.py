@@ -168,7 +168,7 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
-def retrieved_mining_cache(identifiers, model_names, engine):
+def retrieve_mining_cache(identifiers, model_names, engine):
     """Retrieve cached mining results.
 
     Parameters
