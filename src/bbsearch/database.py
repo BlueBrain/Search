@@ -226,11 +226,103 @@ class CORD19DatabaseCreation:
             List of all the sentences extracted from the paragraph.
         """
         if isinstance(paragraphs, str):
-            paragraphs = [paragraphs, ]
+            paragraphs = [
+                paragraphs,
+            ]
 
         all_sentences = []
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
             for pos, sent in enumerate(paragraph.sents):
-                all_sentences += [{'text': str(sent), 'sentence_pos_in_paragraph': pos, **metadata}]
+                all_sentences += [
+                    {"text": str(sent), "sentence_pos_in_paragraph": pos, **metadata}
+                ]
 
         return all_sentences
+
+
+class MiningCacheCreation:
+    def __init__(self, engine):
+        """Create SQL database to save results of mining into a cache.
+
+        Parameters
+        ----------
+        engine: SQLAlchemy.Engine
+            Engine linked to the database.
+        """
+        self.engine = engine
+
+    def construct(self, ee_models_library, n_processes=1, always_mine=False):
+        """Construct and populate the cache of mined results."""
+        self._schema_creation()
+        print("Schemas of the tables are created.")
+        self._populate_table(
+            ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
+        )
+        print("The table has been populated.")
+
+    def _schema_creation(self):
+        """Create the schemas of the different tables in the database."""
+        has_cache = self.engine.dialect.has_table(self.engine, "mining_cache")
+        if has_cache:
+            return
+
+        metadata = sqlalchemy.MetaData()
+        self.mining_cache_table = sqlalchemy.Table(
+            "mining_cache",
+            metadata,
+            sqlalchemy.Column("entity", sqlalchemy.Text()),
+            sqlalchemy.Column("entity_type", sqlalchemy.Text()),
+            sqlalchemy.Column("property", sqlalchemy.Text()),
+            sqlalchemy.Column("property_value", sqlalchemy.Text()),
+            sqlalchemy.Column("property_type", sqlalchemy.Text()),
+            sqlalchemy.Column("property_value_type", sqlalchemy.Text()),
+            sqlalchemy.Column("ontology_source", sqlalchemy.Text()),
+            sqlalchemy.Column("start_char", sqlalchemy.Integer()),
+            sqlalchemy.Column("end_char", sqlalchemy.Integer()),
+            sqlalchemy.Column(
+                "article_id",
+                sqlalchemy.Integer(),
+                sqlalchemy.ForeignKey("articles.article_id"),
+                nullable=False,
+            ),
+            sqlalchemy.Column(
+                "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
+            ),
+            sqlalchemy.Column("pargraph_sha", sqlalchemy.String(8), nullable=False),
+            sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
+        )
+        # TODO: we may want to create indexes for faster querying
+
+    def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
+        """Populate cache with elements extracted by text mining.
+
+        Parameters
+        ----------
+        ee_models_library : pd.DataFrame
+            Models to run.
+
+        n_processes : int, optional
+            Number of max processes to spawn to run text mining and table
+            population in parallel.
+
+        always_mine : bool, optional
+            If `False` (default) will check if elements from a mining model are
+            already present in the cache and if it is the case, the model will
+            not be run again.
+            If `True`, rows of all requested models are dropped from the cache
+            database and mining is run from scratch.
+
+        Returns
+        -------
+        None
+        """
+
+        # TODO: all_texts = generator to iterate through (article_id, par_pos_in_article, text)
+        # TODO: all_texts = (a, p, t, sha(p) for a, p, t in all_texts) # note: here is still a generator!
+        # TODO: For model in the library ... [here potentially process pool]
+        # TODO:     If always_mine: DROP rows where model_name=model
+        # TODO:     Are results of model in the table mined_items_list already?
+        # TODO:         Yes: continue
+        # TODO:     results_of_mining = model.pipe(all_texts, metadata) # note: here is still a generator!
+        # TODO:     engine.execute(INSERT values ) in the two tables
+        pass
