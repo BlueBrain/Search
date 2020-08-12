@@ -3,8 +3,12 @@ import json
 import time
 
 import pandas as pd
+import scispacy
 import spacy
 import sqlalchemy
+
+from bbsearch.mining.pipeline import run_pipeline
+from bbsearch.sql import retrieve_paragraph
 
 
 class CORD19DatabaseCreation:
@@ -262,8 +266,7 @@ class MiningCacheCreation:
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
-        has_cache = self.engine.dialect.has_table(self.engine, "mining_cache")
-        if has_cache:
+        if self.engine.dialect.has_table(self.engine, "mining_cache"):
             return
 
         metadata = sqlalchemy.MetaData()
@@ -277,6 +280,7 @@ class MiningCacheCreation:
             sqlalchemy.Column("property_type", sqlalchemy.Text()),
             sqlalchemy.Column("property_value_type", sqlalchemy.Text()),
             sqlalchemy.Column("ontology_source", sqlalchemy.Text()),
+            sqlalchemy.Column("paper_id", sqlalchemy.Text()),
             sqlalchemy.Column("start_char", sqlalchemy.Integer()),
             sqlalchemy.Column("end_char", sqlalchemy.Integer()),
             sqlalchemy.Column(
@@ -288,7 +292,6 @@ class MiningCacheCreation:
             sqlalchemy.Column(
                 "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
             ),
-            sqlalchemy.Column("pargraph_sha", sqlalchemy.String(8), nullable=False),
             sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
         )
         # TODO: we may want to create indexes for faster querying
@@ -317,12 +320,49 @@ class MiningCacheCreation:
         None
         """
 
-        # TODO: all_texts = generator to iterate through (article_id, par_pos_in_article, text)
-        # TODO: all_texts = (a, p, t, sha(p) for a, p, t in all_texts) # note: here is still a generator!
+        # list of (art_it, par_pos_in_art)
+        arts_pars = self.engine.execute(
+            """SELECT DISTINCT article_id, paragraph_pos_in_article
+               FROM sentences
+            """).fetchall()
+
+        # texts with metadata to feed run_pipeline
+        all_texts = (retrieve_paragraph(art_id, par_pos_in_art, self.engine).iloc[0, 'text'],
+                     {'article_id': art_id,
+                      'paragraph_pos_in_article': par_pos_in_art,
+                      'paper_id': None}  # TODO: paper_id should be computed!
+                     for art_id, par_pos_in_art in arts_pars)
+
+        for model_nm in ee_models_library['model']:
+            if always_mine:
+                self.engine.execute(
+                    f"""DELETE 
+                        FROM mining_cache 
+                        WHERE mining_model = {model_nm}
+                    """)
+            else:  #  Mine only if model is not in cache
+                result = self.engine.execute(
+                    f"""SELECT *
+                            FROM mining_cache
+                            WHERE mining_model = {model_nm}
+                            LIMIT 1
+                    """)
+                if len(result) > 1:
+                    continue
+
+            mined_elements = run_pipeline(texts=all_texts,
+                                          model_entities=spacy.load(model_nm),
+                                          models_relations={}
+                                          )
+            mined_elements['mining_model'] = model_nm
+            self.engine.execute(
+                """INSERT INTO mining_cache VALUES """
+            )
+
+
         # TODO: For model in the library ... [here potentially process pool]
         # TODO:     If always_mine: DROP rows where model_name=model
         # TODO:     Are results of model in the table mined_items_list already?
         # TODO:         Yes: continue
         # TODO:     results_of_mining = model.pipe(all_texts, metadata) # note: here is still a generator!
         # TODO:     engine.execute(INSERT values ) in the two tables
-        pass

@@ -54,7 +54,7 @@ def main():
     elif args.db_type == "mysql":
         password = getpass.getpass("Password:")
         engine = sqlalchemy.create_engine(
-            f"mysql+pymysql://guest:{password}" f"@{args.database_uri}"
+            f"mysql+mysqldb://root:{password}" f"@{args.database_uri}"
         )
     else:
         raise ValueError("This is not an handled db_type.")
