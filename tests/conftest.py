@@ -129,8 +129,9 @@ def fill_db_data(engine, metadata_path, test_parameters):
         metadata.create_all(connection)
 
     # Construction of the index 'article_id_index'
-    mymodel_url_index = sqlalchemy.Index('article_id_index', sentences_table.c.article_id)
-    mymodel_url_index.create(bind=engine)
+    sqlalchemy.Index('article_id_sentences_index', sentences_table.c.article_id).create(bind=engine)
+    sqlalchemy.Index('article_id_mining_cache_index', mining_cache.c.article_id).create(bind=engine)
+    sqlalchemy.Index('article_id_mined_items_list_index', mined_items_list.c.article_id).create(bind=engine)
 
     # Population of the tables 'sentences' and 'articles'
     metadata_df = pd.read_csv(str(metadata_path))
@@ -168,7 +169,7 @@ def fill_db_data(engine, metadata_path, test_parameters):
 
             for ent_ix in range(test_parameters['n_entities_per_section']):
                 s = {'entity': f'entity_{ent_ix}',
-                     'entity_type': f'A',
+                     'entity_type': 'A',
                      'property': None,
                      'property_value': None,
                      'property_type': None,

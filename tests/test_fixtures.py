@@ -8,13 +8,19 @@ tests is to run simple sanity checks rather than detailed bookkeeping.
 """
 import pandas as pd
 import pytest
+import sqlalchemy
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 
 def test_database(fake_sqlalchemy_engine, backend_database):
     """Make sure database tables setup correctly."""
+    inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
+
     for table_name in ['articles', 'sentences', 'mining_cache', 'mined_items_list']:
         res = pd.read_sql('SELECT * FROM {}'.format(table_name), fake_sqlalchemy_engine)
+
+        if table_name != 'articles':
+            assert len(inspector.get_indexes(table_name)) == 1
 
         assert len(res) > 0
     if backend_database == 'sqlite':
