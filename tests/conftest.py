@@ -111,19 +111,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
 
                          )
 
-    mined_items_list = \
-        sqlalchemy.Table('mined_items_list', metadata,
-                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
-                                           sqlalchemy.ForeignKey("articles.article_id"),
-                                           nullable=False),
-                         sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
-                                           nullable=False),
-
-                         sqlalchemy.Column('paragraph_sha', sqlalchemy.Text()),
-                         sqlalchemy.Column('mining_model', sqlalchemy.Text()),
-
-                         )
-
     # Construction of the tables
     with engine.begin() as connection:
         metadata.create_all(connection)
@@ -131,7 +118,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
     # Construction of the index 'article_id_index'
     sqlalchemy.Index('article_id_sentences_index', sentences_table.c.article_id).create(bind=engine)
     sqlalchemy.Index('article_id_mining_cache_index', mining_cache.c.article_id).create(bind=engine)
-    sqlalchemy.Index('article_id_mined_items_list_index', mined_items_list.c.article_id).create(bind=engine)
 
     # Population of the tables 'sentences' and 'articles'
     metadata_df = pd.read_csv(str(metadata_path))
@@ -159,14 +145,8 @@ def fill_db_data(engine, metadata_path, test_parameters):
 
     # populate mining tables
     temp_m = []
-    temp_m_items = []
     for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
         for sec_ix in range(test_parameters['n_sections_per_article']):
-            temp_m_items.append(pd.Series({'article_id': article_id,
-                                           'paragraph_pos_in_article': sec_ix,
-                                           'paragraph_sha': 'some_sha',
-                                           'mining_model': 'v1'}))
-
             for ent_ix in range(test_parameters['n_entities_per_section']):
                 s = {'entity': f'entity_{ent_ix}',
                      'entity_type': 'A',
@@ -188,9 +168,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
     mining_content.index.name = 'entity_id'
     mining_content.index += 1
     mining_content.to_sql(name='mining_cache', con=engine, index=True, if_exists='append')
-
-    mining_items_content = pd.DataFrame(temp_m_items)
-    mining_items_content.to_sql(name='mined_items_list', con=engine, index=False, if_exists='append')
 
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
