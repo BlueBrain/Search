@@ -169,7 +169,7 @@ def create_tasks(task_queues):
     print("Getting all article IDs...")
     engine = sqlalchemy.create_engine(get_engine_uri())
     result = engine.execute("select article_id from articles")
-    all_article_ids = [row[0] for row in result.fetchall()]
+    all_article_ids = sorted([row[0] for row in result.fetchall()])
 
     # # Pretend we're doing something else while the workers are working.
     # print("Waiting a bit...")
@@ -178,8 +178,7 @@ def create_tasks(task_queues):
     # We got some new tasks, put them in the task queues.
     print("Adding new tasks...")
     for model_path in task_queues:
-        for i in range(100):
-            article_id = np.random.choice(all_article_ids)
+        for article_id in all_article_ids[:100]:
             task_queues[model_path].put(article_id)
 
     # # Again pretend we're busy.
