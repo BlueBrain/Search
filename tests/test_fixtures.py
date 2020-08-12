@@ -13,7 +13,7 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 
 def test_database(fake_sqlalchemy_engine, backend_database):
     """Make sure database tables setup correctly."""
-    for table_name in ['articles', 'sentences']:
+    for table_name in ['articles', 'sentences', 'mining_cache', 'mined_items_list']:
         res = pd.read_sql('SELECT * FROM {}'.format(table_name), fake_sqlalchemy_engine)
 
         assert len(res) > 0

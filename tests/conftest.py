@@ -36,7 +36,8 @@ def benchmark_parameters(request):
 def test_parameters():
     """Parameters needed for the tests"""
     return {'n_sentences_per_section': 3,
-            'n_sections_per_article': 2,
+            'n_sections_per_article': 2,  # paragraph = section
+            'n_entities_per_section': 4,
             'embedding_size': 2}
 
 
@@ -83,6 +84,46 @@ def fill_db_data(engine, metadata_path, test_parameters):
                                            nullable=False)
                          )
 
+    mining_cache = \
+        sqlalchemy.Table('mining_cache', metadata,
+                         sqlalchemy.Column('entity_id', sqlalchemy.Integer(),
+                                           primary_key=True, autoincrement=True),
+
+                         sqlalchemy.Column('entity', sqlalchemy.Text()),
+                         sqlalchemy.Column('entity_type', sqlalchemy.Text()),
+                         sqlalchemy.Column('property', sqlalchemy.Text()),
+                         sqlalchemy.Column('property_value', sqlalchemy.Text()),
+                         sqlalchemy.Column('property_type', sqlalchemy.Text()),
+                         sqlalchemy.Column('property_value_type', sqlalchemy.Text()),
+                         sqlalchemy.Column('ontology_source', sqlalchemy.Text()),
+                         sqlalchemy.Column('paper_id', sqlalchemy.Text()),
+                         sqlalchemy.Column('start_char', sqlalchemy.Integer()),
+                         sqlalchemy.Column('end_char', sqlalchemy.Integer()),
+
+                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                           sqlalchemy.ForeignKey("articles.article_id"),
+                                           nullable=False),
+                         sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
+                                           nullable=False),
+
+                         sqlalchemy.Column('paragraph_sha', sqlalchemy.Text()),
+                         sqlalchemy.Column('mining_model', sqlalchemy.Text()),
+
+                         )
+
+    mined_items_list = \
+        sqlalchemy.Table('mined_items_list', metadata,
+                         sqlalchemy.Column('article_id', sqlalchemy.Integer(),
+                                           sqlalchemy.ForeignKey("articles.article_id"),
+                                           nullable=False),
+                         sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
+                                           nullable=False),
+
+                         sqlalchemy.Column('paragraph_sha', sqlalchemy.Text()),
+                         sqlalchemy.Column('mining_model', sqlalchemy.Text()),
+
+                         )
+
     # Construction of the tables
     with engine.begin() as connection:
         metadata.create_all(connection)
@@ -114,6 +155,41 @@ def fill_db_data(engine, metadata_path, test_parameters):
     sentences_content.index.name = 'sentence_id'
     sentences_content.index += 1
     sentences_content.to_sql(name='sentences', con=engine, index=True, if_exists='append')
+
+    # populate mining tables
+    temp_m = []
+    temp_m_items = []
+    for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
+        for sec_ix in range(test_parameters['n_sections_per_article']):
+            temp_m_items.append(pd.Series({'article_id': article_id,
+                                           'paragraph_pos_in_article': sec_ix,
+                                           'paragraph_sha': 'some_sha',
+                                           'mining_model': 'v1'}))
+
+            for ent_ix in range(test_parameters['n_entities_per_section']):
+                s = {'entity': f'entity_{ent_ix}',
+                     'entity_type': f'A',
+                     'property': None,
+                     'property_value': None,
+                     'property_type': None,
+                     'property_value_type': None,
+                     'ontology_source': 'NCIT',
+                     'paper_id': f'{article_id}:whatever:{sec_ix}',
+                     'start_char': ent_ix,
+                     'end_char': ent_ix + 1,
+                     'article_id': article_id,
+                     'paragraph_pos_in_article': sec_ix,
+                     'paragraph_sha': 'some_sha',
+                     'mining_model': 'v1'}
+                temp_m.append(pd.Series(s))
+
+    mining_content = pd.DataFrame(temp_m)
+    mining_content.index.name = 'entity_id'
+    mining_content.index += 1
+    mining_content.to_sql(name='mining_cache', con=engine, index=True, if_exists='append')
+
+    mining_items_content = pd.DataFrame(temp_m_items)
+    mining_items_content.to_sql(name='mined_items_list', con=engine, index=False, if_exists='append')
 
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
