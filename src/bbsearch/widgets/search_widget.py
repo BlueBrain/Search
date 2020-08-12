@@ -209,11 +209,11 @@ class SearchWidget(widgets.VBox):
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
         self.widgets['exclusion_text'].layout.display = 'none'
-        # Remove some models (USE and SBERT)
+        # Remove some models: (USE, SBERT, SBioBERT)
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['BSV', 'SBioBERT'],
+            options=['BSV'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'],
+            tooltips=['BioSentVec'],
             style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(
