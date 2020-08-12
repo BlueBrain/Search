@@ -255,27 +255,17 @@ class MiningCacheCreation:
         """Construct and populate the cache of mined results."""
         self._schema_creation()
         print("Schemas of the tables are created.")
-        self._populate_tables(
-            ee_models_library=ee_models_library, n_processes=1, always_mine=always_mine
+        self._populate_table(
+            ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
         )
-        print("Tables have been populated.")
+        print("The table has been populated.")
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
         has_cache = self.engine.dialect.has_table(self.engine, "mining_cache")
-        has_mined_list = self.engine.dialect.has_table(self.engine, "mined_items_list")
-        if has_cache and has_mined_list:
+        if has_cache:
             return
-        if has_cache ^ has_mined_list:
-            raise RuntimeError(
-                f"Error in intialization of schema of mining cache db! Tables "
-                f"'mining_cache' and 'mined_items_list' should both be present "
-                f"or absent but \n"
-                f" - table 'mining_cache' exists = {has_cache}\n"
-                f" - table 'mined_items_list' exists = {has_mined_list}\n"
-            )
 
-        # If we got here, it means that has_cache and has_mined_list are both False
         metadata = sqlalchemy.MetaData()
         self.mining_cache_table = sqlalchemy.Table(
             "mining_cache",
@@ -301,30 +291,9 @@ class MiningCacheCreation:
             sqlalchemy.Column("pargraph_sha", sqlalchemy.String(8), nullable=False),
             sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
         )
-
-        self.mined_items_list_table = sqlalchemy.Table(
-            "mined_items_list",
-            metadata,
-            sqlalchemy.Column(
-                "article_id",
-                sqlalchemy.Integer(),
-                sqlalchemy.ForeignKey("articles.article_id"),
-                primary_key=True,
-            ),
-            sqlalchemy.Column(
-                "paragraph_pos_in_article", sqlalchemy.Integer(), primary_key=True,
-            ),
-            sqlalchemy.Column("pargraph_sha", sqlalchemy.String(8), primary_key=True),
-            sqlalchemy.Column("mining_model", sqlalchemy.Text(), primary_key=True),
-        )
-
-        with self.engine.begin() as connection:
-            metadata.create_all(connection)
-
         # TODO: we may want to create indexes for faster querying
-        # TODO: we may not want the 'pargraph_sha' column in 'mined_items_list' table
 
-    def _populate_tables(self, ee_models_library, n_processes=1, always_mine=False):
+    def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
         """Populate cache with elements extracted by text mining.
 
         Parameters
@@ -337,17 +306,17 @@ class MiningCacheCreation:
             population in parallel.
 
         always_mine : bool, optional
-            If `False` (default) will check table 'mined_items_list' and if a
-            mining model was already run on the dataset then it will not be run
-            again.
+            If `False` (default) will check if elements from a mining model are
+            already present in the cache and if it is the case, the model will
+            not be run again.
             If `True`, rows of all requested models are dropped from the cache
-            database and mining is run from scratch. WARNING: this option is
-            destructive!
+            database and mining is run from scratch.
 
         Returns
         -------
         None
         """
+
         # TODO: all_texts = generator to iterate through (article_id, par_pos_in_article, text)
         # TODO: all_texts = (a, p, t, sha(p) for a, p, t in all_texts) # note: here is still a generator!
         # TODO: For model in the library ... [here potentially process pool]

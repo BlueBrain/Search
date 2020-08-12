@@ -27,7 +27,11 @@ parser.add_argument(
     help="Max n of processes to run the different requested mining models in parallel.",
 )
 parser.add_argument(
-    "--always_mine", dest="always_mine", action="store_true",
+    "--always_mine",
+    dest="always_mine",
+    action="store_true",
+    help="Force running all mining models, even if extracted entities were "
+    "already found in the cache for some models.",
 )
 args = parser.parse_args()
 
