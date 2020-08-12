@@ -1,3 +1,4 @@
+"""Parallel mining of named entities."""
 import logging
 import pathlib
 import queue
@@ -12,14 +13,38 @@ from bbsearch.mining import run_pipeline
 
 
 class Miner:
+    """Multiprocessing worker class for mining named entities.
+
+    Parameters
+    ----------
+    name : str
+        The name of this worker.
+    engine_uri : str
+        The URI to the text database. Should be a valid argument
+        for `sqlalchemy.create_engine` function. The database should
+        contain tables `articles` and `sentences`.
+    model_path : str or pathlib.Path
+        The path for loading the spacy model that will perform the
+        named entity extraction.
+    task_queue : multiprocessing.Queue
+        The queue with tasks for this worker
+    can_finish : multiprocessing Value
+        An integer shared value to indicate that the worker can finish
+        waiting. Unless `can_finish` is equal to `1`, the worker will
+        continue polling the task queue for new tasks.
+    logging_level : int, optional
+        The logging level for the internal logger
+    """
+
     def __init__(
-        self, name, engine_url, model_path, work_queue, finished, logging_level=None
+        self, name, engine_uri, model_path, task_queue, can_finish, logging_level=None
     ):
         self.name = name
-        self.engine = sqlalchemy.create_engine(engine_url)
+        self.create_engine = sqlalchemy.create_engine(engine_uri)
+        self.engine = self.create_engine
         self.model_path = model_path
-        self.work_queue = work_queue
-        self.finished = finished
+        self.work_queue = task_queue
+        self.can_finish = can_finish
 
         self.n_tasks_done = 0
 
@@ -31,28 +56,36 @@ class Miner:
         self.ee_model = spacy.load(model_path)
 
         self.logger.info("starting mining...")
-        self.work_loop()
+        self._work_loop()
 
         self.logger.info("finished mining, cleaning up...")
-        self.clean_up()
+        self._clean_up()
 
         self.logger.info("all done.")
 
-    def work_loop(self):
+    def _work_loop(self):
+        """Do the work loop."""
         finished = False
         while not finished:
             try:
                 article_id = self.work_queue.get(block=False)
-                self.mine(article_id)
+                self._mine(article_id)
                 self.n_tasks_done += 1
             except queue.Empty:
-                self.logger.info(f"Queue empty")
-                if self.finished.value == 1:
+                self.logger.info("Queue empty")
+                if self.can_finish.value == 1:
                     finished = True
                 else:
                     time.sleep(1)
 
-    def mine(self, article_id):
+    def _mine(self, article_id):
+        """Perform one mining task.
+
+        Parameters
+        ----------
+        article_id : int
+            The article ID for mining.
+        """
         self.logger.info(f"Processing article_id = {article_id}")
 
         self.logger.info("Getting all sentences from the database...")
@@ -79,30 +112,61 @@ class Miner:
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 
-    def clean_up(self):
+    def _clean_up(self):
+        """Clean up after task processing has been finished."""
         self.logger.info(f"I'm proud to have done {self.n_tasks_done} tasks!")
 
     def __str__(self):
+        """Represent self as string.
+
+        Returns
+        -------
+        str
+            The string representation of self.
+        """
         return self.__repr__()
 
     def __repr__(self):
+        """Represent self.
+
+        Returns
+        -------
+        str
+            The representation of self.
+        """
         return f"{self.__class__.__name__}[{self.name}]"
 
 
-def get_engine_url():
+def get_engine_uri():
+    """Get the URI for the MySQL CORD-19 database.
+
+    Returns
+    -------
+    engine_uri : str
+        The database URI.
+    """
     mysql_host = "dgx1.bbp.epfl.ch"
     mysql_port = 8853
     database_name = "cord19_v35"
-    engine_url = (
+    engine_uri = (
         f"mysql+mysqldb://guest:guest@{mysql_host}:{mysql_port}/{database_name}"
     )
 
-    return engine_url
+    return engine_uri
 
 
 def create_tasks(task_queues):
+    """Create tasks for the mining workers.
+
+    Parameters
+    ----------
+    task_queues : dict[str or pathlib.Path, multiprocessing.Queue]
+        Task queues for different models. The keys are the model
+        paths and the values are the actual queues.
+
+    """
     print("Getting all article IDs...")
-    engine = sqlalchemy.create_engine(get_engine_url())
+    engine = sqlalchemy.create_engine(get_engine_uri())
     result = engine.execute("select article_id from articles")
     all_article_ids = [row[0] for row in result.fetchall()]
 
@@ -123,6 +187,16 @@ def create_tasks(task_queues):
 
 
 def do_mining(model_paths, workers_per_model):
+    """Do the parallelized mining.
+
+    Parameters
+    ----------
+    model_paths : set(str or pathlib.Path)
+        The paths to the named entity recognition models that
+        shall be used.
+    workers_per_model : int
+        The number of workers to spawn for each model.
+    """
     # Prepare as many workers as necessary according to `workers_per_model`.
     # Also instantiate one task queue per model.
     print("Preparing the workers...")
@@ -135,7 +209,7 @@ def do_mining(model_paths, workers_per_model):
             workers_info.append((worker_name, model_path))
 
     # A shared integer value to let the workers know when it's finished.
-    finished = Value("i", 0)
+    can_finish = Value("i", 0)
 
     # Create the worker processes.
     print("Spawning the worker processes...")
@@ -145,10 +219,10 @@ def do_mining(model_paths, workers_per_model):
             target=Miner,
             args=(
                 worker_name,
-                get_engine_url(),
+                get_engine_uri(),
                 model_path,
                 task_queues[model_path],
-                finished,
+                can_finish,
             ),
             kwargs=dict(logging_level=logging.INFO),
         )
@@ -161,7 +235,7 @@ def do_mining(model_paths, workers_per_model):
 
     # Wait for the processes to finish.
     print("No more new tasks, just wait for the workers to finish...")
-    finished.value = 1
+    can_finish.value = 1
     for proc in worker_processes:
         proc.join()
 
@@ -169,6 +243,7 @@ def do_mining(model_paths, workers_per_model):
 
 
 def main():
+    """Run main."""
     logging.basicConfig()
 
     model_paths = {
