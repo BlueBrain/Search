@@ -1,14 +1,13 @@
 """Parallel mining of named entities."""
 import argparse
 import logging
-import pathlib
+import multiprocessing as mp
 import queue
 import time
-from multiprocessing import Process, Queue, Value, cpu_count
 
-import numpy as np
 import spacy
 import sqlalchemy
+import sqlalchemy.sql
 
 from bbsearch.mining import run_pipeline
 
@@ -21,15 +20,15 @@ class Miner:
     name : str
         The name of this worker.
     engine_uri : str
-        The URI to the text database. Should be a valid argument
-        for `sqlalchemy.create_engine` function. The database should
+        The URI to the text database. Should be a valid argument for
+        the `sqlalchemy.create_engine` function. The database should
         contain tables `articles` and `sentences`.
-    model_path : str or pathlib.Path
+    model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
-    can_finish : multiprocessing Value
+    can_finish : multiprocessing.Value
         An integer shared value to indicate that the worker can finish
         waiting. Unless `can_finish` is equal to `1`, the worker will
         continue polling the task queue for new tasks.
@@ -69,6 +68,7 @@ class Miner:
         finished = False
         while not finished:
             try:
+                # this gets stuck if `block=False` isn't set, no idea why
                 article_id = self.work_queue.get(block=False)
                 self._mine(article_id)
                 self.n_tasks_done += 1
@@ -90,19 +90,17 @@ class Miner:
         self.logger.info(f"Processing article_id = {article_id}")
 
         self.logger.info("Getting all sentences from the database...")
-        query = f"""
-        select paragraph_pos_in_article, sentence_pos_in_paragraph, text
-        from sentences
-        where article_id = '{article_id}'
+        query = """
+        SELECT paragraph_pos_in_article, sentence_pos_in_paragraph, text
+        FROM sentences
+        WHERE article_id = :article_id 
         """
+        safe_query = sqlalchemy.sql.text(query)
+        result_proxy = self.engine.execute(safe_query, article_id=article_id)
+
         all_sentences = dict()
-        result = self.engine.execute(query)
-        for (
-            paragraph_pos_in_article,
-            sentence_pos_in_paragraph,
-            text,
-        ) in result.fetchall():
-            all_sentences[(paragraph_pos_in_article, sentence_pos_in_paragraph)] = text
+        for paragraph_pos, sentence_pos, text in result_proxy:
+            all_sentences[(paragraph_pos, sentence_pos)] = text
 
         texts = [(all_sentences[key], {}) for key in sorted(all_sentences)]
 
@@ -186,45 +184,39 @@ def create_tasks(task_queues):
     # time.sleep(15)
 
 
-def do_mining(model_paths, workers_per_model):
+def do_mining(models, workers_per_model):
     """Do the parallelized mining.
 
     Parameters
     ----------
-    model_paths : set(str or pathlib.Path)
-        The paths to the named entity recognition models that
-        shall be used.
+    models : dict[str, str]
+        The models to be used for mining. The keys of the dictionary
+        are arbitrary names for the models. The values are model
+        paths or names that will be used in `spacy.load(...)`.
     workers_per_model : int
         The number of workers to spawn for each model.
     """
     # Prepare as many workers as necessary according to `workers_per_model`.
     # Also instantiate one task queue per model.
     print("Preparing the workers...")
+    task_queues = {model_name: mp.Queue() for model_name in models}
     workers_info = []
-    task_queues = dict()
-    for model_path in model_paths:
-        task_queues[model_path] = Queue()
+    for model_name, model_path in models.items():
         for i in range(workers_per_model):
-            worker_name = f"{model_path.name}_{i}"
-            workers_info.append((worker_name, model_path))
+            worker_name = f"{model_name}_{i}"
+            workers_info.append((worker_name, model_path, task_queues[model_name]))
 
     # A shared integer value to let the workers know when it's finished.
-    can_finish = Value("i", 0)
+    can_finish = mp.Value("i", 0)
 
     # Create the worker processes.
     print("Spawning the worker processes...")
     worker_processes = []
-    for worker_name, model_path in workers_info:
-        worker_process = Process(
+    for worker_name, model_path, task_queue in workers_info:
+        worker_process = mp.Process(
+            name=worker_name,
             target=Miner,
-            args=(
-                worker_name,
-                get_engine_uri(),
-                model_path,
-                task_queues[model_path],
-                can_finish,
-            ),
-            kwargs=dict(logging_level=logging.INFO),
+            args=(worker_name, get_engine_uri(), model_path, task_queue, can_finish,),
         )
         worker_process.start()
         worker_processes.append(worker_process)
@@ -234,35 +226,43 @@ def do_mining(model_paths, workers_per_model):
     create_tasks(task_queues)
 
     # Wait for the processes to finish.
-    print("No more new tasks, just wait for the workers to finish...")
+    print("No more new tasks, just waiting for the workers to finish...")
     can_finish.value = 1
-    for proc in worker_processes:
-        proc.join()
+    for process in worker_processes:
+        process.join()
+        if process.exitcode != 0:
+            logging.warning(
+                f"Worker {process.name} terminated with exit code {process.exitcode}!"
+            )
 
     print("Finished.")
 
 
-def main(n_workers):
+def main(workers_per_model, verbose=False):
     """Run main.
 
     Parameters
     ----------
-    n_workers : int
+    workers_per_model : int
         The number of workers per model.
+    verbose : bool
+        If true then the logging level is set to `logging.INFO`.
     """
     logging.basicConfig()
+    if verbose:
+        logging.getLogger().setLevel(logging.INFO)
 
-    model_paths = {
-        pathlib.Path("assets/model1_bc5cdr_annotations5_spacy23"),
+    models = {
+        "bc5cdr_annotations5": "assets/model1_bc5cdr_annotations5_spacy23",
+        "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
     }
-    do_mining(model_paths, workers_per_model=n_workers)
+    do_mining(models, workers_per_model=workers_per_model)
 
 
 parser = argparse.ArgumentParser(description="Parallel mining.")
-parser.add_argument(
-    "--n_workers", type=int, default=cpu_count(),
-)
+parser.add_argument("--workers_per_model", "-w", type=int, default=mp.cpu_count())
+parser.add_argument("--verbose", "-v", action="store_true", default=False)
 args = parser.parse_args()
 if __name__ == "__main__":
-    print(f"Running with {args.n_workers} workers.")
-    main(args.n_workers)
+    print(f"Running with {args.workers_per_model} workers.")
+    main(args.workers_per_model, verbose=args.verbose)
