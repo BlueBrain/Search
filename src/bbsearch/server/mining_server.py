@@ -75,7 +75,8 @@ class MiningServer:
                         "schema": []
                     },
                     "accepted_fields": {
-                        "debug": [True, False]
+                        "debug": [True, False],
+                        "use_cache": [True, False]
                     }
                 },
                 "/database": {
@@ -111,11 +112,13 @@ class MiningServer:
             identifiers = json_request.get("identifiers")
             schema_str = json_request.get("schema")
             debug = json_request.get("debug", False)
+            use_cache = json_request.get("use_cache", True)
 
             self.logger.info("Mining parameters:")
             self.logger.info(f"identifiers : {identifiers}")
             self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
+            self.logger.info(f"use_cache   : {use_cache}")
 
             args_err_response = self.check_args_not_null(identifiers=identifiers, schema=schema_str)
             if args_err_response:
