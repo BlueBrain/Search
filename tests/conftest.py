@@ -33,12 +33,15 @@ def benchmark_parameters(request):
 
 
 @pytest.fixture(scope='session')
-def test_parameters():
+def test_parameters(metadata_path):
     """Parameters needed for the tests"""
-    return {'n_sentences_per_section': 3,
+    return {
+            'n_articles': len(pd.read_csv(metadata_path)),
             'n_sections_per_article': 2,  # paragraph = section
+            'n_sentences_per_section': 3,
             'n_entities_per_section': 4,
-            'embedding_size': 2}
+            'embedding_size': 2
+    }
 
 
 def fill_db_data(engine, metadata_path, test_parameters):

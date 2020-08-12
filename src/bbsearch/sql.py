@@ -168,6 +168,42 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
+def retrieved_mining_cache(identifiers, model_names, engine):
+    """Retrieve cached mining results.
+
+    Parameters
+    ----------
+    identifiers : list of tuple
+        Tuples of form (article_id, paragraph_pos_in_article). Note that if
+        `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
+
+    model_names : list
+        List of model names to consider.
+
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    result : pd.DataFrame
+        Selected rows of the `mining_cache` table.
+
+    """
+    conditions = []
+    for aid, ppos in identifiers:
+        cond = f"(article_id = {aid}{'' if ppos == -1 else ' AND paragraph_pos_in_article = {}'.format(ppos)})"
+        conditions.append(cond)
+
+    conditions_id = " OR ".join(conditions)
+    condition_models = ", ".join([f"'{m}'" for m in model_names])
+
+    query = f"SELECT * FROM mining_cache WHERE ({conditions_id}) AND mining_model in ({condition_models})"
+
+    result = pd.read_sql(query, engine)
+
+    return result
+
+
 class SentenceFilter:
     """Filter sentence IDs by applying conditions.
 
