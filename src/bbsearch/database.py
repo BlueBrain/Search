@@ -345,6 +345,7 @@ class MiningCacheCreation:
         # TODO: paper_id should be computed!
 
         for model_nm in ee_models_library['model']:
+            print(f'Run text mining with model {model_nm}.')
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
@@ -365,7 +366,8 @@ class MiningCacheCreation:
             mined_elements = run_pipeline(
                 texts=all_texts,
                 model_entities=spacy.load(model_nm),
-                models_relations={}
+                models_relations={},
+                debug=True  # we need all the columns!
             )
             mined_elements['mining_model'] = model_nm
             mined_elements.to_sql(
