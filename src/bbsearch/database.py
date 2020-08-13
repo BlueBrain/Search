@@ -354,43 +354,42 @@ class MiningCacheCreation:
         )
         # TODO: paper_id should be computed!
 
-        for model_nm in ee_models_library['model']:
-            print(f'Model {model_nm}')
+        for model_name, info_slice in ee_models_library.groupby('model'):
+            print(f'Model {model_name}')
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
                         FROM mining_cache 
-                        WHERE mining_model = "{model_nm}"
+                        WHERE mining_model = "{model_name}"
                     """
                 )
             else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
                             FROM mining_cache
-                            WHERE mining_model = {model_nm}
+                            WHERE mining_model = {model_name}
                             LIMIT 1
                     """)
                 if len(result) > 1:
                     continue
             timer = Timer()
             with timer('run mining pipeline'):
-                for model_name, info_slice in ee_models_library.groupby('model'):
-                    ee_model = spacy.load(model_name)
+                ee_model = spacy.load(model_name)
 
-                    # Run mining proper
-                    df = run_pipeline(
-                        texts=all_texts,
-                        model_entities=ee_model,
-                        models_relations={},
-                        debug=True  # we need all the columns!
-                    )
+                # Run mining proper
+                df = run_pipeline(
+                    texts=all_texts,
+                    model_entities=ee_model,
+                    models_relations={},
+                    debug=True  # we need all the columns!
+                )
 
-                    # Select only entity types for which this model is responsible
-                    df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
+                # Select only entity types for which this model is responsible
+                df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
-                    # Rename entity types using the model library info, so that we match the schema request
-                    df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
-                                                             info_slice['entity_type']))})
+                # Rename entity types using the model library info, so that we match the schema request
+                df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
+                                                         info_slice['entity_type']))})
 
             print(f'Running mining pipeline [{len(df):,d} entities]: '
                   f'{timer["run mining pipeline"]:7.2f} seconds')
