@@ -75,7 +75,7 @@ class MiningServer:
                         "schema": []
                     },
                     "accepted_fields": {
-                        "debug": [True, False],
+                        "debug": [True, False]
                     }
                 },
                 "/database": {
