@@ -8,6 +8,7 @@ import sqlalchemy
 
 from bbsearch.mining.pipeline import run_pipeline
 from bbsearch.sql import retrieve_paragraph
+from bbsearch.utils import Timer
 
 
 class CORD19DatabaseCreation:
@@ -345,7 +346,7 @@ class MiningCacheCreation:
         # TODO: paper_id should be computed!
 
         for model_nm in ee_models_library['model']:
-            print(f'Run text mining with model {model_nm}.')
+            print(f'Model {model_nm}')
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
@@ -362,20 +363,25 @@ class MiningCacheCreation:
                     """)
                 if len(result) > 1:
                     continue
+            timer = Timer()
+            with timer('run mining pipeline'):
+                mined_elements = run_pipeline(
+                    texts=all_texts,
+                    model_entities=spacy.load(model_nm),
+                    models_relations={},
+                    debug=True  # we need all the columns!
+                )
+                mined_elements['mining_model'] = model_nm
+            print(f'{timer["run mining pipeline"]:7.2f} seconds')
 
-            mined_elements = run_pipeline(
-                texts=all_texts,
-                model_entities=spacy.load(model_nm),
-                models_relations={},
-                debug=True  # we need all the columns!
-            )
-            mined_elements['mining_model'] = model_nm
-            mined_elements.to_sql(
-                name='mining_cache',
-                con=self.engine,
-                if_exists='append',
-                index=False
-            )
+            with timer('insertion into db'):
+                mined_elements.to_sql(
+                    name='mining_cache',
+                    con=self.engine,
+                    if_exists='append',
+                    index=False
+                )
+            print(f'{timer["insertion into db"]:7.2f} seconds')
 
         # Create index
         mining_cache_article_id_index = sqlalchemy.Index(
