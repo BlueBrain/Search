@@ -266,10 +266,17 @@ class MiningCacheCreation:
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
+        metadata = sqlalchemy.MetaData()
+
         if self.engine.dialect.has_table(self.engine, "mining_cache"):
+            self.mining_cache_table = sqlalchemy.Table(
+                "mining_cache",
+                metadata,
+                autoload=True,
+                autoload_with=self.engine
+            )
             return
 
-        metadata = sqlalchemy.MetaData()
         articles_table = sqlalchemy.Table(
             "articles",
             metadata,
