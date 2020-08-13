@@ -1,10 +1,13 @@
 """Parallel mining of named entities."""
 import argparse
+import collections
 import logging
 import multiprocessing as mp
 import queue
 import time
+from pprint import pprint
 
+import pandas as pd
 import spacy
 import sqlalchemy
 import sqlalchemy.sql
@@ -37,12 +40,15 @@ class Miner:
     """
 
     def __init__(
-        self, name, engine_url, model_path, task_queue, can_finish, logging_level=None
+            self, name, engine_url, model_schema, task_queue, can_finish, logging_level=None
     ):
         self.name = name
-        self.create_engine = sqlalchemy.create_engine(engine_url)
-        self.engine = self.create_engine
-        self.model_path = model_path
+        self.engine = sqlalchemy.create_engine(engine_url)
+        self.model_path = model_schema["model_path"]
+        self.model_entities = model_schema["entities"]
+        self.entity_map = {
+            entity_from: entity_to
+            for entity_to, entity_from in self.model_entities}
         self.work_queue = task_queue
         self.can_finish = can_finish
 
@@ -53,7 +59,7 @@ class Miner:
             self.logger.setLevel(logging_level)
 
         self.logger.info("loading the NLP model...")
-        self.ee_model = spacy.load(model_path)
+        self.ee_model = spacy.load(self.model_path)
 
         self.logger.info("starting mining...")
         self._work_loop()
@@ -91,23 +97,46 @@ class Miner:
 
         self.logger.info("Getting all sentences from the database...")
         query = """
-        SELECT paragraph_pos_in_article, sentence_pos_in_paragraph, text
+        SELECT paragraph_pos_in_article, text
         FROM sentences
         WHERE article_id = :article_id
+        ORDER BY paragraph_pos_in_article, sentence_pos_in_paragraph
         """
         safe_query = sqlalchemy.sql.text(query)
         result_proxy = self.engine.execute(safe_query, article_id=article_id)
 
-        all_sentences = dict()
-        for paragraph_pos, sentence_pos, text in result_proxy:
-            all_sentences[(paragraph_pos, sentence_pos)] = text
+        all_paragraphs = collections.defaultdict(list)
+        for paragraph_pos, sentence in result_proxy:
+            all_paragraphs[paragraph_pos].append(sentence)
 
-        texts = [(all_sentences[key], {}) for key in sorted(all_sentences)]
+        texts = []
+        for paragraph_pos in sorted(all_paragraphs):
+            sentences = all_paragraphs[paragraph_pos]
+            paragraph = " ".join(sentences)
+            metadata = {
+                "article_id": article_id,
+                "paragraph_pos_in_article": paragraph_pos,
+                "mining_model": self.model_path,
+            }
+            texts.append((paragraph, metadata))
 
         self.logger.info("Running the pipeline...")
         df_results = run_pipeline(
-            texts=texts, model_entities=self.ee_model, models_relations={}, debug=False
+            texts=texts,
+            model_entities=self.ee_model,
+            models_relations={},
+            debug=True
         )
+
+        # Keep only the entity types we care about
+        rows_to_keep = df_results["entity_type"].isin(self.entity_map)
+        df_results = df_results[rows_to_keep]
+
+        # Map model's names for entity types to desired entity types
+        df_results["entity_type"] = df_results["entity_type"].apply(
+            lambda entity_type: self.entity_map[entity_type])
+
+        df_results.to_sql("mining_cache_temp", con=self.engine, if_exists="append", index=False)
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 
@@ -137,21 +166,14 @@ class Miner:
 
 
 def get_engine_url():
-    """Get the URL for the MySQL CORD-19 database.
+    protocol = "mysql+mysqldb"
+    host = "dgx1.bbp.epfl.ch"
+    port = 8853
+    user = "stan"
+    pw = "letmein"
+    db = "cord19_v35"
 
-    Returns
-    -------
-    engine_url : str
-        The database URL.
-    """
-    mysql_host = "dgx1.bbp.epfl.ch"
-    mysql_port = 8853
-    database_name = "cord19_v35"
-    engine_url = (
-        f"mysql+mysqldb://guest:guest@{mysql_host}:{mysql_port}/{database_name}"
-    )
-
-    return engine_url
+    return f"{protocol}://{user}:{pw}@{host}:{port}/{db}"
 
 
 def create_tasks(task_queues):
@@ -178,12 +200,12 @@ def create_tasks(task_queues):
             task_queues[model_path].put(article_id)
 
 
-def do_mining(models, workers_per_model):
+def do_mining(model_schemas, workers_per_model):
     """Do the parallelized mining.
 
     Parameters
     ----------
-    models : dict[str, str]
+    model_schemas : dict
         The models to be used for mining. The keys of the dictionary
         are arbitrary names for the models. The values are model
         paths or names that will be used in `spacy.load(...)`.
@@ -193,12 +215,13 @@ def do_mining(models, workers_per_model):
     # Prepare as many workers as necessary according to `workers_per_model`.
     # Also instantiate one task queue per model.
     print("Preparing the workers...")
-    task_queues = {model_name: mp.Queue() for model_name in models}
+    task_queues = {model_name: mp.Queue() for model_name in model_schemas}
     workers_info = []
-    for model_name, model_path in models.items():
+    for model_name, model_schema in model_schemas.items():
+        model_path = model_schema["model_path"]
         for i in range(workers_per_model):
             worker_name = f"{model_name}_{i}"
-            workers_info.append((worker_name, model_path, task_queues[model_name]))
+            workers_info.append((worker_name, model_schema, task_queues[model_name]))
 
     # A flag to let the workers know there won't be any new tasks.
     can_finish = mp.Event()
@@ -206,11 +229,11 @@ def do_mining(models, workers_per_model):
     # Create the worker processes.
     print("Spawning the worker processes...")
     worker_processes = []
-    for worker_name, model_path, task_queue in workers_info:
+    for worker_name, model_schema, task_queue in workers_info:
         worker_process = mp.Process(
             name=worker_name,
             target=Miner,
-            args=(worker_name, get_engine_url(), model_path, task_queue, can_finish,),
+            args=(worker_name, get_engine_url(), model_schema, task_queue, can_finish,),
         )
         worker_process.start()
         worker_processes.append(worker_process)
@@ -232,6 +255,40 @@ def do_mining(models, workers_per_model):
     print("Finished.")
 
 
+def get_model_schemas():
+    available_models = {
+        "model1_bc5cdr_annotations5_spacy23": "assets/model1_bc5cdr_annotations5_spacy23",
+        "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
+    }
+
+    schema_df = pd.read_csv("assets/ee_models_library.csv")
+    model_schemas = dict()
+    # {
+    #     "model1_bc5cdr_annotations5_spacy23": {
+    #         "model_path": "/asdf/asdf/asdf",
+    #         "entities": [(ent_1, ent_old_1), (ent_2, ent_old_2)]
+    #     }
+    # }
+    for _, (entity_type, model_path, entity_type_name) in schema_df.iterrows():
+        _, _, model_name = model_path.rpartition("/")
+        if model_name not in model_schemas:
+            model_schemas[model_name] = dict()
+            model_schemas[model_name]["model_path"] = model_path
+            model_schemas[model_name]["entities"] = []
+
+        model_schemas[model_name]["entities"].append((entity_type, entity_type_name))
+
+    filtered_model_schemas = dict()
+    for model_name in model_schemas:
+        if model_name in available_models:
+            filtered_model_schemas[model_name] = model_schemas[model_name]
+            filtered_model_schemas[model_name]["model_path"] = available_models[model_name]
+
+    pprint(filtered_model_schemas)
+
+    return filtered_model_schemas
+
+
 def main(workers_per_model, verbose=False):
     """Run main.
 
@@ -246,11 +303,9 @@ def main(workers_per_model, verbose=False):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
-    models = {
-        "bc5cdr_annotations5": "assets/model1_bc5cdr_annotations5_spacy23",
-        "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
-    }
-    do_mining(models, workers_per_model=workers_per_model)
+    model_schemas = get_model_schemas()
+
+    do_mining(model_schemas, workers_per_model=workers_per_model)
 
 
 parser = argparse.ArgumentParser(description="Parallel mining.")
