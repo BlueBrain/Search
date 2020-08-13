@@ -19,8 +19,8 @@ class Miner:
     ----------
     name : str
         The name of this worker.
-    engine_uri : str
-        The URI to the text database. Should be a valid argument for
+    engine_url : str
+        The URL to the text database. Should be a valid argument for
         the `sqlalchemy.create_engine` function. The database should
         contain tables `articles` and `sentences`.
     model_path : str
@@ -37,10 +37,10 @@ class Miner:
     """
 
     def __init__(
-        self, name, engine_uri, model_path, task_queue, can_finish, logging_level=None
+        self, name, engine_url, model_path, task_queue, can_finish, logging_level=None
     ):
         self.name = name
-        self.create_engine = sqlalchemy.create_engine(engine_uri)
+        self.create_engine = sqlalchemy.create_engine(engine_url)
         self.engine = self.create_engine
         self.model_path = model_path
         self.work_queue = task_queue
@@ -93,7 +93,7 @@ class Miner:
         query = """
         SELECT paragraph_pos_in_article, sentence_pos_in_paragraph, text
         FROM sentences
-        WHERE article_id = :article_id 
+        WHERE article_id = :article_id
         """
         safe_query = sqlalchemy.sql.text(query)
         result_proxy = self.engine.execute(safe_query, article_id=article_id)
@@ -136,22 +136,22 @@ class Miner:
         return f"{self.__class__.__name__}[{self.name}]"
 
 
-def get_engine_uri():
-    """Get the URI for the MySQL CORD-19 database.
+def get_engine_url():
+    """Get the URL for the MySQL CORD-19 database.
 
     Returns
     -------
-    engine_uri : str
-        The database URI.
+    engine_url : str
+        The database URL.
     """
     mysql_host = "dgx1.bbp.epfl.ch"
     mysql_port = 8853
     database_name = "cord19_v35"
-    engine_uri = (
+    engine_url = (
         f"mysql+mysqldb://guest:guest@{mysql_host}:{mysql_port}/{database_name}"
     )
 
-    return engine_uri
+    return engine_url
 
 
 def create_tasks(task_queues):
@@ -165,7 +165,7 @@ def create_tasks(task_queues):
 
     """
     print("Getting all article IDs...")
-    engine = sqlalchemy.create_engine(get_engine_uri())
+    engine = sqlalchemy.create_engine(get_engine_url())
     result = engine.execute("select article_id from articles")
     all_article_ids = sorted([row[0] for row in result.fetchall()])
 
@@ -216,7 +216,7 @@ def do_mining(models, workers_per_model):
         worker_process = mp.Process(
             name=worker_name,
             target=Miner,
-            args=(worker_name, get_engine_uri(), model_path, task_queue, can_finish,),
+            args=(worker_name, get_engine_url(), model_path, task_queue, can_finish,),
         )
         worker_process.start()
         worker_processes.append(worker_process)
