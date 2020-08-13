@@ -76,7 +76,6 @@ class MiningServer:
                     },
                     "accepted_fields": {
                         "debug": [True, False],
-                        "use_cache": [True, False]
                     }
                 },
                 "/database": {
@@ -88,7 +87,8 @@ class MiningServer:
                         "schema": []
                     },
                     "accepted_fields": {
-                        "debug": [True, False]
+                        "debug": [True, False],
+                        "use_cache": [True, False]
                     }
                 }
             }
