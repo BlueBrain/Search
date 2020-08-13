@@ -259,6 +259,7 @@ class MiningCacheCreation:
         """Construct and populate the cache of mined results."""
         self._schema_creation()
         print("Schema of the table has been created.")
+        self._drop_index_if_exists()
         self._populate_table(
             ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
         )
@@ -314,6 +315,8 @@ class MiningCacheCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
+        self.index_name = "mining_cache_article_id_index"
+
     def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
         """Populate cache with elements extracted by text mining.
 
@@ -337,7 +340,6 @@ class MiningCacheCreation:
         -------
         None
         """
-
         # list of (art_it, par_pos_in_art)
         arts_pars = self.engine.execute(
             """SELECT DISTINCT article_id, paragraph_pos_in_article
@@ -349,7 +351,7 @@ class MiningCacheCreation:
         # texts with metadata to feed run_pipeline
         all_texts = (
             (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
-             dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=None))
+             dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=f"{art_id}:{None}:{par_pos_in_art}"))
             for art_id, par_pos_in_art in arts_pars
         )
         # TODO: paper_id should be computed!
@@ -406,21 +408,24 @@ class MiningCacheCreation:
                 )
             print(f'Insertion into sql db: {timer["insertion into db"]:7.2f} seconds')
 
-    def _index_creation(self):
-        timer = Timer()
-        index_name = 'mining_cache_article_id_index'
-
-        # Create index
-        with timer('index creation'):
+    def _drop_index_if_exists(self):
+        inspector = sqlalchemy.inspect(self.engine)
+        indexes_mining_cache = inspector.get_indexes('mining_cache')
+        if indexes_mining_cache:  # TODO: in fact the index should be dropped BEFORE!
             self.engine.execute(
                 f"""
-                DROP INDEX IF EXISTS {index_name}
+                DROP INDEX {self.index_name}
                 ON mining_cache
                 """
             )
-            mining_cache_article_id_index = sqlalchemy.Index(
-                index_name,
+
+    def _index_creation(self):
+        timer = Timer()
+        # Create index
+        with timer('index creation'):
+            index = sqlalchemy.Index(
+                self.index_name,
                 self.mining_cache_table.c.article_id
             )
-            mining_cache_article_id_index.create(bind=self.engine)
+            index.create(bind=self.engine)
         print(f'Index creation: {timer["index creation"]:7.2f} seconds')
