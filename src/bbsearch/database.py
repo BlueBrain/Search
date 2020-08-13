@@ -294,7 +294,12 @@ class MiningCacheCreation:
             ),
             sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
         )
+
+        with self.engine.begin() as connection:
+            metadata.create_all(connection)
+
         # TODO: we may want to create indexes for faster querying
+
 
     def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
         """Populate cache with elements extracted by text mining.
@@ -340,7 +345,7 @@ class MiningCacheCreation:
                         FROM mining_cache 
                         WHERE mining_model = {model_nm}
                     """)
-            else:  #  Mine only if model is not in cache
+            else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
                             FROM mining_cache
@@ -356,7 +361,7 @@ class MiningCacheCreation:
                                           )
             mined_elements['mining_model'] = model_nm
             self.engine.execute(
-                """INSERT INTO mining_cache VALUES """
+                """INSERT INTO mining_cache VALUES """  # TODO
             )
 
 
