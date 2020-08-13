@@ -263,6 +263,8 @@ class MiningCacheCreation:
             ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
         )
         print("The table has been populated.")
+        self._index_creation()
+        print("The index has been created.")
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
@@ -385,13 +387,13 @@ class MiningCacheCreation:
 
                     # Select only entity types for which this model is responsible
                     df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
-                    df.reset_index()
 
                     # Rename entity types using the model library info, so that we match the schema request
                     df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                              info_slice['entity_type']))})
 
-            print(f'Running mining pipeline: {timer["run mining pipeline"]:7.2f} seconds')
+            print(f'Running mining pipeline [{len(df):,d} entities]: '
+                  f'{timer["run mining pipeline"]:7.2f} seconds')
 
             with timer('insertion into db'):
                 df.to_sql(
@@ -402,6 +404,8 @@ class MiningCacheCreation:
                 )
             print(f'Insertion into sql db: {timer["insertion into db"]:7.2f} seconds')
 
+    def _index_creation(self):
+        timer = Timer()
         # Create index
         with timer('index creation'):
             mining_cache_article_id_index = sqlalchemy.Index(
