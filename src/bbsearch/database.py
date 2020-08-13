@@ -374,10 +374,10 @@ class MiningCacheCreation:
                     """)
                 if len(result) > 1:
                     continue
-            timer = Timer()
-            with timer('run mining pipeline'):
-                ee_model = spacy.load(model_name)
 
+            timer = Timer()
+            ee_model = spacy.load(model_name)
+            with timer('run mining pipeline'):
                 # Run mining proper
                 df = run_pipeline(
                     texts=all_texts,
