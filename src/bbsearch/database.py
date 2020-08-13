@@ -350,12 +350,12 @@ class MiningCacheCreation:
                 FROM sentences
                 WHERE article_id = {art_id}
                 """
-            ).fetchall()
+            )
             return (
                 (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
                  dict(article_id=article_id, paragraph_pos_in_article=par_pos_in_art,
                       paper_id=f"{article_id}:{None}:{par_pos_in_art}"))
-                for par_pos_in_art in paragraphs
+                for par_pos_in_art, in paragraphs
             )
             # TODO: paper_id should be computed!
 
@@ -379,7 +379,7 @@ class MiningCacheCreation:
 
             ee_model = spacy.load(model_name)
             t00 = time.perf_counter()
-            for article_id in article_ids:
+            for article_id, in article_ids:
                 t0 = time.perf_counter()
                 # Run text mining
                 df = run_pipeline(
