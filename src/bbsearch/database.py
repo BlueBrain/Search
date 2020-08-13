@@ -341,23 +341,25 @@ class MiningCacheCreation:
         None
         """
         # list of (art_it, par_pos_in_art)
-        arts_pars = self.engine.execute(
-            """SELECT DISTINCT article_id, paragraph_pos_in_article
-               FROM sentences
-               LIMIT 20
-            """
-        )
+        article_ids = self.engine.execute("""SELECT article_id FROM articles""").fetchall()
 
-        # texts with metadata to feed run_pipeline
-        all_texts = (
-            (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
-             dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=f"{art_id}:{None}:{par_pos_in_art}"))
-            for art_id, par_pos_in_art in arts_pars
-        )
-        # TODO: paper_id should be computed!
+        def get_article_texts_with_metadata(article_id):
+            paragraphs = self.engine.execute(
+                f"""
+                SELECT DISTINCT paragraph_pos_in_article
+                FROM sentences
+                WHERE article_id = "{article_id}"
+                """
+            ).fetchall()
+            return (
+                (retrieve_paragraph(article_id, par_pos_in_art, self.engine)['text'].iloc[0],
+                 dict(article_id=article_id, paragraph_pos_in_article=par_pos_in_art,
+                      paper_id=f"{article_id}:{None}:{par_pos_in_art}"))
+                for par_pos_in_art in paragraphs
+            )
+            # TODO: paper_id should be computed!
 
         for model_name, info_slice in ee_models_library.groupby('model'):
-            print(f'Model {model_name}')
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
@@ -375,12 +377,13 @@ class MiningCacheCreation:
                 if len(result) > 1:
                     continue
 
-            timer = Timer()
             ee_model = spacy.load(model_name)
-            with timer('run mining pipeline'):
-                # Run mining proper
+            t00 = time.perf_counter()
+            for article_id in article_ids:
+                t0 = time.perf_counter()
+                # Run text mining
                 df = run_pipeline(
-                    texts=all_texts,
+                    texts=get_article_texts_with_metadata(article_id),
                     model_entities=ee_model,
                     models_relations={},
                     debug=True  # we need all the columns!
@@ -396,17 +399,16 @@ class MiningCacheCreation:
                 df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                          info_slice['entity_type']))})
 
-            print(f'Running mining pipeline [{len(df):,d} entities]: '
-                  f'{timer["run mining pipeline"]:7.2f} seconds')
-
-            with timer('insertion into db'):
                 df.to_sql(
                     name='mining_cache',
                     con=self.engine,
                     if_exists='append',
                     index=False
                 )
-            print(f'Insertion into sql db: {timer["insertion into db"]:7.2f} seconds')
+                t1 = time.perf_counter()
+                print(f'Cached elements mined by {model_name} '
+                      f'from article {article_id}'
+                      f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
 
     def _drop_index_if_exists(self):
         inspector = sqlalchemy.inspect(self.engine)
