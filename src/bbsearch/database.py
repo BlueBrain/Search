@@ -349,7 +349,7 @@ class MiningCacheCreation:
                 self.engine.execute(
                     f"""DELETE 
                         FROM mining_cache 
-                        WHERE mining_model = {model_nm}
+                        WHERE mining_model = "{model_nm}"
                     """
                 )
             else:  # Mine only if model is not in cache
