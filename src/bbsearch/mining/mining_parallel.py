@@ -207,7 +207,8 @@ def do_mining(models, workers_per_model):
             workers_info.append((worker_name, model_path, task_queues[model_name]))
 
     # A shared integer value to let the workers know when it's finished.
-    can_finish = mp.Value("i", 0)
+    # The workers will never write to this value, so we don't need locks.
+    can_finish = mp.Value("i", 0, lock=False)
 
     # Create the worker processes.
     print("Spawning the worker processes...")
@@ -225,9 +226,11 @@ def do_mining(models, workers_per_model):
     print("Creating tasks...")
     create_tasks(task_queues)
 
+    # This operation should be atomic, so don't need a lock.
+    can_finish.value = 1
+
     # Wait for the processes to finish.
     print("No more new tasks, just waiting for the workers to finish...")
-    can_finish.value = 1
     for process in worker_processes:
         process.join()
         if process.exitcode != 0:
@@ -264,5 +267,5 @@ parser.add_argument("--workers_per_model", "-w", type=int, default=mp.cpu_count(
 parser.add_argument("--verbose", "-v", action="store_true", default=False)
 args = parser.parse_args()
 if __name__ == "__main__":
-    print(f"Running with {args.workers_per_model} workers.")
+    print(f"Running with {args.workers_per_model} workers per model.")
     main(args.workers_per_model, verbose=args.verbose)
