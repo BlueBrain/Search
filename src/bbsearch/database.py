@@ -348,11 +348,11 @@ class MiningCacheCreation:
                 f"""
                 SELECT DISTINCT paragraph_pos_in_article
                 FROM sentences
-                WHERE article_id = "{art_id}"
+                WHERE article_id = {art_id}
                 """
             ).fetchall()
             return (
-                (retrieve_paragraph(article_id, par_pos_in_art, self.engine)['text'].iloc[0],
+                (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
                  dict(article_id=article_id, paragraph_pos_in_article=par_pos_in_art,
                       paper_id=f"{article_id}:{None}:{par_pos_in_art}"))
                 for par_pos_in_art in paragraphs
