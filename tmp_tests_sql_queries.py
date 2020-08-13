@@ -3,16 +3,30 @@ import pandas as pd
 import getpass
 from io import StringIO
 
-database_uri = "dgx1.bbp.epfl.ch:8853"
-password = 'jees'#getpass.getpass("Password:")
+from bbsearch.utils import Timer
 
-engine = sqlalchemy.create_engine(f"mysql+pymysql://root:{password}@{database_uri}/cord19_v35")
+
+def get_sql_url():
+    protocol = "mysql"
+    host = "dgx1.bbp.epfl.ch"
+    port = 8853
+    user = "stan"
+    pw = "letmein"
+    db = "cord19_v35"
+
+    return f"{protocol}://{user}:{pw}@{host}:{port}/{db}"
+
+
+timer = Timer(verbose=True)
+engine = sqlalchemy.create_engine(get_sql_url())
 
 if engine.dialect.has_table(engine, "mining_cache"):
     print("--- TABLE mining_cache is already present!")
     engine.execute('DROP TABLE mining_cache')
 
 metadata = sqlalchemy.MetaData()
+articles_table = sqlalchemy.Table(
+    "articles", metadata, autoload=True, autoload_with=engine)
 mining_cache_table = sqlalchemy.Table(
     "mining_cache",
     metadata,
@@ -29,7 +43,7 @@ mining_cache_table = sqlalchemy.Table(
     sqlalchemy.Column(
         "article_id",
         sqlalchemy.Integer(),
-        # sqlalchemy.ForeignKey(articles_table.article_id), # TODO: fix this!
+        sqlalchemy.ForeignKey(articles_table.columns.article_id),
     ),
     sqlalchemy.Column(
         "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
@@ -37,25 +51,25 @@ mining_cache_table = sqlalchemy.Table(
     sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
 )
 
-cols = ["entity",
-        "entity_type",
-        # "property",
-        # "property_value",
-        # "property_type",
-        # "property_value_type",
-        # "ontology_source",  # TODO: fix issue inserting None!
-        "paper_id",
-        "start_char",
-        "end_char",
-        "article_id",
-        "paragraph_pos_in_article",
-        "mining_model"]
+# cols = ["entity",
+#         "entity_type",
+#         "property",
+#         "property_value",
+#         "property_type",
+#         "property_value_type",
+#         "ontology_source",  # TODO: fix issue inserting None!
+#         "paper_id",
+#         "start_char",
+#         "end_char",
+#         "article_id",
+#         "paragraph_pos_in_article",
+#         "mining_model"]
 
 
 with engine.begin() as connection:
     metadata.create_all(connection)
 
-df = pd.read_csv('~/Downloads/extractions_200.csv')
+df = pd.read_csv('assets/extractions_200.csv')
 # df = df.reset_index(drop=True)
 print(df.columns)
 # import pdb; pdb.set_trace()
@@ -64,29 +78,17 @@ df['article_id'] = 123
 df['mining_model'] = 'some_model'
 
 df = df[:10_000]
-
 df = df.where(pd.notnull(df), None)
 
 
-print('START INSERTING')
-import time
-t0 = time.perf_counter()
-# # 1. to_sql
-df.to_sql(name='mining_cache', con=engine, if_exists='append', index=False)
+print(f'START INSERTING {len(df)} entries')
+
+with timer("df.to_sql"):
+    df.to_sql(name='mining_cache', con=engine, if_exists='append', index=False)
 
 
-# 2. insert()
-# with engine.begin() as connection:
-#     connection.execute(
-#         mining_cache_table.insert(),
-#         [
-#             dict(row)
-#             for _, row in df.iterrows()
-#         ]
-#     )
+with timer("engine.execute"):
+    engine.execute(mining_cache_table.insert(), df.to_dict("records"))
 
-t1 = time.perf_counter()
-print('DONE WITH INSERTING in: ', f'{t1 - t0: .1f} s')  # time.strftime('%H:%M:%S', time.gmtime(t1-t0)))
-
-df_out = pd.read_sql('SELECT * FROM mining_cache', engine)
-print(df_out)
+# df_out = pd.read_sql('SELECT * FROM mining_cache', engine)
+# print(df_out)
