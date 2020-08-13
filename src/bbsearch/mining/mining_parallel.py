@@ -28,10 +28,10 @@ class Miner:
         named entity extraction.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
-    can_finish : multiprocessing.Value
-        An integer shared value to indicate that the worker can finish
-        waiting. Unless `can_finish` is equal to `1`, the worker will
-        continue polling the task queue for new tasks.
+    can_finish : multiprocessing.Event
+        A flag to indicate that the worker can stop waiting for new
+        tasks. Unless this flag is set, the worker will continue
+        polling the task queue for new tasks.
     logging_level : int, optional
         The logging level for the internal logger
     """
@@ -74,7 +74,7 @@ class Miner:
                 self.n_tasks_done += 1
             except queue.Empty:
                 self.logger.info("Queue empty")
-                if self.can_finish.value == 1:
+                if self.can_finish.is_set():
                     finished = True
                 else:
                     time.sleep(1)
@@ -164,24 +164,18 @@ def create_tasks(task_queues):
         paths and the values are the actual queues.
 
     """
+    n_tasks_per_model = 100
+
     print("Getting all article IDs...")
     engine = sqlalchemy.create_engine(get_engine_url())
     result = engine.execute("select article_id from articles")
     all_article_ids = sorted([row[0] for row in result.fetchall()])
 
-    # # Pretend we're doing something else while the workers are working.
-    # print("Waiting a bit...")
-    # time.sleep(15)
-
     # We got some new tasks, put them in the task queues.
     print("Adding new tasks...")
     for model_path in task_queues:
-        for article_id in all_article_ids[:100]:
+        for article_id in all_article_ids[:n_tasks_per_model]:
             task_queues[model_path].put(article_id)
-
-    # # Again pretend we're busy.
-    # print("Wait again...")
-    # time.sleep(15)
 
 
 def do_mining(models, workers_per_model):
@@ -206,9 +200,8 @@ def do_mining(models, workers_per_model):
             worker_name = f"{model_name}_{i}"
             workers_info.append((worker_name, model_path, task_queues[model_name]))
 
-    # A shared integer value to let the workers know when it's finished.
-    # The workers will never write to this value, so we don't need locks.
-    can_finish = mp.Value("i", 0, lock=False)
+    # A flag to let the workers know there won't be any new tasks.
+    can_finish = mp.Event()
 
     # Create the worker processes.
     print("Spawning the worker processes...")
@@ -226,10 +219,8 @@ def do_mining(models, workers_per_model):
     print("Creating tasks...")
     create_tasks(task_queues)
 
-    # This operation should be atomic, so don't need a lock.
-    can_finish.value = 1
-
     # Wait for the processes to finish.
+    can_finish.set()
     print("No more new tasks, just waiting for the workers to finish...")
     for process in worker_processes:
         process.join()
