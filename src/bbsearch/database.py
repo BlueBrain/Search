@@ -372,17 +372,29 @@ class MiningCacheCreation:
                     continue
             timer = Timer()
             with timer('run mining pipeline'):
-                mined_elements = run_pipeline(
-                    texts=all_texts,
-                    model_entities=spacy.load(model_nm),
-                    models_relations={},
-                    debug=True  # we need all the columns!
-                )
-                mined_elements['mining_model'] = model_nm
+                for model_name, info_slice in ee_models_library.groupby('model'):
+                    ee_model = spacy.load(model_name)
+
+                    # Run mining proper
+                    df = run_pipeline(
+                        texts=all_texts,
+                        model_entities=ee_model,
+                        models_relations={},
+                        debug=True  # we need all the columns!
+                    )
+
+                    # Select only entity types for which this model is responsible
+                    df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
+                    df.reset_index()
+
+                    # Rename entity types using the model library info, so that we match the schema request
+                    df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
+                                                             info_slice['entity_type']))})
+
             print(f'Running mining pipeline: {timer["run mining pipeline"]:7.2f} seconds')
 
             with timer('insertion into db'):
-                mined_elements.to_sql(
+                df.to_sql(
                     name='mining_cache',
                     con=self.engine,
                     if_exists='append',
@@ -391,8 +403,10 @@ class MiningCacheCreation:
             print(f'Insertion into sql db: {timer["insertion into db"]:7.2f} seconds')
 
         # Create index
-        mining_cache_article_id_index = sqlalchemy.Index(
-            'mining_cache_article_id_index',
-            self.mining_cache_table.c.article_id
-        )
-        mining_cache_article_id_index.create(bind=self.engine)
+        with timer('index creation'):
+            mining_cache_article_id_index = sqlalchemy.Index(
+                'mining_cache_article_id_index',
+                self.mining_cache_table.c.article_id
+            )
+            mining_cache_article_id_index.create(bind=self.engine)
+        print(f'Index creation: {timer["index creation"]:7.2f} seconds')
