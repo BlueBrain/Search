@@ -76,8 +76,18 @@ class Miner:
             try:
                 # this gets stuck if `block=False` isn't set, no idea why
                 article_id = self.work_queue.get(block=False)
-                self._mine(article_id)
-                self.n_tasks_done += 1
+                try:
+                    self._mine(article_id)
+                except Exception as e:
+                    with open("errors.log", "a") as f:
+                        f.write("=" * 80 + "\n")
+                        f.write(f"Worker {self.name} had a problem.\n")
+                        f.write(f"Model name: {self.model_path}\n")
+                        f.write(f"Article ID: {article_id}\n")
+                        f.write(f"Exception type: {type(e)}\n")
+                        f.write(f"Exception name: {e}\n")
+                        f.write(f"Traceback:\n{e.__traceback__}\n\n")
+                        self.n_tasks_done += 1
             except queue.Empty:
                 self.logger.info("Queue empty")
                 if self.can_finish.is_set():
@@ -186,8 +196,6 @@ def create_tasks(task_queues):
         paths and the values are the actual queues.
 
     """
-    n_tasks_per_model = 100
-
     print("Getting all article IDs...")
     engine = sqlalchemy.create_engine(get_engine_url())
     result = engine.execute("select article_id from articles")
@@ -196,7 +204,7 @@ def create_tasks(task_queues):
     # We got some new tasks, put them in the task queues.
     print("Adding new tasks...")
     for model_path in task_queues:
-        for article_id in all_article_ids[:n_tasks_per_model]:
+        for article_id in all_article_ids:
             task_queues[model_path].put(article_id)
 
 
@@ -247,6 +255,7 @@ def do_mining(model_schemas, workers_per_model):
     print("No more new tasks, just waiting for the workers to finish...")
     for process in worker_processes:
         process.join()
+    for process in worker_processes:
         if process.exitcode != 0:
             logging.warning(
                 f"Worker {process.name} terminated with exit code {process.exitcode}!"
@@ -261,7 +270,7 @@ def get_model_schemas():
         "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
     }
 
-    schema_df = pd.read_csv("assets/ee_models_library.csv")
+    schema_df = pd.read_csv("/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv")
     model_schemas = dict()
     # {
     #     "model1_bc5cdr_annotations5_spacy23": {
@@ -282,11 +291,11 @@ def get_model_schemas():
     for model_name in model_schemas:
         if model_name in available_models:
             filtered_model_schemas[model_name] = model_schemas[model_name]
-            filtered_model_schemas[model_name]["model_path"] = available_models[model_name]
+            # filtered_model_schemas[model_name]["model_path"] = available_models[model_name]
 
     pprint(filtered_model_schemas)
 
-    return filtered_model_schemas
+    return model_schemas
 
 
 def main(workers_per_model, verbose=False):
