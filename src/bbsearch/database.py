@@ -379,7 +379,7 @@ class MiningCacheCreation:
                     debug=True  # we need all the columns!
                 )
                 mined_elements['mining_model'] = model_nm
-            print(f'{timer["run mining pipeline"]:7.2f} seconds')
+            print(f'Running mining pipeline: {timer["run mining pipeline"]:7.2f} seconds')
 
             with timer('insertion into db'):
                 mined_elements.to_sql(
@@ -388,7 +388,7 @@ class MiningCacheCreation:
                     if_exists='append',
                     index=False
                 )
-            print(f'{timer["insertion into db"]:7.2f} seconds')
+            print(f'Insertion into sql db: {timer["insertion into db"]:7.2f} seconds')
 
         # Create index
         mining_cache_article_id_index = sqlalchemy.Index(
