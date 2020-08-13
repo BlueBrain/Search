@@ -387,6 +387,9 @@ class MiningCacheCreation:
                 # Select only entity types for which this model is responsible
                 df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
+                # Add info on the mining model used
+                df['mining_model'] = model_name
+
                 # Rename entity types using the model library info, so that we match the schema request
                 df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                          info_slice['entity_type']))})
