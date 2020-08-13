@@ -343,12 +343,12 @@ class MiningCacheCreation:
         # list of (art_it, par_pos_in_art)
         article_ids = self.engine.execute("""SELECT article_id FROM articles""").fetchall()
 
-        def get_article_texts_with_metadata(article_id):
+        def get_article_texts_with_metadata(art_id):
             paragraphs = self.engine.execute(
                 f"""
                 SELECT DISTINCT paragraph_pos_in_article
                 FROM sentences
-                WHERE article_id = "{article_id}"
+                WHERE article_id = "{art_id}"
                 """
             ).fetchall()
             return (
