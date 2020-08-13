@@ -254,6 +254,8 @@ class MiningCacheCreation:
             Engine linked to the database.
         """
         self.engine = engine
+        self.index_name = "mining_cache_article_id_index"
+        self.table_name = "mining_cache"
 
     def construct(self, ee_models_library, n_processes=1, always_mine=False):
         """Construct and populate the cache of mined results."""
@@ -271,9 +273,9 @@ class MiningCacheCreation:
         """Create the schemas of the different tables in the database."""
         metadata = sqlalchemy.MetaData()
 
-        if self.engine.dialect.has_table(self.engine, "mining_cache"):
+        if self.engine.dialect.has_table(self.engine, self.table_name):
             self.mining_cache_table = sqlalchemy.Table(
-                "mining_cache",
+                self.table_name,
                 metadata,
                 autoload=True,
                 autoload_with=self.engine
@@ -288,7 +290,7 @@ class MiningCacheCreation:
         )
 
         self.mining_cache_table = sqlalchemy.Table(
-            "mining_cache",
+            self.table_name,
             metadata,
             sqlalchemy.Column("entity", sqlalchemy.Text()),
             sqlalchemy.Column("entity_type", sqlalchemy.Text()),
@@ -314,8 +316,6 @@ class MiningCacheCreation:
 
         with self.engine.begin() as connection:
             metadata.create_all(connection)
-
-        self.index_name = "mining_cache_article_id_index"
 
     def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
         """Populate cache with elements extracted by text mining.
@@ -361,14 +361,14 @@ class MiningCacheCreation:
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
-                        FROM mining_cache 
+                        FROM {self.table_name} 
                         WHERE mining_model = "{model_name}"
                     """
                 )
             else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
-                            FROM mining_cache
+                            FROM {self.table_name}
                             WHERE mining_model = {model_name}
                             LIMIT 1
                     """)
@@ -410,12 +410,12 @@ class MiningCacheCreation:
 
     def _drop_index_if_exists(self):
         inspector = sqlalchemy.inspect(self.engine)
-        indexes_mining_cache = inspector.get_indexes('mining_cache')
+        indexes_mining_cache = inspector.get_indexes(self.table_name)
         if indexes_mining_cache:  # TODO: in fact the index should be dropped BEFORE!
             self.engine.execute(
                 f"""
                 DROP INDEX {self.index_name}
-                ON mining_cache
+                ON {self.table_name}
                 """
             )
 
