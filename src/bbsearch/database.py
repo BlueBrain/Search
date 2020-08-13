@@ -305,7 +305,7 @@ class MiningCacheCreation:
             sqlalchemy.Column(
                 "article_id",
                 sqlalchemy.Integer(),
-                sqlalchemy.ForeignKey(articles_table.c.article_id),
+                # sqlalchemy.ForeignKey(articles_table.c.article_id),
                 nullable=False,
             ),
             sqlalchemy.Column(
