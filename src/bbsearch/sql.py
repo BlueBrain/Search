@@ -178,7 +178,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
 
     model_names : list
-        List of model names to consider.
+        List of model names to consider. Duplicates are removed automatically.
 
     engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
         SQLAlchemy Engine connected to the database.
@@ -195,7 +195,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         conditions.append(cond)
 
     conditions_id = " OR ".join(conditions)
-    condition_models = ", ".join([f"'{m}'" for m in model_names])
+    condition_models = ", ".join([f"'{m}'" for m in set(model_names)])
 
     query = f"SELECT * FROM mining_cache WHERE ({conditions_id}) AND mining_model in ({condition_models})"
 

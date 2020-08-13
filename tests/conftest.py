@@ -33,18 +33,18 @@ def benchmark_parameters(request):
 
 
 @pytest.fixture(scope='session')
-def test_parameters(metadata_path):
+def test_parameters(metadata_path, entity_types):
     """Parameters needed for the tests"""
     return {
-            'n_articles': len(pd.read_csv(metadata_path)),
-            'n_sections_per_article': 2,  # paragraph = section
-            'n_sentences_per_section': 3,
-            'n_entities_per_section': 4,
-            'embedding_size': 2
+        'n_articles': len(pd.read_csv(metadata_path)),
+        'n_sections_per_article': 2,  # paragraph = section
+        'n_sentences_per_section': 3,
+        'n_entities_per_section': len(entity_types),
+        'embedding_size': 2
     }
 
 
-def fill_db_data(engine, metadata_path, test_parameters):
+def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     metadata = sqlalchemy.MetaData()
 
     # Creation of the schema of the tables
@@ -98,7 +98,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
                          sqlalchemy.Column('property_value', sqlalchemy.Text()),
                          sqlalchemy.Column('property_type', sqlalchemy.Text()),
                          sqlalchemy.Column('property_value_type', sqlalchemy.Text()),
-                         sqlalchemy.Column('ontology_source', sqlalchemy.Text()),
                          sqlalchemy.Column('paper_id', sqlalchemy.Text()),
                          sqlalchemy.Column('start_char', sqlalchemy.Integer()),
                          sqlalchemy.Column('end_char', sqlalchemy.Integer()),
@@ -109,7 +108,6 @@ def fill_db_data(engine, metadata_path, test_parameters):
                          sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
                                            nullable=False),
 
-                         sqlalchemy.Column('paragraph_sha', sqlalchemy.Text()),
                          sqlalchemy.Column('mining_model', sqlalchemy.Text()),
 
                          )
@@ -152,19 +150,18 @@ def fill_db_data(engine, metadata_path, test_parameters):
         for sec_ix in range(test_parameters['n_sections_per_article']):
             for ent_ix in range(test_parameters['n_entities_per_section']):
                 s = {'entity': f'entity_{ent_ix}',
-                     'entity_type': 'A',
+                     'entity_type': entity_types[ent_ix],
                      'property': None,
                      'property_value': None,
                      'property_type': None,
                      'property_value_type': None,
-                     'ontology_source': 'NCIT',
                      'paper_id': f'{article_id}:whatever:{sec_ix}',
                      'start_char': ent_ix,
                      'end_char': ent_ix + 1,
                      'article_id': article_id,
                      'paragraph_pos_in_article': sec_ix,
-                     'paragraph_sha': 'some_sha',
-                     'mining_model': 'v1'}
+                     'mining_model': 'en_ner_craft_md'  # from data/mining/request/ee_models_library.csv
+                     }
                 temp_m.append(pd.Series(s))
 
     mining_content = pd.DataFrame(temp_m)
@@ -190,13 +187,13 @@ def backend_database(request):
 
 
 @pytest.fixture(scope='session')
-def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, backend_database):
+def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, backend_database, entity_types):
     """Connection object (sqlite)."""
     if backend_database == 'sqlite':
         db_path = tmp_path_factory.mktemp('db', numbered=False) / 'cord19_test.db'
         Path(db_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{db_path}')
-        fill_db_data(engine, metadata_path, test_parameters)
+        fill_db_data(engine, metadata_path, test_parameters, entity_types)
         yield engine
 
     else:
@@ -229,7 +226,7 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
         engine.dispose()
         engine = sqlalchemy.create_engine(f'mysql+pymysql://root:my-secret-pw'
                                           f'@127.0.0.1:{port_number}/test')
-        fill_db_data(engine, metadata_path, test_parameters)
+        fill_db_data(engine, metadata_path, test_parameters, entity_types)
 
         yield engine
 
@@ -259,6 +256,14 @@ def metadata_path():
     assert metadata_path.exists()
 
     return metadata_path
+
+
+@pytest.fixture(scope='session')
+def entity_types():
+    """Entity types that can be used throughout tests."""
+    request_path = ROOT_PATH / 'tests' / 'data' / 'mining' / 'request' / 'ee_models_library.csv'
+
+    return list(pd.read_csv(request_path)['entity_type'].unique())
 
 
 @pytest.fixture(scope='session')

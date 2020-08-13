@@ -117,29 +117,29 @@ class TestMiningCache:
         expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] * test_parameters[
             'n_entities_per_section']
 
-        res = retrieve_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
 
-    @pytest.mark.parametrize('mining_model', ['v1', 'wrong_model'])
+    @pytest.mark.parametrize('mining_model', ['en_ner_craft_md', 'wrong_model'])
     def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
         identifiers = [(1, -1), (2, 1)]
         expected_len = 1 * (test_parameters['n_sections_per_article'] *
                             test_parameters['n_entities_per_section']) + 1 * test_parameters['n_entities_per_section']
-        expected_len *= int(mining_model == 'v1')
+        expected_len *= int(mining_model == 'en_ner_craft_md')
 
         res = retrieve_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
-        assert set(res['article_id'].unique()) == ({1, 2} if mining_model == 'v1' else set())
+        assert set(res['article_id'].unique()) == ({1, 2} if mining_model == 'en_ner_craft_md' else set())
 
     def test_retrieve_none(self, fake_sqlalchemy_engine):
         identifiers = [(-12, -1)]
         expected_len = 0
 
-        res = retrieve_mining_cache(identifiers, ['v1'], fake_sqlalchemy_engine)
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len

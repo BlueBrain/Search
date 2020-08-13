@@ -130,10 +130,10 @@ class MiningServer:
                 # determine which models are necessary
                 ee_models_info = self.ee_models_from_request_schema(schema_df)
                 etypes_na = ee_models_info[ee_models_info.model.isna()]['entity_type']
-                ee_models_info = ee_models_info[~ee_models_info.model.isna()]['model'].to_list()
+                model_names = ee_models_info[~ee_models_info.model.isna()]['model'].to_list()
 
                 # get cached results
-                df_all = retrieve_mining_cache(identifiers, ee_models_info, self.connection)
+                df_all = retrieve_mining_cache(identifiers, model_names, self.connection)
 
                 # drop unwanted entity types
                 requested_etypes = schema_df['entity_type'].unique()
@@ -141,7 +141,7 @@ class MiningServer:
 
                 # append the ontology source column
                 os_mapping = {et: os for _, (et, os)
-                              in schema_df[['entity_type_name', 'ontology_source']].iterrows()}
+                              in ee_models_info[['entity_type', 'ontology_source']].iterrows()}
                 df_all['ontology_source'] = df_all['entity_type'].apply(lambda x: os_mapping[x])
 
                 # apply specs if not debug
@@ -167,8 +167,8 @@ class MiningServer:
 
                 texts = [(row['text'],
                           {'paper_id':
-                               f'{row["article_id"]}:{row["section_name"]}'
-                               f':{row["paragraph_pos_in_article"]}'})
+                           f'{row["article_id"]}:{row["section_name"]}'
+                           f':{row["paragraph_pos_in_article"]}'})
                          for _, row in all_paragraphs.iterrows()]
 
                 df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)

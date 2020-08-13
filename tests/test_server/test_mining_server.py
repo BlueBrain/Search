@@ -69,7 +69,8 @@ class TestMiningServer:
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
-    def test_mining_server_database(self, mining_client):
+    @pytest.mark.parametrize('use_cache', [True, False], ids=['with_cache', 'without_cache'])
+    def test_mining_server_database(self, mining_client, use_cache):
         schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
         with open(schema_file, 'r') as f:
             schema_request = f.read()
@@ -85,7 +86,7 @@ class TestMiningServer:
         assert response.json == {"error": "The request has to be a JSON object."}
 
         identifiers = [(1, 0), (2, -1)]
-        request_json = {"identifiers": identifiers, 'schema': schema_request}
+        request_json = {"identifiers": identifiers, 'schema': schema_request, 'use_cache': use_cache}
         response = mining_client.post('/database', json=request_json)
         response_json = response.json
         assert response.status_code == 200
