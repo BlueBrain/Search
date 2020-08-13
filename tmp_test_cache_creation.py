@@ -22,5 +22,6 @@ engine = sqlalchemy.create_engine(get_sql_url())
 
 mining_cache_creation = MiningCacheCreation(engine=engine)
 
-mining_cache_creation.construct()
-
+mining_cache_creation.construct(ee_models_library='/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv',
+                                n_processes=1,
+                                always_mine=True)
