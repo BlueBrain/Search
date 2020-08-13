@@ -406,10 +406,18 @@ class MiningCacheCreation:
 
     def _index_creation(self):
         timer = Timer()
+        index_name = 'mining_cache_article_id_index'
+
         # Create index
         with timer('index creation'):
+            self.engine.execute(
+                f"""
+                DROP INDEX IF EXISTS {index_name}
+                ON mining_cache
+                """
+            )
             mining_cache_article_id_index = sqlalchemy.Index(
-                'mining_cache_article_id_index',
+                index_name,
                 self.mining_cache_table.c.article_id
             )
             mining_cache_article_id_index.create(bind=self.engine)
