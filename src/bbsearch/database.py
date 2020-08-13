@@ -257,7 +257,7 @@ class MiningCacheCreation:
     def construct(self, ee_models_library, n_processes=1, always_mine=False):
         """Construct and populate the cache of mined results."""
         self._schema_creation()
-        print("Schemas of the tables are created.")
+        print("Schema of the table has been created.")
         self._populate_table(
             ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
         )
@@ -338,7 +338,7 @@ class MiningCacheCreation:
 
         # texts with metadata to feed run_pipeline
         all_texts = (
-            (retrieve_paragraph(art_id, par_pos_in_art, self.engine).iloc[0, 'text'],
+            (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
              dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=None))
             for art_id, par_pos_in_art in arts_pars
         )
