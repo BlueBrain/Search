@@ -337,11 +337,11 @@ class MiningCacheCreation:
         )
 
         # texts with metadata to feed run_pipeline
-        all_texts = (retrieve_paragraph(art_id,
-                                        par_pos_in_art, self.engine).iloc[0, 'text'],
-                     dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=None)
-                     for
-                     art_id, par_pos_in_art in arts_pars)
+        all_texts = (
+            (retrieve_paragraph(art_id, par_pos_in_art, self.engine).iloc[0, 'text'],
+             dict(article_id=art_id, paragraph_pos_in_article=par_pos_in_art, paper_id=None))
+            for art_id, par_pos_in_art in arts_pars
+        )
         # TODO: paper_id should be computed!
 
         for model_nm in ee_models_library['model']:
