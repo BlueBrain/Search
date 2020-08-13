@@ -1,3 +1,4 @@
+import pandas as pd
 import sqlalchemy
 
 from bbsearch.database import MiningCacheCreation
@@ -22,6 +23,7 @@ engine = sqlalchemy.create_engine(get_sql_url())
 
 mining_cache_creation = MiningCacheCreation(engine=engine)
 
-mining_cache_creation.construct(ee_models_library='/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv',
+ee_models_df = pd.read_csv('/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv')
+mining_cache_creation.construct(ee_models_library=ee_models_df,
                                 n_processes=1,
                                 always_mine=True)
