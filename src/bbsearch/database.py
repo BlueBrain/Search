@@ -8,7 +8,6 @@ import sqlalchemy
 
 from bbsearch.mining.pipeline import run_pipeline
 from bbsearch.sql import retrieve_articles
-from bbsearch.utils import Timer
 
 
 class CORD19DatabaseCreation:
@@ -261,13 +260,10 @@ class MiningCacheCreation:
         """Construct and populate the cache of mined results."""
         self._schema_creation()
         print("Schema of the table has been created.")
-        self._drop_index_if_exists()
         self._populate_table(
             ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
         )
         print("The table has been populated.")
-        self._index_creation()
-        print("The index has been created.")
 
     def _schema_creation(self):
         """Create the schemas of the different tables in the database."""
@@ -305,13 +301,14 @@ class MiningCacheCreation:
             sqlalchemy.Column(
                 "article_id",
                 sqlalchemy.Integer(),
-                # sqlalchemy.ForeignKey(articles_table.c.article_id),
+                sqlalchemy.ForeignKey(articles_table.c.article_id),
                 nullable=False,
             ),
             sqlalchemy.Column(
                 "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
             ),
-            sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
+            sqlalchemy.Column("mining_model_name", sqlalchemy.Text(), nullable=False),
+            sqlalchemy.Column("mining_model_version", sqlalchemy.Text(), nullable=False),
         )
 
         with self.engine.begin() as connection:
@@ -359,32 +356,31 @@ class MiningCacheCreation:
                     for r in df_articles.iterrows())
 
         def _batch(lst, n=1):
-            l = len(lst)
-            for ndx in range(0, l, n):
-                yield lst[ndx:min(ndx + n, l)]
+            len_lst = len(lst)
+            for ndx in range(0, len_lst, n):
+                yield lst[ndx:min(ndx + n, len_lst)]
 
-        for model_name, info_slice in ee_models_library.groupby('model'):
+        for model_nm, info_slice in ee_models_library.groupby('model'):
+            ee_model = spacy.load(model_nm)
             if always_mine:  # Force re-mining, but first drop old rows in cache
                 self.engine.execute(
                     f"""DELETE 
                         FROM {self.table_name} 
-                        WHERE mining_model = "{model_name}"
+                        WHERE mining_model_name = "{ee_model.meta["name"]}"
                     """
                 )
             else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
                             FROM {self.table_name}
-                            WHERE mining_model = {model_name}
+                            WHERE mining_model_name = {ee_model.meta["name"]}
                             LIMIT 1
                     """)
                 if len(result) > 1:
                     continue
 
-            ee_model = spacy.load(model_name)
             t00 = time.perf_counter()
-            BATCH_SIZE = 5
-            for article_ids in _batch(article_ids, n=BATCH_SIZE):
+            for article_ids in _batch(article_ids, n=1):  # TODO: we may try batching in future
                 t0 = time.perf_counter()
                 # Run text mining
                 df = run_pipeline(
@@ -393,16 +389,19 @@ class MiningCacheCreation:
                     models_relations={},
                     debug=True  # we need all the columns!
                 )
+                t0_1 = time.perf_counter()
 
                 # Select only entity types for which this model is responsible
                 df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
                 # Add info on the mining model used
-                df['mining_model'] = model_name
+                df['mining_model_name'] = ee_model.meta["name"]
+                df['mining_model_version'] = ee_model.meta["version"]
 
                 # Rename entity types using the model library info, so that we match the schema request
                 df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
                                                          info_slice['entity_type']))})
+                t0_2 = time.perf_counter()
 
                 df.to_sql(
                     name='mining_cache',
@@ -411,28 +410,11 @@ class MiningCacheCreation:
                     index=False
                 )
                 t1 = time.perf_counter()
-                print(f'Cached elements mined by {model_name} '
-                      f'from article {article_ids}'
+                print(f'Cached elements mined by {ee_model.meta["name"]} '
+                      f'from articles: {article_ids}'
                       f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
-
-    def _drop_index_if_exists(self):
-        inspector = sqlalchemy.inspect(self.engine)
-        indexes_mining_cache = inspector.get_indexes(self.table_name)
-        if indexes_mining_cache:  # TODO: in fact the index should be dropped BEFORE!
-            self.engine.execute(
-                f"""
-                DROP INDEX {self.index_name}
-                ON {self.table_name}
-                """
-            )
-
-    def _index_creation(self):
-        timer = Timer()
-        # Create index
-        with timer('index creation'):
-            index = sqlalchemy.Index(
-                self.index_name,
-                self.mining_cache_table.c.article_id
-            )
-            index.create(bind=self.engine)
-        print(f'Index creation: {timer["index creation"]:7.2f} seconds')
+                print('Partial times:')
+                print(f' - run_pipeline : {t0_1 - t0:.1f} s.')
+                print(f' - fix columns  : {t0_2 - t0_1:.1f} s.')
+                print(f' - to_sql       : {t1 - t0_2:.1f} s.')
+                print()
