@@ -16,7 +16,9 @@ MYSQL_PWD = "guest"
 DATABASE_NAME = "cord19_v35"
 DRIVERS = ["mysql+pymysql", "mysql+mysqldb", "mysql"]
 QUERIES = {"date_range": "SELECT article_id FROM articles WHERE "
-                         "publish_time BETWEEN '1999-01-01' AND '2020-12-31'"}
+                         "publish_time BETWEEN '1999-01-01' AND '2020-12-31'",
+           "mining_cache": "SELECT * FROM mining_cache WHERE article_id = 111"
+                           " and paragraph_pos_in_article = 0"}
 
 
 @pytest.mark.parametrize("server_name", ["embedding", "mining", "search"])
@@ -55,7 +57,7 @@ class TestEmbedding:
 
 class TestMining:
     @pytest.mark.parametrize("entity_type", ENTITY_TYPES)
-    def test_mine_entity_text(self, benchmark, benchmark_parameters, entity_type):
+    def test_mine_text(self, benchmark, benchmark_parameters, entity_type):
         """Send 100 sentences as raw text."""
         mining_server = benchmark_parameters["mining_server"]
 
@@ -80,9 +82,11 @@ class TestMining:
 
         assert response.ok
 
+    @pytest.mark.parametrize("use_cache", [True, False], ids=["cache", "nocache"])
     @pytest.mark.parametrize("entity_type", ENTITY_TYPES)
     @pytest.mark.parametrize("article_id", ARTICLE_IDS)
-    def test_mine_entity_article(self, benchmark, benchmark_parameters, entity_type, article_id):
+    def test_mine_article(self, benchmark, benchmark_parameters, entity_type, article_id,
+                                 use_cache):
         """Mine an entire article from the database."""
         mining_server = benchmark_parameters["mining_server"]
 
@@ -98,7 +102,9 @@ class TestMining:
         table = pd.Series({"entity_type": entity_type}, index=header).to_frame().transpose()
         schema_request = table.to_csv(index=False)
 
-        payload_json = {"identifiers": identifiers, "schema": schema_request}
+        payload_json = {"identifiers": identifiers,
+                        "schema": schema_request,
+                        "use_cache": use_cache}
 
         response = benchmark(requests.post, url, json=payload_json)
 
