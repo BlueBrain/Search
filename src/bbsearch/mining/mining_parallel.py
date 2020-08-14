@@ -63,7 +63,14 @@ class Miner:
         self.logger = logging.getLogger(str(self))
 
         self.logger.info("loading the NLP model...")
-        self.ee_model = spacy.load(self.model_path)
+        self.model = spacy.load(self.model_path)
+        self.model_meta = {
+            "mining_model": self.model_path,
+            # "mining_model_name": self.model.meta["name"],
+            # "mining_model_version": self.model.meta["version"],
+            # "spacy_version": self.model.meta["spacy_version"],
+            # "spacy_git_version": self.model.meta["spacy_git_version"]
+        }
 
         self.logger.info("starting mining...")
         self._work_loop()
@@ -93,12 +100,30 @@ class Miner:
                         f.write(f"Exception name: {e}\n")
                         f.write("Traceback:\n")
                         traceback.print_exc(file=f)
+                        f.write("\n")
             except queue.Empty:
-                self.logger.info("Queue empty")
+                self.logger.debug("Queue empty")
                 if self.can_finish.is_set():
                     finished = True
                 else:
                     time.sleep(1)
+
+    def _fetch_all_paragraphs(self, article_id):
+        query = """
+                SELECT paragraph_pos_in_article, text
+                FROM sentences
+                WHERE article_id = :article_id
+                ORDER BY paragraph_pos_in_article, sentence_pos_in_paragraph
+                """
+        result_proxy = self.engine.execute(
+            sqlalchemy.sql.text(query), article_id=article_id
+        )
+
+        all_paragraphs = collections.defaultdict(list)
+        for paragraph_pos, sentence in result_proxy:
+            all_paragraphs[paragraph_pos].append(sentence)
+
+        return all_paragraphs
 
     def _mine(self, article_id):
         """Perform one mining task.
@@ -110,21 +135,10 @@ class Miner:
         """
         self.logger.info(f"Processing article_id = {article_id}")
 
-        self.logger.info("Getting all sentences from the database...")
-        query = """
-        SELECT paragraph_pos_in_article, text
-        FROM sentences
-        WHERE article_id = :article_id
-        ORDER BY paragraph_pos_in_article, sentence_pos_in_paragraph
-        """
-        result_proxy = self.engine.execute(
-            sqlalchemy.sql.text(query), article_id=article_id
-        )
+        self.logger.debug("Getting all sentences from the database...")
+        all_paragraphs = self._fetch_all_paragraphs(article_id)
 
-        all_paragraphs = collections.defaultdict(list)
-        for paragraph_pos, sentence in result_proxy:
-            all_paragraphs[paragraph_pos].append(sentence)
-
+        self.logger.debug("Constructing texts...")
         texts = []
         for paragraph_pos in sorted(all_paragraphs):
             sentences = all_paragraphs[paragraph_pos]
@@ -132,15 +146,16 @@ class Miner:
             metadata = {
                 "article_id": article_id,
                 "paragraph_pos_in_article": paragraph_pos,
-                "mining_model": self.model_path,
+                **self.model_meta,
             }
             texts.append((paragraph, metadata))
 
-        self.logger.info("Running the pipeline...")
+        self.logger.debug("Running the pipeline...")
         df_results = run_pipeline(
-            texts=texts, model_entities=self.ee_model, models_relations={}, debug=True
+            texts=texts, model_entities=self.model, models_relations={}, debug=True
         )
 
+        self.logger.debug("Filtering entity types...")
         # Keep only the entity types we care about
         rows_to_keep = df_results["entity_type"].isin(self.entity_map)
         df_results = df_results[rows_to_keep]
@@ -150,6 +165,7 @@ class Miner:
             lambda entity_type: self.entity_map[entity_type]
         )
 
+        self.logger.debug("Writing results to the SQL database...")
         df_results.to_sql(
             self.target_table_name, con=self.engine, if_exists="append", index=False
         )
@@ -387,7 +403,7 @@ def main(workers_per_model, verbose=False):
     """
     logging.basicConfig()
     if verbose:
-        logging.getLogger().setLevel(logging.INFO)
+        logging.getLogger().setLevel(logging.DEBUG)
 
     available_models = {
         "model1_bc5cdr_annotations5_spacy23": "assets/model1_bc5cdr_annotations5_spacy23",
