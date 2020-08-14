@@ -46,6 +46,11 @@ def main():
 
     from bbsearch.database import MiningCacheCreation
 
+    print('Parameters:')
+    for arg in vars(args):
+        print(f'{args}: {getattr(args, arg)}')
+    print()
+
     if args.db_type == "sqlite":
         database_path = "/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db"
         if not pathlib.Path(database_path).exists():
@@ -59,9 +64,6 @@ def main():
     else:
         raise ValueError("This is not an handled db_type.")
 
-    import pdb
-
-    pdb.set_trace()
     ee_models_library = pd.read_csv(args.ee_models_library_file)
     db = MiningCacheCreation(engine=engine)
     db.construct(
