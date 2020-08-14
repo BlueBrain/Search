@@ -234,7 +234,6 @@ class MinerMaster:
             "SELECT article_id FROM articles ORDER BY article_id"
         )
         all_article_ids = [row["article_id"] for row in result_proxy]
-        all_article_ids = all_article_ids[:10]
 
         # We got some new tasks, put them in the task queues.
         self.logger.info("Adding new tasks...")
@@ -306,7 +305,7 @@ def get_cord19_db_url():
     url : str
         The MySQL CORD-19 database URL.
     """
-    protocol = "mysql+mysqldb"
+    protocol = "mysql+pymysql"
     host = "dgx1.bbp.epfl.ch"
     port = 8853
     user = "stan"
@@ -405,7 +404,7 @@ def filter_model_schemas(model_schemas, available_models):
     return filtered_model_schemas
 
 
-def main(workers_per_model, verbose):
+def main(workers_per_model, verbose, log_file_name=None):
     """Run the main entrypoint.
 
     Parameters
@@ -414,9 +413,14 @@ def main(workers_per_model, verbose):
         The number of workers per model.
     verbose : int
         The logging level, -v corresponds to INFO, -vv to DEBUG.
+    log_file_name : str
+        The file for the logs. If not provided the stdout will be used.
     """
     # Set logging level
-    logging.basicConfig()
+    logging.basicConfig(
+        filename=log_file_name,
+        format="%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s",
+    )
     if verbose == 1:
         logging.getLogger().setLevel(logging.INFO)
     elif verbose >= 2:
@@ -459,6 +463,13 @@ parser.add_argument(
     default=0,
     help="The logging level, -v correspond to INFO, -vv to DEBUG",
 )
+parser.add_argument(
+    "--log_file",
+    "-l",
+    type=str,
+    default=None,
+    help="The file for the logs. If not provided the stdout will be used.",
+)
 args = parser.parse_args()
 if __name__ == "__main__":
-    main(args.workers_per_model, args.verbose)
+    main(args.workers_per_model, args.verbose, args.log_file)
