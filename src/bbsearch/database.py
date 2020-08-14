@@ -307,7 +307,7 @@ class MiningCacheCreation:
             sqlalchemy.Column(
                 "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
             ),
-            sqlalchemy.Column("mining_model_name", sqlalchemy.Text(), nullable=False),
+            sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
             sqlalchemy.Column("mining_model_version", sqlalchemy.Text(), nullable=False),
         )
 
@@ -366,14 +366,14 @@ class MiningCacheCreation:
                 self.engine.execute(
                     f"""DELETE 
                         FROM {self.table_name} 
-                        WHERE mining_model_name = "{ee_model.meta["name"]}"
+                        WHERE mining_model = "{ee_model.meta["name"]}"
                     """
                 )
             else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
                             FROM {self.table_name}
-                            WHERE mining_model_name = {ee_model.meta["name"]}
+                            WHERE mining_model = {ee_model.meta["name"]}
                             LIMIT 1
                     """)
                 if len(result) > 1:
@@ -395,7 +395,7 @@ class MiningCacheCreation:
                 df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
                 # Add info on the mining model used
-                df['mining_model_name'] = ee_model.meta["name"]
+                df['mining_model'] = ee_model.meta["name"]
                 df['mining_model_version'] = ee_model.meta["version"]
 
                 # Rename entity types using the model library info, so that we match the schema request
