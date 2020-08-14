@@ -404,7 +404,7 @@ class MiningCacheCreation:
                 t0_2 = time.perf_counter()
 
                 df.to_sql(
-                    name='mining_cache',
+                    name=self.table_name,
                     con=self.engine,
                     if_exists='append',
                     index=False
