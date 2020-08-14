@@ -341,7 +341,7 @@ class MiningCacheCreation:
         None
         """
         # list of (art_it, par_pos_in_art)
-        article_ids = self.engine.execute("""SELECT article_id FROM articles""").fetchall()
+        article_ids = [a for a, in self.engine.execute("""SELECT article_id FROM articles""")]
 
         def _get_article_texts_with_metadata(art_ids):
             def _paper_id(md):
@@ -357,6 +357,11 @@ class MiningCacheCreation:
                         paragraph_pos_in_article=r[1]['paragraph_pos_in_article'],
                         paper_id=_paper_id(r[1])))
                     for r in df_articles.iterrows())
+
+        def _batch(lst, n=1):
+            l = len(lst)
+            for ndx in range(0, l, n):
+                yield lst[ndx:min(ndx + n, l)]
 
         for model_name, info_slice in ee_models_library.groupby('model'):
             if always_mine:  # Force re-mining, but first drop old rows in cache
@@ -378,11 +383,12 @@ class MiningCacheCreation:
 
             ee_model = spacy.load(model_name)
             t00 = time.perf_counter()
-            for article_id, in article_ids:
+            BATCH_SIZE = 5
+            for article_ids in _batch(article_ids, n=BATCH_SIZE):
                 t0 = time.perf_counter()
                 # Run text mining
                 df = run_pipeline(
-                    texts=_get_article_texts_with_metadata(article_id),
+                    texts=_get_article_texts_with_metadata(article_ids),
                     model_entities=ee_model,
                     models_relations={},
                     debug=True  # we need all the columns!
@@ -406,7 +412,7 @@ class MiningCacheCreation:
                 )
                 t1 = time.perf_counter()
                 print(f'Cached elements mined by {model_name} '
-                      f'from article {article_id}'
+                      f'from article {article_ids}'
                       f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
 
     def _drop_index_if_exists(self):
