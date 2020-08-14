@@ -86,7 +86,7 @@ class TestMining:
     @pytest.mark.parametrize("entity_type", ENTITY_TYPES)
     @pytest.mark.parametrize("article_id", ARTICLE_IDS)
     def test_mine_article(self, benchmark, benchmark_parameters, entity_type, article_id,
-                                 use_cache):
+                          use_cache):
         """Mine an entire article from the database."""
         mining_server = benchmark_parameters["mining_server"]
 
