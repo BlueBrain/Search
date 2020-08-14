@@ -29,34 +29,38 @@ class Miner:
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
+    entity_map : dict[str, str]
+        A map from entity types produced by the model to new
+        entity types that should appear in the cached results.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
     can_finish : multiprocessing.Event
         A flag to indicate that the worker can stop waiting for new
         tasks. Unless this flag is set, the worker will continue
         polling the task queue for new tasks.
-    logging_level : int, optional
-        The logging level for the internal logger
     """
 
     def __init__(
-            self, name, engine_url, model_schema, task_queue, can_finish, logging_level=None
+        self,
+        name,
+        engine_url,
+        model_path,
+        entity_map,
+        target_table,
+        task_queue,
+        can_finish,
     ):
         self.name = name
         self.engine = sqlalchemy.create_engine(engine_url)
-        self.model_path = model_schema["model_path"]
-        self.model_entities = model_schema["entities"]
-        self.entity_map = {
-            entity_from: entity_to
-            for entity_to, entity_from in self.model_entities}
+        self.model_path = model_path
+        self.entity_map = entity_map
+        self.target_table_name = target_table
         self.work_queue = task_queue
         self.can_finish = can_finish
 
         self.n_tasks_done = 0
 
         self.logger = logging.getLogger(str(self))
-        if logging_level is not None:
-            self.logger.setLevel(logging_level)
 
         self.logger.info("loading the NLP model...")
         self.ee_model = spacy.load(self.model_path)
@@ -87,7 +91,7 @@ class Miner:
                         f.write(f"Article ID: {article_id}\n")
                         f.write(f"Exception type: {type(e)}\n")
                         f.write(f"Exception name: {e}\n")
-                        f.write(f"Traceback:\n")
+                        f.write("Traceback:\n")
                         traceback.print_exc(file=f)
             except queue.Empty:
                 self.logger.info("Queue empty")
@@ -113,8 +117,9 @@ class Miner:
         WHERE article_id = :article_id
         ORDER BY paragraph_pos_in_article, sentence_pos_in_paragraph
         """
-        safe_query = sqlalchemy.sql.text(query)
-        result_proxy = self.engine.execute(safe_query, article_id=article_id)
+        result_proxy = self.engine.execute(
+            sqlalchemy.sql.text(query), article_id=article_id
+        )
 
         all_paragraphs = collections.defaultdict(list)
         for paragraph_pos, sentence in result_proxy:
@@ -133,10 +138,7 @@ class Miner:
 
         self.logger.info("Running the pipeline...")
         df_results = run_pipeline(
-            texts=texts,
-            model_entities=self.ee_model,
-            models_relations={},
-            debug=True
+            texts=texts, model_entities=self.ee_model, models_relations={}, debug=True
         )
 
         # Keep only the entity types we care about
@@ -145,9 +147,12 @@ class Miner:
 
         # Map model's names for entity types to desired entity types
         df_results["entity_type"] = df_results["entity_type"].apply(
-            lambda entity_type: self.entity_map[entity_type])
+            lambda entity_type: self.entity_map[entity_type]
+        )
 
-        df_results.to_sql("mining_cache_temp", con=self.engine, if_exists="append", index=False)
+        df_results.to_sql(
+            self.target_table_name, con=self.engine, if_exists="append", index=False
+        )
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 
@@ -176,7 +181,14 @@ class Miner:
         return f"{self.__class__.__name__}[{self.name}]"
 
 
-def get_engine_url():
+def get_cord19_db_url():
+    """Construct the URL to the MySQL CORD-19 database.
+
+    Returns
+    -------
+    url : str
+        The MySQL CORD-19 database URL.
+    """
     protocol = "mysql+mysqldb"
     host = "dgx1.bbp.epfl.ch"
     port = 8853
@@ -184,7 +196,9 @@ def get_engine_url():
     pw = "letmein"
     db = "cord19_v35"
 
-    return f"{protocol}://{user}:{pw}@{host}:{port}/{db}"
+    url = f"{protocol}://{user}:{pw}@{host}:{port}/{db}"
+
+    return url
 
 
 def create_tasks(task_queues):
@@ -198,9 +212,10 @@ def create_tasks(task_queues):
 
     """
     print("Getting all article IDs...")
-    engine = sqlalchemy.create_engine(get_engine_url())
-    result = engine.execute("select article_id from articles")
-    all_article_ids = sorted([row[0] for row in result.fetchall()])
+    engine = sqlalchemy.create_engine(get_cord19_db_url())
+    result_proxy = engine.execute("SELECT article_id FROM articles ORDER BY article_id")
+    all_article_ids = [row["article_id"] for row in result_proxy]
+    all_article_ids = all_article_ids[:10]
 
     # We got some new tasks, put them in the task queues.
     print("Adding new tasks...")
@@ -209,7 +224,7 @@ def create_tasks(task_queues):
             task_queues[model_path].put(article_id)
 
 
-def do_mining(model_schemas, workers_per_model):
+def do_mining(model_schemas, target_table, workers_per_model):
     """Do the parallelized mining.
 
     Parameters
@@ -218,34 +233,40 @@ def do_mining(model_schemas, workers_per_model):
         The models to be used for mining. The keys of the dictionary
         are arbitrary names for the models. The values are model
         paths or names that will be used in `spacy.load(...)`.
+    target_table : str
+        The SQL table for writing the mining results.
     workers_per_model : int
         The number of workers to spawn for each model.
     """
-    # Prepare as many workers as necessary according to `workers_per_model`.
-    # Also instantiate one task queue per model.
-    print("Preparing the workers...")
-    task_queues = {model_name: mp.Queue() for model_name in model_schemas}
-    workers_info = []
-    for model_name, model_schema in model_schemas.items():
-        model_path = model_schema["model_path"]
-        for i in range(workers_per_model):
-            worker_name = f"{model_name}_{i}"
-            workers_info.append((worker_name, model_schema, task_queues[model_name]))
-
     # A flag to let the workers know there won't be any new tasks.
     can_finish = mp.Event()
 
-    # Create the worker processes.
+    # Prepare the task queues for the workers - one task queue per model.
+    task_queues = {model_name: mp.Queue() for model_name in model_schemas}
+
+    # Spawn the workers according to `workers_per_model`.
     print("Spawning the worker processes...")
     worker_processes = []
-    for worker_name, model_schema, task_queue in workers_info:
-        worker_process = mp.Process(
-            name=worker_name,
-            target=Miner,
-            args=(worker_name, get_engine_url(), model_schema, task_queue, can_finish,),
-        )
-        worker_process.start()
-        worker_processes.append(worker_process)
+    for model_name, model_schema in model_schemas.items():
+        model_path = model_schema["model_path"]
+        entity_map = model_schema["entity_map"]
+        for i in range(workers_per_model):
+            worker_name = f"{model_name}_{i}"
+            worker_process = mp.Process(
+                name=worker_name,
+                target=Miner,
+                kwargs={
+                    "name": worker_name,
+                    "engine_url": get_cord19_db_url(),
+                    "model_path": model_path,
+                    "entity_map": entity_map,
+                    "target_table": target_table,
+                    "task_queue": task_queues[model_name],
+                    "can_finish": can_finish,
+                },
+            )
+            worker_process.start()
+            worker_processes.append(worker_process)
 
     # Create tasks
     print("Creating tasks...")
@@ -256,6 +277,8 @@ def do_mining(model_schemas, workers_per_model):
     print("No more new tasks, just waiting for the workers to finish...")
     for process in worker_processes:
         process.join()
+
+    # Evaluate workers exit codes.
     for process in worker_processes:
         if process.exitcode != 0:
             logging.warning(
@@ -265,36 +288,91 @@ def do_mining(model_schemas, workers_per_model):
     print("Finished.")
 
 
-def get_model_schemas():
-    available_models = {
-        "model1_bc5cdr_annotations5_spacy23": "assets/model1_bc5cdr_annotations5_spacy23",
-        "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
-    }
+def load_model_schemas(schema_path):
+    """Load the model schemas from a file.
 
-    schema_df = pd.read_csv("/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv")
+    Parameters
+    ----------
+    schema_path : str or pathlib.Path
+        The path to the CSV file containing the model schemas.
+        It should contain the following three columns:
+            1. Public entity type
+            2. Model path
+            3. Model's internal entity type
+
+    Returns
+    -------
+    model_schemas : dict
+        The model schemas in a dictionary of the following form:
+            model_schemas = {
+                "model1_bc5cdr_annotations5_spacy23": {
+                    "model_path": "/path/to/model",
+                    "entity_map": {
+                        "model_entity_type_1": "public_entity_type_1",
+                        "model_entity_type_2": "public_entity_type_2",
+                    },
+                },
+                "en_ner_bionlp13cg_md": {...},
+            }
+        The keys of this dictionary are model names produces form the
+        model paths by taking all characters that follow the last "/"
+        character, or the whole model path if there is no "/" character
+        in the model path.
+    """
+    schema_df = pd.read_csv(schema_path)
     model_schemas = dict()
-    # {
-    #     "model1_bc5cdr_annotations5_spacy23": {
-    #         "model_path": "/asdf/asdf/asdf",
-    #         "entities": [(ent_1, ent_old_1), (ent_2, ent_old_2)]
-    #     }
-    # }
-    for _, (entity_type, model_path, entity_type_name) in schema_df.iterrows():
+    for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
+        index=False
+    ):
         _, _, model_name = model_path.rpartition("/")
         if model_name not in model_schemas:
             model_schemas[model_name] = dict()
             model_schemas[model_name]["model_path"] = model_path
-            model_schemas[model_name]["entities"] = []
+            model_schemas[model_name]["entity_map"] = dict()
 
-        model_schemas[model_name]["entities"].append((entity_type, entity_type_name))
+        model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
 
+    return model_schemas
+
+
+def filter_model_schemas(model_schemas, available_models):
+    """Filter model schemas and replace model paths.
+
+    If only a subset of models in model schemas is available,
+    and/or the local model paths are different to those in
+    model_schemas then this function can be used to select
+    a subset of models from the model schemas and to adjust
+    their paths to the local paths.
+
+    The keys in both `model_schemas` and `available_models`
+    are model names constructed as described in `load_model_schemas`.
+
+    Parameters
+    ----------
+    model_schemas : dict[str, dict]
+        The model schemas as returned by `load_model_schemas`.
+    available_models : dict[str, str or pathlib.Path]
+        A set of available models that should be selected from
+        the model schemas. It has the following form:
+            available_models = {
+                "model_name_1": "path_to_model_1",
+                "model_name_2": "path_to_model_2",
+            }
+
+    Returns
+    -------
+    filtered_model_schemas : dict[str, dict]
+        The updated version of `model_schemas`.
+    """
     filtered_model_schemas = dict()
     for model_name in model_schemas:
         if model_name in available_models:
             filtered_model_schemas[model_name] = model_schemas[model_name]
-            # filtered_model_schemas[model_name]["model_path"] = available_models[model_name]
+            filtered_model_schemas[model_name]["model_path"] = available_models[
+                model_name
+            ]
 
-    return model_schemas
+    return filtered_model_schemas
 
 
 def main(workers_per_model, verbose=False):
@@ -311,9 +389,17 @@ def main(workers_per_model, verbose=False):
     if verbose:
         logging.getLogger().setLevel(logging.INFO)
 
-    model_schemas = get_model_schemas()
+    available_models = {
+        "model1_bc5cdr_annotations5_spacy23": "assets/model1_bc5cdr_annotations5_spacy23",
+        "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
+    }
+    # schema_path = "/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv"
+    schema_path = "assets/ee_models_library.csv"
+    target_table = "mining_cache_temp"
 
-    do_mining(model_schemas, workers_per_model=workers_per_model)
+    model_schemas = load_model_schemas(schema_path)
+    model_schemas = filter_model_schemas(model_schemas, available_models)
+    do_mining(model_schemas, target_table, workers_per_model=workers_per_model)
 
 
 parser = argparse.ArgumentParser(description="Parallel mining.")
