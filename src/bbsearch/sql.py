@@ -197,7 +197,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     conditions_id = " OR ".join(conditions)
     condition_models = ", ".join([f"'{m}'" for m in set(model_names)])
 
-    query = f"SELECT * FROM mining_cache WHERE ({conditions_id}) AND mining_model in ({condition_models})"
+    query = f"SELECT * FROM mining_cache WHERE ({conditions_id}) AND mining_model in ({condition_models})" \
+            " ORDER BY article_id, paragraph_pos_in_article, start_char"
 
     result = pd.read_sql(query, engine)
 
