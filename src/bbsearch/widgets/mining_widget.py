@@ -58,7 +58,7 @@ class MiningWidget(widgets.VBox):
         # "Mine This Text" button
         self.widgets['mine_text'] = widgets.Button(
             description='⚒️  Mine This Text!',
-            layout=widgets.Layout(width='250px', height='50px'))
+            layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_text'].on_click(self._mine_text_clicked)
         self.widgets['mine_text'].add_class('bbs_button')
 
@@ -68,11 +68,6 @@ class MiningWidget(widgets.VBox):
             layout=widgets.Layout(width='350px', height='50px'))
         self.widgets['mine_articles'].on_click(self._mine_articles_clicked)
         self.widgets['mine_articles'].add_class('bbs_button')
-
-        self.widgets['use_cache'] = widgets.ToggleButton(
-            value=False,
-            description='Use cache',
-            layout=widgets.Layout(width='100px', height='50px'))
 
         # "Output Area" Widget
         self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
@@ -85,8 +80,7 @@ class MiningWidget(widgets.VBox):
             self.widgets['input_text'],
             widgets.HBox(children=[
                 self.widgets['mine_text'],
-                self.widgets['mine_articles'],
-                self.widgets['use_cache']]),
+                self.widgets['mine_articles']]),
             self.widgets['out'],
         ]
 
@@ -116,7 +110,6 @@ class MiningWidget(widgets.VBox):
                 self.mining_server_url + '/database',
                 json={"identifiers": information,
                       "schema": schema_str,
-                      "use_cache": self.widgets['use_cache'].value
                       }
             )
         elif isinstance(information, str):
