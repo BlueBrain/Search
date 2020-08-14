@@ -5,7 +5,7 @@ import logging
 import multiprocessing as mp
 import queue
 import time
-from pprint import pprint
+import traceback
 
 import pandas as pd
 import spacy
@@ -78,6 +78,7 @@ class Miner:
                 article_id = self.work_queue.get(block=False)
                 try:
                     self._mine(article_id)
+                    self.n_tasks_done += 1
                 except Exception as e:
                     with open("errors.log", "a") as f:
                         f.write("=" * 80 + "\n")
@@ -86,8 +87,8 @@ class Miner:
                         f.write(f"Article ID: {article_id}\n")
                         f.write(f"Exception type: {type(e)}\n")
                         f.write(f"Exception name: {e}\n")
-                        f.write(f"Traceback:\n{e.__traceback__}\n\n")
-                        self.n_tasks_done += 1
+                        f.write(f"Traceback:\n")
+                        traceback.print_exc(file=f)
             except queue.Empty:
                 self.logger.info("Queue empty")
                 if self.can_finish.is_set():
@@ -292,8 +293,6 @@ def get_model_schemas():
         if model_name in available_models:
             filtered_model_schemas[model_name] = model_schemas[model_name]
             # filtered_model_schemas[model_name]["model_path"] = available_models[model_name]
-
-    pprint(filtered_model_schemas)
 
     return model_schemas
 
