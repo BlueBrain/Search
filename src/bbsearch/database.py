@@ -7,7 +7,7 @@ import spacy
 import sqlalchemy
 
 from bbsearch.mining.pipeline import run_pipeline
-from bbsearch.sql import retrieve_paragraph
+from bbsearch.sql import retrieve_articles
 from bbsearch.utils import Timer
 
 
@@ -343,21 +343,16 @@ class MiningCacheCreation:
         # list of (art_it, par_pos_in_art)
         article_ids = self.engine.execute("""SELECT article_id FROM articles""").fetchall()
 
-        def get_article_texts_with_metadata(art_id):
-            paragraphs = self.engine.execute(
-                f"""
-                SELECT DISTINCT paragraph_pos_in_article
-                FROM sentences
-                WHERE article_id = {art_id}
-                """
-            )
-            return (
-                (retrieve_paragraph(art_id, par_pos_in_art, self.engine)['text'].iloc[0],
-                 dict(article_id=article_id, paragraph_pos_in_article=par_pos_in_art,
-                      paper_id=f"{article_id}:{None}:{par_pos_in_art}"))
-                for par_pos_in_art, in paragraphs
-            )
-            # TODO: paper_id should be computed!
+        def get_article_texts_with_metadata(art_ids):
+            if isinstance(art_ids, int):
+                art_ids = [art_ids]
+            df_articles = retrieve_articles(art_ids, self.engine)
+            return (r[1]['text'],
+                    dict(
+                        article_id=r[1]['article_id'],
+                        paragraph_pos_in_article=r[1]['paragraph_pos_in_article'],
+                        paper_id=f"{r[1]['article_id']}:{r[1]['section_name']}:{r[1]['paragraph_pos_in_article']}")
+                    for r in df_articles.iterrows())
 
         for model_name, info_slice in ee_models_library.groupby('model'):
             if always_mine:  # Force re-mining, but first drop old rows in cache

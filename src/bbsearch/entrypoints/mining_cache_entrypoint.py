@@ -22,7 +22,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--n_processes",
-    default="4",
+    default=1,
     type=int,
     help="Max n of processes to run the different requested mining models in parallel.",
 )
