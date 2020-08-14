@@ -343,15 +343,19 @@ class MiningCacheCreation:
         # list of (art_it, par_pos_in_art)
         article_ids = self.engine.execute("""SELECT article_id FROM articles""").fetchall()
 
-        def get_article_texts_with_metadata(art_ids):
+        def _get_article_texts_with_metadata(art_ids):
+            def _paper_id(md):
+                return f"{md['article_id']}:{md['section_name']}:{md['paragraph_pos_in_article']}"
+
             if isinstance(art_ids, int):
                 art_ids = [art_ids]
             df_articles = retrieve_articles(art_ids, self.engine)
-            return (r[1]['text'],
+
+            return ((r[1]['text'],
                     dict(
                         article_id=r[1]['article_id'],
                         paragraph_pos_in_article=r[1]['paragraph_pos_in_article'],
-                        paper_id=f"{r[1]['article_id']}:{r[1]['section_name']}:{r[1]['paragraph_pos_in_article']}")
+                        paper_id=_paper_id(r[1])))
                     for r in df_articles.iterrows())
 
         for model_name, info_slice in ee_models_library.groupby('model'):
@@ -378,7 +382,7 @@ class MiningCacheCreation:
                 t0 = time.perf_counter()
                 # Run text mining
                 df = run_pipeline(
-                    texts=get_article_texts_with_metadata(article_id),
+                    texts=_get_article_texts_with_metadata(article_id),
                     model_entities=ee_model,
                     models_relations={},
                     debug=True  # we need all the columns!
