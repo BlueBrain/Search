@@ -48,7 +48,7 @@ def main():
 
     print('Parameters:')
     for arg in vars(args):
-        print(f'{args}: {getattr(args, arg)}')
+        print(f'{arg}: {getattr(args, arg)}')
     print()
 
     if args.db_type == "sqlite":
