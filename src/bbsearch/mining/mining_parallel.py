@@ -1,6 +1,7 @@
 """Parallel mining of named entities."""
 import argparse
 import collections
+import io
 import logging
 import multiprocessing as mp
 import queue
@@ -55,14 +56,14 @@ class Miner:
         self.model_path = model_path
         self.entity_map = entity_map
         self.target_table_name = target_table
-        self.work_queue = task_queue
+        self.task_queue = task_queue
         self.can_finish = can_finish
 
         self.n_tasks_done = 0
 
         self.logger = logging.getLogger(str(self))
 
-        self.logger.info("loading the NLP model...")
+        self.logger.info("Loading the NLP model...")
         self.model = spacy.load(self.model_path)
         self.model_meta = {
             "mining_model": self.model_path,
@@ -72,13 +73,18 @@ class Miner:
             # "spacy_git_version": self.model.meta["spacy_git_version"]
         }
 
-        self.logger.info("starting mining...")
+        self.logger.info("Starting mining...")
         self._work_loop()
 
-        self.logger.info("finished mining, cleaning up...")
+        self.logger.info("Finished mining, cleaning up...")
         self._clean_up()
 
-        self.logger.info("all done.")
+    def _log_exception(self, article_id):
+        error_trace = io.StringIO()
+        traceback.print_exc(file=error_trace)
+
+        error_message = f"\nArticle ID : {article_id}\n" + error_trace.getvalue()
+        self.logger.error(error_message)
 
     def _work_loop(self):
         """Do the work loop."""
@@ -86,21 +92,12 @@ class Miner:
         while not finished:
             try:
                 # this gets stuck if `block=False` isn't set, no idea why
-                article_id = self.work_queue.get(block=False)
+                article_id = self.task_queue.get(block=False)
                 try:
                     self._mine(article_id)
                     self.n_tasks_done += 1
-                except Exception as e:
-                    with open("errors.log", "a") as f:
-                        f.write("=" * 80 + "\n")
-                        f.write(f"Worker {self.name} had a problem.\n")
-                        f.write(f"Model name: {self.model_path}\n")
-                        f.write(f"Article ID: {article_id}\n")
-                        f.write(f"Exception type: {type(e)}\n")
-                        f.write(f"Exception name: {e}\n")
-                        f.write("Traceback:\n")
-                        traceback.print_exc(file=f)
-                        f.write("\n")
+                except Exception:
+                    self._log_exception(article_id)
             except queue.Empty:
                 self.logger.debug("Queue empty")
                 if self.can_finish.is_set():
@@ -197,6 +194,110 @@ class Miner:
         return f"{self.__class__.__name__}[{self.name}]"
 
 
+class MinerMaster:
+    """The master class for creating the mining cache.
+
+    Parameters
+    ----------
+    workers_per_model : int
+        The number of workers per model.
+    database_url : str
+        URL to the MySQL CORD-19 database.
+    model_schemas : dict
+        The models to be used for mining. The keys of the dictionary
+        are arbitrary names for the models. The values are model
+        paths or names that will be used in `spacy.load(...)`.
+    target_table : str
+        The SQL table for writing the mining results.
+    """
+
+    def __init__(self, workers_per_model, database_url, model_schemas, target_table):
+        self.workers_per_model = workers_per_model
+        self.database_url = database_url
+        self.model_schemas = model_schemas
+        self.target_table = target_table
+        self.logger = logging.getLogger(self.__class__.__name__)
+
+    def create_tasks(self, task_queues):
+        """Create tasks for the mining workers.
+
+        Parameters
+        ----------
+        task_queues : dict[str or pathlib.Path, multiprocessing.Queue]
+            Task queues for different models. The keys are the model
+            paths and the values are the actual queues.
+
+        """
+        self.logger.info("Getting all article IDs...")
+        engine = sqlalchemy.create_engine(self.database_url)
+        result_proxy = engine.execute(
+            "SELECT article_id FROM articles ORDER BY article_id"
+        )
+        all_article_ids = [row["article_id"] for row in result_proxy]
+        all_article_ids = all_article_ids[:10]
+
+        # We got some new tasks, put them in the task queues.
+        self.logger.info("Adding new tasks...")
+        for model_path in task_queues:
+            for article_id in all_article_ids:
+                task_queues[model_path].put(article_id)
+
+    def do_mining(self):
+        """Do the parallelized mining."""
+        self.logger.info(
+            f"Starting mining with {self.workers_per_model} workers per model."
+        )
+
+        # A flag to let the workers know there won't be any new tasks.
+        can_finish = mp.Event()
+
+        # Prepare the task queues for the workers - one task queue per model.
+        task_queues = {model_name: mp.Queue() for model_name in self.model_schemas}
+
+        # Spawn the workers according to `workers_per_model`.
+        self.logger.info("Spawning the worker processes...")
+        worker_processes = []
+        for model_name, model_schema in self.model_schemas.items():
+            model_path = model_schema["model_path"]
+            entity_map = model_schema["entity_map"]
+            for i in range(self.workers_per_model):
+                worker_name = f"{model_name}_{i}"
+                worker_process = mp.Process(
+                    name=worker_name,
+                    target=Miner,
+                    kwargs={
+                        "name": worker_name,
+                        "engine_url": self.database_url,
+                        "model_path": model_path,
+                        "entity_map": entity_map,
+                        "target_table": self.target_table,
+                        "task_queue": task_queues[model_name],
+                        "can_finish": can_finish,
+                    },
+                )
+                worker_process.start()
+                worker_processes.append(worker_process)
+
+        # Create tasks
+        self.logger.info("Creating tasks...")
+        self.create_tasks(task_queues)
+
+        # Wait for the processes to finish.
+        can_finish.set()
+        self.logger.info("No more new tasks, just waiting for the workers to finish...")
+        for process in worker_processes:
+            process.join()
+
+        # Evaluate workers' exit codes.
+        for process in worker_processes:
+            if process.exitcode != 0:
+                self.logger.error(
+                    f"Worker {process.name} terminated with exit code {process.exitcode}!"
+                )
+
+        self.logger.info("Finished.")
+
+
 def get_cord19_db_url():
     """Construct the URL to the MySQL CORD-19 database.
 
@@ -215,93 +316,6 @@ def get_cord19_db_url():
     url = f"{protocol}://{user}:{pw}@{host}:{port}/{db}"
 
     return url
-
-
-def create_tasks(task_queues):
-    """Create tasks for the mining workers.
-
-    Parameters
-    ----------
-    task_queues : dict[str or pathlib.Path, multiprocessing.Queue]
-        Task queues for different models. The keys are the model
-        paths and the values are the actual queues.
-
-    """
-    print("Getting all article IDs...")
-    engine = sqlalchemy.create_engine(get_cord19_db_url())
-    result_proxy = engine.execute("SELECT article_id FROM articles ORDER BY article_id")
-    all_article_ids = [row["article_id"] for row in result_proxy]
-    all_article_ids = all_article_ids[:10]
-
-    # We got some new tasks, put them in the task queues.
-    print("Adding new tasks...")
-    for model_path in task_queues:
-        for article_id in all_article_ids:
-            task_queues[model_path].put(article_id)
-
-
-def do_mining(model_schemas, target_table, workers_per_model):
-    """Do the parallelized mining.
-
-    Parameters
-    ----------
-    model_schemas : dict
-        The models to be used for mining. The keys of the dictionary
-        are arbitrary names for the models. The values are model
-        paths or names that will be used in `spacy.load(...)`.
-    target_table : str
-        The SQL table for writing the mining results.
-    workers_per_model : int
-        The number of workers to spawn for each model.
-    """
-    # A flag to let the workers know there won't be any new tasks.
-    can_finish = mp.Event()
-
-    # Prepare the task queues for the workers - one task queue per model.
-    task_queues = {model_name: mp.Queue() for model_name in model_schemas}
-
-    # Spawn the workers according to `workers_per_model`.
-    print("Spawning the worker processes...")
-    worker_processes = []
-    for model_name, model_schema in model_schemas.items():
-        model_path = model_schema["model_path"]
-        entity_map = model_schema["entity_map"]
-        for i in range(workers_per_model):
-            worker_name = f"{model_name}_{i}"
-            worker_process = mp.Process(
-                name=worker_name,
-                target=Miner,
-                kwargs={
-                    "name": worker_name,
-                    "engine_url": get_cord19_db_url(),
-                    "model_path": model_path,
-                    "entity_map": entity_map,
-                    "target_table": target_table,
-                    "task_queue": task_queues[model_name],
-                    "can_finish": can_finish,
-                },
-            )
-            worker_process.start()
-            worker_processes.append(worker_process)
-
-    # Create tasks
-    print("Creating tasks...")
-    create_tasks(task_queues)
-
-    # Wait for the processes to finish.
-    can_finish.set()
-    print("No more new tasks, just waiting for the workers to finish...")
-    for process in worker_processes:
-        process.join()
-
-    # Evaluate workers exit codes.
-    for process in worker_processes:
-        if process.exitcode != 0:
-            logging.warning(
-                f"Worker {process.name} terminated with exit code {process.exitcode}!"
-            )
-
-    print("Finished.")
 
 
 def load_model_schemas(schema_path):
@@ -391,20 +405,24 @@ def filter_model_schemas(model_schemas, available_models):
     return filtered_model_schemas
 
 
-def main(workers_per_model, verbose=False):
-    """Run main.
+def main(workers_per_model, verbose):
+    """Run the main entrypoint.
 
     Parameters
     ----------
     workers_per_model : int
         The number of workers per model.
-    verbose : bool
-        If true then the logging level is set to `logging.INFO`.
+    verbose : int
+        The logging level, -v corresponds to INFO, -vv to DEBUG.
     """
+    # Set logging level
     logging.basicConfig()
-    if verbose:
+    if verbose == 1:
+        logging.getLogger().setLevel(logging.INFO)
+    elif verbose >= 2:
         logging.getLogger().setLevel(logging.DEBUG)
 
+    # Prepare the model schemas
     available_models = {
         "model1_bc5cdr_annotations5_spacy23": "assets/model1_bc5cdr_annotations5_spacy23",
         "en_ner_bionlp13cg_md": "en_ner_bionlp13cg_md",
@@ -415,13 +433,32 @@ def main(workers_per_model, verbose=False):
 
     model_schemas = load_model_schemas(schema_path)
     model_schemas = filter_model_schemas(model_schemas, available_models)
-    do_mining(model_schemas, target_table, workers_per_model=workers_per_model)
+
+    # Launch the mining
+    miner_master = MinerMaster(
+        workers_per_model=workers_per_model,
+        database_url=get_cord19_db_url(),
+        model_schemas=model_schemas,
+        target_table=target_table,
+    )
+    miner_master.do_mining()
 
 
 parser = argparse.ArgumentParser(description="Parallel mining.")
-parser.add_argument("--workers_per_model", "-w", type=int, default=mp.cpu_count())
-parser.add_argument("--verbose", "-v", action="store_true", default=False)
+parser.add_argument(
+    "--workers_per_model",
+    "-w",
+    type=int,
+    default=mp.cpu_count(),
+    help="The number of worker processes to spawn for each mining model.",
+)
+parser.add_argument(
+    "--verbose",
+    "-v",
+    action="count",
+    default=0,
+    help="The logging level, -v correspond to INFO, -vv to DEBUG",
+)
 args = parser.parse_args()
 if __name__ == "__main__":
-    print(f"Running with {args.workers_per_model} workers per model.")
-    main(args.workers_per_model, verbose=args.verbose)
+    main(args.workers_per_model, args.verbose)
