@@ -381,40 +381,46 @@ class MiningCacheCreation:
 
             t00 = time.perf_counter()
             for article_ids in _batch(article_ids, n=1):  # TODO: we may try batching in future
-                t0 = time.perf_counter()
-                # Run text mining
-                df = run_pipeline(
-                    texts=_get_article_texts_with_metadata(article_ids),
-                    model_entities=ee_model,
-                    models_relations={},
-                    debug=True  # we need all the columns!
-                )
-                t0_1 = time.perf_counter()
+                try:
+                    t0 = time.perf_counter()
+                    # Run text mining
+                    df = run_pipeline(
+                        texts=_get_article_texts_with_metadata(article_ids),
+                        model_entities=ee_model,
+                        models_relations={},
+                        debug=True  # we need all the columns!
+                    )
+                    t0_1 = time.perf_counter()
 
-                # Select only entity types for which this model is responsible
-                df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
+                    # Select only entity types for which this model is responsible
+                    df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
-                # Add info on the mining model used
-                df['mining_model'] = ee_model.meta["name"]
-                df['mining_model_version'] = ee_model.meta["version"]
+                    # Add info on the mining model used
+                    df['mining_model'] = ee_model.meta["name"]
+                    df['mining_model_version'] = ee_model.meta["version"]
 
-                # Rename entity types using the model library info, so that we match the schema request
-                df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
-                                                         info_slice['entity_type']))})
-                t0_2 = time.perf_counter()
+                    # Rename entity types using the model library info, so that we match the schema request
+                    df = df.replace({'entity_type': dict(zip(info_slice['entity_type_name'],
+                                                             info_slice['entity_type']))})
+                    t0_2 = time.perf_counter()
 
-                df.to_sql(
-                    name=self.table_name,
-                    con=self.engine,
-                    if_exists='append',
-                    index=False
-                )
-                t1 = time.perf_counter()
-                print(f'Cached elements mined by {ee_model.meta["name"]} '
-                      f'from articles: {article_ids}'
-                      f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
-                print('Partial times:')
-                print(f' - run_pipeline : {t0_1 - t0:.1f} s.')
-                print(f' - fix columns  : {t0_2 - t0_1:.1f} s.')
-                print(f' - to_sql       : {t1 - t0_2:.1f} s.')
-                print()
+                    df.to_sql(
+                        name=self.table_name,
+                        con=self.engine,
+                        if_exists='append',
+                        index=False
+                    )
+                    t1 = time.perf_counter()
+                    print(f'Cached elements mined by {ee_model.meta["name"]} '
+                          f'from articles: {article_ids}'
+                          f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
+                    print('Partial times:')
+                    print(f' - run_pipeline : {t0_1 - t0:.1f} s.')
+                    print(f' - fix columns  : {t0_2 - t0_1:.1f} s.')
+                    print(f' - to_sql       : {t1 - t0_2:.1f} s.')
+                    print()
+
+                except Exception as e:
+                    print(f'ERROR! Failed cache elements mined by {ee_model.meta["name"]} '
+                          f'from articles: {article_ids}.'
+                          f'ERROR MESSAGE:\n {str(e)}')
