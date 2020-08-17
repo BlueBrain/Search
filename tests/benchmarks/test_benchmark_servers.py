@@ -1,3 +1,5 @@
+from io import StringIO
+
 import pandas as pd
 import pytest
 import requests
@@ -87,7 +89,7 @@ class TestMining:
     @pytest.mark.parametrize("article_id", ARTICLE_IDS)
     def test_mine_article(self, benchmark, benchmark_parameters, entity_type, article_id,
                           use_cache):
-        """Mine an entire article from the database."""
+        """Mine a single article from the database for a single entity type."""
         mining_server = benchmark_parameters["mining_server"]
 
         if not mining_server:
@@ -109,6 +111,48 @@ class TestMining:
         response = benchmark(requests.post, url, json=payload_json)
 
         assert response.ok
+
+    @pytest.mark.parametrize("n_articles", [50, 100, 200, 400, 800, 1600])
+    def test_mine_many_articles(self, benchmark, benchmark_parameters, n_articles):
+        """Mine big number of articles in cache mode and for all entity types."""
+        use_cache = True
+        mining_server = benchmark_parameters["mining_server"]
+
+        if not mining_server:
+            pytest.skip("Mining server address not provided.")
+
+        url = f"{mining_server}/database"
+        identifiers = [(i, -1) for i in range(1, n_articles + 1)]
+
+        columns = ["entity_type", "property", "property_type", "property_value_type",
+                   "ontology_source"]
+
+        etypes_sources = [('CELL_TYPE', None),
+                          ('CHEMICAL', 'NCIT'),
+                          ('CONDITION', None),
+                          ('DISEASE', 'NCIT'),
+                          ('ORGAN', 'NCIT'),
+                          ('ORGANISM', 'NCIT'),
+                          ('PATHWAY', 'Reactome'),
+                          ('PROTEIN', 'NCIT')
+                          ]
+        schema_request_data = [{'entity_type': etype, 'ontology_source': source}
+                               for etype, source in etypes_sources]
+
+        schema_request = pd.DataFrame(schema_request_data, columns=columns).to_csv(index=False)
+
+        payload_json = {"identifiers": identifiers,
+                        "schema": schema_request,
+                        "use_cache": use_cache}
+
+        response = benchmark(requests.post, url, json=payload_json)
+
+        assert response.ok
+
+        # check nonempty
+        table_extractions = pd.read_csv(StringIO(response.json()['csv_extractions']))
+
+        assert len(table_extractions) > 1
 
 
 class TestMySQL:
