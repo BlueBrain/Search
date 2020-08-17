@@ -366,14 +366,14 @@ class MiningCacheCreation:
                 self.engine.execute(
                     f"""DELETE 
                         FROM {self.table_name} 
-                        WHERE mining_model = "{ee_model.meta["name"]}"
+                        WHERE mining_model = "{model_nm}"
                     """
                 )
             else:  # Mine only if model is not in cache
                 result = self.engine.execute(
                     f"""SELECT *
                             FROM {self.table_name}
-                            WHERE mining_model = {ee_model.meta["name"]}
+                            WHERE mining_model = {model_nm}
                             LIMIT 1
                     """)
                 if len(result) > 1:
@@ -396,7 +396,7 @@ class MiningCacheCreation:
                     df = df[df['entity_type'].isin(info_slice['entity_type_name'])]
 
                     # Add info on the mining model used
-                    df['mining_model'] = ee_model.meta["name"]
+                    df['mining_model'] = model_nm
                     df['mining_model_version'] = ee_model.meta["version"]
 
                     # Rename entity types using the model library info, so that we match the schema request
@@ -411,7 +411,7 @@ class MiningCacheCreation:
                         index=False
                     )
                     t1 = time.perf_counter()
-                    print(f'Cached elements mined by {ee_model.meta["name"]} '
+                    print(f'Cached elements mined by {model_nm} '
                           f'from articles: {article_ids}'
                           f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
                     print('Partial times:')
@@ -421,6 +421,6 @@ class MiningCacheCreation:
                     print()
 
                 except Exception as e:
-                    print(f'ERROR! Failed cache elements mined by {ee_model.meta["name"]} '
+                    print(f'ERROR! Failed cache elements mined by {model_nm} '
                           f'from articles: {article_ids}.'
                           f'ERROR MESSAGE:\n {str(e)}')
