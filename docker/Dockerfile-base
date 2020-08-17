@@ -1,4 +1,4 @@
-FROM python:3.6-slim
+FROM python:3.6
 
 # ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 # ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     vim \
     nodejs npm \
-    libfontconfig1 wkhtmltopdf
+    libfontconfig1 wkhtmltopdf \
+    default-libmysqlclient-dev
 
 # Upgrade pip
 RUN pip install --upgrade pip
@@ -32,9 +33,24 @@ RUN true \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm /tmp/requirements.txt
 
+# Download the scispaCy models
+RUN pip install \
+    https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz \
+    https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz \
+    https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz \
+    https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz \
+    https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
+
+# Download the NLTK data (for the root)
+RUN python -m nltk.downloader punkt stopwords
+
+# Add and select a non-root user (bbsuser)
 RUN groupadd -g 999 docker
 RUN useradd --create-home --uid 1000 --gid docker bbsuser
 USER bbsuser
 WORKDIR /home/bbsuser
+
+# Download the NLTK data (for the bbsuser)
+RUN python -m nltk.downloader punkt stopwords
 
 ENTRYPOINT exec /bin/bash
