@@ -189,15 +189,20 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         Selected rows of the `mining_cache` table.
 
     """
-    conditions = []
-    for aid, ppos in identifiers:
-        cond = f"(article_id = {aid}{'' if ppos == -1 else ' AND paragraph_pos_in_article = {}'.format(ppos)})"
-        conditions.append(cond)
+    if all([ppos == -1 for _, ppos in identifiers]):
+        all_ids = [str(aid) for aid, _ in identifiers]
+        condition_id = f"article_id in ({', '.join(all_ids)})"
+    else:
+        conditions = []
+        for aid, ppos in identifiers:
+            cond = f"(article_id = {aid}{'' if ppos == -1 else ' AND paragraph_pos_in_article = {}'.format(ppos)})"
+            conditions.append(cond)
 
-    conditions_id = " OR ".join(conditions)
+        condition_id = "(" + " OR ".join(conditions) + ")"
+
     condition_models = ", ".join([f"'{m}'" for m in set(model_names)])
 
-    query = f"SELECT * FROM mining_cache WHERE ({conditions_id}) AND mining_model in ({condition_models})" \
+    query = f"SELECT * FROM mining_cache WHERE {condition_id} AND mining_model in ({condition_models})" \
             " ORDER BY article_id, paragraph_pos_in_article, start_char"
 
     result = pd.read_sql(query, engine)
