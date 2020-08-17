@@ -9,7 +9,9 @@ FROM continuumio/miniconda3
 RUN true \
 	&& conda update conda \
 	&& apt-get update \
-	&& apt-get install -y gcc g++ build-essential default-libmysqlclient-dev vim libfontconfig1 wkhtmltopdf
+	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
+
+RUN conda install -c carta mysqlclient
 
 # Install requirements.txt
 RUN mkdir -p /bbs/tmp
