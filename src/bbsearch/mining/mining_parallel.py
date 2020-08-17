@@ -312,9 +312,17 @@ class MinerMaster:
 
         self.logger.info("Closing all task queues...")
         for queue_name, task_queue in task_queues.items():
-            self.logger.debug(f"Closing the queue {queue_name}")
+            self.logger.debug(f"Closing the reading end of the queue {queue_name}")
+            # Note that this is only safe when the queue is empty. This is
+            # because there's a background thread putting buffered data
+            # in the queue. If the queue is not empty it might be that the
+            # background thread is still transferring the data from the
+            # buffer. Closing the reading end of the internal pipe actually
+            # also closes the writing end, and therefore the background
+            # thread will throw a BrokenPipeError as it will fail to write
+            # to the closed pipe.
             task_queue.close()
-            self.logger.debug(f"Joining the queue {queue_name}")
+            self.logger.debug(f"Joining the buffering thread of queue {queue_name}")
             task_queue.join_thread()
 
         # Wait for the processes to finish.
