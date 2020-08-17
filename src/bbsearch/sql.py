@@ -189,7 +189,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         Selected rows of the `mining_cache` table.
 
     """
-    if all([ppos == -1 for _, ppos in identifiers]):
+    if all(ppos == -1 for _, ppos in identifiers):
         all_ids = [str(aid) for aid, _ in identifiers]
         condition_id = f"article_id in ({', '.join(all_ids)})"
     else:
