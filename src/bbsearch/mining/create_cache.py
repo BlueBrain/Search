@@ -228,7 +228,7 @@ class CreateMiningCache:
         self.model_schemas = {
             model_name: model_schema
             for model_name, model_schema in model_schemas_all.items()
-            if model_name in restrict_to_models
+            if model_schema["model_path"] in restrict_to_models
         }
 
     def construct(self):
@@ -249,15 +249,14 @@ class CreateMiningCache:
         self.logger.info("Mining complete")
 
     def _delete_rows(self):
-        for model_name, model_schema in self.model_schemas:
-            query = """
+        for model_name, model_schema in self.model_schemas.items():
+            query = f"""
             DELETE
-            FROM :table
-            WHERE mining_model = :model_name
+            FROM {self.target_table}
+            WHERE mining_model = :mining_model
             """
             self.engine.execute(
                 sqlalchemy.sql.text(query),
-                table=self.target_table,
                 mining_model=model_schema["model_path"],
             )
 

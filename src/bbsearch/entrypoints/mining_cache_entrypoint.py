@@ -19,7 +19,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--ee_models_library_file",
-    default='/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv"',
+    default='/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv',
     type=str,
     help="The csv file with info on which model to use to mine which entity type.",
 )
@@ -33,7 +33,6 @@ parser.add_argument(
 )
 parser.add_argument(
     "--restrict_to_models",
-    dest="models_to_run",
     type=str,
     default=None,
     help="Comma-separated list of models (as called in ee_models_library_file)"
