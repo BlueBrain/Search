@@ -21,17 +21,21 @@ parser.add_argument(
     help="The csv file with info on which model to use to mine which entity type.",
 )
 parser.add_argument(
-    "--n_processes",
+    "--n_processes_per_model",
     default=1,
     type=int,
-    help="Max n of processes to run the different requested mining models in parallel.",
+    help="Each mining model is run in parallel with respect to the others. In "
+    "addition to that, n_processes_per_model are used to run in parallel"
+    "a single mining model.",
 )
 parser.add_argument(
-    "--always_mine",
-    dest="always_mine",
-    action="store_true",
-    help="Force running all mining models, even if extracted entities were "
-    "already found in the cache for some models.",
+    "--restrict_to_models",
+    dest="models_to_run",
+    type=str,
+    default=None,
+    help="Comma-separated list of models (as called in ee_models_library_file)"
+    "to be run to populate the cache. By default, all models in "
+    "ee_models_library_file are run.",
 )
 args = parser.parse_args()
 
@@ -46,9 +50,9 @@ def main():
 
     from bbsearch.database import MiningCacheCreation
 
-    print('Parameters:')
+    print("Parameters:")
     for arg in vars(args):
-        print(f'{arg}: {getattr(args, arg)}')
+        print(f"{arg}: {getattr(args, arg)}")
     print()
 
     if args.db_type == "sqlite":
@@ -65,10 +69,16 @@ def main():
         raise ValueError("This is not an handled db_type.")
 
     ee_models_library = pd.read_csv(args.ee_models_library_file)
-    db = MiningCacheCreation(engine=engine)
+
+    if args.restrict_to_models is None:
+        restrict_to_models = ee_models_library.model.unique().tolist()
+    else:
+        restrict_to_models = args.restrict_to_models.split(",")
+
+    db = MiningCacheCreation(engine=engine, ee_models_library=ee_models_library)
     db.construct(
-        ee_models_library=ee_models_library,
-        n_processes=args.n_processes,
+        restrict_to_models=restrict_to_models,
+        n_processes_per_model=args.n_processes_per_model,
         always_mine=args.always_mine,
     )
 

@@ -192,6 +192,7 @@ class CORD19DatabaseCreation:
                             paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
                                                         'paragraph_pos_in_article': paragraph_pos_in_article})]
 
+
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',
@@ -244,24 +245,31 @@ class CORD19DatabaseCreation:
 
 
 class MiningCacheCreation:
-    def __init__(self, engine):
+    def __init__(self, engine, ee_models_library):
         """Create SQL database to save results of mining into a cache.
 
         Parameters
         ----------
         engine: SQLAlchemy.Engine
             Engine linked to the database.
+
+        ee_models_library : pd.DataFrame
+            Table with information on models repsonsible to mine each entity
+            type and how to rename entity types.
         """
         self.engine = engine
         self.index_name = "mining_cache_article_id_index"
         self.table_name = "mining_cache"
+        self.ee_models_library = ee_models_library
 
-    def construct(self, ee_models_library, n_processes=1, always_mine=False):
+    def construct(self, restrict_to_models, n_processes_per_model=1, always_mine=False):
         """Construct and populate the cache of mined results."""
         self._schema_creation()
         print("Schema of the table has been created.")
         self._populate_table(
-            ee_models_library=ee_models_library, n_processes=n_processes, always_mine=always_mine
+            restrict_to_models=restrict_to_models,
+            n_processes_per_model=n_processes_per_model,
+            always_mine=always_mine
         )
         print("The table has been populated.")
 
@@ -314,34 +322,39 @@ class MiningCacheCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
-    def _populate_table(self, ee_models_library, n_processes=1, always_mine=False):
+    def _populate_table(self, restrict_to_models, n_processes_per_model=1):
         """Populate cache with elements extracted by text mining.
 
         Parameters
         ----------
-        ee_models_library : pd.DataFrame
-            Models to run.
+        restrict_to_models : list of str
+            List of models (as called in ee_models_library_file) to be run to
+            populate the cache.
 
-        n_processes : int, optional
+        n_processes_per_model : int, optional
             Number of max processes to spawn to run text mining and table
             population in parallel.
-
-        always_mine : bool, optional
-            If `False` (default) will check if elements from a mining model are
-            already present in the cache and if it is the case, the model will
-            not be run again.
-            If `True`, rows of all requested models are dropped from the cache
-            database and mining is run from scratch.
 
         Returns
         -------
         None
         """
+        ee_models_library = \
+            self.ee_models_library[self.ee_models_library['mining_model'].isin(restrict_to_models)]
+
         # list of (art_it, par_pos_in_art)
         article_ids = [a for a, in self.engine.execute("""SELECT article_id FROM articles""")]
 
         def _get_article_texts_with_metadata(art_ids):
+            """Returns a generator of (text, metadata_dict) for nlp.pipe
+
+            Parameters
+            ----------
+            art_ids : int or list of int
+                Article(s) to mine.
+            """
             def _paper_id(md):
+                """Given paper metadata, return the paper_id column."""
                 return f"{md['article_id']}:{md['section_name']}:{md['paragraph_pos_in_article']}"
 
             if isinstance(art_ids, int):
@@ -355,37 +368,23 @@ class MiningCacheCreation:
                         paper_id=_paper_id(r[1])))
                     for r in df_articles.iterrows())
 
-        def _batch(lst, n=1):
-            len_lst = len(lst)
-            for ndx in range(0, len_lst, n):
-                yield lst[ndx:min(ndx + n, len_lst)]
-
         for model_nm, info_slice in ee_models_library.groupby('model'):
             ee_model = spacy.load(model_nm)
-            if always_mine:  # Force re-mining, but first drop old rows in cache
-                self.engine.execute(
-                    f"""DELETE 
-                        FROM {self.table_name} 
-                        WHERE mining_model = "{model_nm}"
-                    """
-                )
-            else:  # Mine only if model is not in cache
-                result = self.engine.execute(
-                    f"""SELECT *
-                            FROM {self.table_name}
-                            WHERE mining_model = {model_nm}
-                            LIMIT 1
-                    """)
-                if len(result) > 1:
-                    continue
+
+            self.engine.execute(
+                f"""DELETE 
+                    FROM {self.table_name} 
+                    WHERE mining_model = "{model_nm}"
+                """
+            )
 
             t00 = time.perf_counter()
-            for article_ids in _batch(article_ids, n=1):  # TODO: we may try batching in future
+            for article_id in article_ids:
                 try:
                     t0 = time.perf_counter()
                     # Run text mining
                     df = run_pipeline(
-                        texts=_get_article_texts_with_metadata(article_ids),
+                        texts=_get_article_texts_with_metadata(article_id),
                         model_entities=ee_model,
                         models_relations={},
                         debug=True  # we need all the columns!
@@ -412,7 +411,7 @@ class MiningCacheCreation:
                     )
                     t1 = time.perf_counter()
                     print(f'Cached elements mined by {model_nm} '
-                          f'from articles: {article_ids}'
+                          f'from articles: {article_id}'
                           f' in {t1-t0:.1f} s [cumulative: {t1-t00:.1f} s].')
                     print('Partial times:')
                     print(f' - run_pipeline : {t0_1 - t0:.1f} s.')
@@ -422,5 +421,5 @@ class MiningCacheCreation:
 
                 except Exception as e:
                     print(f'ERROR! Failed cache elements mined by {model_nm} '
-                          f'from articles: {article_ids}.'
+                          f'from articles: {article_id}.'
                           f'ERROR MESSAGE:\n {str(e)}')
