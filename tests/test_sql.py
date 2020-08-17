@@ -125,10 +125,12 @@ class TestMiningCache:
     @pytest.mark.parametrize('mining_model', ['en_ner_craft_md', 'wrong_model'])
     def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
         identifiers = [(1, -1), (2, 1)]
-        expected_len = 1 * (test_parameters['n_sections_per_article'] *
-                            test_parameters['n_entities_per_section']) + 1 * test_parameters['n_entities_per_section']
-        expected_len *= int(mining_model == 'en_ner_craft_md')
-
+        if mining_model == 'en_ner_craft_md':
+            expected_len = \
+                1 * test_parameters['n_sections_per_article'] * test_parameters['n_entities_per_section'] + \
+                1 * 1 * test_parameters['n_entities_per_section']
+        else:
+            expected_len = 0
         res = retrieve_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
 
         assert isinstance(res, pd.DataFrame)
