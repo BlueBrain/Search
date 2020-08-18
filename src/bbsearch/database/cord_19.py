@@ -227,9 +227,7 @@ class CORD19DatabaseCreation:
             List of all the sentences extracted from the paragraph.
         """
         if isinstance(paragraphs, str):
-            paragraphs = [
-                paragraphs,
-            ]
+            paragraphs = [paragraphs]
 
         all_sentences = []
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):

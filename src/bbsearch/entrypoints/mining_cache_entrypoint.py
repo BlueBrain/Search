@@ -55,7 +55,7 @@ def run_create_mining_cache(argv=None):
         "-l",
         type=str,
         metavar="<filename>",
-        default="mining_cache_log.txt",
+        default=None,
         help="The file for the logs. If not provided the stdout will be used.",
     )
     parser.add_argument(
@@ -72,16 +72,13 @@ def run_create_mining_cache(argv=None):
     from ..database import CreateMiningCache
 
     # Configure logging
-    log_file = pathlib.Path(args.log_file).resolve()
-    log_dir = str(log_file.parent)
-    log_file_name = log_file.name
     if args.verbose == 1:
         level = logging.INFO
     elif args.verbose >= 2:
         level = logging.DEBUG
     else:
         level = logging.WARNING
-    configure_logging(log_dir, log_file_name, level)
+    configure_logging(args.log_file, level)
     logger = logging.getLogger(__name__)
 
     # Database type
