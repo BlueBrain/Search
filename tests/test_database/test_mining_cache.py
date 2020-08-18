@@ -1,11 +1,12 @@
 import logging
 import multiprocessing as mp
+import queue
 import time
 
 import pandas as pd
 import pytest
-import sqlalchemy
 
+from bbsearch.database import CreateMiningCache
 from bbsearch.database.mining_cache import Miner
 
 
@@ -139,9 +140,9 @@ class TestCreateMiningCache:
     def cache_creator(self, fake_sqlalchemy_engine):
         ee_models_library = pd.DataFrame([
             {
-                "entity_type": "type_1",
+                "entity_type": "type_1_public",
                 "model": "model_1",
-                "entity_type_name": "type_1_public"
+                "entity_type_name": "type_1",
             }
         ])
         cache_creator_instance = CreateMiningCache(
@@ -188,7 +189,7 @@ class TestCreateMiningCache:
             f"select * from {cache_creator.target_table}",
             con=cache_creator.engine
         )
-        
+
         assert len(df_new_table) == 0
         assert set(df_new_table.columns) == {
             'entity', 'entity_type', 'property', 'property_value',
@@ -201,7 +202,7 @@ class TestCreateMiningCache:
         cache_creator._schema_creation()
 
         # Clean up by deleting the table just created
-        cache_creator.engine.execute(f"drop table {cache_creator.table_name}")
+        cache_creator.engine.execute(f"drop table {cache_creator.target_table}")
 
     def test_load_model_schemas(self, cache_creator):
         model_schemas = cache_creator._load_model_schemas()
@@ -210,15 +211,56 @@ class TestCreateMiningCache:
         assert model_schemas['model_1']['model_path'] == 'model_1'
         assert model_schemas['model_1']['entity_map'] == {'type_1': 'type_1_public'}
 
-    def test_create_tasks(self):
-        queue = mp.Queue()
-
-        def worker(stop_event):
-            while not stop_event.is_set():
+    def test_create_tasks(self, cache_creator):
+        def worker(stop_now):
+            while not stop_now.is_set():
                 time.sleep(0.01)
 
-    def test_do_mining(self):
-        ...
+        queue = mp.Queue()
+        queue_name = "my_queue"
+        task_queues = {queue_name: queue}
 
-    def test_construct(self):
-        ...
+        stop_event = mp.Event()
+        worker_proc = mp.Process(target=worker, args=(stop_event,))
+        worker_proc.start()
+        workers_by_queue = {queue_name: [worker_proc]}
+
+        cache_creator.create_tasks(task_queues, workers_by_queue)
+
+        assert not queue.empty()
+
+        stop_event.set()
+        worker_proc.join()
+
+        # Test adding tasks to a queue where all workers are dead
+        cache_creator.create_tasks(task_queues, workers_by_queue)
+
+    def test_do_mining(self, cache_creator, monkeypatch):
+        def fake_miner(task_queue=None, can_finish=None, **kwargs):
+            while not can_finish.is_set():
+                try:
+                    _ = task_queue.get(timeout=1.0)
+                except queue.Empty:
+                    continue
+
+        monkeypatch.setattr(
+            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            fake_miner,
+        )
+
+        cache_creator.do_mining()
+
+    def test_construct(self, cache_creator, monkeypatch):
+        def fake_miner(task_queue=None, can_finish=None, **kwargs):
+            while not can_finish.is_set():
+                try:
+                    _ = task_queue.get(timeout=1.0)
+                except queue.Empty:
+                    continue
+
+        monkeypatch.setattr(
+            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            fake_miner,
+        )
+
+        cache_creator.construct()

@@ -1,5 +1,4 @@
 """Module for the Database Creation."""
-import collections
 import io
 import logging
 import multiprocessing as mp
