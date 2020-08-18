@@ -190,14 +190,18 @@ def retrieve_mining_cache(identifiers, model_names, engine):
 
     """
     model_names = tuple(set(model_names))
+    if len(model_names) == 1:
+        model_names = f"('{model_names[0]}')"
 
     identifiers_arts = tuple(a for a, p in identifiers if p == -1)
+    if len(identifiers_arts) == 1:
+        identifiers_arts = f"({identifiers_arts[0]})"
     if identifiers_arts:
         query_arts = f"""
         SELECT *
         FROM mining_cache
         WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
-        ORDER BY article_id, paragraph_pos_in_article, start_cha
+        ORDER BY article_id, paragraph_pos_in_article, start_char
         """
         df_arts = pd.read_sql(query_arts, con=engine)
     else:
@@ -211,7 +215,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             SELECT *
             FROM mining_cache
             WHERE ({condition_pars}) AND mining_model IN {model_names}
-            ORDER BY article_id, paragraph_pos_in_article, start_cha
+            ORDER BY article_id, paragraph_pos_in_article, start_char
             """
         df_pars = pd.read_sql(query_pars, con=engine)
     else:
