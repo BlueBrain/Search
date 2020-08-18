@@ -10,6 +10,7 @@ from bbsearch.sql import (
     SentenceFilter,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
+    retrieve_mining_cache,
     retrieve_paragraph,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
@@ -109,21 +110,41 @@ class TestSQLQueries:
             assert articles.shape[0] == len(set(article_id)) * \
                    test_parameters['n_sections_per_article']
 
-    # @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])
-    # @pytest.mark.parametrize('conditions', [[], ['1']])
-    # def test_get_sentence_ids_by_condition(self, fake_sqlalchemy_engine, sentence_ids, conditions):
-    #
-    #     n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences',
-    #                               fake_sqlalchemy_engine).iloc[0, 0]
-    #
-    #     retrieved_sentences = get_sentence_ids_by_condition(conditions,
-    #                                                         fake_sqlalchemy_engine,
-    #                                                         sentence_ids=sentence_ids)
-    #
-    #     expected_length = len(sentence_ids) if sentence_ids is not None else n_sentences
-    #
-    #     assert isinstance(retrieved_sentences, list)
-    #     assert len(retrieved_sentences) == expected_length
+
+class TestMiningCache:
+    def test_retrieve_all(self, fake_sqlalchemy_engine, test_parameters):
+        identifiers = [(i + 1, -1) for i in range(test_parameters['n_articles'])]
+        expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] * test_parameters[
+            'n_entities_per_section']
+
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
+
+    @pytest.mark.parametrize('mining_model', ['en_ner_craft_md', 'wrong_model'])
+    def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
+        identifiers = [(1, -1), (2, 1)]
+        if mining_model == 'en_ner_craft_md':
+            expected_len = \
+                1 * test_parameters['n_sections_per_article'] * test_parameters['n_entities_per_section'] + \
+                1 * 1 * test_parameters['n_entities_per_section']
+        else:
+            expected_len = 0
+        res = retrieve_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
+        assert set(res['article_id'].unique()) == ({1, 2} if mining_model == 'en_ner_craft_md' else set())
+
+    def test_retrieve_none(self, fake_sqlalchemy_engine):
+        identifiers = [(-12, -1)]
+        expected_len = 0
+
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
 
 
 class TestSentenceFilter:

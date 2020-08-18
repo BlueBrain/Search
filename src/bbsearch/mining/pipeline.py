@@ -5,6 +5,17 @@ import spacy
 
 from .relation import REModel, annotate
 
+SPECS = ['entity',
+         'entity_type',
+         'property',
+         'property_value',
+         'property_type',
+         'property_value_type',
+         'ontology_source',
+         'paper_id',  # article_id:section_name:paragraph_id
+         'start_char',
+         'end_char']
+
 
 def run_pipeline(texts, model_entities, models_relations, debug=False):
     """Run end-to-end extractions.
@@ -38,17 +49,6 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
 
     if not all([isinstance(model, REModel) for model_list in models_relations.values() for model in model_list]):
         raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
-
-    specs = ['entity',
-             'entity_type',
-             'property',
-             'property_value',
-             'property_type',
-             'property_value_type',
-             'ontology_source',
-             'paper_id',  # article_id:section_name:paragraph_id
-             'start_char',
-             'end_char']
 
     if models_relations:
         disable_pipe = ['tagger']  # the parser is needed to decompose text into sentences.
@@ -95,6 +95,6 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                                               ))
 
     if not lines or not debug:  # enforce columns if there are no extractions or we are in prod mode
-        return pd.DataFrame(lines, columns=specs)
+        return pd.DataFrame(lines, columns=SPECS)
     else:
         return pd.DataFrame(lines)

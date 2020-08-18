@@ -51,8 +51,8 @@ def main():
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
     elif args.db_type == 'mysql':
         mysql_uri = input('MySQL URI:')
-        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:guest'
-                                          f'@{mysql_uri}/cord19_v35')
+        engine = sqlalchemy.create_engine(f'mysql+mysqldb://guest:guest'
+                                          f'@{mysql_uri}/cord19_v35?charset=utf8mb4')
     else:
         raise ValueError('This is not an handled db_type.')
 
