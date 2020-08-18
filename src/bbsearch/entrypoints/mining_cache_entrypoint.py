@@ -7,7 +7,7 @@ import pathlib
 from ._helper import configure_logging
 
 
-def run_create_mining_cache(argv=None):
+def run_create_mining_cache(argv=None):  # pragma: no cover
     """Mine all texts in database and save results in a cache.
 
     Parameters
@@ -155,5 +155,5 @@ def run_create_mining_cache(argv=None):
     logger.info("All done, bye")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     exit(run_create_mining_cache())
