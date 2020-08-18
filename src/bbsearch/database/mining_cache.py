@@ -26,6 +26,8 @@ class Miner:
     entity_map : dict[str, str]
         A map from entity types produced by the model to new
         entity types that should appear in the cached results.
+    target_table: str
+        The target table name for the mining results.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
     can_finish : multiprocessing.Event
@@ -58,22 +60,59 @@ class Miner:
         self.logger.info("Loading the NLP model")
         self.model = spacy.load(self.model_path)
 
-        self.logger.info("Starting mining")
-        self._work_loop()
+    @staticmethod
+    def create_and_mine(
+        database_engine,
+        model_path,
+        entity_map,
+        target_table,
+        task_queue,
+        can_finish,
+    ):
+        """Create a miner instance and start the mining loop.
 
-        self.logger.info("Finished mining, cleaning up")
-        self._clean_up()
+        Parameters
+        ----------
+        database_engine : SQLAlchemy connectable (engine/connection)
+            The database should contain tables `articles` and `sentences`.
+        model_path : str
+            The path for loading the spacy model that will perform the
+            named entity extraction.
+        entity_map : dict[str, str]
+            A map from entity types produced by the model to new
+            entity types that should appear in the cached results.
+        target_table: str
+            The target table name for the mining results.
+        task_queue : multiprocessing.Queue
+            The queue with tasks for this worker
+        can_finish : multiprocessing.Event
+            A flag to indicate that the worker can stop waiting for new
+            tasks. Unless this flag is set, the worker will continue
+            polling the task queue for new tasks.
+        """
+        miner = Miner(
+            database_engine=database_engine,
+            model_path=model_path,
+            entity_map=entity_map,
+            target_table=target_table,
+            task_queue=task_queue,
+            can_finish=can_finish,
+        )
+
+        miner.work_loop()
+        miner.clean_up()
 
     def _log_exception(self, article_id):
         """Log any unhandled exception raised during mining."""
         error_trace = io.StringIO()
         traceback.print_exc(file=error_trace)
 
-        error_message = f"\nArticle ID : {article_id}\n" + error_trace.getvalue()
+        error_message = f"\nArticle ID: {article_id}\n" + error_trace.getvalue()
         self.logger.error(error_message)
 
-    def _work_loop(self):
+    def work_loop(self):
         """Do the mining work loop."""
+        self.logger.info("Starting mining")
         while not self.can_finish.is_set():
             # Just get new tasks until the main thread sets `can_finish`
             try:
@@ -177,8 +216,9 @@ class Miner:
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 
-    def _clean_up(self):
+    def clean_up(self):
         """Clean up after task processing has been finished."""
+        self.logger.info("Finished mining, cleaning up")
         self.logger.info(f"I'm proud to have done {self.n_tasks_done} tasks!")
 
     def __str__(self):
@@ -391,7 +431,7 @@ class CreateMiningCache:
                 worker_name = f"{model_name}_{i}"
                 worker_process = mp.Process(
                     name=worker_name,
-                    target=Miner,
+                    target=Miner.create_and_mine,
                     kwargs={
                         "database_engine": self.engine,
                         "model_path": model_schema["model_path"],
