@@ -1,10 +1,13 @@
 """Test for the mining server."""
+from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
 
+import pandas as pd
 import pytest
 from flask import Flask
 
+from bbsearch.mining import SPECS
 from bbsearch.server.mining_server import MiningServer
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
@@ -69,7 +72,8 @@ class TestMiningServer:
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
-    def test_mining_server_database(self, mining_client):
+    @pytest.mark.parametrize('use_cache', [True, False], ids=['with_cache', 'without_cache'])
+    def test_mining_server_database(self, mining_client, use_cache):
         schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
         with open(schema_file, 'r') as f:
             schema_request = f.read()
@@ -85,7 +89,7 @@ class TestMiningServer:
         assert response.json == {"error": "The request has to be a JSON object."}
 
         identifiers = [(1, 0), (2, -1)]
-        request_json = {"identifiers": identifiers, 'schema': schema_request}
+        request_json = {"identifiers": identifiers, 'schema': schema_request, 'use_cache': use_cache}
         response = mining_client.post('/database', json=request_json)
         response_json = response.json
         assert response.status_code == 200
@@ -99,3 +103,34 @@ class TestMiningServer:
                'property_value_type,' \
                'ontology_source,paper_id,' \
                'start_char,end_char'
+
+    @pytest.mark.parametrize('debug', [True, False], ids=['debug', 'specs'])
+    def test_mining_cache_detailed(self, mining_client, test_parameters, entity_types, debug):
+        """Test exact count of found entities.
+
+        This test assumes that the requested entity types are a superset of those present
+        in the database (as defined in ee_models_library.csv).
+        """
+        schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
+        with open(schema_file, 'r') as f:
+            schema_request = f.read()
+
+        identifiers = [(1, 0), (2, -1), (3, 1)]
+
+        expected_length = 0
+        for article_id, pos in identifiers:
+            n_paragraphs = test_parameters['n_sections_per_article'] if pos == -1 else 1
+            expected_length += test_parameters['n_entities_per_section'] * n_paragraphs
+
+        request_json = {"identifiers": identifiers,
+                        'schema': schema_request,
+                        'use_cache': True,
+                        'debug': debug}
+        response = mining_client.post('/database', json=request_json)
+
+        assert response.status_code == 200
+
+        df = pd.read_csv(StringIO(response.json['csv_extractions']))
+
+        assert len(df) == expected_length
+        assert debug ^ (df.columns.to_list() == SPECS)
