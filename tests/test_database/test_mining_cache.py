@@ -203,8 +203,12 @@ class TestCreateMiningCache:
         # Clean up by deleting the table just created
         cache_creator.engine.execute(f"drop table {cache_creator.table_name}")
 
-    def test_load_model_schemas(self):
-        ...
+    def test_load_model_schemas(self, cache_creator):
+        model_schemas = cache_creator._load_model_schemas()
+        assert isinstance(model_schemas, dict)
+        assert len(model_schemas) == 1
+        assert model_schemas['model_1']['model_path'] == 'model_1'
+        assert model_schemas['model_1']['entity_map'] == {'type_1': 'type_1_public'}
 
     def test_create_tasks(self):
         queue = mp.Queue()
