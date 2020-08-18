@@ -189,7 +189,6 @@ class CORD19DatabaseCreation:
                             paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
                                                         'paragraph_pos_in_article': paragraph_pos_in_article})]
 
-
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',

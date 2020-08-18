@@ -9,8 +9,8 @@ import traceback
 import spacy
 import sqlalchemy
 
-from bbsearch.mining.pipeline import run_pipeline
-from bbsearch.sql import retrieve_articles
+from ..mining.pipeline import run_pipeline
+from ..sql import retrieve_articles
 
 
 class Miner:
@@ -18,10 +18,8 @@ class Miner:
 
     Parameters
     ----------
-    engine_url : str
-        The URL to the text database. Should be a valid argument for
-        the `sqlalchemy.create_engine` function. The database should
-        contain tables `articles` and `sentences`.
+    database_engine : SQLAlchemy connectable (engine/connection)
+        The database should contain tables `articles` and `sentences`.
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
@@ -37,10 +35,16 @@ class Miner:
     """
 
     def __init__(
-        self, engine_url, model_path, entity_map, target_table, task_queue, can_finish,
+        self,
+        database_engine,
+        model_path,
+        entity_map,
+        target_table,
+        task_queue,
+        can_finish,
     ):
         self.name = mp.current_process().name
-        self.engine = sqlalchemy.create_engine(engine_url)
+        self.engine = database_engine
         self.model_path = model_path
         self.entity_map = entity_map
         self.target_table_name = target_table
@@ -51,16 +55,17 @@ class Miner:
 
         self.logger = logging.getLogger(str(self))
 
-        self.logger.info("Loading the NLP model...")
+        self.logger.info("Loading the NLP model")
         self.model = spacy.load(self.model_path)
 
-        self.logger.info("Starting mining...")
+        self.logger.info("Starting mining")
         self._work_loop()
 
-        self.logger.info("Finished mining, cleaning up...")
+        self.logger.info("Finished mining, cleaning up")
         self._clean_up()
 
     def _log_exception(self, article_id):
+        """Log any unhandled exception raised during mining."""
         error_trace = io.StringIO()
         traceback.print_exc(file=error_trace)
 
@@ -68,7 +73,7 @@ class Miner:
         self.logger.error(error_message)
 
     def _work_loop(self):
-        """Do the work loop."""
+        """Do the mining work loop."""
         while not self.can_finish.is_set():
             # Just get new tasks until the main thread sets `can_finish`
             try:
@@ -101,34 +106,38 @@ class Miner:
 
         return all_paragraphs
 
-    def _get_article_texts_with_metadata(self, art_ids):
+    def _generate_texts_with_metadata(self, article_ids):
         """Return a generator of (text, metadata_dict) for nlp.pipe.
 
         Parameters
         ----------
-        art_ids : int or list of int
+        article_ids : int or list of int
             Article(s) to mine.
+
+        Yields
+        ------
+        text : str
+            The text to mine
+        metadata : dict
+            The metadata for the text.
         """
+        if isinstance(article_ids, int):
+            article_ids = [article_ids]
+        df_articles = retrieve_articles(article_ids, self.engine)
 
-        def _paper_id(md):
-            """Given paper metadata, return the paper_id column."""
-            return f"{md['article_id']}:{md['section_name']}:{md['paragraph_pos_in_article']}"
+        for _, row in df_articles.iterrows():
+            text = row["text"]
+            article_id = row["article_id"]
+            section_name = row["section_name"]
+            paragraph_pos = row["paragraph_pos_in_article"]
 
-        if isinstance(art_ids, int):
-            art_ids = [art_ids]
-        df_articles = retrieve_articles(art_ids, self.engine)
+            metadata = {
+                "article_id": article_id,
+                "paragraph_pos_in_article": paragraph_pos,
+                "paper_id": f"{article_id}:{section_name}:{paragraph_pos}",
+            }
 
-        return (
-            (
-                r[1]["text"],
-                dict(
-                    article_id=r[1]["article_id"],
-                    paragraph_pos_in_article=r[1]["paragraph_pos_in_article"],
-                    paper_id=_paper_id(r[1]),
-                ),
-            )
-            for r in df_articles.iterrows()
-        )
+            yield text, metadata
 
     def _mine(self, article_id):
         """Perform one mining task.
@@ -141,14 +150,14 @@ class Miner:
         self.logger.info(f"Processing article_id = {article_id}")
 
         self.logger.debug("Getting all texts for the article")
-        texts = self._get_article_texts_with_metadata(article_id)
+        texts = self._generate_texts_with_metadata(article_id)
 
-        self.logger.debug("Running the pipeline...")
+        self.logger.debug("Running the pipeline")
         df_results = run_pipeline(
             texts=texts, model_entities=self.model, models_relations={}, debug=True
         )
 
-        self.logger.debug("Filtering entity types...")
+        self.logger.debug("Filtering entity types")
         # Keep only the entity types we care about
         rows_to_keep = df_results["entity_type"].isin(self.entity_map)
         df_results = df_results[rows_to_keep]
@@ -161,7 +170,7 @@ class Miner:
         df_results["mining_model"] = self.model_path
         df_results["mining_model_version"] = self.model.meta["version"]
 
-        self.logger.debug("Writing results to the SQL database...")
+        self.logger.debug("Writing results to the SQL database")
         df_results.to_sql(
             self.target_table_name, con=self.engine, if_exists="append", index=False
         )
@@ -198,12 +207,15 @@ class CreateMiningCache:
 
     Parameters
     ----------
-    database_url: str
-        URL of the CORD-19 database.
+    database_engine: SQLAlchemy connectable (engine/connection)
+        Connection to the CORD-19 database.
 
     ee_models_library : pd.DataFrame
         Table with information on models responsible to mine each entity
         type and how to rename entity types.
+
+    target_table_name : str
+        The target table name for the mining results.
 
     restrict_to_models : list of str
         List of models (as called in ee_models_library_file) to be run to
@@ -215,12 +227,16 @@ class CreateMiningCache:
     """
 
     def __init__(
-        self, database_url, ee_models_library, restrict_to_models, workers_per_model=1
+        self,
+        database_engine,
+        ee_models_library,
+        target_table_name,
+        restrict_to_models,
+        workers_per_model=1,
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.database_url = database_url
-        self.engine = sqlalchemy.create_engine(database_url)
-        self.target_table = "mining_cache_new"
+        self.engine = database_engine
+        self.target_table = target_table_name
         self.ee_models_library = ee_models_library
         self.workers_per_model = workers_per_model
 
@@ -233,22 +249,19 @@ class CreateMiningCache:
 
     def construct(self):
         """Construct and populate the cache of mined results."""
-        self.logger.info("Creating schemas")
+        self.logger.info("Creating target table schema")
         self._schema_creation()
-        self.logger.info("Schema of the table has been created.")
 
-        # self._populate_table(
-        #     restrict_to_models=restrict_to_models,
-        #     n_processes_per_model=n_processes_per_model,
-        # )
         self.logger.info("Deleting rows that will be re-populated")
         self._delete_rows()
 
         self.logger.info("Starting mining")
         self.do_mining()
+
         self.logger.info("Mining complete")
 
     def _delete_rows(self):
+        """Delete rows in the target table that will be re-populated."""
         for model_name, model_schema in self.model_schemas.items():
             query = f"""
             DELETE
@@ -256,8 +269,7 @@ class CreateMiningCache:
             WHERE mining_model = :mining_model
             """
             self.engine.execute(
-                sqlalchemy.sql.text(query),
-                mining_model=model_schema["model_path"],
+                sqlalchemy.sql.text(query), mining_model=model_schema["model_path"],
             )
 
     def _schema_creation(self):
@@ -316,9 +328,8 @@ class CreateMiningCache:
         workers_by_queue : dict[str]
             All worker processes working on tasks from a given queue.
         """
-        self.logger.info("Getting all article IDs...")
-        engine = sqlalchemy.create_engine(self.database_url)
-        result_proxy = engine.execute(
+        self.logger.info("Getting all article IDs")
+        result_proxy = self.engine.execute(
             "SELECT article_id FROM articles ORDER BY article_id"
         )
         all_article_ids = [row["article_id"] for row in result_proxy]
@@ -326,7 +337,7 @@ class CreateMiningCache:
         current_task_ids = {queue_name: 0 for queue_name in task_queues}
 
         # We got some new tasks, put them in the task queues.
-        self.logger.info("Adding new tasks...")
+        self.logger.info("Adding new tasks")
         # As long as there are any tasks keep trying to add them to the queues
         while any(
             task_idx < len(all_article_ids) for task_idx in current_task_ids.values()
@@ -372,7 +383,7 @@ class CreateMiningCache:
         task_queues = {model_name: mp.Queue() for model_name in self.model_schemas}
 
         # Spawn the workers according to `workers_per_model`.
-        self.logger.info("Spawning the worker processes...")
+        self.logger.info("Spawning the worker processes")
         worker_processes = []
         workers_by_queue = {queue_name: [] for queue_name in task_queues}
         for model_name, model_schema in self.model_schemas.items():
@@ -382,7 +393,7 @@ class CreateMiningCache:
                     name=worker_name,
                     target=Miner,
                     kwargs={
-                        "engine_url": self.database_url,
+                        "database_engine": self.engine,
                         "model_path": model_schema["model_path"],
                         "entity_map": model_schema["entity_map"],
                         "target_table": self.target_table,
@@ -395,7 +406,7 @@ class CreateMiningCache:
                 workers_by_queue[model_name].append(worker_process)
 
         # Create tasks
-        self.logger.info("Creating tasks...")
+        self.logger.info("Creating tasks")
         self.create_tasks(task_queues, workers_by_queue)
 
         # Monitor the queues and the workers to decide when we're finished.
@@ -421,7 +432,7 @@ class CreateMiningCache:
                     )
                     can_finish[queue_name].set()
 
-        self.logger.info("Closing all task queues...")
+        self.logger.info("Closing all task queues")
         for queue_name, task_queue in task_queues.items():
             self.logger.debug(f"Closing the reading end of the queue {queue_name}")
             # Note that this is only safe when the queue is empty. This is
@@ -437,7 +448,7 @@ class CreateMiningCache:
             task_queue.join_thread()
 
         # Wait for the processes to finish.
-        self.logger.info("No more new tasks, just waiting for the workers to finish...")
+        self.logger.info("No more new tasks, just waiting for the workers to finish")
         # We'll transfer finished workers from `worker_processes`
         # to `finished_workers`. We're done when `worker_processes` is empty.
         finished_workers = []

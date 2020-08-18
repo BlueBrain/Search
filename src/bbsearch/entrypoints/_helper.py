@@ -1,6 +1,5 @@
 """Helper functions for server entry points."""
 import logging
-import pathlib
 import sys
 
 
@@ -37,7 +36,6 @@ def configure_logging(log_file=None, level=logging.WARNING):
     level : int, optional
         The logging level. See the `logging` module for more information.
     """
-
     logging.basicConfig(
         filename=log_file,
         level=level,

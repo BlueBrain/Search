@@ -29,6 +29,12 @@ def run_create_mining_cache(argv=None):
         help="The URI to the MySQL database.",
     )
     parser.add_argument(
+        "--target_table_name",
+        default="mining_cache_temporary",
+        type=str,
+        help="The name of the target mining cache table",
+    )
+    parser.add_argument(
         "--ee_models_library_file",
         default="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv",
         type=str,
@@ -68,6 +74,7 @@ def run_create_mining_cache(argv=None):
     args = parser.parse_args(argv)
 
     import pandas as pd
+    import sqlalchemy
 
     from ..database import CreateMiningCache
 
@@ -79,9 +86,21 @@ def run_create_mining_cache(argv=None):
     else:
         level = logging.WARNING
     configure_logging(args.log_file, level)
-    logger = logging.getLogger(__name__)
+
+    logger = logging.getLogger("Mining cache entrypoint")
+    logger.info("Welcome to the mining cache creation")
+    logger.info("Parameters:")
+    logger.info(f"db_type                : {args.db_type}")
+    logger.info(f"database_uri           : {args.database_uri}")
+    logger.info(f"target_table_name      : {args.target_table_name}")
+    logger.info(f"ee_models_library_file : {args.ee_models_library_file}")
+    logger.info(f"n_processes_per_model  : {args.n_processes_per_model}")
+    logger.info(f"restrict_to_models     : {args.restrict_to_models}")
+    logger.info(f"log_file               : {args.log_file}")
+    logger.info(f"verbose                : {args.verbose}")
 
     # Database type
+    logger.info("Parsing the database type")
     if args.db_type == "sqlite":
         database_path = "/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db"
         if not pathlib.Path(database_path).exists():
@@ -94,9 +113,11 @@ def run_create_mining_cache(argv=None):
         raise ValueError("This is not a valid db_type.")
 
     # Load the models library
+    logger.info("Loading the models library")
     ee_models_library = pd.read_csv(args.ee_models_library_file)
 
     # Restrict to given models
+    logger.info("Possibly restricting to a subset of models")
     if args.restrict_to_models is None:
         restrict_to_models = ee_models_library.model.unique().tolist()
     else:
@@ -104,21 +125,31 @@ def run_create_mining_cache(argv=None):
             model_path.strip() for model_path in args.restrict_to_models.split(",")
         ]
         for model_path in restrict_to_models:
-            if model_path not in ee_models_library["model"]:
+            if model_path not in ee_models_library["model"].values:
                 logger.warning(
                     f"Can't restrict to model {model_path} because it is not "
                     f"listed in the models library file {args.ee_models_library_file}. "
                     "This entry will be ignored."
                 )
 
+    # Create the database engine
+    logger.info("Creating the database engine")
+    database_engine = sqlalchemy.create_engine(database_url)
+
     # Create the cache creation class and run the cache creation
+    logger.info("Creating the cache miner")
     cache_creator = CreateMiningCache(
-        database_url=database_url,
+        database_engine=database_engine,
         ee_models_library=ee_models_library,
+        target_table_name=args.target_table_name,
         restrict_to_models=restrict_to_models,
         workers_per_model=args.n_processes_per_model,
     )
+
+    logger.info("Launching the mining")
     cache_creator.construct()
+
+    logger.info("All done, bye")
 
 
 if __name__ == "__main__":
