@@ -189,25 +189,35 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         Selected rows of the `mining_cache` table.
 
     """
-    if all(ppos == -1 for _, ppos in identifiers):
-        all_ids = [str(aid) for aid, _ in identifiers]
-        condition_id = f"article_id in ({', '.join(all_ids)})"
+    model_names = tuple(set(model_names))
+
+    identifiers_arts = tuple(a for a, p in identifiers if p == -1)
+    if identifiers_arts:
+        query_arts = f"""
+        SELECT *
+        FROM mining_cache
+        WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
+        ORDER BY article_id, paragraph_pos_in_article, start_cha
+        """
+        df_arts = pd.read_sql(query_arts, con=engine)
     else:
-        conditions = []
-        for aid, ppos in identifiers:
-            cond = f"(article_id = {aid}{'' if ppos == -1 else ' AND paragraph_pos_in_article = {}'.format(ppos)})"
-            conditions.append(cond)
+        df_arts = pd.DataFrame()
 
-        condition_id = "(" + " OR ".join(conditions) + ")"
+    identifiers_pars = [(a, p) for a, p in identifiers if p != -1]
+    if identifiers_pars:
+        condition_pars = " OR ".join(f"(article_id = {a} AND paragraph_pos_in_article = {p})"
+                                     for a, p in identifiers_pars)
+        query_pars = f"""
+            SELECT *
+            FROM mining_cache
+            WHERE ({condition_pars}) AND mining_model IN {model_names}
+            ORDER BY article_id, paragraph_pos_in_article, start_cha
+            """
+        df_pars = pd.read_sql(query_pars, con=engine)
+    else:
+        df_pars = pd.DataFrame()
 
-    condition_models = ", ".join([f"'{m}'" for m in set(model_names)])
-
-    query = f"SELECT * FROM mining_cache WHERE {condition_id} AND mining_model in ({condition_models})" \
-            " ORDER BY article_id, paragraph_pos_in_article, start_char"
-
-    result = pd.read_sql(query, engine)
-
-    return result
+    return df_pars.append(df_arts, ignore_index=True)
 
 
 class SentenceFilter:
