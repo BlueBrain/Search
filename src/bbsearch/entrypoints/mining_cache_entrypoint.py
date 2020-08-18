@@ -15,7 +15,10 @@ def run_create_mining_cache(argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        usage="%(prog)s [options]",
+        description="Mine the CORD-19 database and cache the results.",
+    )
     parser.add_argument(
         "--db_type",
         default="mysql",
