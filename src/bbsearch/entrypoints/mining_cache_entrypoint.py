@@ -78,6 +78,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
     import pandas as pd
     import sqlalchemy
+    from sqlalchemy.pool import NullPool
 
     from ..database import CreateMiningCache
 
@@ -137,7 +138,9 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
     # Create the database engine
     logger.info("Creating the database engine")
-    database_engine = sqlalchemy.create_engine(database_url)
+    # The NullPool prevents the Engine from using any connection more than once
+    # This is important for multiprocessing
+    database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Create the cache creation class and run the cache creation
     logger.info("Creating the cache miner")

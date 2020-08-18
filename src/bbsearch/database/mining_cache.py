@@ -57,6 +57,10 @@ class Miner:
 
         self.logger = logging.getLogger(str(self))
 
+        self.logger.info("Disposing of existing connections in engine")
+        # This is important for multiprocessing
+        self.engine.dispose()
+
         self.logger.info("Loading the NLP model")
         self.model = spacy.load(self.model_path)
 
@@ -127,23 +131,6 @@ class Miner:
                     self.n_tasks_done += 1
                 except Exception:
                     self._log_exception(article_id)
-
-    def _fetch_all_paragraphs(self, article_id):
-        query = """
-        SELECT paragraph_pos_in_article, text
-        FROM sentences
-        WHERE article_id = :article_id
-        ORDER BY paragraph_pos_in_article, sentence_pos_in_paragraph
-        """
-        result_proxy = self.engine.execute(
-            sqlalchemy.sql.text(query), article_id=article_id
-        )
-
-        all_paragraphs = collections.defaultdict(list)
-        for paragraph_pos, sentence in result_proxy:
-            all_paragraphs[paragraph_pos].append(sentence)
-
-        return all_paragraphs
 
     def _generate_texts_with_metadata(self, article_ids):
         """Return a generator of (text, metadata_dict) for nlp.pipe.
