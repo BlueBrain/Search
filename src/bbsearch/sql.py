@@ -168,6 +168,62 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
+def retrieve_mining_cache(identifiers, model_names, engine):
+    """Retrieve cached mining results.
+
+    Parameters
+    ----------
+    identifiers : list of tuple
+        Tuples of form (article_id, paragraph_pos_in_article). Note that if
+        `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
+
+    model_names : list
+        List of model names to consider. Duplicates are removed automatically.
+
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    result : pd.DataFrame
+        Selected rows of the `mining_cache` table.
+
+    """
+    model_names = tuple(set(model_names))
+    if len(model_names) == 1:
+        model_names = f"('{model_names[0]}')"
+
+    identifiers_arts = tuple(a for a, p in identifiers if p == -1)
+    if len(identifiers_arts) == 1:
+        identifiers_arts = f"({identifiers_arts[0]})"
+    if identifiers_arts:
+        query_arts = f"""
+        SELECT *
+        FROM mining_cache
+        WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
+        ORDER BY article_id, paragraph_pos_in_article, start_char
+        """
+        df_arts = pd.read_sql(query_arts, con=engine)
+    else:
+        df_arts = pd.DataFrame()
+
+    identifiers_pars = [(a, p) for a, p in identifiers if p != -1]
+    if identifiers_pars:
+        condition_pars = " OR ".join(f"(article_id = {a} AND paragraph_pos_in_article = {p})"
+                                     for a, p in identifiers_pars)
+        query_pars = f"""
+            SELECT *
+            FROM mining_cache
+            WHERE ({condition_pars}) AND mining_model IN {model_names}
+            ORDER BY article_id, paragraph_pos_in_article, start_char
+            """
+        df_pars = pd.read_sql(query_pars, con=engine)
+    else:
+        df_pars = pd.DataFrame()
+
+    return df_pars.append(df_arts, ignore_index=True)
+
+
 class SentenceFilter:
     """Filter sentence IDs by applying conditions.
 

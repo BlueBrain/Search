@@ -31,14 +31,19 @@ class MiningWidget(widgets.VBox):
         An instance of the article saver.
     default_text : string, optional
         The default text assign to the text area.
+    use_cache : bool
+        If True the mining server will use cached mining results stored in an
+        SQL database. Should lead to major speedups.
     """
 
-    def __init__(self, mining_server_url, schema_request, article_saver=None, default_text=''):
+    def __init__(self, mining_server_url, schema_request, article_saver=None, default_text='',
+                 use_cache=True):
         super().__init__()
 
         self.mining_server_url = mining_server_url
         self.article_saver = article_saver
         self.schema_request = schema_request
+        self.use_cache = use_cache
 
         # This is the output: csv table of extracted entities/relations.
         self.table_extractions = None
@@ -110,6 +115,7 @@ class MiningWidget(widgets.VBox):
                 self.mining_server_url + '/database',
                 json={"identifiers": information,
                       "schema": schema_str,
+                      "use_cache": self.use_cache
                       }
             )
         elif isinstance(information, str):
