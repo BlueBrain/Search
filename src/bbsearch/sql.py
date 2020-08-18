@@ -283,6 +283,7 @@ class SentenceFilter:
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
+        self.string_inclusions = []
         self.restricted_sentence_ids = None
 
     def only_with_journal(self, flag=True):
@@ -323,6 +324,24 @@ class SentenceFilter:
         if date_range is not None:
             self.year_from, self.year_to = date_range
         return self
+
+    def include_strings(self, strings):
+        """Include only sentences containing all of the given strings.
+
+        Parameters
+        ----------
+        strings : list_like
+            The strings to include.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself.
+        """
+        self.logger.info(f"Include strings: {strings}")
+        strings = map(lambda s: s.lower(), strings)
+        strings = filter(lambda s: len(s) > 0, strings)
+        self.string_inclusions.extend(strings)
 
     def exclude_strings(self, strings):
         """Exclude sentences containing any of the given strings.
@@ -410,6 +429,13 @@ class SentenceFilter:
                 sentence_conditions.append(f"INSTR(text, '{text}') = 0")
             else:
                 sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+
+        # Inclusion text
+        for text in self.string_inclusions:
+            if self.connection.url.drivername == 'mysql+pymysql':
+                sentence_conditions.append(f"INSTR(text, '{text}') = 1")
+            else:
+                sentence_conditions.append(f"text LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"
