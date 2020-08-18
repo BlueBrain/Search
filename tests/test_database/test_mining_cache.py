@@ -3,7 +3,6 @@ import multiprocessing as mp
 
 import pytest
 
-from bbsearch.database import CreateMiningCache
 from bbsearch.database.mining_cache import Miner
 
 
