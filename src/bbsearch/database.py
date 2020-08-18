@@ -84,7 +84,11 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
                                                nullable=False),
                              sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
-                                               nullable=False)
+                                               nullable=False),
+                             sqlalchemy.UniqueConstraint('article_id',
+                                                         'paragraph_pos_in_article',
+                                                         'sentence_pos_in_paragraph',
+                                                         name='sentence_unique_identifier')
                              )
 
         with self.engine.begin() as connection:
@@ -186,11 +190,14 @@ class CORD19DatabaseCreation:
                             paragraphs += [(section['text'], {'section_name': section['section'].title(),
                                                               'article_id': article_id,
                                                               'paragraph_pos_in_article': paragraph_pos_in_article})]
+                            paragraph_pos_in_article += 1
 
                         for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
                                                                           start=paragraph_pos_in_article):
                             paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
                                                         'paragraph_pos_in_article': paragraph_pos_in_article})]
+
+                            paragraph_pos_in_article += 1
 
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
