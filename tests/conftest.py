@@ -80,7 +80,11 @@ def fill_db_data(engine, metadata_path, test_parameters):
                          sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
                                            nullable=False),
                          sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
-                                           nullable=False)
+                                           nullable=False),
+                         sqlalchemy.UniqueConstraint('article_id',
+                                                     'paragraph_pos_in_article',
+                                                     'sentence_pos_in_paragraph',
+                                                     name='sentence_unique_identifier')
                          )
 
     # Construction of the tables
