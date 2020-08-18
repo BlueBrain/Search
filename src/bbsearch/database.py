@@ -190,14 +190,14 @@ class CORD19DatabaseCreation:
                             paragraphs += [(section['text'], {'section_name': section['section'].title(),
                                                               'article_id': article_id,
                                                               'paragraph_pos_in_article': paragraph_pos_in_article})]
-                            paragraph_pos_in_article += 1
+                        paragraph_pos_in_article += 1
 
                         for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
                                                                           start=paragraph_pos_in_article):
                             paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
                                                         'paragraph_pos_in_article': paragraph_pos_in_article})]
 
-                            paragraph_pos_in_article += 1
+                        paragraph_pos_in_article += 1
 
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
