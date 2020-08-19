@@ -185,19 +185,25 @@ class CORD19DatabaseCreation:
                     with open(str(json_path), 'r') as json_file:
                         file = json.load(json_file)
 
-                        for paragraph_pos_in_article, section in enumerate(file['body_text'],
-                                                                           start=paragraph_pos_in_article):
-                            paragraphs += [(section['text'], {'section_name': section['section'].title(),
-                                                              'article_id': article_id,
-                                                              'paragraph_pos_in_article': paragraph_pos_in_article})]
-                        paragraph_pos_in_article += 1
+                        for section in file['body_text']:
+                            text = section['text']
+                            metadata = {
+                                'section_name': section['section'].title(),
+                                'article_id': article_id,
+                                'paragraph_pos_in_article': paragraph_pos_in_article,
+                            }
+                            paragraphs.append((text, metadata))
+                            paragraph_pos_in_article += 1
 
-                        for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
-                                                                          start=paragraph_pos_in_article):
-                            paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
-                                                        'paragraph_pos_in_article': paragraph_pos_in_article})]
-
-                        paragraph_pos_in_article += 1
+                        for ref_entry in file['ref_entries'].values():
+                            text = ref_entry['text']
+                            metadata = {
+                                'section_name': 'Caption',
+                                'article_id': article_id,
+                                'paragraph_pos_in_article': paragraph_pos_in_article,
+                            }
+                            paragraphs.append((text, metadata))
+                            paragraph_pos_in_article += 1
 
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
