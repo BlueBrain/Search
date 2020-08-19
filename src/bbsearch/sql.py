@@ -434,7 +434,7 @@ class SentenceFilter:
         # Inclusion text
         for text in self.string_inclusions:
             if self.connection.url.drivername == 'mysql+pymysql':
-                sentence_conditions.append(f"INSTR(text, '{text}') = 1")
+                sentence_conditions.append(f"INSTR(text, '{text}') > 0")
             else:
                 sentence_conditions.append(f"text LIKE '%{text}%'")
 
