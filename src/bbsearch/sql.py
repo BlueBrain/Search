@@ -342,6 +342,7 @@ class SentenceFilter:
         strings = map(lambda s: s.lower(), strings)
         strings = filter(lambda s: len(s) > 0, strings)
         self.string_inclusions.extend(strings)
+        return self
 
     def exclude_strings(self, strings):
         """Exclude sentences containing any of the given strings.
