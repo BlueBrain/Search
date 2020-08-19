@@ -127,11 +127,7 @@ class TestMiner:
 
     def test_str(self, miner_env):
         miner, _, _ = miner_env
-        assert str(miner) == repr(miner)
-
-    def test_repr(self, miner_env):
-        miner, _, _ = miner_env
-        assert repr(miner) == f"Miner[{mp.current_process().name}]"
+        assert str(miner) == f"Miner[{mp.current_process().name}]"
 
 
 class TestCreateMiningCache:

@@ -38,13 +38,13 @@ class Miner:
     """
 
     def __init__(
-        self,
-        database_url,
-        model_path,
-        entity_map,
-        target_table,
-        task_queue,
-        can_finish,
+            self,
+            database_url,
+            model_path,
+            entity_map,
+            target_table,
+            task_queue,
+            can_finish,
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
@@ -67,12 +67,12 @@ class Miner:
 
     @staticmethod
     def create_and_mine(
-        database_url,
-        model_path,
-        entity_map,
-        target_table,
-        task_queue,
-        can_finish,
+            database_url,
+            model_path,
+            entity_map,
+            target_table,
+            task_queue,
+            can_finish,
     ):
         """Create a miner instance and start the mining loop.
 
@@ -219,16 +219,6 @@ class Miner:
         str
             The string representation of self.
         """
-        return self.__repr__()
-
-    def __repr__(self):
-        """Represent self.
-
-        Returns
-        -------
-        str
-            The representation of self.
-        """
         return f"{self.__class__.__name__}[{self.name}]"
 
 
@@ -257,12 +247,12 @@ class CreateMiningCache:
     """
 
     def __init__(
-        self,
-        database_engine,
-        ee_models_library,
-        target_table_name,
-        restrict_to_models,
-        workers_per_model=1,
+            self,
+            database_engine,
+            ee_models_library,
+            target_table_name,
+            restrict_to_models,
+            workers_per_model=1,
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.engine = database_engine
@@ -370,7 +360,7 @@ class CreateMiningCache:
         self.logger.info("Adding new tasks")
         # As long as there are any tasks keep trying to add them to the queues
         while any(
-            task_idx < len(all_article_ids) for task_idx in current_task_ids.values()
+                task_idx < len(all_article_ids) for task_idx in current_task_ids.values()
         ):
             for queue_name, task_queue in task_queues.items():
                 # Check if still task available for the current queue
@@ -383,7 +373,7 @@ class CreateMiningCache:
 
                 # Check if there are still workers working on this queue
                 if not any(
-                    worker.is_alive() for worker in workers_by_queue[queue_name]
+                        worker.is_alive() for worker in workers_by_queue[queue_name]
                 ):
                     self.logger.debug("No workers left working on this queue")
                     current_task_ids[queue_name] = len(all_article_ids)
@@ -450,7 +440,7 @@ class CreateMiningCache:
                     # This queue is already empty we've let the workers know
                     continue
                 if not any(
-                    worker.is_alive() for worker in workers_by_queue[queue_name]
+                        worker.is_alive() for worker in workers_by_queue[queue_name]
                 ):
                     self.logger.debug(f"Emptying the {queue_name} queue")
                     while not task_queue.empty():
@@ -541,7 +531,7 @@ class CreateMiningCache:
 
         model_schemas = dict()
         for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
-            index=False
+                index=False
         ):
             _, _, model_name = model_path.rpartition("/")
             if model_name not in model_schemas:
