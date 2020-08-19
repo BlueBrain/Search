@@ -192,7 +192,7 @@ def run_search(
             SentenceFilter(connection)
             .only_with_journal(has_journal)
             .date_range(date_range)
-            .exclude_strings(exclusion_text.split())
+            .exclude_strings(exclusion_text.split('\n'))
             .run()
         )
 
