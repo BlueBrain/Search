@@ -2,7 +2,7 @@
 
 from .attributes import AttributeAnnotationTab, AttributeExtractor, TextCollectionWidget
 from .eval import prodigy2df, spacy2df
-from .pipeline import run_pipeline
+from .pipeline import SPECS, run_pipeline
 from .relation import ChemProt, REModel, StartWithTheSameLetter, annotate
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     'TextCollectionWidget',
     'ChemProt',
     'REModel',
+    'SPECS',
     'StartWithTheSameLetter',
     'annotate',
     'run_pipeline',

@@ -99,8 +99,8 @@ class TestDatabaseCreation:
         real_tables_names = {table_name for table_name in real_sqlalchemy_engine.table_names()}
         fake_tables_names = {table_name for table_name in fake_sqlalchemy_engine.table_names()}
 
-        assert real_tables_names
-        assert real_tables_names == fake_tables_names
+        assert real_tables_names == {'articles', 'sentences'}
+        assert real_tables_names.issubset(fake_tables_names)
 
         real_inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
         fake_inspector = sqlalchemy.inspect(fake_sqlalchemy_engine)
