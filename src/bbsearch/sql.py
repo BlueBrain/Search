@@ -22,6 +22,7 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
     sentence_ids_s = ', '.join(str(id_) for id_ in sentence_ids)
+    sentence_ids_s = sentence_ids_s or "NULL"
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
                     FROM sentences
                     WHERE sentence_id IN ({sentence_ids_s})"""

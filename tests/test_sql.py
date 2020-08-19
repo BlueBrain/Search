@@ -40,7 +40,7 @@ class TestNoSQL:
 
 class TestSQLQueries:
 
-    @pytest.mark.parametrize('sentence_id', [[7], [7, 9], [-1], [9, 9]])
+    @pytest.mark.parametrize('sentence_id', [[], [7], [7, 9], [-1], [9, 9]])
     def test_retrieve_sentence_from_sentence_ids(self, sentence_id, fake_sqlalchemy_engine):
         """Test that retrieve sentences from sentence_id is working."""
         sentence_text = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_id,
