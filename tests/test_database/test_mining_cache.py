@@ -78,7 +78,7 @@ class TestMiner:
         task_queue.put(article_id)
         miner.work_loop()
 
-        df_result = pd.read_sql("select * from mining_cache_temporary", con=miner.engine)
+        df_result = pd.read_sql("select * from {miner.target_table_name}", con=miner.engine)
         assert len(df_result) == 1
         assert df_result.iloc[0]["article_id"] == fake_result["article_id"]
         assert df_result.iloc[0]["paper_id"] == fake_result["paper_id"]
