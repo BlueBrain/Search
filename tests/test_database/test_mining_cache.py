@@ -225,6 +225,7 @@ class TestCreateMiningCache:
         worker_proc.start()
         workers_by_queue = {queue_name: [worker_proc]}
 
+        assert worker_proc.is_alive()
         cache_creator.create_tasks(task_queues, workers_by_queue)
 
         assert not queue.empty()
