@@ -17,7 +17,7 @@ class TestMiner:
         task_queue = mp.Queue()
         can_finish = mp.Event()
         miner = Miner(
-            database_engine=fake_sqlalchemy_engine,
+            database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
@@ -33,7 +33,7 @@ class TestMiner:
         can_finish.set()
 
         Miner.create_and_mine(
-            database_engine=fake_sqlalchemy_engine,
+            database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
             entity_map={},
             target_table="",

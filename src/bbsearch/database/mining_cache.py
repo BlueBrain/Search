@@ -17,8 +17,10 @@ class Miner:
 
     Parameters
     ----------
-    database_engine : SQLAlchemy connectable (engine/connection)
-        The database should contain tables `articles` and `sentences`.
+    database_url : str
+        URL of a database already containing tables `articles` and `sentences`.
+        The URL should indicate database dialect and connection argument, e.g.
+        `database_url = "postgresql://scott:tiger@localhost/test"`.
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
@@ -37,7 +39,7 @@ class Miner:
 
     def __init__(
         self,
-        database_engine,
+        database_url,
         model_path,
         entity_map,
         target_table,
@@ -45,7 +47,7 @@ class Miner:
         can_finish,
     ):
         self.name = mp.current_process().name
-        self.engine = database_engine
+        self.engine = sqlalchemy.create_engine(database_url)
         self.model_path = model_path
         self.entity_map = entity_map
         self.target_table_name = target_table
@@ -65,7 +67,7 @@ class Miner:
 
     @staticmethod
     def create_and_mine(
-        database_engine,
+        database_url,
         model_path,
         entity_map,
         target_table,
@@ -76,8 +78,10 @@ class Miner:
 
         Parameters
         ----------
-        database_engine : SQLAlchemy connectable (engine/connection)
-            The database should contain tables `articles` and `sentences`.
+        database_url : str
+            URL of a database already containing tables `articles` and `sentences`.
+            The URL should indicate database dialect and connection argument, e.g.
+            `database_url = "postgresql://scott:tiger@localhost/test"`.
         model_path : str
             The path for loading the spacy model that will perform the
             named entity extraction.
@@ -94,7 +98,7 @@ class Miner:
             polling the task queue for new tasks.
         """
         miner = Miner(
-            database_engine=database_engine,
+            database_url=database_url,
             model_path=model_path,
             entity_map=entity_map,
             target_table=target_table,
@@ -419,7 +423,7 @@ class CreateMiningCache:
                     name=worker_name,
                     target=Miner.create_and_mine,
                     kwargs={
-                        "database_engine": self.engine,
+                        "database_url": self.engine.url,
                         "model_path": model_schema["model_path"],
                         "entity_map": model_schema["entity_map"],
                         "target_table": self.target_table,
