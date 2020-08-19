@@ -17,14 +17,6 @@ matrix:
       python: 3.8
       env: TOXENV=lint
 
-    - stage: Docs
-      python: 3.8
-      env: TOXENV=docs
-
-    - stage: Packaging
-      python: 3.8
-      env: TOXENV=check-packaging
-
     - stage: Tests and Coverage
       python: 3.6
       env: TOXENV=py36
@@ -32,6 +24,14 @@ matrix:
       env: TOXENV=py37
     - python: 3.8
       env: TOXENV=py38
+
+    - stage: Docs
+      python: 3.8
+      env: TOXENV=docs
+
+    - stage: Packaging
+      python: 3.8
+      env: TOXENV=check-packaging
 
 before_install:
   # make sure latest docker installed
