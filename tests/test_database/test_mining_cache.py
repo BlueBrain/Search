@@ -88,13 +88,13 @@ class TestMiner:
 
         miner.engine.execute(f"drop table {miner.target_table_name}")
 
-    def test_generate_texts_with_metadata(self, miner_env):
+    def test_generate_texts_with_metadata(self, miner_env, test_parameters):
         miner, task_queue, can_finish = miner_env
         article_id = 1
 
         results = list(miner._generate_texts_with_metadata(article_ids=article_id))
 
-        assert len(results) == 2
+        assert len(results) == test_parameters['n_sections_per_article']
 
         (text_1, meta_1), (text_2, meta_2) = results
 
