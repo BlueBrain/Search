@@ -197,6 +197,11 @@ class TestSentenceFilter:
         pattern = "|".join(exclusion_strings)
         if len(pattern) > 0:
             df_all_sentences = df_all_sentences[~df_all_sentences["text"].str.contains(pattern)]
+
+        inclusion_strings = map(lambda s: s.lower(), inclusion_strings)
+        inclusion_strings = list(filter(lambda s: len(s) > 0, inclusion_strings))
+        bool_mask = df_all_sentences['text'].apply(lambda x: all(s in x for s in inclusion_strings))
+        df_all_sentences = df_all_sentences[bool_mask.astype('bool')]
         ids_from_pandas = df_all_sentences["sentence_id"].tolist()
 
         # Construct filter with various conditions
