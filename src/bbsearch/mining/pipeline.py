@@ -22,9 +22,17 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
 
     Parameters
     ----------
-    texts : list
-        It is a list of tuples where the first element is some
-        text (``str``) and the second element is a dictionary with all relevant metadata.
+    texts : iterator
+        The elements in `texts` are tuples where the first element is the text
+        to be processed and the second element is a dictionary with arbitrary
+        metadata for the text. Each key in this dictionary will be used to
+        construct a new column in the output data frame and the values will
+        appear in the corresponding rows.
+
+        Note that if `debug=False` then the output data frame will have
+        exactly the columns specified by `SPECS`. That means that some
+        columns produced by the entries in metadata might be dropped, and
+        some empty columns might be added.
     model_entities : spacy.lang.en.English
         Spacy model. Note that this model defines entity types.
     models_relations : dict
