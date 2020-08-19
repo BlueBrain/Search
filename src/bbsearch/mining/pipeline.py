@@ -22,7 +22,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
 
     Parameters
     ----------
-    texts : iterator
+    texts : iterable
         The elements in `texts` are tuples where the first element is the text
         to be processed and the second element is a dictionary with arbitrary
         metadata for the text. Each key in this dictionary will be used to
