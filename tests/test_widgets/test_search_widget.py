@@ -356,6 +356,7 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
 
     assert not bot.display_cached
 
+
 @pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
