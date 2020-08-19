@@ -204,9 +204,6 @@ class CORD19DatabaseCreation:
                 print('Number of articles: ', num_articles,
                       'in', f'{time.perf_counter() - start:.1f} seconds')
 
-        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
-        mymodel_url_index.create(bind=self.engine)
-
         return pmc, pdf, rejected_articles
 
     @staticmethod
