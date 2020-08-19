@@ -216,9 +216,9 @@ class TestCreateMiningCache:
             while not stop_now.is_set():
                 time.sleep(0.01)
 
-        queue = mp.Queue()
+        my_queue = mp.Queue()
         queue_name = "my_queue"
-        task_queues = {queue_name: queue}
+        task_queues = {queue_name: my_queue}
 
         stop_event = mp.Event()
         worker_proc = mp.Process(target=worker, args=(stop_event,))
@@ -228,7 +228,13 @@ class TestCreateMiningCache:
         assert worker_proc.is_alive()
         cache_creator.create_tasks(task_queues, workers_by_queue)
 
-        assert not queue.empty()
+        # Ugly workaround. This gives the background thread a bit of time
+        # to flush the buffer into the pipe. Otherwise the following assert
+        # might fail if none of the buffer has been transferred yet.
+        while len(my_queue._buffer) > 0:
+            time.sleep(0.1)
+
+        assert not my_queue.empty()
 
         stop_event.set()
         worker_proc.join()
