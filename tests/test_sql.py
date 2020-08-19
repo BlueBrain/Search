@@ -161,14 +161,16 @@ class TestSentenceFilter:
     @pytest.mark.parametrize("has_journal", [True, False])
     @pytest.mark.parametrize("indices", [[], [1], [1, 2, 3]])
     @pytest.mark.parametrize("date_range", [None, (1960, 2010), (0, 0)])
-    @pytest.mark.parametrize("exclusion_text", ["", "virus", "VIRus\n\nease"])
+    @pytest.mark.parametrize("exclusion_text", ["", "virus"])
+    @pytest.mark.parametrize("inclusion_strings", [[""], ["sentence 1"]])
     def test_sentence_filter(
             self,
             fake_sqlalchemy_engine,
             has_journal,
             indices,
             date_range,
-            exclusion_text
+            exclusion_text,
+            inclusion_strings
     ):
         # Recreate filtering in pandas for comparison
         df_all_articles = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
@@ -204,6 +206,7 @@ class TestSentenceFilter:
             .restrict_sentences_ids_to(indices)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split())
+            .include_strings(inclusion_strings)
         )
 
         # Get filtered ids in a single run
