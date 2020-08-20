@@ -224,10 +224,11 @@ def retrieve_mining_cache(identifiers, model_names, engine):
                 f"""
                 SELECT *
                 FROM mining_cache
-                WHERE (article_id = {a} AND paragraph_pos_in_article = {p}) AND (mining_model IN {model_names})
+                WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
                 """
                 for a, p in identifiers_pars[i * batch_size: (i + 1) * batch_size]
             )
+            query_pars = f"""SELECT * FROM ({query_pars}) tt WHERE tt.mining_model IN {model_names}"""
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
         df_pars = df_pars.sort_values(by=['article_id', 'paragraph_pos_in_article', 'start_char'])
