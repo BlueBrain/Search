@@ -65,8 +65,9 @@ class Miner:
         self.logger.info("Loading the NLP model")
         self.model = spacy.load(self.model_path)
 
-    @staticmethod
+    @classmethod
     def create_and_mine(
+            cls,
             database_url,
             model_path,
             entity_map,
@@ -97,7 +98,7 @@ class Miner:
             tasks. Unless this flag is set, the worker will continue
             polling the task queue for new tasks.
         """
-        miner = Miner(
+        miner = cls(
             database_url=database_url,
             model_path=model_path,
             entity_map=entity_map,
