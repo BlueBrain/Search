@@ -203,10 +203,13 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
     else:
         port_number = 22345
         client = docker.from_env()
-        container = client.containers.run('mysql:latest',
-                                          environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
-                                          ports={'3306/tcp': port_number},
-                                          detach=True)
+        container = client.containers.run(
+            image='mysql:latest',
+            environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
+            ports={'3306/tcp': port_number},
+            detach=True,
+            auto_remove=True,
+        )
 
         max_waiting_time = 2 * 60
         start = time.perf_counter()
@@ -220,9 +223,8 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
                 break
             except OperationalError:
                 # Container not ready, pause and then try again
-                time.sleep(2)
+                time.sleep(0.1)
                 continue
-
         else:
             raise TimeoutError("Could not spawn the MySQL container.")
 

@@ -94,9 +94,6 @@ class CORD19DatabaseCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
-        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
-        mymodel_url_index.create(bind=self.engine)
-
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
 
@@ -220,6 +217,9 @@ class CORD19DatabaseCreation:
                 print('Number of articles: ', num_articles,
                       'in', f'{time.perf_counter() - start:.1f} seconds')
 
+        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
+        mymodel_url_index.create(bind=self.engine)
+
         return pmc, pdf, rejected_articles
 
     @staticmethod
@@ -239,11 +239,13 @@ class CORD19DatabaseCreation:
             List of all the sentences extracted from the paragraph.
         """
         if isinstance(paragraphs, str):
-            paragraphs = [paragraphs, ]
+            paragraphs = [paragraphs]
 
         all_sentences = []
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
             for pos, sent in enumerate(paragraph.sents):
-                all_sentences += [{'text': str(sent), 'sentence_pos_in_paragraph': pos, **metadata}]
+                all_sentences += [
+                    {"text": str(sent), "sentence_pos_in_paragraph": pos, **metadata}
+                ]
 
         return all_sentences
