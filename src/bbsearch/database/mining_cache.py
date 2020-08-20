@@ -199,6 +199,7 @@ class Miner:
 
         df_results["mining_model"] = self.model_path
         df_results["mining_model_version"] = self.model.meta["version"]
+        df_results["spacy_version"] = self.model.meta["spacy_version"]
 
         self.logger.debug("Writing results to the SQL database")
         df_results.to_sql(
@@ -329,6 +330,7 @@ class CreateMiningCache:
             sqlalchemy.Column(
                 "mining_model_version", sqlalchemy.Text(), nullable=False
             ),
+            sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False)
         )
 
         with self.engine.begin() as connection:
