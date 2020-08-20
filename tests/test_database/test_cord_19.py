@@ -14,7 +14,7 @@ def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, tmpdir):
     fake_load = Mock()
     fake_load.return_value = model_entities
 
-    monkeypatch.setattr('bbsearch.database.spacy.load', fake_load)
+    monkeypatch.setattr('bbsearch.database.cord_19.spacy.load', fake_load)
 
     version = 'test'
     Path(f'{tmpdir}/cord19_{version}.db').touch()
@@ -69,7 +69,7 @@ class TestDatabaseCreation:
         fake_load = Mock()
         fake_load.return_value = model_entities
 
-        monkeypatch.setattr('bbsearch.database.spacy.load', fake_load)
+        monkeypatch.setattr('bbsearch.database.cord_19.spacy.load', fake_load)
 
         fake_dir = Path(str(tmpdir)) / 'fake'
         Path(f'{tmpdir}/cord19_test.db').touch()

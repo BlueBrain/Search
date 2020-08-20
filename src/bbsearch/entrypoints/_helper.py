@@ -1,6 +1,5 @@
 """Helper functions for server entry points."""
 import logging
-import pathlib
 import sys
 
 
@@ -26,23 +25,19 @@ def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
     logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
-def configure_logging(log_dir, log_name, level=logging.INFO):
+def configure_logging(log_file=None, level=logging.WARNING):
     """Configure the logging for the server.
 
     Parameters
     ----------
-    log_dir : str or pathlib.Path
-        The directory where the log file will be placed.
-    log_name : str
-        The name of the log file.
+    log_file : str or pathlib.Path, optional
+        The log file. If not provided then the log will be printed in
+        the terminal.
     level : int, optional
         The logging level. See the `logging` module for more information.
     """
-    log_path = pathlib.Path(log_dir) / log_name
-    log_path = log_path.resolve()
-
     logging.basicConfig(
-        filename=log_path,
+        filename=log_file,
         level=level,
         format="%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s",
     )

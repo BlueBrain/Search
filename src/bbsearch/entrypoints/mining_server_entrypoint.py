@@ -1,12 +1,12 @@
 """The entrypoint script for the mining server."""
 import argparse
+import logging
 import os
+import pathlib
 
 from ._helper import configure_logging
 
-parser = argparse.ArgumentParser(
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter
-)
+parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     default="0.0.0.0",
                     type=str,
@@ -32,11 +32,10 @@ def main():
     # Configure logging
     log_dir = os.getenv("LOG_DIR", "/")
     log_name = os.getenv("LOG_NAME", "bbs_mining.log")
-    configure_logging(log_dir, log_name)
+    log_file = pathlib.Path(log_dir) / log_name
+    configure_logging(log_file, logging.INFO)
 
     # Start server
-    import pathlib
-
     import sqlalchemy
     from flask import Flask
 
