@@ -22,6 +22,7 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
     sentence_ids_s = ', '.join(str(id_) for id_ in sentence_ids)
+    sentence_ids_s = sentence_ids_s or "NULL"
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
                     FROM sentences
                     WHERE sentence_id IN ({sentence_ids_s})"""
@@ -283,6 +284,7 @@ class SentenceFilter:
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
+        self.string_inclusions = []
         self.restricted_sentence_ids = None
 
     def only_with_journal(self, flag=True):
@@ -322,6 +324,25 @@ class SentenceFilter:
         self.logger.info(f"Date range: {date_range}")
         if date_range is not None:
             self.year_from, self.year_to = date_range
+        return self
+
+    def include_strings(self, strings):
+        """Include only sentences containing all of the given strings.
+
+        Parameters
+        ----------
+        strings : list_like
+            The strings to include.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself.
+        """
+        self.logger.info(f"Include strings: {strings}")
+        strings = map(lambda s: s.lower(), strings)
+        strings = filter(lambda s: len(s) > 0, strings)
+        self.string_inclusions.extend(strings)
         return self
 
     def exclude_strings(self, strings):
@@ -400,16 +421,24 @@ class SentenceFilter:
         # Restricted sentence IDs
         if self.restricted_sentence_ids is not None:
             sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
-            if not sentence_ids_s and self.connection.url.drivername == 'mysql+pymysql':
+            if not sentence_ids_s and self.connection.url.drivername in {'mysql+mysqldb',
+                                                                         'mysql+pymysql'}:
                 sentence_ids_s = 'NULL'
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
         # Exclusion text
         for text in self.string_exclusions:
-            if self.connection.url.drivername == 'mysql+pymysql':
+            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
                 sentence_conditions.append(f"INSTR(text, '{text}') = 0")
             else:
                 sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+
+        # Inclusion text
+        for text in self.string_inclusions:
+            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
+                sentence_conditions.append(f"INSTR(text, '{text}') > 0")
+            else:
+                sentence_conditions.append(f"text LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"

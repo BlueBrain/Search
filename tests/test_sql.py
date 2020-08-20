@@ -40,7 +40,7 @@ class TestNoSQL:
 
 class TestSQLQueries:
 
-    @pytest.mark.parametrize('sentence_id', [[7], [7, 9], [-1], [9, 9]])
+    @pytest.mark.parametrize('sentence_id', [[], [7], [7, 9], [-1], [9, 9]])
     def test_retrieve_sentence_from_sentence_ids(self, sentence_id, fake_sqlalchemy_engine):
         """Test that retrieve sentences from sentence_id is working."""
         sentence_text = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_id,
@@ -161,14 +161,16 @@ class TestSentenceFilter:
     @pytest.mark.parametrize("has_journal", [True, False])
     @pytest.mark.parametrize("indices", [[], [1], [1, 2, 3]])
     @pytest.mark.parametrize("date_range", [None, (1960, 2010), (0, 0)])
-    @pytest.mark.parametrize("exclusion_text", ["", "virus", "VIRus\n\nease"])
+    @pytest.mark.parametrize("exclusion_text", ["", "virus"])
+    @pytest.mark.parametrize("inclusion_strings", [[""], ["sentence 1"]])
     def test_sentence_filter(
             self,
             fake_sqlalchemy_engine,
             has_journal,
             indices,
             date_range,
-            exclusion_text
+            exclusion_text,
+            inclusion_strings
     ):
         # Recreate filtering in pandas for comparison
         df_all_articles = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
@@ -195,6 +197,11 @@ class TestSentenceFilter:
         pattern = "|".join(exclusion_strings)
         if len(pattern) > 0:
             df_all_sentences = df_all_sentences[~df_all_sentences["text"].str.contains(pattern)]
+
+        inclusion_strings = map(lambda s: s.lower(), inclusion_strings)
+        inclusion_strings = list(filter(lambda s: len(s) > 0, inclusion_strings))
+        bool_mask = df_all_sentences['text'].apply(lambda x: all(s in x for s in inclusion_strings))
+        df_all_sentences = df_all_sentences[bool_mask.astype('bool')]
         ids_from_pandas = df_all_sentences["sentence_id"].tolist()
 
         # Construct filter with various conditions
@@ -204,6 +211,7 @@ class TestSentenceFilter:
             .restrict_sentences_ids_to(indices)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split())
+            .include_strings(inclusion_strings)
         )
 
         # Get filtered ids in a single run

@@ -23,6 +23,7 @@ class RemoteSearcher:
         date_range=None,
         deprioritize_strength="None",
         exclusion_text=None,
+        inclusion_text=None,
         deprioritize_text=None,
         verbose=True,
     ):
@@ -46,8 +47,11 @@ class RemoteSearcher:
         deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
             How strong the deprioritization is.
         exclusion_text : str
-            New line separated collection of strings that are automatically
-            used to exclude a given sentence.
+            New line separated collection of strings that are automatically used to exclude a given sentence.
+            If a sentence contains any of these strings then we filter it out.
+        inclusion_text : str
+            New line separated collection of strings. Only sentences that contain all of these
+            strings are going to make it through the filtering.
         verbose : bool
             If True, then printing statistics to standard output.
         """
@@ -59,6 +63,7 @@ class RemoteSearcher:
             date_range=date_range,
             deprioritize_strength=deprioritize_strength,
             exclusion_text=exclusion_text,
+            inclusion_text=inclusion_text,
             deprioritize_text=deprioritize_text,
             verbose=False,
         )

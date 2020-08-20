@@ -341,6 +341,26 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
             raise TypeError(f'Unrecognized type: {type(display_obj)}')
 
 
+def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    searcher = create_searcher(fake_sqlalchemy_engine)
+    widget = SearchWidget(searcher,
+                          fake_sqlalchemy_engine,
+                          ArticleSaver(fake_sqlalchemy_engine),
+                          results_per_page=10)
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    bot.set_value('inclusion_text', "")
+    bot.click('investigate_button')
+
+    assert bot.display_cached
+
+    bot.set_value('inclusion_text', "THIS TEXT DOES NOT EXIST IN ANY SENTENCE")
+    bot.click('investigate_button')
+
+    assert not bot.display_cached
+
+
 @pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
