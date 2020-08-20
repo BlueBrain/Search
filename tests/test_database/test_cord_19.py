@@ -64,6 +64,16 @@ class TestDatabaseCreation:
         assert len(indexes_sentences) == 1
         assert indexes_sentences[0]['column_names'][0] == 'article_id'
 
+        duplicates_query = """SELECT COUNT(article_id || ':' ||
+                                            paragraph_pos_in_article || ':' ||
+                                            sentence_pos_in_paragraph) c,
+                      article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
+                      FROM sentences
+                      GROUP BY article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
+                      HAVING c > 1; """
+        duplicates_df = pd.read_sql(duplicates_query, real_sqlalchemy_engine)
+        assert len(duplicates_df) == 0
+
     def test_errors(self, tmpdir, jsons_path, monkeypatch, model_entities):
 
         fake_load = Mock()
