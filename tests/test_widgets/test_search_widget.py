@@ -181,8 +181,8 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     query_bsv = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_bsv_id}'
     most_relevant_bsv_text = fake_sqlalchemy_engine.execute(query_bsv).fetchone()[0]
 
-    most_relevant_sbiobert_id = 3
-    query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
+    # most_relevant_sbiobert_id = 3
+    # query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
     # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
 
     embedding_model_bsv = Mock()
