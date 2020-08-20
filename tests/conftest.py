@@ -280,7 +280,7 @@ def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters
     if not (tmp_path_factory.getbasetemp() / 'h5_embeddings').is_dir():
         file_path = tmp_path_factory.mktemp('h5_embeddings', numbered=False) / 'embeddings.h5'
 
-        with h5py.File(file_path) as f:
+        with h5py.File(file_path, 'w') as f:
             for model in models:
                 dset = f.create_dataset(f"{model}",
                                         (n_sentences, dim),
