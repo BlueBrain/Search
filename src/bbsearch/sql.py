@@ -210,15 +210,29 @@ def retrieve_mining_cache(identifiers, model_names, engine):
 
     identifiers_pars = [(a, p) for a, p in identifiers if p != -1]
     if identifiers_pars:
-        condition_pars = " OR ".join(f"(article_id = {a} AND paragraph_pos_in_article = {p})"
-                                     for a, p in identifiers_pars)
-        query_pars = f"""
-            SELECT *
-            FROM mining_cache
-            WHERE ({condition_pars}) AND mining_model IN {model_names}
-            ORDER BY article_id, paragraph_pos_in_article, start_char
-            """
-        df_pars = pd.read_sql(query_pars, con=engine)
+        # Remarks
+        # 1. Conditions are mutually exclusive, so several `UNION`s are
+        #    equivalent to several `OR`s.
+        # 2. `UNION` is considerably faster than `OR` in this case.
+        # 3. If `len(identifiers_pars)` is too large, we may have a too long
+        #    SQL statement which overflows the max length. So we break it down.
+
+        batch_size = 1000
+        dfs_pars = []
+        d, r = divmod(len(identifiers_pars), batch_size)
+        for i in range(0, d + (r > 0)):
+            query_pars = " UNION ".join(
+                f"""
+                SELECT *
+                FROM mining_cache
+                WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
+                """
+                for a, p in identifiers_pars[i * batch_size: (i + 1) * batch_size]
+            )
+            query_pars = f"""SELECT * FROM ({query_pars}) tt WHERE tt.mining_model IN {model_names}"""
+            dfs_pars.append(pd.read_sql(query_pars, engine))
+        df_pars = pd.concat(dfs_pars)
+        df_pars = df_pars.sort_values(by=['article_id', 'paragraph_pos_in_article', 'start_char'])
     else:
         df_pars = pd.DataFrame()
 
