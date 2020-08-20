@@ -202,7 +202,8 @@ class TestCreateMiningCache:
             'entity', 'entity_type', 'property', 'property_value',
             'property_type', 'property_value_type', 'ontology_source',
             'paper_id', 'start_char', 'end_char', 'article_id',
-            'paragraph_pos_in_article', 'mining_model', 'mining_model_version'
+            'paragraph_pos_in_article', 'mining_model', 'mining_model_version',
+            'spacy_version'
         }
 
         # Test calling with the table already existing.
