@@ -251,6 +251,12 @@ class CreateMiningCache:
             workers_per_model=1,
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
+        required_tables = ['articles', 'sentences']
+        for table_name in required_tables:
+            if not self.engine.dialect.has_table(self.engine, table_name):
+                raise ValueError(f"Database at {self.engine.url} does not "
+                                 f"contain required table {table_name}.")
+
         self.engine = database_engine
         self.target_table = target_table_name
         self.ee_models_library = ee_models_library

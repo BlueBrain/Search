@@ -109,7 +109,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     if args.db_type == "sqlite":
         database_path = "/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db"
         if not pathlib.Path(database_path).exists():
-            pathlib.Path(database_path).touch()
+            raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass()
