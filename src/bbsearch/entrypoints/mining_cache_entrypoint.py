@@ -18,6 +18,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]",
         description="Mine the CORD-19 database and cache the results.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
         "--db_type",
@@ -121,20 +122,19 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     ee_models_library = pd.read_csv(args.ee_models_library_file)
 
     # Restrict to given models
-    logger.info("Possibly restricting to a subset of models")
-    if args.restrict_to_models is None:
-        restrict_to_models = ee_models_library.model.unique().tolist()
-    else:
-        restrict_to_models = [
-            model_path.strip() for model_path in args.restrict_to_models.split(",")
-        ]
-        for model_path in restrict_to_models:
+    if args.restrict_to_models is not None:
+        logger.info("Restricting to a subset of models")
+        model_selection = args.restrict_to_models.split(",")
+        model_selection = set(map(lambda s: s.strip(), model_selection))
+        for model_path in model_selection:
             if model_path not in ee_models_library["model"].values:
                 logger.warning(
                     f"Can't restrict to model {model_path} because it is not "
                     f"listed in the models library file {args.ee_models_library_file}. "
                     "This entry will be ignored."
                 )
+        keep_rows = ee_models_library["model"].isin(model_selection)
+        ee_models_library = ee_models_library[keep_rows]
 
     # Create the database engine
     logger.info("Creating the database engine")
@@ -148,7 +148,6 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         database_engine=database_engine,
         ee_models_library=ee_models_library,
         target_table_name=args.target_table_name,
-        restrict_to_models=restrict_to_models,
         workers_per_model=args.n_processes_per_model,
     )
 

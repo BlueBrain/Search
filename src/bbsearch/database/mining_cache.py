@@ -237,10 +237,6 @@ class CreateMiningCache:
     target_table_name : str
         The target table name for the mining results.
 
-    restrict_to_models : list of str
-        List of models (as called in ee_models_library_file) to be run to
-        populate the cache.
-
     workers_per_model : int, optional
         Number of max processes to spawn to run text mining and table
         population in parallel.
@@ -251,7 +247,6 @@ class CreateMiningCache:
             database_engine,
             ee_models_library,
             target_table_name,
-            restrict_to_models,
             workers_per_model=1,
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -260,12 +255,7 @@ class CreateMiningCache:
         self.ee_models_library = ee_models_library
         self.workers_per_model = workers_per_model
 
-        model_schemas_all = self._load_model_schemas()
-        self.model_schemas = {
-            model_name: model_schema
-            for model_name, model_schema in model_schemas_all.items()
-            if model_schema["model_path"] in restrict_to_models
-        }
+        self.model_schemas = self._load_model_schemas()
 
     def construct(self):
         """Construct and populate the cache of mined results."""

@@ -157,7 +157,6 @@ class TestCreateMiningCache:
             database_engine=fake_sqlalchemy_engine,
             ee_models_library=ee_models_library,
             target_table_name="mining_cache_temporary",
-            restrict_to_models=["model_1"],
             workers_per_model=2,
         )
 
