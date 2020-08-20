@@ -183,21 +183,25 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 
     most_relevant_sbiobert_id = 3
     query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
-    most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
+    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
 
     embedding_model_bsv = Mock()
     embedding_model_bsv.embed.return_value = np.array([0, 1])  # 90 degrees
     embedding_model_sbiobert = Mock()
     embedding_model_sbiobert.embed.return_value = np.array([0, -1])  # 270 degrees
 
-    embedding_models = {'BSV': embedding_model_bsv,
-                        'SBioBERT': embedding_model_sbiobert}
+    embedding_models = {
+        'BSV': embedding_model_bsv,
+        # 'SBioBERT': embedding_model_sbiobert
+    }
 
-    precomputed_embeddings = {'BSV': np.ones((n_sentences, 2)),  # 45 degrees
-                              'SBioBERT': np.ones((n_sentences, 2))}  # 45 degrees
+    precomputed_embeddings = {
+        'BSV': np.ones((n_sentences, 2)),  # 45 degrees
+        # 'SBioBERT': np.ones((n_sentences, 2))  # 45 degrees
+    }
 
     precomputed_embeddings['BSV'][most_relevant_bsv_id - 1] = np.array([0.1, 0.9])  # ~90 degrees
-    precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
+    # precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
 
     indices = np.arange(1, n_sentences + 1)
 
@@ -227,13 +231,13 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     assert textwrap.fill(most_relevant_bsv_text, width=80) in captured_display_objects[-1].data
 
     # SBioBERT
-    bot.set_value('sent_embedder', 'SBioBERT')
-    bot.click('investigate_button')
-
-    captured_display_objects = bot.display_cached
-
-    assert len(captured_display_objects) == k * bot.n_displays_per_result
-    assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
+    # bot.set_value('sent_embedder', 'SBioBERT')
+    # bot.click('investigate_button')
+    #
+    # captured_display_objects = bot.display_cached
+    #
+    # assert len(captured_display_objects) == k * bot.n_displays_per_result
+    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
 
 
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
