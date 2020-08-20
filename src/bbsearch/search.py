@@ -2,7 +2,8 @@
 import logging
 
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import torch
+from torch.nn.functional import cosine_similarity
 
 from .sql import SentenceFilter
 from .utils import Timer
@@ -208,16 +209,20 @@ def run_search(
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
+    embeddings_corpus_t = torch.from_numpy(embeddings_corpus)
+
     with timer('query_similarity'):
         logger.info("Computing cosine similarities for the query text")
-        similarities_query = cosine_similarity(X=embedding_query[None, :],
-                                               Y=embeddings_corpus).squeeze()
+        embedding_query_t = torch.from_numpy(embedding_query[None, :])
+        similarities_query = cosine_similarity(embedding_query_t,
+                                               embeddings_corpus_t).numpy()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
             logger.info("Computing cosine similarity for the deprioritization text")
-            similarities_deprio = cosine_similarity(X=embedding_deprioritize[None, :],
-                                                    Y=embeddings_corpus).squeeze()
+            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize[None, :])
+            similarities_deprio = cosine_similarity(embedding_deprioritize_t,
+                                                    embeddings_corpus_t).numpy()
     else:
         similarities_deprio = np.zeros_like(similarities_query)
 
