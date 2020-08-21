@@ -1,3 +1,7 @@
 /.git/
+/assets/
+/data/
 /docker/
 /notebooks/
+/sandbox/
+
