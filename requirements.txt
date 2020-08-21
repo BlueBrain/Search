@@ -3,8 +3,9 @@ Flask==1.1.2
 SQLAlchemy==1.3.19
 Sphinx==3.2.1
 cryptography==3.0
-dash-cytoscape==0.0.5
-dash-table==4.6.2
+dash==1.14.0
+dash-cytoscape==0.2.0
+dash-table==4.9.0
 docker==4.3.1
 flake8==3.8.3
 git+https://github.com/allenai/scibert
@@ -14,7 +15,7 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_l
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
 ipython==7.16.1
 ipywidgets==7.5.1
-jupyter-dash==0.2.1.post1
+jupyter-dash==0.3.1
 jupyter-server-proxy==1.5.0
 jupyterlab==2.2.5
 matplotlib==3.3.1
