@@ -5,15 +5,34 @@ import spacy
 
 from .relation import REModel, annotate
 
+SPECS = ['entity',
+         'entity_type',
+         'property',
+         'property_value',
+         'property_type',
+         'property_value_type',
+         'ontology_source',
+         'paper_id',  # article_id:section_name:paragraph_id
+         'start_char',
+         'end_char']
+
 
 def run_pipeline(texts, model_entities, models_relations, debug=False):
     """Run end-to-end extractions.
 
     Parameters
     ----------
-    texts : list
-        It is a list of tuples where the first element is some
-        text (``str``) and the second element is a dictionary with all relevant metadata.
+    texts : iterable
+        The elements in `texts` are tuples where the first element is the text
+        to be processed and the second element is a dictionary with arbitrary
+        metadata for the text. Each key in this dictionary will be used to
+        construct a new column in the output data frame and the values will
+        appear in the corresponding rows.
+
+        Note that if `debug=False` then the output data frame will have
+        exactly the columns specified by `SPECS`. That means that some
+        columns produced by the entries in metadata might be dropped, and
+        some empty columns might be added.
     model_entities : spacy.lang.en.English
         Spacy model. Note that this model defines entity types.
     models_relations : dict
@@ -38,17 +57,6 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
 
     if not all([isinstance(model, REModel) for model_list in models_relations.values() for model in model_list]):
         raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
-
-    specs = ['entity',
-             'entity_type',
-             'property',
-             'property_value',
-             'property_type',
-             'property_value_type',
-             'ontology_source',
-             'paper_id',  # article_id:section_name:paragraph_id
-             'start_char',
-             'end_char']
 
     if models_relations:
         disable_pipe = ['tagger']  # the parser is needed to decompose text into sentences.
@@ -95,6 +103,6 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
                                               ))
 
     if not lines or not debug:  # enforce columns if there are no extractions or we are in prod mode
-        return pd.DataFrame(lines, columns=specs)
+        return pd.DataFrame(lines, columns=SPECS)
     else:
         return pd.DataFrame(lines)

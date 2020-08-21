@@ -8,8 +8,8 @@ from flask import jsonify, request
 
 import bbsearch
 
-from ..mining import run_pipeline
-from ..sql import retrieve_articles, retrieve_paragraph
+from ..mining import SPECS, run_pipeline
+from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
 
 
 class MiningServer:
@@ -87,7 +87,8 @@ class MiningServer:
                         "schema": []
                     },
                     "accepted_fields": {
-                        "debug": [True, False]
+                        "debug": [True, False],
+                        "use_cache": [True, False]
                     }
                 }
             }
@@ -111,11 +112,13 @@ class MiningServer:
             identifiers = json_request.get("identifiers")
             schema_str = json_request.get("schema")
             debug = json_request.get("debug", False)
+            use_cache = json_request.get("use_cache", True)
 
             self.logger.info("Mining parameters:")
             self.logger.info(f"identifiers : {identifiers}")
             self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
+            self.logger.info(f"use_cache   : {use_cache}")
 
             args_err_response = self.check_args_not_null(identifiers=identifiers, schema=schema_str)
             if args_err_response:
@@ -123,29 +126,52 @@ class MiningServer:
 
             schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
 
-            all_article_ids = []
-            all_paragraphs = pd.DataFrame()
-            for (article_id, paragraph_pos) in identifiers:
-                if paragraph_pos == -1:
-                    all_article_ids += [article_id]
-                else:
-                    paragraph = retrieve_paragraph(article_id,
-                                                   paragraph_pos,
-                                                   engine=self.connection)
-                    all_paragraphs = all_paragraphs.append(paragraph)
+            if use_cache:
+                # determine which models are necessary
+                ee_models_info = self.ee_models_from_request_schema(schema_df)
+                etypes_na = ee_models_info[ee_models_info.model.isna()]['entity_type']
+                model_names = ee_models_info[~ee_models_info.model.isna()]['model'].to_list()
 
-            if all_article_ids:
-                articles = retrieve_articles(article_ids=all_article_ids,
-                                             engine=self.connection)
-                all_paragraphs = all_paragraphs.append(articles)
+                # get cached results
+                df_all = retrieve_mining_cache(identifiers, model_names, self.connection)
 
-            texts = [(row['text'],
-                      {'paper_id':
-                       f'{row["article_id"]}:{row["section_name"]}'
-                       f':{row["paragraph_pos_in_article"]}'})
-                     for _, row in all_paragraphs.iterrows()]
+                # drop unwanted entity types
+                requested_etypes = schema_df['entity_type'].unique()
+                df_all = df_all[df_all['entity_type'].isin(requested_etypes)]
 
-            df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
+                # append the ontology source column
+                os_mapping = {et: os for _, (et, os)
+                              in ee_models_info[['entity_type', 'ontology_source']].iterrows()}
+                df_all['ontology_source'] = df_all['entity_type'].apply(lambda x: os_mapping[x])
+
+                # apply specs if not debug
+                if not debug:
+                    df_all = pd.DataFrame(df_all, columns=SPECS)
+
+            else:
+                all_article_ids = []
+                all_paragraphs = pd.DataFrame()
+                for (article_id, paragraph_pos) in identifiers:
+                    if paragraph_pos == -1:
+                        all_article_ids += [article_id]
+                    else:
+                        paragraph = retrieve_paragraph(article_id,
+                                                       paragraph_pos,
+                                                       engine=self.connection)
+                        all_paragraphs = all_paragraphs.append(paragraph)
+
+                if all_article_ids:
+                    articles = retrieve_articles(article_ids=all_article_ids,
+                                                 engine=self.connection)
+                    all_paragraphs = all_paragraphs.append(articles)
+
+                texts = [(row['text'],
+                          {'paper_id':
+                           f'{row["article_id"]}:{row["section_name"]}'
+                           f':{row["paragraph_pos_in_article"]}'})
+                         for _, row in all_paragraphs.iterrows()]
+
+                df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
             response = self.create_response(df_all, etypes_na)
         else:
             self.logger.info("Request is not JSON. Not processing.")

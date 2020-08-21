@@ -2,14 +2,13 @@
 import argparse
 import logging
 import os
+import pathlib
 
 from bbsearch.utils import H5
 
 from ._helper import configure_logging
 
-parser = argparse.ArgumentParser(
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter
-)
+parser = argparse.ArgumentParser()
 parser.add_argument("--host",
                     default="0.0.0.0",
                     type=str,
@@ -46,15 +45,14 @@ def main():
     # Configure logging
     log_dir = os.getenv("LOG_DIR", ".")
     log_name = os.getenv("LOG_NAME", "bbs_search.log")
+    log_file = pathlib.Path(log_dir) / log_name
     if args.debug:
         log_level = logging.DEBUG
     else:
         log_level = logging.INFO
-    configure_logging(log_dir, log_name, log_level)
+    configure_logging(log_file, log_level)
 
     # Start server
-    import pathlib
-
     import sqlalchemy
     from flask import Flask
 

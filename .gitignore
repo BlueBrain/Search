@@ -1,6 +1,7 @@
 # Custom entries
 /data/
 /assets/
+/sandbox
 /src/sandbox
 /notebooks/untracked
 /.idea/

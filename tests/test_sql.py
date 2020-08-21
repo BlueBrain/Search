@@ -10,6 +10,7 @@ from bbsearch.sql import (
     SentenceFilter,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
+    retrieve_mining_cache,
     retrieve_paragraph,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
@@ -39,7 +40,7 @@ class TestNoSQL:
 
 class TestSQLQueries:
 
-    @pytest.mark.parametrize('sentence_id', [[7], [7, 9], [-1], [9, 9]])
+    @pytest.mark.parametrize('sentence_id', [[], [7], [7, 9], [-1], [9, 9]])
     def test_retrieve_sentence_from_sentence_ids(self, sentence_id, fake_sqlalchemy_engine):
         """Test that retrieve sentences from sentence_id is working."""
         sentence_text = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_id,
@@ -109,21 +110,41 @@ class TestSQLQueries:
             assert articles.shape[0] == len(set(article_id)) * \
                    test_parameters['n_sections_per_article']
 
-    # @pytest.mark.parametrize('sentence_ids', [[1, 2, 5], None])
-    # @pytest.mark.parametrize('conditions', [[], ['1']])
-    # def test_get_sentence_ids_by_condition(self, fake_sqlalchemy_engine, sentence_ids, conditions):
-    #
-    #     n_sentences = pd.read_sql('SELECT COUNT(*) FROM sentences',
-    #                               fake_sqlalchemy_engine).iloc[0, 0]
-    #
-    #     retrieved_sentences = get_sentence_ids_by_condition(conditions,
-    #                                                         fake_sqlalchemy_engine,
-    #                                                         sentence_ids=sentence_ids)
-    #
-    #     expected_length = len(sentence_ids) if sentence_ids is not None else n_sentences
-    #
-    #     assert isinstance(retrieved_sentences, list)
-    #     assert len(retrieved_sentences) == expected_length
+
+class TestMiningCache:
+    def test_retrieve_all(self, fake_sqlalchemy_engine, test_parameters):
+        identifiers = [(i + 1, -1) for i in range(test_parameters['n_articles'])]
+        expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] * test_parameters[
+            'n_entities_per_section']
+
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
+
+    @pytest.mark.parametrize('mining_model', ['en_ner_craft_md', 'wrong_model'])
+    def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
+        identifiers = [(1, -1), (2, 1)]
+        if mining_model == 'en_ner_craft_md':
+            expected_len = \
+                1 * test_parameters['n_sections_per_article'] * test_parameters['n_entities_per_section'] + \
+                1 * 1 * test_parameters['n_entities_per_section']
+        else:
+            expected_len = 0
+        res = retrieve_mining_cache(identifiers, [mining_model], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
+        assert set(res['article_id'].unique()) == ({1, 2} if mining_model == 'en_ner_craft_md' else set())
+
+    def test_retrieve_none(self, fake_sqlalchemy_engine):
+        identifiers = [(-12, -1)]
+        expected_len = 0
+
+        res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
+
+        assert isinstance(res, pd.DataFrame)
+        assert len(res) == expected_len
 
 
 class TestSentenceFilter:
@@ -140,14 +161,16 @@ class TestSentenceFilter:
     @pytest.mark.parametrize("has_journal", [True, False])
     @pytest.mark.parametrize("indices", [[], [1], [1, 2, 3]])
     @pytest.mark.parametrize("date_range", [None, (1960, 2010), (0, 0)])
-    @pytest.mark.parametrize("exclusion_text", ["", "virus", "VIRus\n\nease"])
+    @pytest.mark.parametrize("exclusion_text", ["", "virus"])
+    @pytest.mark.parametrize("inclusion_strings", [[""], ["sentence 1"]])
     def test_sentence_filter(
             self,
             fake_sqlalchemy_engine,
             has_journal,
             indices,
             date_range,
-            exclusion_text
+            exclusion_text,
+            inclusion_strings
     ):
         # Recreate filtering in pandas for comparison
         df_all_articles = pd.read_sql("SELECT * FROM articles", fake_sqlalchemy_engine)
@@ -174,6 +197,11 @@ class TestSentenceFilter:
         pattern = "|".join(exclusion_strings)
         if len(pattern) > 0:
             df_all_sentences = df_all_sentences[~df_all_sentences["text"].str.contains(pattern)]
+
+        inclusion_strings = map(lambda s: s.lower(), inclusion_strings)
+        inclusion_strings = list(filter(lambda s: len(s) > 0, inclusion_strings))
+        bool_mask = df_all_sentences['text'].apply(lambda x: all(s in x for s in inclusion_strings))
+        df_all_sentences = df_all_sentences[bool_mask.astype('bool')]
         ids_from_pandas = df_all_sentences["sentence_id"].tolist()
 
         # Construct filter with various conditions
@@ -183,6 +211,7 @@ class TestSentenceFilter:
             .restrict_sentences_ids_to(indices)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split())
+            .include_strings(inclusion_strings)
         )
 
         # Get filtered ids in a single run

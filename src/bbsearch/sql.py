@@ -22,6 +22,7 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
     sentence_ids_s = ', '.join(str(id_) for id_ in sentence_ids)
+    sentence_ids_s = sentence_ids_s or "NULL"
     sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
                     FROM sentences
                     WHERE sentence_id IN ({sentence_ids_s})"""
@@ -168,6 +169,76 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
+def retrieve_mining_cache(identifiers, model_names, engine):
+    """Retrieve cached mining results.
+
+    Parameters
+    ----------
+    identifiers : list of tuple
+        Tuples of form (article_id, paragraph_pos_in_article). Note that if
+        `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
+
+    model_names : list
+        List of model names to consider. Duplicates are removed automatically.
+
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    result : pd.DataFrame
+        Selected rows of the `mining_cache` table.
+
+    """
+    model_names = tuple(set(model_names))
+    if len(model_names) == 1:
+        model_names = f"('{model_names[0]}')"
+
+    identifiers_arts = tuple(a for a, p in identifiers if p == -1)
+    if len(identifiers_arts) == 1:
+        identifiers_arts = f"({identifiers_arts[0]})"
+    if identifiers_arts:
+        query_arts = f"""
+        SELECT *
+        FROM mining_cache
+        WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
+        ORDER BY article_id, paragraph_pos_in_article, start_char
+        """
+        df_arts = pd.read_sql(query_arts, con=engine)
+    else:
+        df_arts = pd.DataFrame()
+
+    identifiers_pars = [(a, p) for a, p in identifiers if p != -1]
+    if identifiers_pars:
+        # Remarks
+        # 1. Conditions are mutually exclusive, so several `UNION`s are
+        #    equivalent to several `OR`s.
+        # 2. `UNION` is considerably faster than `OR` in this case.
+        # 3. If `len(identifiers_pars)` is too large, we may have a too long
+        #    SQL statement which overflows the max length. So we break it down.
+
+        batch_size = 1000
+        dfs_pars = []
+        d, r = divmod(len(identifiers_pars), batch_size)
+        for i in range(0, d + (r > 0)):
+            query_pars = " UNION ".join(
+                f"""
+                SELECT *
+                FROM mining_cache
+                WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
+                """
+                for a, p in identifiers_pars[i * batch_size: (i + 1) * batch_size]
+            )
+            query_pars = f"""SELECT * FROM ({query_pars}) tt WHERE tt.mining_model IN {model_names}"""
+            dfs_pars.append(pd.read_sql(query_pars, engine))
+        df_pars = pd.concat(dfs_pars)
+        df_pars = df_pars.sort_values(by=['article_id', 'paragraph_pos_in_article', 'start_char'])
+    else:
+        df_pars = pd.DataFrame()
+
+    return df_pars.append(df_arts, ignore_index=True)
+
+
 class SentenceFilter:
     """Filter sentence IDs by applying conditions.
 
@@ -227,6 +298,7 @@ class SentenceFilter:
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
+        self.string_inclusions = []
         self.restricted_sentence_ids = None
 
     def only_with_journal(self, flag=True):
@@ -266,6 +338,25 @@ class SentenceFilter:
         self.logger.info(f"Date range: {date_range}")
         if date_range is not None:
             self.year_from, self.year_to = date_range
+        return self
+
+    def include_strings(self, strings):
+        """Include only sentences containing all of the given strings.
+
+        Parameters
+        ----------
+        strings : list_like
+            The strings to include.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself.
+        """
+        self.logger.info(f"Include strings: {strings}")
+        strings = map(lambda s: s.lower(), strings)
+        strings = filter(lambda s: len(s) > 0, strings)
+        self.string_inclusions.extend(strings)
         return self
 
     def exclude_strings(self, strings):
@@ -344,16 +435,24 @@ class SentenceFilter:
         # Restricted sentence IDs
         if self.restricted_sentence_ids is not None:
             sentence_ids_s = ", ".join(str(x) for x in self.restricted_sentence_ids)
-            if not sentence_ids_s and self.connection.url.drivername == 'mysql+pymysql':
+            if not sentence_ids_s and self.connection.url.drivername in {'mysql+mysqldb',
+                                                                         'mysql+pymysql'}:
                 sentence_ids_s = 'NULL'
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
         # Exclusion text
         for text in self.string_exclusions:
-            if self.connection.url.drivername == 'mysql+pymysql':
+            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
                 sentence_conditions.append(f"INSTR(text, '{text}') = 0")
             else:
                 sentence_conditions.append(f"text NOT LIKE '%{text}%'")
+
+        # Inclusion text
+        for text in self.string_inclusions:
+            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
+                sentence_conditions.append(f"INSTR(text, '{text}') > 0")
+            else:
+                sentence_conditions.append(f"text LIKE '%{text}%'")
 
         # Build and send query
         query = "SELECT sentence_id FROM sentences"
