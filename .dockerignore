@@ -1,7 +1,13 @@
+/.tox/
 /assets/
 /data/
 /docker/
+/docs/
+/htmlcov/
 /notebooks/
 /sandbox/
+/tests/
 *.egg-info/
 *.egg
+.env*
+!.env*.example

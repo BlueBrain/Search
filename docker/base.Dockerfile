@@ -1,10 +1,5 @@
 FROM python:3.6
 
-# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
-# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
-
 # Install system packages
 RUN apt-get update && apt-get install -y \
     git \
@@ -74,4 +69,3 @@ RUN python -m nltk.downloader punkt stopwords
 
 WORKDIR /home/bbsuser
 ENTRYPOINT ["bash"]
-
