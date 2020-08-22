@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     git \
     gcc g++ \
     build-essential \
-    vim \
+    vim htop \
     nodejs npm \
     libfontconfig1 wkhtmltopdf \
     default-libmysqlclient-dev
@@ -31,7 +31,8 @@ COPY requirements.txt /tmp
 RUN true \
     && pip install Cython numpy \
     && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+    && rm /tmp/requirements.txt \
+    && jupyter-lab build
 
 # Download the scispaCy models
 RUN pip install \
@@ -53,4 +54,5 @@ WORKDIR /home/bbsuser
 # Download the NLTK data (for the bbsuser)
 RUN python -m nltk.downloader punkt stopwords
 
-ENTRYPOINT exec /bin/bash
+ENTRYPOINT ["bash"]
+
