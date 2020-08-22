@@ -13,7 +13,7 @@ h5py==2.10.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
-ipython==7.16.1
+ipython>=7.16.1
 ipywidgets==7.5.1
 jupyter-dash==0.3.1
 jupyter-server-proxy==1.5.0
@@ -33,7 +33,7 @@ requests==2.24.0
 responses==0.10.16
 scikit-learn==0.23.2
 scispacy==0.2.5
-sent2vec-prebuilt==0.0.2
+sent2vec-prebuilt>=0.0.2
 sentence-transformers==0.3.3
 spacy==2.3.2
 sphinx-bluebrain-theme==0.2.3

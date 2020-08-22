@@ -3,4 +3,5 @@
 /docker/
 /notebooks/
 /sandbox/
-
+*.egg-info/
+*.egg
