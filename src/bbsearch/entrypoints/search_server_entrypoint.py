@@ -12,9 +12,9 @@ def get_search_app():
     import sqlalchemy
     from flask import Flask
 
-    from ._helper import configure_logging
     from ..server.search_server import SearchServer
     from ..utils import H5
+    from ._helper import configure_logging
 
     # Read configuration
     debug_mode = os.getenv("SEARCH_DEBUG", 0)
@@ -77,7 +77,7 @@ def run_search_server(argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    from dotenv import load_dotenv, find_dotenv
+    from dotenv import find_dotenv, load_dotenv
 
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]", description="Start the BBSear Server.",
