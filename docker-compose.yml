@@ -1,11 +1,5 @@
 version: "3.5"
 services:
-  test:
-    build:
-      context: .
-      dockerfile: docker/test.Dockerfile
-    image: bbs_test
-    container_name: bbs_test_container
 
   base:
     build:

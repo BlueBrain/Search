@@ -3,18 +3,18 @@ FROM python:3.6
 # ARGs are only visible at build time and can be provided in
 # the docker-compose.yml file in the "args:" section or with the
 # --build-arg parameter of docker build
-ARG http_proxy
-ARG https_proxy
-ARG HTTP_PROXY
-ARG HTTPS_PROXY
+ARG BBS_http_proxy
+ARG BBS_https_proxy
+ARG BBS_HTTP_PROXY
+ARG BBS_HTTPS_PROXY
 
 # ENVs are visible both at image build time and container run time.
 # We want the http proxys to be visible in both cases and therefore
 # set them equal to the values of the ARGs.
-ENV http_proxy=$http_proxy
-ENV https_proxy=$https_proxy
-ENV HTTP_PROXY=$HTTP_PROXY
-ENV HTTPS_PROXY=$HTTPS_PROXY
+ENV http_proxy=$BBS_http_proxy
+ENV https_proxy=$BBS_https_proxy
+ENV HTTP_PROXY=$BBS_HTTP_PROXY
+ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 
 # Install system packages
 RUN apt-get update && apt-get install -y \

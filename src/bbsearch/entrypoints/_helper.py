@@ -1,5 +1,6 @@
 """Helper functions for server entry points."""
 import logging
+import os
 import sys
 
 
@@ -42,3 +43,29 @@ def configure_logging(log_file=None, level=logging.WARNING):
         format="%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s",
     )
     sys.excepthook = handle_uncaught_exception
+
+
+def get_var(var_name, default=None, *, check_not_set=True):
+    """Read an environment variable.
+
+    Parameters
+    ----------
+    var_name : str
+        The name of the environment variable.
+    default : str or None
+        The default value of the variable.
+    check_not_set : bool
+        If the value of the variable is `None`, which is the
+        case when the variable is not set, then a `ValueError`
+        is raised.
+
+    Returns
+    -------
+    var : str or None
+        The value of the environment variable.
+    """
+    var = os.getenv(var_name, default)
+    if check_not_set and var is None:
+        raise ValueError(f"The variable ${var_name} must be set")
+
+    return var

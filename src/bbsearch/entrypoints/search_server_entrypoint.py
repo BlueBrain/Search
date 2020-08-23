@@ -1,7 +1,6 @@
 """The entrypoint script for the search server."""
 import argparse
 import logging
-import os
 import pathlib
 
 logger = logging.getLogger(__name__)
@@ -14,41 +13,22 @@ def get_search_app():
 
     from ..server.search_server import SearchServer
     from ..utils import H5
-    from ._helper import configure_logging
+    from ._helper import configure_logging, get_var
 
     # Read configuration
-    debug_mode = os.getenv("SEARCH_DEBUG", 0)
-    log_file = os.getenv("SEARCH_LOG_FILE")
+    log_file = get_var("BBS_SEARCH_LOG_FILE", check_not_set=False)
+    log_level = get_var("BBS_SEARCH_LOG_LEVEL", str(logging.WARNING))
 
-    models_path = os.getenv("SEARCH_MODELS_PATH")
-    embeddings_path = os.getenv("SEARCH_EMBEDDINGS_PATH")
-    which_models = os.getenv("SEARCH_MODELS")
+    models_path = get_var("BBS_SEARCH_MODELS_PATH")
+    embeddings_path = get_var("BBS_SEARCH_EMBEDDINGS_PATH")
+    which_models = get_var("BBS_SEARCH_MODELS")
 
-    mysql_url = os.getenv("SEARCH_MYSQL_URL")
-    mysql_user = os.getenv("SEARCH_MYSQL_USER")
-    mysql_password = os.getenv("SEARCH_MYSQL_PASSWORD")
+    mysql_url = get_var("BBS_SEARCH_MYSQL_URL")
+    mysql_user = get_var("BBS_SEARCH_MYSQL_USER")
+    mysql_password = get_var("BBS_SEARCH_MYSQL_PASSWORD")
 
     # Configure logging
-    if debug_mode:
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.INFO
-    configure_logging(log_file, log_level)
-
-    # Check configuration
-    logger.info("Checking server configuration")
-    if models_path is None:
-        raise ValueError("The variable $SEARCH_MODELS_PATH must be set")
-    if embeddings_path is None:
-        raise ValueError("The variable $SEARCH_EMBEDDINGS_PATH must be set")
-    if which_models is None:
-        raise ValueError("The variable $SEARCH_MODELS must be set")
-    if mysql_url is None:
-        raise ValueError("The variable $SEARCH_MYSQL_URL must be set")
-    if mysql_user is None:
-        raise ValueError("The variable $SEARCH_MYSQL_USER must be set")
-    if mysql_password is None:
-        raise ValueError("The variable $SEARCH_MYSQL_PASSWORD must be set")
+    configure_logging(log_file, int(log_level))
 
     # Start server
     logger.info("Creating the Flask app")
@@ -56,7 +36,7 @@ def get_search_app():
     models_path = pathlib.Path(models_path)
     embeddings_path = pathlib.Path(embeddings_path)
     indices = H5.find_populated_rows(embeddings_path, "BSV")
-    engine_url = f"mysql://${mysql_user}:${mysql_password}@{mysql_url}"
+    engine_url = f"mysql://{mysql_user}:{mysql_password}@{mysql_url}"
 
     engine = sqlalchemy.create_engine(engine_url)
     models_list = [model.strip() for model in which_models.split(",")]
@@ -77,8 +57,9 @@ def run_search_server(argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    from dotenv import find_dotenv, load_dotenv
+    from dotenv import load_dotenv
 
+    # Parse arguments
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]", description="Start the BBSear Server.",
     )
@@ -86,21 +67,16 @@ def run_search_server(argv=None):
     parser.add_argument("--port", default=8080, type=int, help="The server port")
     parser.add_argument(
         "--env-file",
-        default=None,
+        default="",
         type=str,
         help="The name of the .env file with the server configuration",
     )
     args = parser.parse_args(argv)
 
-    # Load configuration from a .env file
-    if args.env_file is None:
-        env_file = find_dotenv()
-    else:
-        env_file = args.env_file
-    load_dotenv(dotenv_path=env_file)
+    # Load configuration from a .env file, if one is found
+    load_dotenv(dotenv_path=args.env_file)
 
-    print("Log file:", os.getenv("LOG_FILE"))
-
+    # Construct and launch the app
     app = get_search_app()
     app.run(host=args.host, port=args.port, threaded=True, debug=True)
 
