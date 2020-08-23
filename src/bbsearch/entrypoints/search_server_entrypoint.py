@@ -17,17 +17,16 @@ def get_search_app():
     from ..utils import H5
 
     # Read configuration
-    log_file = os.getenv("LOG_FILE")
-    debug_mode = os.getenv("DEBUG", 0)
-    models_path = os.getenv("MODELS_PATH")
-    embeddings_path = os.getenv("EMBEDDINGS_PATH")
-    models = os.getenv("MODELS")
-    mysql_driver = os.getenv("MYSQL_DRIVER")
-    mysql_host = os.getenv("MYSQL_HOST")
-    mysql_port = os.getenv("MYSQL_PORT")
-    mysql_database = os.getenv("MYSQL_DATABASE")
-    mysql_user = os.getenv("MYSQL_USER")
-    mysql_password = os.getenv("MYSQL_PASSWORD")
+    debug_mode = os.getenv("SEARCH_DEBUG", 0)
+    log_file = os.getenv("SEARCH_LOG_FILE")
+
+    models_path = os.getenv("SEARCH_MODELS_PATH")
+    embeddings_path = os.getenv("SEARCH_EMBEDDINGS_PATH")
+    which_models = os.getenv("SEARCH_MODELS")
+
+    mysql_url = os.getenv("SEARCH_MYSQL_URL")
+    mysql_user = os.getenv("SEARCH_MYSQL_USER")
+    mysql_password = os.getenv("SEARCH_MYSQL_PASSWORD")
 
     # Configure logging
     if debug_mode:
@@ -39,21 +38,17 @@ def get_search_app():
     # Check configuration
     logger.info("Checking server configuration")
     if models_path is None:
-        raise ValueError("The variable $MODELS_PATH must be set")
+        raise ValueError("The variable $SEARCH_MODELS_PATH must be set")
     if embeddings_path is None:
-        raise ValueError("The variable $EMBEDDINGS_PATH must be set")
-    if models is None:
+        raise ValueError("The variable $SEARCH_EMBEDDINGS_PATH must be set")
+    if which_models is None:
         raise ValueError("The variable $SEARCH_MODELS must be set")
-    if mysql_host is None:
-        raise ValueError("The variable $MYSQL_HOST must be set")
-    if mysql_port is None:
-        raise ValueError("The variable $MYSQL_PORT must be set")
-    if mysql_database is None:
-        raise ValueError("The variable $MYSQL_DATABASE must be set")
+    if mysql_url is None:
+        raise ValueError("The variable $SEARCH_MYSQL_URL must be set")
     if mysql_user is None:
-        raise ValueError("The variable $MYSQL_USER must be set")
+        raise ValueError("The variable $SEARCH_MYSQL_USER must be set")
     if mysql_password is None:
-        raise ValueError("The variable $MYSQL_PASSWORD must be set")
+        raise ValueError("The variable $SEARCH_MYSQL_PASSWORD must be set")
 
     # Start server
     logger.info("Creating the Flask app")
@@ -61,15 +56,10 @@ def get_search_app():
     models_path = pathlib.Path(models_path)
     embeddings_path = pathlib.Path(embeddings_path)
     indices = H5.find_populated_rows(embeddings_path, "BSV")
-    mysql_dialect = "mysql"
-    if mysql_driver is not None:
-        mysql_dialect += f"+{mysql_driver}"
-    mysql_url = (
-        f"${mysql_dialect}://${mysql_user}:${mysql_password}@"
-        f"{mysql_host}:{mysql_port}/{mysql_database}"
-    )
-    engine = sqlalchemy.create_engine(mysql_url)
-    models_list = [model.strip() for model in models.split(",")]
+    engine_url = f"mysql://${mysql_user}:${mysql_password}@{mysql_url}"
+
+    engine = sqlalchemy.create_engine(engine_url)
+    models_list = [model.strip() for model in which_models.split(",")]
 
     SearchServer(app, models_path, embeddings_path, indices, engine, models_list)
 
@@ -87,7 +77,7 @@ def run_search_server(argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv, find_dotenv
 
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]", description="Start the BBSear Server.",
@@ -96,14 +86,18 @@ def run_search_server(argv=None):
     parser.add_argument("--port", default=8080, type=int, help="The server port")
     parser.add_argument(
         "--env-file",
-        default=".env.search",
+        default=None,
         type=str,
         help="The name of the .env file with the server configuration",
     )
     args = parser.parse_args(argv)
 
     # Load configuration from a .env file
-    load_dotenv(dotenv_path=args.env_file)
+    if args.env_file is None:
+        env_file = find_dotenv()
+    else:
+        env_file = args.env_file
+    load_dotenv(dotenv_path=env_file)
 
     print("Log file:", os.getenv("LOG_FILE"))
 

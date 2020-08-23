@@ -42,6 +42,8 @@ services:
     container_name: bbs_embedding
     ports:
       - 8851:8080
+    volumes:
+      - /raid:/raid
     networks:
       - bbs_network
 
@@ -61,4 +63,3 @@ services:
 networks:
   bbs_network:
     driver: bridge
-
