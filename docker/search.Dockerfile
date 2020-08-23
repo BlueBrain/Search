@@ -1,9 +1,11 @@
 FROM bbs_base
 
+USER root
+
 # Install the app
 ADD . /src
 WORKDIR /src
-RUN pip install . gunicorn
+RUN pip install .
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
@@ -19,4 +21,10 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
 EXPOSE 8080
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "bbsearch.entrypoints:run_search_server()"]
+ENTRYPOINT [ \
+"gunicorn",\
+"--bind", "0.0.0.0:8080",\
+"--workers", "1",\
+"--timeout", "180",\
+"bbsearch.entrypoints:get_search_app()"\
+]

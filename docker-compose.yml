@@ -27,6 +27,7 @@ services:
       dockerfile: docker/search.Dockerfile
     image: bbs_search
     container_name: bbs_search
+    env_file: .env
     ports:
       - 8850:8080
     volumes:
@@ -40,6 +41,7 @@ services:
       dockerfile: docker/embedding.Dockerfile
     image: bbs_embedding
     container_name: bbs_embedding
+    env_file: .env
     ports:
       - 8851:8080
     volumes:
@@ -53,6 +55,7 @@ services:
       dockerfile: docker/mining.Dockerfile
     image: bbs_mining
     container_name: bbs_mining
+    env_file: .env
     ports:
       - 8852:8080
     volumes:

@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     git \
     gcc g++ \
     build-essential \
-    vim htop \
+    vim htop less \
     nodejs npm \
     libfontconfig1 wkhtmltopdf \
     default-libmysqlclient-dev
