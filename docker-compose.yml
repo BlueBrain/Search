@@ -1,16 +1,23 @@
-version: "3.8"
+version: "3.5"
 services:
+  test:
+    build:
+      context: .
+      dockerfile: docker/test.Dockerfile
+    image: bbs_test
+    container_name: bbs_test_container
+
   base:
     build:
       context: .
       dockerfile: docker/base.Dockerfile
+      args:
+        - HTTP_PROXY
+        - HTTPS_PROXY
+        - http_proxy
+        - https_proxy
     image: bbs_base
-    container_name: $CONTAINER_NAME_BASE
-    environment:
-      - HTTP_PROXY
-      - HTTPS_PROXY
-      - http_proxy
-      - https_proxy
+    container_name: bbs_base
     networks:
       - bbs_network
 
@@ -19,9 +26,9 @@ services:
       context: .
       dockerfile: docker/search.Dockerfile
     image: bbs_search
-    container_name: $CONTAINER_NAME_SEARCH
+    container_name: bbs_search
     ports:
-      - $PORT_SEARCH:8080
+      - 8850:8080
     volumes:
       - /raid:/raid
     networks:
@@ -32,14 +39,9 @@ services:
       context: .
       dockerfile: docker/embedding.Dockerfile
     image: bbs_embedding
-    container_name: $CONTAINER_NAME_EMBEDDING
-    environment:
-      - HTTP_PROXY
-      - HTTPS_PROXY
-      - http_proxy
-      - https_proxy
+    container_name: bbs_embedding
     ports:
-      - $PORT_EMBEDDING:8080
+      - 8851:8080
     networks:
       - bbs_network
 
@@ -48,38 +50,15 @@ services:
       context: .
       dockerfile: docker/mining.Dockerfile
     image: bbs_mining
-    container_name: $CONTAINER_NAME_MINING
-    environment:
-      - HTTP_PROXY
-      - HTTPS_PROXY
-      - http_proxy
-      - https_proxy
+    container_name: bbs_mining
     ports:
-      - $PORT_MINING:8080
+      - 8852:8080
     volumes:
       - /raid:/raid
     networks:
       - bbs_network
 
-  mysql:
-    build:
-      context: .
-      dockerfile: docker/mysql.Dockerfile
-    image: bbs_mysql
-    container_name: $CONTAINER_NAME_MYSQL
-    environment:
-      - HTTP_PROXY
-      - HTTPS_PROXY
-      - http_proxy
-      - https_proxy
-    ports:
-      - $PORT_MYSQL:3306
-    volumes:
-      - $MYSQL_DATA_PATH:/var/lib/mysql
-    networks:
-      - bbs_network
-
 networks:
   bbs_network:
-    name: bbs_network
     driver: bridge
+
