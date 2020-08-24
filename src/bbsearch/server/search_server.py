@@ -2,7 +2,6 @@
 import logging
 import pathlib
 
-import numpy as np
 from flask import jsonify, request
 
 import bbsearch
