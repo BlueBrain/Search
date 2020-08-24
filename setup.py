@@ -31,7 +31,7 @@ install_requires = [
     "scispacy",
     "sent2vec-prebuilt",
     "sentence-transformers",
-    "spacy==2.3.1",
+    "spacy==2.3.2",
     "tensorflow",
     "tensorflow_hub",
     "torch",
