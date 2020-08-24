@@ -197,32 +197,25 @@ def run_search(
             .run()
         )
 
-    with timer('considered_embeddings_lookup'):
-        logger.info("Constructing mask based on indices and sentence filtering")
-        mask = np.isin(indices, restricted_sentence_ids)
-
-    logger.info("Applying the mask")
-    embeddings_corpus = precomputed_embeddings[mask]
-    sentence_ids = indices[mask]
-
-    if len(sentence_ids) == 0:
+    if len(restricted_sentence_ids) == 0:
+        logger.info("No indices left after sentence filtering. Returning.")
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
-    embeddings_corpus_t = torch.from_numpy(embeddings_corpus)
+    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
 
     with timer('query_similarity'):
         logger.info("Computing cosine similarities for the query text")
         embedding_query_t = torch.from_numpy(embedding_query[None, :])
         similarities_query = cosine_similarity(embedding_query_t,
-                                               embeddings_corpus_t).numpy()
+                                               precomputed_embeddings_t).numpy()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
             logger.info("Computing cosine similarity for the deprioritization text")
             embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize[None, :])
             similarities_deprio = cosine_similarity(embedding_deprioritize_t,
-                                                    embeddings_corpus_t).numpy()
+                                                    precomputed_embeddings_t).numpy()
     else:
         similarities_deprio = np.zeros_like(similarities_query)
 
@@ -240,8 +233,15 @@ def run_search(
 
     with timer('sorting'):
         logger.info(f"Sorting the similarities and getting the top {k} results")
-        top_indices = np.argsort(-similarities)[:k]
+        top_indices = np.argsort(-similarities)
+        # Remember, we skipped the 0th row in the precomputed embeddings array
+        # so row_index=0 corresponds to sentence_id=1
+        top_sentence_ids = top_indices + 1
+
+    mask = np.isin(top_sentence_ids, restricted_sentence_ids)
+    top_sentence_ids_filtered = top_sentence_ids[mask]
+    similarities_filtered = similarities[mask]
 
     logger.info("run_search finished")
 
-    return sentence_ids[top_indices], similarities[top_indices], timer.stats
+    return top_sentence_ids_filtered[:k], similarities_filtered[:k], timer.stats
