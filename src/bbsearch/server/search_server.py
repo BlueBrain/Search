@@ -64,12 +64,13 @@ class SearchServer:
         }
 
         self.logger.info("Loading precomputed embeddings...")
+        # here we're assuming that all embeddings (up to the 0th row)
+        # are correctly populated, note the `[1:]` slice.
         self.precomputed_embeddings = {
             model_name: H5.load(
                 self.embeddings_h5_path,
                 model_name,
-                indices=self.indices
-            ).astype(np.float32)
+            )[1:]
             for model_name in self.embedding_models
         }
 

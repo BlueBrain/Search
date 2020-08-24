@@ -3,6 +3,8 @@ import argparse
 import logging
 import os
 
+import numpy as np
+
 from bbsearch.utils import H5
 
 from ._helper import configure_logging
@@ -23,7 +25,7 @@ parser.add_argument("--models_path",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings.h5",
+                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings_bsv_full.h5",
                     type=str,
                     help="The path to an h5 file with the precomputed embeddings")
 parser.add_argument("--database_uri",
@@ -64,7 +66,11 @@ def main():
     models_path = pathlib.Path(args.models_path)
     embeddings_path = pathlib.Path(args.embeddings_path)
 
-    indices = H5.find_populated_rows(embeddings_path, 'BSV')
+    n_sentences, dim_embedding = H5.get_shape(embeddings_path, 'BSV')
+    # 0th row is for padding and is filled with NaNs
+    # here we're assuming that all embeddings (up to the 0th row)
+    # are correctly populated
+    indices = np.arange(1, n_sentences)
 
     engine = sqlalchemy.create_engine(f"mysql+mysqldb://guest:guest@{args.database_uri}")
 
