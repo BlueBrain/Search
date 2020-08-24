@@ -305,10 +305,9 @@ class H5:
         """
         with h5py.File(h5_path, 'r') as f:
             dset = f[dataset_name]
-            n_rows = len(dset)
 
             if indices is None:
-                indices = np.arange(n_rows)
+                return dset[:]
 
             if len(set(indices)) != len(indices):
                 raise ValueError('There cannot be duplicates inside of the indices')

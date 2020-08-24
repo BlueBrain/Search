@@ -285,11 +285,11 @@ def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters
         with h5py.File(file_path, 'w') as f:
             for model in models:
                 dset = f.create_dataset(f"{model}",
-                                        (n_sentences, dim),
+                                        (n_sentences + 1, dim),
                                         dtype='f4',
                                         fillvalue=np.nan)
 
-                for i in range(0, n_sentences, 2):
+                for i in range(1, n_sentences + 1):
                     dset[i] = np.random.random(dim).astype('float32')
     else:
         file_path = tmp_path_factory.getbasetemp() / 'h5_embeddings' / 'embeddings.h5'
