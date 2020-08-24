@@ -250,8 +250,13 @@ def run_search(
         # so row_index=0 corresponds to sentence_id=1
         top_sentence_ids = top_indices + 1
 
+    logger.info("Applying the sentence filtering to indices")
     mask = np.isin(top_sentence_ids, restricted_sentence_ids)
+
+    logger.info("Gathering filtered sentence IDs")
     top_sentence_ids_filtered = top_sentence_ids[mask]
+
+    logger.info("Gathering filtered similarities")
     similarities_filtered = similarities[mask]
 
     logger.info("run_search finished")
