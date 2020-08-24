@@ -46,13 +46,12 @@ ENV MODELS_PATH="/raid/sync/proj115/bbs_data/trained_models"
 ENV EMBEDDINGS_PATH="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings_bsv_full.h5"
 ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v35"
 ENV LOG_DIR="/raid/projects/bbs/logs"
-ENV LOG_NAME="bbs_search_torch_sim.log"
+ENV LOG_NAME="bbs_search.log"
 ENV MODELS="BSV"
 
 ENTRYPOINT exec search_server \
     --host=0.0.0.0 \
     --port=8080 \
-#    --debug \
     --models_path $MODELS_PATH \
     --embeddings_path $EMBEDDINGS_PATH \
     --database_uri $DATABASE_URI \
