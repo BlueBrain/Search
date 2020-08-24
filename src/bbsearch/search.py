@@ -243,22 +243,12 @@ def run_search(
     alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
-    with timer('sorting'):
-        logger.info(f"Sorting the similarities and getting the top {k} results")
-        top_indices = np.argsort(-similarities)
-        # Remember, we skipped the 0th row in the precomputed embeddings array
-        # so row_index=0 corresponds to sentence_id=1
-        top_sentence_ids = top_indices + 1
+    logger.info("Truncating similarities to the restricted indices")
+    restricted_indices = restricted_sentence_ids - 1
+    restricted_similarities = similarities[restricted_indices]
 
-    logger.info("Applying the sentence filtering to indices")
-    mask = np.isin(top_sentence_ids, restricted_sentence_ids)
+    logger.info(f"Sorting the similarities and getting the top {k} results")
+    top_sorting = np.argsort(-restricted_similarities)
+    top_sorting = top_sorting[:k]
 
-    logger.info("Gathering filtered sentence IDs")
-    top_sentence_ids_filtered = top_sentence_ids[mask]
-
-    logger.info("Gathering filtered similarities")
-    similarities_filtered = similarities[mask]
-
-    logger.info("run_search finished")
-
-    return top_sentence_ids_filtered[:k], similarities_filtered[:k], timer.stats
+    return restricted_sentence_ids[top_sorting], restricted_similarities[top_sorting], timer.stats
