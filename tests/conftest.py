@@ -84,7 +84,11 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                          sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
                                            nullable=False),
                          sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
-                                           nullable=False)
+                                           nullable=False),
+                         sqlalchemy.UniqueConstraint('article_id',
+                                                     'paragraph_pos_in_article',
+                                                     'sentence_pos_in_paragraph',
+                                                     name='sentence_unique_identifier')
                          )
 
     mining_cache = \
@@ -199,10 +203,13 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
     else:
         port_number = 22345
         client = docker.from_env()
-        container = client.containers.run('mysql:latest',
-                                          environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
-                                          ports={'3306/tcp': port_number},
-                                          detach=True)
+        container = client.containers.run(
+            image='mysql:latest',
+            environment={'MYSQL_ROOT_PASSWORD': 'my-secret-pw'},
+            ports={'3306/tcp': port_number},
+            detach=True,
+            auto_remove=True,
+        )
 
         max_waiting_time = 2 * 60
         start = time.perf_counter()
@@ -216,9 +223,8 @@ def fake_sqlalchemy_engine(tmp_path_factory, metadata_path, test_parameters, bac
                 break
             except OperationalError:
                 # Container not ready, pause and then try again
-                time.sleep(2)
+                time.sleep(0.1)
                 continue
-
         else:
             raise TimeoutError("Could not spawn the MySQL container.")
 

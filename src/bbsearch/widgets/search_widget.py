@@ -151,6 +151,13 @@ class SearchWidget(widgets.VBox):
             description='Substring Exclusion (newline separated): '
             )
 
+        self.widgets['inclusion_text'] = widgets.Textarea(
+            layout=widgets.Layout(width='90%', height='80px'),
+            value='',
+            style=self.widgets_style,
+            description='Substring Matching (newline separated): '
+            )
+
         self.widgets['default_value_article_saver'] = widgets.RadioButtons(
             options=[
                 (self.saving_labels[_Save.NOTHING], _Save.NOTHING),
@@ -209,11 +216,11 @@ class SearchWidget(widgets.VBox):
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
         self.widgets['exclusion_text'].layout.display = 'none'
-        # Remove some models (USE and SBERT)
+        # Remove some models: (USE, SBERT, SBioBERT)
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['BSV', 'SBioBERT'],
+            options=['BSV'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec', 'Sentence BioBERT'],
+            tooltips=['BioSentVec'],
             style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(
@@ -241,6 +248,7 @@ class SearchWidget(widgets.VBox):
             self.widgets['deprioritize_text'],
             self.widgets['deprioritize_strength'],
             self.widgets['exclusion_text'],
+            self.widgets['inclusion_text'],
             self.widgets['default_value_article_saver'],
             self.widgets['investigate_button'],
             page_selection,
@@ -416,6 +424,7 @@ class SearchWidget(widgets.VBox):
         deprioritize_strength = self.widgets['deprioritize_strength'].value
         exclusion_text = self.widgets['exclusion_text'].value \
             if 'exclusion_text' in self.widgets.keys() else ''
+        inclusion_text = self.widgets['inclusion_text'].value
         has_journal = self.widgets['has_journal'].value
         date_range = self.widgets['date_range'].value
 
@@ -438,7 +447,8 @@ class SearchWidget(widgets.VBox):
                     date_range=date_range,
                     deprioritize_strength=deprioritize_strength,
                     deprioritize_text=deprioritize_text,
-                    exclusion_text=exclusion_text)
+                    exclusion_text=exclusion_text,
+                    inclusion_text=inclusion_text)
             print(f'{timer["server query"]:7.2f} seconds')
 
             print('Resolving articles...'.ljust(50), end='', flush=True)

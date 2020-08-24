@@ -143,6 +143,7 @@ class SearchServer:
                         "deprioritize_strength": ['None', 'Weak', 'Mild',
                                                   'Strong', 'Stronger'],
                         "exclusion_text": [],
+                        "inclusion_text": [],
                         "deprioritize_text": []
                     }
                 }

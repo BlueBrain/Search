@@ -84,14 +84,15 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('paragraph_pos_in_article', sqlalchemy.Integer(),
                                                nullable=False),
                              sqlalchemy.Column('sentence_pos_in_paragraph', sqlalchemy.Integer(),
-                                               nullable=False)
+                                               nullable=False),
+                             sqlalchemy.UniqueConstraint('article_id',
+                                                         'paragraph_pos_in_article',
+                                                         'sentence_pos_in_paragraph',
+                                                         name='sentence_unique_identifier')
                              )
 
         with self.engine.begin() as connection:
             metadata.create_all(connection)
-
-        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
-        mymodel_url_index.create(bind=self.engine)
 
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
@@ -181,16 +182,25 @@ class CORD19DatabaseCreation:
                     with open(str(json_path), 'r') as json_file:
                         file = json.load(json_file)
 
-                        for paragraph_pos_in_article, section in enumerate(file['body_text'],
-                                                                           start=paragraph_pos_in_article):
-                            paragraphs += [(section['text'], {'section_name': section['section'].title(),
-                                                              'article_id': article_id,
-                                                              'paragraph_pos_in_article': paragraph_pos_in_article})]
+                        for section in file['body_text']:
+                            text = section['text']
+                            metadata = {
+                                'section_name': section['section'].title(),
+                                'article_id': article_id,
+                                'paragraph_pos_in_article': paragraph_pos_in_article,
+                            }
+                            paragraphs.append((text, metadata))
+                            paragraph_pos_in_article += 1
 
-                        for paragraph_pos_in_article, (_, v) in enumerate(file['ref_entries'].items(),
-                                                                          start=paragraph_pos_in_article):
-                            paragraphs += [(v['text'], {'section_name': 'Caption', 'article_id': article_id,
-                                                        'paragraph_pos_in_article': paragraph_pos_in_article})]
+                        for ref_entry in file['ref_entries'].values():
+                            text = ref_entry['text']
+                            metadata = {
+                                'section_name': 'Caption',
+                                'article_id': article_id,
+                                'paragraph_pos_in_article': paragraph_pos_in_article,
+                            }
+                            paragraphs.append((text, metadata))
+                            paragraph_pos_in_article += 1
 
                 sentences = self.segment(nlp, paragraphs)
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
@@ -206,6 +216,9 @@ class CORD19DatabaseCreation:
             if num_articles % 1000 == 0:
                 print('Number of articles: ', num_articles,
                       'in', f'{time.perf_counter() - start:.1f} seconds')
+
+        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
+        mymodel_url_index.create(bind=self.engine)
 
         return pmc, pdf, rejected_articles
 
@@ -226,11 +239,13 @@ class CORD19DatabaseCreation:
             List of all the sentences extracted from the paragraph.
         """
         if isinstance(paragraphs, str):
-            paragraphs = [paragraphs, ]
+            paragraphs = [paragraphs]
 
         all_sentences = []
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
             for pos, sent in enumerate(paragraph.sents):
-                all_sentences += [{'text': str(sent), 'sentence_pos_in_paragraph': pos, **metadata}]
+                all_sentences += [
+                    {"text": str(sent), "sentence_pos_in_paragraph": pos, **metadata}
+                ]
 
         return all_sentences
