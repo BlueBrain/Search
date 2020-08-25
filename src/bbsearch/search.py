@@ -201,7 +201,6 @@ def run_search(
 
     def sentences_filtering(connection, has_journal, date_range, exclusion_text,
                             inclusion_text):
-        logger.info("Applying sentence filtering")
         restricted_sentence_ids = (
             SentenceFilter(connection)
             .only_with_journal(has_journal)
@@ -210,13 +209,14 @@ def run_search(
             .include_strings(inclusion_text.split('\n'))
             .run()
         )
+        logger.info("Ended sentences filtering")
         return restricted_sentence_ids
 
     def cosine_similarity_computation(embedding_query, precomputed_embeddings_t):
-        logger.info("Computing cosine similarities for the query text")
         embedding_query_t = torch.from_numpy(embedding_query[None, :])
         similarities_query = cosine_similarity(embedding_query_t,
                                                precomputed_embeddings_t).numpy()
+        logger.info("Ended cosine similarities computation")
         return similarities_query
 
     precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
@@ -231,7 +231,7 @@ def run_search(
                               embedding_query, precomputed_embeddings_t)
 
     if deprioritize_text is not None and deprioritize_strength != 'None':
-        logger.info("Computing cosine similarity for the deprioritization text")
+        logger.info("Computing cosine similarities for the deprioritization text")
         thread3 = executor.submit(cosine_similarity_computation,
                                   embedding_deprioritize, precomputed_embeddings_t)
 
