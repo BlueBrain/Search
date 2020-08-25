@@ -212,12 +212,20 @@ def run_search(
         logger.info("Ended sentences filtering")
         return restricted_sentence_ids
 
-    def cosine_similarity_computation(embedding_query, precomputed_embeddings_t):
+    def cosine_similarity_computation(embedding_query, precomputed_embeddings_t,
+                                      embedding_deprioritize, deprioritize_text, deprioritize_strength):
         embedding_query_t = torch.from_numpy(embedding_query[None, :])
         similarities_query = cosine_similarity(embedding_query_t,
                                                precomputed_embeddings_t).numpy()
+        if deprioritize_text is not None and deprioritize_strength != 'None':
+            embedding_deprio_t = torch.from_numpy(embedding_deprioritize[None, :])
+            similarities_deprio = cosine_similarity(embedding_deprio_t,
+                                                    precomputed_embeddings_t).numpy()
+        else:
+            similarities_deprio = np.zeros_like(similarities_query)
+
         logger.info("Ended cosine similarities computation")
-        return similarities_query
+        return similarities_query, similarities_deprio
 
     precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
     executor = ThreadPoolExecutor(3)
@@ -228,19 +236,11 @@ def run_search(
 
     logger.info("Computing cosine similarities for the query text")
     thread2 = executor.submit(cosine_similarity_computation,
-                              embedding_query, precomputed_embeddings_t)
-
-    if deprioritize_text is not None and deprioritize_strength != 'None':
-        logger.info("Computing cosine similarities for the deprioritization text")
-        thread3 = executor.submit(cosine_similarity_computation,
-                                  embedding_deprioritize, precomputed_embeddings_t)
+                              embedding_query, precomputed_embeddings_t, embedding_deprioritize,
+                              deprioritize_text, deprioritize_strength)
 
     restricted_sentence_ids = thread1.result()
-    similarities_query = thread2.result()
-    if deprioritize_text is not None and deprioritize_strength != 'None':
-        similarities_deprio = thread3.result()
-    else:
-        similarities_deprio = np.zeros_like(similarities_query)
+    similarities_query, similarities_deprio = thread2.result()
 
     if len(restricted_sentence_ids) == 0:
         logger.info("No indices left after sentence filtering. Returning.")
