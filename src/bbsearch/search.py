@@ -1,6 +1,6 @@
 """Collection of functions focused on searching."""
-from concurrent.futures import ThreadPoolExecutor
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
 import torch
