@@ -1,4 +1,5 @@
 """Collection of functions focused on searching."""
+from concurrent.futures import ThreadPoolExecutor
 import logging
 
 import numpy as np
@@ -192,13 +193,14 @@ def run_search(
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
 
-    if deprioritize_text is not None:
+    if deprioritize_text is not None and deprioritize_strength != 'None':
         with timer('deprioritize_embed'):
             logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
-    with timer('sentences_filtering'):
+    def sentences_filtering(connection, has_journal, date_range, exclusion_text,
+                            inclusion_text):
         logger.info("Applying sentence filtering")
         restricted_sentence_ids = (
             SentenceFilter(connection)
@@ -208,28 +210,41 @@ def run_search(
             .include_strings(inclusion_text.split('\n'))
             .run()
         )
+        return restricted_sentence_ids
 
-    if len(restricted_sentence_ids) == 0:
-        logger.info("No indices left after sentence filtering. Returning.")
-        return np.array([]), np.array([]), timer.stats
-
-    # Compute similarities
-    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
-
-    with timer('query_similarity'):
+    def cosine_similarity_computation(embedding_query, precomputed_embeddings_t):
         logger.info("Computing cosine similarities for the query text")
         embedding_query_t = torch.from_numpy(embedding_query[None, :])
         similarities_query = cosine_similarity(embedding_query_t,
                                                precomputed_embeddings_t).numpy()
+        return similarities_query
 
-    if deprioritize_text is not None:
-        with timer('deprioritize_similarity'):
-            logger.info("Computing cosine similarity for the deprioritization text")
-            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize[None, :])
-            similarities_deprio = cosine_similarity(embedding_deprioritize_t,
-                                                    precomputed_embeddings_t).numpy()
+    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
+    executor = ThreadPoolExecutor(3)
+
+    logger.info("Applying sentences filtering")
+    thread1 = executor.submit(sentences_filtering, connection, has_journal, date_range,
+                              exclusion_text, inclusion_text)
+
+    logger.info("Computing cosine similarities for the query text")
+    thread2 = executor.submit(cosine_similarity_computation,
+                              embedding_query, precomputed_embeddings_t)
+
+    if deprioritize_text is not None and deprioritize_strength != 'None':
+        logger.info("Computing cosine similarity for the deprioritization text")
+        thread3 = executor.submit(cosine_similarity_computation,
+                                  embedding_deprioritize, precomputed_embeddings_t)
+
+    restricted_sentence_ids = thread1.result()
+    similarities_query = thread2.result()
+    if deprioritize_text is not None and deprioritize_strength != 'None':
+        similarities_deprio = thread3.result()
     else:
         similarities_deprio = np.zeros_like(similarities_query)
+
+    if len(restricted_sentence_ids) == 0:
+        logger.info("No indices left after sentence filtering. Returning.")
+        return np.array([]), np.array([]), timer.stats
 
     deprioritizations = {
         'None': (1, 0),

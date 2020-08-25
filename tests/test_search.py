@@ -96,8 +96,8 @@ def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
     assert top_indices.shape == (0,)
     assert similarities.shape == (0,)
     assert isinstance(stats, dict)
-    assert emb_mod.preprocess.call_count == 3
-    assert emb_mod.embed.call_count == 3
+    assert emb_mod.preprocess.call_count == 2
+    assert emb_mod.embed.call_count == 2
 
     top_indices, similarities, stats = run_search(embedding_model=emb_mod,
                                                   precomputed_embeddings=precomputed_embeddings,
