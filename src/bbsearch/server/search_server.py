@@ -4,6 +4,7 @@ import pathlib
 
 from flask import jsonify, request
 import numpy as np
+import torch
 
 import bbsearch
 
@@ -75,10 +76,12 @@ class SearchServer:
         }
 
         self.logger.info("Normalizing precomputed embeddings...")
-        for embeddings in self.precomputed_embeddings.values():
-            norm = np.linalg.norm(embeddings, keepdims=True, axis=1)
+        for model_name, embeddings in self.precomputed_embeddings.items():
+            embeddings_t = torch.from_numpy(embeddings)
+            norm = torch.norm(input=embeddings_t, dim=1, keepdim=True)
             norm[norm == 0] = 1
-            embeddings /= norm
+            embeddings_t /= norm
+            self.precomputed_embeddings[model_name] = embeddings_t.numpy()
 
         self.logger.info("Constructing the local searcher...")
         self.local_searcher = LocalSearcher(
