@@ -498,11 +498,11 @@ class SentenceFilter:
         # self.logger.info(f"Query: {query}")
 
         self.logger.info("Running engine.execute()")
-        results = [row['sentence_id'] for row in self.connection.execute(query)]
+        results = [row['sentence_id'] for row in self.connection.execute(query).fetchall()]
 
         self.logger.info("Converting to numpy array")
         self.results_array = np.array(results)
 
         self.logger.info(f"Filtering gave {len(results)} results")
 
-        return self.results_array
+ #       return self.results_array
