@@ -10,6 +10,7 @@ import ipywidgets
 import numpy as np
 import pytest
 from IPython.display import HTML
+import torch
 
 from bbsearch.search import LocalSearcher
 from bbsearch.widgets import ArticleSaver, SearchWidget
@@ -131,7 +132,7 @@ def create_searcher(engine, n_dim=2):
     embedding_model.embed.return_value = np.random.random(n_dim)
 
     embedding_models = {'BSV': embedding_model}
-    precomputed_embeddings = {'BSV': np.random.random((n_sentences, n_dim))}
+    precomputed_embeddings = {'BSV': torch.rand((n_sentences, n_dim)).to(dtype=torch.float32)}
     indices = np.arange(1, n_sentences + 1)
 
     searcher = LocalSearcher(embedding_models, precomputed_embeddings, indices, connection=engine)

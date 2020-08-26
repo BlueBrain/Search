@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import h5py
 import numpy as np
+import torch
 
 from bbsearch.search import LocalSearcher, run_search
 from bbsearch.utils import H5
@@ -21,13 +22,13 @@ class TestLocalSearcher:
         embeddings = H5.load(embeddings_h5_path, model_name, indices=indices)
 
         # load embeddings
-        precomputed_embeddings = {model_name: embeddings}
+        precomputed_embeddings = {model_name: torch.from_numpy(embeddings)}
         dim = precomputed_embeddings[model_name].shape[1]
 
         # fake embedding model
         emb_mod = Mock()
         emb_mod.preprocess.return_value = query_text
-        emb_mod.embed.return_value = np.ones((dim,))
+        emb_mod.embed.return_value = np.ones((dim,), dtype='float32')
         embedding_models = {model_name: emb_mod}
 
         # actual test
@@ -53,11 +54,12 @@ def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
 
     emb_mod = Mock()
     emb_mod.preprocess.return_value = query_text
-    emb_mod.embed.return_value = np.ones((2,))
+    emb_mod.embed.return_value = np.ones((2,), )
 
     # only take populated rows
     indices = H5.find_populated_rows(embeddings_h5_path, model)
     precomputed_embeddings = H5.load(embeddings_h5_path, model, indices=indices)
+    precomputed_embeddings = torch.from_numpy(precomputed_embeddings)
 
     deprioritized_text = 'Vegetables'
     deprioritized_strength = 'Mild'
@@ -96,8 +98,8 @@ def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
     assert top_indices.shape == (0,)
     assert similarities.shape == (0,)
     assert isinstance(stats, dict)
-    assert emb_mod.preprocess.call_count == 2
-    assert emb_mod.embed.call_count == 2
+    assert emb_mod.preprocess.call_count == 3
+    assert emb_mod.embed.call_count == 3
 
     top_indices, similarities, stats = run_search(embedding_model=emb_mod,
                                                   precomputed_embeddings=precomputed_embeddings,
