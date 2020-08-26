@@ -127,7 +127,7 @@ def run_search(
 
     precomputed_embeddings : torch.Tensor
         2D array containing embeddings of the model corresponding of embedding_model. Rows are
-        sentences and columns are different dimensions.
+        sentences and columns are different dimensions. The embeddings need to be normalized.
 
     indices : np.ndarray
         1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
@@ -168,6 +168,7 @@ def run_search(
     -------
     sentence_ids : np.array
         1D array representing the indices of the top `k` most relevant sentences.
+        The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
 
     similarities : np.array
         1D array reresenting the similarities for each of the top `k` sentences. Note that this will
@@ -221,14 +222,14 @@ def run_search(
 
     with timer('sentences_filtering'):
         logger.info("Applying sentence filtering")
-        restricted_sentence_ids = (
+        restricted_sentence_ids = torch.from_numpy((
             SentenceFilter(connection)
             .only_with_journal(has_journal)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split('\n'))
             .include_strings(inclusion_text.split('\n'))
             .run()
-        )
+        ))
 
     if len(restricted_sentence_ids) == 0:
         logger.info("No indices left after sentence filtering. Returning.")
@@ -241,11 +242,20 @@ def run_search(
                                   weight=precomputed_embeddings)
 
     logger.info("Truncating similarities to the restricted indices")
+    # restricted_sentence_id=  [1, 4, 5]
+    # restricted_indices = [0, 3, 4]
+    # similarities = [20, 21, 22, 23, 24, 25, 26]
+    # restricted_similarities = [20, 23, 24]
     restricted_indices = restricted_sentence_ids - 1
     restricted_similarities = similarities[restricted_indices]
 
     logger.info(f"Sorting the similarities and getting the top {k} results")
-    top_similarities, top_sentence_ids = torch.topk(restricted_similarities, k,
-                                                    largest=True, sorted=True)
+    top_similarities, top_indices = torch.topk(restricted_similarities,
+                                               min(k, len(restricted_similarities)),
+                                               largest=True, sorted=True)
+    # top similarities = [24, 23, 20]
+    # top indices = [2, 1, 0]
+    # restricted_indices[top_indices] = [4, 3, 0]
+    top_sentence_ids = restricted_sentence_ids[top_indices]
 
     return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats

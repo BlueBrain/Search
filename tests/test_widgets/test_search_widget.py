@@ -197,11 +197,14 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     }
 
     precomputed_embeddings = {
-        'BSV': np.ones((n_sentences, 2)),  # 45 degrees
+        'BSV': torch.ones((n_sentences, 2)).to(dtype=torch.float32) ** (1/2),  # 45 degrees
         # 'SBioBERT': np.ones((n_sentences, 2))  # 45 degrees
     }
 
-    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1] = np.array([0.1, 0.9])  # ~90 degrees
+    norm = 0.1 ** 2 + 0.9 ** 2
+    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1, :] = torch.tensor([0.1, 0.9]) / norm #~90
+
+    # degrees
     # precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
 
     indices = np.arange(1, n_sentences + 1)
