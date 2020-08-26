@@ -125,9 +125,10 @@ def run_search(
     embedding_model : bbsearch.embedding_models.EmbeddingModel
         Instance of EmbeddingModel of the model we want to use.
 
-    precomputed_embeddings : torch.Tensor
+    precomputed_embeddings : torch.Tensor()
         2D array containing embeddings of the model corresponding of embedding_model. Rows are
-        sentences and columns are different dimensions. The embeddings need to be normalized.
+        sentences and columns are different dimensions. The embeddings need to be normalized and
+        dtype float32.
 
     indices : np.ndarray
         1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
