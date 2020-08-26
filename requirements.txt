@@ -28,7 +28,7 @@ jupyter-server-proxy==1.5.0
 jupyterlab==2.2.5
 matplotlib==3.3.1
 mysqlclient==2.0.1
-networkx==2.4
+networkx==2.5
 nltk==3.5
 numpy==1.18.5
 pandas==1.1.1
@@ -41,7 +41,7 @@ pytest==6.0.1
 python-dotenv==0.14.0
 rdflib-jsonld==0.5.0
 requests==2.24.0
-responses==0.10.16
+responses==0.11.0
 scikit-learn==0.23.2
 scispacy==0.2.5
 sent2vec-prebuilt>=0.0.2
