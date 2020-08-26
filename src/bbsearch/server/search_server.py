@@ -2,8 +2,8 @@
 import logging
 import pathlib
 
-from flask import jsonify, request
 import torch
+from flask import jsonify, request
 
 import bbsearch
 

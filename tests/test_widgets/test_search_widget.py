@@ -9,8 +9,8 @@ from unittest.mock import Mock
 import ipywidgets
 import numpy as np
 import pytest
-from IPython.display import HTML
 import torch
+from IPython.display import HTML
 
 from bbsearch.search import LocalSearcher
 from bbsearch.widgets import ArticleSaver, SearchWidget
@@ -202,7 +202,8 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     }
 
     norm = 0.1 ** 2 + 0.9 ** 2
-    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1, :] = torch.tensor([0.1, 0.9]) / norm #~90
+    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1, :] = torch.tensor([0.1, 0.9]) / norm
+    # ~90
 
     # degrees
     # precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
