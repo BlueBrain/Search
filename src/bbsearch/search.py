@@ -1,7 +1,6 @@
 """Collection of functions focused on searching."""
 import logging
 
-import faiss
 import numpy as np
 import torch
 import torch.nn.functional as nnf

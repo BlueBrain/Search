@@ -74,7 +74,7 @@ class SearchServer:
             for model_name in self.embedding_models
         }
 
-        self.logger.info("Normalizing precomputed embeddings with faiss...")
+        self.logger.info("Normalizing precomputed embeddings...")
         for embeddings in self.precomputed_embeddings.values():
             norm = np.linalg.norm(embeddings, keepdims=True, axis=1)
             norm[norm == 0] = 1
