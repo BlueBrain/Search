@@ -219,17 +219,18 @@ class TestCreateMiningCache:
         assert model_schemas['model_1']['model_path'] == 'model_1'
         assert model_schemas['model_1']['entity_map'] == {'type_1': 'type_1_public'}
 
-    def test_create_tasks(self, cache_creator):
-        def worker(stop_now):
-            while not stop_now.is_set():
-                time.sleep(0.01)
+    @staticmethod
+    def fake_wait_miner(stop_now):
+        while not stop_now.is_set():
+            time.sleep(0.01)
 
+    def test_create_tasks(self, cache_creator):
         my_queue = mp.Queue()
         queue_name = "my_queue"
         task_queues = {queue_name: my_queue}
 
         stop_event = mp.Event()
-        worker_proc = mp.Process(target=worker, args=(stop_event,))
+        worker_proc = mp.Process(target=self.fake_wait_miner, args=(stop_event,))
         worker_proc.start()
         workers_by_queue = {queue_name: [worker_proc]}
 
@@ -250,32 +251,26 @@ class TestCreateMiningCache:
         # Test adding tasks to a queue where all workers are dead
         cache_creator.create_tasks(task_queues, workers_by_queue)
 
-    def test_do_mining(self, cache_creator, monkeypatch):
-        def fake_miner(task_queue=None, can_finish=None, **kwargs):
-            while not can_finish.is_set():
-                try:
-                    _ = task_queue.get(timeout=1.0)
-                except queue.Empty:
-                    continue
+    @staticmethod
+    def fake_queue_miner(task_queue=None, can_finish=None, **kwargs):
+        while not can_finish.is_set():
+            try:
+                _ = task_queue.get(timeout=1.0)
+            except queue.Empty:
+                continue
 
+    def test_do_mining(self, cache_creator, monkeypatch):
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.Miner.create_and_mine",
-            fake_miner,
+            self.fake_queue_miner,
         )
 
         cache_creator.do_mining()
 
     def test_construct(self, cache_creator, monkeypatch):
-        def fake_miner(task_queue=None, can_finish=None, **kwargs):
-            while not can_finish.is_set():
-                try:
-                    _ = task_queue.get(timeout=1.0)
-                except queue.Empty:
-                    continue
-
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.Miner.create_and_mine",
-            fake_miner,
+            self.fake_queue_miner,
         )
 
         cache_creator.construct()
