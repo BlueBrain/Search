@@ -200,29 +200,18 @@ def run_search(
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
 
-    class SentenceFiltering:
-        def __init__(self):
-            self.restricted_sentence_ids = None
-
-        def run(self, connection, has_journal, date_range, exclusion_text,
-                inclusion_text):
-            self.restricted_sentence_ids = (
-                SentenceFilter(connection)
-                .only_with_journal(has_journal)
-                .date_range(date_range)
-                .exclude_strings(exclusion_text.split('\n'))
-                .include_strings(inclusion_text.split('\n'))
-                .run()
-            )
-            logger.info("Ended sentences filtering")
-            return self.restricted_sentence_ids
+    sentence_filter = (
+        SentenceFilter(connection)
+        .only_with_journal(has_journal)
+        .date_range(date_range)
+        .exclude_strings(exclusion_text.split('\n'))
+        .include_strings(inclusion_text.split('\n'))
+    )
 
     precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
 
     logger.info("Applying sentences filtering")
-    sentence_filter = SentenceFiltering()
-    t = Thread(target=sentence_filter.run, args=(connection, has_journal, date_range,
-                                                 exclusion_text, inclusion_text))
+    t = Thread(target=sentence_filter.run)
     t.start()
 
     logger.info("Computing cosine similarities for the query text")
@@ -239,7 +228,7 @@ def run_search(
     logger.info("Ended cosine similarities computation")
     t.join()
 
-    restricted_sentence_ids = sentence_filter.restricted_sentence_ids
+    restricted_sentence_ids = sentence_filter.results_array
 
     if len(restricted_sentence_ids) == 0:
         logger.info("No indices left after sentence filtering. Returning.")
