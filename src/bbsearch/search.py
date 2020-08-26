@@ -2,7 +2,8 @@
 import logging
 
 import numpy as np
-from sklearn.metrics.pairwise import cosine_similarity
+import torch
+from torch.nn.functional import cosine_similarity
 
 from .sql import SentenceFilter
 from .utils import Timer
@@ -208,28 +209,25 @@ def run_search(
             .run()
         )
 
-    with timer('considered_embeddings_lookup'):
-        logger.info("Constructing mask based on indices and sentence filtering")
-        mask = np.isin(indices, restricted_sentence_ids)
-
-    logger.info("Applying the mask")
-    embeddings_corpus = precomputed_embeddings[mask]
-    sentence_ids = indices[mask]
-
-    if len(sentence_ids) == 0:
+    if len(restricted_sentence_ids) == 0:
+        logger.info("No indices left after sentence filtering. Returning.")
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
+    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
+
     with timer('query_similarity'):
         logger.info("Computing cosine similarities for the query text")
-        similarities_query = cosine_similarity(X=embedding_query[None, :],
-                                               Y=embeddings_corpus).squeeze()
+        embedding_query_t = torch.from_numpy(embedding_query[None, :])
+        similarities_query = cosine_similarity(embedding_query_t,
+                                               precomputed_embeddings_t).numpy()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
             logger.info("Computing cosine similarity for the deprioritization text")
-            similarities_deprio = cosine_similarity(X=embedding_deprioritize[None, :],
-                                                    Y=embeddings_corpus).squeeze()
+            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize[None, :])
+            similarities_deprio = cosine_similarity(embedding_deprioritize_t,
+                                                    precomputed_embeddings_t).numpy()
     else:
         similarities_deprio = np.zeros_like(similarities_query)
 
@@ -245,10 +243,12 @@ def run_search(
     alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
     similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
 
-    with timer('sorting'):
-        logger.info(f"Sorting the similarities and getting the top {k} results")
-        top_indices = np.argsort(-similarities)[:k]
+    logger.info("Truncating similarities to the restricted indices")
+    restricted_indices = restricted_sentence_ids - 1
+    restricted_similarities = similarities[restricted_indices]
 
-    logger.info("run_search finished")
+    logger.info(f"Sorting the similarities and getting the top {k} results")
+    top_sorting = np.argsort(-restricted_similarities)
+    top_sorting = top_sorting[:k]
 
-    return sentence_ids[top_indices], similarities[top_indices], timer.stats
+    return restricted_sentence_ids[top_sorting], restricted_similarities[top_sorting], timer.stats
