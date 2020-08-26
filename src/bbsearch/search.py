@@ -192,14 +192,31 @@ def run_search(
         logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
-        faiss.normalize_L2(embedding_query[None, :])
 
-    if deprioritize_text is not None:
+    if deprioritize_text is None:
+        combined_embeddings = embedding_query
+    else:
         with timer('deprioritize_embed'):
             logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
-            faiss.normalize_L2(embedding_deprioritize[None, :])
+
+        deprioritizations = {
+            'None': (1, 0),
+            'Weak': (0.9, 0.1),
+            'Mild': (0.8, 0.3),
+            'Strong': (0.5, 0.5),
+            'Stronger': (0.5, 0.7),
+        }
+
+        logger.info("Combining embeddings")
+        alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
+        combined_embeddings = alpha_1 * embedding_query - alpha_2 * embedding_deprioritize
+
+    norm = np.linalg.norm(combined_embeddings)
+    if norm == 0:
+        norm = 1
+    combined_embeddings /= norm
 
     with timer('sentences_filtering'):
         logger.info("Applying sentence filtering")
@@ -220,31 +237,10 @@ def run_search(
     precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
 
     with timer('query_similarity'):
-        logger.info("Computing cosine similarities for the query text")
-        embedding_query_t = torch.from_numpy(embedding_query)
-        similarities_query = nnf.linear(input=embedding_query_t,
-                                        weight=precomputed_embeddings_t).numpy().squeeze()
-
-    if deprioritize_text is not None:
-        with timer('deprioritize_similarity'):
-            logger.info("Computing cosine similarity for the deprioritization text")
-            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize)
-            similarities_deprio = nnf.linear(input=embedding_deprioritize_t,
-                                             weight=precomputed_embeddings_t).numpy().squeeze()
-    else:
-        similarities_deprio = np.zeros_like(similarities_query)
-
-    deprioritizations = {
-        'None': (1, 0),
-        'Weak': (0.9, 0.1),
-        'Mild': (0.8, 0.3),
-        'Strong': (0.5, 0.5),
-        'Stronger': (0.5, 0.7),
-    }
-    # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
-    logger.info("Combining query and deprioritizations")
-    alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
-    similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
+        logger.info("Computing cosine similarities for the combined query")
+        embedding_query_t = torch.from_numpy(combined_embeddings)
+        similarities = nnf.linear(input=embedding_query_t,
+                                  weight=precomputed_embeddings_t).numpy()
 
     logger.info("Truncating similarities to the restricted indices")
     restricted_indices = restricted_sentence_ids - 1
