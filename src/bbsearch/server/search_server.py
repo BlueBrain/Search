@@ -2,6 +2,7 @@
 import logging
 import pathlib
 
+import faiss
 from flask import jsonify, request
 import numpy as np
 
@@ -74,10 +75,9 @@ class SearchServer:
             for model_name in self.embedding_models
         }
 
-        self.logger.info("Normalizing precomputed embeddings...")
-        for model_name, embeddings in self.precomputed_embeddings.items():
-            normalized_embeddings = embeddings / np.linalg.norm(embeddings, axis=1)
-            self.precomputed_embeddings[model_name] = normalized_embeddings
+        self.logger.info("Normalizing precomputed embeddings with faiss...")
+        for embeddings in self.precomputed_embeddings.values():
+            faiss.normalize_L2(embeddings)
 
         self.logger.info("Constructing the local searcher...")
         self.local_searcher = LocalSearcher(

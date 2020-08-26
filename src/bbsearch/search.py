@@ -1,6 +1,7 @@
 """Collection of functions focused on searching."""
 import logging
 
+import faiss
 import numpy as np
 import torch
 import torch.nn.functional as nnf
@@ -191,14 +192,14 @@ def run_search(
         logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
-        embedding_query_norm = embedding_query / np.linalg.norm(embedding_query)
+        faiss.normalize_L2(embedding_query[None, :])
 
     if deprioritize_text is not None:
         with timer('deprioritize_embed'):
             logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
-            embedding_deprioritize_norm = embedding_deprioritize / np.linalg.norm(embedding_deprioritize)
+            faiss.normalize_L2(embedding_deprioritize[None, :])
 
     with timer('sentences_filtering'):
         logger.info("Applying sentence filtering")
@@ -220,14 +221,14 @@ def run_search(
 
     with timer('query_similarity'):
         logger.info("Computing cosine similarities for the query text")
-        embedding_query_t = torch.from_numpy(embedding_query_norm[None, :])
+        embedding_query_t = torch.from_numpy(embedding_query)
         similarities_query = nnf.linear(input=embedding_query_t,
                                         weight=precomputed_embeddings_t).numpy().squeeze()
 
     if deprioritize_text is not None:
         with timer('deprioritize_similarity'):
             logger.info("Computing cosine similarity for the deprioritization text")
-            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize_norm[None, :])
+            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize)
             similarities_deprio = nnf.linear(input=embedding_deprioritize_t,
                                              weight=precomputed_embeddings_t).numpy().squeeze()
     else:
