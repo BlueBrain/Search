@@ -497,8 +497,8 @@ class SentenceFilter:
         query = self._build_query()
         # self.logger.info(f"Query: {query}")
 
-        self.logger.info("Running pd.read_sql")
-        results = [row[0] for row in self.connection.execute(query).fetchall()]
+        self.logger.info("Running engine.execute()")
+        results = [row['sentence_id'] for row in self.connection.execute(query)]
 
         self.logger.info("Converting to numpy array")
         self.results_array = np.array(results)
