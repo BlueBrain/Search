@@ -1,10 +1,9 @@
 """Collection of functions focused on searching."""
 import logging
-from threading import Thread
 
 import numpy as np
 import torch
-from torch.nn.functional import cosine_similarity
+import torch.nn.functional as nnf
 
 from .sql import SentenceFilter
 from .utils import Timer
@@ -183,7 +182,6 @@ def run_search(
     logger.info("Starting run_search")
 
     # Replace empty `deprioritize_text` by None
-    embedding_deprioritize = None
     if deprioritize_text is not None and len(deprioritize_text.strip()) == 0:
         deprioritize_text = None
 
@@ -193,46 +191,47 @@ def run_search(
         logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
+        embedding_query_norm = embedding_query / np.linalg.norm(embedding_query)
 
-    if deprioritize_text is not None and deprioritize_strength != 'None':
+    if deprioritize_text is not None:
         with timer('deprioritize_embed'):
             logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
+            embedding_deprioritize_norm = embedding_deprioritize / np.linalg.norm(embedding_deprioritize)
 
-    sentence_filter = (
-        SentenceFilter(connection)
-        .only_with_journal(has_journal)
-        .date_range(date_range)
-        .exclude_strings(exclusion_text.split('\n'))
-        .include_strings(inclusion_text.split('\n'))
-    )
-
-    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
-
-    logger.info("Applying sentences filtering")
-    t = Thread(target=sentence_filter.run)
-    t.start()
-
-    logger.info("Computing cosine similarities for the query text")
-    embedding_query_t = torch.from_numpy(embedding_query[None, :])
-    similarities_query = cosine_similarity(embedding_query_t,
-                                           precomputed_embeddings_t).numpy()
-    if deprioritize_text is not None and deprioritize_strength != 'None':
-        embedding_deprio_t = torch.from_numpy(embedding_deprioritize[None, :])
-        similarities_deprio = cosine_similarity(embedding_deprio_t,
-                                                precomputed_embeddings_t).numpy()
-    else:
-        similarities_deprio = np.zeros_like(similarities_query)
-
-    logger.info("Ended cosine similarities computation")
-    t.join()
-
-    restricted_sentence_ids = sentence_filter.results_array
+    with timer('sentences_filtering'):
+        logger.info("Applying sentence filtering")
+        restricted_sentence_ids = (
+            SentenceFilter(connection)
+            .only_with_journal(has_journal)
+            .date_range(date_range)
+            .exclude_strings(exclusion_text.split('\n'))
+            .include_strings(inclusion_text.split('\n'))
+            .run()
+        )
 
     if len(restricted_sentence_ids) == 0:
         logger.info("No indices left after sentence filtering. Returning.")
         return np.array([]), np.array([]), timer.stats
+
+    # Compute similarities
+    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
+
+    with timer('query_similarity'):
+        logger.info("Computing cosine similarities for the query text")
+        embedding_query_t = torch.from_numpy(embedding_query_norm[None, :])
+        similarities_query = nnf.linear(input=embedding_query_t,
+                                        weight=precomputed_embeddings_t).numpy().squeeze()
+
+    if deprioritize_text is not None:
+        with timer('deprioritize_similarity'):
+            logger.info("Computing cosine similarity for the deprioritization text")
+            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize_norm[None, :])
+            similarities_deprio = nnf.linear(input=embedding_deprioritize_t,
+                                             weight=precomputed_embeddings_t).numpy().squeeze()
+    else:
+        similarities_deprio = np.zeros_like(similarities_query)
 
     deprioritizations = {
         'None': (1, 0),

@@ -300,7 +300,6 @@ class SentenceFilter:
         self.string_exclusions = []
         self.string_inclusions = []
         self.restricted_sentence_ids = None
-        self.results_array = None
 
     def only_with_journal(self, flag=True):
         """Only select articles with a journal.
@@ -497,12 +496,9 @@ class SentenceFilter:
         query = self._build_query()
         # self.logger.info(f"Query: {query}")
 
-        self.logger.info("Running engine.execute()")
-        results = [row['sentence_id'] for row in self.connection.execute(query).fetchall()]
-
-        self.logger.info("Converting to numpy array")
-        self.results_array = np.array(results)
+        self.logger.debug("Running pd.read_sql")
+        results = [row[0] for row in self.connection.execute(query).fetchall()]
 
         self.logger.info(f"Filtering gave {len(results)} results")
 
- #       return self.results_array
+        return np.array(results)
