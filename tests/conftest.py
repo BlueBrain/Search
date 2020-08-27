@@ -147,6 +147,8 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     sentences_content.index.name = 'sentence_id'
     sentences_content.index += 1
     sentences_content.to_sql(name='sentences', con=engine, index=True, if_exists='append')
+    if engine.url.drivername.startswith('mysql'):
+        engine.execute("""CREATE FULLTEXT INDEX fulltext_text ON sentences(text)""")
 
     # populate mining tables
     temp_m = []
