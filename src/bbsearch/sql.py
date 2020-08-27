@@ -443,8 +443,8 @@ class SentenceFilter:
         # Inclusion and Exclusion Text
         if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
             if self.string_exclusions or self.string_inclusions:
-                inclusions = ' '.join(f"+*{string}*" for string in self.string_inclusions)
-                exclusions = ' '.join(f"-*{string}*" for string in self.string_exclusions)
+                inclusions = ' '.join(f"+{string}*" for string in self.string_inclusions)
+                exclusions = ' '.join(f"-{string}*" for string in self.string_exclusions)
                 sentence_conditions.append(
                     f"MATCH(text) AGAINST ('{inclusions} {exclusions}' IN BOOLEAN MODE)")
         else:
