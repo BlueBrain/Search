@@ -40,7 +40,9 @@ def configure_logging(log_file=None, level=logging.WARNING):
     logging.basicConfig(
         filename=log_file,
         level=level,
-        format="%(asctime)s :: %(levelname)-8s :: %(name)s | %(message)s",
+        format="{asctime} :: {levelname:^8s} :: {name} | {message}",
+        style="{",
+        datefmt='%Y-%M-%d @ %H:%M:%S',
     )
     sys.excepthook = handle_uncaught_exception
 
