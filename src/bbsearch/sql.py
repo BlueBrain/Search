@@ -451,6 +451,11 @@ class SentenceFilter:
                 sentence_conditions.append(
                     f"MATCH(text) AGAINST ('{condition}' IN BOOLEAN MODE)")
             elif self.string_exclusions:
+                # This elif statement is to create conditions if there are only exclusions words
+                # without any inclusions. Indeed, in this case, MATCH AGAINST IN BOOLEAN MODE does
+                # not work anymore as you can find on the official docs:
+                # https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html:
+                # boolean-mode search that contains only terms preceded by - returns an empty result
                 for text in self.string_exclusions:
                     sentence_conditions.append(f"INSTR(text, '{text}') = 0")
         else:
