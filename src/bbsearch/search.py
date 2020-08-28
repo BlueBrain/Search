@@ -3,7 +3,7 @@ import logging
 
 import numpy as np
 import torch
-from torch.nn.functional import cosine_similarity
+import torch.nn.functional as nnf
 
 from .sql import SentenceFilter
 from .utils import Timer
@@ -125,9 +125,10 @@ def run_search(
     embedding_model : bbsearch.embedding_models.EmbeddingModel
         Instance of EmbeddingModel of the model we want to use.
 
-    precomputed_embeddings : np.ndarray
+    precomputed_embeddings : torch.Tensor
         2D array containing embeddings of the model corresponding of embedding_model. Rows are
-        sentences and columns are different dimensions.
+        sentences and columns are different dimensions. The embeddings need to be normalized and
+        dtype float32.
 
     indices : np.ndarray
         1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
@@ -168,6 +169,7 @@ def run_search(
     -------
     sentence_ids : np.array
         1D array representing the indices of the top `k` most relevant sentences.
+        The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
 
     similarities : np.array
         1D array reresenting the similarities for each of the top `k` sentences. Note that this will
@@ -191,64 +193,70 @@ def run_search(
         logger.info("Embedding the query text")
         preprocessed_query_text = embedding_model.preprocess(query_text)
         embedding_query = embedding_model.embed(preprocessed_query_text)
+        embedding_query = torch.from_numpy(embedding_query).to(dtype=torch.float32)
 
-    if deprioritize_text is not None:
+    if deprioritize_text is None:
+        combined_embeddings = embedding_query
+    else:
         with timer('deprioritize_embed'):
             logger.info("Embedding the deprioritization text")
             preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
             embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
+            embedding_deprioritize = torch.from_numpy(embedding_deprioritize).to(dtype=torch.float32)
+
+        deprioritizations = {
+            'None': (1, 0),
+            'Weak': (0.9, 0.1),
+            'Mild': (0.8, 0.3),
+            'Strong': (0.5, 0.5),
+            'Stronger': (0.5, 0.7),
+        }
+
+        logger.info("Combining embeddings")
+        alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
+        combined_embeddings = alpha_1 * embedding_query - alpha_2 * embedding_deprioritize
+
+    norm = torch.norm(input=combined_embeddings).item()
+    if norm == 0:
+        norm = 1
+    combined_embeddings /= norm
 
     with timer('sentences_filtering'):
         logger.info("Applying sentence filtering")
-        restricted_sentence_ids = (
+        restricted_sentence_ids = torch.from_numpy((
             SentenceFilter(connection)
             .only_with_journal(has_journal)
             .date_range(date_range)
             .exclude_strings(exclusion_text.split('\n'))
             .include_strings(inclusion_text.split('\n'))
             .run()
-        )
+        ))
 
     if len(restricted_sentence_ids) == 0:
         logger.info("No indices left after sentence filtering. Returning.")
         return np.array([]), np.array([]), timer.stats
 
     # Compute similarities
-    precomputed_embeddings_t = torch.from_numpy(precomputed_embeddings)
-
     with timer('query_similarity'):
-        logger.info("Computing cosine similarities for the query text")
-        embedding_query_t = torch.from_numpy(embedding_query[None, :])
-        similarities_query = cosine_similarity(embedding_query_t,
-                                               precomputed_embeddings_t).numpy()
-
-    if deprioritize_text is not None:
-        with timer('deprioritize_similarity'):
-            logger.info("Computing cosine similarity for the deprioritization text")
-            embedding_deprioritize_t = torch.from_numpy(embedding_deprioritize[None, :])
-            similarities_deprio = cosine_similarity(embedding_deprioritize_t,
-                                                    precomputed_embeddings_t).numpy()
-    else:
-        similarities_deprio = np.zeros_like(similarities_query)
-
-    deprioritizations = {
-        'None': (1, 0),
-        'Weak': (0.9, 0.1),
-        'Mild': (0.8, 0.3),
-        'Strong': (0.5, 0.5),
-        'Stronger': (0.5, 0.7),
-    }
-    # now: maximize L = a1 * cos(x, query) - a2 * cos(x, exclusions)
-    logger.info("Combining query and deprioritizations")
-    alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
-    similarities = alpha_1 * similarities_query - alpha_2 * similarities_deprio
+        logger.info("Computing cosine similarities for the combined query")
+        similarities = nnf.linear(input=combined_embeddings,
+                                  weight=precomputed_embeddings)
 
     logger.info("Truncating similarities to the restricted indices")
+    # restricted_sentence_id=  [1, 4, 5]
+    # restricted_indices = [0, 3, 4]
+    # similarities = [20, 21, 22, 23, 24, 25, 26]
+    # restricted_similarities = [20, 23, 24]
     restricted_indices = restricted_sentence_ids - 1
     restricted_similarities = similarities[restricted_indices]
 
     logger.info(f"Sorting the similarities and getting the top {k} results")
-    top_sorting = np.argsort(-restricted_similarities)
-    top_sorting = top_sorting[:k]
+    top_similarities, top_indices = torch.topk(restricted_similarities,
+                                               min(k, len(restricted_similarities)),
+                                               largest=True, sorted=True)
+    # top similarities = [24, 23, 20]
+    # top indices = [2, 1, 0]
+    # restricted_indices[top_indices] = [4, 3, 0]
+    top_sentence_ids = restricted_sentence_ids[top_indices]
 
-    return restricted_sentence_ids[top_sorting], restricted_similarities[top_sorting], timer.stats
+    return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats
