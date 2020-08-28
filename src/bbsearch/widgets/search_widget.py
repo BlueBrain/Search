@@ -152,11 +152,19 @@ class SearchWidget(widgets.VBox):
             )
 
         self.widgets['inclusion_text'] = widgets.Textarea(
-            layout=widgets.Layout(width='90%', height='80px'),
+            layout=widgets.Layout(width='90%'),
             value='',
             style=self.widgets_style,
-            description='Substring Matching (newline separated): '
-            )
+            description="Exact phrase matching:",
+            rows=5,
+            placeholder=textwrap.dedent("""
+                    One phrase per line. Valid phrases are:
+                    1. Single word                      : glucose
+                    2. Multiple words                   : risk factor
+                    3. Single word with variable suffix : molecul*
+                       (matches "molecule", "molecules", "molecular")
+                    """).strip(),
+        )
 
         self.widgets['default_value_article_saver'] = widgets.RadioButtons(
             options=[
