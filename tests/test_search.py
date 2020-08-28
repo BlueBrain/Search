@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import h5py
 import numpy as np
+import torch
 
 from bbsearch.search import LocalSearcher, run_search
 from bbsearch.utils import H5
@@ -21,13 +22,17 @@ class TestLocalSearcher:
         embeddings = H5.load(embeddings_h5_path, model_name, indices=indices)
 
         # load embeddings
-        precomputed_embeddings = {model_name: embeddings}
+        embeddings_t = torch.from_numpy(embeddings)
+        norm = torch.norm(input=embeddings_t, dim=1, keepdim=True)
+        norm[norm == 0] = 1
+        embeddings_t /= norm
+        precomputed_embeddings = {model_name: embeddings_t}
         dim = precomputed_embeddings[model_name].shape[1]
 
         # fake embedding model
         emb_mod = Mock()
         emb_mod.preprocess.return_value = query_text
-        emb_mod.embed.return_value = np.ones((dim,))
+        emb_mod.embed.return_value = np.ones((dim,), dtype='float32')
         embedding_models = {model_name: emb_mod}
 
         # actual test
@@ -58,6 +63,10 @@ def test_run_search(fake_sqlalchemy_engine, embeddings_h5_path):
     # only take populated rows
     indices = H5.find_populated_rows(embeddings_h5_path, model)
     precomputed_embeddings = H5.load(embeddings_h5_path, model, indices=indices)
+    precomputed_embeddings = torch.from_numpy(precomputed_embeddings)
+    norm = torch.norm(input=precomputed_embeddings, dim=1, keepdim=True)
+    norm[norm == 0] = 1
+    precomputed_embeddings /= norm
 
     deprioritized_text = 'Vegetables'
     deprioritized_strength = 'Mild'
