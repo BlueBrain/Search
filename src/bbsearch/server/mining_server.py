@@ -4,7 +4,7 @@ import logging
 
 import pandas as pd
 import spacy
-from flask import jsonify, request
+from flask import Flask, jsonify, request
 
 import bbsearch
 
@@ -12,13 +12,11 @@ from ..mining import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
 
 
-class MiningServer:
+class MiningServer(Flask):
     """The BBS mining server.
 
     Parameters
     ----------
-    app : flask.Flask
-        The Flask app wrapping the server.
     models_libs : dict of str
         Dictionary mapping each type of extraction ('ee' for entities, 're' for relations, 'ae' for
         attributes) to the csv file with the information on which model to use for the extraction
@@ -33,7 +31,8 @@ class MiningServer:
         The database connection.
     """
 
-    def __init__(self, app, models_libs, connection):
+    def __init__(self, models_libs, connection):
+        super().__init__("mining_server")
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "MiningServer"
@@ -47,10 +46,9 @@ class MiningServer:
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
 
-        self.app = app
-        self.app.route("/text", methods=["POST"])(self.pipeline_text)
-        self.app.route("/database", methods=["POST"])(self.pipeline_database)
-        self.app.route("/help", methods=["POST"])(self.help)
+        self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
+        self.add_url_rule("/database", view_func=self.pipeline_database, methods=["POST"])
+        self.add_url_rule("/help", view_func=self.help, methods=["POST"])
 
         self.logger.info("Initialization done.")
 
@@ -124,7 +122,7 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
-            schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
+            schema_df = self.read_df_from_str(schema_str)
 
             if use_cache:
                 # determine which models are necessary
@@ -199,7 +197,7 @@ class MiningServer:
             if args_err_response:
                 return args_err_response
 
-            schema_df = self.read_df_from_str(schema_str, drop_duplicates=True)
+            schema_df = self.read_df_from_str(schema_str)
 
             texts = [(text, {})]
             df_all, etypes_na = self.mine_texts(texts=texts, schema_request=schema_df, debug=debug)
@@ -289,14 +287,15 @@ class MiningServer:
             DataFrame containing all the elements extracted by text mining.
 
         etypes_na : list[str]
-            Etypes found in the request CSV file for which no available model was found in the library.
+            Entity types found in the request CSV file for which no available
+            model was found in the library.
 
         Returns
         -------
         response: requests.response
             Response containing the dataframe converted in csv table.
         """
-        csv_extractions = df_extractions.to_csv(path_or_buf=None, index=False)
+        csv_extractions = df_extractions.to_csv(index=False)
         warnings = [f'No text mining model was found in the library for \"{etype}\".' for etype in etypes_na]
 
         return jsonify(csv_extractions=csv_extractions, warnings=warnings), 200

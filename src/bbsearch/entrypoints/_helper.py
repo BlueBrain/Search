@@ -60,7 +60,7 @@ def configure_logging(log_file=None, level=logging.WARNING):
     sys.excepthook = handle_uncaught_exception
 
 
-def get_var(var_name, default=None, *, check_not_set=True, var_type=None):
+def get_var(var_name, default=None, *, check_not_set=True, var_type=str):
     """Read an environment variable.
 
     Parameters
@@ -69,11 +69,11 @@ def get_var(var_name, default=None, *, check_not_set=True, var_type=None):
         The name of the environment variable.
     default : object or None
         The default value of the variable.
-    check_not_set : bool
+    check_not_set : bool, optional
         If the value of the variable is `None`, which is the
         case when the variable is not set, then a `ValueError`
         is raised.
-    var_type : callable
+    var_type : callable, optional
         The type of the variable. Before returning the variable will
         be cast to this type.
 
@@ -85,10 +85,8 @@ def get_var(var_name, default=None, *, check_not_set=True, var_type=None):
     var = os.getenv(var_name, default)
     if check_not_set and var is None:
         raise ValueError(f"The variable ${var_name} must be set")
-    if var_type is not None:
-        var = var_type(var)
 
-    return var
+    return var_type(var)
 
 
 def run_server(app_factory, name, argv=None):
