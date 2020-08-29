@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: docker/base.Dockerfile
       args:
-        - HTTP_PROXY
-        - HTTPS_PROXY
-        - http_proxy
-        - https_proxy
+        - BBS_HTTP_PROXY
+        - BBS_HTTPS_PROXY
+        - BBS_http_proxy
+        - BBS_https_proxy
     image: bbs_base
     container_name: bbs_base
     networks:
