@@ -1,4 +1,5 @@
 """Helper functions for server entry points."""
+import argparse
 import logging
 import os
 import sys
@@ -59,19 +60,22 @@ def configure_logging(log_file=None, level=logging.WARNING):
     sys.excepthook = handle_uncaught_exception
 
 
-def get_var(var_name, default=None, *, check_not_set=True):
+def get_var(var_name, default=None, *, check_not_set=True, var_type=None):
     """Read an environment variable.
 
     Parameters
     ----------
     var_name : str
         The name of the environment variable.
-    default : str or None
+    default : object or None
         The default value of the variable.
     check_not_set : bool
         If the value of the variable is `None`, which is the
         case when the variable is not set, then a `ValueError`
         is raised.
+    var_type : callable
+        The type of the variable. Before returning the variable will
+        be cast to this type.
 
     Returns
     -------
@@ -81,5 +85,46 @@ def get_var(var_name, default=None, *, check_not_set=True):
     var = os.getenv(var_name, default)
     if check_not_set and var is None:
         raise ValueError(f"The variable ${var_name} must be set")
+    if var_type is not None:
+        var = var_type(var)
 
     return var
+
+
+def run_server(app_factory, name, argv=None):
+    """Run a server app from the command line.
+
+    This starts Flask's development web server. For development
+    purposes only. For production use the corresponding docker file.
+
+    Parameters
+    ----------
+    app_factory : callable
+        A factory function that returns an instance of a flask app.
+    name : str
+        The server name. This will be printed in the help message.
+    argv : list_like of str
+        The command line arguments.
+    """
+    from dotenv import load_dotenv
+
+    # Parse arguments
+    parser = argparse.ArgumentParser(
+        usage="%(prog)s [options]", description=f"Start the {name} server.",
+    )
+    parser.add_argument("--host", default="localhost", type=str, help="The server host")
+    parser.add_argument("--port", default=8080, type=int, help="The server port")
+    parser.add_argument(
+        "--env-file",
+        default="",
+        type=str,
+        help="The name of the .env file with the server configuration",
+    )
+    args = parser.parse_args(argv)
+
+    # Load configuration from a .env file, if one is found
+    load_dotenv(dotenv_path=args.env_file)
+
+    # Construct and launch the app
+    app = app_factory()
+    app.run(host=args.host, port=args.port, threaded=True, debug=True)

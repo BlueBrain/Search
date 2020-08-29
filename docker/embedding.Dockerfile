@@ -1,25 +1,6 @@
-FROM python:3.6-slim
+FROM bbs_base
 
-# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
-# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
-
-# Install git, gcc, and g++
-RUN apt-get update && apt-get install -y \
-    git \
-    gcc \
-    g++ \
-    build-essential \
-    vim
-
-# Install requirements manualy, this layer will be cached by docker
-COPY requirements.txt /tmp
-RUN true \
-    && pip install --upgrade pip \
-    && pip install Cython numpy \
-    && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+USER root
 
 # Install the app
 ADD . /src
@@ -29,21 +10,20 @@ RUN pip install .
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
 LABEL description="REST API Server for Text Embeddings"
-LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
 
 # Add a user
 RUN useradd --create-home serveruser
 WORKDIR /home/serveruser
 USER serveruser
 
-# Download the NLTK libraries
+# Download the NLTK libraries (for the current user)
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
-# Expose a port
+# Run the entry point
 EXPOSE 8080
-ENV LOG_DIR="/raid/projects/bbs/logs"
-ENV LOG_NAME="bbs_embedding.log"
-
-ENTRYPOINT exec embedding_server \
-    --host=0.0.0.0 \
-    --port=8080
+ENTRYPOINT [\
+"gunicorn", \
+"--bind", "0.0.0.0:8080", \
+"--workers", "1", \
+"--timeout", "180", \
+"bbsearch.entrypoints:get_embedding_app()"]

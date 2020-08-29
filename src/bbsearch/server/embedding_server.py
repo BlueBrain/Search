@@ -4,26 +4,25 @@ import io
 import logging
 import textwrap
 
-from flask import jsonify, make_response, request
+from flask import Flask, jsonify, make_response, request
 
 import bbsearch
 
 from .invalid_usage_exception import InvalidUsage
 
 
-class EmbeddingServer:
+class EmbeddingServer(Flask):
     """Wrapper class representing the embedding server.
 
     Parameters
     ----------
-    app: flask.Flask()
-        Flask application
     embedding_models: dict
         Dictionary whom keys are name of embedding_models
         and values are instance of the embedding models.
     """
 
-    def __init__(self, app, embedding_models):
+    def __init__(self, embedding_models):
+        super().__init__("embedding_server")
         self.logger = logging.getLogger(self.__class__.__name__)
         self.name = 'EmbeddingServer'
         self.version = bbsearch.__version__
@@ -32,11 +31,10 @@ class EmbeddingServer:
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
 
-        self.app = app
-        self.app.route("/")(self.request_welcome)
-        self.app.route("/help", methods=["POST"])(self.help)
-        self.app.route("/v1/embed/<output_type>", methods=["POST"])(self.request_embedding)
-        self.app.errorhandler(InvalidUsage)(self.handle_invalid_usage)
+        self.add_url_rule(rule="/", view_func=self.request_welcome)
+        self.add_url_rule(rule="/help", view_func=self.help, methods=["POST"])
+        self.add_url_rule(rule="/v1/embed/<output_type>", view_func=self.request_embedding, methods=["POST"])
+        self.register_error_handler(InvalidUsage, self.handle_invalid_usage)
 
         self.embedding_models = embedding_models
 
