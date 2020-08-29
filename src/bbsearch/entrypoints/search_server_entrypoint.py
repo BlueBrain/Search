@@ -16,7 +16,7 @@ def get_search_app():
 
     # Read configuration
     log_file = get_var("BBS_SEARCH_LOG_FILE", check_not_set=False)
-    log_level = get_var("BBS_SEARCH_LOG_LEVEL", str(logging.WARNING))
+    log_level = get_var("BBS_SEARCH_LOG_LEVEL", str(logging.INFO))
 
     models_path = get_var("BBS_SEARCH_MODELS_PATH")
     embeddings_path = get_var("BBS_SEARCH_EMBEDDINGS_PATH")
