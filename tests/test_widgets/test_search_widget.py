@@ -9,6 +9,7 @@ from unittest.mock import Mock
 import ipywidgets
 import numpy as np
 import pytest
+import torch
 from IPython.display import HTML
 
 from bbsearch.search import LocalSearcher
@@ -131,7 +132,11 @@ def create_searcher(engine, n_dim=2):
     embedding_model.embed.return_value = np.random.random(n_dim)
 
     embedding_models = {'BSV': embedding_model}
-    precomputed_embeddings = {'BSV': np.random.random((n_sentences, n_dim))}
+    embeddings = torch.rand((n_sentences, n_dim)).to(dtype=torch.float32)
+    norm = torch.norm(input=embeddings, dim=1, keepdim=True)
+    norm[norm == 0] = 1
+    embeddings /= norm
+    precomputed_embeddings = {'BSV': embeddings}
     indices = np.arange(1, n_sentences + 1)
 
     searcher = LocalSearcher(embedding_models, precomputed_embeddings, indices, connection=engine)
@@ -192,16 +197,15 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 
     embedding_models = {
         'BSV': embedding_model_bsv,
-        # 'SBioBERT': embedding_model_sbiobert
     }
 
     precomputed_embeddings = {
-        'BSV': np.ones((n_sentences, 2)),  # 45 degrees
-        # 'SBioBERT': np.ones((n_sentences, 2))  # 45 degrees
+        'BSV': torch.ones((n_sentences, 2)).to(dtype=torch.float32) / 2 ** (1/2),  # 45 degrees
     }
 
-    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1] = np.array([0.1, 0.9])  # ~90 degrees
-    # precomputed_embeddings['SBioBERT'][most_relevant_sbiobert_id - 1] = np.array([0.1, -0.9])  # ~270 degrees
+    norm = (0.1 ** 2 + 0.9 ** 2) ** (1/2)
+    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1, :] = torch.tensor([0.1, 0.9]) / norm
+    # ~90 degrees
 
     indices = np.arange(1, n_sentences + 1)
 
