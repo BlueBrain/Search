@@ -1,5 +1,4 @@
 """The entrypoint script for the search server."""
-import argparse
 import logging
 import pathlib
 

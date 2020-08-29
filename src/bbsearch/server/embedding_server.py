@@ -24,7 +24,7 @@ class EmbeddingServer(Flask):
     def __init__(self, embedding_models):
         super().__init__("embedding_server")
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.name = 'EmbeddingServer'
+        self.name = "EmbeddingServer"
         self.version = bbsearch.__version__
 
         self.logger.info("Initializing the server...")
@@ -33,7 +33,11 @@ class EmbeddingServer(Flask):
 
         self.add_url_rule(rule="/", view_func=self.request_welcome)
         self.add_url_rule(rule="/help", view_func=self.help, methods=["POST"])
-        self.add_url_rule(rule="/v1/embed/<output_type>", view_func=self.request_embedding, methods=["POST"])
+        self.add_url_rule(
+            rule="/v1/embed/<output_type>",
+            view_func=self.request_embedding,
+            methods=["POST"],
+        )
         self.register_error_handler(InvalidUsage, self.handle_invalid_usage)
 
         self.embedding_models = embedding_models
@@ -47,8 +51,8 @@ class EmbeddingServer(Flask):
         self.html_header = textwrap.dedent(html_header).strip() + "\n\n"
 
         self.output_fn = {
-            'csv': self.make_csv_response,
-            'json': self.make_json_response,
+            "csv": self.make_csv_response,
+            "json": self.make_json_response,
         }
 
         self.logger.info("Initialization done.")
@@ -72,23 +76,23 @@ class EmbeddingServer(Flask):
             "GET": {
                 "/": {
                     "description": "Get the welcome page.",
-                    "response_content_type": "text/html"
+                    "response_content_type": "text/html",
                 }
             },
             "POST": {
                 "/help": {
                     "description": "Get this help.",
-                    "response_content_type": "application/json"
+                    "response_content_type": "application/json",
                 },
                 "/v1/embed/json": {
                     "description": "Compute text embeddings.",
                     "response_content_type": "application/json",
                     "required_fields": {
-                                    "model": ["BSV", "SBioBERT", "SBERT", "USE"],
-                                    "text": []
-                    }
-                }
-            }
+                        "model": ["BSV", "SBioBERT", "SBERT", "USE"],
+                        "text": [],
+                    },
+                },
+            },
         }
 
         return jsonify(response)
@@ -114,7 +118,7 @@ class EmbeddingServer(Flask):
         </ul>
         """
 
-        return self.html_header + textwrap.dedent(html).strip() + '\n'
+        return self.html_header + textwrap.dedent(html).strip() + "\n"
 
     def embed_text(self, model, text):
         """Embed text.

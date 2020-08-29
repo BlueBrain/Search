@@ -23,10 +23,10 @@ def get_embedding_app():
     # Load embedding models
     logger.info("Loading embedding models")
     embedding_models = {
-        'USE': USE(),
-        'SBERT': SBERT(),
-        'BSV': BSV(checkpoint_model_path=pathlib.Path(bsv_checkpoint)),
-        'SBioBERT': SBioBERT(),
+        "USE": USE(),
+        "SBERT": SBERT(),
+        "BSV": BSV(checkpoint_model_path=pathlib.Path(bsv_checkpoint)),
+        "SBioBERT": SBioBERT(),
     }
 
     # Create Server app
