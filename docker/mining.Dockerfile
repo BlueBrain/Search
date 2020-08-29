@@ -1,26 +1,6 @@
-FROM python:3.6-slim
+FROM bbs_base
 
-# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
-# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
-# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
-
-# Install git, gcc, and g++
-RUN apt-get update && apt-get install -y \
-    git \
-    gcc \
-    g++ \
-    build-essential \
-    default-libmysqlclient-dev \
-    vim
-
-# Install requirements manualy, this layer will be cached by docker
-COPY requirements.txt /tmp
-RUN true \
-    && pip install --upgrade pip \
-    && pip install Cython numpy \
-    && pip install --no-cache-dir -r /tmp/requirements.txt \
-    && rm /tmp/requirements.txt
+USER root
 
 # Install the app
 ADD . /src
@@ -29,31 +9,21 @@ RUN pip install .
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
-LABEL description="REST API Server for BBSearch Mining"
-LABEL version="$(python -c 'import bbsearch; print(bbsearch.__version__)')"
+LABEL description="REST API Server for Test Mining"
 
 # Add a user
 RUN useradd --create-home serveruser
 WORKDIR /home/serveruser
 USER serveruser
 
-# Download the NLTK libraries
+# Download the NLTK libraries (for the current user)
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
-# Download the scispaCy models
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
-
-# Expose a port
+# Run the entry point
 EXPOSE 8080
-ENV EE_MODELS_LIBRARY="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv"
-ENV LOG_DIR="/raid/projects/bbs/logs"
-ENV LOG_NAME="bbs_mining.log"
-
-ENTRYPOINT exec mining_server \
-    --host=0.0.0.0 \
-    --port=8080 \
-    --ee_models_lib $EE_MODELS_LIBRARY
+ENTRYPOINT [\
+"gunicorn", \
+"--bind", "0.0.0.0:8080", \
+"--workers", "1", \
+"--timeout", "180", \
+"bbsearch.entrypoints:get_mining_app()"]
