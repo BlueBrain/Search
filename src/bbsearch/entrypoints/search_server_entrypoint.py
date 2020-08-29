@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 def get_search_app():
     """Construct the search Flask app."""
     import sqlalchemy
-    from flask import Flask
 
     from ..server.search_server import SearchServer
     from ..utils import H5
@@ -30,20 +29,20 @@ def get_search_app():
     # Configure logging
     configure_logging(log_file, int(log_level))
 
-    # Start server
+    # Initialize flask app
     logger.info("Creating the Flask app")
-    app = Flask("BBSearch Server")
     models_path = pathlib.Path(models_path)
     embeddings_path = pathlib.Path(embeddings_path)
     indices = H5.find_populated_rows(embeddings_path, "BSV")
     engine_url = f"mysql://{mysql_user}:{mysql_password}@{mysql_url}"
-
     engine = sqlalchemy.create_engine(engine_url)
     models_list = [model.strip() for model in which_models.split(",")]
 
-    SearchServer(app, models_path, embeddings_path, indices, engine, models_list)
+    server_app = SearchServer(
+        models_path, embeddings_path, indices, engine, models_list
+    )
 
-    return app
+    return server_app
 
 
 def run_search_server(argv=None):

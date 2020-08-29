@@ -3,7 +3,7 @@ import logging
 import pathlib
 
 import torch
-from flask import jsonify, request
+from flask import Flask, jsonify, request
 
 import bbsearch
 
@@ -12,13 +12,11 @@ from ..search import LocalSearcher
 from ..utils import H5
 
 
-class SearchServer:
+class SearchServer(Flask):
     """The BBS search server.
 
     Parameters
     ----------
-    app : flask.Flask
-        The Flask app wrapping the server.
     trained_models_path : str or pathlib.Path
         The folder containing pre-trained models.
     embeddings_h5_path : str or pathlib.Path
@@ -31,19 +29,18 @@ class SearchServer:
         A list of model names of the embedding models to load.
     """
 
-    def __init__(self,
-                 app,
-                 trained_models_path,
-                 embeddings_h5_path,
-                 indices,
-                 connection,
-                 models,
-                 ):
-
+    def __init__(
+            self,
+            trained_models_path,
+            embeddings_h5_path,
+            indices,
+            connection,
+            models,
+    ):
+        super().__init__("search_server")
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "SearchServer"
-        self.app = app
         self.connection = connection
 
         if indices is None:
@@ -90,8 +87,8 @@ class SearchServer:
             self.connection
         )
 
-        app.route("/help", methods=["POST"])(self.help)
-        app.route("/", methods=["POST"])(self.query)
+        self.add_url_rule("/help", view_func=self.help, methods=["POST"])
+        self.add_url_rule("/", view_func=self.query, methods=["POST"])
 
         self.logger.info("Initialization done.")
 
