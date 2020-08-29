@@ -37,13 +37,25 @@ def configure_logging(log_file=None, level=logging.WARNING):
     level : int, optional
         The logging level. See the `logging` module for more information.
     """
-    logging.basicConfig(
-        filename=log_file,
-        level=level,
-        format="{asctime} :: {levelname:^8s} :: {name} | {message}",
+    root_logger = logging.getLogger()
+
+    formatter = logging.Formatter(
+        fmt="{asctime} :: {levelname:^8s} :: {name} | {message}",
+        datefmt="%Y-%m-%d @ %H:%M:%S",
         style="{",
-        datefmt='%Y-%M-%d @ %H:%M:%S',
     )
+
+    handlers = [
+        logging.StreamHandler(stream=sys.stderr),
+    ]
+    if log_file is not None:
+        handlers.append(logging.FileHandler(filename=log_file))
+
+    for handler in handlers:
+        handler.setLevel(level)
+        handler.setFormatter(formatter)
+        root_logger.addHandler(handler)
+
     sys.excepthook = handle_uncaught_exception
 
 
