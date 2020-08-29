@@ -38,6 +38,7 @@ def configure_logging(log_file=None, level=logging.WARNING):
         The logging level. See the `logging` module for more information.
     """
     root_logger = logging.getLogger()
+    root_logger.setLevel(level)
 
     formatter = logging.Formatter(
         fmt="{asctime} :: {levelname:^8s} :: {name} | {message}",
@@ -52,7 +53,6 @@ def configure_logging(log_file=None, level=logging.WARNING):
         handlers.append(logging.FileHandler(filename=log_file))
 
     for handler in handlers:
-        handler.setLevel(level)
         handler.setFormatter(formatter)
         root_logger.addHandler(handler)
 

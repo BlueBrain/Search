@@ -21,10 +21,9 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
 EXPOSE 8080
-ENTRYPOINT [ \
-"gunicorn",\
-"--bind", "0.0.0.0:8080",\
-"--workers", "1",\
-"--timeout", "180",\
-"bbsearch.entrypoints:get_search_app()"\
-]
+ENTRYPOINT [\
+"gunicorn", \
+"--bind", "0.0.0.0:8080", \
+"--workers", "1", \
+"--timeout", "180", \
+"bbsearch.entrypoints:get_search_app()"]
