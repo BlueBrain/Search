@@ -36,15 +36,23 @@ class MiningServer(Flask):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "MiningServer"
-        self.models_libs = {k: pd.read_csv(v)
-                            for k, v in models_libs.items()}
-        self.ee_models = {model_name: spacy.load(model_name)
-                          for model_name in self.models_libs['ee'].model}
-        self.connection = connection
 
-        self.logger.info("Initializing the server...")
+        self.logger.info("Initializing the server")
         self.logger.info(f"Name: {self.name}")
         self.logger.info(f"Version: {self.version}")
+
+        self.logger.info("Loading the model libraries")
+        self.models_libs = {}
+        for lib_type, lib_file in models_libs.items():
+            self.models_libs[lib_type] = pd.read_csv(lib_file)
+
+        self.logger.info("Loading the NER models")
+        self.ee_models = {}
+        for model_name in self.models_libs["ee"]["model"]:
+            self.logger.info(f"Loading model {model_name}")
+            self.ee_models[model_name] = spacy.load(model_name)
+
+        self.connection = connection
 
         self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
         self.add_url_rule("/database", view_func=self.pipeline_database, methods=["POST"])
