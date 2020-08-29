@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
-from flask import Flask
 
 from bbsearch.server.embedding_server import EmbeddingServer
 
@@ -16,11 +15,9 @@ def embedding_client():
     sbiobert.embed.return_value = np.ones((2,))
     embedding_models = {'sbiobert': sbiobert}
 
-    app = Flask("BBSearch Test Embedding Server")
-    embedding_server = EmbeddingServer(app=app,
-                                       embedding_models=embedding_models)
-    embedding_server.app.config['TESTING'] = True
-    with embedding_server.app.test_client() as client:
+    embedding_server_app = EmbeddingServer(embedding_models=embedding_models)
+    embedding_server_app.config['TESTING'] = True
+    with embedding_server_app.test_client() as client:
         yield client
 
 

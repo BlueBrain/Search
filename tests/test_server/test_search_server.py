@@ -2,7 +2,6 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
-from flask import Flask
 
 from bbsearch.server.search_server import SearchServer
 from bbsearch.utils import H5
@@ -27,18 +26,16 @@ def search_client(monkeypatch, embeddings_h5_path, fake_sqlalchemy_engine, test_
     monkeypatch.setattr('bbsearch.server.search_server.BSV', bsv_model_class)
     monkeypatch.setattr('bbsearch.server.search_server.SBioBERT', sbiobert_model_class)
 
-    app = Flask("BBSearch Test Search Server")
-
     indices = H5.find_populated_rows(embeddings_h5_path, 'BSV')
 
-    search_server = SearchServer(app=app,
-                                 trained_models_path='',
-                                 embeddings_h5_path=embeddings_h5_path,
-                                 indices=indices,
-                                 connection=fake_sqlalchemy_engine,
-                                 models=["BSV", "SBioBERT"])
-    search_server.app.config['TESTING'] = True
-    with search_server.app.test_client() as client:
+    search_server_app = SearchServer(
+        trained_models_path="",
+        embeddings_h5_path=embeddings_h5_path,
+        indices=indices,
+        connection=fake_sqlalchemy_engine,
+        models=["BSV", "SBioBERT"])
+    search_server_app.config['TESTING'] = True
+    with search_server_app.test_client() as client:
         yield client
 
 

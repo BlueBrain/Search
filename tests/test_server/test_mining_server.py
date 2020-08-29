@@ -5,7 +5,6 @@ from unittest.mock import Mock
 
 import pandas as pd
 import pytest
-from flask import Flask
 
 from bbsearch.mining import SPECS
 from bbsearch.server.mining_server import MiningServer
@@ -22,13 +21,12 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
 
     monkeypatch.setattr('bbsearch.server.mining_server.spacy', spacy_mock)
 
-    app = Flask("BBSearch Test Mining Server")
     models_libs = TESTS_PATH / 'data' / 'mining' / 'request' / 'ee_models_library.csv'
-    mining_server = MiningServer(app=app,
+    mining_server_app = MiningServer(
                                  models_libs={'ee': str(models_libs)},
                                  connection=fake_sqlalchemy_engine)
-    mining_server.app.config['TESTING'] = True
-    with mining_server.app.test_client() as client:
+    mining_server_app.config['TESTING'] = True
+    with mining_server_app.test_client() as client:
         yield client
 
 
