@@ -37,7 +37,9 @@ class SearchServer(Flask):
             connection,
             models,
     ):
-        super().__init__("search_server")
+        package_name, *_ = __name__.partition(".")
+        super().__init__(import_name=package_name)
+
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "SearchServer"

@@ -32,7 +32,9 @@ class MiningServer(Flask):
     """
 
     def __init__(self, models_libs, connection):
-        super().__init__("mining_server")
+        package_name, *_ = __name__.partition(".")
+        super().__init__(import_name=package_name)
+
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "MiningServer"
