@@ -158,7 +158,7 @@ class SearchWidget(widgets.VBox):
             description="Exact phrase matching:",
             rows=5,
             placeholder=textwrap.dedent("""
-                    One phrase per line. Valid phrases are:
+                    Case insensitive,  one phrase per line. Valid phrases are:
                     1. Single word                      : glucose
                     2. Multiple words                   : risk factor
                     3. Single word with variable suffix : molecul*
