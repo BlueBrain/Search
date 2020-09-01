@@ -36,7 +36,7 @@ install_requires = [
     "tensorflow_hub",
     "torch",
     "tqdm",
-    "transformers",
+    "transformers>=3",
 ]
 
 extras_require = {
