@@ -184,8 +184,27 @@ class TestEmbeddingModels:
 
         preprocessed_sentences = model.preprocess_many(["A", "B", "C"])
 
+        assert isinstance(preprocessed_sentences, list)
         assert len(preprocessed_sentences) == 3
         assert fake_preprocess.call_count == 3
 
-    def test_default_embed_many(self):
-        pass
+    def test_default_embed_many(self, monkeypatch):
+        class NewModel(EmbeddingModel):
+            @property
+            def dim(self):
+                return 2
+
+            # just to be able to instantiate
+            def embed(self, preprocessed_sentence):
+                return np.ones(self.dim)
+
+        model = NewModel()
+        fake_embed = Mock()
+        fake_embed.return_value = np.ones(model.dim)
+        monkeypatch.setattr(model, 'embed', fake_embed)
+
+        embeddings = model.embed_many(["A", "B", "C"])
+
+        assert isinstance(embeddings, np.ndarray)
+        assert embeddings.shape == (3, model.dim)
+        assert fake_embed.call_count == 3
