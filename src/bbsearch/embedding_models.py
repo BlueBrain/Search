@@ -35,7 +35,7 @@ class EmbeddingModel(ABC):
 
         Returns
         -------
-        preprocessed_sentence: str
+        preprocessed_sentence
             Preprocessed sentence in the format expected by the model if needed.
         """
         return raw_sentence
@@ -52,7 +52,7 @@ class EmbeddingModel(ABC):
 
         Returns
         -------
-        preprocessed_sentences : list[str]
+        preprocessed_sentences
             List of preprocessed sentences corresponding to `raw_sentences`.
         """
         return [self.preprocess(sentence) for sentence in raw_sentences]
