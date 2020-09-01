@@ -166,3 +166,26 @@ class TestEmbeddingModels:
 
         assert final_embeddings.shape == (n_sentences, 512)
         assert np.all(indices == retrieved_indices)
+
+    def test_default_preprocess_many(self, monkeypatch):
+        class NewModel(EmbeddingModel):
+            @property
+            def dim(self):
+                return 2
+
+            # just to be able to instantiate
+            def embed(self, preprocessed_sentence):
+                return np.ones(self.dim)
+
+        model = NewModel()
+        fake_preprocess = Mock()
+        fake_preprocess.return_value = "I am a preprocessed sentence"
+        monkeypatch.setattr(model, 'preprocess', fake_preprocess)
+
+        preprocessed_sentences = model.preprocess_many(["A", "B", "C"])
+
+        assert len(preprocessed_sentences) == 3
+        assert fake_preprocess.call_count == 3
+
+    def test_default_embed_many(self):
+        pass
