@@ -25,6 +25,9 @@ class EmbeddingModel(ABC):
     def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...) if needed by the model.
 
+        This is a default implementation that perform no preprocessing. Model specific
+        preprocessing can be define within children classes.
+
         Parameters
         ----------
         raw_sentence: str
@@ -32,10 +35,27 @@ class EmbeddingModel(ABC):
 
         Returns
         -------
-        preprocessed_sentence:
+        preprocessed_sentence: str
             Preprocessed sentence in the format expected by the model if needed.
         """
         return raw_sentence
+
+    def preprocess_many(self, raw_sentences):
+        """Preprocess multiple sentences.
+
+        This is a default implementation and can be overridden by children classes.
+
+        Parameters
+        ----------
+        raw_sentences : list[str]
+            List of str representing raw sentences that we want to embed.
+
+        Returns
+        -------
+        preprocessed_sentences : list[str]
+            List of preprocessed sentences corresponding to `raw_sentences`.
+        """
+        return [self.preprocess(sentence) for sentence in raw_sentences]
 
     @abstractmethod
     def embed(self, preprocessed_sentence):
@@ -51,6 +71,25 @@ class EmbeddingModel(ABC):
         embedding: numpy.array
             One dimensional vector representing the embedding of the given sentence.
         """
+
+    def embed_many(self, preprocessed_sentences):
+        """Compute sentence embeddings for all provided sentences.
+
+        This is a default implementation. Children classes can implement more sophisticated
+        batching schemes.
+
+        Parameters
+        ----------
+        preprocessed_sentences : list[str]
+            List of preprocessed sentences.
+
+        Returns
+        -------
+        embeddings : np.ndarray
+            2D numpy array with shape `(len(preprocessed_sentences), self.dim)`. Each row
+            is an embedding of a sentence in `preprocessed_sentences`.
+        """
+        return np.array([self.embed(sentence) for sentence in preprocessed_sentences])
 
 
 class SBioBERT(EmbeddingModel):
