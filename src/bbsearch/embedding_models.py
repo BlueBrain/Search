@@ -175,9 +175,10 @@ class SBioBERT(EmbeddingModel):
             Embedding of the specified sentence of shape (768,) if only a single sample in the
             batch. Otherwise `(len(preprocessed_sentences), 768)`.
         """
-        embedding = self.sbiobert_model(**preprocessed_sentence.to(self.device))[1].squeeze().numpy()
+        with torch.no_grad():
+            embedding = self.sbiobert_model(**preprocessed_sentence.to(self.device))[1].squeeze()
 
-        return embedding
+        return embedding.numpy()
 
     def embed_many(self, preprocessed_sentences):
         """Compute the sentences embeddings for multiple sentences.
