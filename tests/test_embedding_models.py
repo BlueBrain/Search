@@ -7,6 +7,7 @@ import pytest
 import sent2vec
 import tensorflow as tf
 import torch
+import transformers
 from sentence_transformers import SentenceTransformer
 
 from bbsearch.embedding_models import (
@@ -35,16 +36,21 @@ class TestEmbeddingModels:
 
     def test_sbiobert_embedding(self, monkeypatch, fake_sqlalchemy_engine, test_parameters, metadata_path):
         torch_model = MagicMock(spec=torch.nn.Module)
-        torch_model.return_value = (torch.ones([1, 8, 768]), torch.ones([1, 768]))
+        torch_model.return_value = (None, torch.ones([1, 768]))
 
         auto_model = Mock()
         auto_model.from_pretrained().bert.to.return_value = torch_model
 
+        tokenizer = Mock()
+        be = MagicMock(spec=transformers.BatchEncoding)
+        be.keys.return_value = ['input_ids', 'token_type_ids', 'attention_mask']
+        tokenizer.return_value = be
+
         auto_tokenizer = Mock()
+        auto_tokenizer.from_pretrained.return_value = tokenizer
 
         monkeypatch.setattr('bbsearch.embedding_models.AutoTokenizer', auto_tokenizer)
         monkeypatch.setattr('bbsearch.embedding_models.AutoModelWithLMHead', auto_model)
-        monkeypatch.setattr('bbsearch.embedding_models.torch', MagicMock())
 
         sbiobert = SBioBERT()
         dummy_sentence = 'This is a dummy sentence'
@@ -53,8 +59,7 @@ class TestEmbeddingModels:
 
         assert isinstance(embedding, np.ndarray)
         torch_model.assert_called_once()
-        auto_tokenizer.from_pretrained().tokenize.assert_called_once()
-        auto_tokenizer.from_pretrained().convert_tokens_to_ids.assert_called_once()
+        tokenizer.assert_called_once()
 
         n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
         n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
