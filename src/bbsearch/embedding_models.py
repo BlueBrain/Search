@@ -313,6 +313,22 @@ class USE(EmbeddingModel):
         embedding = self.use_model([preprocessed_sentence]).numpy()[0]
         return embedding
 
+    def embed_many(self, preprocessed_sentences):
+        """Compute sentence embeddings for multiple sentences.
+
+        Parameters
+        ----------
+        preprocessed_sentences: list[str]
+            Preprocessed sentences to embed.
+
+        Returns
+        -------
+        embedding: numpy.array
+            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 512)`.
+        """
+        embedding = self.use_model(preprocessed_sentences).numpy()
+        return embedding
+
 
 def compute_database_embeddings(connection, model, indices):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
