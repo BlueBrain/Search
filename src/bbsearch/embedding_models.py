@@ -117,53 +117,82 @@ class SBioBERT(EmbeddingModel):
         return 768
 
     def preprocess(self, raw_sentence):
-        """Preprocess the sentence (Tokenization, ...).
+        """Preprocess the sentence - tokenization and determining of token ids.
+
+        Note that this method already works in batched way if we pass a list.
 
         Parameters
         ----------
-        raw_sentence: str
-            Raw sentence to embed.
+        raw_sentence: str or list[str]
+            Raw sentence to embed. One can also provide multiple sentences.
 
         Returns
         -------
-        preprocessed_sentence: torch.Tensor
-            Preprocessed sentence.
+        encoding : transformers.BatchEncoding
+            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
+            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
+            of shape `(n_sentences, n_tokens)`.
+
         """
-        # Add the special tokens.
-        marked_text = "[CLS] " + raw_sentence + " [SEP]"
+        encoding = self.tokenizer(raw_sentence,
+                                  pad_to_max_length=True,
+                                  return_tensors='pt'
+                                  )
+        return encoding
 
-        # Split the sentence into tokens.
-        tokenized_text = self.tokenizer.tokenize(marked_text)
-
-        # Map the token strings to their vocabulary indices.
-        indexed_tokens = self.tokenizer.convert_tokens_to_ids(tokenized_text)
-
-        # Convert inputs to PyTorch tensors
-        preprocessed_sentence = torch.tensor([indexed_tokens]).to(self.device)
-
-        return preprocessed_sentence
-
-    def embed(self, preprocessed_sentence):
-        """Compute the sentences embeddings for a given sentence.
+    def preprocess_many(self, raw_sentences):
+        """Preprocess multiple sentences - tokenization and determining of token ids.
 
         Parameters
         ----------
-        preprocessed_sentence: torch.Tensor
+        raw_sentences: list[str]
+            List of raw sentence to embed.
+
+        Returns
+        -------
+        encodings : transformers.BatchEncoding
+            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
+            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
+            of shape `(n_sentences, n_tokens)`.
+
+        """
+        return self.preprocess(raw_sentences)
+
+    def embed(self, preprocessed_sentence):
+        """Compute the sentence embedding for a given sentence.
+
+        Note that this method already works in batched way if we pass a `BatchEncoding` that
+        contains batches.
+
+        Parameters
+        ----------
+        preprocessed_sentence: transformers.BatchEncoding
             Preprocessed sentence to embed.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence of shape (768,)
+            Embedding of the specified sentence of shape (768,) if only a single sample in the
+            batch. Otherwise `(len(preprocessed_sentences), 768)`.
         """
-        segments_tensors = torch.ones_like(preprocessed_sentence)
-        with torch.no_grad():
-            self.sbiobert_model.eval()
-            encoded_layers, test = self.sbiobert_model(preprocessed_sentence, segments_tensors)
-            sentence_encoding = encoded_layers[-1].squeeze().mean(axis=0)
-            embedding = sentence_encoding.detach().cpu().numpy()
+        embedding = self.sbiobert_model(**preprocessed_sentence.to(self.device))[1].squeeze().numpy()
 
         return embedding
+
+    def embed_many(self, preprocessed_sentences):
+        """Compute the sentences embeddings for multiple sentences.
+
+        Parameters
+        ----------
+        preprocessed_sentences: transformers.BatchEncoding
+            Preprocessed sentence to embed.
+
+        Returns
+        -------
+        embedding: numpy.array
+            Embedding of the specified sentence of shape `(len(preprocessed_sentences), 768)`
+        """
+        return self.embed(preprocessed_sentences)
 
 
 class BSV(EmbeddingModel):
