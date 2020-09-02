@@ -190,9 +190,10 @@ class SBioBERT(EmbeddingModel):
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
         with torch.no_grad():
-            embedding = self.sbiobert_model(**preprocessed_sentence.to(self.device))[1].squeeze()
+            last_hidden_state = self.sbiobert_model(**preprocessed_sentence.to(self.device))[0]
+            embedding = last_hidden_state.mean(dim=1)
 
-        return embedding.numpy()
+        return embedding.cpu().numpy()
 
     def embed_many(self, preprocessed_sentences):
         """Compute the sentences embeddings for multiple sentences.
