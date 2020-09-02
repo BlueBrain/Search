@@ -47,7 +47,7 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        raw_sentences : list[str]
+        raw_sentences : list of str
             List of str representing raw sentences that we want to embed.
 
         Returns
@@ -80,7 +80,7 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        preprocessed_sentences : list[str]
+        preprocessed_sentences : list of str
             List of preprocessed sentences.
 
         Returns
@@ -123,7 +123,7 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentence: str or list[str]
+        raw_sentence: str or list of str
             Raw sentence to embed. One can also provide multiple sentences.
 
         Returns
@@ -145,7 +145,7 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentences: list[str]
+        raw_sentences: list of str
             List of raw sentence to embed.
 
         Returns
@@ -265,7 +265,7 @@ class BSV(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list[str]
+        preprocessed_sentences: list of str
             Preprocessed sentences to embed.
 
         Returns
@@ -313,7 +313,7 @@ class SBERT(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list[str]
+        preprocessed_sentences: list of str
             Preprocessed sentences to embed.
 
         Returns
@@ -362,7 +362,7 @@ class USE(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list[str]
+        preprocessed_sentences: list of str
             Preprocessed sentences to embed.
 
         Returns
