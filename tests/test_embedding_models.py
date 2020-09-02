@@ -37,7 +37,7 @@ class TestEmbeddingModels:
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
         torch_model = MagicMock(spec=torch.nn.Module)
-        torch_model.return_value = (None, torch.ones([n_sentences, 768]))
+        torch_model.return_value = (torch.ones([n_sentences, 10, 768]), None)  # 10 tokens
 
         auto_model = Mock()
         auto_model.from_pretrained().bert.to.return_value = torch_model
@@ -45,6 +45,7 @@ class TestEmbeddingModels:
         tokenizer = Mock()
         be = MagicMock(spec=transformers.BatchEncoding)
         be.keys.return_value = ['input_ids', 'token_type_ids', 'attention_mask']
+        be.__getitem__.side_effect = lambda x: torch.tensor(torch.ones([n_sentences, 10]))
         tokenizer.return_value = be
 
         auto_tokenizer = Mock()

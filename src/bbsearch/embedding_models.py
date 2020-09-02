@@ -191,9 +191,10 @@ class SBioBERT(EmbeddingModel):
         """
         with torch.no_grad():
             last_hidden_state = self.sbiobert_model(**preprocessed_sentence.to(self.device))[0]
-            embedding = last_hidden_state.mean(dim=1)
+            embedding = self.masked_mean(last_hidden_state,
+                                         preprocessed_sentence['attention_mask'])
 
-        return embedding.cpu().numpy()
+        return embedding.squeeze().cpu().numpy()
 
     def embed_many(self, preprocessed_sentences):
         """Compute the sentences embeddings for multiple sentences.
@@ -215,6 +216,40 @@ class SBioBERT(EmbeddingModel):
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
         return self.embed(preprocessed_sentences)
+
+    @staticmethod
+    def masked_mean(last_hidden_state, attention_mask):
+        """Compute the mean of token embeddings while taking into account the padding.
+
+        Note that the `sequence_length` is going to be the number of tokens of the longest
+        sentence + 2 (CLS and SEP are added).
+
+        Parameters
+        ----------
+        last_hidden_state : torch.Tensor
+            Per sample and per token embeddings as returned by the model. Shape `(n_sentences, sequence_length, dim)`.
+
+        attention_mask : torch.Tensor
+            Boolean mask of what tokens were padded (0) or not (1). The dtype is `torch.int64` and the shape
+            is `(n_sentences, sequence_length)`.
+
+        Returns
+        -------
+        sentence_embeddings : torch.Tensor
+            Mean of token embeddings taking into account the padding. The shape is `(n_sentences, dim)`.
+
+
+        References
+        ----------
+        https://github.com/huggingface/transformers/blob/82dd96cae74797be0c1d330566df7f929214b278/model_cards/sentence-transformers/bert-base-nli-mean-tokens/README.md
+        """
+        token_embeddings = last_hidden_state
+        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
+        sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+
+        sentence_embeddings = sum_embeddings / sum_mask
+        return sentence_embeddings
 
 
 class BSV(EmbeddingModel):
