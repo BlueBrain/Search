@@ -133,6 +133,10 @@ class SBioBERT(EmbeddingModel):
             and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
             of shape `(n_sentences, n_tokens)`.
 
+        References
+        ----------
+        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
+
         """
         encoding = self.tokenizer(raw_sentence,
                                   pad_to_max_length=True,
@@ -155,6 +159,10 @@ class SBioBERT(EmbeddingModel):
             and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
             of shape `(n_sentences, n_tokens)`.
 
+        References
+        ----------
+        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
+
         """
         return self.preprocess(raw_sentences)
 
@@ -167,13 +175,19 @@ class SBioBERT(EmbeddingModel):
         Parameters
         ----------
         preprocessed_sentence: transformers.BatchEncoding
-            Preprocessed sentence to embed.
+            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
+            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
+            of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
         embedding: numpy.array
             Embedding of the specified sentence of shape (768,) if only a single sample in the
             batch. Otherwise `(len(preprocessed_sentences), 768)`.
+
+        References
+        ----------
+        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
         with torch.no_grad():
             embedding = self.sbiobert_model(**preprocessed_sentence.to(self.device))[1].squeeze()
@@ -186,12 +200,18 @@ class SBioBERT(EmbeddingModel):
         Parameters
         ----------
         preprocessed_sentences: transformers.BatchEncoding
-            Preprocessed sentence to embed.
+            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
+            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
+            of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
         embedding: numpy.array
             Embedding of the specified sentence of shape `(len(preprocessed_sentences), 768)`
+
+        References
+        ----------
+        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
         return self.embed(preprocessed_sentences)
 
