@@ -258,8 +258,7 @@ class BSV(EmbeddingModel):
         embedding: numpy.array
             Embedding of the specified sentence of shape (700,).
         """
-        embedding = self.bsv_model.embed_sentences([preprocessed_sentence])[0]
-        return embedding
+        return self.embed_many([preprocessed_sentence]).squeeze()
 
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
@@ -307,8 +306,7 @@ class SBERT(EmbeddingModel):
         embedding: numpy.array
             Embedding of the given sentence of shape (768,).
         """
-        embedding = self.sbert_model.encode([preprocessed_sentence])[0]
-        return embedding
+        return self.embed_many([preprocessed_sentence]).squeeze()
 
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
@@ -357,8 +355,7 @@ class USE(EmbeddingModel):
         embedding: numpy.array
             Embedding of the specified sentence of shape (512,).
         """
-        embedding = self.use_model([preprocessed_sentence]).numpy()[0]
-        return embedding
+        return self.embed_many([preprocessed_sentence]).squeeze()
 
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
