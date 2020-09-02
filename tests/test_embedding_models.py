@@ -37,7 +37,7 @@ class TestEmbeddingModels:
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
         torch_model = MagicMock(spec=torch.nn.Module)
-        torch_model.return_value = (None, torch.ones([1, 768]))
+        torch_model.return_value = (None, torch.ones([n_sentences, 768]))
 
         auto_model = Mock()
         auto_model.from_pretrained().bert.to.return_value = torch_model
@@ -70,7 +70,7 @@ class TestEmbeddingModels:
         # Assertions
         assert sbiobert.dim == 768
         assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == (768,) if n_sentences == 1 else (n_sentences, 768)
+        assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         torch_model.assert_called_once()
         tokenizer.assert_called_once()
 
@@ -109,14 +109,14 @@ class TestEmbeddingModels:
 
         embedding = embed_method(preprocess_sentence)
         assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == (700,) if n_sentences == 1 else (n_sentences, 700)
+        assert embedding.shape == ((700,) if n_sentences == 1 else (n_sentences, 700))
         bsv_model.embed_sentences.assert_called_once()
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_sbert_embedding(self, monkeypatch, n_sentences):
         sentence_transormer_class = Mock()
         sbert_model = Mock(spec=SentenceTransformer)
-        sbert_model.encode.return_value = np.ones([1, 768])  # Need to check the dimensions
+        sbert_model.encode.return_value = np.ones([n_sentences, 768])  # Need to check the dimensions
         sentence_transormer_class.return_value = sbert_model
 
         monkeypatch.setattr('bbsearch.embedding_models.SentenceTransformer', sentence_transormer_class)
@@ -139,7 +139,7 @@ class TestEmbeddingModels:
 
         embedding = embed_method(preprocessed_sentence)
         assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == (768,) if n_sentences == 1 else (n_sentences, 768)
+        assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         sbert_model.encode.assert_called_once()
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
@@ -147,7 +147,7 @@ class TestEmbeddingModels:
         hub_module = Mock()
         use_model = Mock()
         hub_module.load.return_value = use_model
-        use_model.return_value = tf.ones((1, 512))
+        use_model.return_value = tf.ones((n_sentences, 512))
 
         monkeypatch.setattr('bbsearch.embedding_models.hub', hub_module)
         use = USE()
@@ -169,7 +169,7 @@ class TestEmbeddingModels:
 
         embedding = embed_method(preprocessed_sentence)
         assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == (512,) if n_sentences == 1 else (n_sentences, 512)
+        assert embedding.shape == ((512,) if n_sentences == 1 else (n_sentences, 512))
         use_model.assert_called_once()
 
     def test_default_preprocess_many(self, monkeypatch):
