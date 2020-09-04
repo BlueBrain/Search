@@ -246,4 +246,4 @@ def test_compute_database(monkeypatch, fake_sqlalchemy_engine, test_parameters, 
     assert final_embeddings.shape == (n_sentences, 700)
     assert np.all(indices == retrieved_indices)
 
-    assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + 1
+    assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(n_sentences % batch_size != 0)

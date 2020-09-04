@@ -469,6 +469,9 @@ def compute_database_embeddings(connection, model, indices, batch_size=256):
         start_ix = batch_ix * batch_size
         end_ix = min((batch_ix + 1) * batch_size, n_sentences)
 
+        if start_ix == end_ix:
+            continue
+
         sentences_text = sentences.iloc[start_ix: end_ix]['text'].to_list()
         sentences_id = sentences.iloc[start_ix: end_ix]['sentence_id'].to_list()
 
