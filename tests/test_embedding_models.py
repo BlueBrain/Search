@@ -216,11 +216,18 @@ class TestEmbeddingModels:
         assert fake_embed.call_count == 3
 
 
-def test_compute_database(monkeypatch, fake_sqlalchemy_engine, test_parameters, metadata_path, tmpdir):
+@pytest.mark.parametrize("batch_size", [1, 5, 1000])
+def test_compute_database(monkeypatch, fake_sqlalchemy_engine, test_parameters, metadata_path, tmpdir,
+                          batch_size):
+
+    n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
+    n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
+        'n_sentences_per_section']
+
     # We use the BSV model to make sure it works
     sent2vec_module = Mock()
-    bsv_model = Mock(spec=sent2vec.Sent2vecModel)
-    bsv_model.embed_sentences.return_value = np.ones([1, 700])  # we only use preprocess and embed
+    bsv_model = Mock(spec=sent2vec.Sent2vecModel, side_effect=lambda x:  np.ones([len(x), 700]))
+    bsv_model.embed_sentences.side_effect = lambda x:  np.ones([len(x), 700])
     sent2vec_module.Sent2vecModel.return_value = bsv_model
 
     new_file_path = Path(str(tmpdir)) / 'test.txt'
@@ -230,14 +237,13 @@ def test_compute_database(monkeypatch, fake_sqlalchemy_engine, test_parameters, 
 
     bsv = BSV(Path(new_file_path))
 
-    n_articles = pd.read_csv(metadata_path)['cord_uid'].notna().sum()
-    n_sentences = n_articles * test_parameters['n_sections_per_article'] * test_parameters[
-        'n_sentences_per_section']
-
     indices = np.arange(1, n_sentences + 1)
     final_embeddings, retrieved_indices = compute_database_embeddings(fake_sqlalchemy_engine,
                                                                       bsv,
-                                                                      indices)
+                                                                      indices,
+                                                                      batch_size=batch_size)
 
     assert final_embeddings.shape == (n_sentences, 700)
     assert np.all(indices == retrieved_indices)
+
+    assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + 1

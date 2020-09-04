@@ -430,7 +430,7 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(connection, model, indices):
+def compute_database_embeddings(connection, model, indices, batch_size=256):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
@@ -444,6 +444,10 @@ def compute_database_embeddings(connection, model, indices):
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to perform the embedding.
 
+    batch_size : int
+        Number of sentences to preprocess and embed at the same time. Should lead to major speedus.
+        Note that the last batch will have a length of `n_sentences % batch_size` (unless it is 0).
+
     Returns
     -------
     final_embeddings: np.array
@@ -455,28 +459,33 @@ def compute_database_embeddings(connection, model, indices):
         exactly to the rows in `final_embeddings`.
     """
     sentences = retrieve_sentences_from_sentence_ids(indices, connection)
+    n_sentences = len(sentences)
 
     all_embeddings = list()
     all_ids = list()
     num_errors = 0
 
-    for index, row in sentences.iterrows():
-        sentence_text, sentence_id = row['text'], row['sentence_id']
+    for batch_ix in range((n_sentences // batch_size) + 1):
+        start_ix = batch_ix * batch_size
+        end_ix = min((batch_ix + 1) * batch_size, n_sentences)
+
+        sentences_text = sentences.iloc[start_ix: end_ix]['text'].to_list()
+        sentences_id = sentences.iloc[start_ix: end_ix]['sentence_id'].to_list()
+
         try:
-            preprocessed_sentence = model.preprocess(sentence_text)
-            embedding = model.embed(preprocessed_sentence)
+            preprocessed_sentences = model.preprocess_many(sentences_text)
+            embeddings = model.embed_many(preprocessed_sentences)
         except IndexError:
             # This could happen when the sentence is too long for example
             num_errors += 1
             continue
 
-        all_ids.append(sentence_id)
-        all_embeddings.append(embedding)
+        all_ids.extend(sentences_id)
+        all_embeddings.append(embeddings)
 
-        if index % 1000 == 0:
-            print(f'Embedded {index} with {num_errors} errors')
+        if batch_ix % 10 == 0:
+            print(f'Embedded {batch_ix} batches with {num_errors} errors')
 
-    final_embeddings = np.array(all_embeddings)
+    final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
-
     return final_embeddings, retrieved_indices
