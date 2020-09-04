@@ -9,7 +9,7 @@ import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelWithLMHead, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
 
@@ -108,7 +108,7 @@ class SBioBERT(EmbeddingModel):
     def __init__(self,
                  device=None):
         self.device = device or torch.device('cpu')
-        self.sbiobert_model = AutoModelWithLMHead.from_pretrained("gsarti/biobert-nli").bert.to(self.device)
+        self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
     @property

@@ -40,7 +40,7 @@ class TestEmbeddingModels:
         torch_model.return_value = (torch.ones([n_sentences, 10, 768]), None)  # 10 tokens
 
         auto_model = Mock()
-        auto_model.from_pretrained().bert.to.return_value = torch_model
+        auto_model.from_pretrained().to.return_value = torch_model
 
         tokenizer = Mock()
         be = MagicMock(spec=transformers.BatchEncoding)
@@ -52,7 +52,7 @@ class TestEmbeddingModels:
         auto_tokenizer.from_pretrained.return_value = tokenizer
 
         monkeypatch.setattr('bbsearch.embedding_models.AutoTokenizer', auto_tokenizer)
-        monkeypatch.setattr('bbsearch.embedding_models.AutoModelWithLMHead', auto_model)
+        monkeypatch.setattr('bbsearch.embedding_models.AutoModel', auto_model)
 
         sbiobert = SBioBERT()
 
