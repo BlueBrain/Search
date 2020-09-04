@@ -430,7 +430,7 @@ class USE(EmbeddingModel):
         return embedding
 
 
-def compute_database_embeddings(connection, model, indices, batch_size=256):
+def compute_database_embeddings(connection, model, indices, batch_size=10):
     """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
 
     Parameters
@@ -447,6 +447,8 @@ def compute_database_embeddings(connection, model, indices, batch_size=256):
     batch_size : int
         Number of sentences to preprocess and embed at the same time. Should lead to major speedus.
         Note that the last batch will have a length of `n_sentences % batch_size` (unless it is 0).
+        Note that some models (SBioBERT) might perform padding to the longest sentence and bigger
+        batch size might not lead to a speedup.
 
     Returns
     -------
