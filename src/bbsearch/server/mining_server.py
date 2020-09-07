@@ -61,6 +61,7 @@ class MiningServer:
         response = {
             "name": self.name,
             "version": self.version,
+            "database": self.connection.url.database,
             "description": "Run the BBS text mining pipeline on a given text.",
             "POST": {
                 "/help": {
