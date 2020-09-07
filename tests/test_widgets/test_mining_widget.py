@@ -110,12 +110,25 @@ def request_callback(request):
     return response
 
 
+def request_callback_help(request):
+    resp_body = {'database': 'test_database'}
+    headers = {'request-id': '1234abcdeABCDE'}
+    response = (200, headers, json.dumps(resp_body))
+    return response
+
+
 @responses.activate
 def test_mining_text(monkeypatch, capsys):
 
     responses.add_callback(
         responses.POST, 'http://test/text',
         callback=request_callback,
+        content_type="application/json"
+    )
+
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
         content_type="application/json"
     )
 
@@ -126,7 +139,7 @@ def test_mining_text(monkeypatch, capsys):
     bot.set_value('input_text', 'HELLO')
     bot.click('mine_text')
 
-    assert len(responses.calls) == 1
+    assert len(responses.calls) == 2
 
     display_objs = bot.display_cached
     assert len(display_objs) == 3  # 1 schema + 1 warning + 1 table_extractions
@@ -146,6 +159,12 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
         content_type="text/csv"
     )
 
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
+
     mining_widget = MiningWidget(mining_server_url='http://test',
                                  schema_request=schema_request)
     empty_dataframe = pd.DataFrame()
@@ -155,7 +174,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     bot.set_value('input_text', 'HELLO')
     bot.click('mine_articles')
 
-    assert len(responses.calls) == 0
+    assert len(responses.calls) == 1
     assert 'No article saver was provided. Nothing to mine.' in bot.stdout_cached
 
     article_saver = ArticleSaver(fake_sqlalchemy_engine)
@@ -170,7 +189,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     bot.set_value('input_text', 'HELLO')
     bot.click('mine_articles')
 
-    assert len(responses.calls) == 1
+    assert len(responses.calls) == 3
     assert "Collecting saved items..." in bot.stdout_cached
     assert isinstance(mining_widget.get_extracted_table(), pd.DataFrame)
 
