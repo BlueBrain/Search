@@ -52,8 +52,10 @@ EXPOSE 8080
 ENV EE_MODELS_LIBRARY="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_mining.log"
+ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v47"
 
 ENTRYPOINT exec mining_server \
     --host=0.0.0.0 \
     --port=8080 \
-    --ee_models_lib $EE_MODELS_LIBRARY
+    --ee_models_lib $EE_MODELS_LIBRARY \
+    --database_uri $DATABASE_URI
