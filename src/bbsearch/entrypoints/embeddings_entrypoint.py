@@ -10,7 +10,7 @@ parser.add_argument("--db_type",
                     help="Type of the database. Possible values: (sqlite, "
                          "mysql)")
 parser.add_argument("--out_dir",
-                    default='/raid/sync/proj115/bbs_data/cord19_v35/embeddings/',
+                    default='/raid/sync/proj115/bbs_data/cord19_v47/embeddings/',
                     type=str,
                     help="The directory path where the embeddings are saved.")
 parser.add_argument("--models",
@@ -51,14 +51,14 @@ def main():
     print('SQL Alchemy Engine creation ....')
 
     if args.db_type == 'sqlite':
-        database_path = '/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db'
+        database_path = '/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db'
         if not pathlib.Path(database_path).exists():
             pathlib.Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
     elif args.db_type == 'mysql':
         password = getpass.getpass('Password:')
         engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:{password}'
-                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v35')
+                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v47')
     else:
         raise ValueError('This is not an handled db_type.')
 
