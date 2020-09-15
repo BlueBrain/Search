@@ -1,7 +1,7 @@
 # Description
 - Annotations collected with `prodigy` in order to train or evaluate NER models.
 - Input files given to the annotators can be either raw sentences 
-(see `raw_sentences`) or pre-annotated files that require corrections or adding new entity types.
+(see `raw_sentences/`) or pre-annotated files that require corrections or adding new entity types.
 
 # Content
 ## `patterns/patterns.jsonl`
