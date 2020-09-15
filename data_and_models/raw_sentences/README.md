@@ -1,6 +1,6 @@
 # Description
 This directory contains collections of raw sentences without any annotations.
-They can be used to feed prodigy during an annotation process, see the `annotations` directory.
+They can be used to feed prodigy during an annotation process, see the `annotations/` directory.
 
 # Content
 ## `raw1_2020-06-10_cord19_TestSet.jsonl`
