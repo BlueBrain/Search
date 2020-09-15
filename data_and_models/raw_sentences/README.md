@@ -24,7 +24,6 @@ They can be used to feed prodigy during an annotation process, see the `annotati
  - All sentences are shuffled
 
 ## `raw4_2020-07-02_cord19_ChemicalOrganism.jsonl`
-
 - 1000 tot sentences
   - 500 sentences chosen with grep of the entities that Emmanuelle identified as CHEMICAL and ORGANISM
   - 500 sentences chosen randomly

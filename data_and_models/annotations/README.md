@@ -6,4 +6,4 @@ directory `raw_sentences`.
 
 # Content
 ## `ner`
-- Annotations collected to train or evaluate NER models.
+- Annotations collected with `prodigy` in order to train or evaluate NER models.
