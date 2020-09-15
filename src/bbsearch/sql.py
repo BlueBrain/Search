@@ -440,18 +440,28 @@ class SentenceFilter:
                 sentence_ids_s = 'NULL'
             sentence_conditions.append(f"sentence_id IN ({sentence_ids_s})")
 
-        # Exclusion text
-        for text in self.string_exclusions:
-            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
-                sentence_conditions.append(f"INSTR(text, '{text}') = 0")
-            else:
+        # Inclusion and Exclusion Text
+        if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
+            if self.string_inclusions:
+                inclusions = ' '.join(f'+"{string}"' if len(string.split(' ')) > 1 else f'+{string}'
+                                      for string in self.string_inclusions)
+                exclusions = ' '.join(f'-"{string}"' if len(string.split(' ')) > 1 else f'-{string}'
+                                      for string in self.string_exclusions)
+                condition = f'{inclusions} {exclusions}'.strip()
+                sentence_conditions.append(
+                    f"MATCH(text) AGAINST ('{condition}' IN BOOLEAN MODE)")
+            elif self.string_exclusions:
+                # This elif statement is to create conditions if there are only exclusions words
+                # without any inclusions. Indeed, in this case, MATCH AGAINST IN BOOLEAN MODE does
+                # not work anymore as you can find on the official docs:
+                # https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html:
+                # boolean-mode search that contains only terms preceded by - returns an empty result
+                for text in self.string_exclusions:
+                    sentence_conditions.append(f"INSTR(text, '{text}') = 0")
+        else:
+            for text in self.string_exclusions:
                 sentence_conditions.append(f"text NOT LIKE '%{text}%'")
-
-        # Inclusion text
-        for text in self.string_inclusions:
-            if self.connection.url.drivername in {'mysql+mysqldb', 'mysql+pymysql'}:
-                sentence_conditions.append(f"INSTR(text, '{text}') > 0")
-            else:
+            for text in self.string_inclusions:
                 sentence_conditions.append(f"text LIKE '%{text}%'")
 
         # Build and send query

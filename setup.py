@@ -30,13 +30,13 @@ install_requires = [
     "scipy",
     "scispacy",
     "sent2vec-prebuilt",
-    "sentence-transformers",
+    "sentence-transformers==0.3.5",
     "spacy==2.3.2",
     "tensorflow",
     "tensorflow_hub",
     "torch",
     "tqdm",
-    "transformers",
+    "transformers==3.0.2",
 ]
 
 extras_require = {
