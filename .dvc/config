@@ -1,7 +1,4 @@
 [core]
     remote = gpfs_storage
-[cache]
-    dir = /raid/.BlueBrainSearch_DVC-cache
-    shared = group
 ['remote "gpfs_storage"']
     url = /gpfs/bbp.cscs.ch/data/project/proj115/dvc_remote_storage
