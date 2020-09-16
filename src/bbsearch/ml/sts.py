@@ -1,5 +1,6 @@
 """Build Semantic Text Similarity (STS) datasets to evaluate sentence embedding models."""
 
+import pickle
 from collections import namedtuple
 from pathlib import Path
 from typing import Callable, List
@@ -125,6 +126,11 @@ def format_results(pairs: List[Pair]) -> str:
     return '\n\n'.join(formatted)
 
 
-def write_results(pairs: List[Pair], path: str) -> None:
+def write_results_txt(pairs: List[Pair], path: str) -> None:
     content = format_results(pairs)
     Path(path).write_text(content, encoding='utf-8')
+
+
+def write_results_pkl(pairs: List[Pair], path: str) -> None:
+    with Path(path).open('wb') as f:
+        pickle.dump(pairs, f)
