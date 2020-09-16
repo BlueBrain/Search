@@ -1,7 +1,20 @@
 """EntryPoint for the creation of the database."""
 import argparse
+import logging
+import os
+import pathlib
+
+from ._helper import configure_logging
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--log_dir",
+                    default="/raid/projects/bbs/logs/",
+                    type=str,
+                    help="The directory path where to save the logs.")
+parser.add_argument("--log_name",
+                    default="database_creation.log",
+                    type=str,
+                    help="The name of the log file.")
 parser.add_argument("--data_path",
                     default="/raid/sync/proj115/bbs_data/cord19_v47",
                     type=str,
@@ -16,6 +29,10 @@ args = parser.parse_args()
 
 def main():
     """Run database construction."""
+    # Configure logging
+    log_file = pathlib.Path(args.log_dir) / args.log_name
+    configure_logging(log_file, logging.INFO)
+
     import getpass
     from pathlib import Path
 
