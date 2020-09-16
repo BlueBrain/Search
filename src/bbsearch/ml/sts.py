@@ -6,6 +6,7 @@ from typing import Callable, List, Tuple
 
 import torch
 import torch.nn.functional as nnf
+
 from bbsearch.embedding_models import BSV, EmbeddingModel
 from bbsearch.utils import H5
 
