@@ -11,7 +11,7 @@ pre-annotates those entities in the prodigy GUI).
 ## `annotations1_EmmanuelleLogette_2020-06-19_raw1_8FirstLabels.jsonl`	
 ```shell script
 prodigy ner.manual \
-    annotations1_EmmanuelleLogette_2020-06-19_raw1_8FirstLabels.jsonl \
+    annotations1_EmmanuelleLogette_2020-06-19_raw1_8FirstLabels \
     blank:en \
     raw1_2020-06-10_cord19_TestSet.jsonl \
     --patterns patterns.jsonl 
@@ -25,7 +25,7 @@ prodigy ner.manual \
 ## `annotations2_CharlotteLorin_2020-06-19_8FirstLabels.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations2_CharlotteLorin_2020-06-19_8FirstLabels.jsonl \
+    annotations2_CharlotteLorin_2020-06-19_8FirstLabels \
     blank:en \
     raw1_2020-06-10_cord19_TestSet.jsonl \
     --patterns patterns.jsonl \
@@ -50,7 +50,7 @@ prodigy ner.manual \
 ## `annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl`
 ```shell script
 prodigy ner.correct \
-    annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl \
+    annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease \
     en_ner_bc5cdr_md \
     raw2_2020-06-29_cord19_Disease.jsonl \
     -l 'DISEASE'
@@ -68,7 +68,7 @@ prodigy ner.correct \
 ## `annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl`
 ```shell script
 prodigy ner.correct \
-    annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl \
+    annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi \
     en_ner_craft_md \
     raw4_2020-07-02_cord19_ChemicalOrganism.jsonl  \
     -l 'TAXON,CHEBI'
@@ -91,7 +91,7 @@ prodigy ner.correct \
 ## `annotations7_EmmanuelleLogette_2020-07-06_raw1_9EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations7_EmmanuelleLogette_2020-07-06_raw1_9EntityTypes.jsonl \
+    annotations7_EmmanuelleLogette_2020-07-06_raw1_9EntityTypes \
     blank:en \
     annotations3_EmmanuelleLogette_2020-07-06_raw1_8FirstLabels.jsonl \ 
     -l 'DISEASE,CHEMICAL,ORGAN,ORGANISM,PROTEIN,PATHWAY,CONDITION,CELL_TYPE,DRUG'
@@ -104,7 +104,7 @@ prodigy ner.manual \
 ## `annotations8_EmmanuelleLogette_2020-07-08_raw5_9EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations8_EmmanuelleLogette_2020-07-08_raw5_9EntityTypes.jsonl \
+    annotations8_EmmanuelleLogette_2020-07-08_raw5_9EntityTypes \
     blank:en \
     raw5_2020-07-08_cord19_Drug_TestSet.jsonl \
     -l 'DISEASE,CHEMICAL,ORGAN,ORGANISM,PROTEIN,PATHWAY,CONDITION
@@ -118,7 +118,7 @@ prodigy ner.manual \
 ## `annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl`
 ```shell script
 prodigy ner.correct \
-    annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl \
+    annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein \
     en_ner_jnlpba_md \
     raw6_2020-07-08_cord19_CelltypeProtein.jsonl \
     -l 'PROTEIN,CELL_TYPE'
@@ -135,7 +135,7 @@ prodigy ner.correct \
 ## `annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl \
+    annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes \
     blank:en \
     $(cat annotations7_EmmanuelleLogette_2020-07-06_raw1_9EntityTypes.jsonl \
           annotations8_EmmanuelleLogette_2020-07-08_raw5_9EntityTypes.jsonl) \
@@ -149,7 +149,7 @@ prodigy ner.manual \
 ## `annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl \
+    annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes \
     blank:en \
     annotations4_CharlotteLorin_2020-07-02_raw1_8FirstLabels.jsonl \
     -l 'DISEASE,CHEMICAL,ORGAN,ORGANISM,PROTEIN,PATHWAY,CONDITION,CELL_TYPE,DRUG,CELL_COMPARTMENT'
@@ -161,7 +161,7 @@ prodigy ner.manual \
 ## `annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl \
+    annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes \
     blank:en \
     raw7_2020-09-01_cord19v35_CellCompartment.jsonl \
     -l 'DISEASE,CHEMICAL,ORGAN,ORGANISM,PROTEIN,PATHWAY,CONDITION,CELL_TYPE,DRUG,CELL_COMPARTMENT'
@@ -173,7 +173,7 @@ prodigy ner.manual \
 ## `annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl`
 ```shell script
 prodigy ner.manual \
-    annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl \
+    annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes \
     blank:en \
     raw7_2020-09-01_cord19v35_CellCompartment.jsonl \
     -l 'DISEASE,CHEMICAL,ORGAN,ORGANISM,PROTEIN,PATHWAY,CONDITION,CELL_TYPE,DRUG,CELL_COMPARTMENT'
