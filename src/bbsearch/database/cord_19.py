@@ -111,10 +111,10 @@ class CORD19DatabaseCreation:
             try:
                 article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
             except Exception as e:
+                rejected_articles += [index]
                 self.logger.error(f'Number of articles rejected: {len(rejected_articles)}')
                 self.logger.error(f'Last rejected: {rejected_articles[-1]}')
                 self.logger.error(str(e))
-                rejected_articles += [index]
 
             if index % 1000 == 0:
                 self.logger.info(f'Number of articles saved: {index}')
