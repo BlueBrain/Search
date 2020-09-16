@@ -1,6 +1,7 @@
 """Module for the Database Creation."""
 import json
 import logging
+import math
 import time
 
 import pandas as pd
@@ -114,7 +115,8 @@ class CORD19DatabaseCreation:
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
             try:
-                if len(article['abstract']) > max_text_length:
+                if not math.isnan(article['abstract']) and len(article['abstract']) > \
+                        max_text_length:
                     article['abstract'] = article['abstract'][:max_text_length]
                     self.logger.warning(f'The abstract of article {index} has a length >'
                                         f' {max_text_length} and was cut off for the database.')
