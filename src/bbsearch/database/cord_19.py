@@ -96,12 +96,17 @@ class CORD19DatabaseCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
-    def _articles_table(self):
+    def _articles_table(self, max_text_length=60000):
         """Fill the Article Table thanks to 'metadata.csv'.
 
         The articles table has all the metadata.csv columns
         expect the 'sha'.
         Moreover, the columns are renamed (cfr. _rename_columns)
+
+        Parameters
+        ----------
+        max_text_length: int
+            Maximum length of the abstract of the articles (constraint coming from MySQL)
         """
         rejected_articles = []
         df = self.metadata.copy()
@@ -109,6 +114,11 @@ class CORD19DatabaseCreation:
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
             try:
+                if len(article['abstract']) > max_text_length:
+                    article['abstract'] = article['abstract'][:max_text_length]
+                    self.logger.warning(f'The abstract of article {index} has a length >'
+                                        f' {max_text_length} and was cut off for the database.')
+
                 article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
             except Exception as e:
                 rejected_articles += [index]
