@@ -18,9 +18,9 @@ Sentence = namedtuple('Sentence', 'id, text')
 Pair = namedtuple('Pair', 'left, right, similarity, target')
 
 
-# Sampling strategies
+###
 
-# Proposed:
+# Proposed sampling strategies:
 #   1. random
 #   2. annotated
 #   3. k-means
@@ -34,9 +34,9 @@ def sampling_random(n: int, **kwargs) -> List[Sampling]:
     return list(map(Sampling, sampled))
 
 
-# Pairing strategies
+###
 
-# Proposed:
+# Proposed pairing strategies:
 #   1. random
 #   2. quartiles
 #   3. power law
@@ -50,6 +50,8 @@ def pairing_powerlaw(similarities: Tensor, groups: int, target: int, **kwargs) -
     index = indexes[1:][rank]
     return Pairing(index.item(), value.item())
 
+
+###
 
 def pair_sentences(n: int, groups: int, sampling: Callable, sparams: dict, pairing: Callable,
                    pparams: dict, model: EmbeddingModel, embeddings: Tensor, engine) -> List[Pair]:
@@ -108,3 +110,21 @@ def sentences_count(engine: Engine) -> int:
 def execute_sql(statement: str, engine: Engine) -> RowProxy:
     result = engine.execute(statement)
     return result.fetchone()
+
+
+def format_results(pairs: List[Pair]) -> str:
+    def _(x):
+        return (
+            f'target: {x.target}  id1: {x.left.id}  id2: {x.right.id}  sim: {x.similarity:.3f}\n'
+            f'-\n'
+            f'{x.left.text.strip()}\n'
+            f'-\n'
+            f'{x.right.text.strip()}\n'
+        )
+    formatted = (_(x) for x in pairs)
+    return '\n\n'.join(formatted)
+
+
+def write_results(pairs: List[Pair], path: str) -> None:
+    content = format_results(pairs)
+    Path(path).write_text(content, encoding='utf-8')
