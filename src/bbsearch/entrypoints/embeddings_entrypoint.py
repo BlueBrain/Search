@@ -65,8 +65,7 @@ def main():
     print('Sentences IDs retrieving....')
 
     sql_query = """SELECT sentence_id
-                   FROM sentences
-                   WHERE section_name IN ('Title', 'Abstract')"""
+                   FROM sentences"""
 
     sentence_ids = pd.read_sql(sql_query, engine)['sentence_id'].to_list()
 
