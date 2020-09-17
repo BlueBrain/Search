@@ -1,4 +1,5 @@
 """Collection of functions for evaluation of NER models."""
+import copy
 import json
 import string
 from collections import OrderedDict
@@ -268,6 +269,7 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
 
     etypes_counts = dict(zip(*unique_etypes(iob_true, mode=mode, return_counts=True)))
     etypes_map = etypes_map or dict()
+    etypes_map = copy.deepcopy(etypes_map)
     for etype in etypes_counts.keys() - etypes_map.keys():
         etypes_map[etype] = etype
 
