@@ -22,31 +22,48 @@ Pair = namedtuple('Pair', 'left, right, similarity, target')
 ###
 
 # Proposed sampling strategies:
-#   1. random
-#   2. annotated
-#   3. k-means
-#   4. LDA
+#   - [done] random
+#   - [done] keywords
+#   - annotated
+#   - k-means
+#   - LDA
 # with automatic cherry picking (length, ...).
 
 def sampling_random(n: int, **kwargs) -> List[Sampling]:
-    # limit: int, seed: int
-    rng = np.random.default_rng(kwargs['seed'])
-    sampled = rng.integers(1, kwargs['limit'], size=n, endpoint=True)
+    limit = kwargs['limit']  # int
+    seed = kwargs['seed']  # int
+    rng = np.random.default_rng(seed)
+    sampled = rng.integers(1, limit, size=n, endpoint=True)
     return list(map(Sampling, sampled))
+
+
+def sampling_keywords(n: int, **kwargs) -> List[Sampling]:
+    sentences = kwargs['sentences']  # DataFrame
+    keywords = kwargs['keywords']  # set(str)
+    seed = kwargs['seed']  # int
+    filtered = sentences[
+        sentences.text.str.match('^[A-Z][a-z]+ .*')
+        & (sentences.text.str.len() >= 100)
+        & (sentences.text.str.len() <= 300)
+        & sentences.text.map(lambda x: not {y.lower() for y in x.split()}.isdisjoint(keywords))
+    ]
+    sampled = filtered.sample(n, random_state=seed)
+    return list(map(Sampling, sampled.index.to_numpy()))
 
 
 ###
 
 # Proposed pairing strategies:
-#   1. random
-#   2. quartiles
-#   3. power law
+#   - random
+#   - quartiles
+#   - [done] power law
 # with automatic cherry picking (length, ...).
 
 def pairing_powerlaw(similarities: Tensor, groups: int, target: int, **kwargs) -> Pairing:
-    # step: int, power: int
+    step = kwargs['step']  # int
+    power = kwargs['power']  # int
     values, indexes = similarities.sort(descending=True)
-    rank = ((groups - target) * kwargs['step']) ** kwargs['power']
+    rank = ((groups - target) * step) ** power
     value = values[1:][rank]
     index = indexes[1:][rank]
     return Pairing(index.item(), value.item())
