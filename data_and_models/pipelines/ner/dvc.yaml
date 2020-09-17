@@ -1,0 +1,10 @@
+stages:
+  model4_craft_annotations6:
+    cmd: python eval.py --annotations_file ../../annotations/ner/annotations1_EmmanuelleLogette_2020-06-19_raw1_8FirstLabels.jsonl
+      --model model4_craft_annotations6/ --stage_name model4_craft_annotations6
+    deps:
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
+    params:
+    - model4_craft_annotations6.etypes
+    outs:
+    - ../../metrics/ner/model4_craft_annotations6_metrics.json
