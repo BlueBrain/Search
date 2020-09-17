@@ -92,8 +92,7 @@ def main():
 
     n_sentences = pd.read_sql(sql_query, engine).iloc[0, 0]
 
-    logger.info(f'{len(sentence_ids)} to embed / '
-          f'Total Number of sentences {n_sentences}')
+    logger.info(f'{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}')
 
     for model in args.models.split(','):
         model = model.strip()
@@ -124,8 +123,7 @@ def main():
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
 
             except Exception as e:
-                logger.error(f'Issues raised for sentence_ids[{index}'
-                      f':{index+args.step}]')
+                logger.error(f'Issues raised for sentence_ids[{index}:{index+args.step}]')
                 logger.error(e)
             logger.info(f'{index+args.step} sentences embeddings computed.')
 
