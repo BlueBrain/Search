@@ -1,4 +1,5 @@
 import json
+import pathlib
 import sqlite3
 from collections import OrderedDict
 from unittest.mock import Mock
@@ -23,7 +24,11 @@ from bbsearch.mining.eval import (
 class TestAnnotations2df:
 
     @pytest.mark.parametrize('answer', ['accept', 'ignore'])
-    def test_overall(self, monkeypatch, answer):
+    def test_overall(self, monkeypatch, answer, tmpdir):
+        tmp_dir = pathlib.Path(str(tmpdir))
+        tmp_file = tmp_dir / "annot.jsonl"
+
+        n_examples = 2
         prodigy_content = {
             'answer': answer,
             'meta': {'pattern': '', 'source': 'amazing source'},
@@ -43,23 +48,17 @@ class TestAnnotations2df:
                        {'text': '.', 'start': 48, 'end': 49, 'id': 8}]
         }
 
-        n_examples = 2
-        examples_table = pd.DataFrame([{'id': i, 'content': json.dumps(prodigy_content)}
-                                       for i in range(n_examples)])
+        with tmp_file.open("w") as f:
+            for _ in range(n_examples):
+                f.write(json.dumps(prodigy_content) + "\n")
 
-        fake_read_sql = Mock()
-        fake_read_sql.return_value = examples_table
-        fake_cnxn = Mock(spec=sqlite3.Connection)
-
-        monkeypatch.setattr('bbsearch.mining.eval.pd.read_sql', fake_read_sql)
-
-        df = prodigy2df(fake_cnxn, dataset_name='cord19_JohnSmith')
+        df = annotations2df(tmp_file)
 
         assert isinstance(df, pd.DataFrame)
         assert len(df) == n_examples * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
 
         if answer == 'accept':
-            assert {'source', 'sentence_id', 'class', 'start_char', 'end_char', 'id',
+            assert {'source', 'class', 'start_char', 'end_char', 'id',
                     'text'} == set(df.columns)
 
 
