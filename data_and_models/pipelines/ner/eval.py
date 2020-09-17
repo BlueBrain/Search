@@ -67,30 +67,25 @@ def main():
     iob_true = df["class"]
     iob_pred = df["class_pred"]
 
-    # Evaluation
-    final_dict = {
-        etype: {
-            mode: ner_report(
+    for etype in etypes:
+        for mode in ["entity", "token"]:
+            final_dict = ner_report(
                 iob_true,
                 iob_pred,
                 mode=mode,
                 return_dict=True,
                 etypes_map=params["etypes"],
             )[etype]
-            for mode in ["entity", "token"]
-        }
-        for etype in etypes
-    }
 
-    output_file = (
-            pathlib.Path.cwd().parent.parent
-            / "metrics"
-            / "ner"
-            / f"{args.stage_name}_metrics.json"
-    )
+            output_file = (
+                    pathlib.Path.cwd().parent.parent
+                    / "metrics"
+                    / "ner"
+                    / f"{args.stage_name}_{etype}_{mode}_metrics.json"
+            )
 
-    with output_file.open("w") as f:
-        f.write(json.dumps(final_dict))
+            with output_file.open("w") as f:
+                f.write(json.dumps(final_dict))
 
 
 if __name__ == "__main__":
