@@ -21,7 +21,7 @@ parser.add_argument("--log_dir",
                     type=str,
                     help="The directory path where to save the logs.")
 parser.add_argument("--log_name",
-                    default="database_creation.log",
+                    default="embeddings_computation.log",
                     type=str,
                     help="The name of the log file.")
 parser.add_argument("--models",
