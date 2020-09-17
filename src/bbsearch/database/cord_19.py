@@ -9,7 +9,14 @@ import sqlalchemy
 
 
 class CORD19DatabaseCreation:
-    """Create SQL database from a specified dataset."""
+    """Create SQL database from a specified dataset.
+
+    Attributes
+    ----------
+    max_text_length: int
+        Max length of values in MySQL column of type TEXT. We have to constraint our text values
+        to be smaller than this value (especially articles.abstract and sentences.text)
+    """
 
     def __init__(self,
                  data_path,
@@ -31,6 +38,7 @@ class CORD19DatabaseCreation:
         self.is_constructed = False
         self.engine = engine
         self.logger = logging.getLogger(self.__class__.__name__)
+        self.max_text_length = 60000
 
     def construct(self):
         """Construct the database."""
@@ -96,17 +104,12 @@ class CORD19DatabaseCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
-    def _articles_table(self, max_text_length=60000):
+    def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
 
         The articles table has all the metadata.csv columns
         expect the 'sha'.
         Moreover, the columns are renamed (cfr. _rename_columns)
-
-        Parameters
-        ----------
-        max_text_length: int
-            Maximum length of the abstract of the articles (constraint coming from MySQL)
         """
         rejected_articles = []
         df = self.metadata.copy()
@@ -115,10 +118,11 @@ class CORD19DatabaseCreation:
         for index, article in df.iterrows():
             try:
                 if isinstance(article['abstract'], str) and len(article['abstract']) > \
-                        max_text_length:
-                    article['abstract'] = article['abstract'][:max_text_length]
+                        self.max_text_length:
+                    article['abstract'] = article['abstract'][:self.max_text_length]
                     self.logger.warning(f'The abstract of article {index} has a length >'
-                                        f' {max_text_length} and was cut off for the database.')
+                                        f' {self.max_text_length} and was cut off for the '
+                                        f'database.')
 
                 article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
             except Exception as e:
@@ -237,7 +241,7 @@ class CORD19DatabaseCreation:
 
         return pmc, pdf, rejected_articles
 
-    def segment(self, nlp, paragraphs, max_text_length=60000):
+    def segment(self, nlp, paragraphs):
         """Segment a paragraph/article into sentences.
 
         Parameters
@@ -246,8 +250,6 @@ class CORD19DatabaseCreation:
             Spacy pipeline applying sentence segmentation.
         paragraphs: List of tuples (text, metadata)
             List of Paragraph/Article in raw text to segment into sentences. [(text, metadata), ]
-        max_text_length: int
-            Maximum length of the sentences (constraint coming from MySQL)
 
         Returns
         -------
@@ -261,11 +263,11 @@ class CORD19DatabaseCreation:
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
             for pos, sent in enumerate(paragraph.sents):
                 text = str(sent)
-                if len(text) > max_text_length:
-                    text = text[:max_text_length]
+                if len(text) > self.max_text_length:
+                    text = text[:self.max_text_length]
                     self.logger.warning(f'One sentence (article {metadata["article_id"]}, '
                                         f'paragraph {metadata["paragraph_pos_in_article"]},'
-                                        f'sentence pos {pos}) has a length > {max_text_length}'
+                                        f'sentence pos {pos}) has a length > {self.max_text_length}'
                                         f'and was cut off for the database.')
                 all_sentences += [
                     {"text": text, "sentence_pos_in_paragraph": pos, **metadata}
