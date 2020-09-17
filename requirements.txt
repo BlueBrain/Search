@@ -25,6 +25,7 @@ numpy==1.18.2
 pandas==1.0.3
 pdfkit==0.6.1
 pillow==7.1.1
+pyaml==20.4.0
 pycodestyle==2.6.0
 pymysql==0.10.0
 pytest-cov==2.10.0
