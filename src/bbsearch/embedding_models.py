@@ -1,4 +1,5 @@
 """Model handling sentences embeddings."""
+import logging
 import string
 from abc import ABC, abstractmethod
 
@@ -12,6 +13,8 @@ from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingModel(ABC):
@@ -489,7 +492,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         all_embeddings.append(embeddings)
 
         if batch_ix % 10 == 0:
-            print(f'Embedded {batch_ix} batches with {num_errors} errors')
+            logger.info(f'Embedded {batch_ix} batches with {num_errors} errors')
 
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)

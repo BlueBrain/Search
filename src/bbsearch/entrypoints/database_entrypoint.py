@@ -1,7 +1,6 @@
 """EntryPoint for the creation of the database."""
 import argparse
 import logging
-import os
 import pathlib
 
 from ._helper import configure_logging
