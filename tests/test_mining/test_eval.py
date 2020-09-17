@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.mining import prodigy2df, spacy2df
+from bbsearch.mining import annotations2df, spacy2df
 from bbsearch.mining.eval import (
     idx2text,
     iob2idx,
@@ -20,7 +20,7 @@ from bbsearch.mining.eval import (
 )
 
 
-class TestProdigy2df:
+class TestAnnotations2df:
 
     @pytest.mark.parametrize('answer', ['accept', 'ignore'])
     def test_overall(self, monkeypatch, answer):
