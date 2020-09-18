@@ -9,6 +9,7 @@ import numpy as np
 import torch
 from sqlalchemy.engine import Engine, RowProxy
 from torch import Tensor
+from tqdm import tqdm
 
 from bbsearch.embedding_models import BSV, EmbeddingModel
 from bbsearch.utils import H5
@@ -76,7 +77,7 @@ def pair_sentences(n: int, groups: int, sampling: Callable, sparams: dict, pairi
     targets = list(range(groups)) * (n // groups)
     samples = sampling(n, **sparams)
     pairs = []
-    for sampled, target in zip(samples, targets):
+    for sampled, target in tqdm(zip(samples, targets), total=n):
         left = retrieve_sentence(sampled.id, engine)
         similarities = compute_similarities(left, model, embeddings)
         paired = pairing(similarities, groups, target, **pparams)
