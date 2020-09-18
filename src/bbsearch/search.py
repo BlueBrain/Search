@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as nnf
 
-from .sql import SentenceFilter
+from .sql import SentenceFilter, retrieve_sentences_from_sentence_ids
 from .utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -242,6 +242,37 @@ def run_search(
         similarities = nnf.linear(input=combined_embeddings,
                                   weight=precomputed_embeddings)
 
+
+
+    logger.info(f"Sorting the similarities and getting the top {k} results")
+    top_sentence_ids, top_similarities = get_top_k_results(k, restricted_similarities, connection)
+    # top similarities = [24, 23, 20]
+    # top indices = [2, 1, 0]
+    # restricted_indices[top_indices] = [4, 3, 0]
+
+    return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats
+
+
+def get_top_k_results(k, similarities, restricted_sentence_ids, connection,
+                      results_type='sentences'):
+    """Retrieve top k results (granularity sentences or articles).
+
+    Parameters
+    ----------
+    k : int
+        Top k results to retrieve.
+    restricted_similarities : torch.Tensor
+        Similarities values
+    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        Connection to the database.
+    results_type : str
+        One of ('sentences', 'articles').
+    Returns
+    -------
+    top_similarities: torch.Tensor
+
+    top_indices: torch.Tensor
+    """
     logger.info("Truncating similarities to the restricted indices")
     # restricted_sentence_id=  [1, 4, 5]
     # restricted_indices = [0, 3, 4]
@@ -250,13 +281,21 @@ def run_search(
     restricted_indices = restricted_sentence_ids - 1
     restricted_similarities = similarities[restricted_indices]
 
-    logger.info(f"Sorting the similarities and getting the top {k} results")
-    top_similarities, top_indices = torch.topk(restricted_similarities,
-                                               min(k, len(restricted_similarities)),
-                                               largest=True, sorted=True)
-    # top similarities = [24, 23, 20]
-    # top indices = [2, 1, 0]
-    # restricted_indices[top_indices] = [4, 3, 0]
-    top_sentence_ids = restricted_sentence_ids[top_indices]
+    if results_type == 'sentences':
+        logger.info(f"Sorting the similarities and getting the top {k} sentences results")
+        top_similarities, top_indices = torch.topk(restricted_similarities,
+                                                   min(k, len(restricted_similarities)),
+                                                   largest=True, sorted=True)
+        top_sentence_ids = restricted_sentence_ids[top_indices]
+        return top_sentence_ids, top_similarities
 
-    return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats
+    elif results_type == 'articles':
+        logger.info(f"Sorting the similarities and getting the top {k} articles results")
+        top_similarities, top_indices = torch.sort(restricted_similarities,
+                                                   descending=True)
+        top_sentence_ids = restricted_sentence_ids[top_indices]
+
+    else:
+        raise NotImplementedError(f'{results_type} not implemented ')
+
+    return top_similarities, top_indices
