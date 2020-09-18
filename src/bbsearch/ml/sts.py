@@ -131,15 +131,16 @@ def execute_sql(statement: str, engine: Engine) -> RowProxy:
 
 
 def format_results(pairs: List[Pair]) -> str:
-    def _(x):
+    def _(i, x):
         return (
+            f'pair: {i}  '
             f'target: {x.target}  id1: {x.left.id}  id2: {x.right.id}  sim: {x.similarity:.3f}\n'
             f'-\n'
             f'{x.left.text.strip()}\n'
             f'-\n'
             f'{x.right.text.strip()}\n'
         )
-    formatted = (_(x) for x in pairs)
+    formatted = (_(i, x) for i, x in enumerate(pairs))
     return '\n\n'.join(formatted)
 
 
