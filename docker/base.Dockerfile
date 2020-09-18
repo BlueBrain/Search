@@ -27,6 +27,11 @@ ENV https_proxy=$BBS_https_proxy
 ENV HTTP_PROXY=$BBS_HTTP_PROXY
 ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 
+# Debian's default LANG=C breaks python3.
+# See commends in the official python docker file:
+# https://github.com/docker-library/python/blob/master/3.6/buster/Dockerfile
+ENV LANG=C.UTF-8
+
 # Install system packages
 #
 # The environment variable $DEBIAN_FRONTENT is necessary to
