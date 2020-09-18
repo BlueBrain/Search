@@ -28,7 +28,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     )
     parser.add_argument(
         "--database_uri",
-        default="dgx1.bbp.epfl.ch:8853/cord19_v35",
+        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
         help="The URI to the MySQL database.",
     )
@@ -107,7 +107,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = "/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db"
+        database_path = "/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db"
         if not pathlib.Path(database_path).exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
