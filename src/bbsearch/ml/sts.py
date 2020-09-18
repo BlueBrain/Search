@@ -13,7 +13,7 @@ from torch import Tensor
 from bbsearch.embedding_models import BSV, EmbeddingModel
 from bbsearch.utils import H5
 
-Sampling = namedtuple('Sampling', 'index')
+Sampling = namedtuple('Sampling', 'id')
 Pairing = namedtuple('Pairing', 'index, similarity')
 Sentence = namedtuple('Sentence', 'id, text')
 Pair = namedtuple('Pair', 'left, right, similarity, target')
@@ -77,7 +77,7 @@ def pair_sentences(n: int, groups: int, sampling: Callable, sparams: dict, pairi
     samples = sampling(n, **sparams)
     pairs = []
     for sampled, target in zip(samples, targets):
-        left = retrieve_sentence(sampled.index + 1, engine)
+        left = retrieve_sentence(sampled.id, engine)
         similarities = compute_similarities(left, model, embeddings)
         paired = pairing(similarities, groups, target, **pparams)
         right = retrieve_sentence(paired.index + 1, engine)
