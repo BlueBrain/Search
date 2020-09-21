@@ -128,7 +128,8 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     metadata_df = pd.read_csv(str(metadata_path))
     metadata_df.index.name = 'article_id'
     metadata_df.index += 1
-    metadata_df.to_sql(name='articles', con=engine, index=True, if_exists='append')
+    with engine.begin() as con:
+        metadata_df.to_sql(name='articles', con=con, index=True, if_exists='append')
 
     temp_s = []
     for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
@@ -146,7 +147,8 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     sentences_content = pd.DataFrame(temp_s)
     sentences_content.index.name = 'sentence_id'
     sentences_content.index += 1
-    sentences_content.to_sql(name='sentences', con=engine, index=True, if_exists='append')
+    with engine.begin() as con:
+        sentences_content.to_sql(name='sentences', con=con, index=True, if_exists='append')
     if engine.url.drivername.startswith('mysql'):
         engine.execute("""CREATE FULLTEXT INDEX fulltext_text ON sentences(text)""")
 
@@ -173,7 +175,8 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     mining_content = pd.DataFrame(temp_m)
     mining_content.index.name = 'entity_id'
     mining_content.index += 1
-    mining_content.to_sql(name='mining_cache', con=engine, index=True, if_exists='append')
+    with engine.begin() as con:
+        mining_content.to_sql(name='mining_cache', con=con, index=True, if_exists='append')
 
 
 @pytest.fixture(scope='session', params=['sqlite', 'mysql'])
