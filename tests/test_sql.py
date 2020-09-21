@@ -112,11 +112,12 @@ class TestSQLQueries:
                 * test_parameters['n_sections_per_article']
 
     def test_retrieve_articles_ids(self, fake_sqlalchemy_engine, test_parameters):
-        article_ids = retrieve_article_ids(fake_sqlalchemy_engine)
-        assert isinstance(article_ids, list)
+        article_ids_dict = retrieve_article_ids(fake_sqlalchemy_engine)
+        assert isinstance(article_ids_dict, dict)
         num_sentences = test_parameters['n_articles'] \
             * test_parameters['n_sections_per_article'] * test_parameters['n_sentences_per_section']
-        assert len(article_ids) == num_sentences
+        assert len(article_ids_dict) == num_sentences
+        article_ids = [x for x in article_ids_dict.values()]
         assert len(set(article_ids)) == test_parameters['n_articles']
 
 

@@ -15,17 +15,12 @@ def retrieve_article_ids(engine):
 
     Returns
     -------
-    article_ids: list of int
-        Articles ID of each sentence of the database.
+    article_id_dict: dict
+        Dictionary giving the corresponding article_id for a given sentence_id
     """
-    article_ids = [
-        x
-        for x, in engine.execute(
-            "SELECT article_id FROM sentences ORDER BY sentence_id"
-        ).fetchall()
-    ]
-
-    return article_ids
+    result_proxy = engine.execute("SELECT sentence_id, article_id FROM sentences")
+    article_id_dict = dict(result_proxy.fetchall())
+    return article_id_dict
 
 
 def retrieve_sentences_from_sentence_ids(sentence_ids, engine):

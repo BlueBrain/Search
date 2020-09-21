@@ -196,6 +196,8 @@ class LocalSearcher:
             Top k results to retrieve.
         similarities : torch.Tensor
             Similarities values
+        restricted_sentence_ids : torch.Tensor
+            Tensor containing the sentences_ids to keep for the top k retrieving.
         granularity : str
             One of ('sentences', 'articles').
 
@@ -241,15 +243,17 @@ class LocalSearcher:
             )
             top_sentence_ids = restricted_sentence_ids[top_indices]
             article_ids = set()
-            for num, ind in enumerate(top_sentence_ids):
-                id_ = ind - 1
-                article_ids.add(self.all_article_ids[id_])
+
+            num = 0
+            for sentence_id in top_sentence_ids:
+                num += 1
+                article_ids.add(self.all_article_ids[int(sentence_id)])
                 if len(article_ids) == k:
                     break
 
             top_sentence_ids, top_similarities = (
-                top_sentence_ids[: num + 1],
-                top_similarities[: num + 1],
+                top_sentence_ids[: num],
+                top_similarities[: num],
             )
 
         else:
