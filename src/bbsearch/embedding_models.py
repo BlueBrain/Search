@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import sent2vec
+import spacy
 import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
@@ -253,6 +254,118 @@ class SBioBERT(EmbeddingModel):
 
         sentence_embeddings = sum_embeddings / sum_mask
         return sentence_embeddings
+
+
+class Sent2VecModel(EmbeddingModel):
+    """BioSentVec.
+
+    Parameters
+    ----------
+    checkpoint_path: pathlib.Path
+        Path to the file of the stored model BSV.
+    """
+
+    def __init__(self, checkpoint_path):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.checkpoint_model_path = checkpoint_path
+        if not self.checkpoint_model_path.is_file():
+            raise FileNotFoundError(f"The file {self.checkpoint_model_path} was not found.")
+
+        self.logger.info(f"Loading the checkpoint from {self.checkpoint_model_path}")
+        self.model = sent2vec.Sent2vecModel()
+        self.model.load_model(str(self.checkpoint_model_path))
+
+        self.logger.info("Loading the preprocessing spacy model")
+        self.nlp = spacy.load("en_core_sci_lg")
+
+    @property
+    def dim(self):
+        """Return dimension of the embedding."""
+        return 700
+
+    def _generate_preprocessed(self, sentences):
+        self.logger.info(f"Preprocessing {len(sentences)} sentences")
+        if isinstance(sentences, str):
+            sentences = [sentences]
+        for sentence in self.nlp.pipe(sentences, disable=["tagger", "parser", "ner"]):
+            new_sentence = " ".join(
+                token.lemma_.lower() for token in sentence
+                if not (
+                        token.is_punct or
+                        token.is_stop or
+                        token.like_num or
+                        token.like_url or
+                        token.like_email or
+                        token.is_bracket
+                )
+            )
+
+            yield new_sentence
+
+    def preprocess(self, raw_sentence):
+        """Preprocess the sentence (Tokenization, ...).
+
+        Parameters
+        ----------
+        raw_sentence: str
+            Raw sentence to embed.
+
+        Returns
+        -------
+        preprocessed_sentence: str
+            Preprocessed sentence.
+        """
+        return next(self._generate_preprocessed(raw_sentence))
+
+    def preprocess_many(self, raw_sentences):
+        """Preprocess multiple sentences.
+
+        This is a default implementation and can be overridden by children classes.
+
+        Parameters
+        ----------
+        raw_sentences : list of str
+            List of str representing raw sentences that we want to embed.
+
+        Returns
+        -------
+        preprocessed_sentences
+            List of preprocessed sentences corresponding to `raw_sentences`.
+        """
+        return list(self._generate_preprocessed(raw_sentences))
+
+    def embed(self, preprocessed_sentence):
+        """Compute the sentences embeddings for a given sentence.
+
+        Parameters
+        ----------
+        preprocessed_sentence: str
+            Preprocessed sentence to embed.
+
+        Returns
+        -------
+        embedding: numpy.array
+            Embedding of the specified sentence of shape (700,).
+        """
+        self.logger.info("Embedding one sentences")
+        return self.embed_many([preprocessed_sentence]).squeeze()
+
+    def embed_many(self, preprocessed_sentences):
+        """Compute sentence embeddings for multiple sentences.
+
+        Parameters
+        ----------
+        preprocessed_sentences: list of str
+            Preprocessed sentences to embed.
+
+        Returns
+        -------
+        embeddings: numpy.array
+            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 700)`.
+        """
+        self.logger.info(f"Embedding {len(preprocessed_sentences)} sentences")
+        embeddings = self.model.embed_sentences(preprocessed_sentences)
+        return embeddings
 
 
 class BSV(EmbeddingModel):
