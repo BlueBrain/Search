@@ -1,5 +1,6 @@
 """Model handling sentences embeddings."""
 import logging
+import pathlib
 import string
 from abc import ABC, abstractmethod
 
@@ -257,39 +258,68 @@ class SBioBERT(EmbeddingModel):
 
 
 class Sent2VecModel(EmbeddingModel):
-    """BioSentVec.
+    """A sent2vec model.
 
     Parameters
     ----------
-    checkpoint_path: pathlib.Path
-        Path to the file of the stored model BSV.
+    checkpoint_path: pathlib.Path or str
+        Location of the model checkpoint.
     """
 
     def __init__(self, checkpoint_path):
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.checkpoint_model_path = checkpoint_path
-        if not self.checkpoint_model_path.is_file():
-            raise FileNotFoundError(f"The file {self.checkpoint_model_path} was not found.")
+        self.checkpoint_path = pathlib.Path(checkpoint_path)
+        if not self.checkpoint_path.is_file():
+            raise FileNotFoundError(
+                f"The checkpoint file {self.checkpoint_path} was not found.")
 
-        self.logger.info(f"Loading the checkpoint from {self.checkpoint_model_path}")
+        self.logger.info(f"Loading the checkpoint from {self.checkpoint_path}")
         self.model = sent2vec.Sent2vecModel()
-        self.model.load_model(str(self.checkpoint_model_path))
+        self.model.load_model(str(self.checkpoint_path))
 
         self.logger.info("Loading the preprocessing spacy model")
-        self.nlp = spacy.load("en_core_sci_lg")
+        # We only need the tokenizer of the spacy model, so we disable
+        # all the other components. Note that vocab takes by far the most
+        # time to load. Internally roughly the following steps take place:
+        #   nlp = spacy.lang.en.English()
+        #   nlp.tokenizer.from_disk(tokenizer_path, exclude=["vocab"])
+        # (See `spacy.language.Language.from_disk`, here the tokenizer path is
+        # "../site-packages/en_core_sci_lg/en_core_sci_lg-x.x.x/tokenizer")
+        # so it doesn't seem that the vocab is necessary for the tokenization.
+        self.nlp = spacy.load(
+            name="en_core_sci_lg",
+            disable=["tagger", "parser", "ner", "vocab"],
+        )
 
     @property
     def dim(self):
-        """Return dimension of the embedding."""
+        """Return dimension of the embedding.
+
+        Returns
+        -------
+        dim : int
+            The dimension of the embedding.
+        """
         return 700
 
     def _generate_preprocessed(self, sentences):
-        self.logger.info(f"Preprocessing {len(sentences)} sentences")
+        """Preprocess sentences and yield results one by one.
+
+        Parameters
+        ----------
+        sentences : iterable of str
+            The sentences to be processed.
+
+        Yields
+        ------
+        preprocessed_sentence : str
+            A preprocessed sentence.
+        """
         if isinstance(sentences, str):
             sentences = [sentences]
-        for sentence in self.nlp.pipe(sentences, disable=["tagger", "parser", "ner"]):
-            new_sentence = " ".join(
-                token.lemma_.lower() for token in sentence
+        for sentence_doc in self.nlp.pipe(sentences):
+            preprocessed_sentence = " ".join(
+                token.lemma_.lower() for token in sentence_doc
                 if not (
                         token.is_punct or
                         token.is_stop or
@@ -300,10 +330,10 @@ class Sent2VecModel(EmbeddingModel):
                 )
             )
 
-            yield new_sentence
+            yield preprocessed_sentence
 
     def preprocess(self, raw_sentence):
-        """Preprocess the sentence (Tokenization, ...).
+        """Preprocess one sentence.
 
         Parameters
         ----------
@@ -320,50 +350,51 @@ class Sent2VecModel(EmbeddingModel):
     def preprocess_many(self, raw_sentences):
         """Preprocess multiple sentences.
 
-        This is a default implementation and can be overridden by children classes.
-
         Parameters
         ----------
         raw_sentences : list of str
-            List of str representing raw sentences that we want to embed.
+            Sentences as they are are extracted from a body of text.
 
         Returns
         -------
-        preprocessed_sentences
-            List of preprocessed sentences corresponding to `raw_sentences`.
+        preprocessed_sentences : list of str
+            Preprocessed sentences. Intended to be fed ot the `embed` or
+            `embed_many` methods.
         """
         return list(self._generate_preprocessed(raw_sentences))
 
     def embed(self, preprocessed_sentence):
-        """Compute the sentences embeddings for a given sentence.
+        """Embed one given sentence.
 
         Parameters
         ----------
         preprocessed_sentence: str
-            Preprocessed sentence to embed.
+            Preprocessed sentence to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embedding: numpy.array
-            Embedding of the specified sentence of shape (700,).
+        embedding: numpy.ndarray
+            Array of shape `(700,)` with the sentence embedding.
         """
-        self.logger.info("Embedding one sentences")
-        return self.embed_many([preprocessed_sentence]).squeeze()
+        embedding = self.embed_many([preprocessed_sentence]).squeeze()
+        return embedding
 
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
 
         Parameters
         ----------
-        preprocessed_sentences: list of str
-            Preprocessed sentences to embed.
+        preprocessed_sentences: iterable of str
+            Preprocessed sentences to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embeddings: numpy.array
-            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 700)`.
+        embeddings: numpy.ndarray
+            Array of shape `(len(preprocessed_sentences), 700)` with the
+            sentence embeddings.
         """
-        self.logger.info(f"Embedding {len(preprocessed_sentences)} sentences")
         embeddings = self.model.embed_sentences(preprocessed_sentences)
         return embeddings
 
