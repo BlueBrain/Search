@@ -116,9 +116,14 @@ class TestEmbeddingModels:
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_sent2vec_embedding(self, monkeypatch, tmpdir, n_sentences):
+        embedding_dim = 12345
+
         # Set up the mocks
         fake_sent2vec_model = Mock(spec=sent2vec.Sent2vecModel)
-        fake_sent2vec_model.embed_sentences.return_value = np.ones([n_sentences, 700])
+        fake_sent2vec_model.embed_sentences.return_value = np.ones(
+            [n_sentences, embedding_dim])
+        fake_sent2vec_model.get_emb_size.return_value = embedding_dim
+
         fake_sent2vec_module = Mock()
         fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
         monkeypatch.setattr('bbsearch.embedding_models.sent2vec', fake_sent2vec_module)
@@ -133,8 +138,7 @@ class TestEmbeddingModels:
         model = Sent2VecModel(new_file_path)
 
         # Embedding dimensionality
-        assert isinstance(model.dim, int)
-        assert model.dim > 0
+        assert model.dim == embedding_dim
 
         # Set testing sentences and methods
         dummy_sentence = 'This is a dummy sentence/test.'

@@ -300,7 +300,7 @@ class Sent2VecModel(EmbeddingModel):
         dim : int
             The dimension of the embedding.
         """
-        return 700
+        return self.model.get_emb_size()
 
     def _generate_preprocessed(self, sentences):
         """Preprocess sentences and yield results one by one.
@@ -377,8 +377,8 @@ class Sent2VecModel(EmbeddingModel):
         embedding: numpy.ndarray
             Array of shape `(700,)` with the sentence embedding.
         """
-        embedding = self.embed_many([preprocessed_sentence]).squeeze()
-        return embedding
+        embedding = self.embed_many([preprocessed_sentence])
+        return embedding.squeeze()
 
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
