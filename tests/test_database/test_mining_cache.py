@@ -174,7 +174,7 @@ class TestCreateMiningCache:
             {"mining_model": valid_model},
             {"mining_model": valid_model + "_not_valid"}
         ])
-        with self.engine.begin() as con:
+        with engine.begin() as con:
             df.to_sql(table_name, con)
 
         # Check table has two rows
