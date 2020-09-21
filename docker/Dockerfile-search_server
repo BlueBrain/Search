@@ -47,7 +47,7 @@ ENV EMBEDDINGS_PATH="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embedding
 ENV DATABASE_URI="dgx1.bbp.epfl.ch:8853/cord19_v47"
 ENV LOG_DIR="/raid/projects/bbs/logs"
 ENV LOG_NAME="bbs_search.log"
-ENV MODELS="BSV"
+ENV MODELS="BSV,Sent2Vec"
 
 ENTRYPOINT exec search_server \
     --host=0.0.0.0 \
