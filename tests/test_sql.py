@@ -8,6 +8,7 @@ import pytest
 
 from bbsearch.sql import (
     SentenceFilter,
+    retrieve_article_ids,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
     retrieve_mining_cache,
@@ -107,15 +108,23 @@ class TestSQLQueries:
         assert isinstance(articles, pd.DataFrame)
         if min(article_id) > 0:  # valid article_id
             assert set(articles['article_id'].to_list()) == set(article_id)
-            assert articles.shape[0] == len(set(article_id)) * \
-                   test_parameters['n_sections_per_article']
+            assert articles.shape[0] == len(set(article_id)) \
+                * test_parameters['n_sections_per_article']
+
+    def test_retrieve_articles_ids(self, fake_sqlalchemy_engine, test_parameters):
+        article_ids = retrieve_article_ids(fake_sqlalchemy_engine)
+        assert isinstance(article_ids, list)
+        num_sentences = test_parameters['n_articles'] \
+            * test_parameters['n_sections_per_article'] * test_parameters['n_sentences_per_section']
+        assert len(article_ids) == num_sentences
+        assert len(set(article_ids)) == test_parameters['n_articles']
 
 
 class TestMiningCache:
     def test_retrieve_all(self, fake_sqlalchemy_engine, test_parameters):
         identifiers = [(i + 1, -1) for i in range(test_parameters['n_articles'])]
-        expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] * test_parameters[
-            'n_entities_per_section']
+        expected_len = test_parameters['n_articles'] * test_parameters['n_sections_per_article'] \
+            * test_parameters['n_entities_per_section']
 
         res = retrieve_mining_cache(identifiers, ['en_ner_craft_md'], fake_sqlalchemy_engine)
 

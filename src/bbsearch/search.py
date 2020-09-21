@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torch.nn.functional as nnf
 
-from .sql import SentenceFilter, retrieve_sentences_from_sentence_ids
+from .sql import SentenceFilter, retrieve_article_ids
 from .utils import Timer
 
 logger = logging.getLogger(__name__)
@@ -39,19 +39,22 @@ class LocalSearcher:
         self.precomputed_embeddings = precomputed_embeddings
         self.indices = indices
         self.connection = connection
+        self.all_article_ids = retrieve_article_ids(self.connection)
 
-    def query(self,
-              which_model,
-              k,
-              query_text,
-              has_journal=False,
-              date_range=None,
-              deprioritize_strength='None',
-              exclusion_text="",
-              inclusion_text="",
-              deprioritize_text=None,
-              verbose=True,
-              ):
+    def query(
+        self,
+        which_model,
+        k,
+        query_text,
+        granularity="sentences",
+        has_journal=False,
+        date_range=None,
+        deprioritize_strength="None",
+        exclusion_text="",
+        inclusion_text="",
+        deprioritize_text=None,
+        verbose=True,
+    ):
         """Do the search.
 
         Parameters
@@ -62,6 +65,8 @@ class LocalSearcher:
             Number of top results to display.
         query_text : str
             Query.
+        granularity : str
+            One of ('sentences', 'articles'). Search granularity.
         has_journal : bool
             If True, only consider papers that have a journal information.
         date_range : tuple
@@ -82,220 +87,170 @@ class LocalSearcher:
 
         Returns
         -------
-        results : tuple
-            All results returned by `run_search`.
+        sentence_ids : np.array
+            1D array representing the indices of the top `k` most relevant sentences.
+            The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
+
+        similarities : np.array
+            1D array reresenting the similarities for each of the top `k` sentences. Note that this will
+            include the deprioritization part.
+
+        stats : dict
+            Various statistics. There are following keys:
+            - 'query_embed_time' - how much time it took to embed the `query_text` in seconds
+            - 'deprioritize_embed_time' - how much time it took to embed the `deprioritize_text` in seconds
+            -
         """
-        results = run_search(
-            self.embedding_models[which_model],
-            self.precomputed_embeddings[which_model],
-            self.indices,
-            self.connection,
-            k,
-            query_text,
-            has_journal,
-            date_range,
-            deprioritize_strength,
-            exclusion_text,
-            inclusion_text,
-            deprioritize_text,
-            verbose)
+        embedding_model = self.embedding_models[which_model]
+        precomputed_embeddings = self.precomputed_embeddings[which_model]
 
-        return results
+        logger.info("Starting run_search")
 
+        # Replace empty `deprioritize_text` by None
+        if deprioritize_text is not None and len(deprioritize_text.strip()) == 0:
+            deprioritize_text = None
 
-def run_search(
-        embedding_model,
-        precomputed_embeddings,
-        indices,
-        connection,
-        k,
-        query_text,
-        has_journal=False,
-        date_range=None,
-        deprioritize_strength='None',
-        exclusion_text="",
-        inclusion_text="",
-        deprioritize_text=None,
-        verbose=True
-):
-    """Generate search results.
+        timer = Timer(verbose=verbose)
 
-    Parameters
-    ----------
-    embedding_model : bbsearch.embedding_models.EmbeddingModel
-        Instance of EmbeddingModel of the model we want to use.
+        with timer("query_embed"):
+            logger.info("Embedding the query text")
+            preprocessed_query_text = embedding_model.preprocess(query_text)
+            embedding_query = embedding_model.embed(preprocessed_query_text)
+            embedding_query = torch.from_numpy(embedding_query).to(dtype=torch.float32)
 
-    precomputed_embeddings : torch.Tensor
-        2D array containing embeddings of the model corresponding of embedding_model. Rows are
-        sentences and columns are different dimensions. The embeddings need to be normalized and
-        dtype float32.
+        if deprioritize_text is None:
+            combined_embeddings = embedding_query
+        else:
+            with timer("deprioritize_embed"):
+                logger.info("Embedding the deprioritization text")
+                preprocessed_deprioritize_text = embedding_model.preprocess(
+                    deprioritize_text
+                )
+                embedding_deprioritize = embedding_model.embed(
+                    preprocessed_deprioritize_text
+                )
+                embedding_deprioritize = torch.from_numpy(embedding_deprioritize).to(
+                    dtype=torch.float32
+                )
 
-    indices : np.ndarray
-        1D array containing sentence_ids corresponding to the rows of `precomputed_embeddings`.
+            deprioritizations = {
+                "None": (1, 0),
+                "Weak": (0.9, 0.1),
+                "Mild": (0.8, 0.3),
+                "Strong": (0.5, 0.5),
+                "Stronger": (0.5, 0.7),
+            }
 
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database.
+            logger.info("Combining embeddings")
+            alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
+            combined_embeddings = (
+                alpha_1 * embedding_query - alpha_2 * embedding_deprioritize
+            )
 
-    k : int
-        Number of top results to display.
+        norm = torch.norm(input=combined_embeddings).item()
+        if norm == 0:
+            norm = 1
+        combined_embeddings /= norm
 
-    query_text : str
-        Query.
+        with timer("sentences_filtering"):
+            logger.info("Applying sentence filtering")
+            restricted_sentence_ids = torch.from_numpy(
+                (
+                    SentenceFilter(self.connection)
+                    .only_with_journal(has_journal)
+                    .date_range(date_range)
+                    .exclude_strings(exclusion_text.split("\n"))
+                    .include_strings(inclusion_text.split("\n"))
+                    .run()
+                )
+            )
 
-    has_journal : bool
-        If True, only consider papers that have a journal information.
+        if len(restricted_sentence_ids) == 0:
+            logger.info("No indices left after sentence filtering. Returning.")
+            return np.array([]), np.array([]), timer.stats
 
-    date_range : tuple
-        Tuple of form (start_year, end_year) representing the considered time range.
+        # Compute similarities
+        with timer("query_similarity"):
+            logger.info("Computing cosine similarities for the combined query")
+            similarities = nnf.linear(
+                input=combined_embeddings, weight=precomputed_embeddings
+            )
 
-    deprioritize_text : str
-        Text query of text to be deprioritized.
+        logger.info(f"Sorting the similarities and getting the top {k} results")
+        top_sentence_ids, top_similarities = self.get_top_k_results(
+            k, similarities, restricted_sentence_ids, granularity=granularity
+        )
 
-    deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
-        How strong the deprioritization is.
+        return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats
 
-    exclusion_text : str
-        New line separated collection of strings that are automatically used to exclude a given sentence.
-        If a sentence contains any of these strings then we filter it out.
+    def get_top_k_results(
+        self, k, similarities, restricted_sentence_ids, granularity="sentences"
+    ):
+        """Retrieve top k results (granularity sentences or articles).
 
-    inclusion_text : str
-        New line separated collection of strings. Only sentences that contain all of these
-        strings are going to make it through the filtering.
+        Parameters
+        ----------
+        k : int
+            Top k results to retrieve.
+        similarities : torch.Tensor
+            Similarities values
+        granularity : str
+            One of ('sentences', 'articles').
 
-    verbose : bool
-        If True, then printing statistics to standard output.
+        Returns
+        -------
+        top_sentence_ids: torch.Tensor
+            1D array representing the indices of the top `k` most relevant sentences.
+            The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
+            k being equal to k for granularity = 'sentences', and num of sentences for k unique
+            articles for granularity = 'articles'
+        top_similarities: torch.Tensor
+            1D array reresenting the similarities for each of the top `k` sentences.
+        """
+        logger.info("Truncating similarities to the restricted indices")
+        # restricted_sentence_id=  [1, 4, 5]
+        # restricted_indices = [0, 3, 4]
+        # similarities = [20, 21, 22, 23, 24, 25, 26]
+        # restricted_similarities = [20, 23, 24]
+        restricted_indices = restricted_sentence_ids - 1
+        restricted_similarities = similarities[restricted_indices]
 
-    Returns
-    -------
-    sentence_ids : np.array
-        1D array representing the indices of the top `k` most relevant sentences.
-        The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
+        if granularity == "sentences":
+            logger.info(
+                f"Sorting the similarities and getting the top {k} sentences results"
+            )
+            top_similarities, top_indices = torch.topk(
+                restricted_similarities,
+                min(k, len(restricted_similarities)),
+                largest=True,
+                sorted=True,
+            )
+            top_sentence_ids = restricted_sentence_ids[top_indices]
+            # top similarities = [24, 23, 20]
+            # top indices = [2, 1, 0]
+            # restricted_indices[top_indices] = [4, 3, 0]
 
-    similarities : np.array
-        1D array reresenting the similarities for each of the top `k` sentences. Note that this will
-        include the deprioritization part.
+        elif granularity == "articles":
+            logger.info(
+                f"Sorting the similarities and getting the top {k} articles results"
+            )
+            top_similarities, top_indices = torch.sort(
+                restricted_similarities, descending=True
+            )
+            top_sentence_ids = restricted_sentence_ids[top_indices]
+            article_ids = set()
+            for num, ind in enumerate(top_sentence_ids):
+                id_ = ind - 1
+                article_ids.add(self.all_article_ids[id_])
+                if len(article_ids) == k:
+                    break
 
-    stats : dict
-        Various statistics. There are following keys:
-        - 'query_embed_time' - how much time it took to embed the `query_text` in seconds
-        - 'deprioritize_embed_time' - how much time it took to embed the `deprioritize_text` in seconds
-        -
-    """
-    logger.info("Starting run_search")
+            top_sentence_ids, top_similarities = (
+                top_sentence_ids[: num + 1],
+                top_similarities[: num + 1],
+            )
 
-    # Replace empty `deprioritize_text` by None
-    if deprioritize_text is not None and len(deprioritize_text.strip()) == 0:
-        deprioritize_text = None
+        else:
+            raise NotImplementedError(f"{granularity} not implemented ")
 
-    timer = Timer(verbose=verbose)
-
-    with timer('query_embed'):
-        logger.info("Embedding the query text")
-        preprocessed_query_text = embedding_model.preprocess(query_text)
-        embedding_query = embedding_model.embed(preprocessed_query_text)
-        embedding_query = torch.from_numpy(embedding_query).to(dtype=torch.float32)
-
-    if deprioritize_text is None:
-        combined_embeddings = embedding_query
-    else:
-        with timer('deprioritize_embed'):
-            logger.info("Embedding the deprioritization text")
-            preprocessed_deprioritize_text = embedding_model.preprocess(deprioritize_text)
-            embedding_deprioritize = embedding_model.embed(preprocessed_deprioritize_text)
-            embedding_deprioritize = torch.from_numpy(embedding_deprioritize).to(dtype=torch.float32)
-
-        deprioritizations = {
-            'None': (1, 0),
-            'Weak': (0.9, 0.1),
-            'Mild': (0.8, 0.3),
-            'Strong': (0.5, 0.5),
-            'Stronger': (0.5, 0.7),
-        }
-
-        logger.info("Combining embeddings")
-        alpha_1, alpha_2 = deprioritizations[deprioritize_strength]
-        combined_embeddings = alpha_1 * embedding_query - alpha_2 * embedding_deprioritize
-
-    norm = torch.norm(input=combined_embeddings).item()
-    if norm == 0:
-        norm = 1
-    combined_embeddings /= norm
-
-    with timer('sentences_filtering'):
-        logger.info("Applying sentence filtering")
-        restricted_sentence_ids = torch.from_numpy((
-            SentenceFilter(connection)
-            .only_with_journal(has_journal)
-            .date_range(date_range)
-            .exclude_strings(exclusion_text.split('\n'))
-            .include_strings(inclusion_text.split('\n'))
-            .run()
-        ))
-
-    if len(restricted_sentence_ids) == 0:
-        logger.info("No indices left after sentence filtering. Returning.")
-        return np.array([]), np.array([]), timer.stats
-
-    # Compute similarities
-    with timer('query_similarity'):
-        logger.info("Computing cosine similarities for the combined query")
-        similarities = nnf.linear(input=combined_embeddings,
-                                  weight=precomputed_embeddings)
-
-
-
-    logger.info(f"Sorting the similarities and getting the top {k} results")
-    top_sentence_ids, top_similarities = get_top_k_results(k, restricted_similarities, connection)
-    # top similarities = [24, 23, 20]
-    # top indices = [2, 1, 0]
-    # restricted_indices[top_indices] = [4, 3, 0]
-
-    return top_sentence_ids.numpy(), top_similarities.numpy(), timer.stats
-
-
-def get_top_k_results(k, similarities, restricted_sentence_ids, connection,
-                      results_type='sentences'):
-    """Retrieve top k results (granularity sentences or articles).
-
-    Parameters
-    ----------
-    k : int
-        Top k results to retrieve.
-    restricted_similarities : torch.Tensor
-        Similarities values
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the database.
-    results_type : str
-        One of ('sentences', 'articles').
-    Returns
-    -------
-    top_similarities: torch.Tensor
-
-    top_indices: torch.Tensor
-    """
-    logger.info("Truncating similarities to the restricted indices")
-    # restricted_sentence_id=  [1, 4, 5]
-    # restricted_indices = [0, 3, 4]
-    # similarities = [20, 21, 22, 23, 24, 25, 26]
-    # restricted_similarities = [20, 23, 24]
-    restricted_indices = restricted_sentence_ids - 1
-    restricted_similarities = similarities[restricted_indices]
-
-    if results_type == 'sentences':
-        logger.info(f"Sorting the similarities and getting the top {k} sentences results")
-        top_similarities, top_indices = torch.topk(restricted_similarities,
-                                                   min(k, len(restricted_similarities)),
-                                                   largest=True, sorted=True)
-        top_sentence_ids = restricted_sentence_ids[top_indices]
         return top_sentence_ids, top_similarities
-
-    elif results_type == 'articles':
-        logger.info(f"Sorting the similarities and getting the top {k} articles results")
-        top_similarities, top_indices = torch.sort(restricted_similarities,
-                                                   descending=True)
-        top_sentence_ids = restricted_sentence_ids[top_indices]
-
-    else:
-        raise NotImplementedError(f'{results_type} not implemented ')
-
-    return top_similarities, top_indices
