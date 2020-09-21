@@ -89,6 +89,15 @@ class SearchWidget(widgets.VBox):
             style=self.widgets_style
             )
 
+        # Select granularity of the search
+        self.widgets['granularity'] = widgets.RadioButtons(
+            options=['sentences', 'articles'],
+            value='sentences',
+            disabled=False,
+            style={'description_width': 'initial', 'button_width': '80px'},
+            description='Granularity of search: ',
+            )
+
         # Select n. of top results to return
         self.widgets['top_results'] = widgets.widgets.IntText(
             value=20,
@@ -248,6 +257,7 @@ class SearchWidget(widgets.VBox):
         ])
         self.children = [
             self.widgets['sent_embedder'],
+            self.widgets['granularity'],
             self.widgets['top_results'],
             self.widgets['print_paragraph'],
             self.widgets['query_text'],
@@ -435,6 +445,7 @@ class SearchWidget(widgets.VBox):
         inclusion_text = self.widgets['inclusion_text'].value
         has_journal = self.widgets['has_journal'].value
         date_range = self.widgets['date_range'].value
+        granularity = self.widgets['granularity'].value
 
         # Clear output and show waiting message
         timer = Timer()
@@ -450,6 +461,7 @@ class SearchWidget(widgets.VBox):
                 self.current_sentence_ids, *_ = self.searcher.query(
                     which_model=which_model,
                     k=k,
+                    granularity=granularity,
                     query_text=query_text,
                     has_journal=has_journal,
                     date_range=date_range,
