@@ -25,7 +25,7 @@ parser.add_argument("--log_name",
                     type=str,
                     help="The name of the log file.")
 parser.add_argument("--models",
-                    default='USE,SBERT,SBioBERT,BSV',
+                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec',
                     type=str,
                     help="Models for which we need to compute the embeddings. "
                          "Format should be comma separated list.")
@@ -33,6 +33,10 @@ parser.add_argument("--bsv_checkpoints",
                     default='/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
                     type=str,
                     help="Path to file containing the checkpoints for the BSV model.")
+parser.add_argument("--sent2vec_checkpoints",
+                    default='/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin',
+                    type=str,
+                    help="Path to file containing the checkpoints for the sent2vec model.")
 parser.add_argument("--step",
                     default='1000',
                     type=int,
@@ -55,6 +59,7 @@ def main():
 
     out_dir = pathlib.Path(args.out_dir)
     bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)
+    sent2vec_checkpoints = pathlib.Path(args.sent2vec_checkpoints)
 
     if not out_dir.exists():
         raise FileNotFoundError(f'The output directory {out_dir} does not exist!')
@@ -101,6 +106,9 @@ def main():
         if model == 'BSV':
             embedding_model = embedding_models.BSV(
                 checkpoint_model_path=bsv_checkpoints)
+        elif model == 'Sent2Vec':
+            embedding_model = embedding_models.Sent2VecModel(
+                checkpoint_path=sent2vec_checkpoints)
         else:
             try:
                 embedding_model_cls = getattr(embedding_models, model)
