@@ -39,7 +39,9 @@ class LocalSearcher:
         self.precomputed_embeddings = precomputed_embeddings
         self.indices = indices
         self.connection = connection
+        logger.info('Retrieving articles ids for all sentence ids...')
         self.all_article_ids = retrieve_article_ids(self.connection)
+        logger.info('Retrieve articles ids: DONE')
 
     def query(
         self,
