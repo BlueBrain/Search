@@ -1,5 +1,6 @@
 """Benchmark INSERT operations through Pandas with and without transactions."""
 
+import numpy as np
 import pandas as pd
 import pytest as pt
 import sqlalchemy
@@ -9,7 +10,9 @@ PORT = 9731
 
 @pt.fixture
 def data():
-    return pd.DataFrame({'column': [1, 2, 3]})
+    rng = np.random.default_rng(1739)
+    numbers = rng.integers(10, size=100000)
+    return pd.DataFrame({'column': numbers})
 
 
 @pt.fixture
