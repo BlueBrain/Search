@@ -19,6 +19,7 @@ class RemoteSearcher:
         which_model,
         k,
         query_text,
+        granularity='sentences',
         has_journal=False,
         date_range=None,
         deprioritize_strength="None",
@@ -37,6 +38,8 @@ class RemoteSearcher:
             Number of top results to display.
         query_text : str
             Query.
+        granularity : str
+            One of ('sentences', 'articles'). Search granularity.
         has_journal : bool
             If True, only consider papers that have a journal information.
         date_range : tuple
@@ -59,6 +62,7 @@ class RemoteSearcher:
             which_model=which_model,
             k=k,
             query_text=query_text,
+            granularity=granularity,
             has_journal=has_journal,
             date_range=date_range,
             deprioritize_strength=deprioritize_strength,

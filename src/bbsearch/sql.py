@@ -5,6 +5,24 @@ import numpy as np
 import pandas as pd
 
 
+def retrieve_article_ids(engine):
+    """Retrieve all articles_id from sentences table.
+
+    Parameters
+    ----------
+    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article_id_dict: dict
+        Dictionary giving the corresponding article_id for a given sentence_id
+    """
+    result_proxy = engine.execute("SELECT sentence_id, article_id FROM sentences")
+    article_id_dict = dict(result_proxy.fetchall())
+    return article_id_dict
+
+
 def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
     """Retrieve sentences given sentence ids.
 
