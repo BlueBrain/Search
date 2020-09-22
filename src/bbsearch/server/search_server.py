@@ -7,7 +7,7 @@ from flask import jsonify, request
 
 import bbsearch
 
-from ..embedding_models import BSV, SBERT, USE, SBioBERT
+from ..embedding_models import BSV, SBERT, USE, SBioBERT, Sent2VecModel
 from ..search import LocalSearcher
 from ..utils import H5
 
@@ -109,13 +109,16 @@ class SearchServer:
             The embedding model class.
         """
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
+        s2v_model_name = "new_s2v_model.bin"
         bsv_model_path = self.trained_models_path / bsv_model_name
+        s2v_model_path = self.trained_models_path / s2v_model_name
 
         model_factories = {
             "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
             "USE": lambda: USE(),
             "SBERT": lambda: SBERT(),
+            "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path)
         }
 
         if model_name not in model_factories:

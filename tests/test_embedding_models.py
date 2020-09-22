@@ -16,6 +16,7 @@ from bbsearch.embedding_models import (
     USE,
     EmbeddingModel,
     SBioBERT,
+    Sent2VecModel,
     compute_database_embeddings,
 )
 
@@ -112,6 +113,55 @@ class TestEmbeddingModels:
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == ((700,) if n_sentences == 1 else (n_sentences, 700))
         bsv_model.embed_sentences.assert_called_once()
+
+    @pytest.mark.parametrize('n_sentences', [1, 5])
+    def test_sent2vec_embedding(self, monkeypatch, tmpdir, n_sentences):
+        embedding_dim = 12345
+
+        # Set up the mocks
+        fake_sent2vec_model = Mock(spec=sent2vec.Sent2vecModel)
+        fake_sent2vec_model.embed_sentences.return_value = np.ones(
+            [n_sentences, embedding_dim])
+        fake_sent2vec_model.get_emb_size.return_value = embedding_dim
+
+        fake_sent2vec_module = Mock()
+        fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
+        monkeypatch.setattr('bbsearch.embedding_models.sent2vec', fake_sent2vec_module)
+
+        # Test invalid checkpoint path
+        with pytest.raises(FileNotFoundError):
+            Sent2VecModel(checkpoint_path='')
+
+        # Instantiate the model class
+        new_file_path = Path(tmpdir) / 'test.txt'
+        new_file_path.touch()
+        model = Sent2VecModel(new_file_path)
+
+        # Embedding dimensionality
+        assert model.dim == embedding_dim
+
+        # Set testing sentences and methods
+        dummy_sentence = 'This is a dummy sentence/test.'
+        preprocess_truth = 'dummy sentence/test'
+        if n_sentences == 1:
+            preprocess_method = model.preprocess
+            embed_method = model.embed
+        else:
+            preprocess_method = model.preprocess_many
+            embed_method = model.embed_many
+            dummy_sentence = n_sentences * [dummy_sentence]
+            preprocess_truth = n_sentences * [preprocess_truth]
+
+        # Test preprocessing
+        preprocess_sentence = preprocess_method(dummy_sentence)
+        assert isinstance(preprocess_sentence, str if n_sentences == 1 else list)
+        assert preprocess_sentence == preprocess_truth
+
+        # Test embedding
+        embedding = embed_method(preprocess_sentence)
+        assert isinstance(embedding, np.ndarray)
+        assert embedding.shape == ((model.dim,) if n_sentences == 1 else (n_sentences, model.dim))
+        fake_sent2vec_model.embed_sentences.assert_called_once()
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_sbert_embedding(self, monkeypatch, n_sentences):

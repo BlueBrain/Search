@@ -82,10 +82,10 @@ class SearchWidget(widgets.VBox):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
+            options=['USE', 'SBERT', 'BSV', 'SBioBERT', 'Sent2Vec'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT'],
+                      'Sentence BioBERT', 'Sent2Vec Model'],
             style=self.widgets_style
             )
 
@@ -235,9 +235,9 @@ class SearchWidget(widgets.VBox):
         self.widgets['exclusion_text'].layout.display = 'none'
         # Remove some models: (USE, SBERT, SBioBERT)
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['BSV'],
+            options=['BSV', 'Sent2Vec'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec'],
+            tooltips=['BioSentVec Model', 'Sent2Vec Model'],
             style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(

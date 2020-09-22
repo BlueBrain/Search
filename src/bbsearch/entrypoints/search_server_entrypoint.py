@@ -36,7 +36,7 @@ parser.add_argument("--debug",
                     default=False,
                     help="Enable debug logging messages")
 parser.add_argument("--models",
-                    default="USE,SBERT,SBioBERT,BSV",
+                    default="USE,SBERT,SBioBERT,BSV,Sent2Vec",
                     type=str,
                     help="Models to load in the search server.")
 args = parser.parse_args()
