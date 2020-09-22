@@ -123,8 +123,9 @@ class CORD19DatabaseCreation:
                     self.logger.warning(f'The abstract of article {index} has a length >'
                                         f' {self.max_text_length} and was cut off for the '
                                         f'database.')
-
-                article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
+                with self.engine.begin() as con:
+                    article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
+                                                          if_exists='append')
             except Exception as e:
                 rejected_articles += [index]
                 self.logger.error(f'Number of articles rejected: {len(rejected_articles)}')
@@ -223,7 +224,8 @@ class CORD19DatabaseCreation:
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',
                                                                 'sentence_pos_in_paragraph'])
-                sentences_df.to_sql(name='sentences', con=self.engine, index=False, if_exists='append')
+                with self.engine.begin() as con:
+                    sentences_df.to_sql(name='sentences', con=con, index=False, if_exists='append')
 
             except Exception as e:
                 rejected_articles += [int(article['article_id'])]
