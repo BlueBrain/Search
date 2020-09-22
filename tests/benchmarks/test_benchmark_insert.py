@@ -23,14 +23,12 @@ def insert_without_transactions(data, engine):
 
 def insert_with_transactions(data, engine):
     with engine.begin() as con:
-        data.to_sql('without', con, if_exists="append", index=False)
+        data.to_sql('with', con, if_exists="append", index=False)
 
 
 def test_insert_without_transactions(benchmark, data, engine):
-    result = benchmark(insert_without_transactions, data, engine)
-    print(type(result))
+    benchmark(insert_without_transactions, data, engine)
 
 
 def test_insert_with_transactions(benchmark, data, engine):
-    result = benchmark(insert_with_transactions, data, engine)
-    print(type(result))
+    benchmark(insert_with_transactions, data, engine)
