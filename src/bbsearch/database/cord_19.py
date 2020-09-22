@@ -239,6 +239,11 @@ class CORD19DatabaseCreation:
         mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
         mymodel_url_index.create(bind=self.engine)
 
+        #Create FULLTEXT INDEX
+        self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
+        self.engine.execute('CREATE FULLTEXT INDEX ft_text ON sentences(text)')
+        self.logger.info('Ended creating FULLTEXT INDEX')
+
         return pmc, pdf, rejected_articles
 
     def segment(self, nlp, paragraphs):
