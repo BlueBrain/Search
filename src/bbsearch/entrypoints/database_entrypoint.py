@@ -1,9 +1,21 @@
 """EntryPoint for the creation of the database."""
 import argparse
+import logging
+import pathlib
+
+from ._helper import configure_logging
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--log_dir",
+                    default="/raid/projects/bbs/logs/",
+                    type=str,
+                    help="The directory path where to save the logs.")
+parser.add_argument("--log_name",
+                    default="database_creation.log",
+                    type=str,
+                    help="The name of the log file.")
 parser.add_argument("--data_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v35",
+                    default="/raid/sync/proj115/bbs_data/cord19_v47",
                     type=str,
                     help="The directory path where the metadata.csv and json files are located, "
                          "files needed to create the database")
@@ -16,6 +28,10 @@ args = parser.parse_args()
 
 def main():
     """Run database construction."""
+    # Configure logging
+    log_file = pathlib.Path(args.log_dir) / args.log_name
+    configure_logging(log_file, logging.INFO)
+
     import getpass
     from pathlib import Path
 
@@ -24,7 +40,7 @@ def main():
     from ..database import CORD19DatabaseCreation
 
     if args.db_type == 'sqlite':
-        database_path = '/raid/sync/proj115/bbs_data/cord19_v35/databases/cord19.db'
+        database_path = '/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db'
         if not Path(database_path).exists():
             Path(database_path).touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
@@ -33,7 +49,7 @@ def main():
         mysql_uri = input('MySQL URI:')
         password = getpass.getpass('Password:')
         engine = sqlalchemy.create_engine(f'mysql+pymysql://root:{password}'
-                                          f'@{mysql_uri}/cord19_v35')
+                                          f'@{mysql_uri}/cord19_v47')
     else:
         raise ValueError(f'\"{args.db_type}" is not supported as a db_type.')
 

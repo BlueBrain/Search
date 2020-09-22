@@ -1,5 +1,6 @@
 """Module for the Database Creation."""
 import json
+import logging
 import time
 
 import pandas as pd
@@ -8,7 +9,14 @@ import sqlalchemy
 
 
 class CORD19DatabaseCreation:
-    """Create SQL database from a specified dataset."""
+    """Create SQL database from a specified dataset.
+
+    Attributes
+    ----------
+    max_text_length: int
+        Max length of values in MySQL column of type TEXT. We have to constraint our text values
+        to be smaller than this value (especially articles.abstract and sentences.text)
+    """
 
     def __init__(self,
                  data_path,
@@ -29,16 +37,18 @@ class CORD19DatabaseCreation:
         self.metadata = pd.read_csv(self.data_path / 'metadata.csv')
         self.is_constructed = False
         self.engine = engine
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.max_text_length = 60000
 
     def construct(self):
         """Construct the database."""
         if not self.is_constructed:
             self._schema_creation()
-            print('Schemas of the tables are created.')
+            self.logger.info('Schemas of the tables are created.')
             self._articles_table()
-            print('Articles table is created.')
+            self.logger.info('Articles table is created.')
             self._sentences_table()
-            print('Sentences table is created.')
+            self.logger.info('Sentences table is created.')
             self.is_constructed = True
         else:
             raise ValueError('This database is already constructed!')
@@ -107,15 +117,23 @@ class CORD19DatabaseCreation:
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
             try:
-                article.to_frame().transpose().to_sql(name='articles', con=self.engine, index=False, if_exists='append')
+                if isinstance(article['abstract'], str) and len(article['abstract']) > \
+                        self.max_text_length:
+                    article['abstract'] = article['abstract'][:self.max_text_length]
+                    self.logger.warning(f'The abstract of article {index} has a length >'
+                                        f' {self.max_text_length} and was cut off for the '
+                                        f'database.')
+                with self.engine.begin() as con:
+                    article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
+                                                          if_exists='append')
             except Exception as e:
-                print(e)
                 rejected_articles += [index]
-                print('Number of articles rejected: ', len(rejected_articles))
-                print('Last rejected: ', rejected_articles[-1])
+                self.logger.error(f'Number of articles rejected: {len(rejected_articles)}')
+                self.logger.error(f'Last rejected: {rejected_articles[-1]}')
+                self.logger.error(str(e))
 
             if index % 1000 == 0:
-                print('Number of articles saved: ', index)
+                self.logger.info(f'Number of articles saved: {index}')
 
     def _sentences_table(self, model_name='en_core_sci_lg'):
         """Fill the sentences table thanks to all the json files.
@@ -206,24 +224,26 @@ class CORD19DatabaseCreation:
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',
                                                                 'sentence_pos_in_paragraph'])
-                sentences_df.to_sql(name='sentences', con=self.engine, index=False, if_exists='append')
+                with self.engine.begin() as con:
+                    sentences_df.to_sql(name='sentences', con=con, index=False, if_exists='append')
 
-            except Exception:
+            except Exception as e:
                 rejected_articles += [int(article['article_id'])]
-                print(len(rejected_articles), 'Rejected Articles:', rejected_articles[-1])
+                self.logger.error(f'{len(rejected_articles)} Rejected Articles: '
+                                  f'{rejected_articles[-1]}')
+                self.logger.error(str(e))
 
             num_articles += 1
             if num_articles % 1000 == 0:
-                print('Number of articles: ', num_articles,
-                      'in', f'{time.perf_counter() - start:.1f} seconds')
+                self.logger.info(f'Number of articles: {num_articles} in '
+                                 f'{time.perf_counter() - start:.1f} seconds')
 
         mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
         mymodel_url_index.create(bind=self.engine)
 
         return pmc, pdf, rejected_articles
 
-    @staticmethod
-    def segment(nlp, paragraphs):
+    def segment(self, nlp, paragraphs):
         """Segment a paragraph/article into sentences.
 
         Parameters
@@ -244,8 +264,15 @@ class CORD19DatabaseCreation:
         all_sentences = []
         for paragraph, metadata in nlp.pipe(paragraphs, as_tuples=True):
             for pos, sent in enumerate(paragraph.sents):
+                text = str(sent)
+                if len(text) > self.max_text_length:
+                    text = text[:self.max_text_length]
+                    self.logger.warning(f'One sentence (article {metadata["article_id"]}, '
+                                        f'paragraph {metadata["paragraph_pos_in_article"]},'
+                                        f'sentence pos {pos}) has a length > {self.max_text_length}'
+                                        f'and was cut off for the database.')
                 all_sentences += [
-                    {"text": str(sent), "sentence_pos_in_paragraph": pos, **metadata}
+                    {"text": text, "sentence_pos_in_paragraph": pos, **metadata}
                 ]
 
         return all_sentences

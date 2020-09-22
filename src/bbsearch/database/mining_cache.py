@@ -202,9 +202,8 @@ class Miner:
         df_results["spacy_version"] = self.model.meta["spacy_version"]
 
         self.logger.debug("Writing results to the SQL database")
-        df_results.to_sql(
-            self.target_table_name, con=self.engine, if_exists="append", index=False
-        )
+        with self.engine.begin() as con:
+            df_results.to_sql(self.target_table_name, con=con, if_exists="append", index=False)
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 

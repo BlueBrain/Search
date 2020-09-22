@@ -24,11 +24,11 @@ parser.add_argument("--models_path",
                     type=str,
                     help="The folder with pretrained models")
 parser.add_argument("--embeddings_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v35/embeddings/embeddings_bsv_full.h5",
+                    default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5",
                     type=str,
                     help="The path to an h5 file with the precomputed embeddings")
 parser.add_argument("--database_uri",
-                    default="dgx1.bbp.epfl.ch:8853/cord19_v35",
+                    default="dgx1.bbp.epfl.ch:8853/cord19_v47",
                     type=str,
                     help="The URI to the MySQL database.")
 parser.add_argument("--debug",
@@ -36,7 +36,7 @@ parser.add_argument("--debug",
                     default=False,
                     help="Enable debug logging messages")
 parser.add_argument("--models",
-                    default="USE,SBERT,SBioBERT,BSV",
+                    default="USE,SBERT,SBioBERT,BSV,Sent2Vec",
                     type=str,
                     help="Models to load in the search server.")
 args = parser.parse_args()
