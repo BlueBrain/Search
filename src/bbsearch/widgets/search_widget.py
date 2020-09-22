@@ -4,6 +4,8 @@ import enum
 import functools
 import logging
 import math
+import requests
+import sys
 import textwrap
 
 import ipywidgets as widgets
@@ -32,12 +34,11 @@ class SearchWidget(widgets.VBox):
 
     Parameters
     ----------
-    searcher : bbsearch.search.LocalSearcher or
-               bbsearch.remote_searcher.RemoteSearcher
-        The search engine.
+    bbs_search_url : str
+        The URL of the bbs_search server.
 
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the SQL database
+    bbs_mysql_engine : sqlalchemy.engine.Engine
+        Engine for connections to the bbs_mysql server.
 
     article_saver: bbsearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
@@ -48,15 +49,15 @@ class SearchWidget(widgets.VBox):
     """
 
     def __init__(self,
-                 searcher,
-                 connection,
+                 bbs_search_url,
+                 bbs_mysql_engine,
                  article_saver=None,
                  results_per_page=10
                  ):
         super().__init__()
 
-        self.searcher = searcher
-        self.connection = connection
+        self.bbs_search_url = bbs_search_url
+        self.bbs_mysql_engine = bbs_mysql_engine
         self.article_saver = article_saver
         self.results_per_page = max(1, results_per_page)
         self.n_pages = 1
@@ -343,13 +344,13 @@ class SearchWidget(widgets.VBox):
                 "text"
         """
         sentence = retrieve_sentences_from_sentence_ids(sentence_ids=(sentence_id,),
-                                                        engine=self.connection)
+                                                        engine=self.bbs_mysql_engine)
         article_id, section_name, text, paragraph_id = \
             sentence.iloc[0][['article_id', 'section_name',
                               'text', 'paragraph_pos_in_article']]
 
         article = retrieve_article_metadata_from_article_id(article_id=article_id,
-                                                            engine=self.connection)
+                                                            engine=self.bbs_mysql_engine)
         article_auth, article_title, ref = \
             article.iloc[0][['authors', 'title', 'url']]
 
@@ -404,7 +405,7 @@ class SearchWidget(widgets.VBox):
         if print_whole_paragraph:
             try:
                 paragraph = retrieve_paragraph_from_sentence_id(sentence_id,
-                                                                self.connection)
+                                                                self.bbs_mysql_engine)
                 formatted_output = self.highlight_in_paragraph(
                     paragraph, text)
             except Exception as err:
@@ -432,43 +433,81 @@ class SearchWidget(widgets.VBox):
 
         return article_metadata, formatted_output
 
+    def _collect_search_configuration(self):
+        """Read the search configuration from the widget components.
+
+        Returns
+        -------
+        search_configuration : dict
+            The search configuration.
+        """
+        search_configuration = {
+            "which_model": self.widgets['sent_embedder'].value,
+            "k": self.widgets["top_results"].value,
+            "query_text": self.widgets['query_text'].value,
+            "granularity": self.widgets['granularity'].value,
+            "has_journal": self.widgets['has_journal'].value,
+            "date_range": self.widgets['date_range'].value,
+            "deprioritize_text": self.widgets['deprioritize_text'].value,
+            "deprioritize_strength": self.widgets['deprioritize_strength'].value,
+            "exclusion_text": self.widgets['exclusion_text'].value
+            if 'exclusion_text' in self.widgets.keys() else '',
+            "inclusion_text": self.widgets['inclusion_text'].value,
+            "verbose": False,
+        }
+
+        return search_configuration
+
+    def _query_search_server(self, search_configuration):
+        """Query the search server.
+
+        Parameters
+        ----------
+        search_configuration : dict
+            The search configuration.
+
+        Returns
+        -------
+        result : dict or None
+            If the query was successful then a dictionary with the query
+            results is returned. In case of an error None is returned.
+        """
+        try:
+            response = requests.post(
+                self.bbs_search_url,
+                json=search_configuration)
+            response.raise_for_status()  # if not response.ok
+        except requests.ConnectionError as e:
+            print("Could not connect to the search server.\n\n{e}", file=sys.stderr)
+            result = None
+        except requests.HTTPError as e:
+            # raised by response.raise_for_status()
+            print(f"There was an HTTP error.\n\n{e}", file=sys.stderr)
+            result = None
+        else:
+            result = response.json()
+
+        return result
+
     def _cb_bt_investigate(self, change_dict):
         """Investigate button callback."""
-        # Get user selection
-        which_model = self.widgets['sent_embedder'].value
-        k = self.widgets['top_results'].value
-        query_text = self.widgets['query_text'].value
-        deprioritize_text = self.widgets['deprioritize_text'].value
-        deprioritize_strength = self.widgets['deprioritize_strength'].value
-        exclusion_text = self.widgets['exclusion_text'].value \
-            if 'exclusion_text' in self.widgets.keys() else ''
-        inclusion_text = self.widgets['inclusion_text'].value
-        has_journal = self.widgets['has_journal'].value
-        date_range = self.widgets['date_range'].value
-        granularity = self.widgets['granularity'].value
-
         # Clear output and show waiting message
         timer = Timer()
         self.widgets['out'].clear_output()
         self.widgets['status'].clear_output()
         with self.widgets['status']:
-            header = f'Query: \"{query_text}\"'
+            search_configuration = self._collect_search_configuration()
+            header = f'Query: \"{search_configuration["query_text"]}\"'
             print(header)
             print('-' * len(header))
 
             print('Sending query to server...'.ljust(50), end='', flush=True)
             with timer("server query"):
-                self.current_sentence_ids, *_ = self.searcher.query(
-                    which_model=which_model,
-                    k=k,
-                    granularity=granularity,
-                    query_text=query_text,
-                    has_journal=has_journal,
-                    date_range=date_range,
-                    deprioritize_strength=deprioritize_strength,
-                    deprioritize_text=deprioritize_text,
-                    exclusion_text=exclusion_text,
-                    inclusion_text=inclusion_text)
+                response = self._query_search_server(search_configuration)
+                if response is None:
+                    return
+                else:
+                    self.current_sentence_ids = response["sentence_ids"]
             print(f'{timer["server query"]:7.2f} seconds')
 
             print('Resolving articles...'.ljust(50), end='', flush=True)
@@ -516,7 +555,7 @@ class SearchWidget(widgets.VBox):
             The paragraph IDs corresponding to the sentence IDs
         """
         sentences = retrieve_sentences_from_sentence_ids(sentence_ids=sentence_ids,
-                                                         engine=self.connection)
+                                                         engine=self.bbs_mysql_engine)
         article_ids = sentences['article_id'].to_list()
         paragraph_ids = sentences['paragraph_pos_in_article'].to_list()
 
