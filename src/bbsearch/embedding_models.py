@@ -307,7 +307,7 @@ class Sent2VecModel(EmbeddingModel):
 
         Parameters
         ----------
-        sentences : iterable of str
+        sentences : iterable of str or str
             The sentences to be processed.
 
         Yields
