@@ -4,12 +4,12 @@ import enum
 import functools
 import logging
 import math
-import requests
 import sys
 import textwrap
 
 import ipywidgets as widgets
 import pdfkit
+import requests
 from IPython.display import HTML, display
 
 from .._css import style
@@ -478,7 +478,7 @@ class SearchWidget(widgets.VBox):
                 json=search_configuration)
             response.raise_for_status()  # if not response.ok
         except requests.ConnectionError as e:
-            print("Could not connect to the search server.\n\n{e}", file=sys.stderr)
+            print(f"Could not connect to the search server.\n\n{e}", file=sys.stderr)
             result = None
         except requests.HTTPError as e:
             # raised by response.raise_for_status()
