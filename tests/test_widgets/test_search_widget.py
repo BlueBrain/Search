@@ -1,4 +1,6 @@
 import contextlib
+from functools import partial
+import json
 import os
 import sys
 import textwrap
@@ -9,6 +11,7 @@ from unittest.mock import Mock
 import ipywidgets
 import numpy as np
 import pytest
+import responses
 import torch
 from IPython.display import HTML
 
@@ -143,6 +146,18 @@ def create_searcher(engine, n_dim=2):
     return searcher
 
 
+def request_callback(request, searcher):
+    payload = json.loads(request.body)
+    top_sentence_ids, top_similarities, stats = searcher.query(**payload)
+    headers = {'request-id': '1234abcdeABCDE'}
+    resp_body = {'sentence_ids': top_sentence_ids.tolist(),
+                 'similarities': top_similarities.tolist(),
+                 'stats': stats}
+    response = (200, headers, json.dumps(resp_body))
+    return response
+
+
+@responses.activate
 @pytest.mark.parametrize('query_text', ['HELLO'])
 @pytest.mark.parametrize('k', [3, 5])
 @pytest.mark.parametrize('results_per_page', [1, 2, 3])
@@ -150,9 +165,16 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     """Test that paging is displaying the right number results"""
 
     searcher = create_searcher(fake_sqlalchemy_engine)
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine),
+
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(connection=fake_sqlalchemy_engine),
                           results_per_page=results_per_page)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -178,6 +200,7 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
         results_left -= displayed_results
 
 
+@responses.activate
 def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     """Check that the most relevant sentence is the first result."""
     n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
@@ -214,10 +237,16 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
                              indices,
                              connection=fake_sqlalchemy_engine)
 
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
     k = 1
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine),
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=k)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -244,6 +273,7 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
 
 
+@responses.activate
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
@@ -251,9 +281,15 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
     k = 10
     result_to_take = 3
 
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine),
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=k)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -292,6 +328,7 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
         raise ValueError(f'Unrecognized saving mode: {saving_mode}')
 
 
+@responses.activate
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """Make sure that default saving buttons result in correct checkboxes."""
@@ -299,9 +336,15 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
     searcher = create_searcher(fake_sqlalchemy_engine)
     k = 10
 
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine),
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=k)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -345,11 +388,19 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
             raise TypeError(f'Unrecognized type: {type(display_obj)}')
 
 
+@responses.activate
 def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     searcher = create_searcher(fake_sqlalchemy_engine)
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine),
+
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=10)
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -365,15 +416,22 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     assert not bot.display_cached
 
 
+@responses.activate
 @pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
     tmpdir = Path(tmpdir)
     searcher = create_searcher(fake_sqlalchemy_engine)
 
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine))
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=(fake_sqlalchemy_engine))
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
@@ -390,15 +448,22 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
 
 
+@responses.activate
 @pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
 def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF article saver state works."""
     tmpdir = Path(tmpdir)
     searcher = create_searcher(fake_sqlalchemy_engine)
 
-    widget = SearchWidget(searcher,
-                          fake_sqlalchemy_engine,
-                          ArticleSaver(fake_sqlalchemy_engine))
+    responses.add_callback(
+        responses.POST, 'http://test',
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+
+    widget = SearchWidget(bbs_search_url='http://test',
+                          bbs_mysql_engine=fake_sqlalchemy_engine,
+                          article_saver=ArticleSaver(fake_sqlalchemy_engine))
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
