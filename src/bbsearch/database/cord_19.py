@@ -104,6 +104,16 @@ class CORD19DatabaseCreation:
         with self.engine.begin() as connection:
             metadata.create_all(connection)
 
+        # Create article_id index
+        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
+        mymodel_url_index.create(bind=self.engine)
+
+        # Create FULLTEXT INDEX
+        if self.engine.url.drivername.startswith('mysql'):
+            self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
+            self.engine.execute('CREATE FULLTEXT INDEX fulltext_text ON sentences(text)')
+            self.logger.info('Ended creating FULLTEXT INDEX')
+
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
 
@@ -235,15 +245,6 @@ class CORD19DatabaseCreation:
             if num_articles % 1000 == 0:
                 self.logger.info(f'Number of articles: {num_articles} in '
                                  f'{time.perf_counter() - start:.1f} seconds')
-
-        mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
-        mymodel_url_index.create(bind=self.engine)
-
-        # Create FULLTEXT INDEX
-        if self.engine.url.drivername.startswith('mysql'):
-            self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
-            self.engine.execute('CREATE FULLTEXT INDEX fulltext_text ON sentences(text)')
-            self.logger.info('Ended creating FULLTEXT INDEX')
 
         return pmc, pdf, rejected_articles
 
