@@ -48,7 +48,7 @@ class TestAnnotations2df:
         # write example twice, but the second one w/o annotations
         with tmp_file.open("w") as f:
             f.write(json.dumps(prodigy_content) + "\n")
-            del prodigy_content['span']
+            del prodigy_content['spans']
             f.write(json.dumps(prodigy_content) + "\n")
 
         df = annotations2df(tmp_file)
