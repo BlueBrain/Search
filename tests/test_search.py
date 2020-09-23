@@ -4,11 +4,11 @@ import numpy as np
 import pytest
 import torch
 
-from bbsearch.search import LocalSearcher
+from bbsearch.search import SearchEngine
 from bbsearch.utils import H5
 
 
-class TestLocalSearcher:
+class TestSearchEngine:
 
     @pytest.mark.parametrize('granularity', ['sentences', 'articles'])
     def test_run_search(self, fake_sqlalchemy_engine, embeddings_h5_path, granularity):
@@ -29,10 +29,10 @@ class TestLocalSearcher:
         norm[norm == 0] = 1
         precomputed_embeddings /= norm
         precomputed_embeddings = {model: precomputed_embeddings}
-        local_searcher = LocalSearcher(embedding_models,
-                                       precomputed_embeddings,
-                                       indices,
-                                       fake_sqlalchemy_engine)
+        search_engine = SearchEngine(embedding_models,
+                                     precomputed_embeddings,
+                                     indices,
+                                     fake_sqlalchemy_engine)
 
         deprioritized_text = 'Vegetables'
         deprioritized_strength = 'Mild'
@@ -41,15 +41,15 @@ class TestLocalSearcher:
                          hasdn,asdnioahsdpihapsdipas;kdn \n
                          jpaijdspojasdn opjpo"""
 
-        top_indices, similarities, stats = local_searcher.query(which_model=model,
-                                                                granularity=granularity,
-                                                                query_text=query_text,
-                                                                deprioritize_text=None,
-                                                                deprioritize_strength=deprioritized_strength,
-                                                                has_journal=True,
-                                                                date_range=(2000, 2021),
-                                                                exclusion_text=exclusion_text,
-                                                                k=k)
+        top_indices, similarities, stats = search_engine.query(which_model=model,
+                                                               granularity=granularity,
+                                                               query_text=query_text,
+                                                               deprioritize_text=None,
+                                                               deprioritize_strength=deprioritized_strength,
+                                                               has_journal=True,
+                                                               date_range=(2000, 2021),
+                                                               exclusion_text=exclusion_text,
+                                                               k=k)
         assert isinstance(stats, dict)
         assert emb_mod.preprocess.call_count == 1
         assert emb_mod.embed.call_count == 1
@@ -64,12 +64,12 @@ class TestLocalSearcher:
                                                              ({sentences_ids})""").fetchall()
             assert len(articles_id) == k
 
-        top_indices, similarities, stats = local_searcher.query(which_model=model,
-                                                                granularity=granularity,
-                                                                query_text=query_text,
-                                                                deprioritize_text=deprioritized_text,
-                                                                date_range=(3000, 3001),
-                                                                k=k)
+        top_indices, similarities, stats = search_engine.query(which_model=model,
+                                                               granularity=granularity,
+                                                               query_text=query_text,
+                                                               deprioritize_text=deprioritized_text,
+                                                               date_range=(3000, 3001),
+                                                               k=k)
 
         assert top_indices.shape == (0,)
         assert similarities.shape == (0,)
@@ -77,11 +77,11 @@ class TestLocalSearcher:
         assert emb_mod.preprocess.call_count == 3
         assert emb_mod.embed.call_count == 3
 
-        top_indices, similarities, stats = local_searcher.query(which_model=model,
-                                                                granularity=granularity,
-                                                                query_text=query_text,
-                                                                deprioritize_text=deprioritized_text,
-                                                                k=k)
+        top_indices, similarities, stats = search_engine.query(which_model=model,
+                                                               granularity=granularity,
+                                                               query_text=query_text,
+                                                               deprioritize_text=deprioritized_text,
+                                                               k=k)
         assert isinstance(stats, dict)
         if granularity == 'sentences':
             assert top_indices.shape == (k,)

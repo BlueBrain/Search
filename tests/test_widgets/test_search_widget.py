@@ -15,7 +15,7 @@ import responses
 import torch
 from IPython.display import HTML
 
-from bbsearch.search import LocalSearcher
+from bbsearch.search import SearchEngine
 from bbsearch.widgets import ArticleSaver, SearchWidget
 from bbsearch.widgets.search_widget import _Save
 
@@ -142,7 +142,7 @@ def create_searcher(engine, n_dim=2):
     precomputed_embeddings = {'BSV': embeddings}
     indices = np.arange(1, n_sentences + 1)
 
-    searcher = LocalSearcher(embedding_models, precomputed_embeddings, indices, connection=engine)
+    searcher = SearchEngine(embedding_models, precomputed_embeddings, indices, connection=engine)
     return searcher
 
 
@@ -237,10 +237,10 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 
     indices = np.arange(1, n_sentences + 1)
 
-    searcher = LocalSearcher(embedding_models,
-                             precomputed_embeddings,
-                             indices,
-                             connection=fake_sqlalchemy_engine)
+    searcher = SearchEngine(embedding_models,
+                            precomputed_embeddings,
+                            indices,
+                            connection=fake_sqlalchemy_engine)
 
     responses.add_callback(
         responses.POST, 'http://test',
