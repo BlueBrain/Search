@@ -45,7 +45,7 @@ extras_require = {
         "cryptography",
         "docker",
         "flake8",
-        "pyaml"
+        "pyaml",
         "pydocstyle",
         "pytest>=4.6",
         "pytest-benchmark",

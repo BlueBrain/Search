@@ -1,8 +1,6 @@
 import json
 import pathlib
-import sqlite3
 from collections import OrderedDict
-from unittest.mock import Mock
 
 import numpy as np
 import pandas as pd
@@ -24,11 +22,10 @@ from bbsearch.mining.eval import (
 class TestAnnotations2df:
 
     @pytest.mark.parametrize('answer', ['accept', 'ignore'])
-    def test_overall(self, monkeypatch, answer, tmpdir):
+    def test_overall(self, answer, tmpdir):
         tmp_dir = pathlib.Path(str(tmpdir))
         tmp_file = tmp_dir / "annot.jsonl"
 
-        n_examples = 2
         prodigy_content = {
             'answer': answer,
             'meta': {'pattern': '', 'source': 'amazing source'},
@@ -48,18 +45,34 @@ class TestAnnotations2df:
                        {'text': '.', 'start': 48, 'end': 49, 'id': 8}]
         }
 
+        # write example twice, but the second one w/o annotations
         with tmp_file.open("w") as f:
-            for _ in range(n_examples):
-                f.write(json.dumps(prodigy_content) + "\n")
+            f.write(json.dumps(prodigy_content) + "\n")
+            del prodigy_content['span']
+            f.write(json.dumps(prodigy_content) + "\n")
 
         df = annotations2df(tmp_file)
 
         assert isinstance(df, pd.DataFrame)
-        assert len(df) == n_examples * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
+        assert len(df) == \
+               2 * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
 
         if answer == 'accept':
             assert {'source', 'class', 'start_char', 'end_char', 'id',
                     'text'} == set(df.columns)
+            # for the first example, annotations are in IOB mode
+            assert set(df['class'][:len(df)//2]) == \
+                   {'O', 'B-PERSON', 'I-PERSON', 'B-GPE', 'B-DATE'}
+
+            # for the second example, no annotations
+            assert set(df['class'][len(df)//2:]) == {'O'}
+
+        # test that it works for more than one file
+        df = annotations2df([tmp_file] * 5)
+        assert isinstance(df, pd.DataFrame)
+
+        assert len(df) == \
+               5 * 2 * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
 
 
 class TestSpacy2df:

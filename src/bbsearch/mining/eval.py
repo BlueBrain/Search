@@ -3,6 +3,7 @@ import copy
 import json
 import string
 from collections import OrderedDict
+from collections.abc import Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,13 +13,13 @@ from spacy.tokens import Doc
 
 
 # TODO : remove references to
-def annotations2df(annots_file, not_entity_symbol='O'):
+def annotations2df(annots_files, not_entity_symbol='O'):
     """Convert prodigy annotations in JSONL format into a pd.DataFrame.
 
     Parameters
     ----------
-    annots_file : str or pathlib.Path
-        Name of the annotation file to load.
+    annots_files : str or iterable of str
+        Name of the annotation file(s) to load.
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.
 
@@ -29,14 +30,21 @@ def annotations2df(annots_file, not_entity_symbol='O'):
         'start_char', end_char', 'id', 'text'.
     """
     final_table_rows = []
-    with open(annots_file) as f:
+
+    if isinstance(annots_files, Iterable):
+        final_tables = [annotations2df(ann, not_entity_symbol) for ann in annots_files]
+        final_table = pd.concat(final_tables, ignore_index=True)
+        return final_table
+
+    with open(annots_files) as f:
         for row in f:
             content = json.loads(row)
 
             if content['answer'] != 'accept':
                 continue
 
-            spans = content['spans']  # list of dict
+            # annotations for the sentence: list of dict (or empty list)
+            spans = content.get('spans', [])
 
             classes = {}
             for ent in spans:
