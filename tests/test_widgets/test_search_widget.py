@@ -1,10 +1,10 @@
 import contextlib
-from functools import partial
 import json
 import os
 import sys
 import textwrap
 from copy import copy
+from functools import partial
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -146,6 +146,17 @@ def create_searcher(engine, n_dim=2):
     return searcher
 
 
+def activate_responses(fake_sqlalchemy_engine):
+    searcher = create_searcher(fake_sqlalchemy_engine)
+    http_address = 'http://test'
+    responses.add_callback(
+        responses.POST, http_address,
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json"
+    )
+    return http_address
+
+
 def request_callback(request, searcher):
     payload = json.loads(request.body)
     top_sentence_ids, top_similarities, stats = searcher.query(**payload)
@@ -164,15 +175,9 @@ def request_callback(request, searcher):
 def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
     """Test that paging is displaying the right number results"""
 
-    searcher = create_searcher(fake_sqlalchemy_engine)
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
-
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(connection=fake_sqlalchemy_engine),
                           results_per_page=results_per_page)
@@ -277,17 +282,12 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
-    searcher = create_searcher(fake_sqlalchemy_engine)
     k = 10
     result_to_take = 3
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=k)
@@ -333,16 +333,10 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
 def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """Make sure that default saving buttons result in correct checkboxes."""
 
-    searcher = create_searcher(fake_sqlalchemy_engine)
     k = 10
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
-
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=k)
@@ -390,15 +384,9 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
 
 @responses.activate
 def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
-    searcher = create_searcher(fake_sqlalchemy_engine)
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
-
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(fake_sqlalchemy_engine),
                           results_per_page=10)
@@ -421,15 +409,9 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
 def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
     tmpdir = Path(tmpdir)
-    searcher = create_searcher(fake_sqlalchemy_engine)
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
-
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=(fake_sqlalchemy_engine))
 
@@ -453,15 +435,9 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
 def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF article saver state works."""
     tmpdir = Path(tmpdir)
-    searcher = create_searcher(fake_sqlalchemy_engine)
+    http_address = activate_responses(fake_sqlalchemy_engine)
 
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
-    )
-
-    widget = SearchWidget(bbs_search_url='http://test',
+    widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(fake_sqlalchemy_engine))
 
