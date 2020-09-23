@@ -19,7 +19,6 @@ Submodules
 
    bbsearch.database
    bbsearch.embedding_models
-   bbsearch.remote_searcher
    bbsearch.search
    bbsearch.sql
    bbsearch.utils
