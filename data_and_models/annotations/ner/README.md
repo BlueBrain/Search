@@ -4,9 +4,6 @@
 (see `raw_sentences/`) or pre-annotated files that require corrections or adding new entity types.
 
 # Content
-## `patterns/patterns.jsonl`
-- Contains all entities that Emmanuelle identified in Ontology v3 (it then 
-pre-annotates those entities in the prodigy GUI).
  
 ## `annotations1_EmmanuelleLogette_2020-06-19_raw1_8FirstLabels.jsonl`	
 ```shell script
