@@ -181,3 +181,28 @@ prodigy ner.manual \
 - 23 tot sentences
 - Annotated by Charlotte Lorin
 - Complete Test set for CELL_COMPARTMENT
+
+## `annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl`
+```shell script
+prodigy ner.correct \
+    annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan \
+    en_ner_bionlp13cg_md \
+    raw8_2020-09-02_cord19v35_CellCompartmentDrugOrgan.jsonl \
+    -l 'ORGAN,SIMPLE_CHEMICAL,CELLULAR_COMPONENT'
+```
+- 383 tot sentences
+- Annotated by EmmanuelleLogette
+- Training set for classes CELL_COMPARTMENT, DRUG, ORGAN
+
+## `annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl`
+```shell script
+prodigy ner.manual \
+    annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway \
+    en_core_web_lg \
+    raw9_2020-09-02_cord19v35_Pathway.jsonl \
+    --patterns pathway_patterns.jsonl \
+    -l 'PATHWAY'
+```
+- 151 tot sentences
+- Annotated by EmmanuelleLogette
+- Training set for class PATHWAY
