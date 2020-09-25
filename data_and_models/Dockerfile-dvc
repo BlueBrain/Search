@@ -1,0 +1,38 @@
+FROM continuumio/miniconda3
+
+# ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
+# ENV http_proxy='http://bbpproxy.epfl.ch:80/'
+# ENV https_proxy='http://bbpproxy.epfl.ch:80/'
+
+# Update conda, install additional system packages
+RUN true \
+	&& conda update conda \
+	&& apt-get update \
+	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
+
+RUN conda install -c carta mysqlclient
+
+# Install requirements.txt
+RUN mkdir -p /bbs/tmp
+COPY /requirements.txt /bbs/tmp
+COPY /prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
+RUN pip install Cython numpy
+RUN pip install -r /bbs/tmp/requirements.txt
+RUN pip install /bbs/tmp/prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
+
+# Jupyter
+RUN conda install -c conda-forge nodejs
+RUN jupyter labextension install @jupyter-widgets/jupyterlab-manager
+RUN jupyter labextension install @jupyterlab/toc
+EXPOSE 8888
+
+RUN groupadd -g 999 docker
+RUN useradd --create-home --uid 1000 --gid docker bbsuser
+
+WORKDIR /bbs
+RUN rm -rf /bbs/tmp
+ENTRYPOINT exec /bin/bash
