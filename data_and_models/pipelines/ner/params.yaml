@@ -29,8 +29,23 @@ train:
       eval_split: 0.1
       n_iter: 10
       dropout: 0.2
-
-model4_craft_annotations6:
-  etypes:
-    ORGANISM: TAXON
-    CHEMICAL: CHEBI
+eval:
+  model1:
+    etypes:
+      DISEASE: DISEASE
+  model2:
+    etypes:
+      CELL_COMPARTMENT: CELLULAR_COMPONENT
+      DRUG: SIMPLE_CHEMICAL
+      ORGAN: ORGAN
+  model3:
+    etypes:
+      CHEMICAL: CHEBI
+      ORGANISM: TAXON
+  model4:
+    etypes:
+      CELL_TYPE: CELL_TYPE
+      PROTEIN: PROTEIN
+  model5:
+    etypes:
+      PATHWAY: PATHWAY
