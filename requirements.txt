@@ -6,7 +6,7 @@ cryptography==3.0
 dash-cytoscape==0.0.5
 dash-table==4.6.2
 docker==4.2.2
-dvc[ssh]==1.6.6
+dvc[ssh]==1.7.9
 flake8==3.8.3
 git+https://github.com/allenai/scibert
 h5py==2.10.0
@@ -30,6 +30,7 @@ pycodestyle==2.6.0
 pymysql==0.10.0
 pytest-cov==2.10.0
 pytest==6.0.1
+pyyaml==5.3.1
 requests==2.23.0
 responses==0.10.15
 scikit-learn==0.23.1
@@ -43,3 +44,4 @@ tensorflow==2.2.0
 torch==1.5.0
 tox==3.18.1
 transformers==2.3.0
+uvicorn==0.11.5
