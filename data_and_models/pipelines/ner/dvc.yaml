@@ -5,6 +5,8 @@ stages:
     deps:
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     - train.py
+    - ../../Dockerfile-dvc
+    - ../../../requirements.txt
     params:
     - train.model1
     outs:
@@ -15,6 +17,8 @@ stages:
     deps:
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     - train.py
+    - ../../Dockerfile-dvc
+    - ../../../requirements.txt
     params:
     - train.model2
     outs:
@@ -25,6 +29,8 @@ stages:
     deps:
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     - train.py
+    - ../../Dockerfile-dvc
+    - ../../../requirements.txt
     params:
     - train.model3
     outs:
@@ -35,6 +41,8 @@ stages:
     deps:
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     - train.py
+    - ../../Dockerfile-dvc
+    - ../../../requirements.txt
     params:
     - train.model4
     outs:
@@ -45,6 +53,8 @@ stages:
     deps:
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     - train.py
+    - ../../Dockerfile-dvc
+    - ../../../requirements.txt
     params:
     - train.model5
     outs:
