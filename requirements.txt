@@ -37,7 +37,7 @@ scikit-learn==0.23.1
 scispacy==0.2.4
 sent2vec-prebuilt
 sentence-transformers==0.2.5.1
-spacy==2.3.1
+spacy==2.3.0
 sphinx-bluebrain-theme==0.2.2
 tensorflow-hub==0.8.0
 tensorflow==2.2.0
