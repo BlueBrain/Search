@@ -2,10 +2,8 @@ train_model1:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     --output_dir ../../models/ner/model1 --model_name model1
   deps:
-  - path: ../../../requirements.txt
-    md5: e42c82bc9d5ec22902c80cfb309ce6de
   - path: ../../Dockerfile-dvc
-    md5: a3d3179dc5d8f5926d41b8e920317bd8
+    md5: 29798e52edaadc9af6a0fbfb1fa71158
   - path: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     md5: 613308ed830d86284a1aee2747d911d0
   - path: train.py
@@ -25,10 +23,8 @@ train_model2:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     --output_dir ../../models/ner/model2 --model_name model2
   deps:
-  - path: ../../../requirements.txt
-    md5: e42c82bc9d5ec22902c80cfb309ce6de
   - path: ../../Dockerfile-dvc
-    md5: a3d3179dc5d8f5926d41b8e920317bd8
+    md5: 29798e52edaadc9af6a0fbfb1fa71158
   - path: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     md5: 2459e49418599ff96ab9db60a29b757b
   - path: train.py
@@ -48,10 +44,8 @@ train_model3:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     --output_dir ../../models/ner/model3 --model_name model3
   deps:
-  - path: ../../../requirements.txt
-    md5: e42c82bc9d5ec22902c80cfb309ce6de
   - path: ../../Dockerfile-dvc
-    md5: a3d3179dc5d8f5926d41b8e920317bd8
+    md5: 29798e52edaadc9af6a0fbfb1fa71158
   - path: ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     md5: 4b6fff4b0091fa10ae7c88a4aeb42ae0
   - path: train.py
@@ -71,10 +65,8 @@ train_model4:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     --output_dir ../../models/ner/model4 --model_name model4
   deps:
-  - path: ../../../requirements.txt
-    md5: e42c82bc9d5ec22902c80cfb309ce6de
   - path: ../../Dockerfile-dvc
-    md5: a3d3179dc5d8f5926d41b8e920317bd8
+    md5: 29798e52edaadc9af6a0fbfb1fa71158
   - path: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     md5: ec5d6b86181b9e4cdefb2b2198d5ae4f
   - path: train.py
@@ -94,10 +86,8 @@ train_model5:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     --output_dir ../../models/ner/model5 --model_name model5
   deps:
-  - path: ../../../requirements.txt
-    md5: e42c82bc9d5ec22902c80cfb309ce6de
   - path: ../../Dockerfile-dvc
-    md5: a3d3179dc5d8f5926d41b8e920317bd8
+    md5: 29798e52edaadc9af6a0fbfb1fa71158
   - path: ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     md5: ceb6ea77d2a6a69962b88218f4f5a663
   - path: train.py

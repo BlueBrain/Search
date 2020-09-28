@@ -13,12 +13,18 @@ RUN true \
 
 RUN conda install -c carta mysqlclient
 
-# Install requirements.txt
+# Revision can be a branch, sha, or tag
+ARG BBS_REVISION=v0.0.2
+ADD . /src
+WORKDIR /src
+RUN pip install git+file://$PWD@$BBS_REVISION
+
+# Assume that we have Prodigy wheel there!
 RUN mkdir -p /bbs/tmp
-COPY /requirements.txt /bbs/tmp
 COPY /prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
-RUN pip install Cython numpy
-RUN pip install -r /bbs/tmp/requirements.txt
+RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
+
+# Install basis scispacy models
 RUN pip install /bbs/tmp/prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
 RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
 RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
