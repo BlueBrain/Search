@@ -14,7 +14,7 @@ RUN true \
 RUN conda install -c carta mysqlclient
 
 # Revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.0.2
+ARG BBS_REVISION=v0.0.3
 ADD . /src
 WORKDIR /src
 RUN pip install git+file://$PWD@$BBS_REVISION
