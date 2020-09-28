@@ -30,22 +30,21 @@ train:
       n_iter: 10
       dropout: 0.2
 eval:
-  model1:
-    etypes:
-      DISEASE: DISEASE
-  model2:
-    etypes:
-      CELL_COMPARTMENT: CELLULAR_COMPONENT
-      DRUG: SIMPLE_CHEMICAL
-      ORGAN: ORGAN
-  model3:
-    etypes:
-      CHEMICAL: CHEBI
-      ORGANISM: TAXON
-  model4:
-    etypes:
-      CELL_TYPE: CELL_TYPE
-      PROTEIN: PROTEIN
-  model5:
-    etypes:
-      PATHWAY: PATHWAY
+  DISEASE:
+    etype_name: DISEASE
+  CELL_COMPARTMENT:
+    etype_name: CELLULAR_COMPONENT
+  DRUG:
+    etype_name: SIMPLE_CHEMICAL
+  ORGAN:
+    etype_name: ORGAN
+  CHEMICAL:
+    etype_name: CHEBI
+  ORGANISM:
+    etype_name: TAXON
+  CELL_TYPE:
+    etype_name: CELL_TYPE
+  PROTEIN:
+    etype_name: PROTEIN
+  PATHWAY:
+    etype_name: PATHWAY

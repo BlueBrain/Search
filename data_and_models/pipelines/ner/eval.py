@@ -1,5 +1,6 @@
 """Evaluation script for NER models."""
 from argparse import ArgumentParser
+from collections import OrderedDict
 import pathlib
 import json
 
@@ -16,35 +17,39 @@ from bbsearch.mining.eval import (
 
 parser = ArgumentParser()
 parser.add_argument(
-    "--annotations_file",
+    "--annotation_files",
     required=True,
     type=str,
-    help="The JSONL file with the test set, i.e. containing "
-         "sentences with ground truth NER annotations.",
+    help="The JSONL file(s) with the test set, i.e. containing "
+    "sentences with ground truth NER annotations. If more than "
+    "one, should be comma-separated.",
 )
 parser.add_argument(
     "--model",
     required=True,
     type=str,
     help="SpaCy model to evaluate. Can either be a SciSpacy model"
-         '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
-         "trained model.",
+    '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
+    "trained model.",
 )
 parser.add_argument(
-    "--stage_name",
+    "--etype", required=True, type=str, help="Name of the entity type.",
+)
+parser.add_argument(
+    "--output_file",
     required=True,
     type=str,
-    help="Name of the stage in the DVC pipeline.",
+    help="Output json file where metrics results should be written.",
 )
 args = parser.parse_args()
 
 
 def main():
-    params = yaml.safe_load(open("params.yaml"))[args.stage_name]
-    etypes = list(params["etypes"].keys())
+    print("Read params.yaml...")
+    params = yaml.safe_load(open("params.yaml"))["eval"][args.etype]
 
     # Load and preprocess the annotations
-    df = annotations2df(args.annotations_file)
+    df = annotations2df(args.annotation_files.split(","))
     ner_model = spacy.load(args.model)
 
     df_pred = []
@@ -67,25 +72,22 @@ def main():
     iob_true = df["class"]
     iob_pred = df["class_pred"]
 
-    for etype in etypes:
+    output_file = pathlib.Path(args.output_file)
+    with output_file.open("w") as f:
+        all_metrics_dict = OrderedDict()
         for mode in ["entity", "token"]:
-            final_dict = ner_report(
+            metrics_dict = ner_report(
                 iob_true,
                 iob_pred,
                 mode=mode,
                 return_dict=True,
-                etypes_map=params["etypes"],
-            )[etype]
-
-            output_file = (
-                    pathlib.Path.cwd().parent.parent
-                    / "metrics"
-                    / "ner"
-                    / f"{args.stage_name}_{etype}_{mode}_metrics.json"
+                etypes_map={args.etype: params["etype_name"]},
+            )[args.etype]
+            metrics_dict = OrderedDict(
+                [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )
-
-            with output_file.open("w") as f:
-                f.write(json.dumps(final_dict))
+            all_metrics_dict.update(metrics_dict)
+        f.write(json.dumps(all_metrics_dict))
 
 
 if __name__ == "__main__":
