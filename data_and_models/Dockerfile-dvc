@@ -29,7 +29,7 @@ RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2
 RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
 RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
 
-RUN pip install uvicorn=0.11.5
+RUN pip install uvicorn==0.11.5
 RUN pip install dvc==1.7.9
 RUN pip install spacy==2.3.0
 
