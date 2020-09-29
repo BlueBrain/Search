@@ -1,6 +1,7 @@
 """Collection of functions for evaluation of NER models."""
 import copy
 import json
+from pathlib import PosixPath
 import string
 from collections import OrderedDict
 from collections.abc import Iterable
@@ -18,7 +19,7 @@ def annotations2df(annots_files, not_entity_symbol='O'):
 
     Parameters
     ----------
-    annots_files : str or iterable of str
+    annots_files : str, iterable of str, path or iterable of path
         Name of the annotation file(s) to load.
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.
@@ -31,14 +32,13 @@ def annotations2df(annots_files, not_entity_symbol='O'):
     """
     final_table_rows = []
 
-    if not isinstance(annots_files, str):
-        if isinstance(annots_files, Iterable):
-            final_tables = [annotations2df(ann, not_entity_symbol) for ann in annots_files]
-            final_table = pd.concat(final_tables, ignore_index=True)
-            return final_table
-        else:
-            raise TypeError("Argument 'annots_files' should be a string or an "
-                            "iterable of strings!")
+    if isinstance(annots_files, list):
+        final_tables = [annotations2df(ann, not_entity_symbol) for ann in annots_files]
+        final_table = pd.concat(final_tables, ignore_index=True)
+        return final_table
+    elif not (isinstance(annots_files, str) or isinstance(annots_files, PosixPath)):
+        raise TypeError("Argument 'annots_files' should be a string or an "
+                        "iterable of strings!")
 
     with open(annots_files) as f:
         for row in f:
