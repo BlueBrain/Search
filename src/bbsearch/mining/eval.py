@@ -3,7 +3,7 @@ import copy
 import json
 import string
 from collections import OrderedDict
-from pathlib import PosixPath
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -35,7 +35,7 @@ def annotations2df(annots_files, not_entity_symbol='O'):
         final_tables = [annotations2df(ann, not_entity_symbol) for ann in annots_files]
         final_table = pd.concat(final_tables, ignore_index=True)
         return final_table
-    elif not (isinstance(annots_files, str) or isinstance(annots_files, PosixPath)):
+    elif not (isinstance(annots_files, str) or isinstance(annots_files, Path)):
         raise TypeError("Argument 'annots_files' should be a string or an "
                         "iterable of strings!")
 
