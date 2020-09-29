@@ -110,9 +110,10 @@ class CORD19DatabaseCreation:
 
         # Create FULLTEXT INDEX
         if self.engine.url.drivername.startswith('mysql'):
-            self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
-            self.engine.execute('CREATE FULLTEXT INDEX fulltext_text ON sentences(text)')
-            self.logger.info('Ended creating FULLTEXT INDEX')
+            with self.engine.begin() as connection:
+                self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
+                connection.execute('CREATE FULLTEXT INDEX fulltext_text ON sentences(text)')
+                self.logger.info('Ended creating FULLTEXT INDEX')
 
     def _articles_table(self):
         """Fill the Article Table thanks to 'metadata.csv'.
