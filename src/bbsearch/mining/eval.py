@@ -19,7 +19,7 @@ def annotations2df(annots_files, not_entity_symbol='O'):
 
     Parameters
     ----------
-    annots_files : str, iterable of str, path or iterable of path
+    annots_files : str, list of str, path or list of path
         Name of the annotation file(s) to load.
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.
