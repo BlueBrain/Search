@@ -1,10 +1,9 @@
 """Collection of functions for evaluation of NER models."""
 import copy
 import json
-from pathlib import PosixPath
 import string
 from collections import OrderedDict
-from collections.abc import Iterable
+from pathlib import PosixPath
 
 import matplotlib.pyplot as plt
 import numpy as np
