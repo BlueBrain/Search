@@ -87,7 +87,7 @@ def main():
                 [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )
             all_metrics_dict.update(metrics_dict)
-        f.write(json.dumps(all_metrics_dict))
+        json.dump(all_metrics_dict, f)
 
 
 if __name__ == "__main__":

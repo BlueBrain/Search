@@ -40,4 +40,4 @@ RUN useradd --create-home --uid 1000 --gid docker bbsuser
 
 WORKDIR /bbs
 RUN rm -rf /bbs/tmp
-ENTRYPOINT exec /bin/bash
+ENTRYPOINT ["/bin/bash"]
