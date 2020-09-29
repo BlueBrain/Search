@@ -18,8 +18,12 @@ def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, fake_sqlalch
 
     version = 'test'
     if fake_sqlalchemy_engine.url.drivername.startswith('mysql'):
+        fake_sqlalchemy_engine.execute("drop database if exists real_test")
         fake_sqlalchemy_engine.execute("create database real_test")
-        engine = sqlalchemy.create_engine(f'{str(fake_sqlalchemy_engine.url)}real_test')
+        fake_url = fake_sqlalchemy_engine.url
+        url = f'{fake_url.drivername}://{fake_url.username}:{fake_url.password}@{fake_url.host}:' \
+              f'{fake_url.port}/'
+        engine = sqlalchemy.create_engine(f'{url}real_test')
     else:
         Path(f'{tmpdir}/cord19_{version}.db').touch()
         engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_{version}.db')
@@ -66,7 +70,7 @@ class TestDatabaseCreation:
 
         assert not indexes_articles
         if real_sqlalchemy_engine.url.drivername.startswith('mysql'):
-            assert len(indexes_sentences) == 3 # article_id, FULLTEXT index, unique_identifier
+            assert len(indexes_sentences) == 3  # article_id, FULLTEXT index, unique_identifier
             for index in indexes_sentences:
                 assert index['name'] in {'sentence_unique_identifier', 'article_id_index',
                                          'fulltext_text'}
