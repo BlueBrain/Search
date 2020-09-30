@@ -9,7 +9,7 @@ from bbsearch.database import CORD19DatabaseCreation
 
 
 @pytest.fixture()
-def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, tmpdir):
+def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, fake_sqlalchemy_engine, tmpdir):
 
     fake_load = Mock()
     fake_load.return_value = model_entities
@@ -17,9 +17,17 @@ def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, tmpdir):
     monkeypatch.setattr('bbsearch.database.cord_19.spacy.load', fake_load)
 
     version = 'test'
-    Path(f'{tmpdir}/cord19_{version}.db').touch()
+    if fake_sqlalchemy_engine.url.drivername.startswith('mysql'):
+        fake_sqlalchemy_engine.execute("drop database if exists real_test")
+        fake_sqlalchemy_engine.execute("create database real_test")
+        fake_url = fake_sqlalchemy_engine.url
+        url = f'{fake_url.drivername}://{fake_url.username}:{fake_url.password}@{fake_url.host}:' \
+              f'{fake_url.port}/'
+        engine = sqlalchemy.create_engine(f'{url}real_test')
+    else:
+        Path(f'{tmpdir}/cord19_{version}.db').touch()
+        engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_{version}.db')
 
-    engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_{version}.db')
     db = CORD19DatabaseCreation(data_path=jsons_path,
                                 engine=engine)
     db.construct()
@@ -61,8 +69,14 @@ class TestDatabaseCreation:
         indexes_sentences = inspector.get_indexes('sentences')
 
         assert not indexes_articles
-        assert len(indexes_sentences) == 1
-        assert indexes_sentences[0]['column_names'][0] == 'article_id'
+        if real_sqlalchemy_engine.url.drivername.startswith('mysql'):
+            assert len(indexes_sentences) == 3  # article_id, FULLTEXT index, unique_identifier
+            for index in indexes_sentences:
+                assert index['name'] in {'sentence_unique_identifier', 'article_id_index',
+                                         'fulltext_text'}
+        else:
+            assert len(indexes_sentences) == 1
+            assert indexes_sentences[0]['column_names'][0] == 'article_id'
 
         duplicates_query = """SELECT COUNT(article_id || ':' ||
                                             paragraph_pos_in_article || ':' ||

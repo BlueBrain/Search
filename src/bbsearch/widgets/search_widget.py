@@ -82,11 +82,20 @@ class SearchWidget(widgets.VBox):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['USE', 'SBERT', 'BSV', 'SBioBERT'],
+            options=['USE', 'SBERT', 'BSV', 'SBioBERT', 'Sent2Vec'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT'],
+                      'Sentence BioBERT', 'Sent2Vec Model'],
             style=self.widgets_style
+            )
+
+        # Select granularity of the search
+        self.widgets['granularity'] = widgets.RadioButtons(
+            options=['sentences', 'articles'],
+            value='sentences',
+            disabled=False,
+            style={'description_width': 'initial', 'button_width': '80px'},
+            description='Granularity of search: ',
             )
 
         # Select n. of top results to return
@@ -226,9 +235,9 @@ class SearchWidget(widgets.VBox):
         self.widgets['exclusion_text'].layout.display = 'none'
         # Remove some models: (USE, SBERT, SBioBERT)
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['BSV'],
+            options=['BSV', 'Sent2Vec'],
             description='Model for Sentence Embedding',
-            tooltips=['BioSentVec'],
+            tooltips=['BioSentVec Model', 'Sent2Vec Model'],
             style=self.widgets_style)
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(
@@ -248,6 +257,7 @@ class SearchWidget(widgets.VBox):
         ])
         self.children = [
             self.widgets['sent_embedder'],
+            self.widgets['granularity'],
             self.widgets['top_results'],
             self.widgets['print_paragraph'],
             self.widgets['query_text'],
@@ -435,6 +445,7 @@ class SearchWidget(widgets.VBox):
         inclusion_text = self.widgets['inclusion_text'].value
         has_journal = self.widgets['has_journal'].value
         date_range = self.widgets['date_range'].value
+        granularity = self.widgets['granularity'].value
 
         # Clear output and show waiting message
         timer = Timer()
@@ -450,6 +461,7 @@ class SearchWidget(widgets.VBox):
                 self.current_sentence_ids, *_ = self.searcher.query(
                     which_model=which_model,
                     k=k,
+                    granularity=granularity,
                     query_text=query_text,
                     has_journal=has_journal,
                     date_range=date_range,
