@@ -67,6 +67,7 @@ class SearchServer(Flask):
         self.local_searcher = None
         self.search_engine_init_thread = threading.Thread(
             target=self._init_search_engine,
+            daemon=True,  # finish __init__ without waiting for the thread
         )
         self.search_engine_init_thread.start()
 
@@ -185,9 +186,12 @@ class SearchServer(Flask):
         self.logger.info("Search query received")
 
         if self.local_searcher is None:
+            self.logger.warning("Query while search engine not yet initialized")
             if self.search_engine_init_thread.is_alive():
+                self.logger.warning("The search engine is still being initialized")
                 return "Search engine still initializing. Wait and try again later.", 500
             else:
+                self.logger.error("The search engine initializer thread is dead.")
                 return "There was an error and the search engine could not be initialized", 500
 
         if request.is_json:
