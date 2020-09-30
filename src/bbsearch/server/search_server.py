@@ -1,6 +1,7 @@
 """The search server."""
 import logging
 import pathlib
+import threading
 
 import torch
 from flask import Flask, jsonify, request
@@ -62,6 +63,19 @@ class SearchServer(Flask):
             for model_name in models
         }
 
+        self.logger.info("Spawning the search engine initialisation thread...")
+        self.local_searcher = None
+        self.search_engine_init_thread = threading.Thread(
+            target=self._init_search_engine,
+        )
+        self.search_engine_init_thread.start()
+
+        self.add_url_rule("/help", view_func=self.help, methods=["POST"])
+        self.add_url_rule("/", view_func=self.query, methods=["POST"])
+
+        self.logger.info("Initialization done.")
+
+    def _init_search_engine(self):
         self.logger.info("Loading precomputed embeddings...")
         # here we're assuming that all embeddings (up to the 0th row)
         # are correctly populated, note the `[1:]` slice.
@@ -88,11 +102,6 @@ class SearchServer(Flask):
             self.indices,
             self.connection
         )
-
-        self.add_url_rule("/help", view_func=self.help, methods=["POST"])
-        self.add_url_rule("/", view_func=self.query, methods=["POST"])
-
-        self.logger.info("Initialization done.")
 
     def _get_model(self, model_name):
         """Construct an embedding model from its name.
@@ -174,6 +183,13 @@ class SearchServer(Flask):
             The JSON response to the query.
         """
         self.logger.info("Search query received")
+
+        if self.local_searcher is None:
+            if self.search_engine_init_thread.is_alive():
+                return "Search engine still initializing. Wait and try again later.", 500
+            else:
+                return "There was an error and the search engine could not be initialized", 500
+
         if request.is_json:
             self.logger.info("Search query is JSON. Processing.")
             json_request = request.get_json()
