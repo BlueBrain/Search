@@ -20,10 +20,13 @@ USER serveruser
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
+# Note the "timeout" parameter. That's to let the server initialisation finish before
+# gunicorn decides that the worker is not responsive and restarts it again.
+# Might think about a better solution in the future... (initialize in a threading?)
 EXPOSE 8080
 ENTRYPOINT [\
 "gunicorn", \
 "--bind", "0.0.0.0:8080", \
 "--workers", "1", \
-"--timeout", "180", \
+"--timeout", "3600", \
 "bbsearch.entrypoints:get_search_app()"]
