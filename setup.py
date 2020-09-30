@@ -15,6 +15,7 @@ install_requires = [
     "ipywidgets",
     "jupyter_dash",
     "jupyter_server_proxy",
+    "langdetect",
     "matplotlib",
     "mysqlclient",
     "networkx",
