@@ -5,7 +5,7 @@ stages:
     deps:
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     - train.py
-    - ../../Dockerfile-dvc
+    - Dockerfile
     params:
     - train.model1
     outs:
@@ -16,7 +16,7 @@ stages:
     deps:
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     - train.py
-    - ../../Dockerfile-dvc
+    - Dockerfile
     params:
     - train.model2
     outs:
@@ -27,7 +27,7 @@ stages:
     deps:
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     - train.py
-    - ../../Dockerfile-dvc
+    - Dockerfile
     params:
     - train.model3
     outs:
@@ -38,7 +38,7 @@ stages:
     deps:
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     - train.py
-    - ../../Dockerfile-dvc
+    - Dockerfile
     params:
     - train.model4
     outs:
@@ -49,7 +49,7 @@ stages:
     deps:
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     - train.py
-    - ../../Dockerfile-dvc
+    - Dockerfile
     params:
     - train.model5
     outs:
@@ -59,7 +59,7 @@ stages:
       --model ../../models/ner/model1 --output_file ../../metrics/ner/disease.json
       --etype DISEASE
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model1
@@ -73,7 +73,7 @@ stages:
       --model ../../models/ner/model2 --output_file ../../metrics/ner/cell_compartment.json
       --etype CELL_COMPARTMENT
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model2
@@ -87,7 +87,7 @@ stages:
       --model ../../models/ner/model2 --output_file ../../metrics/ner/drug.json --etype
       DRUG
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model2
@@ -101,7 +101,7 @@ stages:
       --model ../../models/ner/model2 --output_file ../../metrics/ner/organ.json --etype
       ORGAN
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model2
@@ -115,7 +115,7 @@ stages:
       --model ../../models/ner/model3 --output_file ../../metrics/ner/chemical.json
       --etype CHEMICAL
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model3
@@ -129,7 +129,7 @@ stages:
       --model ../../models/ner/model3 --output_file ../../metrics/ner/organism.json
       --etype ORGANISM
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model3
@@ -143,7 +143,7 @@ stages:
       --model ../../models/ner/model4 --output_file ../../metrics/ner/cell_type.json
       --etype CELL_TYPE
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model4
@@ -157,7 +157,7 @@ stages:
       --model ../../models/ner/model4 --output_file ../../metrics/ner/protein.json
       --etype PROTEIN
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model4
@@ -171,7 +171,7 @@ stages:
       --model ../../models/ner/model5 --output_file ../../metrics/ner/pathway.json
       --etype PATHWAY
     deps:
-    - ../../Dockerfile-dvc
+    - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     - ../../models/ner/model5

@@ -2,7 +2,7 @@ train_model1:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     --output_dir ../../models/ner/model1 --model_name model1
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     md5: 613308ed830d86284a1aee2747d911d0
@@ -23,7 +23,7 @@ train_model2:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     --output_dir ../../models/ner/model2 --model_name model2
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     md5: 2459e49418599ff96ab9db60a29b757b
@@ -44,7 +44,7 @@ train_model3:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     --output_dir ../../models/ner/model3 --model_name model3
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     md5: 4b6fff4b0091fa10ae7c88a4aeb42ae0
@@ -65,7 +65,7 @@ train_model4:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     --output_dir ../../models/ner/model4 --model_name model4
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     md5: ec5d6b86181b9e4cdefb2b2198d5ae4f
@@ -86,7 +86,7 @@ train_model5:
   cmd: python train.py --annotation_files ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     --output_dir ../../models/ner/model5 --model_name model5
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     md5: ceb6ea77d2a6a69962b88218f4f5a663
@@ -108,7 +108,7 @@ eval_disease:
     --model ../../models/ner/model1 --output_file ../../metrics/ner/disease.json --etype
     DISEASE
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -130,7 +130,7 @@ eval_cell_compartment:
     --model ../../models/ner/model2 --output_file ../../metrics/ner/cell_compartment.json
     --etype CELL_COMPARTMENT
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -152,7 +152,7 @@ eval_drug:
     --model ../../models/ner/model2 --output_file ../../metrics/ner/drug.json --etype
     DRUG
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -174,7 +174,7 @@ eval_organ:
     --model ../../models/ner/model2 --output_file ../../metrics/ner/organ.json --etype
     ORGAN
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -196,7 +196,7 @@ eval_chemical:
     --model ../../models/ner/model3 --output_file ../../metrics/ner/chemical.json
     --etype CHEMICAL
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -218,7 +218,7 @@ eval_organism:
     --model ../../models/ner/model3 --output_file ../../metrics/ner/organism.json
     --etype ORGANISM
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -240,7 +240,7 @@ eval_cell_type:
     --model ../../models/ner/model4 --output_file ../../metrics/ner/cell_type.json
     --etype CELL_TYPE
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -262,7 +262,7 @@ eval_protein:
     --model ../../models/ner/model4 --output_file ../../metrics/ner/protein.json --etype
     PROTEIN
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
@@ -284,7 +284,7 @@ eval_pathway:
     --model ../../models/ner/model5 --output_file ../../metrics/ner/pathway.json --etype
     PATHWAY
   deps:
-  - path: ../../Dockerfile-dvc
+  - path: Dockerfile
     md5: 9108c97f69d340d3fc2d8e1f735ffe52
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
