@@ -1,0 +1,3 @@
+outs:
+- md5: 998e96d170fc05117d978a588d0f07a8
+  path: raw5_2020-07-08_cord19_Drug_TestSet.jsonl

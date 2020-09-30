@@ -1,7 +1,7 @@
 """Subpackage for text mining."""
 
 from .attributes import AttributeAnnotationTab, AttributeExtractor, TextCollectionWidget
-from .eval import prodigy2df, spacy2df
+from .eval import annotations2df, spacy2df
 from .pipeline import SPECS, run_pipeline
 from .relation import ChemProt, REModel, StartWithTheSameLetter, annotate
 
@@ -15,6 +15,6 @@ __all__ = [
     'StartWithTheSameLetter',
     'annotate',
     'run_pipeline',
-    'prodigy2df',
+    'annotations2df',
     'spacy2df'
 ]
