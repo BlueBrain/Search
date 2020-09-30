@@ -1,59 +1,45 @@
 """Entrypoint for launching an embedding server."""
-import argparse
 import logging
-import os
 import pathlib
 
-from ._helper import configure_logging
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--host",
-                    default="0.0.0.0",
-                    type=str,
-                    help="The server host IP")
-parser.add_argument("--port",
-                    default=8080,
-                    type=int,
-                    help="The server port")
-parser.add_argument("--bsv_checkpoints",
-                    default='/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
-                    type=str,
-                    help="Path to file containing the checkpoints for the BSV model.")
-args = parser.parse_args()
+from ._helper import configure_logging, get_var, run_server
 
 
-def main():
-    """Parse arguments and run Flask application."""
-    # Configure logging
-    log_dir = os.getenv("LOG_DIR", "/")
-    log_name = os.getenv("LOG_NAME", "bbs_embedding.log")
-    log_file = pathlib.Path(log_dir) / log_name
-    configure_logging(log_file, logging.INFO)
-
-    # Start server
-    from flask import Flask
-
+def get_embedding_app():
+    """Construct the embedding flask app."""
     from ..embedding_models import BSV, SBERT, USE, SBioBERT
     from ..server.embedding_server import EmbeddingServer
 
+    # Read configuration
+    log_file = get_var("BBS_EMBEDDING_LOG_FILE", check_not_set=False)
+    log_level = get_var("BBS_EMBEDDING_LOG_LEVEL", logging.INFO, var_type=int)
+
+    bsv_checkpoint = get_var("BBS_EMBEDDING_BSV_CHECKPOINT_PATH")
+
+    # Configure logging
+    configure_logging(log_file, log_level)
+    logger = logging.getLogger(__name__)
+
+    # Load embedding models
+    logger.info("Loading embedding models")
     embedding_models = {
-        'USE': USE(),
-        'SBERT': SBERT(),
-        'BSV': BSV(checkpoint_model_path=pathlib.Path(args.bsv_checkpoints)),
-        'SBioBERT': SBioBERT()}
+        "USE": USE(),
+        "SBERT": SBERT(),
+        "BSV": BSV(checkpoint_model_path=pathlib.Path(bsv_checkpoint)),
+        "SBioBERT": SBioBERT(),
+    }
 
     # Create Server app
-    app = Flask("BBSearch Embedding Server")
-    EmbeddingServer(app=app,
-                    embedding_models=embedding_models
-                    )
-    app.run(
-        host=args.host,
-        port=args.port,
-        threaded=True,
-        debug=False,
-    )
+    logger.info("Creating the server app")
+    embedding_app = EmbeddingServer(embedding_models)
+
+    return embedding_app
+
+
+def run_embedding_server():
+    """Run the embedding server."""
+    run_server(get_embedding_app, "embedding")
 
 
 if __name__ == "__main__":
-    main()
+    exit(run_embedding_server)

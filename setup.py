@@ -79,9 +79,9 @@ setup(
             "compute_embeddings = bbsearch.entrypoints.embeddings_entrypoint:main",
             "create_database = bbsearch.entrypoints.database_entrypoint:main",
             "create_mining_cache = bbsearch.entrypoints:run_create_mining_cache",
-            "embedding_server = bbsearch.entrypoints.embedding_server_entrypoint:main",
-            "mining_server = bbsearch.entrypoints.mining_server_entrypoint:main",
-            "search_server = bbsearch.entrypoints.search_server_entrypoint:main",
+            "embedding_server = bbsearch.entrypoints:run_embedding_server",
+            "mining_server = bbsearch.entrypoints:run_mining_server",
+            "search_server = bbsearch.entrypoints:run_search_server",
         ]
     },
 )
