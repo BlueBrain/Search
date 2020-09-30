@@ -10,28 +10,24 @@ RUN true \
 	&& conda update conda \
 	&& apt-get update \
 	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
-
 RUN conda install -c carta mysqlclient
 
-# Revision can be a branch, sha, or tag
+# Install basis SciSpaCy models
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
+RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
+
+# Install Prodigy -- assume that we have Prodigy wheel there!
+RUN mkdir -p /bbs/tmp
+COPY prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
+RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
+
+# Instal BlueBrainSearach -- revision can be a branch, sha, or tag
 ARG BBS_REVISION=v0.0.3
 ADD . /src
 WORKDIR /src
 RUN pip install git+file://$PWD@$BBS_REVISION
 
-# Assume that we have Prodigy wheel there!
-RUN mkdir -p /bbs/tmp
-COPY /prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
-RUN pip install /bbs/tmp/prodigy-1.10.0-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
-
-# Install basis scispacy models
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
-
-RUN pip install uvicorn==0.11.5
-RUN pip install dvc==1.7.9
-RUN pip install spacy==2.3.0
 
 EXPOSE 8888
 
