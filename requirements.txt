@@ -6,6 +6,7 @@ cryptography==3.0
 dash-cytoscape==0.0.5
 dash-table==4.6.2
 docker==4.2.2
+dvc[ssh]==1.7.9
 flake8==3.8.3
 git+https://github.com/allenai/scibert
 h5py==2.10.0

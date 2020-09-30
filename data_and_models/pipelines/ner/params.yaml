@@ -1,0 +1,50 @@
+train:
+  model1:
+    prodigy_train_kwargs:
+      spacy_model: en_ner_bc5cdr_md
+      eval_split: 0.1
+      n_iter: 10
+      dropout: 0.2
+  model2:
+    prodigy_train_kwargs:
+      spacy_model: en_ner_bionlp13cg_md
+      eval_split: 0.1
+      n_iter: 10
+      dropout: 0.2
+  model3:
+    prodigy_train_kwargs:
+      spacy_model: en_ner_craft_md
+      eval_split: 0.1
+      n_iter: 10
+      dropout: 0.2
+  model4:
+    prodigy_train_kwargs:
+      spacy_model: en_ner_jnlpba_md
+      eval_split: 0.1
+      n_iter: 10
+      dropout: 0.2
+  model5:
+    prodigy_train_kwargs:
+      spacy_model: en_ner_craft_md
+      eval_split: 0.1
+      n_iter: 10
+      dropout: 0.2
+eval:
+  DISEASE:
+    etype_name: DISEASE
+  CELL_COMPARTMENT:
+    etype_name: CELLULAR_COMPONENT
+  DRUG:
+    etype_name: SIMPLE_CHEMICAL
+  ORGAN:
+    etype_name: ORGAN
+  CHEMICAL:
+    etype_name: CHEBI
+  ORGANISM:
+    etype_name: TAXON
+  CELL_TYPE:
+    etype_name: CELL_TYPE
+  PROTEIN:
+    etype_name: PROTEIN
+  PATHWAY:
+    etype_name: PATHWAY

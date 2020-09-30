@@ -1,0 +1,4 @@
+[core]
+    remote = gpfs_ssh
+['remote "gpfs_ssh"']
+    url = ssh://bbpv1.bbp.epfl.ch/gpfs/bbp.cscs.ch/data/project/proj115/dvc_remote_storage/
