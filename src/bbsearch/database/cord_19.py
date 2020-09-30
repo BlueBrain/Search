@@ -3,10 +3,11 @@ import json
 import logging
 import time
 
-import langdetect
 import pandas as pd
 import spacy
 import sqlalchemy
+from langdetect import DetectorFactory, detect_langs
+from langdetect.lang_detect_exception import LangDetectException
 
 
 class CORD19DatabaseCreation:
@@ -293,9 +294,12 @@ class CORD19DatabaseCreation:
 
         return all_sentences
 
-    @staticmethod
-    def is_article_in_english(article):
+    def is_article_in_english(self, article):
         """Check if the article (thanks to title and abstract) is in english.
+
+        Note the algorithm seems to be non-deterministic,
+        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
+        This is the reason of using `DetectorFactory.seed = 0`
 
         Parameters
         ----------
@@ -307,21 +311,30 @@ class CORD19DatabaseCreation:
         is_english: bool
             True if article is in english, otherwise False.
         """
-        is_english, is_title_english, is_abstract_english = False, False, False
+        DetectorFactory.seed = 0
+        is_title_english, is_abstract_english = False, False
 
         if isinstance(article['title'], str) and article['title'] is not None:
-            title_stats = langdetect.detect_langs(article['title'])
-            for lang_title in title_stats:
-                if lang_title.lang == 'en':
-                    is_title_english = True
+            try:
+                title_stats = detect_langs(article['title'])
+                for lang_title in title_stats:
+                    if lang_title.lang == 'en':
+                        is_title_english = True
+            except LangDetectException as e:
+                self.logger.info(e)
+                is_title_english = None
         else:
             is_title_english = None
 
         if isinstance(article['abstract'], str) and article['abstract'] is not None:
-            abstract_stats = langdetect.detect_langs(article['abstract'])
-            for lang_abstract in abstract_stats:
-                if lang_abstract.lang == 'en':
-                    is_abstract_english = True
+            try:
+                abstract_stats = detect_langs(article['abstract'])
+                for lang_abstract in abstract_stats:
+                    if lang_abstract.lang == 'en':
+                        is_abstract_english = True
+            except LangDetectException as e:
+                self.logger.info(e)
+                is_abstract_english = None
         else:
             is_abstract_english = None
 
