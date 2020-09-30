@@ -40,6 +40,7 @@ def get_search_app():
     server_app = SearchServer(
         models_path, embeddings_path, indices, engine, models_list
     )
+    logger.info("Search server app created successfully.")
 
     return server_app
 

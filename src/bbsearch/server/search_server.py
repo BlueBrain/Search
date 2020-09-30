@@ -67,7 +67,7 @@ class SearchServer(Flask):
         self.local_searcher = None
         self.search_engine_init_thread = threading.Thread(
             target=self._init_search_engine,
-            daemon=True,  # finish __init__ without waiting for the thread
+            daemon=True,
         )
         self.search_engine_init_thread.start()
 
