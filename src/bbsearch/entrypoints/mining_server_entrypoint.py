@@ -12,8 +12,8 @@ def get_mining_app():
     from ..server.mining_server import MiningServer
 
     # Read configuration
-    log_file = get_var("BBS_EMBEDDING_LOG_FILE", check_not_set=False)
-    log_level = get_var("BBS_EMBEDDING_LOG_LEVEL", logging.INFO, var_type=int)
+    log_file = get_var("BBS_MINING_LOG_FILE", check_not_set=False)
+    log_level = get_var("BBS_MINING_LOG_LEVEL", logging.INFO, var_type=int)
 
     ee_models_library = get_var("BBS_MINING_EE_MODEL_LIBRARY")
     db_type = get_var("BBS_MINING_DB_TYPE")
