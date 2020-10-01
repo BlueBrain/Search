@@ -8,7 +8,7 @@ from flask import Flask, jsonify, request
 import bbsearch
 
 from ..embedding_models import BSV, SBERT, USE, SBioBERT, Sent2VecModel
-from ..search import LocalSearcher
+from ..search import SearchEngine
 from ..utils import H5
 
 
@@ -81,8 +81,8 @@ class SearchServer(Flask):
             embeddings_t /= norm
             self.precomputed_embeddings[model_name] = embeddings_t
 
-        self.logger.info("Constructing the local searcher...")
-        self.local_searcher = LocalSearcher(
+        self.logger.info("Constructing the search engine...")
+        self.search_engine = SearchEngine(
             self.embedding_models,
             self.precomputed_embeddings,
             self.indices,
@@ -188,7 +188,7 @@ class SearchServer(Flask):
             self.logger.info(f"query_text : {query_text}")
 
             self.logger.info("Starting the search...")
-            sentence_ids, similarities, stats = self.local_searcher.query(
+            sentence_ids, similarities, stats = self.search_engine.query(
                 which_model,
                 k,
                 query_text,

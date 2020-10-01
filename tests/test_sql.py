@@ -24,7 +24,6 @@ class TestNoSQL:
                                              'mining.attributes',
                                              'mining.pipeline',
                                              'mining.relation',
-                                             'remote_searcher',
                                              'search',
                                              'server.embedding_server',
                                              'server.mining_server',
