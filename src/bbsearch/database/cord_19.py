@@ -294,6 +294,40 @@ class CORD19DatabaseCreation:
 
         return all_sentences
 
+    def is_text_in_english(self, text):
+        """Check if paragraphs are in english.
+
+        Note the algorithm seems to be non-deterministic,
+        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
+        This is the reason of using `DetectorFactory.seed = 0`
+
+        Parameters
+        ----------
+        text: str
+            Text to analyze
+
+        Returns
+        -------
+        is_english: bool
+            True if article is in english, if False, english is not detected as one of the
+            possible language. If None, exception occurs or text was None.
+        """
+        DetectorFactory.seed = 0
+        is_english = False
+        if isinstance(text, str):
+            try:
+                text_stats = detect_langs(text)
+                for lang_text in text_stats:
+                    if lang_text.lang == 'en':
+                        is_english = True
+            except LangDetectException as e:
+                self.logger.info(e)
+                is_english = None
+        else:
+            is_english = None
+
+        return is_english
+
     def is_article_in_english(self, article):
         """Check if the article (thanks to title and abstract) is in english.
 
@@ -311,33 +345,34 @@ class CORD19DatabaseCreation:
         is_english: bool
             True if article is in english, otherwise False.
         """
-        DetectorFactory.seed = 0
-        is_title_english, is_abstract_english = False, False
+        is_title_english = self.is_text_in_english(article['title']) or True
+        is_abstract_english = self.is_text_in_english(article['abstract']) or True
 
-        if isinstance(article['title'], str) and article['title'] is not None:
-            try:
-                title_stats = detect_langs(article['title'])
-                for lang_title in title_stats:
-                    if lang_title.lang == 'en':
-                        is_title_english = True
-            except LangDetectException as e:
-                self.logger.info(e)
-                is_title_english = None
-        else:
-            is_title_english = None
+        is_english = is_title_english and is_abstract_english
 
-        if isinstance(article['abstract'], str) and article['abstract'] is not None:
-            try:
-                abstract_stats = detect_langs(article['abstract'])
-                for lang_abstract in abstract_stats:
-                    if lang_abstract.lang == 'en':
-                        is_abstract_english = True
-            except LangDetectException as e:
-                self.logger.info(e)
-                is_abstract_english = None
-        else:
-            is_abstract_english = None
+        return is_english
 
-        is_english = is_title_english or is_abstract_english
+    def is_text_in_english(self, paragraphs):
+        """Check if paragraphs are in english.
+
+        Note the algorithm seems to be non-deterministic,
+        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
+        This is the reason of using `DetectorFactory.seed = 0`
+
+        Parameters
+        ----------
+        paragraphs: List of tuple
+            List of tuple of format (text, metadata)
+
+        Returns
+        -------
+        is_english: bool
+            True if article is in english, otherwise False.
+        """
+        text = ''
+        for p, _ in paragraphs:
+            text = text + ' ' + p
+
+        is_english = self.is_text_in_english(text)
 
         return is_english
