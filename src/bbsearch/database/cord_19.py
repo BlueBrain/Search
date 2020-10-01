@@ -119,8 +119,10 @@ class CORD19DatabaseCreation:
         df.drop_duplicates('cord_uid', keep='first', inplace=True)
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
-            text = article['title'] + ' ' + article['abstract']
-            lang_detected = self.is_text_in_english(text)
+            title = article['title'] if isinstance(article['title'], str) else ''
+            abstract = article['abstract'] if isinstance(article['abstract'], str) else ''
+            text = title + ' ' + abstract
+            lang_detected = self.detect_text_language(text)
             try:
                 if isinstance(article['abstract'], str) and len(article['abstract']) > \
                         self.max_text_length:
@@ -129,7 +131,7 @@ class CORD19DatabaseCreation:
                                         f' {self.max_text_length} and was cut off for the '
                                         f'database.')
                 with self.engine.begin() as con:
-                    article = {'lang_detected': lang_detected, **article}
+                    article = pd.Series({'lang_detected': lang_detected, **article})
                     article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
                                                           if_exists='append')
             except Exception as e:
@@ -291,8 +293,8 @@ class CORD19DatabaseCreation:
 
         return all_sentences
 
-    def is_text_in_english(self, text):
-        """Check if paragraphs are in english.
+    def detect_text_language(self, text):
+        """Detect the language of a given text.
 
         Note the algorithm seems to be non-deterministic,
         as mentioned in https://github.com/Mimino666/langdetect#basic-usage.

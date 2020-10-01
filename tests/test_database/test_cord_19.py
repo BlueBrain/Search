@@ -54,7 +54,7 @@ class TestDatabaseCreation:
         columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
                             "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
                             "mag_id", "arxiv_id", "pdf_json_files",
-                            "pmc_json_files", "who_covidence_id", "s2_id", "url"}
+                            "pmc_json_files", "who_covidence_id", "s2_id", "url", "lang_detected"}
         articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1",
                                            real_sqlalchemy_engine).columns)
         assert columns_expected == articles_columns
@@ -124,6 +124,7 @@ class TestDatabaseCreation:
             fake_columns = fake_inspector.get_columns(table_name)
             assert real_columns
             assert fake_columns
+            assert len(real_columns) == len(fake_columns)
             for x, y in zip(real_columns, fake_columns):
                 assert str(x['type']) == str(y['type'])
                 assert x['name'] == y['name']
