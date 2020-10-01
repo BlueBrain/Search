@@ -6,7 +6,7 @@ import time
 import pandas as pd
 import spacy
 import sqlalchemy
-from langdetect import DetectorFactory, detect_langs
+from langdetect import DetectorFactory, detect
 from langdetect.lang_detect_exception import LangDetectException
 
 
@@ -81,7 +81,8 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
                              sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
                              sqlalchemy.Column('url', sqlalchemy.Text()),
-                             sqlalchemy.Column('s2_id', sqlalchemy.Text())
+                             sqlalchemy.Column('s2_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('lang_detected', sqlalchemy.Text())
                              )
 
         self.sentences_table = \
@@ -114,32 +115,28 @@ class CORD19DatabaseCreation:
         Moreover, the columns are renamed (cfr. _rename_columns)
         """
         rejected_articles = []
-        not_english_articles = []
         df = self.metadata.copy()
         df.drop_duplicates('cord_uid', keep='first', inplace=True)
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
-            is_english = self.is_article_in_english(article)
-            if is_english is not None and is_english:
-                try:
-                    if isinstance(article['abstract'], str) and len(article['abstract']) > \
-                            self.max_text_length:
-                        article['abstract'] = article['abstract'][:self.max_text_length]
-                        self.logger.warning(f'The abstract of article {index} has a length >'
-                                            f' {self.max_text_length} and was cut off for the '
-                                            f'database.')
-                    with self.engine.begin() as con:
-                        article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
-                                                              if_exists='append')
-                except Exception as e:
-                    rejected_articles += [index]
-                    self.logger.error(f'Number of articles rejected: {len(rejected_articles)}')
-                    self.logger.error(f'Last rejected: {rejected_articles[-1]}')
-                    self.logger.error(str(e))
-            else:
-                not_english_articles += [index]
-                self.logger.info(f'Article {index} seems to be not in english')
-                self.logger.info(f'Number of articles not in english: {len(not_english_articles)}')
+            text = article['title'] + ' ' + article['abstract']
+            lang_detected = self.is_text_in_english(text)
+            try:
+                if isinstance(article['abstract'], str) and len(article['abstract']) > \
+                        self.max_text_length:
+                    article['abstract'] = article['abstract'][:self.max_text_length]
+                    self.logger.warning(f'The abstract of article {index} has a length >'
+                                        f' {self.max_text_length} and was cut off for the '
+                                        f'database.')
+                with self.engine.begin() as con:
+                    article = {'lang_detected': lang_detected, **article}
+                    article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
+                                                          if_exists='append')
+            except Exception as e:
+                rejected_articles += [index]
+                self.logger.error(f'Number of articles rejected: {len(rejected_articles)}')
+                self.logger.error(f'Last rejected: {rejected_articles[-1]}')
+                self.logger.error(str(e))
 
             if index % 1000 == 0:
                 self.logger.info(f'Number of articles saved: {index}')
@@ -304,75 +301,20 @@ class CORD19DatabaseCreation:
         Parameters
         ----------
         text: str
-            Text to analyze
+            Text to analyze.
 
         Returns
         -------
-        is_english: bool
-            True if article is in english, if False, english is not detected as one of the
-            possible language. If None, exception occurs or text was None.
+        lang: str
+            Detected language of the text. If None, no language was detected (raised
+            LangDetectException).
         """
         DetectorFactory.seed = 0
-        is_english = False
+        lang = None
         if isinstance(text, str):
             try:
-                text_stats = detect_langs(text)
-                for lang_text in text_stats:
-                    if lang_text.lang == 'en':
-                        is_english = True
+                lang = str(detect(text))
             except LangDetectException as e:
                 self.logger.info(e)
-                is_english = None
-        else:
-            is_english = None
 
-        return is_english
-
-    def is_article_in_english(self, article):
-        """Check if the article (thanks to title and abstract) is in english.
-
-        Note the algorithm seems to be non-deterministic,
-        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
-        This is the reason of using `DetectorFactory.seed = 0`
-
-        Parameters
-        ----------
-        article: pd.Series
-            Article to inspect
-
-        Returns
-        -------
-        is_english: bool
-            True if article is in english, otherwise False.
-        """
-        is_title_english = self.is_text_in_english(article['title']) or True
-        is_abstract_english = self.is_text_in_english(article['abstract']) or True
-
-        is_english = is_title_english and is_abstract_english
-
-        return is_english
-
-    def is_text_in_english(self, paragraphs):
-        """Check if paragraphs are in english.
-
-        Note the algorithm seems to be non-deterministic,
-        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
-        This is the reason of using `DetectorFactory.seed = 0`
-
-        Parameters
-        ----------
-        paragraphs: List of tuple
-            List of tuple of format (text, metadata)
-
-        Returns
-        -------
-        is_english: bool
-            True if article is in english, otherwise False.
-        """
-        text = ''
-        for p, _ in paragraphs:
-            text = text + ' ' + p
-
-        is_english = self.is_text_in_english(text)
-
-        return is_english
+        return lang
