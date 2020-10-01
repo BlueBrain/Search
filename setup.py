@@ -37,6 +37,7 @@ install_requires = [
     "torch",
     "tqdm",
     "transformers==3.0.2",
+    "pyarrow",
 ]
 
 extras_require = {
