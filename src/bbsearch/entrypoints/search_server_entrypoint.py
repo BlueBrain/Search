@@ -1,88 +1,53 @@
 """The entrypoint script for the search server."""
-import argparse
 import logging
-import os
 import pathlib
 
-import numpy as np
-
-from bbsearch.utils import H5
-
-from ._helper import configure_logging
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--host",
-                    default="0.0.0.0",
-                    type=str,
-                    help="The server host IP")
-parser.add_argument("--port",
-                    default=8080,
-                    type=int,
-                    help="The server port")
-parser.add_argument("--models_path",
-                    default="/raid/sync/proj115/bbs_data/trained_models",
-                    type=str,
-                    help="The folder with pretrained models")
-parser.add_argument("--embeddings_path",
-                    default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5",
-                    type=str,
-                    help="The path to an h5 file with the precomputed embeddings")
-parser.add_argument("--database_uri",
-                    default="dgx1.bbp.epfl.ch:8853/cord19_v47",
-                    type=str,
-                    help="The URI to the MySQL database.")
-parser.add_argument("--debug",
-                    action="store_true",
-                    default=False,
-                    help="Enable debug logging messages")
-parser.add_argument("--models",
-                    default="USE,SBERT,SBioBERT,BSV,Sent2Vec",
-                    type=str,
-                    help="Models to load in the search server.")
-args = parser.parse_args()
+from ._helper import configure_logging, get_var, run_server
 
 
-def main():
-    """Execute the entry point."""
-    # Configure logging
-    log_dir = os.getenv("LOG_DIR", ".")
-    log_name = os.getenv("LOG_NAME", "bbs_search.log")
-    log_file = pathlib.Path(log_dir) / log_name
-    if args.debug:
-        log_level = logging.DEBUG
-    else:
-        log_level = logging.INFO
-    configure_logging(log_file, log_level)
-
-    # Start server
+def get_search_app():
+    """Construct the search flask app."""
     import sqlalchemy
-    from flask import Flask
 
     from ..server.search_server import SearchServer
+    from ..utils import H5
 
-    app = Flask("BBSearch Server")
-    models_path = pathlib.Path(args.models_path)
-    embeddings_path = pathlib.Path(args.embeddings_path)
+    # Read configuration
+    log_file = get_var("BBS_SEARCH_LOG_FILE", check_not_set=False)
+    log_level = get_var("BBS_SEARCH_LOG_LEVEL", logging.INFO, var_type=int)
 
-    n_sentences, dim_embedding = H5.get_shape(embeddings_path, 'BSV')
-    # 0th row is for padding and is filled with NaNs
-    # here we're assuming that all embeddings (up to the 0th row)
-    # are correctly populated
-    indices = np.arange(1, n_sentences)
+    models_path = get_var("BBS_SEARCH_MODELS_PATH")
+    embeddings_path = get_var("BBS_SEARCH_EMBEDDINGS_PATH")
+    which_models = get_var("BBS_SEARCH_MODELS")
 
-    engine = sqlalchemy.create_engine(f"mysql+mysqldb://guest:guest@{args.database_uri}")
+    mysql_url = get_var("BBS_SEARCH_MYSQL_URL")
+    mysql_user = get_var("BBS_SEARCH_MYSQL_USER")
+    mysql_password = get_var("BBS_SEARCH_MYSQL_PASSWORD")
 
-    models = [model.strip() for model in args.models.split(",")]
+    # Configure logging
+    configure_logging(log_file, log_level)
+    logger = logging.getLogger(__name__)
 
-    SearchServer(app, models_path, embeddings_path, indices, engine, models)
+    # Initialize flask app
+    logger.info("Creating the Flask app")
+    models_path = pathlib.Path(models_path)
+    embeddings_path = pathlib.Path(embeddings_path)
+    indices = H5.find_populated_rows(embeddings_path, "BSV")
+    engine_url = f"mysql://{mysql_user}:{mysql_password}@{mysql_url}"
+    engine = sqlalchemy.create_engine(engine_url)
+    models_list = [model.strip() for model in which_models.split(",")]
 
-    app.run(
-        host=args.host,
-        port=args.port,
-        threaded=True,
-        debug=False,
+    server_app = SearchServer(
+        models_path, embeddings_path, indices, engine, models_list
     )
+
+    return server_app
+
+
+def run_search_server():
+    """Run the search server."""
+    run_server(get_search_app, "search")
 
 
 if __name__ == "__main__":
-    main()
+    exit(run_search_server())

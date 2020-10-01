@@ -1,13 +1,12 @@
 import json
-import sqlite3
+import pathlib
 from collections import OrderedDict
-from unittest.mock import Mock
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.mining import prodigy2df, spacy2df
+from bbsearch.mining import annotations2df, spacy2df
 from bbsearch.mining.eval import (
     idx2text,
     iob2idx,
@@ -20,10 +19,13 @@ from bbsearch.mining.eval import (
 )
 
 
-class TestProdigy2df:
+class TestAnnotations2df:
 
     @pytest.mark.parametrize('answer', ['accept', 'ignore'])
-    def test_overall(self, monkeypatch, answer):
+    def test_overall(self, answer, tmpdir):
+        tmp_dir = pathlib.Path(str(tmpdir))
+        tmp_file = tmp_dir / "annot.jsonl"
+
         prodigy_content = {
             'answer': answer,
             'meta': {'pattern': '', 'source': 'amazing source'},
@@ -43,24 +45,34 @@ class TestProdigy2df:
                        {'text': '.', 'start': 48, 'end': 49, 'id': 8}]
         }
 
-        n_examples = 2
-        examples_table = pd.DataFrame([{'id': i, 'content': json.dumps(prodigy_content)}
-                                       for i in range(n_examples)])
+        # write example twice, but the second one w/o annotations
+        with tmp_file.open("w") as f:
+            f.write(json.dumps(prodigy_content) + "\n")
+            del prodigy_content['spans']
+            f.write(json.dumps(prodigy_content) + "\n")
 
-        fake_read_sql = Mock()
-        fake_read_sql.return_value = examples_table
-        fake_cnxn = Mock(spec=sqlite3.Connection)
-
-        monkeypatch.setattr('bbsearch.mining.eval.pd.read_sql', fake_read_sql)
-
-        df = prodigy2df(fake_cnxn, dataset_name='cord19_JohnSmith')
+        df = annotations2df(tmp_file)
 
         assert isinstance(df, pd.DataFrame)
-        assert len(df) == n_examples * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
+        assert len(df) == \
+               2 * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
 
         if answer == 'accept':
-            assert {'source', 'sentence_id', 'class', 'start_char', 'end_char', 'id',
+            assert {'source', 'class', 'start_char', 'end_char', 'id',
                     'text'} == set(df.columns)
+            # for the first example, annotations are in IOB mode
+            assert set(df['class'][:len(df)//2]) == \
+                   {'O', 'B-PERSON', 'I-PERSON', 'B-GPE', 'B-DATE'}
+
+            # for the second example, no annotations
+            assert set(df['class'][len(df)//2:]) == {'O'}
+
+        # test that it works for more than one file
+        df = annotations2df([tmp_file] * 5)
+        assert isinstance(df, pd.DataFrame)
+
+        assert len(df) == \
+               5 * 2 * (len(prodigy_content['tokens']) if answer == 'accept' else 0)
 
 
 class TestSpacy2df:

@@ -3,22 +3,20 @@ import logging
 import pathlib
 
 import torch
-from flask import jsonify, request
+from flask import Flask, jsonify, request
 
 import bbsearch
 
 from ..embedding_models import BSV, SBERT, USE, SBioBERT, Sent2VecModel
-from ..search import LocalSearcher
+from ..search import SearchEngine
 from ..utils import H5
 
 
-class SearchServer:
+class SearchServer(Flask):
     """The BBS search server.
 
     Parameters
     ----------
-    app : flask.Flask
-        The Flask app wrapping the server.
     trained_models_path : str or pathlib.Path
         The folder containing pre-trained models.
     embeddings_h5_path : str or pathlib.Path
@@ -31,19 +29,20 @@ class SearchServer:
         A list of model names of the embedding models to load.
     """
 
-    def __init__(self,
-                 app,
-                 trained_models_path,
-                 embeddings_h5_path,
-                 indices,
-                 connection,
-                 models,
-                 ):
+    def __init__(
+            self,
+            trained_models_path,
+            embeddings_h5_path,
+            indices,
+            connection,
+            models,
+    ):
+        package_name, *_ = __name__.partition(".")
+        super().__init__(import_name=package_name)
 
         self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
         self.name = "SearchServer"
-        self.app = app
         self.connection = connection
 
         if indices is None:
@@ -82,16 +81,16 @@ class SearchServer:
             embeddings_t /= norm
             self.precomputed_embeddings[model_name] = embeddings_t
 
-        self.logger.info("Constructing the local searcher...")
-        self.local_searcher = LocalSearcher(
+        self.logger.info("Constructing the search engine...")
+        self.search_engine = SearchEngine(
             self.embedding_models,
             self.precomputed_embeddings,
             self.indices,
             self.connection
         )
 
-        app.route("/help", methods=["POST"])(self.help)
-        app.route("/", methods=["POST"])(self.query)
+        self.add_url_rule("/help", view_func=self.help, methods=["POST"])
+        self.add_url_rule("/", view_func=self.query, methods=["POST"])
 
         self.logger.info("Initialization done.")
 
@@ -189,7 +188,7 @@ class SearchServer:
             self.logger.info(f"query_text : {query_text}")
 
             self.logger.info("Starting the search...")
-            sentence_ids, similarities, stats = self.local_searcher.query(
+            sentence_ids, similarities, stats = self.search_engine.query(
                 which_model,
                 k,
                 query_text,

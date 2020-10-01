@@ -238,8 +238,16 @@ class CORD19DatabaseCreation:
                 self.logger.info(f'Number of articles: {num_articles} in '
                                  f'{time.perf_counter() - start:.1f} seconds')
 
+        # Create article_id index
         mymodel_url_index = sqlalchemy.Index('article_id_index', self.sentences_table.c.article_id)
         mymodel_url_index.create(bind=self.engine)
+
+        # Create FULLTEXT INDEX
+        if self.engine.url.drivername.startswith('mysql'):
+            with self.engine.begin() as connection:
+                self.logger.info('Start creating FULLTEXT INDEX on sentences (column text)')
+                connection.execute('CREATE FULLTEXT INDEX fulltext_text ON sentences(text)')
+                self.logger.info('Ended creating FULLTEXT INDEX')
 
         return pmc, pdf, rejected_articles
 

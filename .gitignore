@@ -6,6 +6,8 @@
 /notebooks/untracked
 /.idea/
 .DS_Store
+.env*
+!.env*.example
 
 # Version file
 /src/bbsearch/version.py

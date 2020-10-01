@@ -1,0 +1,3 @@
+outs:
+- md5: 75f7ba9b965cef0aab2aaaa434fa9e2d
+  path: pathway_patterns.jsonl
