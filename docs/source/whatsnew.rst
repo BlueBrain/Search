@@ -4,7 +4,7 @@ This page containst changelogs for Blue Brain Search released versions.
 
 Version 0.0.3
 -------------
-**September 30, 2020**
+**October 2, 2020**
 
 - This is the first beta release from Blue Brain Search.
 - Previous releases were highly experimental and should be considered as being
