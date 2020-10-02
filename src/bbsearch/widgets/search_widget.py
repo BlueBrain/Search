@@ -129,7 +129,7 @@ class SearchWidget(widgets.VBox):
             )
 
         self.widgets['is_english'] = widgets.Checkbox(
-            description="Only articles from journals",
+            description="Only articles in English",
             value=True,
             style=self.widgets_style
             )
