@@ -47,6 +47,7 @@ class TestSearchEngine:
                                                                deprioritize_text=None,
                                                                deprioritize_strength=deprioritized_strength,
                                                                has_journal=True,
+                                                               is_english=True,
                                                                date_range=(2000, 2021),
                                                                exclusion_text=exclusion_text,
                                                                k=k)

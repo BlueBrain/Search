@@ -127,6 +127,7 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
 
     # Population of the tables 'sentences' and 'articles'
     metadata_df = pd.read_csv(str(metadata_path))
+    metadata_df['is_english'] = True
     metadata_df.index.name = 'article_id'
     metadata_df.index += 1
     with engine.begin() as con:
