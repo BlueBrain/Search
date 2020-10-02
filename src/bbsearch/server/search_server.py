@@ -149,6 +149,7 @@ class SearchServer(Flask):
                         "k": 'integer number'
                     },
                     "accepted_fields": {
+                        "is_english": [True, False],
                         "has_journal": [True, False],
                         "data_range": ('start_date', 'end_date'),
                         "deprioritize_strength": ['None', 'Weak', 'Mild',
