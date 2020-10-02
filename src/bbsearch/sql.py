@@ -448,7 +448,7 @@ class SentenceFilter:
         sentence_conditions = []
 
         # In English condition
-        if self.only_with_journal_flag:
+        if self.only_english_flag:
             article_conditions.append("is_english = 1")
 
         # Journal condition
