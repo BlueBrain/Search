@@ -46,7 +46,7 @@ class TestEmbeddingModels:
         tokenizer = Mock()
         be = MagicMock(spec=transformers.BatchEncoding)
         be.keys.return_value = ['input_ids', 'token_type_ids', 'attention_mask']
-        be.__getitem__.side_effect = lambda x: torch.tensor(torch.ones([n_sentences, 10]))
+        be.__getitem__.side_effect = lambda x: torch.ones([n_sentences, 10])
         tokenizer.return_value = be
 
         auto_tokenizer = Mock()

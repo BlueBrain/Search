@@ -1,7 +1,9 @@
 """Collection of functions for evaluation of NER models."""
+import copy
 import json
 import string
 from collections import OrderedDict
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,15 +12,14 @@ import sklearn
 from spacy.tokens import Doc
 
 
-def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
-    """Convert prodigy annotations to a pd.DataFrame.
+# TODO : remove references to
+def annotations2df(annots_files, not_entity_symbol='O'):
+    """Convert prodigy annotations in JSONL format into a pd.DataFrame.
 
     Parameters
     ----------
-    cnxn : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
-        Connection to the prodigy database.
-    dataset_name : str
-        Name of the dataset from which to retrieve annotations.
+    annots_files : str, list of str, path or list of path
+        Name of the annotation file(s) to load.
     not_entity_symbol : str
         A symbol to use for tokens that are not an entity.
 
@@ -28,48 +29,41 @@ def prodigy2df(cnxn, dataset_name, not_entity_symbol='O'):
         Each row represents one token, the columns are 'source', 'sentence_id', 'class',
         'start_char', end_char', 'id', 'text'.
     """
-    first_df = pd.read_sql(f'''
-        SELECT *
-        FROM example
-        WHERE example.id IN
-              (
-                  SELECT link.example_id
-                  FROM link
-                  WHERE link.dataset_id IN
-                        (
-                            SELECT dataset.id
-                            FROM dataset
-                            WHERE dataset.name = "{dataset_name}"
-                        )
-              )''',
-                           cnxn)
-
     final_table_rows = []
-    for _, row in first_df.iterrows():
-        sentence_id = row['id']
-        content = json.loads(row['content'])
 
-        if content['answer'] != 'accept':
-            continue
+    if isinstance(annots_files, list):
+        final_tables = [annotations2df(ann, not_entity_symbol) for ann in annots_files]
+        final_table = pd.concat(final_tables, ignore_index=True)
+        return final_table
+    elif not (isinstance(annots_files, str) or isinstance(annots_files, Path)):
+        raise TypeError("Argument 'annots_files' should be a string or an "
+                        "iterable of strings!")
 
-        spans = content['spans']  # list of dict
+    with open(annots_files) as f:
+        for row in f:
+            content = json.loads(row)
 
-        classes = {}
-        for ent in spans:
-            for ix, token_ix in enumerate(range(ent['token_start'], ent['token_end'] + 1)):
-                ent_label = ent['label'].upper()
+            if content['answer'] != 'accept':
+                continue
 
-                classes[token_ix] = "{}-{}".format('B' if ix == 0 else 'I', ent_label)
+            # annotations for the sentence: list of dict (or empty list)
+            spans = content.get('spans', [])
 
-        for token in content['tokens']:
-            final_table_rows.append({'source': content['meta']['source'],
-                                     'sentence_id': sentence_id,
-                                     'class': classes.get(token['id'], not_entity_symbol),
-                                     'start_char': token['start'],
-                                     'end_char': token['end'],
-                                     'id': token['id'],
-                                     'text': token['text']
-                                     })
+            classes = {}
+            for ent in spans:
+                for ix, token_ix in enumerate(range(ent['token_start'], ent['token_end'] + 1)):
+                    ent_label = ent['label'].upper()
+
+                    classes[token_ix] = "{}-{}".format('B' if ix == 0 else 'I', ent_label)
+
+            for token in content['tokens']:
+                final_table_rows.append({'source': content['meta']['source'],
+                                         'class': classes.get(token['id'], not_entity_symbol),
+                                         'start_char': token['start'],
+                                         'end_char': token['end'],
+                                         'id': token['id'],
+                                         'text': token['text']
+                                         })
 
     final_table = pd.DataFrame(final_table_rows)
 
@@ -98,7 +92,7 @@ def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
 
     Notes
     -----
-    One should run the `prodigy2df` first in order to obtain the `ground_truth_tokenization`. If
+    One should run the `annotations2df` first in order to obtain the `ground_truth_tokenization`. If
     it is the case then `ground_truth_tokenization=prodigy_table['text'].to_list()`.
     """
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
@@ -123,12 +117,12 @@ def remove_punctuation(df):
     """Remove punctuation from a dataframe with tokens and entity annotations.
 
     Important: this function should be called only after all the annotations have been
-    loaded by calling `prodigy2df()` and `spacy2df()`.
+    loaded by calling `annotations2df()` and `spacy2df()`.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame with tokens and annotations, can be generated calling `prodigy2df()` and
+        DataFrame with tokens and annotations, can be generated calling `annotations2df()` and
         `spacy2df()`. Should include a column "text" containing one token per row, and one
         or more columns of annotations in IOB format named as "class_XXX".
 
@@ -286,6 +280,7 @@ def ner_report(iob_true, iob_pred, mode='entity', etypes_map=None, return_dict=F
 
     etypes_counts = dict(zip(*unique_etypes(iob_true, mode=mode, return_counts=True)))
     etypes_map = etypes_map or dict()
+    etypes_map = copy.deepcopy(etypes_map)
     for etype in etypes_counts.keys() - etypes_map.keys():
         etypes_map[etype] = etype
 

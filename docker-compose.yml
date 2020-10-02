@@ -1,0 +1,62 @@
+version: "3.5"
+services:
+
+  base:
+    build:
+      context: .
+      dockerfile: docker/base.Dockerfile
+      args:
+        - BBS_HTTP_PROXY
+        - BBS_HTTPS_PROXY
+        - BBS_http_proxy
+        - BBS_https_proxy
+    image: bbs_base
+    container_name: bbs_base
+    networks:
+      - bbs_network
+
+  search:
+    build:
+      context: .
+      dockerfile: docker/search.Dockerfile
+    image: bbs_search
+    container_name: bbs_search
+    env_file: .env
+    ports:
+      - 8850:8080
+    volumes:
+      - /raid:/raid
+    networks:
+      - bbs_network
+
+  embedding:
+    build:
+      context: .
+      dockerfile: docker/embedding.Dockerfile
+    image: bbs_embedding
+    container_name: bbs_embedding
+    env_file: .env
+    ports:
+      - 8851:8080
+    volumes:
+      - /raid:/raid
+    networks:
+      - bbs_network
+
+  mining:
+    build:
+      context: .
+      dockerfile: docker/mining.Dockerfile
+    image: bbs_mining
+    container_name: bbs_mining
+    env_file: .env
+    ports:
+      - 8852:8080
+    volumes:
+      - /raid:/raid
+    networks:
+      - bbs_network
+
+networks:
+  bbs_network:
+    driver: bridge

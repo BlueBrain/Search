@@ -1,0 +1,3 @@
+outs:
+- md5: 470209cd6fa7df1c7c8be0016d3926e7
+  path: raw8_2020-09-02_cord19v35_CellCompartmentDrugOrgan.jsonl

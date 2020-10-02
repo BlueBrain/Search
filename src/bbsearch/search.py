@@ -11,7 +11,7 @@ from .utils import Timer
 logger = logging.getLogger(__name__)
 
 
-class LocalSearcher:
+class SearchEngine:
     """Search locally using assets on disk.
 
     This class requires for several deep-learning modules

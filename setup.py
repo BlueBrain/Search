@@ -6,6 +6,7 @@ install_requires = [
     "dash-cytoscape",
     "dash-table",
     "dash_daq",
+    "dvc[ssh]",
     "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz",
     "en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz",
     "en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz",
@@ -38,6 +39,7 @@ install_requires = [
     "torch",
     "tqdm",
     "transformers==3.0.2",
+    "pyarrow",
 ]
 
 extras_require = {
@@ -79,9 +81,9 @@ setup(
             "compute_embeddings = bbsearch.entrypoints.embeddings_entrypoint:main",
             "create_database = bbsearch.entrypoints.database_entrypoint:main",
             "create_mining_cache = bbsearch.entrypoints:run_create_mining_cache",
-            "embedding_server = bbsearch.entrypoints.embedding_server_entrypoint:main",
-            "mining_server = bbsearch.entrypoints.mining_server_entrypoint:main",
-            "search_server = bbsearch.entrypoints.search_server_entrypoint:main",
+            "embedding_server = bbsearch.entrypoints:run_embedding_server",
+            "mining_server = bbsearch.entrypoints:run_mining_server",
+            "search_server = bbsearch.entrypoints:run_search_server",
         ]
     },
 )
