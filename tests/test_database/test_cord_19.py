@@ -54,7 +54,7 @@ class TestDatabaseCreation:
         columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
                             "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
                             "mag_id", "arxiv_id", "pdf_json_files",
-                            "pmc_json_files", "who_covidence_id", "s2_id", "url", "lang_detected"}
+                            "pmc_json_files", "who_covidence_id", "s2_id", "url", "is_english"}
         articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1",
                                            real_sqlalchemy_engine).columns)
         assert columns_expected == articles_columns

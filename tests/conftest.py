@@ -70,7 +70,7 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                      sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
                      sqlalchemy.Column('url', sqlalchemy.Text()),
                      sqlalchemy.Column('s2_id', sqlalchemy.Text()),
-                     sqlalchemy.Column('lang_detected', sqlalchemy.Text())
+                     sqlalchemy.Column('is_english', sqlalchemy.Boolean())
                      )
 
     sentences_table = \

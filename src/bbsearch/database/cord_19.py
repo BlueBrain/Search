@@ -82,7 +82,7 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
                              sqlalchemy.Column('url', sqlalchemy.Text()),
                              sqlalchemy.Column('s2_id', sqlalchemy.Text()),
-                             sqlalchemy.Column('lang_detected', sqlalchemy.Text())
+                             sqlalchemy.Column('is_english', sqlalchemy.Boolean())
                              )
 
         self.sentences_table = \
@@ -122,7 +122,7 @@ class CORD19DatabaseCreation:
             title = article['title'] if isinstance(article['title'], str) else ''
             abstract = article['abstract'] if isinstance(article['abstract'], str) else ''
             text = title + ' ' + abstract
-            lang_detected = self.detect_text_language(text)
+            is_english = self.check_is_english(text)
             try:
                 if isinstance(article['abstract'], str) and len(article['abstract']) > \
                         self.max_text_length:
@@ -131,7 +131,7 @@ class CORD19DatabaseCreation:
                                         f' {self.max_text_length} and was cut off for the '
                                         f'database.')
                 with self.engine.begin() as con:
-                    article = pd.Series({'lang_detected': lang_detected, **article})
+                    article = pd.Series({'is_english': is_english, **article})
                     article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
                                                           if_exists='append')
             except Exception as e:
@@ -293,8 +293,8 @@ class CORD19DatabaseCreation:
 
         return all_sentences
 
-    def detect_text_language(self, text):
-        """Detect the language of a given text.
+    def check_is_english(self, text):
+        """Detect if the given text is English.
 
         Note the algorithm seems to be non-deterministic,
         as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
@@ -319,4 +319,5 @@ class CORD19DatabaseCreation:
             except LangDetectException as e:
                 self.logger.info(e)
 
-        return lang
+        is_english = lang == "en"
+        return is_english

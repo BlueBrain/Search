@@ -94,7 +94,7 @@ class TestSQLQueries:
                                           'doi', 'pmcid', 'pubmed_id', 'license', 'abstract',
                                           'publish_time', 'authors', 'journal', 'mag_id',
                                           'who_covidence_id', 'arxiv_id', 'pdf_json_files',
-                                          'pmc_json_files', 'url', 's2_id', 'lang_detected'])
+                                          'pmc_json_files', 'url', 's2_id', 'is_english'])
         if article_id >= 0:  # valid article_id for the fake_sqlalchemy_engine (>0 for the real one)
             assert len(article.index) == 1
         else:
