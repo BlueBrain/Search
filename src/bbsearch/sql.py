@@ -335,7 +335,7 @@ class SentenceFilter:
             The instance of `SentenceFilter` itself. Useful for
             chained applications of filters.
         """
-        self.logger.info(f"Only with journal: {flag}")
+        self.logger.info(f"Only in English: {flag}")
         self.only_english_flag = flag
         return self
 
