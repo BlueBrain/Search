@@ -1,6 +1,8 @@
+.. include:: ./_substitutions.rst
+
 Changelog
 =========
-This page containst changelogs for Blue Brain Search released versions.
+This page contains changelogs for Blue Brain Search released versions.
 
 Version 0.0.3
 -------------
@@ -12,7 +14,7 @@ Version 0.0.3
 
 Changes
 ^^^^^^^
-- **Updgrade** CORD19 database from v35 to v47.
+- |Fix| CORD19 database from v35 to v47.
 - **Add** button to Literature Search widget to let user choose whether to retrieve
   top N articles or top N sentences.
 - **Fix** bug in database creation where auto-increment was triggered even if
