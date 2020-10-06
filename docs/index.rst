@@ -20,6 +20,12 @@ Welcome to Blue Brain Search's documentation!
 
    source/api/bbsearch
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Release History
+
+   source/whatsnew
+
 
 
 Indices and tables
