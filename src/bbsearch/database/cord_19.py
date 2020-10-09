@@ -230,7 +230,7 @@ class CORD19DatabaseCreation:
 
                 # Consider first n sentences in paper to quickly determine if it is in English
                 n_sents_language = 10
-                is_english = self.check_is_english(sentences_df[:n_sents_language]['text'])
+                is_english = self.check_is_english(' '.join(sentences_df[:n_sents_language]['text']))
                 update_stmt = """UPDATE articles
                                  SET is_english = :is_english
                                  WHERE article_id = :article_id"""
