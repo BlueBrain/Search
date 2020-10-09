@@ -119,10 +119,6 @@ class CORD19DatabaseCreation:
         df.drop_duplicates('cord_uid', keep='first', inplace=True)
         df['publish_time'] = pd.to_datetime(df['publish_time'])
         for index, article in df.iterrows():
-            title = article['title'] if isinstance(article['title'], str) else ''
-            abstract = article['abstract'] if isinstance(article['abstract'], str) else ''
-            text = title + ' ' + abstract
-            is_english = self.check_is_english(text)
             try:
                 if isinstance(article['abstract'], str) and len(article['abstract']) > \
                         self.max_text_length:
@@ -131,7 +127,6 @@ class CORD19DatabaseCreation:
                                         f' {self.max_text_length} and was cut off for the '
                                         f'database.')
                 with self.engine.begin() as con:
-                    article = pd.Series({'is_english': is_english, **article})
                     article.to_frame().transpose().to_sql(name='articles', con=con, index=False,
                                                           if_exists='append')
             except Exception as e:
@@ -232,8 +227,19 @@ class CORD19DatabaseCreation:
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',
                                                                 'sentence_pos_in_paragraph'])
+
+                # Consider first n sentences in paper to quickly determine if it is in English
+                n_sents_language = 10
+                is_english = self.check_is_english(sentences_df[:n_sents_language]['text'])
+                update_stmt = """UPDATE articles
+                                 SET is_english = :is_english
+                                 WHERE article_id = :article_id"""
+
                 with self.engine.begin() as con:
                     sentences_df.to_sql(name='sentences', con=con, index=False, if_exists='append')
+                    con.execute(sqlalchemy.sql.text(update_stmt),
+                                is_english=is_english,
+                                article_id=article_id)
 
             except Exception as e:
                 rejected_articles += [int(article['article_id'])]
