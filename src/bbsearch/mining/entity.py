@@ -2,6 +2,8 @@
 import copy
 import json
 
+import spacy
+
 
 def dump_jsonl(data, path):
     """Save a list of dictionaries to a jsonl.
@@ -53,9 +55,11 @@ def remap_entity_type(patterns, etype_mapping):
 
     etype_mapping : dict
         Keys are our entity type names and values are entity type names inside of the spacy model.
-        ```
-        {"CHEMICAL": "CHEBI"}
-        ```
+
+        .. code-block:: Python
+
+            {"CHEMICAL": "CHEBI"}
+
 
     Returns
     -------
@@ -83,6 +87,7 @@ def global2model_patterns(patterns, ee_models_library):
      {"label": "ORG", "pattern": "Apple"},
      {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}
     ]
+
     Parameters
     ----------
     patterns : list
@@ -110,3 +115,34 @@ def global2model_patterns(patterns, ee_models_library):
         res[model] = remap_entity_type(patterns, etype_mapping)
 
     return res
+
+
+def check_patterns_agree(model, patterns):
+    """Validate whether patterns of an existing model agree with given patterns.
+
+    Parameters
+    ----------
+    model : spacy.Language
+        A model that contains an `EntityRuler`.
+
+    patterns : list
+        List of patterns.
+
+    Returns
+    -------
+    res
+        If True, the patterns agree.
+
+    Raises
+    ------
+    ValueError
+        The model does not contain an entity ruler or it contains more than 1.
+    """
+    all_er = [pipe for pipe in model.pipeline if isinstance(pipe[1], spacy.pipeline.entityruler.EntityRuler)]
+
+    if not all_er:
+        raise ValueError("The model contains no EntityRuler")
+    elif len(all_er) > 1:
+        raise ValueError("The model contains more than 1 EntityRuler")
+    else:
+        return patterns == all_er[0][1].patterns

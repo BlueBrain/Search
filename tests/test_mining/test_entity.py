@@ -2,8 +2,11 @@
 import pathlib
 
 import pandas as pd
+import pytest
+import spacy
 
 from bbsearch.mining import (
+    check_patterns_agree,
     dump_jsonl,
     global2model_patterns,
     load_jsonl,
@@ -11,7 +14,7 @@ from bbsearch.mining import (
 )
 
 
-def test_load_jsonl(tmpdir):
+def test_load_save_jsonl(tmpdir):
     path = pathlib.Path(str(tmpdir)) / "file.jsonl"
 
     li = [{"a": 1, "b": "cc"}, {"k": 23}]
@@ -99,3 +102,40 @@ def test_global2model_patterns():
     assert res["model_1"] == model_1_patterns
     assert res["model_2"] == model_2_patterns
     assert res["model_3"] == model_3_patterns
+
+
+def test_check_patterns_agree():
+    model = spacy.blank("en")
+
+    # No entity rulers
+    with pytest.raises(ValueError):
+        check_patterns_agree(model, [])
+
+    er_1 = spacy.pipeline.entityruler.EntityRuler(model)
+    er_2 = spacy.pipeline.entityruler.EntityRuler(model)
+
+    # Single entity ruler
+    model.add_pipe(er_1, first=True, name="er_1")
+
+    assert check_patterns_agree(model, [])
+
+    patterns = [
+        {"label": "DISEASE", "pattern": [{"LOWER": "covid-19"}]},
+        {
+            "label": "DISEASE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
+        {"label": "CHEMICAL", "pattern": [{"LOWER": "glucose"}]},
+    ]
+    er_1.add_patterns(patterns)
+
+    assert check_patterns_agree(model, patterns)
+    assert not check_patterns_agree(
+        model, patterns[::-1]
+    )  # unfortunately the order matters
+
+    # Two entity rules
+    model.add_pipe(er_2, first=True, name="er_2")
+
+    with pytest.raises(ValueError):
+        check_patterns_agree(model, [])
