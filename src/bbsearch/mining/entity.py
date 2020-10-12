@@ -1,4 +1,5 @@
 """Module focusing on entity recognition."""
+import copy
 import json
 
 
@@ -37,3 +38,38 @@ def load_jsonl(path):
         data = [json.loads(jline) for jline in text.splitlines()]
 
     return data
+
+
+def remap_entity_type(patterns, etype_mapping):
+    """Remap entity types in the patterns to a specific model.
+
+    For each entity type in the patterns try to see whether the model supports it
+    and if not relabel the entity type to `NaE`.
+
+    Parameters
+    ----------
+    patterns : list
+        List of patterns.
+
+    etype_mapping : dict
+        Keys are our entity type names and values are entity type names inside of the spacy model.
+        ```
+        {"CHEMICAL": "CHEBI"}
+        ```
+
+    Returns
+    -------
+    adjusted_patterns : list
+        Patterns that are supposed to be for a specific spacy model.
+    """
+    adjusted_patterns = copy.deepcopy(patterns)
+
+    for p in adjusted_patterns:
+        label = p['label']
+
+        if label in etype_mapping:
+            p['label'] = etype_mapping[label]
+        else:
+            p['label'] = "NaE"
+
+    return adjusted_patterns
