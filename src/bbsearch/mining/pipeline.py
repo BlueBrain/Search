@@ -69,7 +69,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
     for doc, metadata in docs_gen:
         subtexts = doc.sents if models_relations else [doc]
         for subtext in subtexts:
-            detected_entities = [ent for ent in subtext.ents]
+            detected_entities = [ent for ent in subtext.ents if ent.label_ != "NaE"]
 
             for s_ent in detected_entities:
                 # add single lines for entities
