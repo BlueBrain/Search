@@ -73,3 +73,40 @@ def remap_entity_type(patterns, etype_mapping):
             p['label'] = "NaE"
 
     return adjusted_patterns
+
+
+def global2model_patterns(patterns, ee_models_library):
+    """Convert global patterns to model specific patterns.
+
+    The `patterns` list can look like this
+    [
+     {"label": "ORG", "pattern": "Apple"},
+     {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}
+    ]
+    Parameters
+    ----------
+    patterns : list
+        List of patterns where the entity type is always referring to the entity type naming
+        convention we have internally ("entity_type" column of `ee_models_library`).
+
+    ee_models_library : pd.DataFrame
+        3 columns DataFrame connecting model location, our naming and model naming of entity type.
+        * "entity_type": our naming of entity_types
+        * "model": path to the model folder
+        * "entity_type_name": internal name of entities
+
+    Returns
+    -------
+    res : dict
+        The key are the locations of the model and the values are list of patterns that one
+        can load with `EntityRuler(nlp, patterns=patterns)`
+
+    """
+    all_models = ee_models_library["model"].unique()
+    res = {}
+    for model in all_models:
+        etype_mapping = {row["entity_type"]: row["entity_type_name"]
+                         for _, row in ee_models_library[ee_models_library["model"] == model].iterrows()}
+        res[model] = remap_entity_type(patterns, etype_mapping)
+
+    return res
