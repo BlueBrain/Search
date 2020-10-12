@@ -3,7 +3,12 @@ import pathlib
 
 import pandas as pd
 
-from bbsearch.mining import dump_jsonl, global2model_patterns, load_jsonl, remap_entity_type
+from bbsearch.mining import (
+    dump_jsonl,
+    global2model_patterns,
+    load_jsonl,
+    remap_entity_type,
+)
 
 
 def test_load_jsonl(tmpdir):
@@ -19,7 +24,10 @@ def test_load_jsonl(tmpdir):
 def test_entity_type():
     patterns = [
         {"label": "DISEASE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "DISEASE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
+        {
+            "label": "DISEASE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
         {"label": "CHEMICAL", "pattern": [{"LOWER": "glucose"}]},
     ]
 
@@ -28,8 +36,12 @@ def test_entity_type():
     adjusted_patterns = remap_entity_type(patterns, etype_mapping)
     adjusted_patterns_true = [
         {"label": "NaE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "NaE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
-        {"label": "CHEBI", "pattern": [{"LOWER": "glucose"}]}]
+        {
+            "label": "NaE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
+        {"label": "CHEBI", "pattern": [{"LOWER": "glucose"}]},
+    ]
 
     assert patterns is not adjusted_patterns
     assert adjusted_patterns == adjusted_patterns_true
@@ -38,14 +50,21 @@ def test_entity_type():
 def test_global2model_patterns():
     patterns = [
         {"label": "DISEASE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "DISEASE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
+        {
+            "label": "DISEASE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
         {"label": "CHEMICAL", "pattern": [{"LOWER": "glucose"}]},
     ]
 
-    ee_models_library = pd.DataFrame([["CHEMICAL", "model_1", "CHEBI"],
-                                      ["ORGANISM", "model_2", "ORG"],
-                                      ["DISEASE", "model_3", "DISEASE"]],
-                                     columns=["entity_type", "model", "entity_type_name"])
+    ee_models_library = pd.DataFrame(
+        [
+            ["CHEMICAL", "model_1", "CHEBI"],
+            ["ORGANISM", "model_2", "ORG"],
+            ["DISEASE", "model_3", "DISEASE"],
+        ],
+        columns=["entity_type", "model", "entity_type_name"],
+    )
 
     res = global2model_patterns(patterns, ee_models_library)
 
@@ -54,17 +73,26 @@ def test_global2model_patterns():
 
     model_1_patterns = [
         {"label": "NaE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "NaE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
+        {
+            "label": "NaE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
         {"label": "CHEBI", "pattern": [{"LOWER": "glucose"}]},
     ]
     model_2_patterns = [
         {"label": "NaE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "NaE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
+        {
+            "label": "NaE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
         {"label": "NaE", "pattern": [{"LOWER": "glucose"}]},
     ]
     model_3_patterns = [
         {"label": "DISEASE", "pattern": [{"LOWER": "covid-19"}]},
-        {"label": "DISEASE", "pattern": [{"LOWER": "covid"}, {"TEXT": '-'}, {"TEXT": "19"}]},
+        {
+            "label": "DISEASE",
+            "pattern": [{"LOWER": "covid"}, {"TEXT": "-"}, {"TEXT": "19"}],
+        },
         {"label": "NaE", "pattern": [{"LOWER": "glucose"}]},
     ]
 
