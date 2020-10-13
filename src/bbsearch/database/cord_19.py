@@ -6,8 +6,8 @@ import time
 import pandas as pd
 import spacy
 import sqlalchemy
-from langdetect import DetectorFactory, detect
-from langdetect.lang_detect_exception import LangDetectException
+import langdetect
+import langdetect.lang_detect_exception
 
 
 class CORD19DatabaseCreation:
@@ -300,11 +300,11 @@ class CORD19DatabaseCreation:
         return all_sentences
 
     def check_is_english(self, text):
-        """Detect if the given text is English.
+        """Checks if the given text is English.
 
         Note the algorithm seems to be non-deterministic,
         as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
-        This is the reason of using `DetectorFactory.seed = 0`
+        This is the reason of using `langdetect.DetectorFactory.seed = 0`
 
         Parameters
         ----------
@@ -313,16 +313,16 @@ class CORD19DatabaseCreation:
 
         Returns
         -------
-        lang: str
-            Detected language of the text. If None, no language was detected (raised
-            LangDetectException).
+        lang: bool or None
+            Whether the language of the provided `text` is in English or not. If
+            the input `text` is an empty string, `None` is returned.
         """
-        DetectorFactory.seed = 0
+        langdetect.DetectorFactory.seed = 0
         lang = None
         if isinstance(text, str):
             try:
-                lang = str(detect(text))
-            except LangDetectException as e:
+                lang = str(langdetect.detect(text))
+            except langdetect.lang_detect_exception.LangDetectException as e:
                 self.logger.info(e)
 
         is_english = lang == "en"
