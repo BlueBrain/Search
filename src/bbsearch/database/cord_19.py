@@ -3,11 +3,11 @@ import json
 import logging
 import time
 
+import langdetect
+import langdetect.lang_detect_exception
 import pandas as pd
 import spacy
 import sqlalchemy
-import langdetect
-import langdetect.lang_detect_exception
 
 
 class CORD19DatabaseCreation:
@@ -300,7 +300,7 @@ class CORD19DatabaseCreation:
         return all_sentences
 
     def check_is_english(self, text):
-        """Checks if the given text is English.
+        """Check if the given text is English.
 
         Note the algorithm seems to be non-deterministic,
         as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
