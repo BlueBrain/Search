@@ -312,12 +312,32 @@ class SentenceFilter:
         self.connection = connection
         self.logger = logging.getLogger(self.__class__.__name__)
 
+        self.only_english_flag = False
         self.only_with_journal_flag = False
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
         self.string_inclusions = []
         self.restricted_sentence_ids = None
+
+    def only_english(self, flag=True):
+        """Only select articles that are in English.
+
+        Parameters
+        ----------
+        flag : bool
+            If True, then only articles for which are in English
+            will be selected.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
+        """
+        self.logger.info(f"Only in English: {flag}")
+        self.only_english_flag = flag
+        return self
 
     def only_with_journal(self, flag=True):
         """Only select articles with a journal.
@@ -426,6 +446,10 @@ class SentenceFilter:
     def _build_query(self):
         article_conditions = []
         sentence_conditions = []
+
+        # In English condition
+        if self.only_english_flag:
+            article_conditions.append("is_english = 1")
 
         # Journal condition
         if self.only_with_journal_flag:

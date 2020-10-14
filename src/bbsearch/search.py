@@ -50,6 +50,7 @@ class SearchEngine:
         query_text,
         granularity="sentences",
         has_journal=False,
+        is_english=True,
         date_range=None,
         deprioritize_strength="None",
         exclusion_text="",
@@ -71,6 +72,8 @@ class SearchEngine:
             One of ('sentences', 'articles'). Search granularity.
         has_journal : bool
             If True, only consider papers that have a journal information.
+        is_english : bool
+            If True, only consider papers that are in English.
         date_range : tuple
             Tuple of form (start_year, end_year) representing the considered
             time range.
@@ -159,6 +162,7 @@ class SearchEngine:
             restricted_sentence_ids = torch.from_numpy(
                 (
                     SentenceFilter(self.connection)
+                    .only_english(is_english)
                     .only_with_journal(has_journal)
                     .date_range(date_range)
                     .exclude_strings(exclusion_text.split("\n"))

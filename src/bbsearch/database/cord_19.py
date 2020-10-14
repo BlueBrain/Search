@@ -3,6 +3,8 @@ import json
 import logging
 import time
 
+import langdetect
+import langdetect.lang_detect_exception
 import pandas as pd
 import spacy
 import sqlalchemy
@@ -79,7 +81,8 @@ class CORD19DatabaseCreation:
                              sqlalchemy.Column('pdf_json_files', sqlalchemy.Text()),
                              sqlalchemy.Column('pmc_json_files', sqlalchemy.Text()),
                              sqlalchemy.Column('url', sqlalchemy.Text()),
-                             sqlalchemy.Column('s2_id', sqlalchemy.Text())
+                             sqlalchemy.Column('s2_id', sqlalchemy.Text()),
+                             sqlalchemy.Column('is_english', sqlalchemy.Boolean())
                              )
 
         self.sentences_table = \
@@ -224,8 +227,19 @@ class CORD19DatabaseCreation:
                 sentences_df = pd.DataFrame(sentences, columns=['sentence_id', 'section_name', 'article_id',
                                                                 'text', 'paragraph_pos_in_article',
                                                                 'sentence_pos_in_paragraph'])
+
+                # Consider first n sentences in paper to quickly determine if it is in English
+                n_sents_language = 10
+                is_english = self.check_is_english(' '.join(sentences_df[:n_sents_language]['text']))
+                update_stmt = """UPDATE articles
+                                 SET is_english = :is_english
+                                 WHERE article_id = :article_id"""
+
                 with self.engine.begin() as con:
                     sentences_df.to_sql(name='sentences', con=con, index=False, if_exists='append')
+                    con.execute(sqlalchemy.sql.text(update_stmt),
+                                is_english=is_english,
+                                article_id=article_id)
 
             except Exception as e:
                 rejected_articles += [int(article['article_id'])]
@@ -284,3 +298,32 @@ class CORD19DatabaseCreation:
                 ]
 
         return all_sentences
+
+    def check_is_english(self, text):
+        """Check if the given text is English.
+
+        Note the algorithm seems to be non-deterministic,
+        as mentioned in https://github.com/Mimino666/langdetect#basic-usage.
+        This is the reason of using `langdetect.DetectorFactory.seed = 0`
+
+        Parameters
+        ----------
+        text: str
+            Text to analyze.
+
+        Returns
+        -------
+        lang: bool or None
+            Whether the language of the provided `text` is in English or not. If
+            the input `text` is an empty string, `None` is returned.
+        """
+        langdetect.DetectorFactory.seed = 0
+        lang = None
+        if isinstance(text, str):
+            try:
+                lang = str(langdetect.detect(text))
+            except langdetect.lang_detect_exception.LangDetectException as e:
+                self.logger.info(e)
+
+        is_english = lang == "en"
+        return is_english

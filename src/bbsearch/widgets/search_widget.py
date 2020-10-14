@@ -128,6 +128,12 @@ class SearchWidget(widgets.VBox):
             style=self.widgets_style
             )
 
+        self.widgets['is_english'] = widgets.Checkbox(
+            description="Only articles in English",
+            value=True,
+            style=self.widgets_style
+            )
+
         self.widgets['date_range'] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
@@ -263,6 +269,7 @@ class SearchWidget(widgets.VBox):
             self.widgets['print_paragraph'],
             self.widgets['query_text'],
             self.widgets['has_journal'],
+            self.widgets['is_english'],
             self.widgets['date_range'],
             self.widgets['deprioritize_text'],
             self.widgets['deprioritize_strength'],
@@ -447,6 +454,7 @@ class SearchWidget(widgets.VBox):
             "query_text": self.widgets['query_text'].value,
             "granularity": self.widgets['granularity'].value,
             "has_journal": self.widgets['has_journal'].value,
+            "is_english": self.widgets['is_english'].value,
             "date_range": self.widgets['date_range'].value,
             "deprioritize_text": self.widgets['deprioritize_text'].value,
             "deprioritize_strength": self.widgets['deprioritize_strength'].value,
