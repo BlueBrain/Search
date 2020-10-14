@@ -69,11 +69,10 @@ def global2model_patterns(patterns, ee_models_library):
         can load with `EntityRuler(nlp, patterns=patterns)`
 
     """
-    all_models = ee_models_library["model"].unique()
     res = {}
-    for model in all_models:
+    for model, ee_models_library_slice in ee_models_library.groupby("model"):
         etype_mapping = {row["entity_type"]: row["entity_type_name"]
-                         for _, row in ee_models_library[ee_models_library["model"] == model].iterrows()}
+                         for _, row in ee_models_library_slice.iterrows()}
         res[model] = remap_entity_type(patterns, etype_mapping)
 
     return res
