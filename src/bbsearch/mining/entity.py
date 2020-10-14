@@ -99,11 +99,11 @@ def check_patterns_agree(model, patterns):
     ValueError
         The model does not contain an entity ruler or it contains more than 1.
     """
-    all_er = [pipe for pipe in model.pipeline if isinstance(pipe[1], spacy.pipeline.EntityRuler)]
+    all_er = [pipe for _, pipe in model.pipeline if isinstance(pipe, spacy.pipeline.EntityRuler)]
 
     if not all_er:
         raise ValueError("The model contains no EntityRuler")
     elif len(all_er) > 1:
         raise ValueError("The model contains more than 1 EntityRuler")
     else:
-        return patterns == all_er[0][1].patterns
+        return patterns == all_er.pop().patterns
