@@ -1,27 +1,13 @@
 """Collections of tests covering the `entity.py` module."""
-import pathlib
-
 import pandas as pd
 import pytest
 import spacy
 
 from bbsearch.mining import (
     check_patterns_agree,
-    dump_jsonl,
     global2model_patterns,
-    load_jsonl,
     remap_entity_type,
 )
-
-
-def test_load_save_jsonl(tmpdir):
-    path = pathlib.Path(str(tmpdir)) / "file.jsonl"
-
-    li = [{"a": 1, "b": "cc"}, {"k": 23}]
-    dump_jsonl(li, path)
-    lo = load_jsonl(path)
-
-    assert li == lo
 
 
 def test_entity_type():

@@ -5,7 +5,7 @@ import h5py
 import numpy as np
 import pytest
 
-from bbsearch.utils import H5, Timer
+from bbsearch.utils import H5, JSONL, Timer
 
 
 class TestTimer:
@@ -226,3 +226,13 @@ class TestH5:
         assert res_np.shape == shape
         assert np.allclose(res_np[indices], data)
         assert np.all(np.isnan(res_np[indices_complement]))
+
+
+def test_load_save_jsonl(tmpdir):
+    path = pathlib.Path(str(tmpdir)) / "file.jsonl"
+
+    li = [{"a": 1, "b": "cc"}, {"k": 23}]
+    JSONL.dump_jsonl(li, path)
+    lo = JSONL.load_jsonl(path)
+
+    assert li == lo
