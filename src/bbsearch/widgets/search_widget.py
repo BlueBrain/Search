@@ -79,6 +79,11 @@ class SearchWidget(widgets.VBox):
         self._adjust_widgets()
         self._init_ui()
 
+        response = requests.post(
+            self.bbs_search_url + '/help',
+        )
+        self.database_name = response.json()['database'] if response.ok else None
+
     def _init_widgets(self):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
@@ -509,7 +514,7 @@ class SearchWidget(widgets.VBox):
             print(header)
             print('-' * len(header))
 
-            print(f'INFO: Database {self.connection.url.database} is used for the search query.')
+            print(f'INFO: Database {self.database_name} is used for the search query.')
             print('Sending query to server...'.ljust(50), end='', flush=True)
             with timer("server query"):
                 response = self._query_search_server(search_configuration)

@@ -168,6 +168,13 @@ def request_callback(request, searcher):
     return response
 
 
+def request_callback_help(request):
+    resp_body = {'database': 'test_database'}
+    headers = {'request-id': '1234abcdeABCDE'}
+    response = (200, headers, json.dumps(resp_body))
+    return response
+
+
 @responses.activate
 @pytest.mark.parametrize('query_text', ['HELLO'])
 @pytest.mark.parametrize('k', [3, 5])
@@ -176,6 +183,12 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
     """Test that paging is displaying the right number results"""
 
     http_address = activate_responses(fake_sqlalchemy_engine)
+
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
 
     widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
@@ -248,6 +261,12 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
         content_type="application/json"
     )
 
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
+
     k = 1
     widget = SearchWidget(bbs_search_url='http://test',
                           bbs_mysql_engine=fake_sqlalchemy_engine,
@@ -282,6 +301,13 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
+
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
+
     k = 10
     result_to_take = 3
 
@@ -332,6 +358,11 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """Make sure that default saving buttons result in correct checkboxes."""
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
 
     k = 10
     http_address = activate_responses(fake_sqlalchemy_engine)
@@ -386,6 +417,12 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
 def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     http_address = activate_responses(fake_sqlalchemy_engine)
 
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
+
     widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
                           article_saver=ArticleSaver(fake_sqlalchemy_engine),
@@ -410,6 +447,12 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF report works."""
     tmpdir = Path(tmpdir)
     http_address = activate_responses(fake_sqlalchemy_engine)
+
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
 
     widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
@@ -436,6 +479,12 @@ def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     """Make sure creation of PDF article saver state works."""
     tmpdir = Path(tmpdir)
     http_address = activate_responses(fake_sqlalchemy_engine)
+
+    responses.add_callback(
+        responses.POST, 'http://test/help',
+        callback=request_callback_help,
+        content_type="application/json"
+    )
 
     widget = SearchWidget(bbs_search_url=http_address,
                           bbs_mysql_engine=fake_sqlalchemy_engine,
