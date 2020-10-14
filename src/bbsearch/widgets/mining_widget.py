@@ -54,6 +54,11 @@ class MiningWidget(widgets.VBox):
         self._init_widgets(default_text)
         self._init_ui()
 
+        response = requests.post(
+            self.mining_server_url + '/help',
+        )
+        self.database_name = response.json()['database'] if response.ok else None
+
     def _init_widgets(self, default_text):
         # "Input Text" Widget
         self.widgets['input_text'] = widgets.Textarea(
@@ -111,6 +116,7 @@ class MiningWidget(widgets.VBox):
         """
         schema_str = schema_df.to_csv(path_or_buf=None, index=False)
         if isinstance(information, list):
+            print(f"The widget is using database: {self.database_name}")
             response = requests.post(
                 self.mining_server_url + '/database',
                 json={"identifiers": information,

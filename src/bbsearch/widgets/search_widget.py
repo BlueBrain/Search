@@ -509,6 +509,7 @@ class SearchWidget(widgets.VBox):
             print(header)
             print('-' * len(header))
 
+            print(f'INFO: Database {self.connection.url.database} is used for the search query.')
             print('Sending query to server...'.ljust(50), end='', flush=True)
             with timer("server query"):
                 response = self._query_search_server(search_configuration)

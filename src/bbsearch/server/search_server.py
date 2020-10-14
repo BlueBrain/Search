@@ -133,6 +133,7 @@ class SearchServer(Flask):
         response = {
             "name": self.name,
             "version": self.version,
+            "database": self.connection.url.database,
             "description": "Run the BBS text search for a given sentence.",
             "POST": {
                 "/help": {
