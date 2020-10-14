@@ -14,7 +14,7 @@ def dump_jsonl(data, path):
         List of dictionaries (json files).
 
     path : pathlib.Path
-        File where to save it il.
+        File where to save it.
     """
     with path.open("w") as f:
         for x in data:
@@ -103,7 +103,7 @@ def global2model_patterns(patterns, ee_models_library):
     Returns
     -------
     res : dict
-        The key are the locations of the model and the values are list of patterns that one
+        The keys are the locations of the model and the values are list of patterns that one
         can load with `EntityRuler(nlp, patterns=patterns)`
 
     """
@@ -130,7 +130,7 @@ def check_patterns_agree(model, patterns):
 
     Returns
     -------
-    res
+    res : bool
         If True, the patterns agree.
 
     Raises
