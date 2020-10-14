@@ -17,7 +17,7 @@ SPECS = ['entity',
          'end_char']
 
 
-def run_pipeline(texts, model_entities, models_relations, debug=False):
+def run_pipeline(texts, model_entities, models_relations, debug=False, not_entity_label="NaE"):
     """Run end-to-end extractions.
 
     Parameters
@@ -43,6 +43,9 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
     debug : bool
         If True, columns are not necessarily matching the specification. However, they
         contain debugging information. If False, then matching exactly the specification.
+    not_entity_label : str or None
+        If a str, then all entities with type `not_entity_label` will be excluded. If None,
+        then no exclusion will be taking place.
 
     Returns
     -------
@@ -69,7 +72,8 @@ def run_pipeline(texts, model_entities, models_relations, debug=False):
     for doc, metadata in docs_gen:
         subtexts = doc.sents if models_relations else [doc]
         for subtext in subtexts:
-            detected_entities = [ent for ent in subtext.ents]
+            detected_entities = [ent for ent in subtext.ents if
+                                 not_entity_label is None or ent.label_ != not_entity_label]
 
             for s_ent in detected_entities:
                 # add single lines for entities

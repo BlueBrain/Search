@@ -1,7 +1,9 @@
 """Collection of tests focused on the bbsearch.mining.pipeline module."""
+from unittest.mock import Mock
 
 import pandas as pd
 import pytest
+from spacy.language import Language
 from spacy.tokens import Doc, Span
 
 from bbsearch.mining import StartWithTheSameLetter, run_pipeline
@@ -95,3 +97,27 @@ def test_without_relation(model_entities, debug, n_paragraphs):
 
         else:
             assert df.columns.to_list() == official_specs
+
+
+def test_not_entity_label(model_entities):
+    texts = ["California is a state.", {}]
+
+    doc = model_entities(texts[0])  # detects only "California"
+    new_ent = Span(doc, start=3, end=4, label='NaE')
+    doc.ents = doc.ents + (new_ent,)  # we add "state" as an entity
+
+    model_entities_m = Mock(spec=Language)
+    model_entities_m.pipe.return_value = [(doc, {})]
+    models_relations = {}
+
+    df_1 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="!")
+    assert len(df_1) == 2
+
+    df_2 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="NaE")
+    assert len(df_2) == 1
+
+    df_3 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label=None)
+    assert len(df_3) == 2
+
+    df_4 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="GPE")
+    assert len(df_4) == 1
