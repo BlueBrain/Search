@@ -1,0 +1,22 @@
+# Description
+- Annotations collected in order to train or evaluate sentence embedding models. 
+
+# Content
+ 
+## `sentence_similarity_cord19.csv`
+- Sentences pairs with similarity scores annotated by Emmanuelle Logette. 
+- 40 sentences pairs in total:
+  - 20 pairs (those with `sentence_id` starting by `A-`) are generically
+  extracted from the CORD-19 dataset
+  - 20 pairs (those with `sentence_id` starting by `B-`) are also extracted from
+  the CORD-19 dataset but are focused on "COVID-19" and "glucose" topics.
+- The scoring system is the one used in Soğancıoğlu G. et al. "BIOSSES: a semantic sentence
+ similarity estimation system for the biomedical domain." Bioinformatics 33.14 (2017): i49-i58.
+	
+| Score | Comment |
+| --- | --- |
+| 0 | The two sentences are on different topics. |
+| 1 | The two sentences are not equivalent, but are on the same topic. |
+| 2 | The two sentences are not equivalent, but share some details. |
+| 3 | The two sentences are roughly equivalent, but some important information differs/missing. |
+| 4 | The two sentences are completely or mostly equivalent, as they mean the same thing. |
