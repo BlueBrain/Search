@@ -88,10 +88,10 @@ class SearchWidget(widgets.VBox):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['USE', 'SBERT', 'BSV', 'SBioBERT', 'Sent2Vec'],
+            options=['USE', 'SBERT', 'BSV', 'SBioBERT', 'Sent2Vec', 'BIOBERT NLI+STS'],
             description='Model for Sentence Embedding',
             tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT', 'Sent2Vec Model'],
+                      'Sentence BioBERT', 'Sent2Vec Model', 'BIOBERT model'],
             style=self.widgets_style
             )
 

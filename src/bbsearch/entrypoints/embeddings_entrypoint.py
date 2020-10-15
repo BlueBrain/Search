@@ -25,7 +25,7 @@ parser.add_argument("--log_name",
                     type=str,
                     help="The name of the log file.")
 parser.add_argument("--models",
-                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec',
+                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec,BIOBERT NLI+STS',
                     type=str,
                     help="Models for which we need to compute the embeddings. "
                          "Format should be comma separated list.")
@@ -109,6 +109,8 @@ def main():
         elif model == 'Sent2Vec':
             embedding_model = embedding_models.Sent2VecModel(
                 checkpoint_path=sent2vec_checkpoints)
+        elif model == 'BIOBERT NLI+STS':
+            embedding_model = embedding_models.SentTransformer(model_name='BIOBERT NLI+STS')
         else:
             try:
                 embedding_model_cls = getattr(embedding_models, model)
