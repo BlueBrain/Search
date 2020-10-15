@@ -3,3 +3,7 @@ eval:
     class: BSV
     init_kwargs:
       checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+  biobert_nli_sts:
+    class: SentTransformer
+    init_kwargs:
+      model_name: clagator/biobert_v1.1_pubmed_nli_sts
