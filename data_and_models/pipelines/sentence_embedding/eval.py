@@ -5,10 +5,10 @@ import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import yaml
-from scipy.stats import kendalltau, spearmanr, pearsonr
+from scipy.stats import kendalltau, pearsonr, spearmanr
 from sklearn.metrics.pairwise import cosine_similarity
 
 parser = ArgumentParser()
@@ -17,14 +17,11 @@ parser.add_argument(
     required=True,
     type=str,
     help="The CSV file(s) with the test set, i.e. containing sentences pairs "
-         "with the annotated ground-truth simliarity. If more than one, should "
-         "be comma-separated.",
+    "with the annotated ground-truth simliarity. If more than one, should "
+    "be comma-separated.",
 )
 parser.add_argument(
-    "--model",
-    required=True,
-    type=str,
-    help="Name of the model to evaluate.",
+    "--model", required=True, type=str, help="Name of the model to evaluate.",
 )
 parser.add_argument(
     "--output_file",
@@ -38,9 +35,9 @@ args = parser.parse_args()
 def main():
     print("Read params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"][args.model]
-    module = importlib.import_module('bbsearch.embedding_models')
-    class_ = getattr(module, params['class'])
-    model = class_(**params['init_kwargs'])
+    module = importlib.import_module("bbsearch.embedding_models")
+    class_ = getattr(module, params["class"])
+    model = class_(**params["init_kwargs"])
 
     print("Read test set...")
     df_sents = pd.read_csv(args.annotation_files)
@@ -48,8 +45,12 @@ def main():
     y_true = df_sents["score"]
     embeddings_1 = model.embed_many(model.preprocess_many(df_sents["sentence_1"]))
     embeddings_2 = model.embed_many(model.preprocess_many(df_sents["sentence_2"]))
-    y_pred = np.array([cosine_similarity(e1[np.newaxis], e2[np.newaxis]).item()
-                       for e1, e2 in zip(embeddings_1, embeddings_2)])
+    y_pred = np.array(
+        [
+            cosine_similarity(e1[np.newaxis], e2[np.newaxis]).item()
+            for e1, e2 in zip(embeddings_1, embeddings_2)
+        ]
+    )
 
     metrics_dict = OrderedDict()
     metrics_dict["kendall_tau"] = kendalltau(y_true, y_pred).correlation
