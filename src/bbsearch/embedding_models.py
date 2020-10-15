@@ -480,16 +480,32 @@ class BSV(EmbeddingModel):
         return embeddings
 
 
-class SBERT(EmbeddingModel):
-    """Sentence BERT.
+class SentTransformer(EmbeddingModel):
+    """Sentence Transformer.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the model to use for the embeddings
+        Currently:
+            - 'bert-base-nli-mean-tokens' is the one we use as SBERT
+            - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
 
     References
     ----------
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self):
-        self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+    def __init__(self, model_name="SBERT"):
+
+        if model_name == "SBERT":
+            model = "bert-base-nli-mean-tokens"
+        elif model_name == "BIOBERT NLI+STS":
+            model = "clagator/biobert_v1.1_pubmed_nli_sts"
+        else:
+            raise ValueError(f'We currently do not support this model: {model_name}')
+
+        self.senttransf_model = SentenceTransformer(model)
 
     @property
     def dim(self):
@@ -524,7 +540,7 @@ class SBERT(EmbeddingModel):
         embedding: numpy.array
             Embedding of the specified sentences of shape `(len(preprocessed_sentences), 768)`.
         """
-        embeddings = np.array(self.sbert_model.encode(preprocessed_sentences))
+        embeddings = np.array(self.senttransf_model.encode(preprocessed_sentences))
         return embeddings
 
 

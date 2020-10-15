@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 
 import bbsearch
 
-from ..embedding_models import BSV, SBERT, USE, SBioBERT, Sent2VecModel
+from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -116,7 +116,8 @@ class SearchServer(Flask):
             "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
             "USE": lambda: USE(),
-            "SBERT": lambda: SBERT(),
+            "SBERT": lambda: SentTransformer(model_name="SBERT"),
+            "BIOBERT NLI+STS": lambda: SentTransformer(model_name="BIOBERT NLI+STS"),
             "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path)
         }
 

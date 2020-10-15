@@ -12,11 +12,11 @@ from sentence_transformers import SentenceTransformer
 
 from bbsearch.embedding_models import (
     BSV,
-    SBERT,
     USE,
     EmbeddingModel,
     SBioBERT,
     Sent2VecModel,
+    SentTransformer,
     compute_database_embeddings,
 )
 
@@ -164,14 +164,14 @@ class TestEmbeddingModels:
         fake_sent2vec_model.embed_sentences.assert_called_once()
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
-    def test_sbert_embedding(self, monkeypatch, n_sentences):
+    def test_senttransf_embedding(self, monkeypatch, n_sentences):
         sentence_transormer_class = Mock()
-        sbert_model = Mock(spec=SentenceTransformer)
-        sbert_model.encode.return_value = np.ones([n_sentences, 768])  # Need to check the dimensions
-        sentence_transormer_class.return_value = sbert_model
+        senttrans_model = Mock(spec=SentenceTransformer)
+        senttrans_model.encode.return_value = np.ones([n_sentences, 768])  # Need to check the dimensions
+        sentence_transormer_class.return_value = senttrans_model
 
         monkeypatch.setattr('bbsearch.embedding_models.SentenceTransformer', sentence_transormer_class)
-        sbert = SBERT()
+        sbert = SentTransformer()
 
         # Preparations
         dummy_sentence = 'This is a dummy sentence/test.'
@@ -191,7 +191,7 @@ class TestEmbeddingModels:
         embedding = embed_method(preprocessed_sentence)
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
-        sbert_model.encode.assert_called_once()
+        senttrans_model.encode.assert_called_once()
 
     @pytest.mark.parametrize('n_sentences', [1, 5])
     def test_use_embedding(self, monkeypatch, n_sentences):
