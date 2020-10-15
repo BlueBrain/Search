@@ -129,7 +129,8 @@ def main():
                     embedding_models.compute_database_embeddings(engine,
                                                                  embedding_model,
                                                                  sentence_ids[
-                                                                     index:index+args.step])
+                                                                     index:index+args.step],
+                                                                 batch_size=args.step)
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
 
             except Exception as e:
