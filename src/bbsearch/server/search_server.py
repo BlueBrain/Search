@@ -149,7 +149,7 @@ class SearchServer(Flask):
                     "response_content_type": "application/json",
                     "required_fields": {
                         "query_text": [],
-                        "which_model": [self.models],
+                        "which_model": self.models,
                         "k": 'integer number'
                     },
                     "accepted_fields": {
