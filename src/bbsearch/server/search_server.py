@@ -57,6 +57,7 @@ class SearchServer(Flask):
         self.embeddings_h5_path = pathlib.Path(embeddings_h5_path)
 
         self.logger.info("Initializing embedding models...")
+        self.models = models
         self.embedding_models = {
             model_name: self._get_model(model_name)
             for model_name in models
@@ -135,6 +136,7 @@ class SearchServer(Flask):
             "name": self.name,
             "version": self.version,
             "database": self.connection.url.database,
+            "supported_models": self.models,
             "description": "Run the BBS text search for a given sentence.",
             "POST": {
                 "/help": {
@@ -147,7 +149,7 @@ class SearchServer(Flask):
                     "response_content_type": "application/json",
                     "required_fields": {
                         "query_text": [],
-                        "which_model": ["BSV", "SBioBERT"],
+                        "which_model": [self.models],
                         "k": 'integer number'
                     },
                     "accepted_fields": {
