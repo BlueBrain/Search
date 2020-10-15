@@ -1,5 +1,5 @@
 bbsearch.mining.entity module
-===========================
+=============================
 
 .. automodule:: bbsearch.mining.entity
    :members:
