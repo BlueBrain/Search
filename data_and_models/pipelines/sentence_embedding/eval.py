@@ -6,8 +6,9 @@ from argparse import ArgumentParser
 from collections import OrderedDict
 
 import pandas as pd
-import spacy
+import numpy as np
 import yaml
+from scipy.stats import kendalltau, spearmanr, pearsonr
 from sklearn.metrics.pairwise import cosine_similarity
 
 parser = ArgumentParser()
@@ -41,7 +42,23 @@ def main():
     class_ = getattr(module, params['class'])
     model = class_(**params['init_kwargs'])
 
-    print(model.embed("This is a sentence."))
+    print("Read test set...")
+    df_sents = pd.read_csv(args.annotation_files)
+
+    y_true = df_sents["score"]
+    embeddings_1 = model.embed_many(model.preprocess_many(df_sents["sentence_1"]))
+    embeddings_2 = model.embed_many(model.preprocess_many(df_sents["sentence_2"]))
+    y_pred = np.array([cosine_similarity(e1[np.newaxis], e2[np.newaxis]).item()
+                       for e1, e2 in zip(embeddings_1, embeddings_2)])
+
+    metrics_dict = OrderedDict()
+    metrics_dict["kendall_tau"] = kendalltau(y_true, y_pred).correlation
+    metrics_dict["pearson_r"] = pearsonr(y_true, y_pred).correlation
+    metrics_dict["spearman_rho"] = spearmanr(y_true, y_pred).correlation
+
+    output_file = pathlib.Path(args.output_file)
+    with output_file.open("w") as f:
+        json.dump(metrics_dict, f)
 
 
 if __name__ == "__main__":
