@@ -1,4 +1,5 @@
-"""Module focusing on entity recognition."""
+"""Classes and functions for entity extraction (aka named entity recognition)."""
+
 import copy
 
 import spacy

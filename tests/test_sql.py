@@ -21,7 +21,7 @@ from bbsearch.sql import (
 class TestNoSQL:
 
     @pytest.mark.parametrize('module_name', ['embedding_models',
-                                             'mining.attributes',
+                                             'mining.attribute',
                                              'mining.pipeline',
                                              'mining.relation',
                                              'search',

@@ -1,7 +1,4 @@
-"""Classes and functions for Attribute Extraction.
-
-The main workhorse is the class `AttributeExtraction`.
-"""
+"""Classes and functions for attribute extraction."""
 
 import collections
 import json

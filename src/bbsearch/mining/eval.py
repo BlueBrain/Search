@@ -1,4 +1,5 @@
-"""Collection of functions for evaluation of NER models."""
+"""Classes and functions for evaluating mining models predictions."""
+
 import copy
 import json
 import string

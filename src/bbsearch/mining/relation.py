@@ -1,4 +1,5 @@
-"""Relation Extraction."""
+"""Classes and functions for relation extraction."""
+
 from abc import ABC, abstractmethod
 from collections import defaultdict
 

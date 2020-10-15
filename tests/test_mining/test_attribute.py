@@ -676,7 +676,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr('bbsearch.mining.attributes.requests', fake_requests)
+        monkeypatch.setattr('bbsearch.mining.attribute.requests', fake_requests)
         fake_requests.post.return_value = response
 
         # Test 1
@@ -888,7 +888,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(real_response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr('bbsearch.mining.attributes.requests', fake_requests)
+        monkeypatch.setattr('bbsearch.mining.attribute.requests', fake_requests)
         fake_requests.post.return_value = response
 
         response_json = extractor.get_core_nlp_analysis(text)
