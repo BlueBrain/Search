@@ -33,15 +33,16 @@ args = parser.parse_args()
 
 
 def main():
-    print("Read params.yaml...")
+    print("Reading params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"][args.model]
     module = importlib.import_module("bbsearch.embedding_models")
     class_ = getattr(module, params["class"])
     model = class_(**params["init_kwargs"])
 
-    print("Read test set...")
+    print("Reading test set...")
     df_sents = pd.read_csv(args.annotation_files)
 
+    print("Computing test scores...")
     y_true = df_sents["score"]
     embeddings_1 = model.embed_many(model.preprocess_many(df_sents["sentence_1"]))
     embeddings_2 = model.embed_many(model.preprocess_many(df_sents["sentence_2"]))
@@ -54,12 +55,15 @@ def main():
 
     metrics_dict = OrderedDict()
     metrics_dict["kendall_tau"] = kendalltau(y_true, y_pred).correlation
-    metrics_dict["pearson_r"] = pearsonr(y_true, y_pred).correlation
+    metrics_dict["pearson_r"] = pearsonr(y_true, y_pred)[0]
     metrics_dict["spearman_rho"] = spearmanr(y_true, y_pred).correlation
 
+    print("Writing to file...")
     output_file = pathlib.Path(args.output_file)
     with output_file.open("w") as f:
         json.dump(metrics_dict, f)
+
+    print("Done.")
 
 
 if __name__ == "__main__":

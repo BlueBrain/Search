@@ -1,0 +1,36 @@
+eval_bsv:
+  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    --model=bsv --output_file=../../metrics/sentence_embedding/bsv.json
+  deps:
+  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    md5: 92a4235ce8d292ff382ce008c31da45c
+  - path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+    md5: e0c6c5cf7e4f8e88ec253ee46b461e58
+  - path: eval.py
+    md5: 1ed839234261e61a6d19d5f555cc2eb4
+  params:
+    params.yaml:
+      eval.bsv:
+        class: BSV
+        init_kwargs:
+          checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+  outs:
+  - path: ../../metrics/sentence_embedding/bsv.json
+    md5: 59bedb32e03ede0369812c9b9fef0652
+eval_biobert_nli_sts:
+  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    --model=biobert_nli_sts --output_file=../../metrics/sentence_embedding/biobert_nli_sts.json
+  deps:
+  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    md5: 92a4235ce8d292ff382ce008c31da45c
+  - path: eval.py
+    md5: 1ed839234261e61a6d19d5f555cc2eb4
+  params:
+    params.yaml:
+      eval.biobert_nli_sts:
+        class: SentTransformer
+        init_kwargs:
+          model_name: clagator/biobert_v1.1_pubmed_nli_sts
+  outs:
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts.json
+    md5: 986585105e09772a70587cae72402260
