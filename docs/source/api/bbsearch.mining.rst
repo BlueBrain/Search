@@ -7,7 +7,8 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   bbsearch.mining.attributes
+   bbsearch.mining.attribute
+   bbsearch.mining.entity
    bbsearch.mining.eval
    bbsearch.mining.pipeline
    bbsearch.mining.relation

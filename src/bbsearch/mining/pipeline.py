@@ -1,4 +1,4 @@
-"""Entire end-to-end pipeline extracting entities and relations from text."""
+"""Complete pipeline to mine entities, relations, attributes from text."""
 
 import pandas as pd
 import spacy

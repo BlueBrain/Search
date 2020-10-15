@@ -1,4 +1,5 @@
-"""Module focusing on entity recognition."""
+"""Classes and functions for entity extraction (aka named entity recognition)."""
+
 import copy
 
 import spacy
@@ -31,12 +32,12 @@ def remap_entity_type(patterns, etype_mapping):
     adjusted_patterns = copy.deepcopy(patterns)
 
     for p in adjusted_patterns:
-        label = p['label']
+        label = p["label"]
 
         if label in etype_mapping:
-            p['label'] = etype_mapping[label]
+            p["label"] = etype_mapping[label]
         else:
-            p['label'] = "NaE"
+            p["label"] = "NaE"
 
     return adjusted_patterns
 
@@ -45,10 +46,14 @@ def global2model_patterns(patterns, ee_models_library):
     """Convert global patterns to model specific patterns.
 
     The `patterns` list can look like this
-    [
-     {"label": "ORG", "pattern": "Apple"},
-     {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}
-    ]
+
+    .. code-block:: Python
+
+        [
+         {"label": "ORG", "pattern": "Apple"},
+         {"label": "GPE", "pattern": [{"LOWER": "san"}, {"LOWER": "francisco"}]}
+        ]
+
 
     Parameters
     ----------
@@ -67,12 +72,13 @@ def global2model_patterns(patterns, ee_models_library):
     res : dict
         The keys are the locations of the model and the values are list of patterns that one
         can load with `EntityRuler(nlp, patterns=patterns)`
-
     """
     res = {}
     for model, ee_models_library_slice in ee_models_library.groupby("model"):
-        etype_mapping = {row["entity_type"]: row["entity_type_name"]
-                         for _, row in ee_models_library_slice.iterrows()}
+        etype_mapping = {
+            row["entity_type"]: row["entity_type_name"]
+            for _, row in ee_models_library_slice.iterrows()
+        }
         res[model] = remap_entity_type(patterns, etype_mapping)
 
     return res
@@ -99,7 +105,11 @@ def check_patterns_agree(model, patterns):
     ValueError
         The model does not contain an entity ruler or it contains more than 1.
     """
-    all_er = [pipe for _, pipe in model.pipeline if isinstance(pipe, spacy.pipeline.EntityRuler)]
+    all_er = [
+        pipe
+        for _, pipe in model.pipeline
+        if isinstance(pipe, spacy.pipeline.EntityRuler)
+    ]
 
     if not all_er:
         raise ValueError("The model contains no EntityRuler")
