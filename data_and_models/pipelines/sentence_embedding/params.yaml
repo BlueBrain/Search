@@ -1,0 +1,5 @@
+eval:
+  bsv:
+    class: BSV
+    init_kwargs:
+      checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
