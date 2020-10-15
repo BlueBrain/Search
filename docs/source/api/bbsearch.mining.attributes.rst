@@ -1,7 +1,7 @@
-bbsearch.mining.attributes module
+bbsearch.mining.attribute module
 =================================
 
-.. automodule:: bbsearch.mining.attributes
+.. automodule:: bbsearch.mining.attribute
    :members:
    :undoc-members:
    :show-inheritance:
