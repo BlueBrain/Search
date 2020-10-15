@@ -110,7 +110,7 @@ def main():
             embedding_model = embedding_models.Sent2VecModel(
                 checkpoint_path=sent2vec_checkpoints)
         elif model == 'BIOBERT NLI+STS':
-            embedding_model = embedding_models.SentTransformer(model_name='BIOBERT NLI+STS')
+            embedding_model = embedding_models.SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts")
         else:
             try:
                 embedding_model_cls = getattr(embedding_models, model)

@@ -496,16 +496,9 @@ class SentTransformer(EmbeddingModel):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, model_name="SBERT"):
+    def __init__(self, model_name="bert-base-nli-mean-tokens"):
 
-        if model_name == "SBERT":
-            model = "bert-base-nli-mean-tokens"
-        elif model_name == "BIOBERT NLI+STS":
-            model = "clagator/biobert_v1.1_pubmed_nli_sts"
-        else:
-            raise ValueError(f'We currently do not support this model: {model_name}')
-
-        self.senttransf_model = SentenceTransformer(model)
+        self.senttransf_model = SentenceTransformer(model_name)
 
     @property
     def dim(self):
