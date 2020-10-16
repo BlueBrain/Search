@@ -2,7 +2,12 @@
 - Annotations collected in order to train or evaluate sentence embedding models. 
 
 # Content
- 
+
+## `cord19_v47_sentences_pre.txt`
+- Unannotated file of sentences (one line per sentence) from cord-19.
+- 20,510,932 total sentences.
+- Can be used to train unspervised nlp models.
+
 ## `sentence_similarity_cord19.csv`
 - Sentences pairs with similarity scores annotated by Emmanuelle Logette. 
 - 40 sentences pairs in total:
