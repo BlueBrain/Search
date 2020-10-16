@@ -1,10 +1,10 @@
 """EntryPoint for the computation and saving of the embeddings."""
-import os
-
 import argparse
 import getpass
 import logging
+import os
 import pathlib
+
 import torch
 
 from ._helper import configure_logging
@@ -108,7 +108,9 @@ def main():
             if os.environ['CUDA_VISIBLE_DEVICES']:
                 device = 'cuda'
         except KeyError:
-            logger.info(f'The environment variable CUDA_VISIBLE_DEVICES seems not specified.')
+            logger.info('The environment variable CUDA_VISIBLE_DEVICES seems not specified.')
+
+    logger.info(f'The device used for the embeddings computation is {device}.')
 
     for model in args.models.split(','):
         model = model.strip()
