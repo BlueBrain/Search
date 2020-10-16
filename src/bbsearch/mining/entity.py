@@ -2,7 +2,259 @@
 
 import copy
 
+import numpy as np
+import pandas as pd
 import spacy
+
+from bbsearch.utils import JSONL
+
+
+class PatternCreator:
+    """Utility class for easy handling of patterns.
+
+    Parameters
+    ----------
+    storage : None or pd.DataFrame
+        If provided, we automatically populate `_storage` with it. If None, then
+        we start from scratch - no patterns.
+
+    Attributes
+    ----------
+    _storage : pd.DataFrame
+        A representation of all patterns allows for comfortable sorting,
+        filtering, etc.
+
+    """
+
+    @classmethod
+    def load(cls, path):
+        """Load from a jsonl file.
+
+        Parameters
+        ----------
+        path : pathlib.Path
+            Path to a jsonl file with patterns.
+
+        Returns
+        -------
+        pattern_creator : PatternCreator
+            Instance of a ``PatternCreator``.
+        """
+        inst = cls()
+        patterns = JSONL.load_jsonl(path)
+
+        for p in patterns:
+            inst.add(label=p['label'], pattern=p['pattern'])
+
+        return inst
+
+    def __init__(self, storage=None):
+        if storage is None:
+            columns = ["label"]
+            self._storage = pd.DataFrame(columns=columns)
+        else:
+            self._storage = storage.reset_index()
+
+    def __eq__(self, other):
+        """Determine if equal.
+
+        Parameters
+        ----------
+        other : PatternCreator
+            Some other PatternCreator that we wish to compare to.
+
+        Returns
+        -------
+        bool
+            If True, the patterns are identical. Note that the order does not matter.
+        """
+        if not isinstance(other, self.__class__):
+            return False
+
+        self_df_unsorted = self.to_df()
+        other_df_unsorted = other.to_df()
+
+        self_df_sorted = self_df_unsorted.sort_values(by=list(self_df_unsorted.columns))
+        other_df_sorted = other_df_unsorted.sort_values(by=list(other_df_unsorted.columns))
+
+        return np.array_equal(self_df_sorted.values, other_df_sorted.values)
+
+    def add(self, label, pattern, check_exists=False):
+        """Add a single raw in the patterns.
+
+        Parameters
+        ----------
+        label : str
+            Entity type to associate with a given pattern.
+
+        pattern : str or dict or list
+            The pattern we want to match. The behavior depends on the type.
+            * ``str``: can be used for exact matching (case sensitive). We internally convert
+              it to a single-token pattern `{"TEXT": pattern}`.
+            * ``dict``: a single-token pattern. This dictionary can contain at most 2 entries.
+              The first one represents the attribute: value pair ("LEMMA": "world"). The second
+              has a key "OP" and is optional. It represents the operator/quantifier to be used.
+              An example of a valid pattern dict is `{"LEMMA": "world", "OP": "+"}`. Note that
+              it would detect entities like "world" and "world world world".
+            * ``list``: a multi-token pattern. A list of dictionaries that are of the same form
+              as described above.
+        check_exists : bool
+            If True, we only allow to add patterns that do not exist yet.
+        """
+
+        if isinstance(pattern, str):
+            pattern_ = [{"TEXT": pattern}]
+
+        elif isinstance(pattern, dict):
+            pattern_ = [pattern]
+
+        elif isinstance(pattern, list):
+            pattern_ = pattern
+
+        else:
+            raise TypeError("Unsupported type of pattern")
+
+        new_row = self.raw2row({"label": label, "pattern": pattern_})
+
+        new_storage = self._storage.append(new_row.to_frame().T, ignore_index=True)
+        if check_exists and new_storage.duplicated().any():
+            raise ValueError("The pattern already exists")
+
+        self._storage = new_storage
+
+    def drop(self, labels):
+        """Drop one or multiple patterns
+
+        Parameters
+        ----------
+        labels : int or list
+            If ``int`` then represent a row index to be dropped. If ``list`` then
+            a collection of row indices to be dropped.
+        """
+        self._storage.drop(index=labels, inplace=True)
+
+    def to_df(self):
+        """Convert to DataFrame."""
+        return self._storage
+
+    def to_list(self, sort_by=None):
+        """Convert to list.
+
+        Parameters
+        ----------
+        sort_by : None or list
+            If None, then no sorting taking place. If ``list``, then the names of columns
+            along which to sort.
+        """
+        sorted_storage = self._storage.sort_values(by=sort_by) if sort_by is not None else self._storage
+        return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
+
+    def save(self, path, sort_by=None):
+        """"Save to jsonl.
+
+        Parameters
+        ----------
+        sort_by : None or list
+            If None, then no sorting taking place. If ``list``, then the names of columns
+            along which to sort.
+        """
+        patterns = self.to_list(sort_by=sort_by)
+        JSONL.dump_jsonl(patterns, path)
+
+    def test(self, text, model=None, disable=None, **add_pipe_kwargs):
+        """Test the current patterns on text.
+
+        Parameters
+        ----------
+        text : str
+            Some text.
+
+        model : spacy.language.Language or None
+            Spacy model. If not provided we default to `spacy.blank("en")`.
+
+        disable : list or None
+            List of elements to remove from the pipeline.
+
+        **add_pipe_kwargs : dict
+            Additionally parameters to be passed into the `add_pipe` method. Note that
+            one can control the position the ``EntityRuler`` this way. If not specified
+            we put at at the very end.
+
+        Returns
+        -------
+        doc : spacy.Doc
+            Doc containing the entities under the `ents` property.
+        """
+        model = model or spacy.blank("en")
+        disable = disable or []
+        add_pipe_kwargs = add_pipe_kwargs or {"last": True}
+        er = spacy.pipeline.EntityRuler(model, patterns=self.to_list(), validate=True)
+        model.add_pipe(er, **add_pipe_kwargs)
+
+        return model(text, disable=disable)
+
+    @staticmethod
+    def raw2row(raw):
+        """Convert an element of patterns list to a pd.Series.
+
+        Parameters
+        ----------
+        raw : dict
+            Dictionary with two keys: 'label' and 'pattern'
+
+        Returns
+        -------
+        row : pd.Series
+            The index contains the following elements: "label",
+            "attribute_0", "value_0", "attribute_1", "value_1",...
+
+        """
+        d = {"label": raw["label"]}
+        for token_ix, e in enumerate(raw["pattern"]):
+
+            if len(e) == 1:
+                pass
+            elif len(e) == 2 and "OP" in e:
+                pass
+            else:
+                raise ValueError('Invalid element, multi-attribute matches are not supported')
+
+            attribute = list(e)[0]
+            value_type = type(e[attribute]).__name__
+            value = str(e[attribute])
+            op = e.get('OP', "")
+
+            d.update({f"attribute_{token_ix}": attribute,
+                      f"value_{token_ix}": value,
+                      f"value_type_{token_ix}": value_type,
+                      f"op_{token_ix}": op})
+        return pd.Series(d)
+
+    @staticmethod
+    def row2raw(row):
+        """Convert pd.Series to a valid pattern list."""
+        pattern = []
+        token_ix = 0
+        while True:
+            try:
+                attribute = row[f"attribute_{token_ix}"]  # str
+                value_str = row[f"value_{token_ix}"]  # str
+                value_type = row[f"value_type_{token_ix}"]
+
+                value = eval(f"{value_type}({value_str})") if value_type != 'str' else value_str
+                op = row[f"op_{token_ix}"]  # str
+
+                token_pattern = {attribute: value}
+                if op:
+                    token_pattern["OP"] = op
+
+                pattern.append(token_pattern)
+            except KeyError:
+                break
+
+            token_ix += 1
+
+        return {"label": row["label"], 'pattern': pattern}
 
 
 def remap_entity_type(patterns, etype_mapping):
