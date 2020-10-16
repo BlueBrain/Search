@@ -79,7 +79,7 @@ class PatternCreator:
 
         return np.array_equal(self_df_sorted.values, other_df_sorted.values)
 
-    def add(self, label, pattern, check_exists=False):
+    def add(self, label, pattern, check_exists=True):
         """Add a single raw in the patterns.
 
         Parameters
@@ -101,7 +101,6 @@ class PatternCreator:
         check_exists : bool
             If True, we only allow to add patterns that do not exist yet.
         """
-
         if isinstance(pattern, str):
             pattern_ = [{"TEXT": pattern}]
 
@@ -123,7 +122,7 @@ class PatternCreator:
         self._storage = new_storage
 
     def drop(self, labels):
-        """Drop one or multiple patterns
+        """Drop one or multiple patterns.
 
         Parameters
         ----------
@@ -150,7 +149,7 @@ class PatternCreator:
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
     def save(self, path, sort_by=None):
-        """"Save to jsonl.
+        """Save to jsonl.
 
         Parameters
         ----------
@@ -249,7 +248,7 @@ class PatternCreator:
                     token_pattern["OP"] = op
 
                 pattern.append(token_pattern)
-            except KeyError:
+            except (KeyError, NameError):
                 break
 
             token_ix += 1
