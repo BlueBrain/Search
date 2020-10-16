@@ -1,30 +1,11 @@
-eval_bsv:
-  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    --model=bsv --output_file=../../metrics/sentence_embedding/bsv.json
-  deps:
-  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    md5: 92a4235ce8d292ff382ce008c31da45c
-  - path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
-    md5: e0c6c5cf7e4f8e88ec253ee46b461e58
-  - path: eval.py
-    md5: 1ed839234261e61a6d19d5f555cc2eb4
-  params:
-    params.yaml:
-      eval.bsv:
-        class: BSV
-        init_kwargs:
-          checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
-  outs:
-  - path: ../../metrics/sentence_embedding/bsv.json
-    md5: 59bedb32e03ede0369812c9b9fef0652
 eval_biobert_nli_sts:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    --model=biobert_nli_sts --output_file=../../metrics/sentence_embedding/biobert_nli_sts.json
+    --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
   deps:
   - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     md5: 92a4235ce8d292ff382ce008c31da45c
   - path: eval.py
-    md5: 1ed839234261e61a6d19d5f555cc2eb4
+    md5: b89c44903aa94a554e410f609925edb1
   params:
     params.yaml:
       eval.biobert_nli_sts:
@@ -32,5 +13,32 @@ eval_biobert_nli_sts:
         init_kwargs:
           model_name: clagator/biobert_v1.1_pubmed_nli_sts
   outs:
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts.csv
+    md5: c4829d5440c0c5cf4d26cbcdf1b4cc8c
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.json
     md5: 986585105e09772a70587cae72402260
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
+    md5: 1bdd2423c1c4f21641e99111660b7c40
+eval_bsv:
+  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    --model=bsv --output_dir=../../metrics/sentence_embedding
+  deps:
+  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    md5: 92a4235ce8d292ff382ce008c31da45c
+  - path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+    md5: e0c6c5cf7e4f8e88ec253ee46b461e58
+  - path: eval.py
+    md5: b89c44903aa94a554e410f609925edb1
+  params:
+    params.yaml:
+      eval.bsv:
+        class: BSV
+        init_kwargs:
+          checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+  outs:
+  - path: ../../metrics/sentence_embedding/bsv.csv
+    md5: b059830562a4ff93700948cfff583b65
+  - path: ../../metrics/sentence_embedding/bsv.json
+    md5: 59bedb32e03ede0369812c9b9fef0652
+  - path: ../../metrics/sentence_embedding/bsv.png
+    md5: 8a40551aee69c37828b5074f1118ff25

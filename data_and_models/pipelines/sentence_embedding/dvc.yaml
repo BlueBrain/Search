@@ -1,22 +1,28 @@
 stages:
+  eval_biobert_nli_sts:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - eval.py
+    params:
+    - eval.biobert_nli_sts
+    outs:
+    - ../../metrics/sentence_embedding/biobert_nli_sts.csv
+    - ../../metrics/sentence_embedding/biobert_nli_sts.png
+    metrics:
+    - ../../metrics/sentence_embedding/biobert_nli_sts.json
   eval_bsv:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=bsv --output_file=../../metrics/sentence_embedding/bsv.json
+      --model=bsv --output_dir=../../metrics/sentence_embedding
     deps:
     - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     - ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
     - eval.py
     params:
     - eval.bsv
+    outs:
+    - ../../metrics/sentence_embedding/bsv.csv
+    - ../../metrics/sentence_embedding/bsv.png
     metrics:
     - ../../metrics/sentence_embedding/bsv.json
-  eval_biobert_nli_sts:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=biobert_nli_sts --output_file=../../metrics/sentence_embedding/biobert_nli_sts.json
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - eval.py
-    params:
-    - eval.biobert_nli_sts
-    metrics:
-    - ../../metrics/sentence_embedding/biobert_nli_sts.json
