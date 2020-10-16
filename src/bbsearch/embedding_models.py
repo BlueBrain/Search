@@ -1,6 +1,7 @@
 """Model handling sentences embeddings."""
 import logging
 import pathlib
+import pickle
 import string
 from abc import ABC, abstractmethod
 
@@ -586,6 +587,74 @@ class USE(EmbeddingModel):
         """
         embedding = self.use_model(preprocessed_sentences).numpy()
         return embedding
+
+
+class SklearnVectorizer(EmbeddingModel):
+    """Simple wrapper for sklearn vectorizer models.
+
+    Parameters
+    ----------
+    checkpoint_path: pathlib.Path or str
+        Location of the model checkpoint in pickle format.
+    """
+
+    def __init__(self, checkpoint_path):
+        self.checkpoint_path = pathlib.Path(checkpoint_path)
+        self.model = pickle.load(self.checkpoint_path)
+
+    @property
+    def dim(self):
+        """Return dimension of the embedding.
+
+        Returns
+        -------
+        dim : int
+            The dimension of the embedding.
+        """
+        if hasattr(self.model, "n_features"):  # e.g. HashingVectorizer
+            return self.model.n_features
+        elif hasattr(self.model, "vocabulary_"):  # e.g. TfIdfVectorizer
+            return len(self.model.vocabulary_)
+        else:
+            raise NotImplementedError(
+                f"Something went wrong, embedding dimension for class "
+                f"{type(self.model)} could not be computed."
+            )
+
+    def embed(self, preprocessed_sentence):
+        """Embed one given sentence.
+
+        Parameters
+        ----------
+        preprocessed_sentence: str
+            Preprocessed sentence to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
+
+        Returns
+        -------
+        embedding: numpy.ndarray
+            Array of shape `(dim,)` with the sentence embedding.
+        """
+        embedding = self.embed_many([preprocessed_sentence])
+        return embedding.squeeze()
+
+    def embed_many(self, preprocessed_sentences):
+        """Compute sentence embeddings for multiple sentences.
+
+        Parameters
+        ----------
+        preprocessed_sentences: iterable of str
+            Preprocessed sentences to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
+
+        Returns
+        -------
+        embeddings: numpy.ndarray
+            Array of shape `(len(preprocessed_sentences), dim)` with the
+            sentence embeddings.
+        """
+        embeddings = self.model.transform(preprocessed_sentences).todense()
+        return embeddings
 
 
 def compute_database_embeddings(connection, model, indices, batch_size=10):

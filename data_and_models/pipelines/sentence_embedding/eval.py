@@ -1,4 +1,3 @@
-"""Evaluation script for NER models."""
 import importlib
 import json
 import pathlib
