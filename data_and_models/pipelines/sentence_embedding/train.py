@@ -48,13 +48,15 @@ def main():
         print("Training model...")
         model.fit(corpus)
         print("Saving model to disk...")
-        pickle.dump(model, out_dir / "model.pkl")
+        with open(out_dir / "model.pkl", "wb") as f:
+            pickle.dump(model, f)
     elif args.model == "count":
         model = CountVectorizer(**params["init_kwargs"])
         print("Training model...")
         model.fit(corpus)
         print("Saving model to disk...")
-        pickle.dump(model, out_dir / "model.pkl")
+        with open(out_dir / "model.pkl", "wb") as f:
+            pickle.dump(model, f)
     else:
         raise ValueError(f"Training not available for model {args.model}!")
 
