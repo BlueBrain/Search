@@ -53,7 +53,7 @@ class PatternCreator:
             columns = ["label"]
             self._storage = pd.DataFrame(columns=columns)
         else:
-            self._storage = storage.reset_index()
+            self._storage = storage.reset_index(drop=True)
 
     def __eq__(self, other):
         """Determine if equal.
@@ -74,10 +74,19 @@ class PatternCreator:
         self_df_unsorted = self.to_df()
         other_df_unsorted = other.to_df()
 
-        self_df_sorted = self_df_unsorted.sort_values(by=list(self_df_unsorted.columns))
-        other_df_sorted = other_df_unsorted.sort_values(by=list(other_df_unsorted.columns))
+        if set(self_df_unsorted.columns) != set(other_df_unsorted.columns):
+            return False
 
-        return np.array_equal(self_df_sorted.values, other_df_sorted.values)
+        sort_by = list(self_df_unsorted.columns)
+        self_df_sorted = self_df_unsorted.sort_values(by=sort_by)
+        other_df_sorted = other_df_unsorted.sort_values(by=sort_by)
+
+        self_is_nan = self_df_sorted.isnull().values
+        other_is_nan = other_df_sorted.isnull().values
+
+        return np.array_equal(self_is_nan,
+                              other_is_nan) and np.array_equal(self_df_sorted.values[~self_is_nan],
+                                                               other_df_sorted.values[~other_is_nan])
 
     def add(self, label, pattern, check_exists=True):
         """Add a single raw in the patterns.
@@ -199,7 +208,9 @@ class PatternCreator:
         Parameters
         ----------
         raw : dict
-            Dictionary with two keys: 'label' and 'pattern'
+            Dictionary with two keys: 'label' and 'pattern'.
+            The `pattern` needs to be a list of dictionaries
+            each representing a pattern for a given token.
 
         Returns
         -------
