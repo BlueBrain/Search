@@ -40,7 +40,7 @@ def main():
     with open(args.sentences_file, "r") as f:
         corpus = f.readlines()
 
-    out_dir = Path(args.output_dir) / args.model
+    out_dir = Path(args.output_dir)
     os.makedirs(out_dir, exist_ok=True)
 
     if args.model == "tf_idf":
