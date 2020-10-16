@@ -1,8 +1,11 @@
 """EntryPoint for the computation and saving of the embeddings."""
+import os
+
 import argparse
 import getpass
 import logging
 import pathlib
+import torch
 
 from ._helper import configure_logging
 
@@ -99,6 +102,14 @@ def main():
 
     logger.info(f'{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}')
 
+    device = None
+    if torch.cuda.is_available():
+        try:
+            if os.environ['CUDA_VISIBLE_DEVICES']:
+                device = 'cuda'
+        except KeyError:
+            logger.info(f'The environment variable CUDA_VISIBLE_DEVICES seems not specified.')
+
     for model in args.models.split(','):
         model = model.strip()
 
@@ -110,7 +121,8 @@ def main():
             embedding_model = embedding_models.Sent2VecModel(
                 checkpoint_path=sent2vec_checkpoints)
         elif model == 'BIOBERT NLI+STS':
-            embedding_model = embedding_models.SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts")
+            embedding_model = embedding_models.SentTransformer(
+                model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device)
         else:
             try:
                 embedding_model_cls = getattr(embedding_models, model)

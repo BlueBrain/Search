@@ -496,9 +496,9 @@ class SentTransformer(EmbeddingModel):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, model_name="bert-base-nli-mean-tokens"):
+    def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
 
-        self.senttransf_model = SentenceTransformer(model_name)
+        self.senttransf_model = SentenceTransformer(model_name, device=device)
 
     @property
     def dim(self):
