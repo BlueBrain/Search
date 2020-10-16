@@ -60,6 +60,7 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
 
     device: str
         If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS, SBioBERT, SBERT)
+
     Returns
     -------
     bbsearch.embedding_models.EmbeddingModel
