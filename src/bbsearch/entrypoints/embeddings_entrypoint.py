@@ -140,7 +140,7 @@ def main():
 
     logger.info(f'{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}')
 
-    device = None
+    device = 'cpu'
     if torch.cuda.is_available():
         try:
             if os.environ['CUDA_VISIBLE_DEVICES']:
