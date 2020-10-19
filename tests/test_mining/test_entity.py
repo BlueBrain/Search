@@ -24,6 +24,36 @@ class TestPatternCreator:
         assert pc1 != "wrong type"
         assert pc1 != pc2  # different columns
 
+    def test_drop(self):
+        pc = PatternCreator()
+
+        pc.add("ET1", "hello")
+        pc.add("ET1", "there")
+        pc.add("ET2", "world")
+        pc.add("ET4", "dog")
+
+        assert pc.to_df().index.to_list() == [0, 1, 2, 3]
+
+        pc.drop([1, 2])
+
+        assert pc.to_df().index.to_list() == [0, 1]
+
+    def test_to_df(self):
+        pc = PatternCreator()
+
+        pc.add("ET1", "hello")
+        pc.add("ET1", "there")
+
+        df_1 = pc.to_df()
+        df_2 = pc.to_df()
+
+        df_2.loc[0, "label"] = "REPLACED_LABEL"
+
+        df_3 = pc.to_df()
+
+        assert not df_1.equals(df_2)
+        assert df_1.equals(df_3)
+
     def test_errors(self):
         pc = PatternCreator()
 

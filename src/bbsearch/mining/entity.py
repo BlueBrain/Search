@@ -141,22 +141,35 @@ class PatternCreator:
             If ``int`` then represent a row index to be dropped. If ``list`` then
             a collection of row indices to be dropped.
         """
-        self._storage.drop(index=labels, inplace=True)
+        self._storage = self._storage.drop(index=labels).reset_index(drop=True)
 
     def to_df(self):
-        """Convert to DataFrame."""
-        return self._storage
+        """Convert to a pd.DataFrame.
+
+        Returns
+        -------
+        pd.DataFrame
+            Copy of the `_storage`. Each row represents a single entity type pattern. All
+            elements are strings.
+        """
+        return self._storage.copy()
 
     def to_list(self, sort_by=None):
-        """Convert to list.
+        """Convert to a list.
 
         Parameters
         ----------
         sort_by : None or list
             If None, then no sorting taking place. If ``list``, then the names of columns
             along which to sort.
+
+        Returns
+        -------
+        list
+            A list where each element represents one entity type pattern. Note that
+            this list can be directly passed into the `EntityRuler`.
         """
-        sorted_storage = self._storage.sort_values(by=sort_by) if sort_by is not None else self._storage
+        sorted_storage = self.to_df().sort_values(by=sort_by) if sort_by is not None else self._storage
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
     def save(self, path, sort_by=None):
