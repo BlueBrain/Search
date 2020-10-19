@@ -188,7 +188,7 @@ class PatternCreator:
         **add_pipe_kwargs : dict
             Additionally parameters to be passed into the `add_pipe` method. Note that
             one can control the position the ``EntityRuler`` this way. If not specified
-            we put at at the very end.
+            we put it at the very end.
 
         Returns
         -------
@@ -218,7 +218,7 @@ class PatternCreator:
             Dictionary with two keys: 'label' and 'pattern'.
             The `pattern` needs to be a list of dictionaries
             each representing a pattern for a given token.
-            The `label` represents the entity type.
+            The `label` is a string representing the entity type.
 
         Returns
         -------
@@ -229,8 +229,16 @@ class PatternCreator:
             ...
 
         """
+        if not isinstance(raw["label"], str):
+            raise TypeError("The label needs to be a string")
+
+        if not isinstance(raw["pattern"], list):
+            raise TypeError("The pattern needs to be a list")
+
         d = {"label": raw["label"]}
         for token_ix, e in enumerate(raw["pattern"]):
+            if not isinstance(e, dict):
+                raise TypeError("The per token pattern needs to be a dictionary")
 
             if len(e) == 1:
                 pass
@@ -239,7 +247,7 @@ class PatternCreator:
             else:
                 raise ValueError('Invalid element, multi-attribute matches are not supported')
 
-            attribute = list(e)[0]
+            attribute = next(filter(lambda key: key != "OP", e))
             value_type = type(e[attribute]).__name__
             value = str(e[attribute])
             op = e.get('OP', "")
@@ -272,7 +280,7 @@ class PatternCreator:
             Dictionary with two keys: 'label' and 'pattern'.
             The `pattern` needs to be a list of dictionaries
             each representing a pattern for a given token.
-            The `label` represents the entity type.
+            The `label` is a string representing the entity type.
         """
         pattern = []
         token_ix = 0

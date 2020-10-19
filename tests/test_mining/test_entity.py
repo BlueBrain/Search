@@ -93,6 +93,41 @@ class TestPatternCreator:
 
         assert len(doc2.ents) == 0
 
+    def test_raw2row_errors(self):
+        # pattern not a list
+        with pytest.raises(TypeError):
+            PatternCreator.raw2row({"label": "ET1",
+                                    "pattern": {"LOWER": "TEXT"}})
+
+        # label not a str
+        with pytest.raises(TypeError):
+            PatternCreator.raw2row({"label": 232,
+                                    "pattern": [{"LOWER": "TEXT"}]})
+
+        # element not dictionary
+        with pytest.raises(TypeError):
+            PatternCreator.raw2row({"label": "etype",
+                                    "pattern": [11]})
+
+    @pytest.mark.parametrize("raw", [
+        {"label": "ET1",
+         "pattern": [{"LOWER": "something"}]},
+        {"label": "ET2",
+         "pattern": [{"REGEX": "^S"}]},
+        {"label": "ET3",
+         "pattern": [{"LEMMA": "bb", "OP": "!"}]},
+        {"label": "ET4",
+         "pattern": [{"OP": "+", "LOWER": "fdsaf"}]},
+        {"label": "ET5",
+         "pattern": [{"ORTH": "fdsaf"}, {"LEMMA": "aaa"}]},
+        {"label": "ET6",
+         "pattern": [{"OP": "+", "LOWER": "aaa"},
+                     {"OP": "!", "LEMMA": "bb"},
+                     {"OP": "?", "ORTH": "cc"}]},
+    ])
+    def test_raw2row2raw(self, raw):
+        assert raw == PatternCreator.row2raw(PatternCreator.raw2row(raw))
+
 
 def test_entity_type():
     patterns = [
