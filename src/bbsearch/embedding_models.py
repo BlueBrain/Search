@@ -6,12 +6,12 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import sent2vec
+import sentence_transformers
 import spacy
 import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-import sentence_transformers
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
