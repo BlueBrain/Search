@@ -54,6 +54,19 @@ class TestPatternCreator:
         assert not df_1.equals(df_2)
         assert df_1.equals(df_3)
 
+    def test_to_list(self):
+        pc = PatternCreator()
+
+        pc.add("ET1", "hello")
+        pc.add("ET2", {"TEXT": "there"})
+        pc.add("ET3", [{"TEXT": {"IN": ["world", "cake"]}}])
+        pc.add("ET4", [{"TEXT": {"IN": ["aa", "bbb"]}},
+                       {"TEXT": {"REGEX": "^s"}}])
+
+        res = pc.to_list()
+
+        assert len(res) == 4
+
     def test_errors(self):
         pc = PatternCreator()
 
@@ -141,8 +154,8 @@ class TestPatternCreator:
                                     "pattern": [11]})
 
     def test_row2raw(self):
-        # unsupported value_type
-        with pytest.raises(TypeError):
+        # unsupported value_type - eval fails
+        with pytest.raises(NameError):
             PatternCreator.row2raw(pd.Series({"label": "et1",
                                               "attribute_0": "TEXT",
                                               "value_0": "aaa",
