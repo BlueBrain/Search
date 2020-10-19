@@ -14,6 +14,26 @@ Legend
 - |Remove| denotes removed features.
 
 
+Verions 0.0.4
+=============
+**Ocober 20, 2020**
+
+Changes
+-------
+- |Add| language detection with `langdetect`, allowing to filter out articles
+  not in English or no useful content.
+- |Add| widgets inform the user on the CORD-19 version being used.
+- |Add| `bbsearch.utils.JSONL` for easy interaction with JSONL files.
+- |Add| `bbsearch.entity.PatternCreator` and other functionalities to perform
+  rule-based named entity recognition.
+- |Change| module names
+- |Change| in `bbsearch.embedding_models`, `SBERT` class is now replaced by a
+  more general-purpose `SentTransformer` which can wrap any object from
+  `sentence_transformers.SentenceTransformer`.
+- |Add| `bbsearch.embedding_models.SklearnVectorizer` is a new class that can be used to wrap any `sklearn`
+  vectorizer object (`TfidfVectorizer`, `CountVectorizer`, `HashingVectorizer`).
+
+
 Version 0.0.3
 =============
 **October 2, 2020**

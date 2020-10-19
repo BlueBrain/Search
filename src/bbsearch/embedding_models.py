@@ -489,10 +489,10 @@ class SentTransformer(EmbeddingModel):
     Parameters
     ----------
     model_name : str
-        Name of the model to use for the embeddings
+        Name of the model to use for the embeddings.
         Currently:
-            - 'bert-base-nli-mean-tokens' is the one we use as SBERT
-            - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
+        - 'bert-base-nli-mean-tokens' is the one we use as SBERT
+        - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
 
     References
     ----------
