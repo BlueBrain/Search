@@ -44,7 +44,7 @@ class PatternCreator:
         patterns = JSONL.load_jsonl(path)
 
         for p in patterns:
-            inst.add(label=p['label'], pattern=p['pattern'])
+            inst.add(label=p["label"], pattern=p["pattern"])
 
         return inst
 
@@ -215,7 +215,7 @@ class PatternCreator:
         Parameters
         ----------
         raw : dict
-            Dictionary with two keys: 'label' and 'pattern'.
+            Dictionary with two keys: "label" and "pattern".
             The `pattern` needs to be a list of dictionaries
             each representing a pattern for a given token.
             The `label` is a string representing the entity type.
@@ -245,12 +245,12 @@ class PatternCreator:
             elif len(e) == 2 and "OP" in e:
                 pass
             else:
-                raise ValueError('Invalid element, multi-attribute matches are not supported')
+                raise ValueError("Invalid element, multi-attribute matches are not supported")
 
             attribute = next(filter(lambda key: key != "OP", e))
             value_type = type(e[attribute]).__name__
             value = str(e[attribute])
-            op = e.get('OP', "")
+            op = e.get("OP", "")
 
             d.update({f"attribute_{token_ix}": attribute,
                       f"value_{token_ix}": value,
@@ -277,7 +277,7 @@ class PatternCreator:
         Returns
         -------
         raw : dict
-            Dictionary with two keys: 'label' and 'pattern'.
+            Dictionary with two keys: "label" and "pattern".
             The `pattern` needs to be a list of dictionaries
             each representing a pattern for a given token.
             The `label` is a string representing the entity type.
@@ -316,7 +316,7 @@ class PatternCreator:
         if token_ix == 0:
             raise ValueError("No valid pattern was found")
 
-        return {"label": row["label"], 'pattern': pattern}
+        return {"label": row["label"], "pattern": pattern}
 
 
 def remap_entity_type(patterns, etype_mapping):
