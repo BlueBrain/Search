@@ -250,7 +250,8 @@ class SearchWidget(widgets.VBox):
         self.widgets['sent_embedder'] = widgets.RadioButtons(
             options=self.supported_models,
             description='Model for Sentence Embedding',
-            style=self.widgets_style)
+            style=self.widgets_style,
+            layout=widgets.Layout(width='350px', height='50px'))
         # Remove some deprioritization strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(
             options=['None', 'Mild', 'Stronger'],
