@@ -18,8 +18,8 @@ eval:
   tf_idf:
     class: SklearnVectorizer
     init_kwargs:
-      checkpoint_model_path: ../../models/sentence_embedding/tf_idf/model.pkl
+      checkpoint_path: ../../models/sentence_embedding/tf_idf/model.pkl
   count:
     class: SklearnVectorizer
     init_kwargs:
-      checkpoint_model_path: ../../models/sentence_embedding/count/model.pkl
+      checkpoint_path: ../../models/sentence_embedding/count/model.pkl
