@@ -11,7 +11,7 @@ import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-from sentence_transformers import SentenceTransformer
+import sentence_transformers
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
@@ -498,7 +498,7 @@ class SentTransformer(EmbeddingModel):
 
     def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
 
-        self.senttransf_model = SentenceTransformer(model_name, device=device)
+        self.senttransf_model = sentence_transformers.SentenceTransformer(model_name, device=device)
 
     @property
     def dim(self):
