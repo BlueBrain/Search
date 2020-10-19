@@ -22,7 +22,7 @@ class PatternCreator:
     ----------
     _storage : pd.DataFrame
         A representation of all patterns allows for comfortable sorting,
-        filtering, etc.
+        filtering, etc. Note that each row represents a single pattern.
 
     """
 
@@ -98,15 +98,17 @@ class PatternCreator:
 
         pattern : str or dict or list
             The pattern we want to match. The behavior depends on the type.
-            * ``str``: can be used for exact matching (case sensitive). We internally convert
+
+            - ``str``: can be used for exact matching (case sensitive). We internally convert
               it to a single-token pattern `{"TEXT": pattern}`.
-            * ``dict``: a single-token pattern. This dictionary can contain at most 2 entries.
+            - ``dict``: a single-token pattern. This dictionary can contain at most 2 entries.
               The first one represents the attribute: value pair ("LEMMA": "world"). The second
               has a key "OP" and is optional. It represents the operator/quantifier to be used.
               An example of a valid pattern dict is `{"LEMMA": "world", "OP": "+"}`. Note that
               it would detect entities like "world" and "world world world".
-            * ``list``: a multi-token pattern. A list of dictionaries that are of the same form
+            - ``list``: a multi-token pattern. A list of dictionaries that are of the same form
               as described above.
+
         check_exists : bool
             If True, we only allow to add patterns that do not exist yet.
         """
@@ -205,18 +207,26 @@ class PatternCreator:
     def raw2row(raw):
         """Convert an element of patterns list to a pd.Series.
 
+        The goal of this function is to create a pd.Series
+        with all entries being strings. This will allow us
+        to check for duplicates between different rows really
+        quickly.
+
         Parameters
         ----------
         raw : dict
             Dictionary with two keys: 'label' and 'pattern'.
             The `pattern` needs to be a list of dictionaries
             each representing a pattern for a given token.
+            The `label` represents the entity type.
 
         Returns
         -------
         row : pd.Series
             The index contains the following elements: "label",
-            "attribute_0", "value_0", "attribute_1", "value_1",...
+            "attribute_0", "value_0", "value_type_0", "op_0",
+            "attribute_1", "value_1", "value_type_1", "op_1",
+            ...
 
         """
         d = {"label": raw["label"]}
@@ -242,7 +252,28 @@ class PatternCreator:
 
     @staticmethod
     def row2raw(row):
-        """Convert pd.Series to a valid pattern list."""
+        """Convert pd.Series to a valid pattern dictionary.
+
+        Note that the `value_{i}` is always a string, however,
+        we cast it to `value_type_{i}` type. In most cases the
+        type will be ``int``, ``str`` or ``dict``. Since
+        this casting is done dynamically we use `eval`.
+
+        Parameters
+        ----------
+        row : pd.Series
+            The index contains the following elements: "label",
+            "attribute_0", "value_0", "value_type_0", "op_0",
+            "attribute_1", "value_1", "value_type_1", "op_1",
+
+        Returns
+        -------
+        raw : dict
+            Dictionary with two keys: 'label' and 'pattern'.
+            The `pattern` needs to be a list of dictionaries
+            each representing a pattern for a given token.
+            The `label` represents the entity type.
+        """
         pattern = []
         token_ix = 0
         while True:
