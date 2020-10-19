@@ -201,6 +201,10 @@ class TestPatternCreator:
                      {"OP": "?", "ORTH": "cc"}]},
         {"label": "ET7",
          "pattern": [{"LENGTH": 5}]},
+        {"label": "ET8",
+         "pattern": [{"TEXT": {"IN": ["aa", "bbb"]}},
+                     {"TEXT": {"REGEX": "^s"}}]}
+
     ])
     def test_raw2row2raw(self, raw):
         assert raw == PatternCreator.row2raw(PatternCreator.raw2row(raw))
