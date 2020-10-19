@@ -1,3 +1,4 @@
+import importlib
 import pickle
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
@@ -10,11 +11,6 @@ import tensorflow as tf
 import torch
 import transformers
 from sentence_transformers import SentenceTransformer
-from sklearn.feature_extraction.text import (
-    CountVectorizer,
-    HashingVectorizer,
-    TfidfVectorizer,
-)
 
 from bbsearch.embedding_models import (
     BSV,
@@ -237,8 +233,8 @@ class TestEmbeddingModels:
                            "Another one just for fun.",
                            "This is also used to train the model.",
                            "And this sentence completes the sentences dataset."]
-
-        backend_cls = globals()[backend]
+        module = importlib.import_module("bbsearch.embedding_models")
+        backend_cls = getattr(module, backend)
         model = backend_cls()
         model.fit(train_sentences)
         save_file = Path(tmpdir) / "model.pkl"
