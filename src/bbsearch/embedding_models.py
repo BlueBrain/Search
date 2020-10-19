@@ -600,7 +600,8 @@ class SklearnVectorizer(EmbeddingModel):
 
     def __init__(self, checkpoint_path):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
-        self.model = pickle.load(self.checkpoint_path)
+        with open(self.checkpoint_path, "rb") as f:
+            self.model = pickle.load(f)
 
     @property
     def dim(self):
@@ -653,7 +654,7 @@ class SklearnVectorizer(EmbeddingModel):
             Array of shape `(len(preprocessed_sentences), dim)` with the
             sentence embeddings.
         """
-        embeddings = self.model.transform(preprocessed_sentences).todense()
+        embeddings = self.model.transform(preprocessed_sentences).toarray()
         return embeddings
 
 

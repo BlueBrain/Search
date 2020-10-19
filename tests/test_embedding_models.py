@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
@@ -9,6 +10,11 @@ import tensorflow as tf
 import torch
 import transformers
 from sentence_transformers import SentenceTransformer
+from sklearn.feature_extraction.text import (
+    CountVectorizer,
+    HashingVectorizer,
+    TfidfVectorizer,
+)
 
 from bbsearch.embedding_models import (
     BSV,
@@ -17,6 +23,7 @@ from bbsearch.embedding_models import (
     SBioBERT,
     Sent2VecModel,
     SentTransformer,
+    SklearnVectorizer,
     compute_database_embeddings,
 )
 
@@ -222,6 +229,51 @@ class TestEmbeddingModels:
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == ((512,) if n_sentences == 1 else (n_sentences, 512))
         use_model.assert_called_once()
+
+    @pytest.mark.parametrize("backend", ["TfidfVectorizer", "CountVectorizer", "HashingVectorizer"])
+    @pytest.mark.parametrize("n_sentences", [1, 5])
+    def test_sklearnvectorizer_embedding(self, tmpdir, backend, n_sentences):
+        train_sentences = ["This is a sentence to train our model.",
+                           "Another one just for fun.",
+                           "This is also used to train the model.",
+                           "And this sentence completes the sentences dataset."]
+
+        backend_cls = globals()[backend]
+        model = backend_cls()
+        model.fit(train_sentences)
+        save_file = Path(tmpdir) / "model.pkl"
+        print("Saving model to disk...")
+        with open(save_file, "wb") as f:
+            pickle.dump(model, f)
+
+        skl_vectorizer = SklearnVectorizer(checkpoint_path=save_file)
+
+        # Preparations
+        dummy_sentence = 'This is a dummy sentence/test.'
+        if n_sentences != 1:
+            dummy_sentence = n_sentences * [dummy_sentence]
+
+        preprocess_method = getattr(skl_vectorizer, 'preprocess' if n_sentences == 1 else 'preprocess_many')
+        embed_method = getattr(skl_vectorizer, 'embed' if n_sentences == 1 else 'embed_many')
+
+        # Assertions
+        if backend in ("TfidfVectorizer", "CountVectorizer"):
+            assert skl_vectorizer.dim == 19
+        elif backend == "HashingVectorizer":
+            assert skl_vectorizer.dim == 2 ** 20
+        else:
+            raise ValueError(f"Don't know what to do with backend {backend}")
+
+        preprocessed_sentence = preprocess_method(dummy_sentence)
+        assert preprocessed_sentence == dummy_sentence
+
+        embedding = embed_method(preprocessed_sentence)
+        assert isinstance(embedding, np.ndarray)
+
+        if n_sentences == 1:
+            assert embedding.shape == (skl_vectorizer.dim,)
+        else:
+            assert embedding.shape == (n_sentences, skl_vectorizer.dim)
 
     def test_default_preprocess_many(self, monkeypatch):
         class NewModel(EmbeddingModel):
