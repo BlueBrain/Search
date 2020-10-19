@@ -282,26 +282,39 @@ class PatternCreator:
             each representing a pattern for a given token.
             The `label` is a string representing the entity type.
         """
+        type_mapping = {"dict": dict,
+                        "int": int,
+                        "list": list,
+                        "str": str}
         pattern = []
         token_ix = 0
         while True:
             try:
                 attribute = row[f"attribute_{token_ix}"]  # str
                 value_str = row[f"value_{token_ix}"]  # str
-                value_type = row[f"value_type_{token_ix}"]
-
-                value = eval(f"{value_type}({value_str})") if value_type != 'str' else value_str
+                value_type = row[f"value_type_{token_ix}"]  # str
                 op = row[f"op_{token_ix}"]  # str
+
+                if any(not isinstance(x, str) for x in [attribute, value_str, value_type, op]):
+                    raise KeyError()
+
+                if value_type not in type_mapping:
+                    raise TypeError(f"Unrecognized type {value_type}")
+
+                value = type_mapping[value_type](value_str)
 
                 token_pattern = {attribute: value}
                 if op:
                     token_pattern["OP"] = op
 
                 pattern.append(token_pattern)
-            except (KeyError, NameError):
+            except KeyError:
                 break
 
             token_ix += 1
+
+        if token_ix == 0:
+            raise ValueError("No valid pattern was found")
 
         return {"label": row["label"], 'pattern': pattern}
 

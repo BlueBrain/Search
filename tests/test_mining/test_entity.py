@@ -1,6 +1,7 @@
 """Collections of tests covering the `entity.py` module."""
 import pathlib
 
+import numpy as np
 import pandas as pd
 import pytest
 import spacy
@@ -93,7 +94,7 @@ class TestPatternCreator:
 
         assert len(doc2.ents) == 0
 
-    def test_raw2row_errors(self):
+    def test_raw2row(self):
         # pattern not a list
         with pytest.raises(TypeError):
             PatternCreator.raw2row({"label": "ET1",
@@ -108,6 +109,37 @@ class TestPatternCreator:
         with pytest.raises(TypeError):
             PatternCreator.raw2row({"label": "etype",
                                     "pattern": [11]})
+
+    def test_row2raw(self):
+        # unsupported value_type
+        with pytest.raises(TypeError):
+            PatternCreator.row2raw(pd.Series({"label": "et1",
+                                              "attribute_0": "TEXT",
+                                              "value_0": "aaa",
+                                              "value_type_0": "wrong_type",
+                                              "op_0": ""}))
+
+        # already the first token is invalid
+        with pytest.raises(ValueError):
+            PatternCreator.row2raw(pd.Series({"label": "et1",
+                                              "attribute_0": np.nan,
+                                              "value_0": "aaa",
+                                              "value_type_0": "wrong_type",
+                                              "op_0": ""}))
+
+        res = PatternCreator.row2raw(pd.Series(
+            {"label": "et1",
+             "attribute_0": "TEXT",
+             "value_0": "aaa",
+             "value_type_0": "str",
+             "op_0": "",
+             "attribute_1": np.nan,
+             "value_1": "bbb",
+             "value_type_1": "int",
+             "op_1": "!"}
+        ))
+
+        assert res == {"label": "et1", "pattern": [{"TEXT": "aaa"}]}
 
     @pytest.mark.parametrize("raw", [
         {"label": "ET1",
@@ -124,6 +156,8 @@ class TestPatternCreator:
          "pattern": [{"OP": "+", "LOWER": "aaa"},
                      {"OP": "!", "LEMMA": "bb"},
                      {"OP": "?", "ORTH": "cc"}]},
+        {"label": "ET7",
+         "pattern": [{"LENGTH": 5}]},
     ])
     def test_raw2row2raw(self, raw):
         assert raw == PatternCreator.row2raw(PatternCreator.raw2row(raw))
