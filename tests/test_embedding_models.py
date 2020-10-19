@@ -233,7 +233,7 @@ class TestEmbeddingModels:
                            "Another one just for fun.",
                            "This is also used to train the model.",
                            "And this sentence completes the sentences dataset."]
-        module = importlib.import_module("bbsearch.embedding_models")
+        module = importlib.import_module("sklearn.feature_extraction.text")
         backend_cls = getattr(module, backend)
         model = backend_cls()
         model.fit(train_sentences)
