@@ -24,29 +24,17 @@ class PatternCreator:
         A representation of all patterns allows for comfortable sorting,
         filtering, etc. Note that each row represents a single pattern.
 
+    Examples
+    --------
+    >>> from bbsearch.mining import PatternCreator
+    >>>
+    >>> pc = PatternCreator()
+    >>> pc.add("FOOD", [{"LOWER": "oreo"}])
+    >>> pc.add("DRINK", [{"LOWER": {"REGEX": "^w"}}, {"LOWER": "milk"}])
+    >>> doc = pc("It is necessary to dip the oreo in warm milk!")
+    >>> [(str(e), e.label_) for e in doc.ents]
+    [('oreo', 'FOOD'), ('warm milk', 'DRINK')]
     """
-
-    @classmethod
-    def load(cls, path):
-        """Load from a jsonl file.
-
-        Parameters
-        ----------
-        path : pathlib.Path
-            Path to a jsonl file with patterns.
-
-        Returns
-        -------
-        pattern_creator : bbsearch.mining.PatternCreator
-            Instance of a ``PatternCreator``.
-        """
-        inst = cls()
-        patterns = JSONL.load_jsonl(path)
-
-        for p in patterns:
-            inst.add(label=p["label"], pattern=p["pattern"])
-
-        return inst
 
     def __init__(self, storage=None):
         if storage is None:
@@ -54,6 +42,38 @@ class PatternCreator:
             self._storage = pd.DataFrame(columns=columns)
         else:
             self._storage = storage.reset_index(drop=True)
+
+    def __call__(self, text, model=None, disable=None, **add_pipe_kwargs):
+        """Test the current patterns on text.
+
+        Parameters
+        ----------
+        text : str
+            Some text.
+
+        model : spacy.language.Language or None
+            Spacy model. If not provided we default to `spacy.blank("en")`.
+
+        disable : list or None
+            List of elements to remove from the pipeline.
+
+        **add_pipe_kwargs : dict
+            Additionally parameters to be passed into the `add_pipe` method. Note that
+            one can control the position the ``EntityRuler`` this way. If not specified
+            we put it at the very end.
+
+        Returns
+        -------
+        doc : spacy.Doc
+            Doc containing the entities under the `ents` property.
+        """
+        model = model or spacy.blank("en")
+        disable = disable or []
+        add_pipe_kwargs = add_pipe_kwargs or {"last": True}
+        er = spacy.pipeline.EntityRuler(model, patterns=self.to_list(), validate=True)
+        model.add_pipe(er, **add_pipe_kwargs)
+
+        return model(text, disable=disable)
 
     def __eq__(self, other):
         """Determine if equal.
@@ -169,10 +189,11 @@ class PatternCreator:
             A list where each element represents one entity type pattern. Note that
             this list can be directly passed into the `EntityRuler`.
         """
-        sorted_storage = self.to_df().sort_values(by=sort_by) if sort_by is not None else self._storage
+        storage = self.to_df()
+        sorted_storage = storage.sort_values(by=sort_by) if sort_by is not None else storage
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
-    def save(self, path, sort_by=None):
+    def to_jsonl(self, path, sort_by=None):
         """Save to jsonl.
 
         Parameters
@@ -184,37 +205,27 @@ class PatternCreator:
         patterns = self.to_list(sort_by=sort_by)
         JSONL.dump_jsonl(patterns, path)
 
-    def test(self, text, model=None, disable=None, **add_pipe_kwargs):
-        """Test the current patterns on text.
+    @classmethod
+    def from_jsonl(cls, path):
+        """Load from a jsonl file.
 
         Parameters
         ----------
-        text : str
-            Some text.
-
-        model : spacy.language.Language or None
-            Spacy model. If not provided we default to `spacy.blank("en")`.
-
-        disable : list or None
-            List of elements to remove from the pipeline.
-
-        **add_pipe_kwargs : dict
-            Additionally parameters to be passed into the `add_pipe` method. Note that
-            one can control the position the ``EntityRuler`` this way. If not specified
-            we put it at the very end.
+        path : pathlib.Path
+            Path to a jsonl file with patterns.
 
         Returns
         -------
-        doc : spacy.Doc
-            Doc containing the entities under the `ents` property.
+        pattern_creator : bbsearch.mining.PatternCreator
+            Instance of a ``PatternCreator``.
         """
-        model = model or spacy.blank("en")
-        disable = disable or []
-        add_pipe_kwargs = add_pipe_kwargs or {"last": True}
-        er = spacy.pipeline.EntityRuler(model, patterns=self.to_list(), validate=True)
-        model.add_pipe(er, **add_pipe_kwargs)
+        inst = cls()
+        patterns = JSONL.load_jsonl(path)
 
-        return model(text, disable=disable)
+        for p in patterns:
+            inst.add(label=p["label"], pattern=p["pattern"])
+
+        return inst
 
     @staticmethod
     def raw2row(raw):

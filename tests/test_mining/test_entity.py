@@ -115,25 +115,25 @@ class TestPatternCreator:
                                            "op_1",
                                            }
 
-        pc.save(tmpdir_p)
-        pc_loaded = PatternCreator.load(tmpdir_p)
+        pc.to_jsonl(tmpdir_p)
+        pc_loaded = PatternCreator.from_jsonl(tmpdir_p)
         pc_manual = PatternCreator(storage=pc.to_df())
 
         assert pc == pc_loaded == pc_manual
 
-    def test_test(self):
+    def test_call(self):
         pc = PatternCreator()
 
         pc.add("new_entity_type", "tall")
 
         text = "I saw a tall building."
-        doc = pc.test(text)
+        doc = pc(text)
         assert len(doc.ents) == 1
         assert list(doc.ents)[0].label_ == "new_entity_type"
 
         pc.drop(0)
 
-        doc2 = pc.test(text)
+        doc2 = pc(text)
 
         assert len(doc2.ents) == 0
 
