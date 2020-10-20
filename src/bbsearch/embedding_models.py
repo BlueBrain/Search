@@ -549,8 +549,8 @@ class USE(EmbeddingModel):
     https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder?hl=en
     """
 
-    def __init__(self):
-        self.use_version = 5
+    def __init__(self, use_version=5):
+        self.use_version = use_version
         self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
 
     @property
