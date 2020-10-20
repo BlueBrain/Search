@@ -6,12 +6,12 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import sent2vec
+import sentence_transformers
 import spacy
 import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
@@ -102,8 +102,8 @@ class SBioBERT(EmbeddingModel):
 
     Parameters
     ----------
-    device: torch.device
-        Torch device.
+    device: str
+        Available device for the model. Can be {'cuda', 'cpu', None}
 
     References
     ----------
@@ -112,7 +112,8 @@ class SBioBERT(EmbeddingModel):
 
     def __init__(self,
                  device=None):
-        self.device = device or torch.device('cpu')
+        available_device = device or 'cpu'
+        self.device = torch.device(available_device)
         self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
@@ -480,16 +481,25 @@ class BSV(EmbeddingModel):
         return embeddings
 
 
-class SBERT(EmbeddingModel):
-    """Sentence BERT.
+class SentTransformer(EmbeddingModel):
+    """Sentence Transformer.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the model to use for the embeddings
+        Currently:
+            - 'bert-base-nli-mean-tokens' is the one we use as SBERT
+            - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
 
     References
     ----------
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self):
-        self.sbert_model = SentenceTransformer('bert-base-nli-mean-tokens')
+    def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
+
+        self.senttransf_model = sentence_transformers.SentenceTransformer(model_name, device=device)
 
     @property
     def dim(self):
@@ -524,7 +534,7 @@ class SBERT(EmbeddingModel):
         embedding: numpy.array
             Embedding of the specified sentences of shape `(len(preprocessed_sentences), 768)`.
         """
-        embeddings = np.array(self.sbert_model.encode(preprocessed_sentences))
+        embeddings = np.array(self.senttransf_model.encode(preprocessed_sentences))
         return embeddings
 
 
@@ -641,3 +651,39 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
     return final_embeddings, retrieved_indices
+
+
+def get_embedding_model(model_name, checkpoint_path=None, device=None):
+    """Construct an embedding model from its name.
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model.
+
+    checkpoint_path : pathlib.Path
+        Path to load the embedding models (Needed for BSV and Sent2Vec)
+
+    device: str
+        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS, SBioBERT, SBERT)
+
+    Returns
+    -------
+    bbsearch.embedding_models.EmbeddingModel
+        The embedding model instance.
+    """
+    model_factories = {
+        "BSV": lambda: BSV(checkpoint_model_path=checkpoint_path),
+        "SBioBERT": lambda: SBioBERT(device=device),
+        "USE": lambda: USE(),
+        "SBERT": lambda: SentTransformer(model_name="bert-base-nli-mean-tokens", device=device),
+        "BIOBERT NLI+STS": lambda: SentTransformer(
+            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device),
+        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path)
+    }
+
+    if model_name not in model_factories:
+        raise ValueError(f"Unknown model name: {model_name}")
+    selected_factory = model_factories[model_name]
+
+    return selected_factory()

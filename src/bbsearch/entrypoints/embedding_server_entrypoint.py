@@ -7,7 +7,7 @@ from ._helper import configure_logging, get_var, run_server
 
 def get_embedding_app():
     """Construct the embedding flask app."""
-    from ..embedding_models import BSV, SBERT, USE, SBioBERT
+    from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
     from ..server.embedding_server import EmbeddingServer
 
     # Read configuration
@@ -15,6 +15,7 @@ def get_embedding_app():
     log_level = get_var("BBS_EMBEDDING_LOG_LEVEL", logging.INFO, var_type=int)
 
     bsv_checkpoint = get_var("BBS_EMBEDDING_BSV_CHECKPOINT_PATH")
+    sent2vec_checkpoint = get_var("BBS_EMBEDDING_SENT2VEC_CHECKPOINT_PATH")
 
     # Configure logging
     configure_logging(log_file, log_level)
@@ -24,7 +25,9 @@ def get_embedding_app():
     logger.info("Loading embedding models")
     embedding_models = {
         "USE": USE(),
-        "SBERT": SBERT(),
+        "SBERT": SentTransformer(model_name="bert-base-nli-mean-tokens"),
+        "BIOBERT NLI+STS": SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts"),
+        "Sent2Vec": Sent2VecModel(checkpoint_path=pathlib.Path(sent2vec_checkpoint)),
         "BSV": BSV(checkpoint_model_path=pathlib.Path(bsv_checkpoint)),
         "SBioBERT": SBioBERT(),
     }

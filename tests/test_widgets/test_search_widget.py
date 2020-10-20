@@ -169,7 +169,7 @@ def request_callback(request, searcher):
 
 
 def request_callback_help(request):
-    resp_body = {'database': 'test_database'}
+    resp_body = {'database': 'test_database', 'supported_models': ['BSV']}
     headers = {'request-id': '1234abcdeABCDE'}
     response = (200, headers, json.dumps(resp_body))
     return response
@@ -352,6 +352,16 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
 
     else:
         raise ValueError(f'Unrecognized saving mode: {saving_mode}')
+
+
+def test_errors(fake_sqlalchemy_engine, monkeypatch, capsys):
+    """Check that widget raises an error when bbs search server not working. """
+
+    with pytest.raises(Exception):
+        SearchWidget(bbs_search_url='fake_address',
+                     bbs_mysql_engine=fake_sqlalchemy_engine,
+                     article_saver=ArticleSaver(fake_sqlalchemy_engine),
+                     results_per_page=3)
 
 
 @responses.activate

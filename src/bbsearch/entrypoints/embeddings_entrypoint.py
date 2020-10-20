@@ -2,7 +2,10 @@
 import argparse
 import getpass
 import logging
+import os
 import pathlib
+
+import torch
 
 from ._helper import configure_logging
 
@@ -25,7 +28,7 @@ parser.add_argument("--log_name",
                     type=str,
                     help="The name of the log file.")
 parser.add_argument("--models",
-                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec',
+                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec,BIOBERT NLI+STS',
                     type=str,
                     help="Models for which we need to compute the embeddings. "
                          "Format should be comma separated list.")
@@ -99,23 +102,34 @@ def main():
 
     logger.info(f'{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}')
 
+    device = 'cpu'
+    if torch.cuda.is_available():
+        try:
+            if os.environ['CUDA_VISIBLE_DEVICES']:
+                device = 'cuda'
+        except KeyError:
+            logger.info('The environment variable CUDA_VISIBLE_DEVICES seems not specified.')
+
+    logger.info(f'The device used for the embeddings computation is {device}.')
+
     for model in args.models.split(','):
         model = model.strip()
 
         logger.info(f'Loading of the embedding model {model}')
+
+        checkpoint_path = None
         if model == 'BSV':
-            embedding_model = embedding_models.BSV(
-                checkpoint_model_path=bsv_checkpoints)
+            checkpoint_path = bsv_checkpoints
         elif model == 'Sent2Vec':
-            embedding_model = embedding_models.Sent2VecModel(
-                checkpoint_path=sent2vec_checkpoints)
-        else:
-            try:
-                embedding_model_cls = getattr(embedding_models, model)
-                embedding_model = embedding_model_cls()
-            except AttributeError:
-                logger.warning(f'The model {model} is not supported.')
-                continue
+            checkpoint_path = sent2vec_checkpoints
+
+        try:
+            embedding_model = embedding_models.get_embedding_model(model,
+                                                                   checkpoint_path=checkpoint_path,
+                                                                   device=device)
+        except ValueError:
+            logger.warning(f'The model {model} is not supported.')
+            continue
 
         logger.info(f'Creation of the H5 dataset for {model} ...')
         H5.create(embeddings_path, model, (n_sentences+1, embedding_model.dim))
@@ -127,7 +141,8 @@ def main():
                     embedding_models.compute_database_embeddings(engine,
                                                                  embedding_model,
                                                                  sentence_ids[
-                                                                     index:index+args.step])
+                                                                     index:index+args.step],
+                                                                 batch_size=args.step)
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
 
             except Exception as e:

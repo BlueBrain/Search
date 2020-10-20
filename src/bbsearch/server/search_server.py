@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 
 import bbsearch
 
-from ..embedding_models import BSV, SBERT, USE, SBioBERT, Sent2VecModel
+from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -57,6 +57,7 @@ class SearchServer(Flask):
         self.embeddings_h5_path = pathlib.Path(embeddings_h5_path)
 
         self.logger.info("Initializing embedding models...")
+        self.models = models
         self.embedding_models = {
             model_name: self._get_model(model_name)
             for model_name in models
@@ -116,7 +117,8 @@ class SearchServer(Flask):
             "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
             "USE": lambda: USE(),
-            "SBERT": lambda: SBERT(),
+            "SBERT": lambda: SentTransformer(model_name="bert-base-nli-mean-tokens"),
+            "BIOBERT NLI+STS": lambda: SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts"),
             "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path)
         }
 
@@ -134,6 +136,7 @@ class SearchServer(Flask):
             "name": self.name,
             "version": self.version,
             "database": self.connection.url.database,
+            "supported_models": self.models,
             "description": "Run the BBS text search for a given sentence.",
             "POST": {
                 "/help": {
@@ -146,7 +149,7 @@ class SearchServer(Flask):
                     "response_content_type": "application/json",
                     "required_fields": {
                         "query_text": [],
-                        "which_model": ["BSV", "SBioBERT"],
+                        "which_model": self.models,
                         "k": 'integer number'
                     },
                     "accepted_fields": {
