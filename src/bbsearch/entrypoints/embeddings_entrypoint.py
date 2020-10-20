@@ -64,7 +64,7 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
     Returns
     -------
     bbsearch.embedding_models.EmbeddingModel
-        The embedding model class.
+        The embedding model instance.
     """
     from .. import embedding_models
     model_factories = {
