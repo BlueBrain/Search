@@ -102,8 +102,8 @@ class SBioBERT(EmbeddingModel):
 
     Parameters
     ----------
-    device: torch.device
-        Torch device.
+    device: str
+        Available device for the model. Can be {'cuda', 'cpu', None}
 
     References
     ----------
@@ -112,7 +112,8 @@ class SBioBERT(EmbeddingModel):
 
     def __init__(self,
                  device=None):
-        self.device = device or torch.device('cpu')
+        available_device = device or 'cpu'
+        self.device = torch.device(available_device)
         self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
