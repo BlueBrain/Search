@@ -7,12 +7,12 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 import sent2vec
+import sentence_transformers
 import spacy
 import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-from sentence_transformers import SentenceTransformer
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
@@ -103,8 +103,8 @@ class SBioBERT(EmbeddingModel):
 
     Parameters
     ----------
-    device: torch.device
-        Torch device.
+    device: str
+        Available device for the model. Can be {'cuda', 'cpu', None}
 
     References
     ----------
@@ -113,7 +113,8 @@ class SBioBERT(EmbeddingModel):
 
     def __init__(self,
                  device=None):
-        self.device = device or torch.device('cpu')
+        available_device = device or 'cpu'
+        self.device = torch.device(available_device)
         self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(self.device)
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
@@ -499,9 +500,9 @@ class SentTransformer(EmbeddingModel):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, model_name="bert-base-nli-mean-tokens"):
+    def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
 
-        self.senttransf_model = SentenceTransformer(model_name)
+        self.senttransf_model = sentence_transformers.SentenceTransformer(model_name, device=device)
 
     @property
     def dim(self):

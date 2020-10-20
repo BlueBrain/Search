@@ -354,6 +354,16 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
         raise ValueError(f'Unrecognized saving mode: {saving_mode}')
 
 
+def test_errors(fake_sqlalchemy_engine, monkeypatch, capsys):
+    """Check that widget raises an error when bbs search server not working. """
+
+    with pytest.raises(Exception):
+        SearchWidget(bbs_search_url='fake_address',
+                     bbs_mysql_engine=fake_sqlalchemy_engine,
+                     article_saver=ArticleSaver(fake_sqlalchemy_engine),
+                     results_per_page=3)
+
+
 @responses.activate
 @pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):

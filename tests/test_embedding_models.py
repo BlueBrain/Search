@@ -173,7 +173,8 @@ class TestEmbeddingModels:
         senttrans_model.encode.return_value = np.ones([n_sentences, 768])  # Need to check the dimensions
         sentence_transormer_class.return_value = senttrans_model
 
-        monkeypatch.setattr('bbsearch.embedding_models.SentenceTransformer', sentence_transormer_class)
+        monkeypatch.setattr('bbsearch.embedding_models.sentence_transformers.SentenceTransformer',
+                            sentence_transormer_class)
         sbert = SentTransformer()
 
         # Preparations
