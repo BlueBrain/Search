@@ -651,3 +651,39 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
     return final_embeddings, retrieved_indices
+
+
+def get_embedding_model(model_name, checkpoint_path=None, device=None):
+    """Construct an embedding model from its name.
+
+    Parameters
+    ----------
+    model_name : str
+        The name of the model.
+
+    checkpoint_path : pathlib.Path
+        Path to load the embedding models (Needed for BSV and Sent2Vec)
+
+    device: str
+        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS, SBioBERT, SBERT)
+
+    Returns
+    -------
+    bbsearch.embedding_models.EmbeddingModel
+        The embedding model instance.
+    """
+    model_factories = {
+        "BSV": lambda: BSV(checkpoint_model_path=checkpoint_path),
+        "SBioBERT": lambda: SBioBERT(device=device),
+        "USE": lambda: USE(),
+        "SBERT": lambda: SentTransformer(model_name="bert-base-nli-mean-tokens", device=device),
+        "BIOBERT NLI+STS": lambda: SentTransformer(
+            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device),
+        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path)
+    }
+
+    if model_name not in model_factories:
+        raise ValueError(f"Unknown model name: {model_name}")
+    selected_factory = model_factories[model_name]
+
+    return selected_factory()
