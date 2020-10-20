@@ -76,8 +76,12 @@ class SearchWidget(widgets.VBox):
         response = requests.post(
             self.bbs_search_url + '/help',
         )
+        if not response.ok:
+            raise Exception(f"It seems there is an issue with the bbs search server. Response "
+                            f"status is {response.status_code} : {response.content}")
+
         self.supported_models = response.json()['supported_models']
-        self.database_name = response.json()['database'] if response.ok else None
+        self.database_name = response.json()['database']
 
         self.widgets_style = {'description_width': 'initial'}
         self.widgets = dict()
