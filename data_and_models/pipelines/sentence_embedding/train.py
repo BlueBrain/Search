@@ -19,7 +19,11 @@ parser.add_argument(
     help="Output directory where the trained model will be saved.",
 )
 parser.add_argument(
-    "--model", required=True, type=str, help="Name of the model to train.",
+    "--model",
+    choices=["tf_idf", "count"],
+    required=True,
+    type=str,
+    help="Name of the model to train.",
 )
 parser.add_argument(
     "--seed",

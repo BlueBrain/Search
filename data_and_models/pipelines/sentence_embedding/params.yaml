@@ -1,10 +1,10 @@
 train:
   tf_idf:
     init_kwargs:
-      lowercase: 1
+      lowercase: True
   count:
     init_kwargs:
-      lowercase: 1
+      lowercase: True
 
 eval:
   bsv:
