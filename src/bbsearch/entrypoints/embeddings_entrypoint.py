@@ -162,8 +162,9 @@ def main():
             checkpoint_path = sent2vec_checkpoints
 
         try:
-            embedding_model = get_embedding_model(model, checkpoint_path=checkpoint_path,
-                                                  device=device)
+            embedding_model = embedding_models.get_embedding_model(model,
+                                                                   checkpoint_path=checkpoint_path,
+                                                                   device=device)
         except ValueError:
             logger.warning(f'The model {model} is not supported.')
             continue
