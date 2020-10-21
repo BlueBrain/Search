@@ -47,44 +47,6 @@ parser.add_argument("--step",
 args = parser.parse_args()
 
 
-def get_embedding_model(model_name, checkpoint_path=None, device=None):
-    """Construct an embedding model from its name.
-
-    Parameters
-    ----------
-    model_name : str
-        The name of the model.
-
-    checkpoint_path : pathlib.Path
-        Path to load the embedding models (Needed for BSV and Sent2Vec)
-
-    device: str
-        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS, SBioBERT, SBERT)
-
-    Returns
-    -------
-    bbsearch.embedding_models.EmbeddingModel
-        The embedding model instance.
-    """
-    from .. import embedding_models
-    model_factories = {
-        "BSV": lambda: embedding_models.BSV(checkpoint_model_path=checkpoint_path),
-        "SBioBERT": lambda: embedding_models.SBioBERT(device=device),
-        "USE": lambda: embedding_models.USE(),
-        "SBERT": lambda: embedding_models.SentTransformer(model_name="bert-base-nli-mean-tokens",
-                                                          device=device),
-        "BIOBERT NLI+STS": lambda: embedding_models.SentTransformer(
-            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device),
-        "Sent2Vec": lambda: embedding_models.Sent2VecModel(checkpoint_path=checkpoint_path)
-    }
-
-    if model_name not in model_factories:
-        raise ValueError(f"Unknown model name: {model_name}")
-    selected_factory = model_factories[model_name]
-
-    return selected_factory()
-
-
 def main():
     """Compute Embeddings."""
     # Configure logging

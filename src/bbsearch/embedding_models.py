@@ -416,8 +416,7 @@ class BSV(EmbeddingModel):
 
     def __init__(self,
                  checkpoint_model_path):
-        if isinstance(checkpoint_model_path, str):
-            checkpoint_model_path = pathlib.Path(checkpoint_model_path)
+        checkpoint_model_path = pathlib.Path(checkpoint_model_path)
         self.checkpoint_model_path = checkpoint_model_path
         if not self.checkpoint_model_path.is_file():
             raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
