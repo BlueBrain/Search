@@ -4,6 +4,7 @@ import pathlib
 import string
 from abc import ABC, abstractmethod
 
+import joblib
 import numpy as np
 import sent2vec
 import sentence_transformers
@@ -405,7 +406,7 @@ class BSV(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_model_path: pathlib.Path
+    checkpoint_model_path: pathlib.Path or str
         Path to the file of the stored model BSV.
 
     References
@@ -415,6 +416,7 @@ class BSV(EmbeddingModel):
 
     def __init__(self,
                  checkpoint_model_path):
+        checkpoint_model_path = pathlib.Path(checkpoint_model_path)
         self.checkpoint_model_path = checkpoint_model_path
         if not self.checkpoint_model_path.is_file():
             raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
@@ -487,10 +489,10 @@ class SentTransformer(EmbeddingModel):
     Parameters
     ----------
     model_name : str
-        Name of the model to use for the embeddings
+        Name of the model to use for the embeddings.
         Currently:
-            - 'bert-base-nli-mean-tokens' is the one we use as SBERT
-            - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
+        - 'bert-base-nli-mean-tokens' is the one we use as SBERT
+        - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
 
     References
     ----------
@@ -546,8 +548,8 @@ class USE(EmbeddingModel):
     https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder?hl=en
     """
 
-    def __init__(self):
-        self.use_version = 5
+    def __init__(self, use_version=5):
+        self.use_version = use_version
         self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
 
     @property
@@ -585,6 +587,74 @@ class USE(EmbeddingModel):
         """
         embedding = self.use_model(preprocessed_sentences).numpy()
         return embedding
+
+
+class SklearnVectorizer(EmbeddingModel):
+    """Simple wrapper for sklearn vectorizer models.
+
+    Parameters
+    ----------
+    checkpoint_path: pathlib.Path or str
+        Location of the model checkpoint in pickle format.
+    """
+
+    def __init__(self, checkpoint_path):
+        self.checkpoint_path = pathlib.Path(checkpoint_path)
+        self.model = joblib.load(self.checkpoint_path)
+
+    @property
+    def dim(self):
+        """Return dimension of the embedding.
+
+        Returns
+        -------
+        dim : int
+            The dimension of the embedding.
+        """
+        if hasattr(self.model, "n_features"):  # e.g. HashingVectorizer
+            return self.model.n_features
+        elif hasattr(self.model, "vocabulary_"):  # e.g. TfIdfVectorizer
+            return len(self.model.vocabulary_)
+        else:
+            raise NotImplementedError(
+                f"Something went wrong, embedding dimension for class "
+                f"{type(self.model)} could not be computed."
+            )
+
+    def embed(self, preprocessed_sentence):
+        """Embed one given sentence.
+
+        Parameters
+        ----------
+        preprocessed_sentence: str
+            Preprocessed sentence to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
+
+        Returns
+        -------
+        embedding: numpy.ndarray
+            Array of shape `(dim,)` with the sentence embedding.
+        """
+        embedding = self.embed_many([preprocessed_sentence])
+        return embedding.squeeze()
+
+    def embed_many(self, preprocessed_sentences):
+        """Compute sentence embeddings for multiple sentences.
+
+        Parameters
+        ----------
+        preprocessed_sentences: iterable of str
+            Preprocessed sentences to embed. Can by obtained using the
+            `preprocess` or `preprocess_many` methods.
+
+        Returns
+        -------
+        embeddings: numpy.ndarray
+            Array of shape `(len(preprocessed_sentences), dim)` with the
+            sentence embeddings.
+        """
+        embeddings = self.model.transform(preprocessed_sentences).toarray()
+        return embeddings
 
 
 def compute_database_embeddings(connection, model, indices, batch_size=10):

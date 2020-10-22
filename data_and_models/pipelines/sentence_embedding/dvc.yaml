@@ -1,0 +1,124 @@
+stages:
+  eval_biobert_nli_sts:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.biobert_nli_sts
+    outs:
+    - ../../metrics/sentence_embedding/biobert_nli_sts.csv
+    - ../../metrics/sentence_embedding/biobert_nli_sts.png
+    metrics:
+    - ../../metrics/sentence_embedding/biobert_nli_sts.json
+  eval_bsv:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=bsv --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - ../../models/sentence_embedding/bsv
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.bsv
+    outs:
+    - ../../metrics/sentence_embedding/bsv.csv
+    - ../../metrics/sentence_embedding/bsv.png
+    metrics:
+    - ../../metrics/sentence_embedding/bsv.json
+  train_tf_idf:
+    cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+      --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
+    deps:
+    - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+    - Dockerfile
+    - train.py
+    params:
+    - train.tf_idf
+    outs:
+    - ../../models/sentence_embedding/tf_idf
+  eval_tf_idf:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=tf_idf --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - ../../models/sentence_embedding/tf_idf
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.tf_idf
+    outs:
+    - ../../metrics/sentence_embedding/tf_idf.csv
+    - ../../metrics/sentence_embedding/tf_idf.png
+    metrics:
+    - ../../metrics/sentence_embedding/tf_idf.json
+  train_count:
+    cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+      --model=count --output_dir=../../models/sentence_embedding/count
+    deps:
+    - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+    - Dockerfile
+    - train.py
+    params:
+    - train.count
+    outs:
+    - ../../models/sentence_embedding/count
+  eval_count:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=count --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - ../../models/sentence_embedding/count
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.count
+    outs:
+    - ../../metrics/sentence_embedding/count.csv
+    - ../../metrics/sentence_embedding/count.png
+    metrics:
+    - ../../metrics/sentence_embedding/count.json
+  eval_use:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=use --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.use
+    outs:
+    - ../../metrics/sentence_embedding/use.csv
+    - ../../metrics/sentence_embedding/use.png
+    metrics:
+    - ../../metrics/sentence_embedding/use.json
+  eval_sbert:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=sbert --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.sbert
+    outs:
+    - ../../metrics/sentence_embedding/sbert.csv
+    - ../../metrics/sentence_embedding/sbert.png
+    metrics:
+    - ../../metrics/sentence_embedding/sbert.json
+  eval_sbiobert:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=sbiobert --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - Dockerfile
+    - eval.py
+    params:
+    - eval.sbiobert
+    outs:
+    - ../../metrics/sentence_embedding/sbiobert.csv
+    - ../../metrics/sentence_embedding/sbiobert.png
+    metrics:
+    - ../../metrics/sentence_embedding/sbiobert.json

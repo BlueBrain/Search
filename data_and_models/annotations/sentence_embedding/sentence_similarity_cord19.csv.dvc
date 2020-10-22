@@ -1,0 +1,3 @@
+outs:
+- md5: 92a4235ce8d292ff382ce008c31da45c
+  path: sentence_similarity_cord19.csv

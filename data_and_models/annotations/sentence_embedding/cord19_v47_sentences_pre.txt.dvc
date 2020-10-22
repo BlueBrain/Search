@@ -1,0 +1,3 @@
+outs:
+- md5: d0c68b698738f714df81eb5fb29236fe
+  path: cord19_v47_sentences_pre.txt
