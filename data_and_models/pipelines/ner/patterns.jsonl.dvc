@@ -1,0 +1,3 @@
+outs:
+- md5: 5ae5480d8eb70eefb6a65d858c9f06b5
+  path: patterns.jsonl
