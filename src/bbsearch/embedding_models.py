@@ -1,10 +1,10 @@
 """Model handling sentences embeddings."""
 import logging
 import pathlib
-import pickle
 import string
 from abc import ABC, abstractmethod
 
+import joblib
 import numpy as np
 import sent2vec
 import sentence_transformers
@@ -600,8 +600,7 @@ class SklearnVectorizer(EmbeddingModel):
 
     def __init__(self, checkpoint_path):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
-        with open(self.checkpoint_path, "rb") as f:
-            self.model = pickle.load(f)
+        self.model = joblib.load(self.checkpoint_path)
 
     @property
     def dim(self):

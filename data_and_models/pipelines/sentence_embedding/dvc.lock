@@ -7,7 +7,7 @@ eval_biobert_nli_sts:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.biobert_nli_sts:
@@ -16,11 +16,11 @@ eval_biobert_nli_sts:
           model_name: clagator/biobert_v1.1_pubmed_nli_sts
   outs:
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.csv
-    md5: c4fdc67b5ba47c37400bb4d4d2b51061
+    md5: fae1c6d3a8efb3354dc3d81682491a07
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.json
     md5: 07ceb39e7a538a28f569e09f01ae56b1
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
-    md5: a8f476d62be97d376585784b7a7a8b79
+    md5: f0f56319299ba4c29d08c14bbd82f544
 eval_bsv:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=bsv --output_dir=../../metrics/sentence_embedding
@@ -32,7 +32,7 @@ eval_bsv:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.bsv:
@@ -41,11 +41,11 @@ eval_bsv:
           checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
   outs:
   - path: ../../metrics/sentence_embedding/bsv.csv
-    md5: 4323ecc2547ac4fdcdcf8c93deaa89b6
+    md5: 5849682de58ae1b1fc345c446ac60af3
   - path: ../../metrics/sentence_embedding/bsv.json
     md5: 59bedb32e03ede0369812c9b9fef0652
   - path: ../../metrics/sentence_embedding/bsv.png
-    md5: 099d65d576b3b695aef453eb881e7ae9
+    md5: 8dfaeb2843380e72b1ca6188abf3f1ba
 train_tf_idf:
   cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
     --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
@@ -55,7 +55,7 @@ train_tf_idf:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: train.py
-    md5: 7335c304f78d66ce9b2a30b31fcbbac0
+    md5: f6cee44f7ab03e4013407f664a74a26e
   params:
     params.yaml:
       train.tf_idf:
@@ -63,7 +63,7 @@ train_tf_idf:
           lowercase: true
   outs:
   - path: ../../models/sentence_embedding/tf_idf
-    md5: 17fe16eb5b309b5a33e5ccb232380575.dir
+    md5: c3d8d93ea35588bea873d098cc3f8cdc.dir
 eval_tf_idf:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=tf_idf --output_dir=../../metrics/sentence_embedding
@@ -71,11 +71,11 @@ eval_tf_idf:
   - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     md5: 92a4235ce8d292ff382ce008c31da45c
   - path: ../../models/sentence_embedding/tf_idf
-    md5: 17fe16eb5b309b5a33e5ccb232380575.dir
+    md5: c3d8d93ea35588bea873d098cc3f8cdc.dir
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.tf_idf:
@@ -84,11 +84,11 @@ eval_tf_idf:
           checkpoint_path: ../../models/sentence_embedding/tf_idf/model.pkl
   outs:
   - path: ../../metrics/sentence_embedding/tf_idf.csv
-    md5: 25dfd3ce96edeb02038735ed40a775bb
+    md5: 212b39946c23a416a0056b5e48136b31
   - path: ../../metrics/sentence_embedding/tf_idf.json
     md5: 5d8beda62321460ed2221329b60d506a
   - path: ../../metrics/sentence_embedding/tf_idf.png
-    md5: 20e99e64bc88b7c2980e63763c22684c
+    md5: 0859ee0b73f300c446f6931b1181a2de
 train_count:
   cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
     --model=count --output_dir=../../models/sentence_embedding/count
@@ -98,7 +98,7 @@ train_count:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: train.py
-    md5: 7335c304f78d66ce9b2a30b31fcbbac0
+    md5: f6cee44f7ab03e4013407f664a74a26e
   params:
     params.yaml:
       train.count:
@@ -106,7 +106,7 @@ train_count:
           lowercase: true
   outs:
   - path: ../../models/sentence_embedding/count
-    md5: 0ba440f24b981a7c92486f1fa354c93f.dir
+    md5: 354a4e5495bda2eb663b9984f233d686.dir
 eval_count:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=count --output_dir=../../metrics/sentence_embedding
@@ -114,11 +114,11 @@ eval_count:
   - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     md5: 92a4235ce8d292ff382ce008c31da45c
   - path: ../../models/sentence_embedding/count
-    md5: 0ba440f24b981a7c92486f1fa354c93f.dir
+    md5: 354a4e5495bda2eb663b9984f233d686.dir
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.count:
@@ -127,11 +127,11 @@ eval_count:
           checkpoint_path: ../../models/sentence_embedding/count/model.pkl
   outs:
   - path: ../../metrics/sentence_embedding/count.csv
-    md5: cfda7f604ccea8117e847e24acec08eb
+    md5: de5820a6b76984ac81eed350a1807f88
   - path: ../../metrics/sentence_embedding/count.json
     md5: 90ca5beef27c502587f20bfcf6187283
   - path: ../../metrics/sentence_embedding/count.png
-    md5: 20e99e64bc88b7c2980e63763c22684c
+    md5: 0859ee0b73f300c446f6931b1181a2de
 eval_use:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=use --output_dir=../../metrics/sentence_embedding
@@ -141,7 +141,7 @@ eval_use:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.use:
@@ -150,11 +150,11 @@ eval_use:
           use_version: 5
   outs:
   - path: ../../metrics/sentence_embedding/use.csv
-    md5: cc176b46ccd7ad4e23168ca32160bd8e
+    md5: 723bbaf41c68dd09305820057a604a6a
   - path: ../../metrics/sentence_embedding/use.json
     md5: 4c72b969a56c9665b46a1fef13e48faa
   - path: ../../metrics/sentence_embedding/use.png
-    md5: de4afeac604fa59a56b1b053efe5c116
+    md5: 8a0b8b0339891a0a6bf7d159a10ba551
 eval_sbert:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=sbert --output_dir=../../metrics/sentence_embedding
@@ -164,7 +164,7 @@ eval_sbert:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.sbert:
@@ -173,11 +173,11 @@ eval_sbert:
           model_name: bert-base-nli-mean-tokens
   outs:
   - path: ../../metrics/sentence_embedding/sbert.csv
-    md5: 680c2257149b0b0ca17515d15d9c7c4c
+    md5: 122f6acb30f412302775c51486c27ed4
   - path: ../../metrics/sentence_embedding/sbert.json
     md5: ea9c4003ca96c0a16ad5c971e447fee6
   - path: ../../metrics/sentence_embedding/sbert.png
-    md5: bf2653a8da9a2243ba6f0d0d09585cbd
+    md5: dceb91b8df273bb0f0819e6cab159427
 eval_sbiobert:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=sbiobert --output_dir=../../metrics/sentence_embedding
@@ -187,7 +187,7 @@ eval_sbiobert:
   - path: Dockerfile
     md5: cdd8a127766f760429134b1b294349ee
   - path: eval.py
-    md5: 0a65518060e1a9a5082ad337e94fad29
+    md5: f7b0b3434455b169ca6a924d231aba97
   params:
     params.yaml:
       eval.sbiobert:
@@ -195,8 +195,8 @@ eval_sbiobert:
         init_kwargs: {}
   outs:
   - path: ../../metrics/sentence_embedding/sbiobert.csv
-    md5: 3a972fc1e2b0a0745f8fd8ac8bbb8007
+    md5: e1b06106de5f9b4d19bb5944254c1615
   - path: ../../metrics/sentence_embedding/sbiobert.json
     md5: aaba862daa19f719258ce728c0b226ad
   - path: ../../metrics/sentence_embedding/sbiobert.png
-    md5: 02c6586fe480941bb7a2d40df10e37d0
+    md5: a6b355afade21090108b3322ef5e712e

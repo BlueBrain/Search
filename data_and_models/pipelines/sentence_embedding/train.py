@@ -1,8 +1,9 @@
 import argparse
 import os
-import pickle
+from collections import OrderedDict
 from pathlib import Path
 
+import joblib
 import numpy as np
 import yaml
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
@@ -51,16 +52,26 @@ def main():
         model = TfidfVectorizer(**params["init_kwargs"])
         print("Training model...")
         model.fit(corpus)
+        # hack: https://github.com/scikit-learn/scikit-learn/issues/18669
+        model.vocabulary_ = OrderedDict(
+            sorted(model.vocabulary_.items(), key=lambda kv: kv[1])
+        )
+        model._stop_words_id = 0
         print("Saving model to disk...")
         with open(out_dir / "model.pkl", "wb") as f:
-            pickle.dump(model, f)
+            joblib.dump(model, f)
     elif args.model == "count":
         model = CountVectorizer(**params["init_kwargs"])
         print("Training model...")
         model.fit(corpus)
+        # hack: https://github.com/scikit-learn/scikit-learn/issues/18669
+        model.vocabulary_ = OrderedDict(
+            sorted(model.vocabulary_.items(), key=lambda kv: kv[1])
+        )
+        model._stop_words_id = 0
         print("Saving model to disk...")
         with open(out_dir / "model.pkl", "wb") as f:
-            pickle.dump(model, f)
+            joblib.dump(model, f)
     else:
         raise ValueError(f"Training not available for model {args.model}!")
 

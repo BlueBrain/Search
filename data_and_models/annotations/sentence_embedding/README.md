@@ -6,7 +6,7 @@
 ## `cord19_v47_sentences_pre.txt`
 - Unannotated file of sentences (one line per sentence) from cord-19.
 - 20,510,932 total sentences.
-- Can be used to train unspervised nlp models.
+- Can be used to train unsupervised nlp models.
 
 ## `sentence_similarity_cord19.csv`
 - Sentences pairs with similarity scores annotated by Emmanuelle Logette. 

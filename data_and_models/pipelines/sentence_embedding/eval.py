@@ -68,7 +68,7 @@ def main():
     # preprint arXiv:1803.11175 (2018).
     words_of_interest = [
         "COVID-19",
-        "Sars-Cov-2",
+        "SARS-CoV-2",
         "coronavirus",
         "sugar",
         "glucose",
