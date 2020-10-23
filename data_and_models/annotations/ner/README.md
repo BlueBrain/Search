@@ -203,3 +203,7 @@ prodigy ner.manual \
 - 151 tot sentences
 - Annotated by EmmanuelleLogette
 - Training set for class PATHWAY
+
+## `rule_based_patterns.jsonl`
+- Collection of patterns for rule based entity recognition with `EntityRuler`
+- We use it in the `add_er_*` stages to append an `EntityRuler`
