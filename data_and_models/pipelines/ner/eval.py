@@ -23,16 +23,16 @@ parser.add_argument(
     required=True,
     type=str,
     help="The JSONL file(s) with the test set, i.e. containing "
-         "sentences with ground truth NER annotations. If more than "
-         "one, should be comma-separated.",
+    "sentences with ground truth NER annotations. If more than "
+    "one, should be comma-separated.",
 )
 parser.add_argument(
     "--model",
     required=True,
     type=str,
     help="SpaCy model to evaluate. Can either be a SciSpacy model"
-         '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
-         "trained model.",
+    '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
+    "trained model.",
 )
 parser.add_argument(
     "--etype", required=True, type=str, help="Name of the entity type.",
