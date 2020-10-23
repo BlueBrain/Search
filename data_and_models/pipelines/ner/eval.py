@@ -46,7 +46,7 @@ parser.add_argument(
 parser.add_argument(
     "--patterns_file",
     type=str,
-    help="Path to the patterns file.",
+    help="Path to the patterns file used for rule-based entity recognition.",
 )
 args = parser.parse_args()
 
