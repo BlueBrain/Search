@@ -62,9 +62,9 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_
         raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
 
     if models_relations:
-        disable_pipe = ['tagger']  # the parser is needed to decompose text into sentences.
+        disable_pipe = []  # parser is needed to split text into sentences, tagger for EntityRuler
     else:
-        disable_pipe = ['tagger', 'parser']
+        disable_pipe = ['parser']
 
     docs_gen = model_entities.pipe(texts, disable=disable_pipe, as_tuples=True)
     lines = []
