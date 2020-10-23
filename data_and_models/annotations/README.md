@@ -7,3 +7,6 @@ directory `raw_sentences/`.
 # Content
 ## `ner/`
 - Annotations collected with `prodigy` in order to train or evaluate NER models.
+
+## `sentence_embedding/`
+- Annotations collected in order to train or evaluate sentence embedding models. 

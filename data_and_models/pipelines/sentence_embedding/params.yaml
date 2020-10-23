@@ -1,0 +1,36 @@
+train:
+  tf_idf:
+    init_kwargs:
+      lowercase: True
+  count:
+    init_kwargs:
+      lowercase: True
+
+eval:
+  bsv:
+    class: BSV
+    init_kwargs:
+      checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+  biobert_nli_sts:
+    class: SentTransformer
+    init_kwargs:
+      model_name: clagator/biobert_v1.1_pubmed_nli_sts
+  tf_idf:
+    class: SklearnVectorizer
+    init_kwargs:
+      checkpoint_path: ../../models/sentence_embedding/tf_idf/model.pkl
+  count:
+    class: SklearnVectorizer
+    init_kwargs:
+      checkpoint_path: ../../models/sentence_embedding/count/model.pkl
+  use:
+    class: USE
+    init_kwargs:
+      use_version: 5
+  sbert:
+    class: SentTransformer
+    init_kwargs:
+      model_name: bert-base-nli-mean-tokens
+  sbiobert:
+    class: SBioBERT
+    init_kwargs: {}
