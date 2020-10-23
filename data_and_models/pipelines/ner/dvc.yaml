@@ -54,137 +54,192 @@ stages:
     - train.model5
     outs:
     - ../../models/ner/model5
+  add_er_1:
+    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model1
+    deps:
+    - Dockerfile
+    - ../../models/ner/model1
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    params:
+    - eval.DISEASE
+    outs:
+    - ../../models/ner_er/model1
+  add_er_2:
+    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model2
+    deps:
+    - Dockerfile
+    - ../../models/ner/model2
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    params:
+    - eval.CELL_COMPARTMENT
+    - eval.DRUG
+    - eval.ORGAN
+    outs:
+    - ../../models/ner_er/model2
+  add_er_3:
+    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model3
+    deps:
+    - Dockerfile
+    - ../../models/ner/model3
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    params:
+    - eval.CHEMICAL
+    - eval.ORGANISM
+    outs:
+    - ../../models/ner_er/model3
+  add_er_4:
+    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model4
+    deps:
+    - Dockerfile
+    - ../../models/ner/model4
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    params:
+    - eval.CELL_TYPE
+    - eval.PROTEIN
+    outs:
+    - ../../models/ner_er/model4
+  add_er_5:
+    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model5
+    deps:
+    - Dockerfile
+    - ../../models/ner/model5
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    params:
+    - eval.PATHWAY
+    outs:
+    - ../../models/ner_er/model5
   eval_disease:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model1 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../metrics/ner/disease.json
+      --model ../../models/ner_er/model1 --output_file ../../metrics/ner/disease.json
       --etype DISEASE
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model1
+    - ../../models/ner_er/model1
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.DISEASE
     metrics:
     - ../../metrics/ner/disease.json
   eval_cell_compartment:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model2 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/cell_compartment.json
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/cell_compartment.json
       --etype CELL_COMPARTMENT
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model2
+    - ../../models/ner_er/model2
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.CELL_COMPARTMENT
     metrics:
     - ../../metrics/ner/cell_compartment.json
   eval_drug:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model2 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/drug.json --etype
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json --etype
       DRUG
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model2
+    - ../../models/ner_er/model2
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.DRUG
     metrics:
     - ../../metrics/ner/drug.json
   eval_organ:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model2 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/organ.json --etype
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json --etype
       ORGAN
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model2
+    - ../../models/ner_er/model2
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.ORGAN
     metrics:
     - ../../metrics/ner/organ.json
   eval_chemical:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model3 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/chemical.json
+      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/chemical.json
       --etype CHEMICAL
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model3
+    - ../../models/ner_er/model3
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.CHEMICAL
     metrics:
     - ../../metrics/ner/chemical.json
   eval_organism:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model3 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/organism.json
+      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/organism.json
       --etype ORGANISM
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model3
+    - ../../models/ner_er/model3
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.ORGANISM
     metrics:
     - ../../metrics/ner/organism.json
   eval_cell_type:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model4 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/cell_type.json
+      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/cell_type.json
       --etype CELL_TYPE
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model4
+    - ../../models/ner_er/model4
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.CELL_TYPE
     metrics:
     - ../../metrics/ner/cell_type.json
   eval_protein:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model4 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/protein.json
+      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/protein.json
       --etype PROTEIN
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model4
+    - ../../models/ner_er/model4
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.PROTEIN
     metrics:
     - ../../metrics/ner/protein.json
   eval_pathway:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner/model5 --patterns_file ../../annotations/ner/rule_based_patterns.jsonl  --output_file ../../metrics/ner/pathway.json
+      --model ../../models/ner_er/model5 --output_file ../../metrics/ner/pathway.json
       --etype PATHWAY
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-    - ../../models/ner/model5
+    - ../../models/ner_er/model5
     - eval.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
     params:
     - eval.PATHWAY
     metrics:

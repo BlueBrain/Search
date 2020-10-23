@@ -8,14 +8,12 @@ import pandas as pd
 import spacy
 import yaml
 
-from bbsearch.mining import remap_entity_type
 from bbsearch.mining.eval import (
     annotations2df,
     spacy2df,
     remove_punctuation,
     ner_report,
 )
-from bbsearch.utils import JSONL
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -43,11 +41,6 @@ parser.add_argument(
     type=str,
     help="Output json file where metrics results should be written.",
 )
-parser.add_argument(
-    "--patterns_file",
-    type=str,
-    help="Path to the patterns file used for rule-based entity recognition.",
-)
 args = parser.parse_args()
 
 
@@ -59,22 +52,11 @@ def main():
     df = annotations2df(args.annotation_files.split(","))
     ner_model = spacy.load(args.model)
 
-    if args.patterns_file is not None:
-        print("Loading patterns")
-        path_patterns = pathlib.Path(args.patterns_file)
-        er = spacy.pipeline.EntityRuler(ner_model, validate=True, overwrite_ents=True)
-        patterns = JSONL.load_jsonl(path_patterns)
-        modified_patterns = remap_entity_type(patterns, {args.etype: params["etype_name"]})
-        er.add_patterns(modified_patterns)
-        ner_model.add_pipe(er, after="ner")
-
     df_pred = []
     for source, df_ in df.groupby("source"):
         df_ = df_.sort_values(by="id", inplace=False, ignore_index=True)
         df_sentence = spacy2df(
-            spacy_model=ner_model,
-            ground_truth_tokenization=df_["text"].to_list(),
-            excluded_entity_type="NaE"
+            spacy_model=ner_model, ground_truth_tokenization=df_["text"].to_list()
         )
         df_sentence["id"] = df_["id"].values
         df_sentence["source"] = source
