@@ -17,12 +17,20 @@ from bbsearch.mining.eval import (
 
 parser = ArgumentParser()
 parser.add_argument(
-    "--annotation_files",
+    "--annotation_files1",
     required=True,
     type=str,
     help="The JSONL file(s) with the test set, i.e. containing "
-    "sentences with ground truth NER annotations. If more than "
-    "one, should be comma-separated.",
+    "sentences NER annotations of the first annotator, the one we will consider as ground truth. "
+    "If more than one, should be comma-separated.",
+)
+parser.add_argument(
+    "--annotation_files2",
+    required=True,
+    type=str,
+    help="The JSONL file(s) with the test set, i.e. containing "
+    "sentences NER annotations of the second annotator, the one we will consider as human "
+    "annotator. If more than one, should be comma-separated.",
 )
 parser.add_argument(
     "--model",
@@ -49,7 +57,15 @@ def main():
     params = yaml.safe_load(open("params.yaml"))["eval"][args.etype]
 
     # Load and preprocess the annotations
-    df = annotations2df(args.annotation_files.split(","))
+    df_a1 = annotations2df(args.annotation_files1.split(","))
+    df_a2 = annotations2df(args.annotation_files2.split(","))
+    # Merge the common sentences between annotators
+    df = df_a2.merge(df_a1,
+                     on=['source', 'id', 'text', 'start_char', 'end_char'],
+                     suffixes=('_annotator_1', '_annotator_2'),
+                     how='inner')
+
+    # Load NER model
     ner_model = spacy.load(args.model)
 
     df_pred = []
@@ -69,24 +85,30 @@ def main():
 
     df = remove_punctuation(df)
 
-    iob_true = df["class"]
+    iob_true = df["class_annotator_1"]
     iob_pred = df["class_pred"]
+    iob_interrater = df["class_annotator_2"]
+
+    labels = ["eval", "interrater"]
+    annots = [iob_pred, iob_interrater]
+    etypes_maps = [{args.etype: params["etype_name"]}, None]
 
     output_file = pathlib.Path(args.output_file)
     with output_file.open("w") as f:
         all_metrics_dict = OrderedDict()
         for mode in ["entity", "token"]:
-            metrics_dict = ner_report(
-                iob_true,
-                iob_pred,
-                mode=mode,
-                return_dict=True,
-                etypes_map={args.etype: params["etype_name"]},
-            )[args.etype]
-            metrics_dict = OrderedDict(
-                [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
-            )
-            all_metrics_dict.update(metrics_dict)
+            for label, annot, etypes_map in zip(labels, annots, etypes_maps):
+                metrics_dict = ner_report(
+                    iob_true,
+                    annot,
+                    mode=mode,
+                    return_dict=True,
+                    etypes_map=etypes_map,
+                )[args.etype]
+                metrics_dict = OrderedDict(
+                    [(f"{mode}_{k}_{label}", v) for k, v in metrics_dict.items()]
+                )
+                all_metrics_dict.update(metrics_dict)
         json.dump(all_metrics_dict, f)
 
 
