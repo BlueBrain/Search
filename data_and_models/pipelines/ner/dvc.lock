@@ -5,7 +5,7 @@ train_model1:
   - path: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     md5: 613308ed830d86284a1aee2747d911d0
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
   params:
@@ -26,7 +26,7 @@ train_model2:
   - path: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     md5: 2459e49418599ff96ab9db60a29b757b
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
   params:
@@ -47,7 +47,7 @@ train_model3:
   - path: ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     md5: 4b6fff4b0091fa10ae7c88a4aeb42ae0
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
   params:
@@ -68,7 +68,7 @@ train_model4:
   - path: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     md5: ec5d6b86181b9e4cdefb2b2198d5ae4f
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
   params:
@@ -89,7 +89,7 @@ train_model5:
   - path: ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     md5: ceb6ea77d2a6a69962b88218f4f5a663
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
   params:
@@ -113,9 +113,9 @@ eval_disease:
   - path: ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     md5: 117da032ef2e2792429dff88c06c90b7
   - path: ../../models/ner_er/model1
-    md5: 9f4446bc53b25e9a5a8d4e86042adb9d.dir
+    md5: dbbaa5075e65c5e78a9c8a570f064d96.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -137,7 +137,7 @@ eval_cell_compartment:
   - path: ../../models/ner_er/model2
     md5: 31ab2cdb7a0b9b893e21773f91e16c11.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -159,7 +159,7 @@ eval_drug:
   - path: ../../models/ner_er/model2
     md5: 31ab2cdb7a0b9b893e21773f91e16c11.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -181,7 +181,7 @@ eval_organ:
   - path: ../../models/ner_er/model2
     md5: 31ab2cdb7a0b9b893e21773f91e16c11.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -203,7 +203,7 @@ eval_chemical:
   - path: ../../models/ner_er/model3
     md5: 94d05414394a5da4b309e09497508797.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -225,7 +225,7 @@ eval_organism:
   - path: ../../models/ner_er/model3
     md5: 94d05414394a5da4b309e09497508797.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -247,7 +247,7 @@ eval_cell_type:
   - path: ../../models/ner_er/model4
     md5: c3e7bea84232750b7146b1dfa9f464eb.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -269,7 +269,7 @@ eval_protein:
   - path: ../../models/ner_er/model4
     md5: c3e7bea84232750b7146b1dfa9f464eb.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -291,7 +291,7 @@ eval_pathway:
   - path: ../../models/ner_er/model5
     md5: ade5d1e7829d09dfdc103ca5ddfc5707.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: eval.py
     md5: 485af821f76ccdefd5eeea7925a36281
   params:
@@ -310,7 +310,7 @@ add_er_1:
   - path: ../../models/ner/model1
     md5: 4c687b7dd44d0f7adc2d3df2e2e4f624.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: add_er.py
     md5: 85f204c1bc3fb6783dc68fceb46cda05
   params:
@@ -319,7 +319,7 @@ add_er_1:
         etype_name: DISEASE
   outs:
   - path: ../../models/ner_er/model1
-    md5: 9f4446bc53b25e9a5a8d4e86042adb9d.dir
+    md5: dbbaa5075e65c5e78a9c8a570f064d96.dir
 add_er_2:
   cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN
     --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
@@ -330,7 +330,7 @@ add_er_2:
   - path: ../../models/ner/model2
     md5: 2e3337ad9af49c9fef0332b6c3ad0832.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: add_er.py
     md5: 85f204c1bc3fb6783dc68fceb46cda05
   params:
@@ -354,7 +354,7 @@ add_er_3:
   - path: ../../models/ner/model3
     md5: 1e6e071c4a730f49f671155e2c6065db.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: add_er.py
     md5: 85f204c1bc3fb6783dc68fceb46cda05
   params:
@@ -376,7 +376,7 @@ add_er_4:
   - path: ../../models/ner/model4
     md5: 60213648fac010c178b81983ff76492b.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: add_er.py
     md5: 85f204c1bc3fb6783dc68fceb46cda05
   params:
@@ -397,7 +397,7 @@ add_er_5:
   - path: ../../models/ner/model5
     md5: aab9909077d22a91c01042bf7468e80d.dir
   - path: Dockerfile
-    md5: 183be29a16293e57aa1895fde6204014
+    md5: 52af30d575bdab4eed0c6752e9f682f7
   - path: add_er.py
     md5: 85f204c1bc3fb6783dc68fceb46cda05
   params:
