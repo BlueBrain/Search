@@ -62,7 +62,7 @@ def main():
     # Merge the common sentences between annotators
     df = df_a2.merge(df_a1,
                      on=['source', 'id', 'text', 'start_char', 'end_char'],
-                     suffixes=('_annotator_1', '_annotator_2'),
+                     suffixes=('_annotator_2', '_annotator_1'),
                      how='inner')
 
     # Load NER model
