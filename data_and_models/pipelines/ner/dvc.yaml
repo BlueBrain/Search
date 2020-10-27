@@ -55,8 +55,8 @@ stages:
     outs:
     - ../../models/ner/model5
   add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file
-      ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model1
+    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model1
     deps:
     - Dockerfile
     - ../../models/ner/model1
@@ -67,9 +67,8 @@ stages:
     outs:
     - ../../models/ner_er/model1
   add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN
-      --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
-      ../../models/ner_er/model2
+    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model2
     deps:
     - Dockerfile
     - ../../models/ner/model2
@@ -82,9 +81,8 @@ stages:
     outs:
     - ../../models/ner_er/model2
   add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM
-      --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
-      ../../models/ner_er/model3
+    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model3
     deps:
     - Dockerfile
     - ../../models/ner/model3
@@ -96,9 +94,8 @@ stages:
     outs:
     - ../../models/ner_er/model3
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN
-      --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
-      ../../models/ner_er/model4
+    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model4
     deps:
     - Dockerfile
     - ../../models/ner/model4
@@ -110,8 +107,8 @@ stages:
     outs:
     - ../../models/ner_er/model4
   add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file
-      ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model5
+    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --output_file ../../models/ner_er/model5
     deps:
     - Dockerfile
     - ../../models/ner/model5
@@ -151,8 +148,8 @@ stages:
     - ../../metrics/ner/cell_compartment.json
   eval_drug:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json
-      --etype DRUG
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json --etype
+      DRUG
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
@@ -165,8 +162,8 @@ stages:
     - ../../metrics/ner/drug.json
   eval_organ:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json
-      --etype ORGAN
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json --etype
+      ORGAN
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
