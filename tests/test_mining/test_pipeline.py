@@ -110,14 +110,14 @@ def test_not_entity_label(model_entities):
     model_entities_m.pipe.return_value = [(doc, {})]
     models_relations = {}
 
-    df_1 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="!")
+    df_1 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="!")
     assert len(df_1) == 2
 
-    df_2 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="NaE")
+    df_2 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="NaE")
     assert len(df_2) == 1
 
-    df_3 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label=None)
+    df_3 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type=None)
     assert len(df_3) == 2
 
-    df_4 = run_pipeline(texts, model_entities_m, models_relations, not_entity_label="GPE")
+    df_4 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="GPE")
     assert len(df_4) == 1

@@ -17,7 +17,7 @@ SPECS = ['entity',
          'end_char']
 
 
-def run_pipeline(texts, model_entities, models_relations, debug=False, not_entity_label="NaE"):
+def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_entity_type="NaE"):
     """Run end-to-end extractions.
 
     Parameters
@@ -43,7 +43,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, not_entit
     debug : bool
         If True, columns are not necessarily matching the specification. However, they
         contain debugging information. If False, then matching exactly the specification.
-    not_entity_label : str or None
+    excluded_entity_type : str or None
         If a str, then all entities with type `not_entity_label` will be excluded. If None,
         then no exclusion will be taking place.
 
@@ -62,9 +62,9 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, not_entit
         raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
 
     if models_relations:
-        disable_pipe = ['tagger']  # the parser is needed to decompose text into sentences.
+        disable_pipe = []  # parser is needed to split text into sentences, tagger for EntityRuler
     else:
-        disable_pipe = ['tagger', 'parser']
+        disable_pipe = ['parser']
 
     docs_gen = model_entities.pipe(texts, disable=disable_pipe, as_tuples=True)
     lines = []
@@ -73,7 +73,7 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, not_entit
         subtexts = doc.sents if models_relations else [doc]
         for subtext in subtexts:
             detected_entities = [ent for ent in subtext.ents if
-                                 not_entity_label is None or ent.label_ != not_entity_label]
+                                 excluded_entity_type is None or ent.label_ != excluded_entity_type]
 
             for s_ent in detected_entities:
                 # add single lines for entities

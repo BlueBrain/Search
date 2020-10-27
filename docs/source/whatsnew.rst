@@ -14,6 +14,16 @@ Legend
 - |Remove| denotes removed features.
 
 
+Verions 0.0.5
+=============
+**Ocober 26, 2020**
+
+Changes
+-------
+- |Change| `bbsearch.mining.eval.spacy2df` can now work with NER pipelines
+  including entity rulers.
+
+
 Verions 0.0.4
 =============
 **Ocober 20, 2020**

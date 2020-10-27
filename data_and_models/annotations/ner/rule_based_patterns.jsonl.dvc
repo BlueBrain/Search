@@ -1,0 +1,3 @@
+outs:
+- md5: bfd6d361397cbe4a80261ffacdd35885
+  path: rule_based_patterns.jsonl

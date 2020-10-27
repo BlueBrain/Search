@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
+import spacy
 from spacy.tokens import Doc
 
 
@@ -71,20 +72,28 @@ def annotations2df(annots_files, not_entity_symbol='O'):
     return final_table
 
 
-def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
+def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O', excluded_entity_type='NaE'):
     """Turn NER of a spacy model into a pd.DataFrame.
 
     Parameters
     ----------
     spacy_model : spacy.language.Language
-        Spacy model that will be used for NER (not tokenization).
+        Spacy model that will be used for NER, EntityRuler and Tagger (not tokenization).
+        Note that a Tagger might be necessary for tagger EntityRuler.
 
     ground_truth_tokenization : list
         List of str (words) representing the ground truth tokenization. This will guarantee that the
         ground truth dataframe will be aligned with the prediction dataframe.
 
     not_entity_symbol : str
-        A symbol to use for tokens that are not an entity.
+        A symbol to use for tokens that are not a part of any entity. Note that this symbol will be
+        used for all tokens for which the `ent_iob_` attribute of `spacy.Token` is equal to
+        "O".
+
+    excluded_entity_type : str or None
+        Entity type that is going to be automatically excluded. Note that it is different from
+        `not_entity_symbol` since it corresponds to the `label_` attribute of ``spacy.Span``
+        objects. If None, then no exclusion will be taking place.
 
     Returns
     -------
@@ -97,8 +106,15 @@ def spacy2df(spacy_model, ground_truth_tokenization, not_entity_symbol='O'):
     it is the case then `ground_truth_tokenization=prodigy_table['text'].to_list()`.
     """
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
-    ner = spacy_model.get_pipe('ner')
-    new_doc = ner(doc)
+    new_doc = doc
+    for _, pipe in spacy_model.pipeline:
+        if isinstance(pipe, (spacy.pipeline.EntityRecognizer,
+                             spacy.pipeline.EntityRuler,
+                             spacy.pipeline.Tagger)):
+            new_doc = pipe(new_doc)
+
+    new_doc.ents = tuple([e for e in new_doc.ents if excluded_entity_type is None
+                          or e.label_ != excluded_entity_type])
 
     all_rows = []
     for token in new_doc:
