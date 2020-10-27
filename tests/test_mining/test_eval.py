@@ -5,6 +5,7 @@ from collections import OrderedDict
 import numpy as np
 import pandas as pd
 import pytest
+import spacy
 
 from bbsearch.mining import annotations2df, spacy2df
 from bbsearch.mining.eval import (
@@ -61,11 +62,11 @@ class TestAnnotations2df:
             assert {'source', 'class', 'start_char', 'end_char', 'id',
                     'text'} == set(df.columns)
             # for the first example, annotations are in IOB mode
-            assert set(df['class'][:len(df)//2]) == \
+            assert set(df['class'][:len(df) // 2]) == \
                    {'O', 'B-PERSON', 'I-PERSON', 'B-GPE', 'B-DATE'}
 
             # for the second example, no annotations
-            assert set(df['class'][len(df)//2:]) == {'O'}
+            assert set(df['class'][len(df) // 2:]) == {'O'}
 
         # test that it works for more than one file
         df = annotations2df([tmp_file] * 5)
@@ -86,6 +87,43 @@ class TestSpacy2df:
         assert isinstance(df, pd.DataFrame)
         assert len(df) == len(ground_truth_tokenization)
         assert df['class'].to_list() == classes
+        assert 'class' in df.columns
+        assert 'text' in df.columns
+
+    @pytest.mark.parametrize("overwrite_ents", [True, False], ids=["overwrite", "dont_overwrite"])
+    @pytest.mark.parametrize("excluded_entity_type", [None, "ET1", "ET2"])
+    def test_exclusion(self, overwrite_ents, excluded_entity_type, model_entities):
+        ground_truth_tokenization = ['Britney', 'Spears', 'had', 'a', 'concert', 'in', 'Brazil',
+                                     'yesterday', '.']
+
+        # 1st level = overwrite_ents, 2nd level = excluded_entity_type
+        classes_true = {
+            True: {
+                None: ['B-PERSON', 'I-PERSON', 'O', 'O', 'B-ET2', 'O', 'B-GPE', 'B-DATE', 'O'],
+                "ET1": ['B-PERSON', 'I-PERSON', 'O', 'O', 'B-ET2', 'O', 'B-GPE', 'B-DATE', 'O'],
+                "ET2": ['B-PERSON', 'I-PERSON', 'O', 'O', 'O', 'O', 'B-GPE', 'B-DATE', 'O']
+            },
+            False: {
+                None: ['B-PERSON', 'I-PERSON', 'O', 'O', 'B-ET1', 'O', 'B-GPE', 'B-DATE', 'O'],
+                "ET1": ['B-PERSON', 'I-PERSON', 'O', 'O', 'O', 'O', 'B-GPE', 'B-DATE', 'O'],
+                "ET2": ['B-PERSON', 'I-PERSON', 'O', 'O', 'B-ET1', 'O', 'B-GPE', 'B-DATE', 'O']
+            }
+        }
+        model = spacy.blank('en')
+        ner = model_entities.get_pipe("ner")
+        er1 = spacy.pipeline.EntityRuler(model, patterns=[{'label': 'ET1', 'pattern': 'concert'}])
+        er2 = spacy.pipeline.EntityRuler(model, patterns=[{'label': 'ET2', 'pattern': 'concert'}],
+                                         overwrite_ents=overwrite_ents)
+
+        model.add_pipe(ner, first=True)
+        model.add_pipe(er1, name='er_1', last=True)
+        model.add_pipe(er2, name='er_2', last=True)
+
+        df = spacy2df(model, ground_truth_tokenization, excluded_entity_type=excluded_entity_type)
+
+        assert isinstance(df, pd.DataFrame)
+        assert len(df) == len(ground_truth_tokenization)
+        assert df['class'].to_list() == classes_true[overwrite_ents][excluded_entity_type]
         assert 'class' in df.columns
         assert 'text' in df.columns
 
@@ -157,7 +195,7 @@ def test_idx2text(ner_annotations, dataset, annotator, etype, texts):
     ('bio', 'token', None,
      {'CONDITION': [1, 2, 0], 'DISEASE': [8, 1, 3], 'PATHWAY': [2, 2, 0], 'ORGANISM': [0, 9, 0]}),
     ('sample', 'entity', {'a': 'c'},
-     {'a': [2, 2, 4], 'b':[1, 2, 1], 'd': [0, 1, 0]}),
+     {'a': [2, 2, 4], 'b': [1, 2, 1], 'd': [0, 1, 0]}),
     ('sample', 'token', {'a': 'c'},
      {'a': [4, 1, 4], 'b': [3, 1, 1], 'd': [0, 1, 0]})
 ])
