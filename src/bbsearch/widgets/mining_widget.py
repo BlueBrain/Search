@@ -1,6 +1,6 @@
 """Module for the mining widget."""
 import io
-from dataclasses import dataclass
+import warnings
 
 import ipywidgets as widgets
 import pandas as pd
@@ -11,11 +11,104 @@ from .._css import style
 from ..utils import Timer
 
 
-@dataclass
-class SchemaRequest:
-    """Class for keeping track of request schema in a mutable way."""
+class MiningSchema:
+    """The mining schema for the mining widget."""
 
-    schema: pd.DataFrame = pd.DataFrame()
+    def __init__(self):
+        self.columns = (
+            "entity_type",
+            "property",
+            "property_type",
+            "property_value_type",
+            "ontology_source",
+        )
+        self.schema_df = pd.DataFrame(columns=self.columns)
+
+    def add_entity(
+        self,
+        entity_type,
+        property_name=None,
+        property_type=None,
+        property_value_type=None,
+        ontology_source=None,
+    ):
+        """Add a new entity to the schema.
+
+        A warning is issued for duplicate entities.
+
+        Parameters
+        ----------
+        entity_type : str
+            The entity type, for example "CHEMICAL".
+        property_name: str, optional
+            The property name, for example "isChiral".
+        property_type : str, optional
+            The property type, for example "ATTRIBUTE".
+        property_value_type : str, optional
+            The property value type, for example "BOOLEAN".
+        ontology_source : str, optional
+            The ontology source, for example "NCIT".
+        """
+        row = {
+            "entity_type": entity_type,
+            "property": property_name,
+            "property_type": property_type,
+            "property_value_type": property_value_type,
+            "ontology_source": ontology_source,
+        }
+        # Make sure there are no duplicates to begin with
+        self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
+        self.schema_df = self.schema_df.append(row, ignore_index=True)
+        # If there are any duplicates at this point, then then it must have
+        # come from the appended row.
+        if any(self.schema_df.duplicated()):
+            self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
+            warnings.warn("This entry already exists. No new entry was created.")
+
+    def add_from_df(self, entity_df):
+        """Add entities from a given dataframe.
+
+        The data frame has to contain a column named "entity_type". Any
+        columns matching the schema columns will be processed, all other
+        columns will be ignored.
+
+        Parameters
+        ----------
+        entity_df : pd.DataFrame
+            The dataframe with new entities.
+        """
+        # The dataframe must contain the "entity_type" column
+        if "entity_type" not in entity_df.columns:
+            raise ValueError("Column named 'entity_type' not found.")
+
+        # Collect all other valid columns
+        valid_columns = []
+        for column in self.schema_df:
+            if column in entity_df.columns:
+                valid_columns.append(column)
+            else:
+                warnings.warn(f"No column named {column} was found.")
+
+        # Add new data to the schema
+        for _, row in entity_df[valid_columns].iterrows():
+            self.add_entity(
+                row["entity_type"],
+                property_name=row.get("property"),
+                property_type=row.get("property_type"),
+                property_value_type=row.get("property_value_type"),
+                ontology_source=row.get("ontology_source"),
+            )
+
+    @property
+    def df(self):
+        """Get a dataframe with all entities.
+
+        Returns
+        -------
+        schema_df : pd.DataFrame
+            The dataframe with all entities.
+        """
+        return self.schema_df.copy()
 
 
 class MiningWidget(widgets.VBox):
@@ -25,8 +118,9 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    schema_request : bbsearch.widgets.SchemaRequest
-        An object holding a dataframe with the requested mining schema (entity, relation, attribute types).
+    mining_schema : bbsearch.widgets.MiningSchema
+        An object holding a dataframe with the requested mining df
+        (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.
     default_text : string, optional
@@ -36,13 +130,13 @@ class MiningWidget(widgets.VBox):
         SQL database. Should lead to major speedups.
     """
 
-    def __init__(self, mining_server_url, schema_request, article_saver=None, default_text='',
+    def __init__(self, mining_server_url, mining_schema, article_saver=None, default_text='',
                  use_cache=True):
         super().__init__()
 
         self.mining_server_url = mining_server_url
         self.article_saver = article_saver
-        self.schema_request = schema_request
+        self.mining_schema = mining_schema
         self.use_cache = use_cache
 
         # This is the output: csv table of extracted entities/relations.
@@ -103,7 +197,7 @@ class MiningWidget(widgets.VBox):
             Information can be either a raw string text, either a list of tuples
             (article_id, paragraph_id) related to the database.
         schema_df : pd.DataFrame
-            A dataframe with the requested mining schema (entity, relation, attribute types).
+            A dataframe with the requested mining df (entity, relation, attribute types).
         debug : bool
             If True, columns are not necessarily matching the specification. However, they
             contain debugging information. If False, then matching exactly the specification.
@@ -114,7 +208,7 @@ class MiningWidget(widgets.VBox):
             The final table. If `debug=True` then it contains all the metadata. If False then it
             only contains columns in the official specification.
         """
-        schema_str = schema_df.to_csv(path_or_buf=None, index=False)
+        schema_str = schema_df.to_csv(index=False)
         if isinstance(information, list):
             print(f"The widget is using database: {self.database_name}")
             response = requests.post(
@@ -165,13 +259,13 @@ class MiningWidget(widgets.VBox):
                 identifiers = self.article_saver.get_saved_items()
 
             print(f'{timer["collect items"]:7.2f} seconds')
-            print('Mining request schema:')
-            display(self.schema_request.schema)
+            print('Mining request df:')
+            display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
                 self.table_extractions = self.textmining_pipeline(
                     information=identifiers,
-                    schema_df=self.schema_request.schema
+                    schema_df=self.mining_schema.df
                 )
             print(f'{timer["pipeline"]:7.2f} seconds')
 
@@ -180,13 +274,13 @@ class MiningWidget(widgets.VBox):
     def _mine_text_clicked(self, b):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
-            print('Mining request schema:')
-            display(self.schema_request.schema)
+            print('Mining request df:')
+            display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             text = self.widgets['input_text'].value
             self.table_extractions = self.textmining_pipeline(
                 information=text,
-                schema_df=self.schema_request.schema
+                schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
 

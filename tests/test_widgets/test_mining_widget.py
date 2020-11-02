@@ -6,7 +6,7 @@ import pandas as pd
 import responses
 from IPython.display import HTML
 
-from bbsearch.widgets import ArticleSaver, MiningWidget, SchemaRequest
+from bbsearch.widgets import ArticleSaver, MiningSchema, MiningWidget
 
 
 class MiningWidgetBot:
@@ -95,10 +95,10 @@ table_extractions = pd.DataFrame(columns)
 
 TESTS_PATH = Path(__file__).resolve().parent.parent
 
-schema_request = SchemaRequest()
+mining_schema = MiningSchema()
 schema_file = TESTS_PATH / 'data' / 'mining' / 'request' / 'request.csv'
 df_schema = pd.read_csv(schema_file)
-schema_request.schema = df_schema
+mining_schema.add_from_df(df_schema)
 
 
 def request_callback(request):
@@ -133,7 +133,7 @@ def test_mining_text(monkeypatch, capsys):
     )
 
     mining_widget = MiningWidget(mining_server_url='http://test',
-                                 schema_request=schema_request)
+                                 mining_schema=mining_schema)
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
     bot.set_value('input_text', 'HELLO')
@@ -145,7 +145,7 @@ def test_mining_text(monkeypatch, capsys):
     assert len(display_objs) == 3  # 1 schema + 1 warning + 1 table_extractions
     assert isinstance(display_objs[0], pd.DataFrame)
 
-    assert display_objs[0].equals(df_schema)
+    assert display_objs[0].equals(df_schema.drop_duplicates(ignore_index=True))
     assert isinstance(display_objs[1], HTML)
     assert display_objs[2].equals(table_extractions)
 
@@ -166,7 +166,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     )
 
     mining_widget = MiningWidget(mining_server_url='http://test',
-                                 schema_request=schema_request)
+                                 mining_schema=mining_schema)
     empty_dataframe = pd.DataFrame()
     assert empty_dataframe.equals(mining_widget.get_extracted_table())
 
@@ -182,7 +182,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
         article_saver.add_article(article_id=i)
 
     mining_widget = MiningWidget(mining_server_url='http://test',
-                                 schema_request=schema_request,
+                                 mining_schema=mining_schema,
                                  article_saver=article_saver)
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
@@ -198,6 +198,6 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine):
     assert isinstance(display_objs[0], pd.DataFrame)
     assert isinstance(display_objs[2], pd.DataFrame)
 
-    assert display_objs[0].equals(df_schema)
+    assert display_objs[0].equals(df_schema.drop_duplicates(ignore_index=True))
     assert isinstance(display_objs[1], HTML)
     assert display_objs[2].equals(table_extractions)
