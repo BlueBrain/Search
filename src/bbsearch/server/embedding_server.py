@@ -74,7 +74,7 @@ class EmbeddingServer(Flask):
         response = {
             "name": self.name,
             "version": self.version,
-            "description": "Run the BBS embedding computation server for a given sentence.",
+            "description": "The BBS sentence embedding server.",
             "GET": {
                 "/": {
                     "description": "Get the welcome page.",

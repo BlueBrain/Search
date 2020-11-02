@@ -18,13 +18,13 @@ class MiningWidgetBot:
         Instance of the MiningWidget.
 
     capsys : pytest.fixture
-        Captures standard output. It will enable us to capture print statements done by the
-        mining widget.
+        Captures standard output. It will enable us to capture print
+        statements done by the mining widget.
 
     monkeypatch : pytest.fixture
-        Allows for easy patching. Note that we patch the `display` function of IPython.
-        This way we are going to be able to capture all the objects the
-        `mining_widget.widgets['out']` holds.
+        Allows for easy patching. Note that we patch the `display` function
+        of IPython. This way we are going to be able to capture all the
+        objects the `mining_widget.widgets['out']` holds.
     """
 
     def __init__(self, mining_widget, capsys, monkeypatch):
@@ -77,7 +77,8 @@ class MiningWidgetBot:
     def set_value(self, widget_name, value):
         """Set a value of a chosen widget.
 
-        Note that this works with multiple different widgets like sliders, dropdowns, ...
+        Note that this works with multiple different widgets like sliders,
+        dropdowns, ...
 
         Parameters
         ----------

@@ -123,8 +123,8 @@ class TestMiningServer:
     ):
         """Test exact count of found entities.
 
-        This test assumes that the requested entity types are a superset of those present
-        in the database (as defined in ee_models_library.csv).
+        This test assumes that the requested entity types are a superset of
+        those present in the database (as defined in ee_models_library.csv).
         """
         schema_file = TESTS_PATH / "data" / "mining" / "request" / "request.csv"
         with open(schema_file, "r") as f:

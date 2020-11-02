@@ -31,8 +31,8 @@ class EmbeddingModel(ABC):
     def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...) if needed by the model.
 
-        This is a default implementation that perform no preprocessing. Model specific
-        preprocessing can be define within children classes.
+        This is a default implementation that perform no preprocessing.
+        Model specific preprocessing can be define within children classes.
 
         Parameters
         ----------
@@ -81,8 +81,8 @@ class EmbeddingModel(ABC):
     def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for all provided sentences.
 
-        This is a default implementation. Children classes can implement more sophisticated
-        batching schemes.
+        This is a default implementation. Children classes can implement more
+        sophisticated batching schemes.
 
         Parameters
         ----------
@@ -92,8 +92,8 @@ class EmbeddingModel(ABC):
         Returns
         -------
         embeddings : np.ndarray
-            2D numpy array with shape `(len(preprocessed_sentences), self.dim)`. Each row
-            is an embedding of a sentence in `preprocessed_sentences`.
+            2D numpy array with shape `(len(preprocessed_sentences), self.dim)`.
+            Each row is an embedding of a sentence in `preprocessed_sentences`.
         """
         return np.array([self.embed(sentence) for sentence in preprocessed_sentences])
 
@@ -137,9 +137,9 @@ class SBioBERT(EmbeddingModel):
         Returns
         -------
         encoding : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
-            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
-            of shape `(n_sentences, n_tokens)`.
+            Dictionary like object that holds the following keys: 'input_ids',
+            'token_type_ids' and 'attention_mask'. All of the corresponding
+            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         References
         ----------
@@ -162,9 +162,9 @@ class SBioBERT(EmbeddingModel):
         Returns
         -------
         encodings : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
-            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
-            of shape `(n_sentences, n_tokens)`.
+            Dictionary like object that holds the following keys: 'input_ids',
+            'token_type_ids' and 'attention_mask'. All of the corresponding
+            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         References
         ----------
@@ -176,21 +176,21 @@ class SBioBERT(EmbeddingModel):
     def embed(self, preprocessed_sentence):
         """Compute the sentence embedding for a given sentence.
 
-        Note that this method already works in batched way if we pass a `BatchEncoding` that
-        contains batches.
+        Note that this method already works in batched way if we pass a
+        `BatchEncoding` that contains batches.
 
         Parameters
         ----------
         preprocessed_sentence: transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
-            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
-            of shape `(n_sentences, n_tokens)`.
+            Dictionary like object that holds the following keys: 'input_ids',
+            'token_type_ids' and 'attention_mask'. All of the corresponding
+            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence of shape (768,) if only a single sample in the
-            batch. Otherwise `(len(preprocessed_sentences), 768)`.
+            Embedding of the specified sentence of shape (768,) if only a single
+            sample in the batch. Otherwise `(len(preprocessed_sentences), 768)`.
 
         References
         ----------
@@ -212,14 +212,15 @@ class SBioBERT(EmbeddingModel):
         Parameters
         ----------
         preprocessed_sentences: transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids', 'token_type_ids'
-            and 'attention_mask'. All of the corresponding values are going to be ``torch.Tensor``
-            of shape `(n_sentences, n_tokens)`.
+            Dictionary like object that holds the following keys: 'input_ids',
+            'token_type_ids' and 'attention_mask'. All of the corresponding
+            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentence of shape `(len(preprocessed_sentences), 768)`
+            Embedding of the specified sentence of shape
+            `(len(preprocessed_sentences), 768)`
 
         References
         ----------
@@ -231,22 +232,24 @@ class SBioBERT(EmbeddingModel):
     def masked_mean(last_hidden_state, attention_mask):
         """Compute the mean of token embeddings while taking into account the padding.
 
-        Note that the `sequence_length` is going to be the number of tokens of the longest
-        sentence + 2 (CLS and SEP are added).
+        Note that the `sequence_length` is going to be the number of tokens of
+        the longest sentence + 2 (CLS and SEP are added).
 
         Parameters
         ----------
         last_hidden_state : torch.Tensor
-            Per sample and per token embeddings as returned by the model. Shape `(n_sentences, sequence_length, dim)`.
+            Per sample and per token embeddings as returned by the model. Shape
+            `(n_sentences, sequence_length, dim)`.
 
         attention_mask : torch.Tensor
-            Boolean mask of what tokens were padded (0) or not (1). The dtype is `torch.int64` and the shape
-            is `(n_sentences, sequence_length)`.
+            Boolean mask of what tokens were padded (0) or not (1). The dtype
+            is `torch.int64` and the shape is `(n_sentences, sequence_length)`.
 
         Returns
         -------
         sentence_embeddings : torch.Tensor
-            Mean of token embeddings taking into account the padding. The shape is `(n_sentences, dim)`.
+            Mean of token embeddings taking into account the padding. The shape
+            is `(n_sentences, dim)`.
 
 
         References
@@ -488,7 +491,8 @@ class BSV(EmbeddingModel):
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 700)`.
+            Embedding of the specified sentences of shape
+            `(len(preprocessed_sentences), 700)`.
         """
         embeddings = self.bsv_model.embed_sentences(preprocessed_sentences)
         return embeddings
@@ -547,7 +551,8 @@ class SentTransformer(EmbeddingModel):
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 768)`.
+            Embedding of the specified sentences of shape
+            `(len(preprocessed_sentences), 768)`.
         """
         embeddings = np.array(self.senttransf_model.encode(preprocessed_sentences))
         return embeddings
@@ -564,7 +569,8 @@ class USE(EmbeddingModel):
     def __init__(self, use_version=5):
         self.use_version = use_version
         self.use_model = hub.load(
-            f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}"
+            "https://tfhub.dev/google/universal-sentence-encoder-large/"
+            + str(self.use_version)
         )
 
     @property
@@ -598,7 +604,8 @@ class USE(EmbeddingModel):
         Returns
         -------
         embedding: numpy.array
-            Embedding of the specified sentences of shape `(len(preprocessed_sentences), 512)`.
+            Embedding of the specified sentences of shape
+            `(len(preprocessed_sentences), 512)`.
         """
         embedding = self.use_model(preprocessed_sentences).numpy()
         return embedding
@@ -673,34 +680,36 @@ class SklearnVectorizer(EmbeddingModel):
 
 
 def compute_database_embeddings(connection, model, indices, batch_size=10):
-    """Compute Sentences Embeddings for a given model and a given database (articles with covid19_tag True).
+    """Compute sentences embeddings.
+
+    The embeddings are computed for a given model and a given database
+    (articles with covid19_tag True).
 
     Parameters
     ----------
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         Connection to the database.
-
     model: EmbeddingModel
         Instance of the EmbeddingModel of choice.
-
     indices : np.ndarray
-        1D array storing the sentence_ids for which we want to perform the embedding.
-
+        1D array storing the sentence_ids for which we want to perform the
+        embedding.
     batch_size : int
-        Number of sentences to preprocess and embed at the same time. Should lead to major speedus.
-        Note that the last batch will have a length of `n_sentences % batch_size` (unless it is 0).
-        Note that some models (SBioBERT) might perform padding to the longest sentence and bigger
+        Number of sentences to preprocess and embed at the same time. Should
+        lead to major speedups. Note that the last batch will have a length of
+        `n_sentences % batch_size` (unless it is 0). Note that some models
+        (SBioBERT) might perform padding to the longest sentence and bigger
         batch size might not lead to a speedup.
 
     Returns
     -------
     final_embeddings: np.array
-        2D numpy array with all sentences embeddings for the given models. Its shape is
-        `(len(retrieved_indices), dim)`.
+        2D numpy array with all sentences embeddings for the given models. Its
+        shape is `(len(retrieved_indices), dim)`.
 
     retrieved_indices : np.ndarray
-        1D array of sentence_ids that we managed to embed. Note that the order corresponds
-        exactly to the rows in `final_embeddings`.
+        1D array of sentence_ids that we managed to embed. Note that the order
+        corresponds exactly to the rows in `final_embeddings`.
     """
     sentences = retrieve_sentences_from_sentence_ids(indices, connection)
     n_sentences = len(sentences)
@@ -747,10 +756,11 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
         The name of the model.
 
     checkpoint_path : pathlib.Path
-        Path to load the embedding models (Needed for BSV and Sent2Vec)
+        Path to load the embedding models (Needed for BSV and Sent2Vec).
 
     device: str
-        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS, SBioBERT, SBERT)
+        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS,
+        SBioBERT, SBERT).
 
     Returns
     -------

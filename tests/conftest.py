@@ -194,7 +194,8 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                     "end_char": ent_ix + 1,
                     "article_id": article_id,
                     "paragraph_pos_in_article": sec_ix,
-                    "mining_model": "en_ner_craft_md",  # from data/mining/request/ee_models_library.csv
+                    # from data/mining/request/ee_models_library.csv
+                    "mining_model": "en_ner_craft_md",
                 }
                 temp_m.append(pd.Series(s))
 

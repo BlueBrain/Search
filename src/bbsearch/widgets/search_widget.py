@@ -112,8 +112,8 @@ class SearchWidget(widgets.VBox):
             value=20, description="Top N results", style=self.widgets_style
         )
 
-        # Choose whether to print whole paragraph containing sentence highlighted, or just the
-        # sentence
+        # Choose whether to print whole paragraph containing sentence
+        # highlighted, or just the sentence
         self.widgets["print_paragraph"] = widgets.Checkbox(
             value=True, description="Show whole paragraph", style=self.widgets_style
         )
@@ -347,7 +347,9 @@ class SearchWidget(widgets.VBox):
         end = start + len(sentence)
         highlighted_paragraph = f"""
             <div class="paragraph">
-                {paragraph[:start]} <div class="paragraph_emph"> {paragraph[start:end]} </div> {paragraph[end:]}
+                {paragraph[:start]}
+                <div class="paragraph_emph"> {paragraph[start:end]} </div>
+                {paragraph[end:]}
             </div>
             """
 

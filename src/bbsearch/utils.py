@@ -66,8 +66,8 @@ class Timer:
             Name of the process to be timed.
 
         message : str or None
-            Optional message to be printed to stoud when entering. Note that it only has an effect if
-            `self.verbose=True`.
+            Optional message to be printed to stoud when entering. Note that
+            it only has an effect if `self.verbose=True`.
 
         """
         self.name = name
@@ -89,7 +89,8 @@ class Timer:
 
         if self.name == "overall":
             raise ValueError(
-                "The 'overall' key is restricted for length of the lifetime of the Timer."
+                "The 'overall' key is restricted for length of the "
+                "lifetime of the Timer."
             )
 
         self.start_time = time.perf_counter()

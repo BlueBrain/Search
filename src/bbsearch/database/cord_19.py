@@ -16,8 +16,9 @@ class CORD19DatabaseCreation:
     Attributes
     ----------
     max_text_length: int
-        Max length of values in MySQL column of type TEXT. We have to constraint our text values
-        to be smaller than this value (especially articles.abstract and sentences.text)
+        Max length of values in MySQL column of type TEXT. We have to
+        constraint our text values to be smaller than this value
+        (especially articles.abstract and sentences.text).
     """
 
     def __init__(self, data_path, engine):
@@ -26,7 +27,8 @@ class CORD19DatabaseCreation:
         Parameters
         ----------
         data_path: pathlib.Path
-            Directory to the dataset where metadata.csv and all jsons file are located.
+            Directory to the dataset where metadata.csv and all jsons file
+            are located.
         engine: SQLAlchemy.Engine
             Engine linked to the database.
         """
@@ -175,16 +177,20 @@ class CORD19DatabaseCreation:
         pmc: int
             Number of articles with at least one pmc_json.
         pdf: int
-            Number of articles that does not have pmc_json file but at least one pdf_json.
+            Number of articles that does not have pmc_json file but
+            at leastone pdf_json.
         rejected_articles: list of int
-            Article_id of the articles that raises an error during the parsing.
+            Article_id of the articles that raises an error during
+            the parsing.
         """
         nlp = spacy.load(model_name, disable=["tagger", "ner"])
 
         articles_table = pd.read_sql(
-            """SELECT article_id, title, abstract, pmc_json_files, pdf_json_files
-                                        FROM articles
-                                        WHERE (abstract IS NOT NULL) OR (title IS NOT NULL)""",
+            """
+            SELECT article_id, title, abstract, pmc_json_files, pdf_json_files
+            FROM articles
+            WHERE (abstract IS NOT NULL) OR (title IS NOT NULL)
+            """,
             con=self.engine,
         )
 
@@ -275,7 +281,8 @@ class CORD19DatabaseCreation:
                     ],
                 )
 
-                # Consider first n sentences in paper to quickly determine if it is in English
+                # Consider first n sentences in paper to quickly determine
+                # if it is in English
                 n_sents_language = 10
                 is_english = self.check_is_english(
                     " ".join(sentences_df[:n_sents_language]["text"])
@@ -336,7 +343,8 @@ class CORD19DatabaseCreation:
         nlp: spacy.language.Language
             Spacy pipeline applying sentence segmentation.
         paragraphs: List of tuples (text, metadata)
-            List of Paragraph/Article in raw text to segment into sentences. [(text, metadata), ]
+            List of Paragraph/Article in raw text to segment into sentences.
+            [(text, metadata), ].
 
         Returns
         -------

@@ -43,7 +43,10 @@ parser.add_argument(
 )
 parser.add_argument(
     "--bsv_checkpoints",
-    default="/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin",
+    default=(
+        "/raid/sync/proj115/bbs_data/trained_models/"
+        "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
+    ),
     type=str,
     help="Path to file containing the checkpoints for the BSV model.",
 )

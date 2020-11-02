@@ -21,7 +21,7 @@ class SearchServer(Flask):
         The folder containing pre-trained models.
     embeddings_h5_path : str or pathlib.Path
         The path to the h5 file containing pre-computed embeddings.
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         The database connection.
     indices : np.ndarray
         1D array containing sentence_ids to be considered for precomputed embeddings.

@@ -17,11 +17,20 @@ class REModel(ABC):
     @property
     @abstractmethod
     def classes(self):
-        """list[str]: Names of supported relation classes."""
+        """Names of supported relation classes.
+
+        Returns
+        -------
+        list of str
+            Names of supported relation classes.
+        """
 
     @abstractmethod
     def predict_probs(self, annotated_sentence):
-        """Predict per-class probabilities for the relation between subject and object in an annotated sentence.
+        """Relation probabilities between subject and object.
+
+        Predict per-class probabilities for the relation between subject and
+        object in an annotated sentence.
 
         Parameters
         ----------
@@ -32,11 +41,12 @@ class REModel(ABC):
         Returns
         -------
         relation_probs : pd.Series
-            Per-class probability vector. The index contains the class names, the values are the probabilities.
+            Per-class probability vector. The index contains the class names,
+            the values are the probabilities.
         """
 
     def predict(self, annotated_sentence, return_prob=False):
-        """Predict most likely relation between subject and object in an annotated sentence.
+        """Predict most likely relation between subject and object.
 
         Parameters
         ----------
@@ -79,21 +89,25 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     Parameters
     ----------
     doc : spacy.tokens.Doc
-        The entire document (input text). Note that spacy uses it for absolute referencing.
+        The entire document (input text). Note that spacy uses it for
+        absolute referencing.
 
     sent : spacy.tokens.Span
         One sentence from the `doc` where we look for relations.
 
     ent_1 : spacy.tokens.Span
-        The first entity in the sentence. One can get its type by using the `label_` attribute.
+        The first entity in the sentence. One can get its type by using the
+        `label_` attribute.
 
     ent_2 : spacy.tokens.Span
-        The second entity in the sentence. One can get its type by using the `label_` attribute.
+        The second entity in the sentence. One can get its type by using the
+        `label_` attribute.
 
     etype_symbols: dict or defaultdict
-        Keys represent different entity types ("GGP", "CHEBI") and the values are tuples of size 2.
-        Each of these tuples represents the starting and ending symbol to wrap the recognized entity with.
-        Each ``REModel`` has the `symbols` property that encodes how its inputs should be annotated.
+        Keys represent different entity types ("GGP", "CHEBI") and the values
+        are tuples of size 2. Each of these tuples represents the starting
+        and ending symbol to wrap the recognized entity with. Each ``REModel``
+        has the `symbols` property that encodes how its inputs should be annotated.
 
     Returns
     -------

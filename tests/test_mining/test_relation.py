@@ -8,7 +8,10 @@ from bbsearch.mining import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):
-    text = "This is a filler sentence. Bill Gates founded Microsoft and currently lives in the USA."
+    text = (
+        "This is a filler sentence. Bill Gates founded Microsoft and "
+        "currently lives in the USA."
+    )
 
     # entities are [Bill Gates, Microsoft, USA]
     # etypes are ['PERSON', 'ORG', 'GPE']

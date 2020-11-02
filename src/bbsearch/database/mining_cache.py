@@ -230,7 +230,7 @@ class CreateMiningCache:
 
     Parameters
     ----------
-    database_engine: SQLAlchemy connectable (engine/connection)
+    database_engine: sqlalchemy.engine.Engine
         Connection to the CORD-19 database.
 
     ee_models_library : pd.DataFrame
@@ -491,7 +491,8 @@ class CreateMiningCache:
                     finished_workers.append(process)
                     if process.exitcode != 0:
                         self.logger.error(
-                            f"Worker {process.name} terminated with exit code {process.exitcode}!"
+                            f"Worker {process.name} terminated with exit "
+                            f"code {process.exitcode}!"
                         )
 
             # Remove all workers that are already in the `finished_workers`

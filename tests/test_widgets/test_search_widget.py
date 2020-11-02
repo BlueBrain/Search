@@ -29,17 +29,17 @@ class SearchWidgetBot:
         Instance of the SearchWidget.
 
     capsys : pytest.fixture
-        Captures standard output. It will enable us to capture print statements done by the
-        search widget.
+        Captures standard output. It will enable us to capture print
+        statements done by the search widget.
 
     monkeypatch : pytest.fixture
-        Allows for easy patching. Note that we patch the `display` function of IPython.
-        This way we are going to be able to capture all the objects the
-        `search_widget.widgets['out']` holds.
+        Allows for easy patching. Note that we patch the `display`
+        function of IPython. This way we are going to be able to
+        capture all the objects the `search_widget.widgets['out']` holds.
 
     n_displays_per_result : int
-        Number of displayed objects for each result in the top results. Note that
-        currently it is 4 since we are outputing:
+        Number of displayed objects for each result in the top results.
+        Note that currently it is 4 since we are outputting:
 
             - Article metadata : ``IPython.core.display.HTML``
             - Store paragraph checkbox : ``widgets.Checkbox``
@@ -99,7 +99,8 @@ class SearchWidgetBot:
     def set_value(self, widget_name, value):
         """Set a value of a chosen widget.
 
-        Note that this works with multiple different widgets like sliders, dropdowns, ...
+        Note that this works with multiple different widgets like sliders,
+        dropdowns, ...
 
         Parameters
         ----------
@@ -247,8 +248,13 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     most_relevant_bsv_text = fake_sqlalchemy_engine.execute(query_bsv).fetchone()[0]
 
     # most_relevant_sbiobert_id = 3
-    # query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
-    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
+    # query_sbiobert = f"""
+    # SELECT text
+    # FROM sentences
+    # WHERE sentence_id = {most_relevant_sbiobert_id}"""
+    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(
+    #     query_sbiobert
+    # ).fetchone()[0]
 
     embedding_model_bsv = Mock()
     embedding_model_bsv.embed.return_value = np.array([0, 1])  # 90 degrees
@@ -325,7 +331,8 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     # captured_display_objects = bot.display_cached
     #
     # assert len(captured_display_objects) == k * bot.n_displays_per_result
-    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
+    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in \
+    #        captured_display_objects[-1].data
 
 
 @responses.activate
@@ -333,7 +340,7 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
 def test_article_saver_gets_updated(
     fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode
 ):
-    """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
+    """Clicking paragraph or article checkbox modifies the ArticleSaver state."""
 
     responses.add_callback(
         responses.POST,

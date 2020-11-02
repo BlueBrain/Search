@@ -2,8 +2,9 @@
 
 Notes
 -----
-The internals of fixtures might vary based on how conftest.py sets them up. The goal of these
-tests is to run simple sanity checks rather than detailed bookkeeping.
+The internals of fixtures might vary based on how conftest.py sets them up.
+The goal of these tests is to run simple sanity checks rather than detailed
+bookkeeping.
 
 """
 import pandas as pd

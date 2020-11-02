@@ -24,8 +24,8 @@ def real_sqlalchemy_engine(
         fake_sqlalchemy_engine.execute("create database real_test")
         fake_url = fake_sqlalchemy_engine.url
         url = (
-            f"{fake_url.drivername}://{fake_url.username}:{fake_url.password}@{fake_url.host}:"
-            f"{fake_url.port}/"
+            f"{fake_url.drivername}://{fake_url.username}:{fake_url.password}@"
+            f"{fake_url.host}:{fake_url.port}/"
         )
         engine = sqlalchemy.create_engine(f"{url}real_test")
     else:
@@ -119,13 +119,19 @@ class TestDatabaseCreation:
             assert len(indexes_sentences) == 1
             assert indexes_sentences[0]["column_names"][0] == "article_id"
 
-        duplicates_query = """SELECT COUNT(article_id || ':' ||
-                                            paragraph_pos_in_article || ':' ||
-                                            sentence_pos_in_paragraph) c,
-                      article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
-                      FROM sentences
-                      GROUP BY article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
-                      HAVING c > 1; """
+        duplicates_query = """
+        SELECT COUNT(
+            article_id || ':' ||
+            paragraph_pos_in_article || ':' ||
+            sentence_pos_in_paragraph
+        ) c,
+        article_id,
+        paragraph_pos_in_article,
+        sentence_pos_in_paragraph
+        FROM sentences
+        GROUP BY article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
+        HAVING c > 1;
+        """
         duplicates_df = pd.read_sql(duplicates_query, real_sqlalchemy_engine)
         assert len(duplicates_df) == 0
 
@@ -148,7 +154,11 @@ class TestDatabaseCreation:
             db.construct()
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
-        """Tests that the schema of the fake database is always the same as the real one. """
+        """Test real vs. fake database.
+
+        Tests that the schema of the fake database is always the same as
+        the real one.
+        """
         real_tables_names = {
             table_name for table_name in real_sqlalchemy_engine.table_names()
         }

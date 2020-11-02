@@ -91,22 +91,25 @@ def spacy2df(
     Parameters
     ----------
     spacy_model : spacy.language.Language
-        Spacy model that will be used for NER, EntityRuler and Tagger (not tokenization).
-        Note that a Tagger might be necessary for tagger EntityRuler.
+        Spacy model that will be used for NER, EntityRuler and Tagger
+        (not tokenization). Note that a Tagger might be necessary for
+        tagger EntityRuler.
 
     ground_truth_tokenization : list
-        List of str (words) representing the ground truth tokenization. This will guarantee that the
-        ground truth dataframe will be aligned with the prediction dataframe.
+        List of str (words) representing the ground truth tokenization.
+        This will guarantee that the ground truth dataframe will be aligned
+        with the prediction dataframe.
 
     not_entity_symbol : str
-        A symbol to use for tokens that are not a part of any entity. Note that this symbol will be
-        used for all tokens for which the `ent_iob_` attribute of `spacy.Token` is equal to
-        "O".
+        A symbol to use for tokens that are not a part of any entity.
+        Note that this symbol will be used for all tokens for which the
+        `ent_iob_` attribute of `spacy.Token` is equal to "O".
 
     excluded_entity_type : str or None
-        Entity type that is going to be automatically excluded. Note that it is different from
-        `not_entity_symbol` since it corresponds to the `label_` attribute of ``spacy.Span``
-        objects. If None, then no exclusion will be taking place.
+        Entity type that is going to be automatically excluded. Note that
+        it is different from `not_entity_symbol` since it corresponds to the
+        `label_` attribute of ``spacy.Span`` objects. If None, then no
+        exclusion will be taking place.
 
     Returns
     -------
@@ -115,8 +118,9 @@ def spacy2df(
 
     Notes
     -----
-    One should run the `annotations2df` first in order to obtain the `ground_truth_tokenization`. If
-    it is the case then `ground_truth_tokenization=prodigy_table['text'].to_list()`.
+    One should run the `annotations2df` first in order to obtain the
+    `ground_truth_tokenization`. If it is the case then
+    `ground_truth_tokenization=prodigy_table['text'].to_list()`.
     """
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
     new_doc = doc
@@ -163,15 +167,16 @@ def spacy2df(
 def remove_punctuation(df):
     """Remove punctuation from a dataframe with tokens and entity annotations.
 
-    Important: this function should be called only after all the annotations have been
-    loaded by calling `annotations2df()` and `spacy2df()`.
+    Important: this function should be called only after all the annotations
+    have been loaded by calling `annotations2df()` and `spacy2df()`.
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame with tokens and annotations, can be generated calling `annotations2df()` and
-        `spacy2df()`. Should include a column "text" containing one token per row, and one
-        or more columns of annotations in IOB format named as "class_XXX".
+        DataFrame with tokens and annotations, can be generated calling
+        `annotations2df()` and `spacy2df()`. Should include a column
+        "text" containing one token per row, and one or more columns of
+        annotations in IOB format named as "class_XXX".
 
     Returns
     -------
@@ -193,19 +198,22 @@ def remove_punctuation(df):
 
 
 def unique_etypes(iob, return_counts=False, mode="entity"):
-    """Return the sorted unique entity types from a vector of annotations in IOB format.
+    """Return the sorted unique entity types for annotations in IOB format.
 
     Parameters
     ----------
     iob : pd.Series[str]
-        Annotations in the IOB format. Elements of the pd.Series should be either 'O',
-        'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where 'ENTITY_TYPE' is the name of some entity type.
+        Annotations in the IOB format. Elements of the pd.Series should
+        be either 'O', 'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where
+        'ENTITY_TYPE' is the name of some entity type.
 
     return_counts : bool, optional
-        If True, also return the number of times each unique entity type appears in the input.
+        If True, also return the number of times each unique entity
+        type appears in the input.
 
     mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+        Evaluation mode. One of 'entity', 'token': notice that an
+        'entity' can span several tokens.
 
     Returns
     -------
@@ -213,8 +221,8 @@ def unique_etypes(iob, return_counts=False, mode="entity"):
         The sorted unique entity types.
 
     unique_counts : list[int], optional
-        The number of times each of the unique entity types comes up in the input. Only provided if
-        `return_counts` is True.
+        The number of times each of the unique entity types comes up in
+        the input. Only provided if `return_counts` is True.
     """
     unique = sorted(
         {
@@ -246,8 +254,9 @@ def iob2idx(iob, etype):
     Parameters
     ----------
     iob : pd.Series[str]
-        Annotations in the IOB format. Elements of the pd.Series should be either 'O',
-        'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where 'ENTITY_TYPE' is the name of some entity type.
+        Annotations in the IOB format. Elements of the pd.Series should be
+        either 'O', 'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where 'ENTITY_TYPE'
+        is the name of some entity type.
 
     etype : str
         Name of the entity type of interest.
@@ -255,8 +264,8 @@ def iob2idx(iob, etype):
     Returns
     -------
     idxs : pd.DataFrame[int, int]
-        Dataframe with 2 columns, 'start' and 'end', representing start and end position of the
-        entities of the specified entity type.
+        Dataframe with 2 columns, 'start' and 'end', representing start
+        and end position of the entities of the specified entity type.
     """
     b_symbol = f"B-{etype}"
     i_symbol = f"I-{etype}"
@@ -281,8 +290,8 @@ def idx2text(tokens, idxs):
         Tokens obtained from tokenization of a text.
 
     idxs : pd.Series[int, int]
-        Dataframe with 2 columns, 'start' and 'end', representing start and end position of the
-        entities of the specified entity type.
+        Dataframe with 2 columns, 'start' and 'end', representing start
+        and end position of the entities of the specified entity type.
 
     Returns
     -------
@@ -308,12 +317,14 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
         Predicted IOB annotations.
 
     mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity'
+        can span several tokens.
 
     etypes_map : dict, optional
-        Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotations. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
+        Dictionary mapping entity type names in the ground truth annotations
+        to the corresponding entity type names in the predicted annotations.
+        Useful when entity types have different names in `iob_true` and
+        `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
@@ -322,7 +333,8 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
     -------
     report : string / dict
         Text summary of the precision, recall, F1 score for each entity type.
-        Dictionary returned if output_dict is True. Dictionary has the following structure
+        Dictionary returned if output_dict is True. Dictionary has the
+        following structure
 
         .. code-block:: python
 
@@ -403,7 +415,9 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
 def ner_errors(
     iob_true, iob_pred, tokens, mode="entity", etypes_map=None, return_dict=False
 ):
-    """Build a summary report collecting false positives and false negatives for each entity type.
+    """Build a summary report for the named entity recognition.
+
+    False positives and false negatives for each entity type are collected.
 
     Parameters
     ----------
@@ -417,12 +431,14 @@ def ner_errors(
         Tokens obtained from tokenization of a text.
 
     mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity'
+        can span several tokens.
 
     etypes_map : dict, optional
-        Dictionary mapping entity type names in the ground truth annotations to the corresponding
-        entity type names in the predicted annotations. Useful when entity types have different
-        names in `iob_true` and `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
+        Dictionary mapping entity type names in the ground truth annotations
+        to the corresponding entity type names in the predicted annotations.
+        Useful when entity types have different names in `iob_true` and
+        `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
 
     return_dict : bool, optional
         If True, return output as dict.
@@ -431,7 +447,8 @@ def ner_errors(
     -------
     report : string / dict
         Text summary of the precision, recall, F1 score for each entity type.
-        Dictionary returned if output_dict is True. Dictionary has the following structure
+        Dictionary returned if output_dict is True. Dictionary has the
+        following structure
 
         .. code-block:: python
 
@@ -509,17 +526,19 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode="entity"):
         Predicted IOB annotations.
 
     normalize : {'true', 'pred', 'all'}, default=None
-        Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the
-        population. If None, the confusion matrix will not be normalized.
+        Normalizes confusion matrix over the true (rows), predicted (columns)
+        conditions or all the population. If None, the confusion matrix will
+        not be normalized.
 
     mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity'
+        can span several tokens.
 
     Returns
     -------
     cm : pd.DataFrame
-        Dataframe where the index contains the ground truth entity types and the columns contain the
-        predicted entity types.
+        Dataframe where the index contains the ground truth entity types and
+        the columns contain the predicted entity types.
     """
     etypes_true = unique_etypes(iob_true)
     etypes_pred = unique_etypes(iob_pred)
@@ -600,11 +619,13 @@ def plot_ner_confusion_matrix(
         Predicted IOB annotations.
 
     normalize : {'true', 'pred', 'all'}, default=None
-        Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the
-        population. If None, the confusion matrix will not be normalized.
+        Normalizes confusion matrix over the true (rows), predicted (columns)
+        conditions or all the population. If None, the confusion matrix will
+        not be normalized.
 
     mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity' can span several tokens.
+        Evaluation mode. One of 'entity', 'token': notice that an 'entity'
+        can span several tokens.
 
     cmap : str or matplotlib Colormap, default='viridis'
         Colormap recognized by matplotlib.

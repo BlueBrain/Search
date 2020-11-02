@@ -10,12 +10,12 @@ def retrieve_article_ids(engine):
 
     Parameters
     ----------
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    article_id_dict: dict
+    article_id_dict : dict
         Dictionary giving the corresponding article_id for a given sentence_id
     """
     result_proxy = engine.execute("SELECT sentence_id, article_id FROM sentences")
@@ -28,14 +28,14 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
 
     Parameters
     ----------
-    sentence_ids: list of int
+    sentence_ids : list of int
         Sentence ids for which need to retrieve the text.
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    sentences: pd.DataFrame
+    sentences : pd.DataFrame
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
@@ -56,14 +56,15 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
     ----------
     sentence_id: int
         Sentence id for which need to retrieve the paragraph.
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
     paragraph: str or None
-        If ``str`` then a paragraph containing the sentence of the given sentence_id. If None
-        then the `sentence_id` was not found in the sentences table.
+        If ``str`` then a paragraph containing the sentence of the given
+        sentence_id. If None then the `sentence_id` was not found in the
+        sentences table.
     """
     sql_query = f"""SELECT text
                     FROM sentences
@@ -94,9 +95,10 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
         Article id.
 
     paragraph_pos_in_article : int
-        Relative position of a paragraph in an article. Note that the numbering starts from 0.
+        Relative position of a paragraph in an article. Note that the numbering
+        starts from 0.
 
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -141,15 +143,16 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
     ----------
     article_id: int
         Article id for which need to retrieve the article metadata.
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
     article: pd.DataFrame
-        DataFrame containing the article metadata. The columns are 'article_id', 'cord_uid', 'sha',
-        'source_x', 'title', 'doi', 'pmcid', 'pubmed_id', 'license', 'abstract',
-        'publish_time', 'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
+        DataFrame containing the article metadata. The columns are
+        'article_id', 'cord_uid', 'sha', 'source_x', 'title', 'doi',
+        'pmcid', 'pubmed_id', 'license', 'abstract', 'publish_time',
+        'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
         'pdf_json_files', 'pmc_json_files', 'url', 's2_id'.
     """
     sql_query = f"""SELECT *
@@ -166,7 +169,7 @@ def retrieve_articles(article_ids, engine):
     ----------
     article_ids: list of int
         List of Article id for which need to retrieve the entire text article.
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -207,7 +210,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     model_names : list
         List of model names to consider. Duplicates are removed automatically.
 
-    engine: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    engine: sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
@@ -255,7 +258,11 @@ def retrieve_mining_cache(identifiers, model_names, engine):
                 """
                 for a, p in identifiers_pars[i * batch_size : (i + 1) * batch_size]
             )
-            query_pars = f"""SELECT * FROM ({query_pars}) tt WHERE tt.mining_model IN {model_names}"""
+            query_pars = f"""
+            SELECT *
+            FROM ({query_pars}) tt
+            WHERE tt.mining_model IN {model_names}
+            """
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
         df_pars = df_pars.sort_values(
@@ -313,7 +320,7 @@ class SentenceFilter:
 
     Parameters
     ----------
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         Connection to the database that contains the `articles`
         and `sentences` tables.
     """
@@ -510,11 +517,13 @@ class SentenceFilter:
                     f"MATCH(text) AGAINST ('{condition}' IN BOOLEAN MODE)"
                 )
             elif self.string_exclusions:
-                # This elif statement is to create conditions if there are only exclusions words
-                # without any inclusions. Indeed, in this case, MATCH AGAINST IN BOOLEAN MODE does
-                # not work anymore as you can find on the official docs:
-                # https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html:
-                # boolean-mode search that contains only terms preceded by - returns an empty result
+                # This elif statement is to create conditions if there are
+                # onlyexclusions words; without any inclusions. Indeed,
+                # in this case, MATCH AGAINST IN BOOLEAN MODE does; not work
+                # anymore as you can find on the official docs:
+                # https://dev.mysql.com/doc/refman/8.0/en/fulltext-boolean.html
+                # boolean-mode search that contains only terms preceded by -
+                # returns an empty result
                 for text in self.string_exclusions:
                     sentence_conditions.append(f"INSTR(text, '{text}') = 0")
         else:

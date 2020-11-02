@@ -59,7 +59,11 @@ class TestArticleSaver:
         ].to_list()
         all_articles_paragraphs_id = dict()
         for article_id in set(article_ids):
-            sql_query = f"SELECT paragraph_pos_in_article FROM sentences WHERE article_id = {article_id}"
+            sql_query = f"""
+            SELECT paragraph_pos_in_article
+            FROM sentences
+            WHERE article_id = {article_id}
+            """
             all_paragraph_pos_in_article = pd.read_sql(
                 sql_query, fake_sqlalchemy_engine
             )["paragraph_pos_in_article"].to_list()

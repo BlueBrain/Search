@@ -119,15 +119,17 @@ class PatternCreator:
         pattern : str or dict or list
             The pattern we want to match. The behavior depends on the type.
 
-            - ``str``: can be used for exact matching (case sensitive). We internally convert
-              it to a single-token pattern `{"TEXT": pattern}`.
-            - ``dict``: a single-token pattern. This dictionary can contain at most 2 entries.
-              The first one represents the attribute: value pair ("LEMMA": "world"). The second
-              has a key "OP" and is optional. It represents the operator/quantifier to be used.
-              An example of a valid pattern dict is `{"LEMMA": "world", "OP": "+"}`. Note that
-              it would detect entities like "world" and "world world world".
-            - ``list``: a multi-token pattern. A list of dictionaries that are of the same form
-              as described above.
+            - ``str``: can be used for exact matching (case sensitive). We
+              internally convert it to a single-token pattern `{"TEXT": pattern}`.
+            - ``dict``: a single-token pattern. This dictionary can contain
+              at most 2 entries. The first one represents the attribute:
+              value pair ("LEMMA": "world"). The second has a key "OP" and is
+              optional. It represents the operator/quantifier to be used.
+              An example of a valid pattern dict is
+              `{"LEMMA": "world", "OP": "+"}`. Note that it would detect
+              entities like "world" and "world world world".
+            - ``list``: a multi-token pattern. A list of dictionaries that
+              are of the same form as described above.
 
         check_exists : bool
             If True, we only allow to add patterns that do not exist yet.
@@ -169,8 +171,8 @@ class PatternCreator:
         Returns
         -------
         pd.DataFrame
-            Copy of the `_storage`. Each row represents a single entity type pattern. All
-            elements are strings.
+            Copy of the `_storage`. Each row represents a single entity type
+            pattern. All elements are strings.
         """
         return self._storage.copy()
 
@@ -180,14 +182,14 @@ class PatternCreator:
         Parameters
         ----------
         sort_by : None or list
-            If None, then no sorting taking place. If ``list``, then the names of columns
-            along which to sort.
+            If None, then no sorting taking place. If ``list``, then the
+            names of columns along which to sort.
 
         Returns
         -------
         list
-            A list where each element represents one entity type pattern. Note that
-            this list can be directly passed into the `EntityRuler`.
+            A list where each element represents one entity type pattern.
+            Note that this list can be directly passed into the `EntityRuler`.
         """
         storage = self.to_df()
         sorted_storage = (
@@ -201,8 +203,8 @@ class PatternCreator:
         Parameters
         ----------
         sort_by : None or list
-            If None, then no sorting taking place. If ``list``, then the names of columns
-            along which to sort.
+            If None, then no sorting taking place. If ``list``, then the
+            names of columns along which to sort.
         """
         patterns = self.to_list(sort_by=sort_by)
         JSONL.dump_jsonl(patterns, path)
@@ -363,7 +365,8 @@ def remap_entity_type(patterns, etype_mapping):
         List of patterns.
 
     etype_mapping : dict
-        Keys are our entity type names and values are entity type names inside of the spacy model.
+        Keys are our entity type names and values are entity type names
+        inside of the spacy model.
 
         .. code-block:: Python
 
@@ -404,20 +407,23 @@ def global2model_patterns(patterns, ee_models_library):
     Parameters
     ----------
     patterns : list
-        List of patterns where the entity type is always referring to the entity type naming
-        convention we have internally ("entity_type" column of `ee_models_library`).
+        List of patterns where the entity type is always referring to the
+        entity type naming convention we have internally ("entity_type"
+        column of `ee_models_library`).
 
     ee_models_library : pd.DataFrame
-        3 columns DataFrame connecting model location, our naming and model naming of entity type.
-        * "entity_type": our naming of entity_types
-        * "model": path to the model folder
-        * "entity_type_name": internal name of entities
+        3 columns DataFrame connecting model location, our naming and model
+        naming of entity type.
+
+        - "entity_type": our naming of entity_types
+        - "model": path to the model folder
+        - "entity_type_name": internal name of entities
 
     Returns
     -------
     res : dict
-        The keys are the locations of the model and the values are list of patterns that one
-        can load with `EntityRuler(nlp, patterns=patterns)`
+        The keys are the locations of the model and the values are list of
+        patterns that one can load with `EntityRuler(nlp, patterns=patterns)`.
     """
     res = {}
     for model, ee_models_library_slice in ee_models_library.groupby("model"):

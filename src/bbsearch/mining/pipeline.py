@@ -40,28 +40,32 @@ def run_pipeline(
     model_entities : spacy.lang.en.English
         Spacy model. Note that this model defines entity types.
     models_relations : dict
-        The keys are pairs (two element tuples) of entity types (i.e. ('GGP', 'CHEBI')). The first entity type
-        is the subject and the second one is the object. Note that the entity types should correspond to those inside
-        of `model_entities`. The value is a list of instances of relation extraction models,
-        that is instances of some subclass of ``REModel``.
+        The keys are pairs (two element tuples) of entity types
+        (i.e. ('GGP', 'CHEBI')). The first entity type is the subject
+        and the second one is the object. Note that the entity types
+        should correspond to those inside of `model_entities`. The value
+        is a list of instances of relation extraction models, that is
+        instances of some subclass of ``REModel``.
     debug : bool
-        If True, columns are not necessarily matching the specification. However, they
-        contain debugging information. If False, then matching exactly the specification.
+        If True, columns are not necessarily matching the specification.
+        However, they contain debugging information. If False, then
+        matching exactly the specification.
     excluded_entity_type : str or None
-        If a str, then all entities with type `not_entity_label` will be excluded. If None,
-        then no exclusion will be taking place.
+        If a str, then all entities with type `not_entity_label` will be
+        excluded. If None, then no exclusion will be taking place.
 
     Returns
     -------
     pd.DataFrame
-        The final table. If `debug=True` then it contains all the metadata. If False then it
-        only contains columns in the official specification.
+        The final table. If `debug=True` then it contains all the metadata.
+        If False then it only contains columns in the official specification.
     """
     # sanity checks
     if not isinstance(model_entities, spacy.language.Language):
         raise TypeError(
-            "Current implementation requires `model_entities` to be an instance of "
-            '`spacy.language.Language`. Try with `model_entities=spacy.load("en_ner_craft_md")`'
+            "Current implementation requires `model_entities` to be an "
+            "instance of  `spacy.language.Language`. Try with "
+            '`model_entities=spacy.load("en_ner_craft_md")`'
         )
 
     if not all(

@@ -18,16 +18,18 @@ class MiningServer(Flask):
     Parameters
     ----------
     models_libs : dict of str
-        Dictionary mapping each type of extraction ('ee' for entities, 're' for relations, 'ae' for
-        attributes) to the csv file with the information on which model to use for the extraction
-        of each entity, relation, or attribute type, respectively.
-        For 'ee', the csv file should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
+        Dictionary mapping each type of extraction ('ee' for entities,
+        're' for relations, 'ae' for attributes) to the csv file with the
+        information on which model to use for the extraction of each entity,
+        relation, or attribute type, respectively. For 'ee', the csv file
+        should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
 
          - 'entity_type': name of entity type, as called in the request schema
-         - 'model': name of a spaCy or scispaCy model (e.g. 'en_ner_craft_md') or path to a custom trained spaCy model
+         - 'model': name of a spaCy or scispaCy model (e.g. 'en_ner_craft_md')
+           or path to a custom trained spaCy model
          - 'entity_type_name': name of entity type, as called in 'model.labels'
 
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         The database connection.
     """
 
@@ -85,8 +87,7 @@ class MiningServer(Flask):
                     "accepted_fields": {"debug": [True, False]},
                 },
                 "/database": {
-                    "description": "Mine given paragraph ids from the database according to a given"
-                    "schema.",
+                    "description": "The BBS text mining server." "schema.",
                     "response_content_type": "application/json",
                     "required_fields": {
                         "identifiers": [
@@ -106,7 +107,7 @@ class MiningServer(Flask):
         return jsonify(response)
 
     def ee_models_from_request_schema(self, schema_df):
-        """Return info on which model to use to mine each of the required entity types in schema."""
+        """Find entity extraction model for entity types."""
         schema_df = schema_df[schema_df["property"].isna()]
         return schema_df.merge(self.models_libs["ee"], on="entity_type", how="left")[
             ["entity_type", "model", "entity_type_name", "ontology_source"]
@@ -246,7 +247,7 @@ class MiningServer(Flask):
         return response
 
     def mine_texts(self, texts, schema_request, debug):
-        """Run mining pipeline on a list of texts, using models implied by the schema request."""
+        """Run mining pipeline on a given list of texts."""
         self.logger.info("Running the mining pipeline...")
 
         ee_models_info = self.ee_models_from_request_schema(schema_request)
@@ -269,7 +270,8 @@ class MiningServer(Flask):
                 etype_name = row["entity_type_name"]
                 df.loc[df["entity_type"] == etype_name, "ontology_source"] = ont_src
 
-            # Rename entity types using the model library info, so that we match the schema request
+            # Rename entity types using the model library info, so that
+            # we match the schema request
             df = df.replace(
                 {
                     "entity_type": dict(
@@ -287,7 +289,10 @@ class MiningServer(Flask):
         )
 
     def check_args_not_null(self, **kwargs):
-        """Sanity check that arguments provided are not null. Returns False if all is good."""
+        """Sanity check that arguments provided are not null.
+
+        Returns False if all is good.
+        """
         for k, v in kwargs.items():
             if v is None:
                 self.logger.info(f'No "{k}" was provided. Stopping.')

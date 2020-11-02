@@ -12,7 +12,10 @@ from bbsearch.mining import StartWithTheSameLetter, run_pipeline
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])
 @pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_overall(model_entities, debug, n_paragraphs):
-    text = "This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too."
+    text = (
+        "This is a filler sentence. Britney Spears had a concert in "
+        "Brazil yesterday. And I am a filler too."
+    )
 
     # wrong arguments
     with pytest.raises(TypeError):
@@ -73,7 +76,10 @@ def test_overall(model_entities, debug, n_paragraphs):
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])
 @pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_without_relation(model_entities, debug, n_paragraphs):
-    text = "This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too."
+    text = (
+        "This is a filler sentence. Britney Spears had a concert "
+        "in Brazil yesterday. And I am a filler too."
+    )
 
     models_relations = {}
     texts = n_paragraphs * [(text, {"important_parameter": 10})]
