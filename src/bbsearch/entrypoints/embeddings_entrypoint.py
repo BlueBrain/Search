@@ -10,40 +10,52 @@ import torch
 from ._helper import configure_logging
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--db_type",
-                    default="mysql",
-                    type=str,
-                    help="Type of the database. Possible values: (sqlite, "
-                         "mysql)")
-parser.add_argument("--out_dir",
-                    default='/raid/sync/proj115/bbs_data/cord19_v47/embeddings/',
-                    type=str,
-                    help="The directory path where the embeddings are saved.")
-parser.add_argument("--log_dir",
-                    default="/raid/projects/bbs/logs/",
-                    type=str,
-                    help="The directory path where to save the logs.")
-parser.add_argument("--log_name",
-                    default="embeddings_computation.log",
-                    type=str,
-                    help="The name of the log file.")
-parser.add_argument("--models",
-                    default='USE,SBERT,SBioBERT,BSV,Sent2Vec,BIOBERT NLI+STS',
-                    type=str,
-                    help="Models for which we need to compute the embeddings. "
-                         "Format should be comma separated list.")
-parser.add_argument("--bsv_checkpoints",
-                    default='/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin',
-                    type=str,
-                    help="Path to file containing the checkpoints for the BSV model.")
-parser.add_argument("--sent2vec_checkpoints",
-                    default='/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin',
-                    type=str,
-                    help="Path to file containing the checkpoints for the sent2vec model.")
-parser.add_argument("--step",
-                    default='1000',
-                    type=int,
-                    help="Batch size for the embeddings computation")
+parser.add_argument(
+    "--db_type",
+    default="mysql",
+    type=str,
+    help="Type of the database. Possible values: (sqlite, " "mysql)",
+)
+parser.add_argument(
+    "--out_dir",
+    default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/",
+    type=str,
+    help="The directory path where the embeddings are saved.",
+)
+parser.add_argument(
+    "--log_dir",
+    default="/raid/projects/bbs/logs/",
+    type=str,
+    help="The directory path where to save the logs.",
+)
+parser.add_argument(
+    "--log_name",
+    default="embeddings_computation.log",
+    type=str,
+    help="The name of the log file.",
+)
+parser.add_argument(
+    "--models",
+    default="USE,SBERT,SBioBERT,BSV,Sent2Vec,BIOBERT NLI+STS",
+    type=str,
+    help="Models for which we need to compute the embeddings. "
+    "Format should be comma separated list.",
+)
+parser.add_argument(
+    "--bsv_checkpoints",
+    default="/raid/sync/proj115/bbs_data/trained_models/BioSentVec_PubMed_MIMICIII-bigram_d700.bin",
+    type=str,
+    help="Path to file containing the checkpoints for the BSV model.",
+)
+parser.add_argument(
+    "--sent2vec_checkpoints",
+    default="/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin",
+    type=str,
+    help="Path to file containing the checkpoints for the sent2vec model.",
+)
+parser.add_argument(
+    "--step", default="1000", type=int, help="Batch size for the embeddings computation"
+)
 args = parser.parse_args()
 
 
@@ -65,90 +77,101 @@ def main():
     sent2vec_checkpoints = pathlib.Path(args.sent2vec_checkpoints)
 
     if not out_dir.exists():
-        raise FileNotFoundError(f'The output directory {out_dir} does not exist!')
+        raise FileNotFoundError(f"The output directory {out_dir} does not exist!")
     if not bsv_checkpoints.exists():
-        raise FileNotFoundError(f'The BSV checkpoints {bsv_checkpoints} does '
-                                f'not exist!')
+        raise FileNotFoundError(
+            f"The BSV checkpoints {bsv_checkpoints} does " f"not exist!"
+        )
 
-    embeddings_path = out_dir / 'embeddings.h5'
+    embeddings_path = out_dir / "embeddings.h5"
 
-    logger.info('SQL Alchemy Engine creation ....')
+    logger.info("SQL Alchemy Engine creation ....")
 
-    if args.db_type == 'sqlite':
-        database_path = '/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db'
+    if args.db_type == "sqlite":
+        database_path = "/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db"
         if not pathlib.Path(database_path).exists():
             pathlib.Path(database_path).touch()
-        engine = sqlalchemy.create_engine(f'sqlite:///{database_path}')
-    elif args.db_type == 'mysql':
-        password = getpass.getpass('Password:')
-        engine = sqlalchemy.create_engine(f'mysql+pymysql://guest:{password}'
-                                          f'@dgx1.bbp.epfl.ch:8853/cord19_v47')
+        engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
+    elif args.db_type == "mysql":
+        password = getpass.getpass("Password:")
+        engine = sqlalchemy.create_engine(
+            f"mysql+pymysql://guest:{password}" f"@dgx1.bbp.epfl.ch:8853/cord19_v47"
+        )
     else:
-        raise ValueError('This is not an handled db_type.')
+        raise ValueError("This is not an handled db_type.")
 
-    logger.info('Sentences IDs retrieving....')
+    logger.info("Sentences IDs retrieving....")
 
     sql_query = """SELECT sentence_id
                    FROM sentences"""
 
-    sentence_ids = pd.read_sql(sql_query, engine)['sentence_id'].to_list()
+    sentence_ids = pd.read_sql(sql_query, engine)["sentence_id"].to_list()
 
-    logger.info('Counting Number Total of sentences....')
+    logger.info("Counting Number Total of sentences....")
 
     sql_query = """SELECT COUNT(*)
                    FROM sentences"""
 
     n_sentences = pd.read_sql(sql_query, engine).iloc[0, 0]
 
-    logger.info(f'{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}')
+    logger.info(
+        f"{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}"
+    )
 
-    device = 'cpu'
+    device = "cpu"
     if torch.cuda.is_available():
         try:
-            if os.environ['CUDA_VISIBLE_DEVICES']:
-                device = 'cuda'
+            if os.environ["CUDA_VISIBLE_DEVICES"]:
+                device = "cuda"
         except KeyError:
-            logger.info('The environment variable CUDA_VISIBLE_DEVICES seems not specified.')
+            logger.info(
+                "The environment variable CUDA_VISIBLE_DEVICES seems not specified."
+            )
 
-    logger.info(f'The device used for the embeddings computation is {device}.')
+    logger.info(f"The device used for the embeddings computation is {device}.")
 
-    for model in args.models.split(','):
+    for model in args.models.split(","):
         model = model.strip()
 
-        logger.info(f'Loading of the embedding model {model}')
+        logger.info(f"Loading of the embedding model {model}")
 
         checkpoint_path = None
-        if model == 'BSV':
+        if model == "BSV":
             checkpoint_path = bsv_checkpoints
-        elif model == 'Sent2Vec':
+        elif model == "Sent2Vec":
             checkpoint_path = sent2vec_checkpoints
 
         try:
-            embedding_model = embedding_models.get_embedding_model(model,
-                                                                   checkpoint_path=checkpoint_path,
-                                                                   device=device)
+            embedding_model = embedding_models.get_embedding_model(
+                model, checkpoint_path=checkpoint_path, device=device
+            )
         except ValueError:
-            logger.warning(f'The model {model} is not supported.')
+            logger.warning(f"The model {model} is not supported.")
             continue
 
-        logger.info(f'Creation of the H5 dataset for {model} ...')
-        H5.create(embeddings_path, model, (n_sentences+1, embedding_model.dim))
+        logger.info(f"Creation of the H5 dataset for {model} ...")
+        H5.create(embeddings_path, model, (n_sentences + 1, embedding_model.dim))
 
-        logger.info(f'Computation of the embeddings for {model} ...')
+        logger.info(f"Computation of the embeddings for {model} ...")
         for index in range(0, len(sentence_ids), args.step):
             try:
-                final_embeddings, retrieved_indices = \
-                    embedding_models.compute_database_embeddings(engine,
-                                                                 embedding_model,
-                                                                 sentence_ids[
-                                                                     index:index+args.step],
-                                                                 batch_size=args.step)
+                (
+                    final_embeddings,
+                    retrieved_indices,
+                ) = embedding_models.compute_database_embeddings(
+                    engine,
+                    embedding_model,
+                    sentence_ids[index : index + args.step],
+                    batch_size=args.step,
+                )
                 H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
 
             except Exception as e:
-                logger.error(f'Issues raised for sentence_ids[{index}:{index+args.step}]')
+                logger.error(
+                    f"Issues raised for sentence_ids[{index}:{index+args.step}]"
+                )
                 logger.error(e)
-            logger.info(f'{index+args.step} sentences embeddings computed.')
+            logger.info(f"{index+args.step} sentences embeddings computed.")
 
 
 if __name__ == "__main__":

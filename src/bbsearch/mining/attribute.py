@@ -64,12 +64,12 @@ class AttributeExtractor:
             The type of the quantity.
         """
         try:
-            quantity_type = quantity['rawUnit']['type']
+            quantity_type = quantity["rawUnit"]["type"]
         except KeyError:
             try:
-                quantity_type = quantity['normalizedUnit']['type']
+                quantity_type = quantity["normalizedUnit"]["type"]
             except KeyError:
-                quantity_type = ''
+                quantity_type = ""
 
         return quantity_type
 
@@ -93,14 +93,17 @@ class AttributeExtractor:
         logger.debug("get_measurement_type")
         logger.debug(f"measurement:\n{measurement}")
 
-        quantity_types = [self.get_quantity_type(quantity)
-                          for quantity in self.iter_quantities(measurement)]
+        quantity_types = [
+            self.get_quantity_type(quantity)
+            for quantity in self.iter_quantities(measurement)
+        ]
         logger.debug(f"quantity_types: {quantity_types}")
 
         quantity_type_counts = collections.Counter(quantity_types)
         most_common_quantity_types = sorted(
             quantity_type_counts.most_common(),
-            key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == '')))
+            key=lambda t_cnt: (-t_cnt[1], int(t_cnt[0] == "")),
+        )
         measurement_type = most_common_quantity_types[0][0]
 
         return measurement_type
@@ -135,9 +138,7 @@ class AttributeExtractor:
         measurements : list_like
             All Grobid measurements extracted from the given text.
         """
-        response = requests.post(
-            self.grobid_quantities_url,
-            files={'text': text})
+        response = requests.post(self.grobid_quantities_url, files={"text": text})
         measurements = []
 
         if response.status_code != 200:
@@ -145,8 +146,8 @@ class AttributeExtractor:
             warnings.warn(msg)
         else:
             response_json = json.loads(response.text)
-            if 'measurements' in response_json:
-                measurements = response_json['measurements']
+            if "measurements" in response_json:
+                measurements = response_json["measurements"]
 
         return measurements
 
@@ -168,20 +169,23 @@ class AttributeExtractor:
         output : IPython.core.display.HTML
             The annotated text.
         """
+
         def annotate_quantity(quantity):
             annotations = []
-            start = quantity['offsetStart']
-            end = quantity['offsetEnd']
-            formatted_text = f"<span class=\"number\">{text[start:end]}</span>"
+            start = quantity["offsetStart"]
+            end = quantity["offsetEnd"]
+            formatted_text = f'<span class="number">{text[start:end]}</span>'
             quantity_type = AttributeExtractor.get_quantity_type(quantity)
             if quantity_type:
-                formatted_text += f"<span class=\"quantityType\">[{quantity_type}]</span>"
+                formatted_text += f'<span class="quantityType">[{quantity_type}]</span>'
             annotations.append([start, end, formatted_text])
 
-            if 'rawUnit' in quantity:
-                start = quantity['rawUnit']['offsetStart']
-                end = quantity['rawUnit']['offsetEnd']
-                annotations.append([start, end, f"<span class=\"unit\">{text[start:end]}</span>"])
+            if "rawUnit" in quantity:
+                start = quantity["rawUnit"]["offsetStart"]
+                end = quantity["rawUnit"]["offsetEnd"]
+                annotations.append(
+                    [start, end, f'<span class="unit">{text[start:end]}</span>']
+                )
 
             return annotations
 
@@ -191,7 +195,7 @@ class AttributeExtractor:
                 annotations += annotate_quantity(quantity)
 
         annotations = sorted(annotations, key=lambda x: x[0])
-        annotated_text = ''
+        annotated_text = ""
         last_idx = 0
         for start, end, quantity in annotations:
             if start >= last_idx:
@@ -240,10 +244,10 @@ class AttributeExtractor:
         """
         ids = []
         for token in tokens:
-            overlap_start = max(start, token['characterOffsetBegin'])
-            overlap_end = min(end, token['characterOffsetEnd'])
+            overlap_start = max(start, token["characterOffsetBegin"])
+            overlap_end = min(end, token["characterOffsetEnd"])
             if overlap_start < overlap_end:
-                ids.append(token['index'])
+                ids.append(token["index"])
 
         return ids
 
@@ -262,20 +266,20 @@ class AttributeExtractor:
             A Grobid quantity in the given measurement.
 
         """
-        if 'quantity' in measurement:
-            yield measurement['quantity']
-        elif 'quantities' in measurement:
-            yield from measurement['quantities']
-        elif 'quantityMost' in measurement or 'quantityLeast' in measurement:
-            if 'quantityLeast' in measurement:
-                yield measurement['quantityLeast']
-            if 'quantityMost' in measurement:
-                yield measurement['quantityMost']
-        elif 'quantityBase' in measurement or 'quantityRange' in measurement:
-            if 'quantityBase' in measurement:
-                yield measurement['quantityBase']
-            if 'quantityRange' in measurement:
-                yield measurement['quantityRange']
+        if "quantity" in measurement:
+            yield measurement["quantity"]
+        elif "quantities" in measurement:
+            yield from measurement["quantities"]
+        elif "quantityMost" in measurement or "quantityLeast" in measurement:
+            if "quantityLeast" in measurement:
+                yield measurement["quantityLeast"]
+            if "quantityMost" in measurement:
+                yield measurement["quantityMost"]
+        elif "quantityBase" in measurement or "quantityRange" in measurement:
+            if "quantityBase" in measurement:
+                yield measurement["quantityBase"]
+            if "quantityRange" in measurement:
+                yield measurement["quantityRange"]
         else:
             warnings.warn("no quantity in measurement")
             return
@@ -356,9 +360,8 @@ class AttributeExtractor:
             the given entity.
         """
         return self.get_overlapping_token_ids(
-            entity.start_char,
-            entity.end_char,
-            tokens)
+            entity.start_char, entity.end_char, tokens
+        )
 
     @staticmethod
     def iter_parents(dependencies, token_idx):
@@ -382,10 +385,10 @@ class AttributeExtractor:
             The index of a parent token.
         """
         for link in dependencies:
-            if link['dependent'] == token_idx:
-                parent = link['governor']
+            if link["dependent"] == token_idx:
+                parent = link["governor"]
                 if parent != 0:
-                    yield link['governor']
+                    yield link["governor"]
 
     def find_nn_parents(self, dependencies, tokens_d, token_idx):
         """Parse CoreNLP dependencies to find parents of token.
@@ -417,6 +420,7 @@ class AttributeExtractor:
         parents : list
             A list of parents.
         """
+
         def get_nn(idx):
             if tokens_d[idx]["pos"].startswith("NN"):
                 return [idx]
@@ -506,8 +510,10 @@ class AttributeExtractor:
             a list of string representations of quantities is
             returned.
         """
-        quantities = [self.quantity_to_str(quantity)
-                      for quantity in self.iter_quantities(measurement)]
+        quantities = [
+            self.quantity_to_str(quantity)
+            for quantity in self.iter_quantities(measurement)
+        ]
 
         if len(quantities) == 1:
             quantities = quantities[0]
@@ -572,8 +578,8 @@ class AttributeExtractor:
             request_data = text.encode("utf-8")
             request_params = '?properties={"annotators":"depparse"}'
             response = requests.post(
-                self.core_nlp_url + request_params,
-                data=request_data)
+                self.core_nlp_url + request_params, data=request_data
+            )
             assert response.status_code == 200
             response_json = json.loads(response.text)
         except requests.exceptions.RequestException:
@@ -584,7 +590,7 @@ class AttributeExtractor:
             warnings.warn("Could not parse the CoreNLP response JSON.")
         finally:
             if response_json is None:
-                response_json = {'sentences': []}
+                response_json = {"sentences": []}
 
         return response_json
 
@@ -606,14 +612,16 @@ class AttributeExtractor:
         have_common_parents : bool
             Whether or not the entity is linked to the measurement.
         """
-        tokens = core_nlp_sentence['tokens']
-        dependencies = core_nlp_sentence['basicDependencies']
-        tokens_d = {token['index']: token for token in tokens}
+        tokens = core_nlp_sentence["tokens"]
+        dependencies = core_nlp_sentence["basicDependencies"]
+        tokens_d = {token["index"]: token for token in tokens}
 
         measurement_ids = self.get_measurement_tokens(measurement, tokens)
         ne_ids = self.get_entity_tokens(entity, tokens)
 
-        measurement_parents = self.find_all_parents(dependencies, tokens_d, measurement_ids)
+        measurement_parents = self.find_all_parents(
+            dependencies, tokens_d, measurement_ids
+        )
         ne_parents = self.find_all_parents(dependencies, tokens_d, ne_ids)
 
         measurement_parents = set(measurement_parents)
@@ -622,10 +630,9 @@ class AttributeExtractor:
 
         return have_common_parents
 
-    def extract_attributes(self,
-                           text,
-                           linked_attributes_only=True,
-                           raw_attributes=False):
+    def extract_attributes(
+        self, text, linked_attributes_only=True, raw_attributes=False
+    ):
         """Extract attributes from text.
 
         Parameters
@@ -656,7 +663,9 @@ class AttributeExtractor:
         # CoreNLP
         logging.info("Sending CoreNLP query...")
         response_json = self.get_core_nlp_analysis(text)
-        logging.info("CoreNLP found {} sentences".format(len(response_json['sentences'])))
+        logging.info(
+            "CoreNLP found {} sentences".format(len(response_json["sentences"]))
+        )
 
         # Analysis
         columns = ["entity", "entity_type", "attribute"]
@@ -665,13 +674,13 @@ class AttributeExtractor:
 
         for entity in doc.ents:
             for i, measurement in enumerate(measurements):
-                for core_nlp_sentence in response_json['sentences']:
+                for core_nlp_sentence in response_json["sentences"]:
                     have_link = self.are_linked(measurement, entity, core_nlp_sentence)
                     if have_link > 0:
                         row = {
                             "entity": entity.text,
                             "entity_type": entity.label_,
-                            "attribute": measurement
+                            "attribute": measurement,
                         }
                         rows.append(row)
                         recorded_measurements.add(i)
@@ -679,9 +688,7 @@ class AttributeExtractor:
         if not linked_attributes_only:
             for i, measurement in enumerate(measurements):
                 if i not in recorded_measurements:
-                    row = {
-                        "attribute": measurement
-                    }
+                    row = {"attribute": measurement}
                     rows.append(row)
 
         df_attributes = pd.DataFrame(rows, columns=columns)
@@ -730,7 +737,8 @@ class AttributeAnnotationTab(widgets.Tab):
         self.outputs = collections.OrderedDict()
         self.outputs["Raw Text"] = widgets.Output()
         self.outputs["Named Entities"] = widgets.Output(
-            layout=widgets.Layout(width="80ch"))
+            layout=widgets.Layout(width="80ch")
+        )
         self.outputs["Attributes"] = widgets.Output()
         self.outputs["Table"] = widgets.Output()
 
@@ -748,7 +756,8 @@ class AttributeAnnotationTab(widgets.Tab):
         """
         text = textwrap.dedent(text).strip()
         df = self.attribute_extractor.extract_attributes(
-            text, linked_attributes_only=False)
+            text, linked_attributes_only=False
+        )
         doc = self.ee_model(text)
         measurements = self.attribute_extractor.get_grobid_measurements(text)
 
@@ -763,7 +772,8 @@ class AttributeAnnotationTab(widgets.Tab):
                 display(HTML(displacy_out))
         with self.outputs["Attributes"]:
             annotated = self.attribute_extractor.annotate_quantities(
-                text, measurements, 70)
+                text, measurements, 70
+            )
             display(annotated)
         with self.outputs["Table"]:
             display(df)
@@ -799,7 +809,8 @@ class TextCollectionWidget(widgets.VBox):
             value=0,
             min=0,
             max=len(texts) - 1,
-            continuous_update=False)
+            continuous_update=False,
+        )
         self.idx_slider.observe(self._on_idx_change, names="value")
         self.tab = AttributeAnnotationTab(attribute_extractor, ee_model)
 

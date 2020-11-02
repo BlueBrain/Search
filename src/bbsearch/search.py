@@ -39,9 +39,9 @@ class SearchEngine:
         self.precomputed_embeddings = precomputed_embeddings
         self.indices = indices
         self.connection = connection
-        logger.info('Retrieving articles ids for all sentence ids...')
+        logger.info("Retrieving articles ids for all sentence ids...")
         self.all_article_ids = retrieve_article_ids(self.connection)
-        logger.info('Retrieve articles ids: DONE')
+        logger.info("Retrieve articles ids: DONE")
 
     def query(
         self,
@@ -256,8 +256,8 @@ class SearchEngine:
                     break
 
             top_sentence_ids, top_similarities = (
-                top_sentence_ids[: num],
-                top_similarities[: num],
+                top_sentence_ids[:num],
+                top_similarities[:num],
             )
 
         else:

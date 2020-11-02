@@ -111,11 +111,12 @@ class SBioBERT(EmbeddingModel):
     https://huggingface.co/gsarti/biobert-nli
     """
 
-    def __init__(self,
-                 device=None):
-        available_device = device or 'cpu'
+    def __init__(self, device=None):
+        available_device = device or "cpu"
         self.device = torch.device(available_device)
-        self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(self.device)
+        self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(
+            self.device
+        )
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
 
     @property
@@ -145,10 +146,9 @@ class SBioBERT(EmbeddingModel):
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
 
         """
-        encoding = self.tokenizer(raw_sentence,
-                                  pad_to_max_length=True,
-                                  return_tensors='pt'
-                                  )
+        encoding = self.tokenizer(
+            raw_sentence, pad_to_max_length=True, return_tensors="pt"
+        )
         return encoding
 
     def preprocess_many(self, raw_sentences):
@@ -197,9 +197,12 @@ class SBioBERT(EmbeddingModel):
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
         with torch.no_grad():
-            last_hidden_state = self.sbiobert_model(**preprocessed_sentence.to(self.device))[0]
-            embedding = self.masked_mean(last_hidden_state,
-                                         preprocessed_sentence['attention_mask'])
+            last_hidden_state = self.sbiobert_model(
+                **preprocessed_sentence.to(self.device)
+            )[0]
+            embedding = self.masked_mean(
+                last_hidden_state, preprocessed_sentence["attention_mask"]
+            )
 
         return embedding.squeeze().cpu().numpy()
 
@@ -251,7 +254,9 @@ class SBioBERT(EmbeddingModel):
         https://github.com/huggingface/transformers/blob/82dd96cae74797be0c1d330566df7f929214b278/model_cards/sentence-transformers/bert-base-nli-mean-tokens/README.md
         """
         token_embeddings = last_hidden_state
-        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        input_mask_expanded = (
+            attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+        )
         sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
         sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
@@ -273,7 +278,8 @@ class Sent2VecModel(EmbeddingModel):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
         if not self.checkpoint_path.is_file():
             raise FileNotFoundError(
-                f"The checkpoint file {self.checkpoint_path} was not found.")
+                f"The checkpoint file {self.checkpoint_path} was not found."
+            )
 
         self.logger.info(f"Loading the checkpoint from {self.checkpoint_path}")
         self.model = sent2vec.Sent2vecModel()
@@ -321,14 +327,15 @@ class Sent2VecModel(EmbeddingModel):
             sentences = [sentences]
         for sentence_doc in self.nlp.pipe(sentences):
             preprocessed_sentence = " ".join(
-                token.lemma_.lower() for token in sentence_doc
+                token.lemma_.lower()
+                for token in sentence_doc
                 if not (
-                        token.is_punct or
-                        token.is_stop or
-                        token.like_num or
-                        token.like_url or
-                        token.like_email or
-                        token.is_bracket
+                    token.is_punct
+                    or token.is_stop
+                    or token.like_num
+                    or token.like_url
+                    or token.like_email
+                    or token.is_bracket
                 )
             )
 
@@ -414,15 +421,16 @@ class BSV(EmbeddingModel):
     https://github.com/ncbi-nlp/BioSentVec
     """
 
-    def __init__(self,
-                 checkpoint_model_path):
+    def __init__(self, checkpoint_model_path):
         checkpoint_model_path = pathlib.Path(checkpoint_model_path)
         self.checkpoint_model_path = checkpoint_model_path
         if not self.checkpoint_model_path.is_file():
-            raise FileNotFoundError(f'The file {self.checkpoint_model_path} was not found.')
+            raise FileNotFoundError(
+                f"The file {self.checkpoint_model_path} was not found."
+            )
         self.bsv_model = sent2vec.Sent2vecModel()
         self.bsv_model.load_model(str(self.checkpoint_model_path))
-        self.bsv_stopwords = set(stopwords.words('english'))
+        self.bsv_stopwords = set(stopwords.words("english"))
 
     @property
     def dim(self):
@@ -442,14 +450,17 @@ class BSV(EmbeddingModel):
         preprocessed_sentence: str
             Preprocessed sentence.
         """
-        raw_sentence = raw_sentence.replace('/', ' / ')
-        raw_sentence = raw_sentence.replace('.-', ' .- ')
-        raw_sentence = raw_sentence.replace('.', ' . ')
-        raw_sentence = raw_sentence.replace('\'', ' \' ')
+        raw_sentence = raw_sentence.replace("/", " / ")
+        raw_sentence = raw_sentence.replace(".-", " .- ")
+        raw_sentence = raw_sentence.replace(".", " . ")
+        raw_sentence = raw_sentence.replace("'", " ' ")
         raw_sentence = raw_sentence.lower()
-        tokens = [token for token in word_tokenize(raw_sentence)
-                  if token not in string.punctuation and token not in self.bsv_stopwords]
-        return ' '.join(tokens)
+        tokens = [
+            token
+            for token in word_tokenize(raw_sentence)
+            if token not in string.punctuation and token not in self.bsv_stopwords
+        ]
+        return " ".join(tokens)
 
     def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
@@ -501,7 +512,9 @@ class SentTransformer(EmbeddingModel):
 
     def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
 
-        self.senttransf_model = sentence_transformers.SentenceTransformer(model_name, device=device)
+        self.senttransf_model = sentence_transformers.SentenceTransformer(
+            model_name, device=device
+        )
 
     @property
     def dim(self):
@@ -550,7 +563,9 @@ class USE(EmbeddingModel):
 
     def __init__(self, use_version=5):
         self.use_version = use_version
-        self.use_model = hub.load(f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}")
+        self.use_model = hub.load(
+            f"https://tfhub.dev/google/universal-sentence-encoder-large/{self.use_version}"
+        )
 
     @property
     def dim(self):
@@ -701,8 +716,8 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         if start_ix == end_ix:
             continue
 
-        sentences_text = sentences.iloc[start_ix: end_ix]['text'].to_list()
-        sentences_id = sentences.iloc[start_ix: end_ix]['sentence_id'].to_list()
+        sentences_text = sentences.iloc[start_ix:end_ix]["text"].to_list()
+        sentences_id = sentences.iloc[start_ix:end_ix]["sentence_id"].to_list()
 
         try:
             preprocessed_sentences = model.preprocess_many(sentences_text)
@@ -716,7 +731,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         all_embeddings.append(embeddings)
 
         if batch_ix % 10 == 0:
-            logger.info(f'Embedded {batch_ix} batches with {num_errors} errors')
+            logger.info(f"Embedded {batch_ix} batches with {num_errors} errors")
 
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
@@ -746,10 +761,13 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
         "BSV": lambda: BSV(checkpoint_model_path=checkpoint_path),
         "SBioBERT": lambda: SBioBERT(device=device),
         "USE": lambda: USE(),
-        "SBERT": lambda: SentTransformer(model_name="bert-base-nli-mean-tokens", device=device),
+        "SBERT": lambda: SentTransformer(
+            model_name="bert-base-nli-mean-tokens", device=device
+        ),
         "BIOBERT NLI+STS": lambda: SentTransformer(
-            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device),
-        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path)
+            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device
+        ),
+        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path),
     }
 
     if model_name not in model_factories:

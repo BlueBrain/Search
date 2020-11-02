@@ -32,8 +32,10 @@ class MiningWidgetBot:
         self._display_cached = []
         self._capsys = capsys
 
-        monkeypatch.setattr('bbsearch.widgets.mining_widget.display',
-                            lambda x: self._display_cached.append(x))
+        monkeypatch.setattr(
+            "bbsearch.widgets.mining_widget.display",
+            lambda x: self._display_cached.append(x),
+        )
 
     @property
     def display_cached(self):
@@ -88,9 +90,11 @@ class MiningWidgetBot:
         self.mining_widget.widgets[widget_name].value = value
 
 
-columns = {'name': pd.Series(['John Smith', 'Erica Meyers']),
-           'department': pd.Series(['Accounting', 'IT']),
-           'birthday': pd.Series(['November', 'March'])}
+columns = {
+    "name": pd.Series(["John Smith", "Erica Meyers"]),
+    "department": pd.Series(["Accounting", "IT"]),
+    "birthday": pd.Series(["November", "March"]),
+}
 table_extractions = pd.DataFrame(columns)
 
 TESTS_PATH = Path(__file__).resolve().parent.parent
@@ -98,16 +102,15 @@ TESTS_PATH = Path(__file__).resolve().parent.parent
 
 def request_callback(request):
     dataframe = table_extractions.to_csv(index=False)
-    resp_body = {'warnings': ['This is a test warning'],
-                 'csv_extractions': dataframe}
-    headers = {'request-id': '1234abcdeABCDE'}
+    resp_body = {"warnings": ["This is a test warning"], "csv_extractions": dataframe}
+    headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response
 
 
 def request_callback_help(request):
-    resp_body = {'database': 'test_database'}
-    headers = {'request-id': '1234abcdeABCDE'}
+    resp_body = {"database": "test_database"}
+    headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response
 
@@ -117,27 +120,29 @@ def test_mining_text(monkeypatch, capsys, mining_schema_df):
     mining_schema_df = mining_schema_df.drop_duplicates(ignore_index=True)
 
     responses.add_callback(
-        responses.POST, 'http://test/text',
+        responses.POST,
+        "http://test/text",
         callback=request_callback,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     mining_schema = MiningSchema()
     mining_schema.add_from_df(mining_schema_df)
     mining_widget = MiningWidget(
-        mining_server_url='http://test',
+        mining_server_url="http://test",
         mining_schema=mining_schema,
     )
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
-    bot.set_value('input_text', 'HELLO')
-    bot.click('mine_text')
+    bot.set_value("input_text", "HELLO")
+    bot.click("mine_text")
 
     assert len(responses.calls) == 2
 
@@ -155,46 +160,48 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine, mining_sch
     mining_schema_df = mining_schema_df.drop_duplicates(ignore_index=True)
 
     responses.add_callback(
-        responses.POST, 'http://test/database',
+        responses.POST,
+        "http://test/database",
         callback=request_callback,
-        content_type="text/csv"
+        content_type="text/csv",
     )
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     mining_schema = MiningSchema()
     mining_schema.add_from_df(mining_schema_df)
     mining_widget = MiningWidget(
-        mining_server_url='http://test',
+        mining_server_url="http://test",
         mining_schema=mining_schema,
     )
     empty_dataframe = pd.DataFrame()
     assert empty_dataframe.equals(mining_widget.get_extracted_table())
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
-    bot.set_value('input_text', 'HELLO')
-    bot.click('mine_articles')
+    bot.set_value("input_text", "HELLO")
+    bot.click("mine_articles")
 
     assert len(responses.calls) == 1
-    assert 'No article saver was provided. Nothing to mine.' in bot.stdout_cached
+    assert "No article saver was provided. Nothing to mine." in bot.stdout_cached
 
     article_saver = ArticleSaver(fake_sqlalchemy_engine)
     for i in range(2):
         article_saver.add_article(article_id=i)
 
     mining_widget = MiningWidget(
-        mining_server_url='http://test',
+        mining_server_url="http://test",
         mining_schema=mining_schema,
         article_saver=article_saver,
     )
 
     bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
-    bot.set_value('input_text', 'HELLO')
-    bot.click('mine_articles')
+    bot.set_value("input_text", "HELLO")
+    bot.click("mine_articles")
 
     assert len(responses.calls) == 3
     assert "Collecting saved items..." in bot.stdout_cached

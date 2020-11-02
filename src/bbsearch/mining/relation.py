@@ -106,29 +106,44 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     """
     # checks
     if ent_1 == ent_2:
-        raise ValueError('One needs to provide two separate entities.')
+        raise ValueError("One needs to provide two separate entities.")
 
-    if not (sent.start <= ent_1.start <= ent_1.end <= sent.end and sent.start <= ent_2.start <= ent_2.end <= sent.end):
-        raise ValueError('The provided entities are outside of the given sentence.')
+    if not (
+        sent.start <= ent_1.start <= ent_1.end <= sent.end
+        and sent.start <= ent_2.start <= ent_2.end <= sent.end
+    ):
+        raise ValueError("The provided entities are outside of the given sentence.")
 
     etype_1 = ent_1.label_
     etype_2 = ent_2.label_
 
-    if not isinstance(etype_symbols, defaultdict) and not (etype_1 in etype_symbols and etype_2 in etype_symbols):
-        raise ValueError('Please specify the special symbols for both of the entity types.')
+    if not isinstance(etype_symbols, defaultdict) and not (
+        etype_1 in etype_symbols and etype_2 in etype_symbols
+    ):
+        raise ValueError(
+            "Please specify the special symbols for both of the entity types."
+        )
 
     tokens = []
     i = sent.start
     while i < sent.end:
-        new_token = ' '  # hack to keep the punctuation nice
+        new_token = " "  # hack to keep the punctuation nice
 
         if ent_1.start == i:
             start, end = ent_1.start, ent_1.end
-            new_token += etype_symbols[etype_1][0] + doc[start:end].text + etype_symbols[etype_1][1]
+            new_token += (
+                etype_symbols[etype_1][0]
+                + doc[start:end].text
+                + etype_symbols[etype_1][1]
+            )
 
         elif ent_2.start == i:
             start, end = ent_2.start, ent_2.end
-            new_token += etype_symbols[etype_2][0] + doc[start:end].text + etype_symbols[etype_2][1]
+            new_token += (
+                etype_symbols[etype_2][0]
+                + doc[start:end].text
+                + etype_symbols[etype_2][1]
+            )
 
         else:
             start, end = i, i + 1
@@ -137,7 +152,7 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
         tokens.append(new_token)
         i += end - start
 
-    return ''.join(tokens).strip()
+    return "".join(tokens).strip()
 
 
 class ChemProt(REModel):
@@ -154,35 +169,38 @@ class ChemProt(REModel):
     """
 
     def __init__(self, model_path):
-        self.model_ = Predictor.from_path(model_path, predictor_name='text_classifier')
+        self.model_ = Predictor.from_path(model_path, predictor_name="text_classifier")
 
     @property
     def classes(self):
         """Names of supported relation classes."""
         return [
-            'INHIBITOR',
-            'SUBSTRATE',
-            'INDIRECT-DOWNREGULATOR',
-            'INDIRECT-UPREGULATOR',
-            'ACTIVATOR',
-            'ANTAGONIST',
-            'PRODUCT-OF',
-            'AGONIST',
-            'DOWNREGULATOR',
-            'UPREGULATOR',
-            'AGONIST-ACTIVATOR',
-            'SUBSTRATE_PRODUCT-OF',
-            'AGONIST-INHIBITOR']
+            "INHIBITOR",
+            "SUBSTRATE",
+            "INDIRECT-DOWNREGULATOR",
+            "INDIRECT-UPREGULATOR",
+            "ACTIVATOR",
+            "ANTAGONIST",
+            "PRODUCT-OF",
+            "AGONIST",
+            "DOWNREGULATOR",
+            "UPREGULATOR",
+            "AGONIST-ACTIVATOR",
+            "SUBSTRATE_PRODUCT-OF",
+            "AGONIST-INHIBITOR",
+        ]
 
     @property
     def symbols(self):
         """Symbols for annotation."""
-        return {'GGP': ('[[ ', ' ]]'),
-                'CHEBI': ('<< ', ' >>')}
+        return {"GGP": ("[[ ", " ]]"), "CHEBI": ("<< ", " >>")}
 
     def predict_probs(self, annotated_sentence):
         """Predict probabilities for the relation."""
-        return pd.Series(self.model_.predict(sentence=annotated_sentence)['class_probs'], index=self.classes)
+        return pd.Series(
+            self.model_.predict(sentence=annotated_sentence)["class_probs"],
+            index=self.classes,
+        )
 
 
 class StartWithTheSameLetter(REModel):
@@ -194,15 +212,17 @@ class StartWithTheSameLetter(REModel):
     @property
     def classes(self):
         """Names of supported relation classes."""
-        return ['START_WITH_SAME_LETTER', 'START_WITH_DIFFERENT_LETTER']
+        return ["START_WITH_SAME_LETTER", "START_WITH_DIFFERENT_LETTER"]
 
     def predict_probs(self, annotated_sentence):
         """Predict probabilities for the relation."""
-        left_symbol, _ = self.symbols['anything']
+        left_symbol, _ = self.symbols["anything"]
         s_len = len(left_symbol)
 
         ent_1_first_letter_ix = annotated_sentence.find(left_symbol) + s_len
-        ent_2_first_letter_ix = annotated_sentence.find(left_symbol, ent_1_first_letter_ix + 1) + s_len
+        ent_2_first_letter_ix = (
+            annotated_sentence.find(left_symbol, ent_1_first_letter_ix + 1) + s_len
+        )
 
         ent_1_first_letter = annotated_sentence[ent_1_first_letter_ix]
         ent_2_first_letter = annotated_sentence[ent_2_first_letter_ix]
@@ -215,4 +235,4 @@ class StartWithTheSameLetter(REModel):
     @property
     def symbols(self):
         """Symbols for annotation."""
-        return defaultdict(lambda: ('[[ ', ' ]]'))
+        return defaultdict(lambda: ("[[ ", " ]]"))

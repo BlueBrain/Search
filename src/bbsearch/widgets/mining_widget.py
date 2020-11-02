@@ -28,8 +28,14 @@ class MiningWidget(widgets.VBox):
         SQL database. Should lead to major speedups.
     """
 
-    def __init__(self, mining_server_url, mining_schema, article_saver=None, default_text='',
-                 use_cache=True):
+    def __init__(
+        self,
+        mining_server_url,
+        mining_schema,
+        article_saver=None,
+        default_text="",
+        use_cache=True,
+    ):
         super().__init__()
 
         self.mining_server_url = mining_server_url
@@ -47,43 +53,45 @@ class MiningWidget(widgets.VBox):
         self._init_ui()
 
         response = requests.post(
-            self.mining_server_url + '/help',
+            self.mining_server_url + "/help",
         )
-        self.database_name = response.json()['database'] if response.ok else None
+        self.database_name = response.json()["database"] if response.ok else None
 
     def _init_widgets(self, default_text):
         # "Input Text" Widget
-        self.widgets['input_text'] = widgets.Textarea(
-            value=default_text,
-            layout=widgets.Layout(width='75%', height='300px'))
+        self.widgets["input_text"] = widgets.Textarea(
+            value=default_text, layout=widgets.Layout(width="75%", height="300px")
+        )
 
         # "Mine This Text" button
-        self.widgets['mine_text'] = widgets.Button(
-            description='⚒️  Mine This Text!',
-            layout=widgets.Layout(width='350px', height='50px'))
-        self.widgets['mine_text'].on_click(self._mine_text_clicked)
-        self.widgets['mine_text'].add_class('bbs_button')
+        self.widgets["mine_text"] = widgets.Button(
+            description="⚒️  Mine This Text!",
+            layout=widgets.Layout(width="350px", height="50px"),
+        )
+        self.widgets["mine_text"].on_click(self._mine_text_clicked)
+        self.widgets["mine_text"].add_class("bbs_button")
 
         # "Mine Selected Articles" button
-        self.widgets['mine_articles'] = widgets.Button(
-            description='⚒️  Mine Selected Articles!',
-            layout=widgets.Layout(width='350px', height='50px'))
-        self.widgets['mine_articles'].on_click(self._mine_articles_clicked)
-        self.widgets['mine_articles'].add_class('bbs_button')
+        self.widgets["mine_articles"] = widgets.Button(
+            description="⚒️  Mine Selected Articles!",
+            layout=widgets.Layout(width="350px", height="50px"),
+        )
+        self.widgets["mine_articles"].on_click(self._mine_articles_clicked)
+        self.widgets["mine_articles"].add_class("bbs_button")
 
         # "Output Area" Widget
-        self.widgets['out'] = widgets.Output(layout={'border': '0.5px solid black'})
+        self.widgets["out"] = widgets.Output(layout={"border": "0.5px solid black"})
 
     def _init_ui(self):
         css_style = style.get_css_style()
-        display(HTML(f'<style> {css_style} </style>'))
+        display(HTML(f"<style> {css_style} </style>"))
 
         self.children = [
-            self.widgets['input_text'],
-            widgets.HBox(children=[
-                self.widgets['mine_text'],
-                self.widgets['mine_articles']]),
-            self.widgets['out'],
+            self.widgets["input_text"],
+            widgets.HBox(
+                children=[self.widgets["mine_text"], self.widgets["mine_articles"]]
+            ),
+            self.widgets["out"],
         ]
 
     def textmining_pipeline(self, information, schema_df, debug=False):
@@ -110,29 +118,31 @@ class MiningWidget(widgets.VBox):
         if isinstance(information, list):
             print(f"The widget is using database: {self.database_name}")
             response = requests.post(
-                self.mining_server_url + '/database',
-                json={"identifiers": information,
-                      "schema": schema_str,
-                      "use_cache": self.use_cache
-                      }
+                self.mining_server_url + "/database",
+                json={
+                    "identifiers": information,
+                    "schema": schema_str,
+                    "use_cache": self.use_cache,
+                },
             )
         elif isinstance(information, str):
             response = requests.post(
-                self.mining_server_url + '/text',
-                json={"text": information,
-                      "schema": schema_str,
-                      "debug": debug
-                      }
+                self.mining_server_url + "/text",
+                json={"text": information, "schema": schema_str, "debug": debug},
             )
         else:
-            raise TypeError('Wrong type for the information!')
+            raise TypeError("Wrong type for the information!")
 
         table_extractions = None
         if response.status_code == 200:
             response_dict = response.json()
-            for warning_msg in response_dict['warnings']:
-                display(HTML(f'<div style="color:#BA4A00"> <b>WARNING!</b> {warning_msg} </div>'))
-            with io.StringIO(response_dict['csv_extractions']) as f:
+            for warning_msg in response_dict["warnings"]:
+                display(
+                    HTML(
+                        f'<div style="color:#BA4A00"> <b>WARNING!</b> {warning_msg} </div>'
+                    )
+                )
+            with io.StringIO(response_dict["csv_extractions"]) as f:
                 table_extractions = pd.read_csv(f)
         else:
             print("Server response is ERROR!")
@@ -142,43 +152,41 @@ class MiningWidget(widgets.VBox):
         return table_extractions
 
     def _mine_articles_clicked(self, b):
-        self.widgets['out'].clear_output()
+        self.widgets["out"].clear_output()
 
         if self.article_saver is None:
-            with self.widgets['out']:
+            with self.widgets["out"]:
                 print("No article saver was provided. Nothing to mine.")
             return
 
-        with self.widgets['out']:
+        with self.widgets["out"]:
             timer = Timer()
 
-            print("Collecting saved items...".ljust(50), end='', flush=True)
+            print("Collecting saved items...".ljust(50), end="", flush=True)
             with timer("collect items"):
                 identifiers = self.article_saver.get_saved_items()
 
             print(f'{timer["collect items"]:7.2f} seconds')
-            print('Mining request schema:')
+            print("Mining request schema:")
             display(self.mining_schema.df)
-            print("Running the mining pipeline...".ljust(50), end='', flush=True)
+            print("Running the mining pipeline...".ljust(50), end="", flush=True)
             with timer("pipeline"):
                 self.table_extractions = self.textmining_pipeline(
-                    information=identifiers,
-                    schema_df=self.mining_schema.df
+                    information=identifiers, schema_df=self.mining_schema.df
                 )
             print(f'{timer["pipeline"]:7.2f} seconds')
 
             display(self.table_extractions)
 
     def _mine_text_clicked(self, b):
-        self.widgets['out'].clear_output()
-        with self.widgets['out']:
-            print('Mining request schema:')
+        self.widgets["out"].clear_output()
+        with self.widgets["out"]:
+            print("Mining request schema:")
             display(self.mining_schema.df)
-            print("Running the mining pipeline...".ljust(50), end='', flush=True)
-            text = self.widgets['input_text'].value
+            print("Running the mining pipeline...".ljust(50), end="", flush=True)
+            text = self.widgets["input_text"].value
             self.table_extractions = self.textmining_pipeline(
-                information=text,
-                schema_df=self.mining_schema.df
+                information=text, schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
 

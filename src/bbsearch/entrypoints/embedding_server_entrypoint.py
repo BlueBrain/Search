@@ -26,7 +26,9 @@ def get_embedding_app():
     embedding_models = {
         "USE": USE(),
         "SBERT": SentTransformer(model_name="bert-base-nli-mean-tokens"),
-        "BIOBERT NLI+STS": SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts"),
+        "BIOBERT NLI+STS": SentTransformer(
+            model_name="clagator/biobert_v1.1_pubmed_nli_sts"
+        ),
         "Sent2Vec": Sent2VecModel(checkpoint_path=pathlib.Path(sent2vec_checkpoint)),
         "BSV": BSV(checkpoint_model_path=pathlib.Path(bsv_checkpoint)),
         "SBioBERT": SBioBERT(),

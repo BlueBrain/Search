@@ -104,9 +104,9 @@ class PatternCreator:
         self_is_nan = self_df_sorted.isnull().values
         other_is_nan = other_df_sorted.isnull().values
 
-        return np.array_equal(self_is_nan,
-                              other_is_nan) and np.array_equal(self_df_sorted.values[~self_is_nan],
-                                                               other_df_sorted.values[~other_is_nan])
+        return np.array_equal(self_is_nan, other_is_nan) and np.array_equal(
+            self_df_sorted.values[~self_is_nan], other_df_sorted.values[~other_is_nan]
+        )
 
     def add(self, label, pattern, check_exists=True):
         """Add a single raw in the patterns.
@@ -190,7 +190,9 @@ class PatternCreator:
             this list can be directly passed into the `EntityRuler`.
         """
         storage = self.to_df()
-        sorted_storage = storage.sort_values(by=sort_by) if sort_by is not None else storage
+        sorted_storage = (
+            storage.sort_values(by=sort_by) if sort_by is not None else storage
+        )
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
     def to_jsonl(self, path, sort_by=None):
@@ -269,17 +271,23 @@ class PatternCreator:
             elif len(e) == 2 and "OP" in e:
                 pass
             else:
-                raise ValueError("Invalid element, multi-attribute matches are not supported")
+                raise ValueError(
+                    "Invalid element, multi-attribute matches are not supported"
+                )
 
             attribute = next(filter(lambda key: key != "OP", e))
             value_type = type(e[attribute]).__name__
             value = str(e[attribute])
             op = e.get("OP", "")
 
-            d.update({f"attribute_{token_ix}": attribute,
-                      f"value_{token_ix}": value,
-                      f"value_type_{token_ix}": value_type,
-                      f"op_{token_ix}": op})
+            d.update(
+                {
+                    f"attribute_{token_ix}": attribute,
+                    f"value_{token_ix}": value,
+                    f"value_type_{token_ix}": value_type,
+                    f"op_{token_ix}": op,
+                }
+            )
         return pd.Series(d)
 
     @staticmethod
@@ -315,10 +323,17 @@ class PatternCreator:
                 value_type = row[f"value_type_{token_ix}"]  # str
                 op = row[f"op_{token_ix}"]  # str
 
-                if any(not isinstance(x, str) for x in [attribute, value_str, value_type, op]):
+                if any(
+                    not isinstance(x, str)
+                    for x in [attribute, value_str, value_type, op]
+                ):
                     raise KeyError()
 
-                value = eval(f"{value_type}({value_str})") if value_type != 'str' else value_str
+                value = (
+                    eval(f"{value_type}({value_str})")
+                    if value_type != "str"
+                    else value_str
+                )
 
                 token_pattern = {attribute: value}
                 if op:

@@ -8,7 +8,7 @@ from bbsearch.mining import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):
-    text = 'This is a filler sentence. Bill Gates founded Microsoft and currently lives in the USA.'
+    text = "This is a filler sentence. Bill Gates founded Microsoft and currently lives in the USA."
 
     # entities are [Bill Gates, Microsoft, USA]
     # etypes are ['PERSON', 'ORG', 'GPE']
@@ -16,10 +16,11 @@ def test_annotate(model_entities):
     ents = list(doc.ents)
     sents = list(doc.sents)
     etypes = [e.label_ for e in ents]
-    etype_symbols = {'PERSON': ('<< ', ' >>'),
-                     'ORG': ('[[ ', ' ]]'),
-                     'GPE': ('{{ ', ' }}')
-                     }
+    etype_symbols = {
+        "PERSON": ("<< ", " >>"),
+        "ORG": ("[[ ", " ]]"),
+        "GPE": ("{{ ", " }}"),
+    }
 
     # Just make sure the the spacy model is the same
     assert isinstance(doc, Doc)
@@ -30,14 +31,16 @@ def test_annotate(model_entities):
     assert len(sents) == 2
     assert all([isinstance(s, Span) for s in sents])
 
-    assert etypes == ['PERSON', 'ORG', 'GPE']
+    assert etypes == ["PERSON", "ORG", "GPE"]
 
     # Wrong arguments
     with pytest.raises(ValueError):
         annotate(doc, sents[1], ents[0], ents[0], etype_symbols)  # identical entities
 
     with pytest.raises(ValueError):
-        annotate(doc, sents[0], ents[0], ents[1], etype_symbols)  # not in the right sentence
+        annotate(
+            doc, sents[0], ents[0], ents[1], etype_symbols
+        )  # not in the right sentence
 
     with pytest.raises(ValueError):
         annotate(doc, sents[1], ents[0], ents[1], {})  # missing symbols
@@ -47,56 +50,63 @@ def test_annotate(model_entities):
     res_2 = annotate(doc, sents[1], ents[1], ents[2], etype_symbols)
     res_3 = annotate(doc, sents[1], ents[2], ents[0], etype_symbols)
 
-    true_1 = '<< Bill Gates >> founded [[ Microsoft ]] and currently lives in the USA.'
-    true_2 = 'Bill Gates founded [[ Microsoft ]] and currently lives in the {{ USA }}.'
-    true_3 = '<< Bill Gates >> founded Microsoft and currently lives in the {{ USA }}.'
+    true_1 = "<< Bill Gates >> founded [[ Microsoft ]] and currently lives in the USA."
+    true_2 = "Bill Gates founded [[ Microsoft ]] and currently lives in the {{ USA }}."
+    true_3 = "<< Bill Gates >> founded Microsoft and currently lives in the {{ USA }}."
 
-    assert res_1 == annotate(doc, sents[1], ents[1], ents[0], etype_symbols)  # symmetric
-    assert res_2 == annotate(doc, sents[1], ents[2], ents[1], etype_symbols)  # symmetric
-    assert res_3 == annotate(doc, sents[1], ents[0], ents[2], etype_symbols)  # symmetric
+    assert res_1 == annotate(
+        doc, sents[1], ents[1], ents[0], etype_symbols
+    )  # symmetric
+    assert res_2 == annotate(
+        doc, sents[1], ents[2], ents[1], etype_symbols
+    )  # symmetric
+    assert res_3 == annotate(
+        doc, sents[1], ents[0], ents[2], etype_symbols
+    )  # symmetric
 
     assert res_1 == true_1
     assert res_2 == true_2
     assert res_3 == true_3
 
 
-@pytest.mark.parametrize('return_prob', [True, False])
+@pytest.mark.parametrize("return_prob", [True, False])
 def test_chemprot(monkeypatch, return_prob):
     class_probs = 13 * [0]
     class_probs[7] = 1
 
     fake_model = Mock()
-    fake_model.predict.return_value = {'class_probs': class_probs}
+    fake_model.predict.return_value = {"class_probs": class_probs}
 
     fake_predictor = Mock()
     fake_predictor.from_path.return_value = fake_model
 
-    monkeypatch.setattr('bbsearch.mining.relation.Predictor', fake_predictor)
+    monkeypatch.setattr("bbsearch.mining.relation.Predictor", fake_predictor)
 
-    re_model = ChemProt('')
-    annotated_sentence = "The selective << betaAR >> agonist [[ isoproterenol ]] caused an" \
-                         " enhancement of hippocampal CA3 network activity"
+    re_model = ChemProt("")
+    annotated_sentence = (
+        "The selective << betaAR >> agonist [[ isoproterenol ]] caused an"
+        " enhancement of hippocampal CA3 network activity"
+    )
 
     outputs = re_model.predict(annotated_sentence, return_prob)
 
     # predict
     if return_prob:
-        assert outputs[0] == 'AGONIST'
+        assert outputs[0] == "AGONIST"
         assert outputs[1] == 1
     else:
-        assert outputs == 'AGONIST'
+        assert outputs == "AGONIST"
 
     # Symbols
-    assert re_model.symbols == {'GGP': ('[[ ', ' ]]'),
-                                'CHEBI': ('<< ', ' >>')}
+    assert re_model.symbols == {"GGP": ("[[ ", " ]]"), "CHEBI": ("<< ", " >>")}
 
 
-@pytest.mark.parametrize('return_prob', [True, False])
+@pytest.mark.parametrize("return_prob", [True, False])
 def test_start_with_the_same_letter(return_prob):
     re_model = StartWithTheSameLetter()
 
-    assert re_model.symbols['etype_1'] == ('[[ ', ' ]]')
-    assert re_model.symbols['whatever'] == ('[[ ', ' ]]')
+    assert re_model.symbols["etype_1"] == ("[[ ", " ]]")
+    assert re_model.symbols["whatever"] == ("[[ ", " ]]")
 
     annotated_sentence_1 = "Our [[ dad ]] walked the [[ Dog ]]."
     annotated_sentence_2 = "Our [[ dad ]] walked the [[ cat ]]."
@@ -119,5 +129,5 @@ def test_start_with_the_same_letter(return_prob):
         relation_1 = outputs_1
         relation_2 = outputs_2
 
-    assert relation_1 == 'START_WITH_SAME_LETTER'
-    assert relation_2 == 'START_WITH_DIFFERENT_LETTER'
+    assert relation_1 == "START_WITH_SAME_LETTER"
+    assert relation_2 == "START_WITH_DIFFERENT_LETTER"

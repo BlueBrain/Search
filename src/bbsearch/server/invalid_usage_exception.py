@@ -19,5 +19,5 @@ class InvalidUsage(Exception):
     def to_dict(self):
         """Generate a dictionary."""
         rv = dict()
-        rv['message'] = self.message
+        rv["message"] = self.message
         return rv

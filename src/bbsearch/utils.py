@@ -80,13 +80,17 @@ class Timer:
     def __enter__(self):
         """Launch the timer."""
         if self.name is None:
-            raise ValueError('No name specified, one needs to call the instance with some name.')
+            raise ValueError(
+                "No name specified, one needs to call the instance with some name."
+            )
 
         if self.name in self.logs:
-            raise ValueError('{} has already been timed'.format(self.name))
+            raise ValueError("{} has already been timed".format(self.name))
 
-        if self.name == 'overall':
-            raise ValueError("The 'overall' key is restricted for length of the lifetime of the Timer.")
+        if self.name == "overall":
+            raise ValueError(
+                "The 'overall' key is restricted for length of the lifetime of the Timer."
+            )
 
         self.start_time = time.perf_counter()
 
@@ -104,8 +108,12 @@ class Timer:
             self.logs[self.name] = end_time - self.start_time
 
             if self.verbose:
-                fmt = '{:.2f}'
-                print("{} took ".format(self.name) + fmt.format(self.logs[self.name]) + ' seconds')
+                fmt = "{:.2f}"
+                print(
+                    "{} took ".format(self.name)
+                    + fmt.format(self.logs[self.name])
+                    + " seconds"
+                )
 
         # cleanup
         self.start_time = None
@@ -118,7 +126,7 @@ class Timer:
     @property
     def stats(self):
         """Return all timing statistics."""
-        return {'overall': time.perf_counter() - self.inst_time, **self.logs}
+        return {"overall": time.perf_counter() - self.inst_time, **self.logs}
 
 
 class H5:
@@ -139,7 +147,7 @@ class H5:
         indices : np.ndarray
             1D array that determines the rows to be set to fillvalue.
         """
-        with h5py.File(h5_path, 'a') as f:
+        with h5py.File(h5_path, "a") as f:
             h5_dset = f[dataset_name]
             fillvalue = h5_dset.fillvalue
             dim = h5_dset.shape[1]
@@ -147,7 +155,7 @@ class H5:
             h5_dset[np.sort(indices)] = np.ones((len(indices), dim)) * fillvalue
 
     @staticmethod
-    def create(h5_path, dataset_name, shape, dtype='f4'):
+    def create(h5_path, dataset_name, shape, dtype="f4"):
         """Create a dataset (and potentially also a h5 file).
 
         Parameters
@@ -173,15 +181,21 @@ class H5:
         [1] http://docs.h5py.org/en/stable/faq.html#faq
         """
         if h5_path.is_file():
-            with h5py.File(h5_path, 'a') as f:
+            with h5py.File(h5_path, "a") as f:
                 if dataset_name in f.keys():
-                    raise ValueError('The {} dataset already exists.'.format(dataset_name))
+                    raise ValueError(
+                        "The {} dataset already exists.".format(dataset_name)
+                    )
 
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
+                f.create_dataset(
+                    dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan
+                )
 
         else:
-            with h5py.File(h5_path, 'w') as f:
-                f.create_dataset(dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan)
+            with h5py.File(h5_path, "w") as f:
+                f.create_dataset(
+                    dataset_name, shape=shape, dtype=dtype, fillvalue=np.nan
+                )
 
     @staticmethod
     def find_unpopulated_rows(h5_path, dataset_name, batch_size=2000, verbose=False):
@@ -206,7 +220,7 @@ class H5:
         unpop_rows : np.ndarray
             1D numpy array of ints representing row indices of unpopulated rows (nan).
         """
-        with h5py.File(h5_path, 'r') as f:
+        with h5py.File(h5_path, "r") as f:
             dset = f[dataset_name]
             n_rows = len(dset)
 
@@ -217,7 +231,7 @@ class H5:
                 iterable = tqdm.tqdm(iterable)
 
             for i in iterable:
-                row = dset[i: i + batch_size]
+                row = dset[i : i + batch_size]
                 is_unpop = np.isnan(row).any(axis=1)  # (batch_size,)
 
                 unpop_rows.extend(list(np.where(is_unpop)[0] + i))
@@ -247,14 +261,13 @@ class H5:
         pop_rows : np.ndarray
             1D numpy array of ints representing row indices of populated rows (not nan).
         """
-        with h5py.File(h5_path, 'r') as f:
+        with h5py.File(h5_path, "r") as f:
             dset = f[dataset_name]
             n_rows = len(dset)  # 7
 
-        unpop_rows = H5.find_unpopulated_rows(h5_path,
-                                              dataset_name,
-                                              batch_size=batch_size,
-                                              verbose=verbose)  # [2, 3, 6]
+        unpop_rows = H5.find_unpopulated_rows(
+            h5_path, dataset_name, batch_size=batch_size, verbose=verbose
+        )  # [2, 3, 6]
 
         pop_rows = np.setdiff1d(np.arange(n_rows), unpop_rows)  # [0, 1, 4, 5]
 
@@ -272,7 +285,7 @@ class H5:
         dataset_name : str
             Name of the dataset.
         """
-        with h5py.File(h5_path, 'r') as f:
+        with h5py.File(h5_path, "r") as f:
             shape = f[dataset_name].shape
 
         return shape
@@ -304,14 +317,14 @@ class H5:
         res : np.ndarray
             Numpy array of shape `(len(indices), ...)` holding the loaded rows.
         """
-        with h5py.File(h5_path, 'r') as f:
+        with h5py.File(h5_path, "r") as f:
             dset = f[dataset_name]
 
             if indices is None:
                 return dset[:]
 
             if len(set(indices)) != len(indices):
-                raise ValueError('There cannot be duplicates inside of the indices')
+                raise ValueError("There cannot be duplicates inside of the indices")
 
             argsort = indices.argsort()  # [3, 1, 0, 2]
 
@@ -328,7 +341,7 @@ class H5:
                 iterable = tqdm.tqdm(iterable)
 
             for i in iterable:
-                subarray = dset[sorted_indices[i: i + batch_size]]  # (batch_size, dim)
+                subarray = dset[sorted_indices[i : i + batch_size]]  # (batch_size, dim)
                 final_res_l.append(subarray)
 
             final_res = np.concatenate(final_res_l, axis=0)
@@ -353,7 +366,7 @@ class H5:
         indices : np.ndarray
             1D numpy array that determines row indices whre the `data` pasted.
         """
-        with h5py.File(h5_path, 'a') as f:
+        with h5py.File(h5_path, "a") as f:
             h5_dset = f[dataset_name]
 
             argsort = indices.argsort()

@@ -5,19 +5,23 @@ import spacy
 
 from .relation import REModel, annotate
 
-SPECS = ['entity',
-         'entity_type',
-         'property',
-         'property_value',
-         'property_type',
-         'property_value_type',
-         'ontology_source',
-         'paper_id',  # article_id:section_name:paragraph_id
-         'start_char',
-         'end_char']
+SPECS = [
+    "entity",
+    "entity_type",
+    "property",
+    "property_value",
+    "property_type",
+    "property_value_type",
+    "ontology_source",
+    "paper_id",  # article_id:section_name:paragraph_id
+    "start_char",
+    "end_char",
+]
 
 
-def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_entity_type="NaE"):
+def run_pipeline(
+    texts, model_entities, models_relations, debug=False, excluded_entity_type="NaE"
+):
     """Run end-to-end extractions.
 
     Parameters
@@ -55,16 +59,28 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_
     """
     # sanity checks
     if not isinstance(model_entities, spacy.language.Language):
-        raise TypeError('Current implementation requires `model_entities` to be an instance of '
-                        '`spacy.language.Language`. Try with `model_entities=spacy.load("en_ner_craft_md")`')
+        raise TypeError(
+            "Current implementation requires `model_entities` to be an instance of "
+            '`spacy.language.Language`. Try with `model_entities=spacy.load("en_ner_craft_md")`'
+        )
 
-    if not all([isinstance(model, REModel) for model_list in models_relations.values() for model in model_list]):
-        raise TypeError('Each relation extraction model needs to be a subclass of REModel.')
+    if not all(
+        [
+            isinstance(model, REModel)
+            for model_list in models_relations.values()
+            for model in model_list
+        ]
+    ):
+        raise TypeError(
+            "Each relation extraction model needs to be a subclass of REModel."
+        )
 
     if models_relations:
-        disable_pipe = []  # parser is needed to split text into sentences, tagger for EntityRuler
+        disable_pipe = (
+            []
+        )  # parser is needed to split text into sentences, tagger for EntityRuler
     else:
-        disable_pipe = ['parser']
+        disable_pipe = ["parser"]
 
     docs_gen = model_entities.pipe(texts, disable=disable_pipe, as_tuples=True)
     lines = []
@@ -72,17 +88,23 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_
     for doc, metadata in docs_gen:
         subtexts = doc.sents if models_relations else [doc]
         for subtext in subtexts:
-            detected_entities = [ent for ent in subtext.ents if
-                                 excluded_entity_type is None or ent.label_ != excluded_entity_type]
+            detected_entities = [
+                ent
+                for ent in subtext.ents
+                if excluded_entity_type is None or ent.label_ != excluded_entity_type
+            ]
 
             for s_ent in detected_entities:
                 # add single lines for entities
-                lines.append(dict(entity=s_ent.text,
-                                  entity_type=s_ent.label_,
-                                  start_char=s_ent.start_char,
-                                  end_char=s_ent.end_char,
-                                  **metadata)
-                             )
+                lines.append(
+                    dict(
+                        entity=s_ent.text,
+                        entity_type=s_ent.label_,
+                        start_char=s_ent.start_char,
+                        end_char=s_ent.end_char,
+                        **metadata
+                    )
+                )
 
                 # extract relations
                 for o_ent in detected_entities:
@@ -92,21 +114,28 @@ def run_pipeline(texts, model_entities, models_relations, debug=False, excluded_
                     so = (s_ent.label_, o_ent.label_)
                     if so in models_relations:
                         for re_model in models_relations[so]:
-                            annotated_sent = annotate(doc, subtext, s_ent, o_ent, re_model.symbols)
+                            annotated_sent = annotate(
+                                doc, subtext, s_ent, o_ent, re_model.symbols
+                            )
                             property_ = re_model.predict(annotated_sent)
-                            lines.append(dict(entity=s_ent.text,
-                                              entity_type=s_ent.label_,
-                                              relation_model=re_model.__class__.__name__,
-                                              start_char=s_ent.start_char,
-                                              end_char=s_ent.end_char,
-                                              property_type='relation',
-                                              property=property_,
-                                              property_value=o_ent.text,
-                                              property_value_type=o_ent.label_,
-                                              **metadata
-                                              ))
+                            lines.append(
+                                dict(
+                                    entity=s_ent.text,
+                                    entity_type=s_ent.label_,
+                                    relation_model=re_model.__class__.__name__,
+                                    start_char=s_ent.start_char,
+                                    end_char=s_ent.end_char,
+                                    property_type="relation",
+                                    property=property_,
+                                    property_value=o_ent.text,
+                                    property_value_type=o_ent.label_,
+                                    **metadata
+                                )
+                            )
 
-    if not lines or not debug:  # enforce columns if there are no extractions or we are in prod mode
+    if (
+        not lines or not debug
+    ):  # enforce columns if there are no extractions or we are in prod mode
         return pd.DataFrame(lines, columns=SPECS)
     else:
         return pd.DataFrame(lines)

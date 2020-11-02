@@ -11,13 +11,12 @@ from bbsearch.database.mining_cache import Miner
 
 
 class TestMiner:
-
     @pytest.fixture
     def miner_env(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.spacy.load",
-            lambda model_path: model_entities
+            lambda model_path: model_entities,
         )
 
         task_queue = mp.Queue()
@@ -41,7 +40,7 @@ class TestMiner:
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.spacy.load",
-            lambda model_path: model_entities
+            lambda model_path: model_entities,
         )
 
         Miner.create_and_mine(
@@ -77,7 +76,7 @@ class TestMiner:
         fake_result = {
             "article_id": article_id,
             "paper_id": "my_paper",
-            "entity_type": "ORGAN"
+            "entity_type": "ORGAN",
         }
 
         def run_pipeline(*args, **kwargs):
@@ -90,11 +89,16 @@ class TestMiner:
         task_queue.put(article_id)
         miner.work_loop()
 
-        df_result = pd.read_sql(f"select * from {miner.target_table_name}", con=miner.engine)
+        df_result = pd.read_sql(
+            f"select * from {miner.target_table_name}", con=miner.engine
+        )
         assert len(df_result) == 1
         assert df_result.iloc[0]["article_id"] == fake_result["article_id"]
         assert df_result.iloc[0]["paper_id"] == fake_result["paper_id"]
-        assert df_result.iloc[0]["entity_type"] == miner.entity_map[fake_result["entity_type"]]
+        assert (
+            df_result.iloc[0]["entity_type"]
+            == miner.entity_map[fake_result["entity_type"]]
+        )
         assert "mining_model" in df_result.columns
         assert "mining_model_version" in df_result.columns
 
@@ -106,27 +110,27 @@ class TestMiner:
 
         results = list(miner._generate_texts_with_metadata(article_ids=article_id))
 
-        assert len(results) == test_parameters['n_sections_per_article']
+        assert len(results) == test_parameters["n_sections_per_article"]
 
         (text_1, meta_1), (text_2, meta_2) = results
 
         assert text_1 == (
-            'I am a sentence 0 in section 0 in article 1. I am a sentence 1 in '
-            'section 0 in article 1. I am a sentence 2 in section 0 in article 1.'
+            "I am a sentence 0 in section 0 in article 1. I am a sentence 1 in "
+            "section 0 in article 1. I am a sentence 2 in section 0 in article 1."
         )
         assert meta_1 == {
-            'article_id': 1,
-            'paragraph_pos_in_article': 0,
-            'paper_id': '1:section_0:0',
+            "article_id": 1,
+            "paragraph_pos_in_article": 0,
+            "paper_id": "1:section_0:0",
         }
         assert text_2 == (
-            'I am a sentence 0 in section 1 in article 1. I am a sentence 1 in '
-            'section 1 in article 1. I am a sentence 2 in section 1 in article 1.'
+            "I am a sentence 0 in section 1 in article 1. I am a sentence 1 in "
+            "section 1 in article 1. I am a sentence 2 in section 1 in article 1."
         )
         assert meta_2 == {
-            'article_id': 1,
-            'paragraph_pos_in_article': 1,
-            'paper_id': '1:section_1:1',
+            "article_id": 1,
+            "paragraph_pos_in_article": 1,
+            "paper_id": "1:section_1:1",
         }
 
     def test_clean_up(self, miner_env, caplog):
@@ -143,16 +147,17 @@ class TestMiner:
 
 
 class TestCreateMiningCache:
-
     @pytest.fixture
     def cache_creator(self, fake_sqlalchemy_engine):
-        ee_models_library = pd.DataFrame([
-            {
-                "entity_type": "type_1_public",
-                "model": "model_1",
-                "entity_type_name": "type_1",
-            }
-        ])
+        ee_models_library = pd.DataFrame(
+            [
+                {
+                    "entity_type": "type_1_public",
+                    "model": "model_1",
+                    "entity_type_name": "type_1",
+                }
+            ]
+        )
         cache_creator_instance = CreateMiningCache(
             database_engine=fake_sqlalchemy_engine,
             ee_models_library=ee_models_library,
@@ -170,10 +175,12 @@ class TestCreateMiningCache:
         # Create a table with two rows, one with good model, one with bad
         assert len(model_schemas) >= 1
         valid_model = list(model_schemas.keys())[0]
-        df = pd.DataFrame([
-            {"mining_model": valid_model},
-            {"mining_model": valid_model + "_not_valid"}
-        ])
+        df = pd.DataFrame(
+            [
+                {"mining_model": valid_model},
+                {"mining_model": valid_model + "_not_valid"},
+            ]
+        )
         with engine.begin() as con:
             df.to_sql(table_name, con)
 
@@ -194,17 +201,26 @@ class TestCreateMiningCache:
     def test_schema_creation(self, cache_creator):
         cache_creator._schema_creation()
         df_new_table = pd.read_sql(
-            f"select * from {cache_creator.target_table}",
-            con=cache_creator.engine
+            f"select * from {cache_creator.target_table}", con=cache_creator.engine
         )
 
         assert len(df_new_table) == 0
         assert set(df_new_table.columns) == {
-            'entity', 'entity_type', 'property', 'property_value',
-            'property_type', 'property_value_type', 'ontology_source',
-            'paper_id', 'start_char', 'end_char', 'article_id',
-            'paragraph_pos_in_article', 'mining_model', 'mining_model_version',
-            'spacy_version'
+            "entity",
+            "entity_type",
+            "property",
+            "property_value",
+            "property_type",
+            "property_value_type",
+            "ontology_source",
+            "paper_id",
+            "start_char",
+            "end_char",
+            "article_id",
+            "paragraph_pos_in_article",
+            "mining_model",
+            "mining_model_version",
+            "spacy_version",
         }
 
         # Test calling with the table already existing.
@@ -217,8 +233,8 @@ class TestCreateMiningCache:
         model_schemas = cache_creator._load_model_schemas()
         assert isinstance(model_schemas, dict)
         assert len(model_schemas) == 1
-        assert model_schemas['model_1']['model_path'] == 'model_1'
-        assert model_schemas['model_1']['entity_map'] == {'type_1': 'type_1_public'}
+        assert model_schemas["model_1"]["model_path"] == "model_1"
+        assert model_schemas["model_1"]["entity_map"] == {"type_1": "type_1_public"}
 
     @staticmethod
     def fake_wait_miner(stop_now):

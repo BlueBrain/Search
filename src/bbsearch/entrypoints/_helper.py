@@ -108,7 +108,8 @@ def run_server(app_factory, name, argv=None):
 
     # Parse arguments
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [options]", description=f"Start the {name} server.",
+        usage="%(prog)s [options]",
+        description=f"Start the {name} server.",
     )
     parser.add_argument("--host", default="localhost", type=str, help="The server host")
     parser.add_argument("--port", default=8080, type=int, help="The server port")

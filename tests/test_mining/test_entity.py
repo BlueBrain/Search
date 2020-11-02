@@ -60,8 +60,7 @@ class TestPatternCreator:
         pc.add("ET1", "hello")
         pc.add("ET2", {"TEXT": "there"})
         pc.add("ET3", [{"TEXT": {"IN": ["world", "cake"]}}])
-        pc.add("ET4", [{"TEXT": {"IN": ["aa", "bbb"]}},
-                       {"TEXT": {"REGEX": "^s"}}])
+        pc.add("ET4", [{"TEXT": {"IN": ["aa", "bbb"]}}, {"TEXT": {"REGEX": "^s"}}])
 
         res = pc.to_list()
 
@@ -91,11 +90,13 @@ class TestPatternCreator:
         pc.add("NEW_ENTITY_TYPE", "cake")
 
         assert len(pc.to_df()) == 1
-        assert set(pc.to_df().columns) == {"label",
-                                           "attribute_0",
-                                           "value_0",
-                                           "value_type_0",
-                                           "op_0"}
+        assert set(pc.to_df().columns) == {
+            "label",
+            "attribute_0",
+            "value_0",
+            "value_type_0",
+            "op_0",
+        }
 
         pc.add("COOL_ENTITY_TYPE", {"LEMMA": "pancake", "OP": "*"})
 
@@ -104,16 +105,17 @@ class TestPatternCreator:
         pc.add("SOME_ENTITY_TYPE", [{"TEXT": "good"}, {"TEXT": "pizza"}])
 
         assert len(pc.to_df()) == 3
-        assert set(pc.to_df().columns) == {"label",
-                                           "attribute_0",
-                                           "value_0",
-                                           "value_type_0",
-                                           "op_0",
-                                           "attribute_1",
-                                           "value_1",
-                                           "value_type_1",
-                                           "op_1",
-                                           }
+        assert set(pc.to_df().columns) == {
+            "label",
+            "attribute_0",
+            "value_0",
+            "value_type_0",
+            "op_0",
+            "attribute_1",
+            "value_1",
+            "value_type_1",
+            "op_1",
+        }
 
         pc.to_jsonl(tmpdir_p)
         pc_loaded = PatternCreator.from_jsonl(tmpdir_p)
@@ -140,72 +142,86 @@ class TestPatternCreator:
     def test_raw2row(self):
         # pattern not a list
         with pytest.raises(TypeError):
-            PatternCreator.raw2row({"label": "ET1",
-                                    "pattern": {"LOWER": "TEXT"}})
+            PatternCreator.raw2row({"label": "ET1", "pattern": {"LOWER": "TEXT"}})
 
         # label not a str
         with pytest.raises(TypeError):
-            PatternCreator.raw2row({"label": 232,
-                                    "pattern": [{"LOWER": "TEXT"}]})
+            PatternCreator.raw2row({"label": 232, "pattern": [{"LOWER": "TEXT"}]})
 
         # element not dictionary
         with pytest.raises(TypeError):
-            PatternCreator.raw2row({"label": "etype",
-                                    "pattern": [11]})
+            PatternCreator.raw2row({"label": "etype", "pattern": [11]})
 
     def test_row2raw(self):
         # unsupported value_type - eval fails
         with pytest.raises(NameError):
-            PatternCreator.row2raw(pd.Series({"label": "et1",
-                                              "attribute_0": "TEXT",
-                                              "value_0": "aaa",
-                                              "value_type_0": "wrong_type",
-                                              "op_0": ""}))
+            PatternCreator.row2raw(
+                pd.Series(
+                    {
+                        "label": "et1",
+                        "attribute_0": "TEXT",
+                        "value_0": "aaa",
+                        "value_type_0": "wrong_type",
+                        "op_0": "",
+                    }
+                )
+            )
 
         # already the first token is invalid
         with pytest.raises(ValueError):
-            PatternCreator.row2raw(pd.Series({"label": "et1",
-                                              "attribute_0": np.nan,
-                                              "value_0": "aaa",
-                                              "value_type_0": "wrong_type",
-                                              "op_0": ""}))
+            PatternCreator.row2raw(
+                pd.Series(
+                    {
+                        "label": "et1",
+                        "attribute_0": np.nan,
+                        "value_0": "aaa",
+                        "value_type_0": "wrong_type",
+                        "op_0": "",
+                    }
+                )
+            )
 
-        res = PatternCreator.row2raw(pd.Series(
-            {"label": "et1",
-             "attribute_0": "TEXT",
-             "value_0": "aaa",
-             "value_type_0": "str",
-             "op_0": "",
-             "attribute_1": np.nan,
-             "value_1": "bbb",
-             "value_type_1": "int",
-             "op_1": "!"}
-        ))
+        res = PatternCreator.row2raw(
+            pd.Series(
+                {
+                    "label": "et1",
+                    "attribute_0": "TEXT",
+                    "value_0": "aaa",
+                    "value_type_0": "str",
+                    "op_0": "",
+                    "attribute_1": np.nan,
+                    "value_1": "bbb",
+                    "value_type_1": "int",
+                    "op_1": "!",
+                }
+            )
+        )
 
         assert res == {"label": "et1", "pattern": [{"TEXT": "aaa"}]}
 
-    @pytest.mark.parametrize("raw", [
-        {"label": "ET1",
-         "pattern": [{"LOWER": "something"}]},
-        {"label": "ET2",
-         "pattern": [{"REGEX": "^S"}]},
-        {"label": "ET3",
-         "pattern": [{"LEMMA": "bb", "OP": "!"}]},
-        {"label": "ET4",
-         "pattern": [{"OP": "+", "LOWER": "fdsaf"}]},
-        {"label": "ET5",
-         "pattern": [{"ORTH": "fdsaf"}, {"LEMMA": "aaa"}]},
-        {"label": "ET6",
-         "pattern": [{"OP": "+", "LOWER": "aaa"},
-                     {"OP": "!", "LEMMA": "bb"},
-                     {"OP": "?", "ORTH": "cc"}]},
-        {"label": "ET7",
-         "pattern": [{"LENGTH": 5}]},
-        {"label": "ET8",
-         "pattern": [{"TEXT": {"IN": ["aa", "bbb"]}},
-                     {"TEXT": {"REGEX": "^s"}}]}
-
-    ])
+    @pytest.mark.parametrize(
+        "raw",
+        [
+            {"label": "ET1", "pattern": [{"LOWER": "something"}]},
+            {"label": "ET2", "pattern": [{"REGEX": "^S"}]},
+            {"label": "ET3", "pattern": [{"LEMMA": "bb", "OP": "!"}]},
+            {"label": "ET4", "pattern": [{"OP": "+", "LOWER": "fdsaf"}]},
+            {"label": "ET5", "pattern": [{"ORTH": "fdsaf"}, {"LEMMA": "aaa"}]},
+            {
+                "label": "ET6",
+                "pattern": [
+                    {"OP": "+", "LOWER": "aaa"},
+                    {"OP": "!", "LEMMA": "bb"},
+                    {"OP": "?", "ORTH": "cc"},
+                ],
+            },
+            {"label": "ET7", "pattern": [{"LENGTH": 5}]},
+            {
+                "label": "ET8",
+                "pattern": [{"TEXT": {"IN": ["aa", "bbb"]}}, {"TEXT": {"REGEX": "^s"}}],
+            },
+        ],
+    )
     def test_raw2row2raw(self, raw):
         assert raw == PatternCreator.row2raw(PatternCreator.raw2row(raw))
 
