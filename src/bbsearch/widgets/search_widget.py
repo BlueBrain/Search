@@ -242,10 +242,34 @@ class SearchWidget(widgets.VBox):
         self.widgets['page_forward'].on_click(
             lambda b: self.set_page(self.current_page + 1))
 
+        # Put advanced settings to a tab
+        self.widgets['advanced_settings'] = widgets.Tab(children=[widgets.VBox([
+            self.widgets['sent_embedder'],
+            self.widgets['granularity'],
+            self.widgets['top_results'],
+            self.widgets['print_paragraph'],
+            self.widgets['has_journal'],
+            self.widgets['is_english'],
+            self.widgets['date_range'],
+            self.widgets['deprioritize_text'],
+            self.widgets['deprioritize_strength'],
+            self.widgets['exclusion_text'],
+            self.widgets['inclusion_text'],
+            self.widgets['default_value_article_saver']
+        ])])
+        self.widgets['advanced_settings'].set_title(0, "Advanced Settings")
+        self.widgets['advanced_settings'].display = 'none'
+
+        self.widgets['show_advanced_chb'] = widgets.Checkbox(
+            value=False,
+            description='Show advanced settings',
+        )
+
         # Callbacks
         self.widgets['investigate_button'].on_click(self._cb_bt_investigate)
         self.widgets['report_button'].on_click(self._cb_bt_pdf_report_search)
         self.widgets['articles_button'].on_click(self._cb_bt_pdf_report_article_saver)
+        self.widgets['show_advanced_chb'].observe(self._cb_chkb_advanced, names='value')
 
     def _adjust_widgets(self):
         """Hide from the user not used functionalities in the widgets."""
@@ -272,20 +296,11 @@ class SearchWidget(widgets.VBox):
             self.widgets['page_label'],
             self.widgets['page_forward']
         ])
+
         self.children = [
-            self.widgets['sent_embedder'],
-            self.widgets['granularity'],
-            self.widgets['top_results'],
-            self.widgets['print_paragraph'],
             self.widgets['query_text'],
-            self.widgets['has_journal'],
-            self.widgets['is_english'],
-            self.widgets['date_range'],
-            self.widgets['deprioritize_text'],
-            self.widgets['deprioritize_strength'],
-            self.widgets['exclusion_text'],
-            self.widgets['inclusion_text'],
-            self.widgets['default_value_article_saver'],
+            self.widgets['show_advanced_chb'],
+            self.widgets['advanced_settings'],
             self.widgets['investigate_button'],
             page_selection,
             self.widgets['out'],
@@ -638,6 +653,12 @@ class SearchWidget(widgets.VBox):
             self.article_saver.add_article(article_id)
         else:
             self.article_saver.remove_article(article_id)
+
+    def _cb_chkb_advanced(self, change_dict):
+        if change_dict['new']:
+            self.widgets['advanced_settings'].layout.display = 'block'
+        else:
+            self.widgets['advanced_settings'].layout.display = 'none'
 
     def _create_saving_checkboxes(self, article_id, paragraph_id):
         chk_paragraph = widgets.Checkbox(
