@@ -86,19 +86,16 @@ class SearchWidget(widgets.VBox):
         self.widgets_style = {'description_width': 'initial'}
         self.widgets = dict()
         self._init_widgets()
-        self._adjust_widgets()
         self._init_ui()
 
     def _init_widgets(self):
         """Initialize widget dictionary."""
         # Select model to compute Sentence Embeddings
         self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=['USE', 'SBERT', 'BSV', 'SBioBERT', 'Sent2Vec', 'BIOBERT NLI+STS'],
+            options=self.supported_models,
             description='Model for Sentence Embedding',
-            tooltips=['Universal Sentence Encoder', 'Sentence BERT', 'BioSentVec',
-                      'Sentence BioBERT', 'Sent2Vec Model', 'BIOBERT model'],
-            style=self.widgets_style
-            )
+            style=self.widgets_style,
+            layout=widgets.Layout(width='450px', height='50px'))
 
         # Select granularity of the search
         self.widgets['granularity'] = widgets.RadioButtons(
@@ -163,11 +160,10 @@ class SearchWidget(widgets.VBox):
 
         # Select Deprioritization Strength
         self.widgets['deprioritize_strength'] = widgets.RadioButtons(
-            options=['None', 'Weak', 'Mild', 'Strong', 'Stronger'],
+            options=['None', 'Mild', 'Stronger'],  # ['None', 'Weak', 'Mild', 'Strong', 'Stronger']
             disabled=False,
             style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength',
-            )
+            description='Deprioritization strength')
 
         # Enter Substrings Exclusions
         self.widgets['exclusion_text'] = widgets.Textarea(
@@ -176,6 +172,7 @@ class SearchWidget(widgets.VBox):
             style=self.widgets_style,
             description='Substring Exclusion (newline separated): '
             )
+        self.widgets['exclusion_text'].layout.display = 'none'
 
         self.widgets['inclusion_text'] = widgets.Textarea(
             layout=widgets.Layout(width='90%'),
@@ -258,8 +255,9 @@ class SearchWidget(widgets.VBox):
             self.widgets['default_value_article_saver']
         ])])
         self.widgets['advanced_settings'].set_title(0, "Advanced Settings")
-        self.widgets['advanced_settings'].display = 'none'
+        self.widgets['advanced_settings'].layout.display = 'none'
 
+        # Disable advanced settings checkbox
         self.widgets['show_advanced_chb'] = widgets.Checkbox(
             value=False,
             description='Show advanced settings',
@@ -270,22 +268,6 @@ class SearchWidget(widgets.VBox):
         self.widgets['report_button'].on_click(self._cb_bt_pdf_report_search)
         self.widgets['articles_button'].on_click(self._cb_bt_pdf_report_article_saver)
         self.widgets['show_advanced_chb'].observe(self._cb_chkb_advanced, names='value')
-
-    def _adjust_widgets(self):
-        """Hide from the user not used functionalities in the widgets."""
-        self.widgets['exclusion_text'].layout.display = 'none'
-        # Remove some models: (USE, SBERT, SBioBERT)
-        self.widgets['sent_embedder'] = widgets.RadioButtons(
-            options=self.supported_models,
-            description='Model for Sentence Embedding',
-            style=self.widgets_style,
-            layout=widgets.Layout(width='450px', height='50px'))
-        # Remove some deprioritization strength
-        self.widgets['deprioritize_strength'] = widgets.RadioButtons(
-            options=['None', 'Mild', 'Stronger'],
-            disabled=False,
-            style={'description_width': 'initial', 'button_width': '80px'},
-            description='Deprioritization strength')
 
     def _init_ui(self):
         css_style = style.get_css_style()
