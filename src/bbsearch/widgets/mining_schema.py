@@ -52,7 +52,7 @@ class MiningSchema:
         # Make sure there are no duplicates to begin with
         self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
         self.schema_df = self.schema_df.append(row, ignore_index=True)
-        # If there are any duplicates at this point, then then it must have
+        # If there are any duplicates at this point, then it must have
         # come from the appended row.
         if any(self.schema_df.duplicated()):
             self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
