@@ -18,8 +18,7 @@ class MiningWidget(widgets.VBox):
     mining_server_url : str
         The URL of the mining server.
     mining_schema : bbsearch.widgets.MiningSchema
-        An object holding a dataframe with the requested mining df
-        (entity, relation, attribute types).
+        The requested mining schema (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.
     default_text : string, optional
@@ -158,7 +157,7 @@ class MiningWidget(widgets.VBox):
                 identifiers = self.article_saver.get_saved_items()
 
             print(f'{timer["collect items"]:7.2f} seconds')
-            print('Mining request df:')
+            print('Mining request schema:')
             display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
@@ -173,7 +172,7 @@ class MiningWidget(widgets.VBox):
     def _mine_text_clicked(self, b):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
-            print('Mining request df:')
+            print('Mining request schema:')
             display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             text = self.widgets['input_text'].value

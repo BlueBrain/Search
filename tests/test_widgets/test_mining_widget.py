@@ -145,7 +145,7 @@ def test_mining_text(monkeypatch, capsys, mining_schema_df):
     assert len(display_objs) == 3  # 1 schema + 1 warning + 1 table_extractions
     assert isinstance(display_objs[0], pd.DataFrame)
 
-    assert display_objs[0].equals(mining_schema_df.drop_duplicates(ignore_index=True))
+    assert display_objs[0].equals(mining_schema_df)
     assert isinstance(display_objs[1], HTML)
     assert display_objs[2].equals(table_extractions)
 
@@ -205,6 +205,6 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine, mining_sch
     assert isinstance(display_objs[0], pd.DataFrame)
     assert isinstance(display_objs[2], pd.DataFrame)
 
-    assert display_objs[0].equals(mining_schema_df.drop_duplicates(ignore_index=True))
+    assert display_objs[0].equals(mining_schema_df)
     assert isinstance(display_objs[1], HTML)
     assert display_objs[2].equals(table_extractions)
