@@ -40,7 +40,7 @@ class SearchWidget(widgets.VBox):
     bbs_mysql_engine : sqlalchemy.engine.Engine
         Engine for connections to the bbs_mysql server.
 
-    article_saver: bbsearch.widgets.ArticleSaver, optional
+    article_saver : bbsearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
 
@@ -334,7 +334,7 @@ class SearchWidget(widgets.VBox):
         ----------
         paragraph : str
             The paragraph in which to highlight the sentence.
-        sentence: str
+        sentence : str
             The sentence to highlight.
 
         Returns
@@ -415,18 +415,18 @@ class SearchWidget(widgets.VBox):
 
         Parameters
         ----------
-        result_info: dict
+        result_info : dict
             The information for a single result obtained by calling
             `_fetch_result_info`.
 
-        print_whole_paragraph: bool
+        print_whole_paragraph : bool
             If true, the whole paragraph will be displayed in the results of the widget.
 
         Returns
         -------
-        article_metadata: str
+        article_metadata : str
             Formatted string containing the metadata of the article.
-        formatted_output: str
+        formatted_output : str
             Formatted output of the sentence.
         """
         sentence_id = result_info["sentence_id"]

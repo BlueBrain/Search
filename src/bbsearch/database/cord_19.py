@@ -15,7 +15,7 @@ class CORD19DatabaseCreation:
 
     Attributes
     ----------
-    max_text_length: int
+    max_text_length : int
         Max length of values in MySQL column of type TEXT. We have to
         constraint our text values to be smaller than this value
         (especially articles.abstract and sentences.text).
@@ -26,10 +26,10 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        data_path: pathlib.Path
+        data_path : pathlib.Path
             Directory to the dataset where metadata.csv and all jsons file
             are located.
-        engine: SQLAlchemy.Engine
+        engine : SQLAlchemy.Engine
             Engine linked to the database.
         """
         self.data_path = data_path
@@ -127,8 +127,8 @@ class CORD19DatabaseCreation:
         """Fill the Article Table thanks to 'metadata.csv'.
 
         The articles table has all the metadata.csv columns
-        expect the 'sha'.
-        Moreover, the columns are renamed (cfr. _rename_columns)
+        expect the 'sha'. Moreover, the columns are renamed
+        (cfr. _rename_columns).
         """
         rejected_articles = []
         df = self.metadata.copy()
@@ -169,17 +169,17 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        model_name: str, optional
+        model_name : str, optional
             SpaCy model used to parse the text into sentences.
 
         Returns
         -------
-        pmc: int
+        pmc :  int
             Number of articles with at least one pmc_json.
-        pdf: int
+        pdf : int
             Number of articles that does not have pmc_json file but
-            at leastone pdf_json.
-        rejected_articles: list of int
+            at least one pdf_json.
+        rejected_articles : list of int
             Article_id of the articles that raises an error during
             the parsing.
         """
@@ -340,15 +340,15 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        nlp: spacy.language.Language
+        nlp : spacy.language.Language
             Spacy pipeline applying sentence segmentation.
-        paragraphs: List of tuples (text, metadata)
+        paragraphs : List of tuples (text, metadata)
             List of Paragraph/Article in raw text to segment into sentences.
             [(text, metadata), ].
 
         Returns
         -------
-        all_sentences: list of dict
+        all_sentences : list of dict
             List of all the sentences extracted from the paragraph.
         """
         if isinstance(paragraphs, str):
@@ -381,12 +381,12 @@ class CORD19DatabaseCreation:
 
         Parameters
         ----------
-        text: str
+        text : str
             Text to analyze.
 
         Returns
         -------
-        lang: bool or None
+        lang : bool or None
             Whether the language of the provided `text` is in English or not. If
             the input `text` is an empty string, `None` is returned.
         """

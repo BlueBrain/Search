@@ -314,12 +314,12 @@ class MiningServer(Flask):
 
         Parameters
         ----------
-        error_message: str
+        error_message : str
             Error message to send if there is an issue.
 
         Returns
         -------
-        response: str
+        response : str
             Response to send with the error_message in a json format.
         """
         response = jsonify(error=error_message)
@@ -332,7 +332,7 @@ class MiningServer(Flask):
 
         Parameters
         ----------
-        df_extractions: pd.DataFrame
+        df_extractions : pd.DataFrame
             DataFrame containing all the elements extracted by text mining.
 
         etypes_na : list[str]
@@ -341,7 +341,7 @@ class MiningServer(Flask):
 
         Returns
         -------
-        response: requests.response
+        response : requests.response
             Response containing the dataframe converted in csv table.
         """
         csv_extractions = df_extractions.to_csv(index=False)

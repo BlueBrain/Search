@@ -54,14 +54,14 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
 
     Parameters
     ----------
-    sentence_id: int
+    sentence_id : int
         Sentence id for which need to retrieve the paragraph.
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    paragraph: str or None
+    paragraph : str or None
         If ``str`` then a paragraph containing the sentence of the given
         sentence_id. If None then the `sentence_id` was not found in the
         sentences table.
@@ -98,12 +98,12 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
         Relative position of a paragraph in an article. Note that the numbering
         starts from 0.
 
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    paragraph: pd.DataFrame
+    paragraph : pd.DataFrame
         pd.DataFrame with the paragraph and its metadata:
         article_id, text, section_name, paragraph_pos_in_article.
     """
@@ -141,14 +141,14 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
 
     Parameters
     ----------
-    article_id: int
+    article_id : int
         Article id for which need to retrieve the article metadata.
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    article: pd.DataFrame
+    article : pd.DataFrame
         DataFrame containing the article metadata. The columns are
         'article_id', 'cord_uid', 'sha', 'source_x', 'title', 'doi',
         'pmcid', 'pubmed_id', 'license', 'abstract', 'publish_time',
@@ -167,14 +167,14 @@ def retrieve_articles(article_ids, engine):
 
     Parameters
     ----------
-    article_ids: list of int
+    article_ids : list of int
         List of Article id for which need to retrieve the entire text article.
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns
     -------
-    articles: pd.DataFrame
+    articles : pd.DataFrame
         DataFrame containing the articles divided into paragraphs. The columns are
         'article_id', 'paragraph_pos_in_article', 'text', 'section_name'.
     """
@@ -210,7 +210,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     model_names : list
         List of model names to consider. Duplicates are removed automatically.
 
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
     Returns

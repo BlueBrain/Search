@@ -36,7 +36,7 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        raw_sentence: str
+        raw_sentence : str
             Raw sentence to embed.
 
         Returns
@@ -69,12 +69,12 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             One dimensional vector representing the embedding of the given sentence.
         """
 
@@ -103,7 +103,7 @@ class SBioBERT(EmbeddingModel):
 
     Parameters
     ----------
-    device: str
+    device : str
         Available device for the model. Can be {'cuda', 'cpu', None}
 
     References
@@ -131,7 +131,7 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentence: str or list of str
+        raw_sentence : str or list of str
             Raw sentence to embed. One can also provide multiple sentences.
 
         Returns
@@ -156,7 +156,7 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentences: list of str
+        raw_sentences : list of str
             List of raw sentence to embed.
 
         Returns
@@ -181,14 +181,14 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: transformers.BatchEncoding
+        preprocessed_sentence : transformers.BatchEncoding
             Dictionary like object that holds the following keys: 'input_ids',
             'token_type_ids' and 'attention_mask'. All of the corresponding
             values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentence of shape (768,) if only a single
             sample in the batch. Otherwise `(len(preprocessed_sentences), 768)`.
 
@@ -211,14 +211,14 @@ class SBioBERT(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: transformers.BatchEncoding
+        preprocessed_sentences : transformers.BatchEncoding
             Dictionary like object that holds the following keys: 'input_ids',
             'token_type_ids' and 'attention_mask'. All of the corresponding
             values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentence of shape
             `(len(preprocessed_sentences), 768)`
 
@@ -272,7 +272,7 @@ class Sent2VecModel(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_path: pathlib.Path or str
+    checkpoint_path : pathlib.Path or str
         Location of the model checkpoint.
     """
 
@@ -349,12 +349,12 @@ class Sent2VecModel(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentence: str
+        raw_sentence : str
             Raw sentence to embed.
 
         Returns
         -------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence.
         """
         return next(self._generate_preprocessed(raw_sentence))
@@ -380,13 +380,13 @@ class Sent2VecModel(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embedding: numpy.ndarray
+        embedding : numpy.ndarray
             Array of shape `(700,)` with the sentence embedding.
         """
         embedding = self.embed_many([preprocessed_sentence])
@@ -397,13 +397,13 @@ class Sent2VecModel(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: iterable of str
+        preprocessed_sentences : iterable of str
             Preprocessed sentences to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embeddings: numpy.ndarray
+        embeddings : numpy.ndarray
             Array of shape `(len(preprocessed_sentences), 700)` with the
             sentence embeddings.
         """
@@ -416,7 +416,7 @@ class BSV(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_model_path: pathlib.Path or str
+    checkpoint_model_path : pathlib.Path or str
         Path to the file of the stored model BSV.
 
     References
@@ -445,12 +445,12 @@ class BSV(EmbeddingModel):
 
         Parameters
         ----------
-        raw_sentence: str
+        raw_sentence : str
             Raw sentence to embed.
 
         Returns
         -------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence.
         """
         raw_sentence = raw_sentence.replace("/", " / ")
@@ -470,12 +470,12 @@ class BSV(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentence of shape (700,).
         """
         return self.embed_many([preprocessed_sentence]).squeeze()
@@ -485,12 +485,12 @@ class BSV(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list of str
+        preprocessed_sentences : list of str
             Preprocessed sentences to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentences of shape
             `(len(preprocessed_sentences), 700)`.
         """
@@ -530,12 +530,12 @@ class SentTransformer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the given sentence of shape (768,).
         """
         return self.embed_many([preprocessed_sentence]).squeeze()
@@ -545,12 +545,12 @@ class SentTransformer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list of str
+        preprocessed_sentences : list of str
             Preprocessed sentences to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentences of shape
             `(len(preprocessed_sentences), 768)`.
         """
@@ -583,12 +583,12 @@ class USE(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentence of shape (512,).
         """
         return self.embed_many([preprocessed_sentence]).squeeze()
@@ -598,12 +598,12 @@ class USE(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: list of str
+        preprocessed_sentences : list of str
             Preprocessed sentences to embed.
 
         Returns
         -------
-        embedding: numpy.array
+        embedding : numpy.array
             Embedding of the specified sentences of shape
             `(len(preprocessed_sentences), 512)`.
         """
@@ -616,7 +616,7 @@ class SklearnVectorizer(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_path: pathlib.Path or str
+    checkpoint_path : pathlib.Path or str
         Location of the model checkpoint in pickle format.
     """
 
@@ -648,13 +648,13 @@ class SklearnVectorizer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence: str
+        preprocessed_sentence : str
             Preprocessed sentence to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embedding: numpy.ndarray
+        embedding : numpy.ndarray
             Array of shape `(dim,)` with the sentence embedding.
         """
         embedding = self.embed_many([preprocessed_sentence])
@@ -665,13 +665,13 @@ class SklearnVectorizer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences: iterable of str
+        preprocessed_sentences : iterable of str
             Preprocessed sentences to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embeddings: numpy.ndarray
+        embeddings : numpy.ndarray
             Array of shape `(len(preprocessed_sentences), dim)` with the
             sentence embeddings.
         """
@@ -689,7 +689,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     ----------
     connection : sqlalchemy.engine.Engine
         Connection to the database.
-    model: EmbeddingModel
+    model : EmbeddingModel
         Instance of the EmbeddingModel of choice.
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to perform the
@@ -703,7 +703,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
 
     Returns
     -------
-    final_embeddings: np.array
+    final_embeddings : np.array
         2D numpy array with all sentences embeddings for the given models. Its
         shape is `(len(retrieved_indices), dim)`.
 
@@ -758,7 +758,7 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
     checkpoint_path : pathlib.Path
         Path to load the embedding models (Needed for BSV and Sent2Vec).
 
-    device: str
+    device : str
         If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS,
         SBioBERT, SBERT).
 

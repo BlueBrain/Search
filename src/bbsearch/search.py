@@ -209,13 +209,13 @@ class SearchEngine:
 
         Returns
         -------
-        top_sentence_ids: torch.Tensor
+        top_sentence_ids : torch.Tensor
             1D array representing the indices of the top `k` most relevant
             sentences. The size of this array is going to be either (k, ) or
             (len(restricted_sentences_ids), ). k being equal to k for
             granularity = 'sentences', and num of sentences for k unique
             articles for granularity = 'articles'.
-        top_similarities: torch.Tensor
+        top_similarities : torch.Tensor
             1D array representing the similarities for each of the top `k` sentences.
         """
         logger.info("Truncating similarities to the restricted indices")

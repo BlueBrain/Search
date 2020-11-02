@@ -16,7 +16,7 @@ class EmbeddingServer(Flask):
 
     Parameters
     ----------
-    embedding_models: dict
+    embedding_models : dict
         Dictionary whom keys are name of embedding_models
         and values are instance of the embedding models.
     """

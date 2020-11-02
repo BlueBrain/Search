@@ -27,7 +27,7 @@ class Miner:
     entity_map : dict[str, str]
         A map from entity types produced by the model to new
         entity types that should appear in the cached results.
-    target_table: str
+    target_table : str
         The target table name for the mining results.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
@@ -89,7 +89,7 @@ class Miner:
         entity_map : dict[str, str]
             A map from entity types produced by the model to new
             entity types that should appear in the cached results.
-        target_table: str
+        target_table : str
             The target table name for the mining results.
         task_queue : multiprocessing.Queue
             The queue with tasks for this worker
@@ -230,7 +230,7 @@ class CreateMiningCache:
 
     Parameters
     ----------
-    database_engine: sqlalchemy.engine.Engine
+    database_engine : sqlalchemy.engine.Engine
         Connection to the CORD-19 database.
 
     ee_models_library : pd.DataFrame

@@ -137,9 +137,8 @@ def run_pipeline(
                                 )
                             )
 
-    if (
-        not lines or not debug
-    ):  # enforce columns if there are no extractions or we are in prod mode
+    # enforce columns if there are no extractions or we are in prod mode
+    if not lines or not debug:
         return pd.DataFrame(lines, columns=SPECS)
     else:
         return pd.DataFrame(lines)

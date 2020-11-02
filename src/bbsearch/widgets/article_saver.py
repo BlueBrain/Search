@@ -31,13 +31,13 @@ class ArticleSaver:
 
     Parameters
     ----------
-    connection: sqlalchemy.engine.Engine
+    connection : sqlalchemy.engine.Engine
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
-    connection: sqlalchemy.engine.Engine
+    connection : sqlalchemy.engine.Engine
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
@@ -151,9 +151,9 @@ class ArticleSaver:
 
         Returns
         -------
-        full_articles: set of int
+        full_articles : set of int
             Set of the article ids chosen by the user.
-        just_paragraphs: set of tuple
+        just_paragraphs : set of tuple
             Set of tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
         full_articles = set(
@@ -173,7 +173,7 @@ class ArticleSaver:
 
         Returns
         -------
-        identifiers: list of tuple
+        identifiers : list of tuple
             Tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
         saved_items = []
@@ -292,7 +292,7 @@ class ArticleSaver:
 
         Returns
         -------
-        table: pd.DataFrame
+        table : pd.DataFrame
             DataFrame containing all the paragraphs seen and choice made for it.
         """
         rows = []

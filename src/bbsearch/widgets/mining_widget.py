@@ -99,7 +99,7 @@ class MiningWidget(widgets.VBox):
 
         Parameters
         ----------
-        information: str or list.
+        information : str or list.
             Information can be either a raw string text, either a list of tuples
             (article_id, paragraph_id) related to the database.
         schema_df : pd.DataFrame
@@ -112,7 +112,7 @@ class MiningWidget(widgets.VBox):
 
         Returns
         -------
-        table_extractions: pd.DataFrame
+        table_extractions : pd.DataFrame
             The final table. If `debug=True` then it contains all the
             metadata. If False then it only contains columns in the
             official specification.

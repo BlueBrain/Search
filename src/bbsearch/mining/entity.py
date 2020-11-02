@@ -198,7 +198,7 @@ class PatternCreator:
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
     def to_jsonl(self, path, sort_by=None):
-        """Save to jsonl.
+        """Save to JSONL.
 
         Parameters
         ----------
@@ -211,12 +211,12 @@ class PatternCreator:
 
     @classmethod
     def from_jsonl(cls, path):
-        """Load from a jsonl file.
+        """Load from a JSONL file.
 
         Parameters
         ----------
         path : pathlib.Path
-            Path to a jsonl file with patterns.
+            Path to a JSONL file with patterns.
 
         Returns
         -------
@@ -255,7 +255,6 @@ class PatternCreator:
             "attribute_0", "value_0", "value_type_0", "op_0",
             "attribute_1", "value_1", "value_type_1", "op_1",
             ...
-
         """
         if not isinstance(raw["label"], str):
             raise TypeError("The label needs to be a string")

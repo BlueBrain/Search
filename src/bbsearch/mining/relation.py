@@ -103,7 +103,7 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
         The second entity in the sentence. One can get its type by using the
         `label_` attribute.
 
-    etype_symbols: dict or defaultdict
+    etype_symbols : dict or defaultdict
         Keys represent different entity types ("GGP", "CHEBI") and the values
         are tuples of size 2. Each of these tuples represents the starting
         and ending symbol to wrap the recognized entity with. Each ``REModel``
