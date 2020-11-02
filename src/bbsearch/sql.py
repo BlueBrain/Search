@@ -93,11 +93,9 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
     ----------
     article_id : int
         Article id.
-
     paragraph_pos_in_article : int
         Relative position of a paragraph in an article. Note that the numbering
         starts from 0.
-
     engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
@@ -206,10 +204,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     identifiers : list of tuple
         Tuples of form (article_id, paragraph_pos_in_article). Note that if
         `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
-
     model_names : list
         List of model names to consider. Duplicates are removed automatically.
-
     engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
@@ -217,7 +213,6 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     -------
     result : pd.DataFrame
         Selected rows of the `mining_cache` table.
-
     """
     model_names = tuple(set(model_names))
     if len(model_names) == 1:

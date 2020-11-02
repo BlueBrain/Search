@@ -91,18 +91,14 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     doc : spacy.tokens.Doc
         The entire document (input text). Note that spacy uses it for
         absolute referencing.
-
     sent : spacy.tokens.Span
         One sentence from the `doc` where we look for relations.
-
     ent_1 : spacy.tokens.Span
         The first entity in the sentence. One can get its type by using the
         `label_` attribute.
-
     ent_2 : spacy.tokens.Span
         The second entity in the sentence. One can get its type by using the
         `label_` attribute.
-
     etype_symbols : dict or defaultdict
         Keys represent different entity types ("GGP", "CHEBI") and the values
         are tuples of size 2. Each of these tuples represents the starting

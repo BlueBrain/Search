@@ -232,14 +232,11 @@ class CreateMiningCache:
     ----------
     database_engine : sqlalchemy.engine.Engine
         Connection to the CORD-19 database.
-
     ee_models_library : pd.DataFrame
         Table with information on models responsible to mine each entity
         type and how to rename entity types.
-
     target_table_name : str
         The target table name for the mining results.
-
     workers_per_model : int, optional
         Number of max processes to spawn to run text mining and table
         population in parallel.

@@ -21,15 +21,12 @@ class Timer:
     ----------
     inst_time : float
         Time of instantiation.
-
     name : str or None
         Name of the process to be timed.
         The user can control the value via the `__call__` magic.
-
     logs : dict
         Internal dictionary that stores all the times.
         The keys are the process names and the values are number of seconds.
-
     start_time : float or None
         Time of the last enter. Is dynamically changed when entering.
 
@@ -64,11 +61,9 @@ class Timer:
         ----------
         name : str
             Name of the process to be timed.
-
         message : str or None
             Optional message to be printed to stoud when entering. Note that
             it only has an effect if `self.verbose=True`.
-
         """
         self.name = name
 
@@ -141,10 +136,8 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         indices : np.ndarray
             1D array that determines the rows to be set to fillvalue.
         """
@@ -163,13 +156,10 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         shape : tuple of int
             Two element tuple representing rows and columns.
-
         dtype : str
             Dtype of the h5 array. See references for all the details.
 
@@ -206,13 +196,10 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         batch_size : int
             Number of rows to be loaded at a time.
-
         verbose : bool
             Controls verbosity.
 
@@ -247,13 +234,10 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         batch_size : int
             Number of rows to be loaded at a time.
-
         verbose : bool
             Controls verbosity.
 
@@ -282,7 +266,6 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
         """
@@ -299,17 +282,13 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         batch_size : int
             Number of rows to be loaded at a time.
-
         indices : None or np.ndarray
             If None then we load all the rows from the dataset. If ``np.ndarray``
             then the loading only selected indices.
-
         verbose : bool
             Controls verbosity.
 
@@ -357,13 +336,10 @@ class H5:
         ----------
         h5_path : pathlib.Path
             Path to the h5 file.
-
         dataset_name : str
             Name of the dataset.
-
         data : np.ndarray
             2D numpy array to be written into the h5 file.
-
         indices : np.ndarray
             1D numpy array that determines row indices whre the `data` pasted.
         """
@@ -385,7 +361,6 @@ class JSONL:
         ----------
         data : list
             List of dictionaries (json files).
-
         path : pathlib.Path
             File where to save it.
         """
@@ -408,7 +383,7 @@ class JSONL:
         data : list
             List of dictionaries.
         """
-        with path.open("r") as f:
+        with path.open() as f:
             text = f.read()
             data = [json.loads(jline) for jline in text.splitlines()]
 

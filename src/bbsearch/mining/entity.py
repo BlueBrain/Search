@@ -50,13 +50,10 @@ class PatternCreator:
         ----------
         text : str
             Some text.
-
         model : spacy.language.Language or None
             Spacy model. If not provided we default to `spacy.blank("en")`.
-
         disable : list or None
             List of elements to remove from the pipeline.
-
         **add_pipe_kwargs : dict
             Additionally parameters to be passed into the `add_pipe` method. Note that
             one can control the position the ``EntityRuler`` this way. If not specified
@@ -115,7 +112,6 @@ class PatternCreator:
         ----------
         label : str
             Entity type to associate with a given pattern.
-
         pattern : str or dict or list
             The pattern we want to match. The behavior depends on the type.
 
@@ -362,7 +358,6 @@ def remap_entity_type(patterns, etype_mapping):
     ----------
     patterns : list
         List of patterns.
-
     etype_mapping : dict
         Keys are our entity type names and values are entity type names
         inside of the spacy model.
@@ -442,7 +437,6 @@ def check_patterns_agree(model, patterns):
     ----------
     model : spacy.Language
         A model that contains an `EntityRuler`.
-
     patterns : list
         List of patterns.
 

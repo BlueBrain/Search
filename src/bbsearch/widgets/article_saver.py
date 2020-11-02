@@ -40,18 +40,15 @@ class ArticleSaver:
     connection : sqlalchemy.engine.Engine
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
-
     state : set
         The state that keeps track of saved items. It is a set of tuples
         of the form `(article_id, paragraph_id)` each representing one
         saved item. The items with `paragraph_id = -1` indicate that the
         whole article should be saved.
-
     state_hash : int or None
         A hash uniquely identifying a certain state. This is used to
         cache `df_chosen_texts` and avoid recomputing it if the state
         has not changed.
-
     df_chosen_texts : pd.DataFrame
         The rows represent different paragraphs and the columns are
         'article_id', 'section_name', 'paragraph_id', 'text'.

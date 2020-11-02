@@ -240,7 +240,6 @@ class SBioBERT(EmbeddingModel):
         last_hidden_state : torch.Tensor
             Per sample and per token embeddings as returned by the model. Shape
             `(n_sentences, sequence_length, dim)`.
-
         attention_mask : torch.Tensor
             Boolean mask of what tokens were padded (0) or not (1). The dtype
             is `torch.int64` and the shape is `(n_sentences, sequence_length)`.
@@ -250,7 +249,6 @@ class SBioBERT(EmbeddingModel):
         sentence_embeddings : torch.Tensor
             Mean of token embeddings taking into account the padding. The shape
             is `(n_sentences, dim)`.
-
 
         References
         ----------
@@ -706,7 +704,6 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     final_embeddings : np.array
         2D numpy array with all sentences embeddings for the given models. Its
         shape is `(len(retrieved_indices), dim)`.
-
     retrieved_indices : np.ndarray
         1D array of sentence_ids that we managed to embed. Note that the order
         corresponds exactly to the rows in `final_embeddings`.
@@ -754,10 +751,8 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
     ----------
     model_name : str
         The name of the model.
-
     checkpoint_path : pathlib.Path
         Path to load the embedding models (Needed for BSV and Sent2Vec).
-
     device : str
         If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS,
         SBioBERT, SBERT).

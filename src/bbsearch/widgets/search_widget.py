@@ -36,14 +36,11 @@ class SearchWidget(widgets.VBox):
     ----------
     bbs_search_url : str
         The URL of the bbs_search server.
-
     bbs_mysql_engine : sqlalchemy.engine.Engine
         Engine for connections to the bbs_mysql server.
-
     article_saver : bbsearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
-
     results_per_page : int, optional
         The number of results to display per results page.
     """
@@ -418,7 +415,6 @@ class SearchWidget(widgets.VBox):
         result_info : dict
             The information for a single result obtained by calling
             `_fetch_result_info`.
-
         print_whole_paragraph : bool
             If true, the whole paragraph will be displayed in the results of the widget.
 

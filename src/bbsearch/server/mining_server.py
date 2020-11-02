@@ -334,7 +334,6 @@ class MiningServer(Flask):
         ----------
         df_extractions : pd.DataFrame
             DataFrame containing all the elements extracted by text mining.
-
         etypes_na : list[str]
             Entity types found in the request CSV file for which no available
             model was found in the library.
