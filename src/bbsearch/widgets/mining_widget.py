@@ -95,7 +95,7 @@ class MiningWidget(widgets.VBox):
             Information can be either a raw string text, either a list of tuples
             (article_id, paragraph_id) related to the database.
         schema_df : pd.DataFrame
-            A dataframe with the requested mining df (entity, relation, attribute types).
+            A dataframe with the requested mining schema (entity, relation, attribute types).
         debug : bool
             If True, columns are not necessarily matching the specification. However, they
             contain debugging information. If False, then matching exactly the specification.
