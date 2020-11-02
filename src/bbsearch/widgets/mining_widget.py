@@ -1,6 +1,5 @@
 """Module for the mining widget."""
 import io
-from dataclasses import dataclass
 
 import ipywidgets as widgets
 import pandas as pd
@@ -11,13 +10,6 @@ from .._css import style
 from ..utils import Timer
 
 
-@dataclass
-class SchemaRequest:
-    """Class for keeping track of request schema in a mutable way."""
-
-    schema: pd.DataFrame = pd.DataFrame()
-
-
 class MiningWidget(widgets.VBox):
     """The mining widget.
 
@@ -25,8 +17,8 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    schema_request : bbsearch.widgets.SchemaRequest
-        An object holding a dataframe with the requested mining schema (entity, relation, attribute types).
+    mining_schema : bbsearch.widgets.MiningSchema
+        The requested mining schema (entity, relation, attribute types).
     article_saver : bbsearch.widgets.ArticleSaver
         An instance of the article saver.
     default_text : string, optional
@@ -36,13 +28,13 @@ class MiningWidget(widgets.VBox):
         SQL database. Should lead to major speedups.
     """
 
-    def __init__(self, mining_server_url, schema_request, article_saver=None, default_text='',
+    def __init__(self, mining_server_url, mining_schema, article_saver=None, default_text='',
                  use_cache=True):
         super().__init__()
 
         self.mining_server_url = mining_server_url
         self.article_saver = article_saver
-        self.schema_request = schema_request
+        self.mining_schema = mining_schema
         self.use_cache = use_cache
 
         # This is the output: csv table of extracted entities/relations.
@@ -114,7 +106,7 @@ class MiningWidget(widgets.VBox):
             The final table. If `debug=True` then it contains all the metadata. If False then it
             only contains columns in the official specification.
         """
-        schema_str = schema_df.to_csv(path_or_buf=None, index=False)
+        schema_str = schema_df.to_csv(index=False)
         if isinstance(information, list):
             print(f"The widget is using database: {self.database_name}")
             response = requests.post(
@@ -166,12 +158,12 @@ class MiningWidget(widgets.VBox):
 
             print(f'{timer["collect items"]:7.2f} seconds')
             print('Mining request schema:')
-            display(self.schema_request.schema)
+            display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             with timer("pipeline"):
                 self.table_extractions = self.textmining_pipeline(
                     information=identifiers,
-                    schema_df=self.schema_request.schema
+                    schema_df=self.mining_schema.df
                 )
             print(f'{timer["pipeline"]:7.2f} seconds')
 
@@ -181,12 +173,12 @@ class MiningWidget(widgets.VBox):
         self.widgets['out'].clear_output()
         with self.widgets['out']:
             print('Mining request schema:')
-            display(self.schema_request.schema)
+            display(self.mining_schema.df)
             print("Running the mining pipeline...".ljust(50), end='', flush=True)
             text = self.widgets['input_text'].value
             self.table_extractions = self.textmining_pipeline(
                 information=text,
-                schema_df=self.schema_request.schema
+                schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
 
