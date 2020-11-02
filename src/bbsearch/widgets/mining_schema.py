@@ -72,12 +72,12 @@ class MiningSchema:
         """
         # The dataframe must contain the "entity_type" column
         if "entity_type" not in entity_df.columns:
-            raise ValueError("Column named 'entity_type' not found.")
+            raise ValueError("Column named entity_type not found.")
 
         # Collect all other valid columns
         valid_columns = []
-        for column in self.schema_df:
-            if column in entity_df.columns:
+        for column in entity_df:
+            if column in self.schema_df.columns:
                 valid_columns.append(column)
             else:
                 warnings.warn(f"No column named {column} was found.")

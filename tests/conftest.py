@@ -337,3 +337,10 @@ def punctuation_annotations():
     files_location = ROOT_PATH / 'tests' / 'data' / 'mining' / 'eval'
     return {mode: pd.read_csv(files_location / f'iob_punctuation_{mode}.csv')
             for mode in ('before', 'after')}
+
+
+@pytest.fixture()
+def mining_schema_df():
+    schema_file = ROOT_PATH / "tests" / "data" / "mining" / "request" / "request.csv"
+    df = pd.read_csv(schema_file)
+    return df
