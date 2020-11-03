@@ -16,7 +16,7 @@ class EmbeddingServer(Flask):
 
     Parameters
     ----------
-    embedding_models: dict
+    embedding_models : dict
         Dictionary whom keys are name of embedding_models
         and values are instance of the embedding models.
     """
@@ -74,7 +74,7 @@ class EmbeddingServer(Flask):
         response = {
             "name": self.name,
             "version": self.version,
-            "description": "Run the BBS embedding computation server for a given sentence.",
+            "description": "The BBS sentence embedding server.",
             "GET": {
                 "/": {
                     "description": "Get the welcome page.",

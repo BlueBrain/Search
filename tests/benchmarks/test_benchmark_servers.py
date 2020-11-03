@@ -17,10 +17,12 @@ MYSQL_USER = "guest"
 MYSQL_PWD = "guest"
 DATABASE_NAME = "cord19_v35"
 DRIVERS = ["mysql+pymysql", "mysql+mysqldb", "mysql"]
-QUERIES = {"date_range": "SELECT article_id FROM articles WHERE "
-                         "publish_time BETWEEN '1999-01-01' AND '2020-12-31'",
-           "mining_cache": "SELECT * FROM mining_cache WHERE article_id = 111"
-                           " and paragraph_pos_in_article = 0"}
+QUERIES = {
+    "date_range": "SELECT article_id FROM articles WHERE "
+    "publish_time BETWEEN '1999-01-01' AND '2020-12-31'",
+    "mining_cache": "SELECT * FROM mining_cache WHERE article_id = 111"
+    " and paragraph_pos_in_article = 0",
+}
 
 
 @pytest.mark.parametrize("server_name", ["embedding", "mining", "search"])
@@ -49,8 +51,7 @@ class TestEmbedding:
 
         url = f"{embedding_server}/v1/embed/json"
 
-        payload_json = {"text": "Glucose is a risk factor for COVID-19",
-                        "model": model}
+        payload_json = {"text": "Glucose is a risk factor for COVID-19", "model": model}
 
         response = benchmark(requests.post, url, json=payload_json)
 
@@ -67,15 +68,24 @@ class TestMining:
             pytest.skip("Mining server address not provided.")
 
         url = f"{mining_server}/text"
-        text = "Glucose is mainly made by plants during" \
-               " photosynthesis from water and carbon dioxide."
+        text = (
+            "Glucose is mainly made by plants during"
+            " photosynthesis from water and carbon dioxide."
+        )
 
         text *= 100
 
-        header = ["entity_type", "property", "property_type", "property_value_type",
-                  "ontology_source"]
+        header = [
+            "entity_type",
+            "property",
+            "property_type",
+            "property_value_type",
+            "ontology_source",
+        ]
 
-        table = pd.Series({"entity_type": entity_type}, index=header).to_frame().transpose()
+        table = (
+            pd.Series({"entity_type": entity_type}, index=header).to_frame().transpose()
+        )
         schema_request = table.to_csv(index=False)
 
         payload_json = {"text": text, "schema": schema_request}
@@ -87,8 +97,9 @@ class TestMining:
     @pytest.mark.parametrize("use_cache", [True, False], ids=["cache", "nocache"])
     @pytest.mark.parametrize("entity_type", ENTITY_TYPES)
     @pytest.mark.parametrize("article_id", ARTICLE_IDS)
-    def test_mine_article(self, benchmark, benchmark_parameters, entity_type, article_id,
-                          use_cache):
+    def test_mine_article(
+        self, benchmark, benchmark_parameters, entity_type, article_id, use_cache
+    ):
         """Mine a single article from the database for a single entity type."""
         mining_server = benchmark_parameters["mining_server"]
 
@@ -98,15 +109,24 @@ class TestMining:
         url = f"{mining_server}/database"
         identifiers = [(article_id, -1)]
 
-        header = ["entity_type", "property", "property_type", "property_value_type",
-                  "ontology_source"]
+        header = [
+            "entity_type",
+            "property",
+            "property_type",
+            "property_value_type",
+            "ontology_source",
+        ]
 
-        table = pd.Series({"entity_type": entity_type}, index=header).to_frame().transpose()
+        table = (
+            pd.Series({"entity_type": entity_type}, index=header).to_frame().transpose()
+        )
         schema_request = table.to_csv(index=False)
 
-        payload_json = {"identifiers": identifiers,
-                        "schema": schema_request,
-                        "use_cache": use_cache}
+        payload_json = {
+            "identifiers": identifiers,
+            "schema": schema_request,
+            "use_cache": use_cache,
+        }
 
         response = benchmark(requests.post, url, json=payload_json)
 
@@ -124,33 +144,45 @@ class TestMining:
         url = f"{mining_server}/database"
         identifiers = [(i, -1) for i in range(1, n_articles + 1)]
 
-        columns = ["entity_type", "property", "property_type", "property_value_type",
-                   "ontology_source"]
+        columns = [
+            "entity_type",
+            "property",
+            "property_type",
+            "property_value_type",
+            "ontology_source",
+        ]
 
-        etypes_sources = [('CELL_TYPE', None),
-                          ('CHEMICAL', 'NCIT'),
-                          ('CONDITION', None),
-                          ('DISEASE', 'NCIT'),
-                          ('ORGAN', 'NCIT'),
-                          ('ORGANISM', 'NCIT'),
-                          ('PATHWAY', 'Reactome'),
-                          ('PROTEIN', 'NCIT')
-                          ]
-        schema_request_data = [{'entity_type': etype, 'ontology_source': source}
-                               for etype, source in etypes_sources]
+        etypes_sources = [
+            ("CELL_TYPE", None),
+            ("CHEMICAL", "NCIT"),
+            ("CONDITION", None),
+            ("DISEASE", "NCIT"),
+            ("ORGAN", "NCIT"),
+            ("ORGANISM", "NCIT"),
+            ("PATHWAY", "Reactome"),
+            ("PROTEIN", "NCIT"),
+        ]
+        schema_request_data = [
+            {"entity_type": etype, "ontology_source": source}
+            for etype, source in etypes_sources
+        ]
 
-        schema_request = pd.DataFrame(schema_request_data, columns=columns).to_csv(index=False)
+        schema_request = pd.DataFrame(schema_request_data, columns=columns).to_csv(
+            index=False
+        )
 
-        payload_json = {"identifiers": identifiers,
-                        "schema": schema_request,
-                        "use_cache": use_cache}
+        payload_json = {
+            "identifiers": identifiers,
+            "schema": schema_request,
+            "use_cache": use_cache,
+        }
 
         response = benchmark(requests.post, url, json=payload_json)
 
         assert response.ok
 
         # check nonempty
-        table_extractions = pd.read_csv(StringIO(response.json()['csv_extractions']))
+        table_extractions = pd.read_csv(StringIO(response.json()["csv_extractions"]))
 
         assert len(table_extractions) > 1
 
@@ -197,9 +229,11 @@ class TestSearch:
             pytest.skip("Search server address not provided.")
 
         url = f"{search_server}/"
-        payload_json = {"query_text": "Glucose is a risk factor for COVID-19",
-                        "k": 20,
-                        "which_model": "BSV"}
+        payload_json = {
+            "query_text": "Glucose is a risk factor for COVID-19",
+            "k": 20,
+            "which_model": "BSV",
+        }
 
         response = benchmark(requests.post, url, json=payload_json)
 

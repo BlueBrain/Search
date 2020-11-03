@@ -50,13 +50,10 @@ class PatternCreator:
         ----------
         text : str
             Some text.
-
         model : spacy.language.Language or None
             Spacy model. If not provided we default to `spacy.blank("en")`.
-
         disable : list or None
             List of elements to remove from the pipeline.
-
         **add_pipe_kwargs : dict
             Additionally parameters to be passed into the `add_pipe` method. Note that
             one can control the position the ``EntityRuler`` this way. If not specified
@@ -104,9 +101,9 @@ class PatternCreator:
         self_is_nan = self_df_sorted.isnull().values
         other_is_nan = other_df_sorted.isnull().values
 
-        return np.array_equal(self_is_nan,
-                              other_is_nan) and np.array_equal(self_df_sorted.values[~self_is_nan],
-                                                               other_df_sorted.values[~other_is_nan])
+        return np.array_equal(self_is_nan, other_is_nan) and np.array_equal(
+            self_df_sorted.values[~self_is_nan], other_df_sorted.values[~other_is_nan]
+        )
 
     def add(self, label, pattern, check_exists=True):
         """Add a single raw in the patterns.
@@ -115,19 +112,20 @@ class PatternCreator:
         ----------
         label : str
             Entity type to associate with a given pattern.
-
         pattern : str or dict or list
             The pattern we want to match. The behavior depends on the type.
 
-            - ``str``: can be used for exact matching (case sensitive). We internally convert
-              it to a single-token pattern `{"TEXT": pattern}`.
-            - ``dict``: a single-token pattern. This dictionary can contain at most 2 entries.
-              The first one represents the attribute: value pair ("LEMMA": "world"). The second
-              has a key "OP" and is optional. It represents the operator/quantifier to be used.
-              An example of a valid pattern dict is `{"LEMMA": "world", "OP": "+"}`. Note that
-              it would detect entities like "world" and "world world world".
-            - ``list``: a multi-token pattern. A list of dictionaries that are of the same form
-              as described above.
+            - ``str``: can be used for exact matching (case sensitive). We
+              internally convert it to a single-token pattern `{"TEXT": pattern}`.
+            - ``dict``: a single-token pattern. This dictionary can contain
+              at most 2 entries. The first one represents the attribute:
+              value pair ("LEMMA": "world"). The second has a key "OP" and is
+              optional. It represents the operator/quantifier to be used.
+              An example of a valid pattern dict is
+              `{"LEMMA": "world", "OP": "+"}`. Note that it would detect
+              entities like "world" and "world world world".
+            - ``list``: a multi-token pattern. A list of dictionaries that
+              are of the same form as described above.
 
         check_exists : bool
             If True, we only allow to add patterns that do not exist yet.
@@ -169,8 +167,8 @@ class PatternCreator:
         Returns
         -------
         pd.DataFrame
-            Copy of the `_storage`. Each row represents a single entity type pattern. All
-            elements are strings.
+            Copy of the `_storage`. Each row represents a single entity type
+            pattern. All elements are strings.
         """
         return self._storage.copy()
 
@@ -180,39 +178,41 @@ class PatternCreator:
         Parameters
         ----------
         sort_by : None or list
-            If None, then no sorting taking place. If ``list``, then the names of columns
-            along which to sort.
+            If None, then no sorting taking place. If ``list``, then the
+            names of columns along which to sort.
 
         Returns
         -------
         list
-            A list where each element represents one entity type pattern. Note that
-            this list can be directly passed into the `EntityRuler`.
+            A list where each element represents one entity type pattern.
+            Note that this list can be directly passed into the `EntityRuler`.
         """
         storage = self.to_df()
-        sorted_storage = storage.sort_values(by=sort_by) if sort_by is not None else storage
+        sorted_storage = (
+            storage.sort_values(by=sort_by) if sort_by is not None else storage
+        )
         return [self.row2raw(row) for _, row in sorted_storage.iterrows()]
 
     def to_jsonl(self, path, sort_by=None):
-        """Save to jsonl.
+        """Save to JSONL.
 
         Parameters
         ----------
         sort_by : None or list
-            If None, then no sorting taking place. If ``list``, then the names of columns
-            along which to sort.
+            If None, then no sorting taking place. If ``list``, then the
+            names of columns along which to sort.
         """
         patterns = self.to_list(sort_by=sort_by)
         JSONL.dump_jsonl(patterns, path)
 
     @classmethod
     def from_jsonl(cls, path):
-        """Load from a jsonl file.
+        """Load from a JSONL file.
 
         Parameters
         ----------
         path : pathlib.Path
-            Path to a jsonl file with patterns.
+            Path to a JSONL file with patterns.
 
         Returns
         -------
@@ -251,7 +251,6 @@ class PatternCreator:
             "attribute_0", "value_0", "value_type_0", "op_0",
             "attribute_1", "value_1", "value_type_1", "op_1",
             ...
-
         """
         if not isinstance(raw["label"], str):
             raise TypeError("The label needs to be a string")
@@ -269,17 +268,23 @@ class PatternCreator:
             elif len(e) == 2 and "OP" in e:
                 pass
             else:
-                raise ValueError("Invalid element, multi-attribute matches are not supported")
+                raise ValueError(
+                    "Invalid element, multi-attribute matches are not supported"
+                )
 
             attribute = next(filter(lambda key: key != "OP", e))
             value_type = type(e[attribute]).__name__
             value = str(e[attribute])
             op = e.get("OP", "")
 
-            d.update({f"attribute_{token_ix}": attribute,
-                      f"value_{token_ix}": value,
-                      f"value_type_{token_ix}": value_type,
-                      f"op_{token_ix}": op})
+            d.update(
+                {
+                    f"attribute_{token_ix}": attribute,
+                    f"value_{token_ix}": value,
+                    f"value_type_{token_ix}": value_type,
+                    f"op_{token_ix}": op,
+                }
+            )
         return pd.Series(d)
 
     @staticmethod
@@ -315,10 +320,17 @@ class PatternCreator:
                 value_type = row[f"value_type_{token_ix}"]  # str
                 op = row[f"op_{token_ix}"]  # str
 
-                if any(not isinstance(x, str) for x in [attribute, value_str, value_type, op]):
+                if any(
+                    not isinstance(x, str)
+                    for x in [attribute, value_str, value_type, op]
+                ):
                     raise KeyError()
 
-                value = eval(f"{value_type}({value_str})") if value_type != 'str' else value_str
+                value = (
+                    eval(f"{value_type}({value_str})")
+                    if value_type != "str"
+                    else value_str
+                )
 
                 token_pattern = {attribute: value}
                 if op:
@@ -346,9 +358,9 @@ def remap_entity_type(patterns, etype_mapping):
     ----------
     patterns : list
         List of patterns.
-
     etype_mapping : dict
-        Keys are our entity type names and values are entity type names inside of the spacy model.
+        Keys are our entity type names and values are entity type names
+        inside of the spacy model.
 
         .. code-block:: Python
 
@@ -389,20 +401,23 @@ def global2model_patterns(patterns, ee_models_library):
     Parameters
     ----------
     patterns : list
-        List of patterns where the entity type is always referring to the entity type naming
-        convention we have internally ("entity_type" column of `ee_models_library`).
+        List of patterns where the entity type is always referring to the
+        entity type naming convention we have internally ("entity_type"
+        column of `ee_models_library`).
 
     ee_models_library : pd.DataFrame
-        3 columns DataFrame connecting model location, our naming and model naming of entity type.
-        * "entity_type": our naming of entity_types
-        * "model": path to the model folder
-        * "entity_type_name": internal name of entities
+        3 columns DataFrame connecting model location, our naming and model
+        naming of entity type.
+
+        - "entity_type": our naming of entity_types
+        - "model": path to the model folder
+        - "entity_type_name": internal name of entities
 
     Returns
     -------
     res : dict
-        The keys are the locations of the model and the values are list of patterns that one
-        can load with `EntityRuler(nlp, patterns=patterns)`
+        The keys are the locations of the model and the values are list of
+        patterns that one can load with `EntityRuler(nlp, patterns=patterns)`.
     """
     res = {}
     for model, ee_models_library_slice in ee_models_library.groupby("model"):
@@ -422,7 +437,6 @@ def check_patterns_agree(model, patterns):
     ----------
     model : spacy.Language
         A model that contains an `EntityRuler`.
-
     patterns : list
         List of patterns.
 

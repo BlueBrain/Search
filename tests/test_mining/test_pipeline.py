@@ -9,14 +9,17 @@ from spacy.tokens import Doc, Span
 from bbsearch.mining import StartWithTheSameLetter, run_pipeline
 
 
-@pytest.mark.parametrize('n_paragraphs', [0, 1, 5])
-@pytest.mark.parametrize('debug', [True, False], ids=['debug', 'official_spec'])
+@pytest.mark.parametrize("n_paragraphs", [0, 1, 5])
+@pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_overall(model_entities, debug, n_paragraphs):
-    text = 'This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too.'
+    text = (
+        "This is a filler sentence. Britney Spears had a concert in "
+        "Brazil yesterday. And I am a filler too."
+    )
 
     # wrong arguments
     with pytest.raises(TypeError):
-        run_pipeline([], model_entities, {('etype_1', 'etype_2'): ['WRONG TYPE']})
+        run_pipeline([], model_entities, {("etype_1", "etype_2"): ["WRONG TYPE"]})
 
     # entities are [Britney Spears, Brazil, yesterday]
     doc = model_entities(text)
@@ -33,58 +36,67 @@ def test_overall(model_entities, debug, n_paragraphs):
     assert len(sents) == 3
     assert all([isinstance(s, Span) for s in sents])
 
-    assert etypes == ['PERSON', 'GPE', 'DATE']
+    assert etypes == ["PERSON", "GPE", "DATE"]
 
-    models_relations = {('PERSON', 'DATE'): [StartWithTheSameLetter()],
-                        ('PERSON', 'GPE'): [StartWithTheSameLetter()]
-                        }
-    texts = n_paragraphs * [(text, {'important_parameter': 10})]
+    models_relations = {
+        ("PERSON", "DATE"): [StartWithTheSameLetter()],
+        ("PERSON", "GPE"): [StartWithTheSameLetter()],
+    }
+    texts = n_paragraphs * [(text, {"important_parameter": 10})]
     df = run_pipeline(texts, model_entities, models_relations, debug)
 
-    official_specs = ['entity',
-                      'entity_type',
-                      'property',
-                      'property_value',
-                      'property_type',
-                      'property_value_type',
-                      'ontology_source',
-                      'paper_id',
-                      'start_char',
-                      'end_char']
+    official_specs = [
+        "entity",
+        "entity_type",
+        "property",
+        "property_value",
+        "property_type",
+        "property_value_type",
+        "ontology_source",
+        "paper_id",
+        "start_char",
+        "end_char",
+    ]
 
     assert isinstance(df, pd.DataFrame)
     assert len(df) == n_paragraphs * (
-            3 + 1 + 1)  # 3 entities, 1 ('PERSON', 'DATE') relation and ('PERSON', 'GPE') relation
+        3 + 1 + 1
+    )  # 3 entities, 1 ('PERSON', 'DATE') relation and ('PERSON', 'GPE') relation
 
     if n_paragraphs > 0:
         if debug:
             assert df.columns.to_list() != official_specs
-            assert 'important_parameter' in df.columns
-            assert all(df['important_parameter'] == 10)
+            assert "important_parameter" in df.columns
+            assert all(df["important_parameter"] == 10)
 
         else:
             assert df.columns.to_list() == official_specs
 
 
-@pytest.mark.parametrize('n_paragraphs', [0, 1, 5])
-@pytest.mark.parametrize('debug', [True, False], ids=['debug', 'official_spec'])
+@pytest.mark.parametrize("n_paragraphs", [0, 1, 5])
+@pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_without_relation(model_entities, debug, n_paragraphs):
-    text = 'This is a filler sentence. Britney Spears had a concert in Brazil yesterday. And I am a filler too.'
+    text = (
+        "This is a filler sentence. Britney Spears had a concert "
+        "in Brazil yesterday. And I am a filler too."
+    )
 
     models_relations = {}
-    texts = n_paragraphs * [(text, {'important_parameter': 10})]
+    texts = n_paragraphs * [(text, {"important_parameter": 10})]
     df = run_pipeline(texts, model_entities, models_relations, debug)
 
-    official_specs = ['entity',
-                      'entity_type',
-                      'property',
-                      'property_value',
-                      'property_type',
-                      'property_value_type',
-                      'ontology_source',
-                      'paper_id',
-                      'start_char',
-                      'end_char']
+    official_specs = [
+        "entity",
+        "entity_type",
+        "property",
+        "property_value",
+        "property_type",
+        "property_value_type",
+        "ontology_source",
+        "paper_id",
+        "start_char",
+        "end_char",
+    ]
 
     assert isinstance(df, pd.DataFrame)
     assert len(df) == n_paragraphs * 3  # 3 entities
@@ -92,8 +104,8 @@ def test_without_relation(model_entities, debug, n_paragraphs):
     if n_paragraphs > 0:
         if debug:
             assert df.columns.to_list() != official_specs
-            assert 'important_parameter' in df.columns
-            assert all(df['important_parameter'] == 10)
+            assert "important_parameter" in df.columns
+            assert all(df["important_parameter"] == 10)
 
         else:
             assert df.columns.to_list() == official_specs
@@ -103,21 +115,29 @@ def test_not_entity_label(model_entities):
     texts = ["California is a state.", {}]
 
     doc = model_entities(texts[0])  # detects only "California"
-    new_ent = Span(doc, start=3, end=4, label='NaE')
+    new_ent = Span(doc, start=3, end=4, label="NaE")
     doc.ents = doc.ents + (new_ent,)  # we add "state" as an entity
 
     model_entities_m = Mock(spec=Language)
     model_entities_m.pipe.return_value = [(doc, {})]
     models_relations = {}
 
-    df_1 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="!")
+    df_1 = run_pipeline(
+        texts, model_entities_m, models_relations, excluded_entity_type="!"
+    )
     assert len(df_1) == 2
 
-    df_2 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="NaE")
+    df_2 = run_pipeline(
+        texts, model_entities_m, models_relations, excluded_entity_type="NaE"
+    )
     assert len(df_2) == 1
 
-    df_3 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type=None)
+    df_3 = run_pipeline(
+        texts, model_entities_m, models_relations, excluded_entity_type=None
+    )
     assert len(df_3) == 2
 
-    df_4 = run_pipeline(texts, model_entities_m, models_relations, excluded_entity_type="GPE")
+    df_4 = run_pipeline(
+        texts, model_entities_m, models_relations, excluded_entity_type="GPE"
+    )
     assert len(df_4) == 1

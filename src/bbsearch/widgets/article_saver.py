@@ -31,27 +31,24 @@ class ArticleSaver:
 
     Parameters
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
 
     Attributes
     ----------
-    connection: SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         An SQL database connectable compatible with `pandas.read_sql`.
         The database is supposed to have paragraphs and articles tables.
-
     state : set
         The state that keeps track of saved items. It is a set of tuples
         of the form `(article_id, paragraph_id)` each representing one
         saved item. The items with `paragraph_id = -1` indicate that the
         whole article should be saved.
-
     state_hash : int or None
         A hash uniquely identifying a certain state. This is used to
         cache `df_chosen_texts` and avoid recomputing it if the state
         has not changed.
-
     df_chosen_texts : pd.DataFrame
         The rows represent different paragraphs and the columns are
         'article_id', 'section_name', 'paragraph_id', 'text'.
@@ -61,8 +58,9 @@ class ArticleSaver:
         self.connection = connection
         self.state = set()
         self.state_hash = None
-        self.df_chosen_texts = pd.DataFrame(columns=[
-            'article_id', 'section_name', 'paragraph_pos_in_article', 'text'])
+        self.df_chosen_texts = pd.DataFrame(
+            columns=["article_id", "section_name", "paragraph_pos_in_article", "text"]
+        )
 
     def add_article(self, article_id):
         """Save an article.
@@ -150,18 +148,21 @@ class ArticleSaver:
 
         Returns
         -------
-        full_articles: set of int
+        full_articles : set of int
             Set of the article ids chosen by the user.
-        just_paragraphs: set of tuple
+        just_paragraphs : set of tuple
             Set of tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
-        full_articles = set(article_id
-                            for article_id, paragraph_pos_in_article in self.state
-                            if paragraph_pos_in_article == -1)
-        just_paragraphs = set((article_id, paragraph_pos_in_article)
-                              for article_id, paragraph_pos_in_article in self.state
-                              if paragraph_pos_in_article != -1 and
-                              article_id not in full_articles)
+        full_articles = set(
+            article_id
+            for article_id, paragraph_pos_in_article in self.state
+            if paragraph_pos_in_article == -1
+        )
+        just_paragraphs = set(
+            (article_id, paragraph_pos_in_article)
+            for article_id, paragraph_pos_in_article in self.state
+            if paragraph_pos_in_article != -1 and article_id not in full_articles
+        )
         return full_articles, just_paragraphs
 
     def get_saved_items(self):
@@ -169,7 +170,7 @@ class ArticleSaver:
 
         Returns
         -------
-        identifiers: list of tuple
+        identifiers : list of tuple
             Tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
         saved_items = []
@@ -186,14 +187,13 @@ class ArticleSaver:
 
         full_articles, just_paragraphs = self._get_clean_state()
 
-        articles = retrieve_articles(article_ids=full_articles,
-                                     engine=self.connection)
+        articles = retrieve_articles(article_ids=full_articles, engine=self.connection)
         self.df_chosen_texts = self.df_chosen_texts.append(articles)
 
         for (article_id, paragraph_pos_in_article) in just_paragraphs:
-            paragraph = retrieve_paragraph(article_id,
-                                           paragraph_pos_in_article,
-                                           engine=self.connection)
+            paragraph = retrieve_paragraph(
+                article_id, paragraph_pos_in_article, engine=self.connection
+            )
             self.df_chosen_texts = self.df_chosen_texts.append(paragraph)
 
     def get_chosen_texts(self):
@@ -214,10 +214,12 @@ class ArticleSaver:
         return self.df_chosen_texts.copy()
 
     def _fetch_article_info(self, article_id):
-        article = retrieve_article_metadata_from_article_id(article_id=article_id,
-                                                            engine=self.connection)
-        article_authors, article_title, ref = \
-            article.iloc[0][['authors', 'title', 'url']]
+        article = retrieve_article_metadata_from_article_id(
+            article_id=article_id, engine=self.connection
+        )
+        article_authors, article_title, ref = article.iloc[0][
+            ["authors", "title", "url"]
+        ]
 
         return ref, article_title, article_authors
 
@@ -235,18 +237,22 @@ class ArticleSaver:
             The file to which the report was written.
         """
         css_style = style.get_css_style()
-        article_report = f'<style> {css_style} </style>'
+        article_report = f"<style> {css_style} </style>"
         width = 80
 
         df_chosen_texts = self.get_chosen_texts()
 
-        for article_id, df_article in df_chosen_texts.groupby('article_id'):
-            df_article = df_article.sort_values(by='paragraph_pos_in_article', ascending=True, axis=0)
-            if len(df_article['section_name'].unique()) == 1:
-                section_name = df_article['section_name'].iloc[0]
+        for article_id, df_article in df_chosen_texts.groupby("article_id"):
+            df_article = df_article.sort_values(
+                by="paragraph_pos_in_article", ascending=True, axis=0
+            )
+            if len(df_article["section_name"].unique()) == 1:
+                section_name = df_article["section_name"].iloc[0]
             else:
-                section_name = f'{len(df_article["section_name"].unique())} different ' \
-                               f'sections are selected for this article.'
+                section_name = (
+                    f'{len(df_article["section_name"].unique())} different '
+                    f"sections are selected for this article."
+                )
             ref, article_title, article_authors = self._fetch_article_info(article_id)
             article_metadata = f"""
             <a href="{ref}">
@@ -260,8 +266,10 @@ class ArticleSaver:
             """
             article_report += article_metadata
 
-            article_report += '<br/>'.join((textwrap.fill(t_, width=width) for t_ in df_article.text))
-            article_report += '<br/>' * 2
+            article_report += "<br/>".join(
+                (textwrap.fill(t_, width=width) for t_ in df_article.text)
+            )
+            article_report += "<br/>" * 2
 
         if output_dir is None:
             output_dir = pathlib.Path.cwd()
@@ -281,7 +289,7 @@ class ArticleSaver:
 
         Returns
         -------
-        table: pd.DataFrame
+        table : pd.DataFrame
             DataFrame containing all the paragraphs seen and choice made for it.
         """
         rows = []
@@ -290,12 +298,15 @@ class ArticleSaver:
                 option = "Save full article"
             else:
                 option = "Save paragraph"
-            rows.append({
-                'article_id': article_id,
-                'paragraph_pos_in_article': paragraph_pos_in_article,
-                'option': option})
+            rows.append(
+                {
+                    "article_id": article_id,
+                    "paragraph_pos_in_article": paragraph_pos_in_article,
+                    "option": option,
+                }
+            )
         table = pd.DataFrame(
-            data=rows,
-            columns=['article_id', 'paragraph_pos_in_article', 'option'])
+            data=rows, columns=["article_id", "paragraph_pos_in_article", "option"]
+        )
 
         return table

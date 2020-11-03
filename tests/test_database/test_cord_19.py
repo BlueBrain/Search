@@ -9,27 +9,30 @@ from bbsearch.database import CORD19DatabaseCreation
 
 
 @pytest.fixture()
-def real_sqlalchemy_engine(jsons_path, monkeypatch, model_entities, fake_sqlalchemy_engine, tmpdir):
+def real_sqlalchemy_engine(
+    jsons_path, monkeypatch, model_entities, fake_sqlalchemy_engine, tmpdir
+):
 
     fake_load = Mock()
     fake_load.return_value = model_entities
 
-    monkeypatch.setattr('bbsearch.database.cord_19.spacy.load', fake_load)
+    monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
 
-    version = 'test'
-    if fake_sqlalchemy_engine.url.drivername.startswith('mysql'):
+    version = "test"
+    if fake_sqlalchemy_engine.url.drivername.startswith("mysql"):
         fake_sqlalchemy_engine.execute("drop database if exists real_test")
         fake_sqlalchemy_engine.execute("create database real_test")
         fake_url = fake_sqlalchemy_engine.url
-        url = f'{fake_url.drivername}://{fake_url.username}:{fake_url.password}@{fake_url.host}:' \
-              f'{fake_url.port}/'
-        engine = sqlalchemy.create_engine(f'{url}real_test')
+        url = (
+            f"{fake_url.drivername}://{fake_url.username}:{fake_url.password}@"
+            f"{fake_url.host}:{fake_url.port}/"
+        )
+        engine = sqlalchemy.create_engine(f"{url}real_test")
     else:
-        Path(f'{tmpdir}/cord19_{version}.db').touch()
-        engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_{version}.db')
+        Path(f"{tmpdir}/cord19_{version}.db").touch()
+        engine = sqlalchemy.create_engine(f"sqlite:///{tmpdir}/cord19_{version}.db")
 
-    db = CORD19DatabaseCreation(data_path=jsons_path,
-                                engine=engine)
+    db = CORD19DatabaseCreation(data_path=jsons_path, engine=engine)
     db.construct()
     fake_load.assert_called_once()
 
@@ -43,48 +46,92 @@ class TestDatabaseCreation:
         """Tests that the two tables expected has been created. """
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
         tables_names = [table_name for table_name in inspector.get_table_names()]
-        assert 'sentences' in tables_names
-        assert 'articles' in tables_names
+        assert "sentences" in tables_names
+        assert "articles" in tables_names
 
         df = pd.read_sql("SELECT * FROM articles", real_sqlalchemy_engine)
         assert df.shape[0] == 4
-        df1 = pd.read_sql("SELECT DISTINCT article_id FROM sentences", real_sqlalchemy_engine)
+        df1 = pd.read_sql(
+            "SELECT DISTINCT article_id FROM sentences", real_sqlalchemy_engine
+        )
         assert df1.shape[0] == 4
 
-        columns_expected = {"article_id", "cord_uid", "sha", "source_x", "title", "doi", "pmcid",
-                            "pubmed_id", "license", "abstract", "publish_time", "authors", "journal",
-                            "mag_id", "arxiv_id", "pdf_json_files",
-                            "pmc_json_files", "who_covidence_id", "s2_id", "url", "is_english"}
-        articles_columns = set(pd.read_sql("SELECT * FROM articles LIMIT 1",
-                                           real_sqlalchemy_engine).columns)
+        columns_expected = {
+            "article_id",
+            "cord_uid",
+            "sha",
+            "source_x",
+            "title",
+            "doi",
+            "pmcid",
+            "pubmed_id",
+            "license",
+            "abstract",
+            "publish_time",
+            "authors",
+            "journal",
+            "mag_id",
+            "arxiv_id",
+            "pdf_json_files",
+            "pmc_json_files",
+            "who_covidence_id",
+            "s2_id",
+            "url",
+            "is_english",
+        }
+        articles_columns = set(
+            pd.read_sql(
+                "SELECT * FROM articles LIMIT 1", real_sqlalchemy_engine
+            ).columns
+        )
         assert columns_expected == articles_columns
-        sentences_expected = {"sentence_id", "article_id", "section_name",
-                              "text", "paragraph_pos_in_article", "sentence_pos_in_paragraph"}
-        sentences_columns = set(pd.read_sql("SELECT * FROM sentences LIMIT 1",
-                                            real_sqlalchemy_engine).columns)
+        sentences_expected = {
+            "sentence_id",
+            "article_id",
+            "section_name",
+            "text",
+            "paragraph_pos_in_article",
+            "sentence_pos_in_paragraph",
+        }
+        sentences_columns = set(
+            pd.read_sql(
+                "SELECT * FROM sentences LIMIT 1", real_sqlalchemy_engine
+            ).columns
+        )
         assert sentences_expected == sentences_columns
 
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
-        indexes_articles = inspector.get_indexes('articles')
-        indexes_sentences = inspector.get_indexes('sentences')
+        indexes_articles = inspector.get_indexes("articles")
+        indexes_sentences = inspector.get_indexes("sentences")
 
         assert not indexes_articles
-        if real_sqlalchemy_engine.url.drivername.startswith('mysql'):
-            assert len(indexes_sentences) == 3  # article_id, FULLTEXT index, unique_identifier
+        if real_sqlalchemy_engine.url.drivername.startswith("mysql"):
+            assert (
+                len(indexes_sentences) == 3
+            )  # article_id, FULLTEXT index, unique_identifier
             for index in indexes_sentences:
-                assert index['name'] in {'sentence_unique_identifier', 'article_id_index',
-                                         'fulltext_text'}
+                assert index["name"] in {
+                    "sentence_unique_identifier",
+                    "article_id_index",
+                    "fulltext_text",
+                }
         else:
             assert len(indexes_sentences) == 1
-            assert indexes_sentences[0]['column_names'][0] == 'article_id'
+            assert indexes_sentences[0]["column_names"][0] == "article_id"
 
-        duplicates_query = """SELECT COUNT(article_id || ':' ||
-                                            paragraph_pos_in_article || ':' ||
-                                            sentence_pos_in_paragraph) c,
-                      article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
-                      FROM sentences
-                      GROUP BY article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
-                      HAVING c > 1; """
+        duplicates_query = """
+        SELECT COUNT(
+            article_id || ':' ||
+            paragraph_pos_in_article || ':' ||
+            sentence_pos_in_paragraph
+        ) c,
+        article_id,
+        paragraph_pos_in_article,
+        sentence_pos_in_paragraph
+        FROM sentences
+        GROUP BY article_id, paragraph_pos_in_article, sentence_pos_in_paragraph
+        HAVING c > 1;
+        """
         duplicates_df = pd.read_sql(duplicates_query, real_sqlalchemy_engine)
         assert len(duplicates_df) == 0
 
@@ -93,27 +140,33 @@ class TestDatabaseCreation:
         fake_load = Mock()
         fake_load.return_value = model_entities
 
-        monkeypatch.setattr('bbsearch.database.cord_19.spacy.load', fake_load)
+        monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
 
-        fake_dir = Path(str(tmpdir)) / 'fake'
-        Path(f'{tmpdir}/cord19_test.db').touch()
-        engine = sqlalchemy.create_engine(f'sqlite:///{tmpdir}/cord19_test.db')
+        fake_dir = Path(str(tmpdir)) / "fake"
+        Path(f"{tmpdir}/cord19_test.db").touch()
+        engine = sqlalchemy.create_engine(f"sqlite:///{tmpdir}/cord19_test.db")
 
         with pytest.raises(NotADirectoryError):
-            CORD19DatabaseCreation(data_path=fake_dir,
-                                   engine=engine)
+            CORD19DatabaseCreation(data_path=fake_dir, engine=engine)
         with pytest.raises(ValueError):
-            db = CORD19DatabaseCreation(data_path=jsons_path,
-                                        engine=engine)
+            db = CORD19DatabaseCreation(data_path=jsons_path, engine=engine)
             db.construct()
             db.construct()
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
-        """Tests that the schema of the fake database is always the same as the real one. """
-        real_tables_names = {table_name for table_name in real_sqlalchemy_engine.table_names()}
-        fake_tables_names = {table_name for table_name in fake_sqlalchemy_engine.table_names()}
+        """Test real vs. fake database.
 
-        assert real_tables_names == {'articles', 'sentences'}
+        Tests that the schema of the fake database is always the same as
+        the real one.
+        """
+        real_tables_names = {
+            table_name for table_name in real_sqlalchemy_engine.table_names()
+        }
+        fake_tables_names = {
+            table_name for table_name in fake_sqlalchemy_engine.table_names()
+        }
+
+        assert real_tables_names == {"articles", "sentences"}
         assert real_tables_names.issubset(fake_tables_names)
 
         real_inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
@@ -126,5 +179,5 @@ class TestDatabaseCreation:
             assert fake_columns
             assert len(real_columns) == len(fake_columns)
             for x, y in zip(real_columns, fake_columns):
-                assert str(x['type']) == str(y['type'])
-                assert x['name'] == y['name']
+                assert str(x["type"]) == str(y["type"])
+                assert x["name"] == y["name"]

@@ -29,17 +29,17 @@ class SearchWidgetBot:
         Instance of the SearchWidget.
 
     capsys : pytest.fixture
-        Captures standard output. It will enable us to capture print statements done by the
-        search widget.
+        Captures standard output. It will enable us to capture print
+        statements done by the search widget.
 
     monkeypatch : pytest.fixture
-        Allows for easy patching. Note that we patch the `display` function of IPython.
-        This way we are going to be able to capture all the objects the
-        `search_widget.widgets['out']` holds.
+        Allows for easy patching. Note that we patch the `display`
+        function of IPython. This way we are going to be able to
+        capture all the objects the `search_widget.widgets['out']` holds.
 
     n_displays_per_result : int
-        Number of displayed objects for each result in the top results. Note that
-        currently it is 4 since we are outputing:
+        Number of displayed objects for each result in the top results.
+        Note that currently it is 4 since we are outputting:
 
             - Article metadata : ``IPython.core.display.HTML``
             - Store paragraph checkbox : ``widgets.Checkbox``
@@ -54,8 +54,10 @@ class SearchWidgetBot:
         self._capsys = capsys
         self.n_displays_per_result = n_displays_per_result
 
-        monkeypatch.setattr('bbsearch.widgets.search_widget.display',
-                            lambda x: self._display_cached.append(x))
+        monkeypatch.setattr(
+            "bbsearch.widgets.search_widget.display",
+            lambda x: self._display_cached.append(x),
+        )
 
     @property
     def display_cached(self):
@@ -97,7 +99,8 @@ class SearchWidgetBot:
     def set_value(self, widget_name, value):
         """Set a value of a chosen widget.
 
-        Note that this works with multiple different widgets like sliders, dropdowns, ...
+        Note that this works with multiple different widgets like sliders,
+        dropdowns, ...
 
         Parameters
         ----------
@@ -129,30 +132,33 @@ def cd_temp(path):
 
 def create_searcher(engine, n_dim=2):
     """Create a LocalSearcher in some reasonable way."""
-    n_sentences = engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = engine.execute("SELECT COUNT(*) FROM sentences").fetchone()[0]
 
     embedding_model = Mock()
     embedding_model.embed.return_value = np.random.random(n_dim)
 
-    embedding_models = {'BSV': embedding_model}
+    embedding_models = {"BSV": embedding_model}
     embeddings = torch.rand((n_sentences, n_dim)).to(dtype=torch.float32)
     norm = torch.norm(input=embeddings, dim=1, keepdim=True)
     norm[norm == 0] = 1
     embeddings /= norm
-    precomputed_embeddings = {'BSV': embeddings}
+    precomputed_embeddings = {"BSV": embeddings}
     indices = np.arange(1, n_sentences + 1)
 
-    searcher = SearchEngine(embedding_models, precomputed_embeddings, indices, connection=engine)
+    searcher = SearchEngine(
+        embedding_models, precomputed_embeddings, indices, connection=engine
+    )
     return searcher
 
 
 def activate_responses(fake_sqlalchemy_engine):
     searcher = create_searcher(fake_sqlalchemy_engine)
-    http_address = 'http://test'
+    http_address = "http://test"
     responses.add_callback(
-        responses.POST, http_address,
+        responses.POST,
+        http_address,
         callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
+        content_type="application/json",
     )
     return http_address
 
@@ -160,57 +166,69 @@ def activate_responses(fake_sqlalchemy_engine):
 def request_callback(request, searcher):
     payload = json.loads(request.body)
     top_sentence_ids, top_similarities, stats = searcher.query(**payload)
-    headers = {'request-id': '1234abcdeABCDE'}
-    resp_body = {'sentence_ids': top_sentence_ids.tolist(),
-                 'similarities': top_similarities.tolist(),
-                 'stats': stats}
+    headers = {"request-id": "1234abcdeABCDE"}
+    resp_body = {
+        "sentence_ids": top_sentence_ids.tolist(),
+        "similarities": top_similarities.tolist(),
+        "stats": stats,
+    }
     response = (200, headers, json.dumps(resp_body))
     return response
 
 
 def request_callback_help(request):
-    resp_body = {'database': 'test_database', 'supported_models': ['BSV']}
-    headers = {'request-id': '1234abcdeABCDE'}
+    resp_body = {"database": "test_database", "supported_models": ["BSV"]}
+    headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response
 
 
 @responses.activate
-@pytest.mark.parametrize('query_text', ['HELLO'])
-@pytest.mark.parametrize('k', [3, 5])
-@pytest.mark.parametrize('results_per_page', [1, 2, 3])
-def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page):
+@pytest.mark.parametrize("query_text", ["HELLO"])
+@pytest.mark.parametrize("k", [3, 5])
+@pytest.mark.parametrize("results_per_page", [1, 2, 3])
+def test_paging(
+    fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, results_per_page
+):
     """Test that paging is displaying the right number results"""
 
     http_address = activate_responses(fake_sqlalchemy_engine)
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(connection=fake_sqlalchemy_engine),
-                          results_per_page=results_per_page)
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(connection=fake_sqlalchemy_engine),
+        results_per_page=results_per_page,
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
     # Initial state
-    assert 'Click on "Search Literature!" button to display some results.' in bot.stdout_cached
+    assert (
+        'Click on "Search Literature!" button to display some results.'
+        in bot.stdout_cached
+    )
     assert not bot.display_cached
 
-    bot.set_value('top_results', k)
-    bot.set_value('query_text', query_text)
-    bot.click('investigate_button')
-    assert len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_result
+    bot.set_value("top_results", k)
+    bot.set_value("query_text", query_text)
+    bot.click("investigate_button")
+    assert (
+        len(bot.display_cached) == min(results_per_page, k) * bot.n_displays_per_result
+    )
 
     results_left = k - min(results_per_page, k)
 
     # Make sure paging works
     while results_left > 0:
-        bot.click('page_forward')
+        bot.click("page_forward")
         displayed_results = min(results_per_page, results_left)
 
         assert len(bot.display_cached) == displayed_results * bot.n_displays_per_result
@@ -221,15 +239,22 @@ def test_paging(fake_sqlalchemy_engine, monkeypatch, capsys, query_text, k, resu
 @responses.activate
 def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     """Check that the most relevant sentence is the first result."""
-    n_sentences = fake_sqlalchemy_engine.execute('SELECT COUNT(*) FROM sentences').fetchone()[0]
+    n_sentences = fake_sqlalchemy_engine.execute(
+        "SELECT COUNT(*) FROM sentences"
+    ).fetchone()[0]
 
     most_relevant_bsv_id = 7
-    query_bsv = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_bsv_id}'
+    query_bsv = f"SELECT text FROM sentences WHERE sentence_id = {most_relevant_bsv_id}"
     most_relevant_bsv_text = fake_sqlalchemy_engine.execute(query_bsv).fetchone()[0]
 
     # most_relevant_sbiobert_id = 3
-    # query_sbiobert = f'SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}'
-    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(query_sbiobert).fetchone()[0]
+    # query_sbiobert = f"""
+    # SELECT text
+    # FROM sentences
+    # WHERE sentence_id = {most_relevant_sbiobert_id}"""
+    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(
+    #     query_sbiobert
+    # ).fetchone()[0]
 
     embedding_model_bsv = Mock()
     embedding_model_bsv.embed.return_value = np.array([0, 1])  # 90 degrees
@@ -237,55 +262,67 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     embedding_model_sbiobert.embed.return_value = np.array([0, -1])  # 270 degrees
 
     embedding_models = {
-        'BSV': embedding_model_bsv,
+        "BSV": embedding_model_bsv,
     }
 
     precomputed_embeddings = {
-        'BSV': torch.ones((n_sentences, 2)).to(dtype=torch.float32) / 2 ** (1/2),  # 45 degrees
+        "BSV": torch.ones((n_sentences, 2)).to(dtype=torch.float32)
+        / 2 ** (1 / 2),  # 45 degrees
     }
 
-    norm = (0.1 ** 2 + 0.9 ** 2) ** (1/2)
-    precomputed_embeddings['BSV'][most_relevant_bsv_id - 1, :] = torch.tensor([0.1, 0.9]) / norm
+    norm = (0.1 ** 2 + 0.9 ** 2) ** (1 / 2)
+    precomputed_embeddings["BSV"][most_relevant_bsv_id - 1, :] = (
+        torch.tensor([0.1, 0.9]) / norm
+    )
     # ~90 degrees
 
     indices = np.arange(1, n_sentences + 1)
 
-    searcher = SearchEngine(embedding_models,
-                            precomputed_embeddings,
-                            indices,
-                            connection=fake_sqlalchemy_engine)
-
-    responses.add_callback(
-        responses.POST, 'http://test',
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json"
+    searcher = SearchEngine(
+        embedding_models,
+        precomputed_embeddings,
+        indices,
+        connection=fake_sqlalchemy_engine,
     )
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test",
+        callback=partial(request_callback, searcher=searcher),
+        content_type="application/json",
+    )
+
+    responses.add_callback(
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     k = 1
-    widget = SearchWidget(bbs_search_url='http://test',
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
-                          results_per_page=k)
+    widget = SearchWidget(
+        bbs_search_url="http://test",
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+        results_per_page=k,
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', k)
-    bot.set_value('print_paragraph', False)
+    bot.set_value("top_results", k)
+    bot.set_value("print_paragraph", False)
 
     # BSV
-    bot.set_value('sent_embedder', 'BSV')
-    bot.click('investigate_button')
+    bot.set_value("sent_embedder", "BSV")
+    bot.click("investigate_button")
 
     captured_display_objects = bot.display_cached
 
     assert len(captured_display_objects) == k * bot.n_displays_per_result
-    assert textwrap.fill(most_relevant_bsv_text, width=80) in captured_display_objects[-1].data
+    assert (
+        textwrap.fill(most_relevant_bsv_text, width=80)
+        in captured_display_objects[-1].data
+    )
 
     # SBioBERT
     # bot.set_value('sent_embedder', 'SBioBERT')
@@ -294,18 +331,22 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     # captured_display_objects = bot.display_cached
     #
     # assert len(captured_display_objects) == k * bot.n_displays_per_result
-    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in captured_display_objects[-1].data
+    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in \
+    #        captured_display_objects[-1].data
 
 
 @responses.activate
-@pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
-def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
-    """When clicking the paragraph or article checkbox the ArticleSaver state is modified."""
+@pytest.mark.parametrize("saving_mode", [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
+def test_article_saver_gets_updated(
+    fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode
+):
+    """Clicking paragraph or article checkbox modifies the ArticleSaver state."""
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     k = 10
@@ -313,25 +354,27 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
 
     http_address = activate_responses(fake_sqlalchemy_engine)
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
-                          results_per_page=k)
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+        results_per_page=k,
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', k)
-    bot.set_value('default_value_article_saver', _Save.NOTHING)
-    bot.click('investigate_button')
+    bot.set_value("top_results", k)
+    bot.set_value("default_value_article_saver", _Save.NOTHING)
+    bot.click("investigate_button")
 
     captured_display_objects = bot.display_cached
 
     assert len(captured_display_objects) == k * bot.n_displays_per_result
-    assert bot.get_value('default_value_article_saver') == _Save.NOTHING
+    assert bot.get_value("default_value_article_saver") == _Save.NOTHING
 
     start = result_to_take * bot.n_displays_per_result
     end = (result_to_take + 1) * bot.n_displays_per_result
-    meta, chb_paragraph, chb_article, out = captured_display_objects[start: end]
+    meta, chb_paragraph, chb_article, out = captured_display_objects[start:end]
 
     # Check the checkbox
     if saving_mode == _Save.NOTHING:
@@ -351,42 +394,47 @@ def test_article_saver_gets_updated(fake_sqlalchemy_engine, monkeypatch, capsys,
         assert list(widget.article_saver.state)[0][1] == -1  # actual value 4
 
     else:
-        raise ValueError(f'Unrecognized saving mode: {saving_mode}')
+        raise ValueError(f"Unrecognized saving mode: {saving_mode}")
 
 
 def test_errors(fake_sqlalchemy_engine, monkeypatch, capsys):
     """Check that widget raises an error when bbs search server not working. """
 
     with pytest.raises(Exception):
-        SearchWidget(bbs_search_url='fake_address',
-                     bbs_mysql_engine=fake_sqlalchemy_engine,
-                     article_saver=ArticleSaver(fake_sqlalchemy_engine),
-                     results_per_page=3)
+        SearchWidget(
+            bbs_search_url="fake_address",
+            bbs_mysql_engine=fake_sqlalchemy_engine,
+            article_saver=ArticleSaver(fake_sqlalchemy_engine),
+            results_per_page=3,
+        )
 
 
 @responses.activate
-@pytest.mark.parametrize('saving_mode', [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
+@pytest.mark.parametrize("saving_mode", [_Save.NOTHING, _Save.PARAGRAPH, _Save.ARTICLE])
 def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, saving_mode):
     """Make sure that default saving buttons result in correct checkboxes."""
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
     k = 10
     http_address = activate_responses(fake_sqlalchemy_engine)
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
-                          results_per_page=k)
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+        results_per_page=k,
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', k)
-    bot.set_value('default_value_article_saver', saving_mode)
-    bot.click('investigate_button')
+    bot.set_value("top_results", k)
+    bot.set_value("default_value_article_saver", saving_mode)
+    bot.click("investigate_button")
 
     captured_display_objects = bot.display_cached
 
@@ -403,24 +451,24 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
         assert 0 < len(widget.article_saver.state) <= k
         assert all(x[1] == -1 for x in widget.article_saver.state)
     else:
-        raise ValueError(f'Unrecognized saving mode: {saving_mode}')
+        raise ValueError(f"Unrecognized saving mode: {saving_mode}")
 
     for i, display_obj in enumerate(captured_display_objects):
         if isinstance(display_obj, ipywidgets.Checkbox):
-            if display_obj.description == 'Extract the paragraph':
+            if display_obj.description == "Extract the paragraph":
                 assert display_obj.value == (saving_mode == _Save.PARAGRAPH)
 
-            elif display_obj.description == 'Extract the entire article':
+            elif display_obj.description == "Extract the entire article":
                 assert display_obj.value == (saving_mode == _Save.ARTICLE)
 
             else:
-                raise ValueError(f'Unrecognized checkbox, {i}')
+                raise ValueError(f"Unrecognized checkbox, {i}")
 
         elif isinstance(display_obj, HTML):
             pass
 
         else:
-            raise TypeError(f'Unrecognized type: {type(display_obj)}')
+            raise TypeError(f"Unrecognized type: {type(display_obj)}")
 
 
 @responses.activate
@@ -428,25 +476,28 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     http_address = activate_responses(fake_sqlalchemy_engine)
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(fake_sqlalchemy_engine),
-                          results_per_page=10)
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+        results_per_page=10,
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('inclusion_text', "")
-    bot.click('investigate_button')
+    bot.set_value("inclusion_text", "")
+    bot.click("investigate_button")
 
     assert bot.display_cached
 
-    bot.set_value('inclusion_text', "THIS TEXT DOES NOT EXIST IN ANY SENTENCE")
-    bot.click('investigate_button')
+    bot.set_value("inclusion_text", "THIS TEXT DOES NOT EXIST IN ANY SENTENCE")
+    bot.click("investigate_button")
 
     assert not bot.display_cached
 
@@ -459,28 +510,31 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     http_address = activate_responses(fake_sqlalchemy_engine)
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=(fake_sqlalchemy_engine))
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=(fake_sqlalchemy_engine),
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', 2)
-    bot.click('investigate_button')
+    bot.set_value("top_results", 2)
+    bot.click("investigate_button")
 
     bot.stdout_cached  # clear standard output
 
     with cd_temp(tmpdir):
-        bot.click('report_button')
+        bot.click("report_button")
 
-    assert 'Creating the search results PDF report...' in bot.stdout_cached
+    assert "Creating the search results PDF report..." in bot.stdout_cached
 
-    assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
+    assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1
 
 
 @responses.activate
@@ -491,26 +545,29 @@ def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     http_address = activate_responses(fake_sqlalchemy_engine)
 
     responses.add_callback(
-        responses.POST, 'http://test/help',
+        responses.POST,
+        "http://test/help",
         callback=request_callback_help,
-        content_type="application/json"
+        content_type="application/json",
     )
 
-    widget = SearchWidget(bbs_search_url=http_address,
-                          bbs_mysql_engine=fake_sqlalchemy_engine,
-                          article_saver=ArticleSaver(fake_sqlalchemy_engine))
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+    )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
 
-    bot.set_value('top_results', 2)
-    bot.set_value('default_value_article_saver', _Save.ARTICLE)
-    bot.click('investigate_button')
+    bot.set_value("top_results", 2)
+    bot.set_value("default_value_article_saver", _Save.ARTICLE)
+    bot.click("investigate_button")
 
     bot.stdout_cached  # clear standard output
 
     with cd_temp(tmpdir):
-        bot.click('articles_button')
+        bot.click("articles_button")
 
-    assert 'Creating the saved results PDF report... ' in bot.stdout_cached
+    assert "Creating the saved results PDF report... " in bot.stdout_cached
 
-    assert len([f for f in tmpdir.iterdir() if f.suffix == '.pdf']) == 1
+    assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1

@@ -30,7 +30,7 @@ class SearchEngine:
     indices : np.ndarray
         1D array containing sentence_ids corresponding to the rows of each of the
         values of precomputed_embeddings.
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         The database connection.
     """
 
@@ -39,9 +39,9 @@ class SearchEngine:
         self.precomputed_embeddings = precomputed_embeddings
         self.indices = indices
         self.connection = connection
-        logger.info('Retrieving articles ids for all sentence ids...')
+        logger.info("Retrieving articles ids for all sentence ids...")
         self.all_article_ids = retrieve_article_ids(self.connection)
-        logger.info('Retrieve articles ids: DONE')
+        logger.info("Retrieve articles ids: DONE")
 
     def query(
         self,
@@ -82,29 +82,31 @@ class SearchEngine:
         deprioritize_strength : str, {'None', 'Weak', 'Mild', 'Strong', 'Stronger'}
             How strong the deprioritization is.
         exclusion_text : str
-            New line separated collection of strings that are automatically used to exclude a given
-            sentence. If a sentence contains any of these strings then we filter it out.
+            New line separated collection of strings that are automatically
+            used to exclude a given sentence. If a sentence contains any of
+            these strings then we filter it out.
         inclusion_text : str
-            New line separated collection of strings. Only sentences that contain all of these
-            strings are going to make it through the filtering.
+            New line separated collection of strings. Only sentences that
+            contain all of these strings are going to make it through the
+            filtering.
         verbose : bool
             If True, then printing statistics to standard output.
 
         Returns
         -------
         sentence_ids : np.array
-            1D array representing the indices of the top `k` most relevant sentences.
-            The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
-
+            1D array representing the indices of the top `k` most relevant
+            sentences. The size of this array is going to be either (k, ) or
+            (len(restricted_sentences_ids), ).
         similarities : np.array
-            1D array reresenting the similarities for each of the top `k` sentences. Note that this will
-            include the deprioritization part.
-
+            1D array reresenting the similarities for each of the top `k`
+            sentences. Note that this will include the deprioritization part.
         stats : dict
             Various statistics. There are following keys:
-            - 'query_embed_time' - how much time it took to embed the `query_text` in seconds
-            - 'deprioritize_embed_time' - how much time it took to embed the `deprioritize_text` in seconds
-            -
+            - 'query_embed_time' - how much time it took to embed the
+              `query_text` in seconds
+            - 'deprioritize_embed_time' - how much time it took to embed the
+              `deprioritize_text` in seconds
         """
         embedding_model = self.embedding_models[which_model]
         precomputed_embeddings = self.precomputed_embeddings[which_model]
@@ -207,13 +209,14 @@ class SearchEngine:
 
         Returns
         -------
-        top_sentence_ids: torch.Tensor
-            1D array representing the indices of the top `k` most relevant sentences.
-            The size of this array is going to be either (k, ) or (len(restricted_sentences_ids), ).
-            k being equal to k for granularity = 'sentences', and num of sentences for k unique
-            articles for granularity = 'articles'
-        top_similarities: torch.Tensor
-            1D array reresenting the similarities for each of the top `k` sentences.
+        top_sentence_ids : torch.Tensor
+            1D array representing the indices of the top `k` most relevant
+            sentences. The size of this array is going to be either (k, ) or
+            (len(restricted_sentences_ids), ). k being equal to k for
+            granularity = 'sentences', and num of sentences for k unique
+            articles for granularity = 'articles'.
+        top_similarities : torch.Tensor
+            1D array representing the similarities for each of the top `k` sentences.
         """
         logger.info("Truncating similarities to the restricted indices")
         # restricted_sentence_id=  [1, 4, 5]
@@ -256,8 +259,8 @@ class SearchEngine:
                     break
 
             top_sentence_ids, top_similarities = (
-                top_sentence_ids[: num],
-                top_similarities[: num],
+                top_sentence_ids[:num],
+                top_similarities[:num],
             )
 
         else:

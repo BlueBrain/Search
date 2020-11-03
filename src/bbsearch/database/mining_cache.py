@@ -27,7 +27,7 @@ class Miner:
     entity_map : dict[str, str]
         A map from entity types produced by the model to new
         entity types that should appear in the cached results.
-    target_table: str
+    target_table : str
         The target table name for the mining results.
     task_queue : multiprocessing.Queue
         The queue with tasks for this worker
@@ -38,13 +38,13 @@ class Miner:
     """
 
     def __init__(
-            self,
-            database_url,
-            model_path,
-            entity_map,
-            target_table,
-            task_queue,
-            can_finish,
+        self,
+        database_url,
+        model_path,
+        entity_map,
+        target_table,
+        task_queue,
+        can_finish,
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
@@ -67,13 +67,13 @@ class Miner:
 
     @classmethod
     def create_and_mine(
-            cls,
-            database_url,
-            model_path,
-            entity_map,
-            target_table,
-            task_queue,
-            can_finish,
+        cls,
+        database_url,
+        model_path,
+        entity_map,
+        target_table,
+        task_queue,
+        can_finish,
     ):
         """Create a miner instance and start the mining loop.
 
@@ -89,7 +89,7 @@ class Miner:
         entity_map : dict[str, str]
             A map from entity types produced by the model to new
             entity types that should appear in the cached results.
-        target_table: str
+        target_table : str
             The target table name for the mining results.
         task_queue : multiprocessing.Queue
             The queue with tasks for this worker
@@ -203,7 +203,9 @@ class Miner:
 
         self.logger.debug("Writing results to the SQL database")
         with self.engine.begin() as con:
-            df_results.to_sql(self.target_table_name, con=con, if_exists="append", index=False)
+            df_results.to_sql(
+                self.target_table_name, con=con, if_exists="append", index=False
+            )
 
         self.logger.info(f"Mined {len(df_results)} entities.")
 
@@ -228,34 +230,33 @@ class CreateMiningCache:
 
     Parameters
     ----------
-    database_engine: SQLAlchemy connectable (engine/connection)
+    database_engine : sqlalchemy.engine.Engine
         Connection to the CORD-19 database.
-
     ee_models_library : pd.DataFrame
         Table with information on models responsible to mine each entity
         type and how to rename entity types.
-
     target_table_name : str
         The target table name for the mining results.
-
     workers_per_model : int, optional
         Number of max processes to spawn to run text mining and table
         population in parallel.
     """
 
     def __init__(
-            self,
-            database_engine,
-            ee_models_library,
-            target_table_name,
-            workers_per_model=1,
+        self,
+        database_engine,
+        ee_models_library,
+        target_table_name,
+        workers_per_model=1,
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
-        required_tables = ['articles', 'sentences']
+        required_tables = ["articles", "sentences"]
         for table_name in required_tables:
             if not database_engine.dialect.has_table(database_engine, table_name):
-                raise ValueError(f"Database at {database_engine.url} does not "
-                                 f"contain required table {table_name}.")
+                raise ValueError(
+                    f"Database at {database_engine.url} does not "
+                    f"contain required table {table_name}."
+                )
 
         self.engine = database_engine
         self.target_table = target_table_name
@@ -286,7 +287,8 @@ class CreateMiningCache:
             WHERE mining_model = :mining_model
             """
             self.engine.execute(
-                sqlalchemy.sql.text(query), mining_model=model_schema["model_path"],
+                sqlalchemy.sql.text(query),
+                mining_model=model_schema["model_path"],
             )
 
     def _schema_creation(self):
@@ -329,7 +331,7 @@ class CreateMiningCache:
             sqlalchemy.Column(
                 "mining_model_version", sqlalchemy.Text(), nullable=False
             ),
-            sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False)
+            sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False),
         )
 
         with self.engine.begin() as connection:
@@ -358,7 +360,7 @@ class CreateMiningCache:
         self.logger.info("Adding new tasks")
         # As long as there are any tasks keep trying to add them to the queues
         while any(
-                task_idx < len(all_article_ids) for task_idx in current_task_ids.values()
+            task_idx < len(all_article_ids) for task_idx in current_task_ids.values()
         ):
             for queue_name, task_queue in task_queues.items():
                 # Check if still task available for the current queue
@@ -371,7 +373,7 @@ class CreateMiningCache:
 
                 # Check if there are still workers working on this queue
                 if not any(
-                        worker.is_alive() for worker in workers_by_queue[queue_name]
+                    worker.is_alive() for worker in workers_by_queue[queue_name]
                 ):
                     self.logger.debug("No workers left working on this queue")
                     current_task_ids[queue_name] = len(all_article_ids)
@@ -438,7 +440,7 @@ class CreateMiningCache:
                     # This queue is already empty we've let the workers know
                     continue
                 if not any(
-                        worker.is_alive() for worker in workers_by_queue[queue_name]
+                    worker.is_alive() for worker in workers_by_queue[queue_name]
                 ):
                     self.logger.debug(f"Emptying the {queue_name} queue")
                     while not task_queue.empty():
@@ -486,7 +488,8 @@ class CreateMiningCache:
                     finished_workers.append(process)
                     if process.exitcode != 0:
                         self.logger.error(
-                            f"Worker {process.name} terminated with exit code {process.exitcode}!"
+                            f"Worker {process.name} terminated with exit "
+                            f"code {process.exitcode}!"
                         )
 
             # Remove all workers that are already in the `finished_workers`
@@ -529,7 +532,7 @@ class CreateMiningCache:
 
         model_schemas = dict()
         for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
-                index=False
+            index=False
         ):
             _, _, model_name = model_path.rpartition("/")
             if model_name not in model_schemas:

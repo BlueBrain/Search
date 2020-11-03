@@ -21,7 +21,7 @@ class SearchServer(Flask):
         The folder containing pre-trained models.
     embeddings_h5_path : str or pathlib.Path
         The path to the h5 file containing pre-computed embeddings.
-    connection : SQLAlchemy connectable (engine/connection) or database str URI or DBAPI2 connection (fallback mode)
+    connection : sqlalchemy.engine.Engine
         The database connection.
     indices : np.ndarray
         1D array containing sentence_ids to be considered for precomputed embeddings.
@@ -30,12 +30,12 @@ class SearchServer(Flask):
     """
 
     def __init__(
-            self,
-            trained_models_path,
-            embeddings_h5_path,
-            indices,
-            connection,
-            models,
+        self,
+        trained_models_path,
+        embeddings_h5_path,
+        indices,
+        connection,
+        models,
     ):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
@@ -46,7 +46,7 @@ class SearchServer(Flask):
         self.connection = connection
 
         if indices is None:
-            raise ValueError('Please specify the indices.')
+            raise ValueError("Please specify the indices.")
 
         self.indices = indices
         self.logger.info("Initializing the server...")
@@ -59,8 +59,7 @@ class SearchServer(Flask):
         self.logger.info("Initializing embedding models...")
         self.models = models
         self.embedding_models = {
-            model_name: self._get_model(model_name)
-            for model_name in models
+            model_name: self._get_model(model_name) for model_name in models
         }
 
         self.logger.info("Loading precomputed embeddings...")
@@ -87,7 +86,7 @@ class SearchServer(Flask):
             self.embedding_models,
             self.precomputed_embeddings,
             self.indices,
-            self.connection
+            self.connection,
         )
 
         self.add_url_rule("/help", view_func=self.help, methods=["POST"])
@@ -118,8 +117,10 @@ class SearchServer(Flask):
             "SBioBERT": lambda: SBioBERT(),
             "USE": lambda: USE(),
             "SBERT": lambda: SentTransformer(model_name="bert-base-nli-mean-tokens"),
-            "BIOBERT NLI+STS": lambda: SentTransformer(model_name="clagator/biobert_v1.1_pubmed_nli_sts"),
-            "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path)
+            "BIOBERT NLI+STS": lambda: SentTransformer(
+                model_name="clagator/biobert_v1.1_pubmed_nli_sts"
+            ),
+            "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path),
         }
 
         if model_name not in model_factories:
@@ -141,29 +142,34 @@ class SearchServer(Flask):
             "POST": {
                 "/help": {
                     "description": "Get this help.",
-                    "response_content_type": "application/json"
+                    "response_content_type": "application/json",
                 },
                 "/": {
                     "description": "Compute search through database"
-                                   "and give back most similar sentences to the query.",
+                    "and give back most similar sentences to the query.",
                     "response_content_type": "application/json",
                     "required_fields": {
                         "query_text": [],
                         "which_model": self.models,
-                        "k": 'integer number'
+                        "k": "integer number",
                     },
                     "accepted_fields": {
                         "is_english": [True, False],
                         "has_journal": [True, False],
-                        "data_range": ('start_date', 'end_date'),
-                        "deprioritize_strength": ['None', 'Weak', 'Mild',
-                                                  'Strong', 'Stronger'],
+                        "data_range": ("start_date", "end_date"),
+                        "deprioritize_strength": [
+                            "None",
+                            "Weak",
+                            "Mild",
+                            "Strong",
+                            "Stronger",
+                        ],
                         "exclusion_text": [],
                         "inclusion_text": [],
-                        "deprioritize_text": []
-                    }
-                }
-            }
+                        "deprioritize_text": [],
+                    },
+                },
+            },
         }
 
         return jsonify(response)
@@ -194,23 +200,19 @@ class SearchServer(Flask):
 
             self.logger.info("Starting the search...")
             sentence_ids, similarities, stats = self.search_engine.query(
-                which_model,
-                k,
-                query_text,
-                **json_request)
+                which_model, k, query_text, **json_request
+            )
 
             self.logger.info(f"Search completed, got {len(sentence_ids)} results.")
 
             response = dict(
                 sentence_ids=sentence_ids.tolist(),
                 similarities=similarities.tolist(),
-                stats=stats)
+                stats=stats,
+            )
         else:
             self.logger.info("Search query is not JSON. Not processing.")
-            response = dict(
-                sentence_ids=None,
-                similarities=None,
-                stats=None)
+            response = dict(sentence_ids=None, similarities=None, stats=None)
 
         response_json = jsonify(response)
 
