@@ -8,12 +8,14 @@ import sys
 import textwrap
 
 import ipywidgets as widgets
+import pandas as pd
 import pdfkit
 import requests
 from IPython.display import HTML, display
 
 from .._css import style
 from ..sql import (
+    get_titles,
     retrieve_article_metadata_from_article_id,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
@@ -65,8 +67,7 @@ class SearchWidget(widgets.VBox):
 
         self.radio_buttons = []
         self.current_sentence_ids = []
-        self.current_paragraph_ids = []
-        self.current_article_ids = []
+        self.history = []
 
         response = requests.post(
             self.bbs_search_url + "/help",
@@ -542,16 +543,9 @@ class SearchWidget(widgets.VBox):
                     self.current_sentence_ids = response["sentence_ids"]
             print(f'{timer["server query"]:7.2f} seconds')
 
-            print("Resolving articles...".ljust(50), end="", flush=True)
-            with timer("id resolution"):
-                self.current_article_ids, self.current_paragraph_ids = self.resolve_ids(
-                    self.current_sentence_ids
-                )
-            print(f'{timer["id resolution"]:7.2f} seconds')
-
-            print("Applying default saving...".ljust(50), end="", flush=True)
+            print("Processing search results...".ljust(50), end="", flush=True)
             with timer("default saving"):
-                self._apply_default_saving()
+                self._process_search_results()
             print(f'{timer["default saving"]:7.2f} seconds')
 
             print("Updating the results display...".ljust(50), end="", flush=True)
@@ -564,23 +558,90 @@ class SearchWidget(widgets.VBox):
 
             print("Done.")
 
-    def _apply_default_saving(self):
+    def _process_search_results(self):
+        """Flag items corresponding to sentence IDs for saving.
+
+        The default saving strategy is given by the corresponding
+        saving setting widget state.
+
+        This also updates the search history.
+        """
         default_saving_value = self.widgets["default_value_article_saver"].value
-        if default_saving_value != _Save.NOTHING:
-            for article_id, paragraph_id in zip(
-                self.current_article_ids, self.current_paragraph_ids
-            ):
-                if default_saving_value == _Save.ARTICLE:
-                    self.article_saver.add_article(article_id)
-                elif default_saving_value == _Save.PARAGRAPH:
-                    self.article_saver.add_paragraph(article_id, paragraph_id)
+        sentence_df = retrieve_sentences_from_sentence_ids(
+            sentence_ids=self.current_sentence_ids,
+            engine=self.bbs_mysql_engine,
+            keep_order=True,
+        )
+
+        for row in sentence_df.itertuples(index=False):
+            self.history.append(
+                (row.article_id, row.paragraph_pos_in_article, row.sentence_id)
+            )
+            if default_saving_value == _Save.ARTICLE:
+                self.article_saver.add_article(row.article_id)
+            elif default_saving_value == _Save.PARAGRAPH:
+                self.article_saver.add_paragraph(row.article_id, row.paragraph_id)
+
+    def saved_results(self):
+        """Get all search results that were flagged for saving.
+
+        Returns
+        -------
+        saved_items_df : pd.DataFrame
+            A data frame with all saved search results.
+        """
+        # Get all titles first
+        article_ids = [article_id for article_id, *_ in self.history]
+        titles = get_titles(article_ids, self.bbs_mysql_engine)
+
+        # For each item in history get its saving status
+        rows = []
+        seen = set()
+        columns = ["Article ID", "Paragraph #", "Paragraph", "Article", "Title"]
+        markers = {True: "✓", False: ""}
+        for item in self.history:
+            # Skip duplicate items
+            if item in seen:
+                continue
+            else:
+                seen.add(item)
+            article_id, paragraph_pos, sentence_id = item
+
+            # Get saving status from the article saver
+            if self.article_saver is None:
+                paragraph_saved = False
+                article_saved = False
+            else:
+                paragraph_saved = self.article_saver.has_paragraph(
+                    article_id, paragraph_pos
+                )
+                article_saved = self.article_saver.has_article(article_id)
+
+            # Dont' show -1 if no paragraph saved
+            if not paragraph_saved:
+                paragraph_pos = ""
+
+            # Dont' show items that are not saved
+            if any([paragraph_saved, article_saved]):
+                row = (
+                    article_id,
+                    paragraph_pos,
+                    markers[paragraph_saved],
+                    markers[article_saved],
+                    titles[article_id],
+                )
+                rows.append(row)
+
+        saved_items_df = pd.DataFrame(rows, columns=columns)
+
+        return saved_items_df
 
     def resolve_ids(self, sentence_ids):
         """Resolve sentence IDs into article and paragraph IDs.
 
         Parameters
         ----------
-        sentence_ids : list_like
+        sentence_ids : iterable of int
             A list of sentence IDs to be resolved
 
         Returns

@@ -5,6 +5,33 @@ import numpy as np
 import pandas as pd
 
 
+def get_titles(article_ids, engine):
+    """Get article titles from the SQL database.
+
+    Parameters
+    ----------
+    article_ids : iterable of int
+        An iterable of article IDs.
+    engine : sqlalchemy.engine.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    titles : dict
+        Dictionary mapping article IDs to the article titles.
+    """
+    query = f"""\
+    SELECT article_id, title
+    FROM articles
+    WHERE article_id IN ({",".join(map(str, article_ids))})
+    """
+    with engine.connect() as connection:
+        response = connection.execute(query).fetchall()
+        titles = {article_id: title for article_id, title in response}
+
+    return titles
+
+
 def retrieve_article_ids(engine):
     """Retrieve all articles_id from sentences table.
 
@@ -23,30 +50,43 @@ def retrieve_article_ids(engine):
     return article_id_dict
 
 
-def retrieve_sentences_from_sentence_ids(sentence_ids, engine):
+def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False):
     """Retrieve sentences given sentence ids.
 
     Parameters
     ----------
-    sentence_ids : list of int
+    sentence_ids : iterable of int
         Sentence ids for which need to retrieve the text.
-    engine: sqlalchemy.engine.Engine
+    engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
+    keep_order : bool, optional
+        Make sure that the order of sentence ID in the result data frame
+        is the same. Note that the default value is `False`.
 
     Returns
     -------
-    sentences : pd.DataFrame
+    df_sentences : pd.DataFrame
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
     sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
     sentence_ids_s = sentence_ids_s or "NULL"
-    sql_query = f"""SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
-                    FROM sentences
-                    WHERE sentence_id IN ({sentence_ids_s})"""
-    sentences = pd.read_sql(sql_query, engine)
+    sql_query = f"""
+    SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
+    FROM sentences
+    WHERE sentence_id IN ({sentence_ids_s})
+    """
+    df_sentences = pd.read_sql(sql_query, engine)
 
-    return sentences
+    if keep_order:
+        which_row = {
+            sentence_id: i for i, sentence_id in df_sentences["sentence_id"].iteritems()
+        }
+        correct_order = [which_row[sentence_id] for sentence_id in sentence_ids]
+        df_sentences = df_sentences.reindex(correct_order)
+        df_sentences.reset_index(drop=True, inplace=True)
+
+    return df_sentences
 
 
 def retrieve_paragraph_from_sentence_id(sentence_id, engine):
