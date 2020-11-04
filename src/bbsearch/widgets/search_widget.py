@@ -311,7 +311,7 @@ class SearchWidget(widgets.VBox):
             self.widgets["articles_button"],
         ]
 
-        with self.widgets["status"]:
+        with self.widgets["out"]:
             init_text = r"""
               ____  ____   _____
              |  _ \|  _ \ / ____|

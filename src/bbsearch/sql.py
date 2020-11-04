@@ -20,6 +20,9 @@ def get_titles(article_ids, engine):
     titles : dict
         Dictionary mapping article IDs to the article titles.
     """
+    if len(article_ids) == 0:
+        return {}
+
     query = f"""\
     SELECT article_id, title
     FROM articles
