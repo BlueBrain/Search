@@ -1,5 +1,7 @@
 """Model handling sentences embeddings."""
 import logging
+import multiprocessing as mp
+import os
 import pathlib
 import string
 from abc import ABC, abstractmethod
@@ -9,6 +11,7 @@ import numpy as np
 import sent2vec
 import sentence_transformers
 import spacy
+import sqlalchemy
 import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
@@ -16,6 +19,7 @@ from nltk.corpus import stopwords
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
+from .utils import H5
 
 logger = logging.getLogger(__name__)
 
@@ -739,7 +743,11 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         if batch_ix % 10 == 0:
             logger.info(f"Embedded {batch_ix} batches with {num_errors} errors")
 
-    final_embeddings = np.concatenate(all_embeddings, axis=0)
+    if len(all_embeddings) == 1:
+        final_embeddings = all_embeddings
+    else:
+        final_embeddings = np.concatenate(all_embeddings, axis=0)  # concatenate triggers copying
+
     retrieved_indices = np.array(all_ids)
     return final_embeddings, retrieved_indices
 
@@ -780,3 +788,173 @@ def get_embedding_model(model_name, checkpoint_path=None, device=None):
     selected_factory = model_factories[model_name]
 
     return selected_factory()
+
+
+class MPEmbedder:
+    """Embedding of sentences with multiprocessing.
+
+    Parameters
+    ----------
+    database_url : str
+        URL of the database.
+    model_name : str
+        Name of the embedding model to be used.
+    indices : np.ndarray
+        1D array storing the sentence_ids for which we want to compute the
+        embedding.
+    h5_path_output : pathlib.Path
+        Path to where the output h5 file will be lying.
+    batch_size_inference : int
+        Number of sentences to preprocess and embed at the same time. Should
+        lead to major speedups. Note that the last batch will have a length of
+        `n_sentences % batch_size` (unless it is 0). Note that some models
+        (SBioBERT) might perform padding to the longest sentence in the batch
+        and bigger batch size might not lead to a speedup.
+    batch_size_transfer : int
+        Batch size to be used for transfering data from the temporary h5 files to the
+        final h5 file.
+    n_processes : int
+        Number of processes to use. Note that each process gets
+        `len(indices) / n_processes` sentences to embed.
+    checkpoint_path : pathlib.Path or None
+        If provided, it represents the path to the trained model. Note
+        that for some embedding models it is not necessary (they have
+        a standard caching directory).
+    gpus : None or list
+        If not specified, all processes will be using CPU. If not None, then
+        it needs to be a list of length `n_processes` where each element
+        represents the GPU id (integer) to be used. None elements will
+        be interpreted as CPU.
+    delete_temp : bool
+        If True, the temporary h5 files are deleted after the final h5 is created.
+        Disabling this flag is useful for testing and debugging purposes.
+    temp_folder : None or pathlib.Path
+        If None, then all temporary h5 files stored into the same folders as the the ouput h5.
+        Otherwise they are stored in the specified folder.
+
+    """
+
+    def __init__(
+            self,
+            database_url,
+            model_name,
+            indices,
+            h5_path_output,
+            batch_size_inference=16,
+            batch_size_transfer=1000,
+            n_processes=2,
+            checkpoint_path=None,
+            gpus=None,
+            delete_temp=True,
+            temp_folder=None,
+    ):
+        self.database_url = database_url
+        self.model_name = model_name
+        self.indices = indices
+        self.h5_path_output = h5_path_output
+        self.batch_size_inference = batch_size_inference
+        self.batch_size_transfer = batch_size_transfer
+        self.n_processes = n_processes
+        self.checkpoint_path = checkpoint_path
+        self.delete_temp = delete_temp
+        self.temp_folder = temp_folder
+
+        if gpus is not None and len(gpus) != n_processes:
+            raise ValueError("One needs to specify the GPU for each process separately")
+
+        self.gpus = gpus
+
+    def do_embedding(self):
+        """Do the parallelized embedding."""
+        output_folder = self.temp_folder or self.h5_path_output.parent
+
+        worker_processes = []
+        splits = [x for x in np.array_split(self.indices, self.n_processes) if len(x) > 0]
+        concatenate_inputs = {}
+
+        for process_ix, split in enumerate(splits):
+            temp_h5_path = output_folder / f"{self.h5_path_output.stem}_temp{process_ix}.h5"
+
+            worker_process = mp.Process(
+                name=f"worker_{process_ix}",
+                target=self.create_and_embed,
+                kwargs={
+                    "database_url": self.database_url,
+                    "model_name": self.model_name,
+                    "indices": split,
+                    "temp_h5_path": temp_h5_path,
+                    "batch_size": self.batch_size_inference,
+                    "checkpoint_path": self.checkpoint_path,
+                    "gpu": None if self.gpus is None else self.gpus[process_ix]
+                }
+            )
+            worker_process.start()
+            worker_processes.append(worker_process)
+            concatenate_inputs[temp_h5_path] = split
+
+        # Wait for the temporary
+        for process in worker_processes:
+            process.join()
+
+        # Create a big h5 file from the temporary h5 files
+        H5.concatenate(self.h5_path_output,
+                       self.model_name,
+                       concatenate_inputs,
+                       delete_inputs=self.delete_temp,
+                       batch_size=self.batch_size_transfer)
+
+    @staticmethod
+    def create_and_embed(database_url,
+                         model_name,
+                         indices,
+                         temp_h5_path,
+                         batch_size,
+                         checkpoint_path,
+                         gpu):
+        """Run per worker function.
+
+        Parameters
+        ----------
+        database_url : str
+            URL of the database.
+        model_name : str
+            Name of the model to use for embedding.
+        indices : np.ndarray
+            1D array of sentences ids indices representing what
+            the worker needs to embed.
+        temp_h5_path : pathlib.Path
+            Path to where we store the temporary h5 file.
+        batch_size : int
+            Number of sentences in the batch.
+        checkpoint_path : None or pathlib.Path
+            If provided, then used to load the pretrained embedding model.
+        gpu : int or None
+            If None, we are going to use a CPU. Otherwise, we use a GPU
+            with the specified id.
+        """
+        model = get_embedding_model(model_name,
+                                    checkpoint_path=checkpoint_path,
+                                    device="cpu" if gpu is None else "cuda")
+
+        engine = sqlalchemy.create_engine(database_url)
+        engine.dispose()
+
+        if gpu is not None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+
+        if temp_h5_path.exists():
+            raise FileExistsError(f"{temp_h5_path} already exists")
+
+        H5.create(temp_h5_path, model_name, shape=(len(indices), model.dim))
+
+        for pos_indices, batch_indices in zip(np.array_split(np.arange(len(indices)), batch_size),
+                                              np.array_split(indices, batch_size)):
+            embeddings, retrieved_indices = compute_database_embeddings(engine,
+                                                                        model,
+                                                                        batch_indices,
+                                                                        batch_size=len(batch_indices))
+
+            if not np.array_equal(retrieved_indices, batch_indices):
+                raise ValueError("The retrieved and requested indices do not agree.")
+
+            H5.write(temp_h5_path, model_name, embeddings, pos_indices)
