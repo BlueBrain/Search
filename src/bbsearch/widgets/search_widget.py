@@ -577,10 +577,13 @@ class SearchWidget(widgets.VBox):
             self.history.append(
                 (row.article_id, row.paragraph_pos_in_article, row.sentence_id)
             )
-            if default_saving_value == _Save.ARTICLE:
-                self.article_saver.add_article(row.article_id)
-            elif default_saving_value == _Save.PARAGRAPH:
-                self.article_saver.add_paragraph(row.article_id, row.paragraph_id)
+            if self.article_saver is not None:
+                if default_saving_value == _Save.ARTICLE:
+                    self.article_saver.add_article(row.article_id)
+                elif default_saving_value == _Save.PARAGRAPH:
+                    self.article_saver.add_paragraph(
+                        row.article_id, row.paragraph_pos_in_article
+                    )
 
     def saved_results(self):
         """Get all search results that were flagged for saving.
@@ -596,17 +599,9 @@ class SearchWidget(widgets.VBox):
 
         # For each item in history get its saving status
         rows = []
-        seen = set()
         columns = ["Article ID", "Paragraph #", "Paragraph", "Article", "Title"]
         markers = {True: "✓", False: ""}
-        for item in self.history:
-            # Skip duplicate items
-            if item in seen:
-                continue
-            else:
-                seen.add(item)
-            article_id, paragraph_pos, sentence_id = item
-
+        for article_id, paragraph_pos, sentence_id in self.history:
             # Get saving status from the article saver
             if self.article_saver is None:
                 paragraph_saved = False
@@ -617,11 +612,11 @@ class SearchWidget(widgets.VBox):
                 )
                 article_saved = self.article_saver.has_article(article_id)
 
-            # Dont' show -1 if no paragraph saved
+            # Dont' show paragraph position if no paragraph saved
             if not paragraph_saved:
                 paragraph_pos = ""
 
-            # Dont' show items that are not saved
+            # Don't show items that are not saved
             if any([paragraph_saved, article_saved]):
                 row = (
                     article_id,
@@ -635,29 +630,6 @@ class SearchWidget(widgets.VBox):
         saved_items_df = pd.DataFrame(rows, columns=columns)
 
         return saved_items_df
-
-    def resolve_ids(self, sentence_ids):
-        """Resolve sentence IDs into article and paragraph IDs.
-
-        Parameters
-        ----------
-        sentence_ids : iterable of int
-            A list of sentence IDs to be resolved
-
-        Returns
-        -------
-        article_ids : list_like
-            The article IDs corresponding to the sentence IDs
-        paragraph_ids : list_like
-            The paragraph IDs corresponding to the sentence IDs
-        """
-        sentences = retrieve_sentences_from_sentence_ids(
-            sentence_ids=sentence_ids, engine=self.bbs_mysql_engine
-        )
-        article_ids = sentences["article_id"].to_list()
-        paragraph_ids = sentences["paragraph_pos_in_article"].to_list()
-
-        return article_ids, paragraph_ids
 
     def set_page(self, new_page, force=False):
         """Go to a given page in the results view.
