@@ -953,7 +953,7 @@ class MPEmbedder:
 
         n_indices = len(indices)
         H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
-        H5.create(temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1))
+        H5.create(temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1),  dtype="int32")
 
         for pos_indices in np.array_split(np.arange(n_indices), n_indices / batch_size):
             batch_indices = indices[pos_indices]
@@ -965,4 +965,7 @@ class MPEmbedder:
                 raise ValueError("The retrieved and requested indices do not agree.")
 
             H5.write(temp_h5_path, model_name, embeddings, pos_indices)
-            H5.write(temp_h5_path, f"{model_name}_indices", batch_indices, pos_indices)
+            H5.write(temp_h5_path,
+                    f"{model_name}_indices",
+                    batch_indices.reshape(-1, 1),
+                    pos_indices)
