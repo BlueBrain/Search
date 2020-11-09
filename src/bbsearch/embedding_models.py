@@ -831,18 +831,18 @@ class MPEmbedder:
     """
 
     def __init__(
-            self,
-            database_url,
-            model_name,
-            indices,
-            h5_path_output,
-            batch_size_inference=16,
-            batch_size_transfer=1000,
-            n_processes=2,
-            checkpoint_path=None,
-            gpus=None,
-            delete_temp=True,
-            temp_folder=None,
+        self,
+        database_url,
+        model_name,
+        indices,
+        h5_path_output,
+        batch_size_inference=16,
+        batch_size_transfer=1000,
+        n_processes=2,
+        checkpoint_path=None,
+        gpus=None,
+        delete_temp=True,
+        temp_folder=None,
     ):
         self.database_url = database_url
         self.model_name = model_name
@@ -865,11 +865,15 @@ class MPEmbedder:
         output_folder = self.temp_folder or self.h5_path_output.parent
 
         worker_processes = []
-        splits = [x for x in np.array_split(self.indices, self.n_processes) if len(x) > 0]
-        concatenate_inputs = {}
+        splits = [
+            x for x in np.array_split(self.indices, self.n_processes) if len(x) > 0
+        ]
+        h5_paths_temp = []
 
         for process_ix, split in enumerate(splits):
-            temp_h5_path = output_folder / f"{self.h5_path_output.stem}_temp{process_ix}.h5"
+            temp_h5_path = (
+                output_folder / f"{self.h5_path_output.stem}_temp{process_ix}.h5"
+            )
 
             worker_process = mp.Process(
                 name=f"worker_{process_ix}",
@@ -881,32 +885,36 @@ class MPEmbedder:
                     "temp_h5_path": temp_h5_path,
                     "batch_size": self.batch_size_inference,
                     "checkpoint_path": self.checkpoint_path,
-                    "gpu": None if self.gpus is None else self.gpus[process_ix]
-                }
+                    "gpu": None if self.gpus is None else self.gpus[process_ix],
+                },
             )
             worker_process.start()
             worker_processes.append(worker_process)
-            concatenate_inputs[temp_h5_path] = split
+            h5_paths_temp.append(temp_h5_path)
 
         # Wait for the temporary
         for process in worker_processes:
             process.join()
 
         # Create a big h5 file from the temporary h5 files
-        H5.concatenate(self.h5_path_output,
-                       self.model_name,
-                       concatenate_inputs,
-                       delete_inputs=self.delete_temp,
-                       batch_size=self.batch_size_transfer)
+        H5.concatenate(
+            self.h5_path_output,
+            self.model_name,
+            h5_paths_temp,
+            delete_inputs=self.delete_temp,
+            batch_size=self.batch_size_transfer,
+        )
 
     @staticmethod
-    def create_and_embed(database_url,
-                         model_name,
-                         indices,
-                         temp_h5_path,
-                         batch_size,
-                         checkpoint_path,
-                         gpu):
+    def create_and_embed(
+        database_url,
+        model_name,
+        indices,
+        temp_h5_path,
+        batch_size,
+        checkpoint_path,
+        gpu,
+    ):
         """Run per worker function.
 
         Parameters
@@ -928,9 +936,11 @@ class MPEmbedder:
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
         """
-        model = get_embedding_model(model_name,
-                                    checkpoint_path=checkpoint_path,
-                                    device="cpu" if gpu is None else "cuda")
+        model = get_embedding_model(
+            model_name,
+            checkpoint_path=checkpoint_path,
+            device="cpu" if gpu is None else "cuda",
+        )
 
         engine = sqlalchemy.create_engine(database_url)
         engine.dispose()
@@ -941,16 +951,18 @@ class MPEmbedder:
         if temp_h5_path.exists():
             raise FileExistsError(f"{temp_h5_path} already exists")
 
-        H5.create(temp_h5_path, model_name, shape=(len(indices), model.dim))
+        n_indices = len(indices)
+        H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
+        H5.create(temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1))
 
-        for pos_indices, batch_indices in zip(np.array_split(np.arange(len(indices)), batch_size),
-                                              np.array_split(indices, batch_size)):
-            embeddings, retrieved_indices = compute_database_embeddings(engine,
-                                                                        model,
-                                                                        batch_indices,
-                                                                        batch_size=len(batch_indices))
+        for pos_indices in np.array_split(np.arange(n_indices), n_indices / batch_size):
+            batch_indices = indices[pos_indices]
+            embeddings, retrieved_indices = compute_database_embeddings(
+                engine, model, batch_indices, batch_size=len(batch_indices)
+            )
 
             if not np.array_equal(retrieved_indices, batch_indices):
                 raise ValueError("The retrieved and requested indices do not agree.")
 
             H5.write(temp_h5_path, model_name, embeddings, pos_indices)
+            H5.write(temp_h5_path, f"{model_name}_indices", batch_indices, pos_indices)
