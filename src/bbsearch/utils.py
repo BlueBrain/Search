@@ -149,6 +149,75 @@ class H5:
             h5_dset[np.sort(indices)] = np.ones((len(indices), dim)) * fillvalue
 
     @staticmethod
+    def concatenate(
+        h5_path_output, dataset_name, h5_paths_temp, delete_inputs=True, batch_size=2000
+    ):
+        """Concatenate multiple h5 files into one h5 file.
+
+        Parameters
+        ----------
+        h5_path_output : pathlib.Path
+            Path to the h5 file. Note that this file can already exist and contain other
+            datasets.
+        dataset_name : str
+            Name of the dataset.
+        h5_paths_temp : list
+            Paths to the the input h5 files. Note that each of them will have 2 datasets:
+            * `{dataset_name}` - dtype = float and shape (length, dim)
+            * `{dataset_name}_indices` - dtype = int and shape (length, 1)
+        delete_inputs : bool
+            If True, then all input h5 files are deleted once the concatenation is done.
+        batch_size : int
+            Batch size to be used for transfers from the input h5 to the final one.
+        """
+        if not h5_paths_temp:
+            raise ValueError("No temporary h5 files provided.")
+
+        all_indices = set()
+        dim = None
+        for path_temp in h5_paths_temp:
+            with h5py.File(path_temp, "r") as f:
+                current_indices = set(f[f"{dataset_name}_indices"][:, 0])
+                current_dim = f[f"{dataset_name}"].shape[1]
+
+                if dim is None:
+                    dim = current_dim
+                else:
+                    if current_dim != dim:
+                        raise ValueError(
+                            f"The dimension of {path_temp} is inconsistent"
+                        )
+
+                if all_indices & current_indices:
+                    raise ValueError(
+                        f"The file {path_temp} introduces an overlapping index"
+                    )
+
+                all_indices |= current_indices
+
+        final_length = max(all_indices) + 1
+        H5.create(h5_path_output, dataset_name, shape=(final_length, dim))
+
+        for path_temp in h5_paths_temp:
+            with h5py.File(path_temp, "r") as f:
+                current_indices = f[f"{dataset_name}_indices"][:, 0]
+                batches = np.array_split(
+                    np.arange(len(current_indices)), len(current_indices) / batch_size
+                )
+                h5_data = f[f"{dataset_name}"]
+                for batch in batches:
+                    H5.write(
+                        h5_path_output,
+                        dataset_name,
+                        h5_data[batch],
+                        current_indices[batch],
+                    )
+
+        if delete_inputs:
+            for path_temp in h5_paths_temp:
+                path_temp.unlink()
+
+    @staticmethod
     def create(h5_path, dataset_name, shape, dtype="f4"):
         """Create a dataset (and potentially also a h5 file).
 
