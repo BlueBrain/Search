@@ -28,7 +28,7 @@ def get_titles(article_ids, engine):
     FROM articles
     WHERE article_id IN ({",".join(map(str, article_ids))})
     """
-    with engine.connect() as connection:
+    with engine.begin() as connection:
         response = connection.execute(query).fetchall()
         titles = {article_id: title for article_id, title in response}
 
@@ -80,7 +80,7 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
     WHERE sentence_id IN ({sentence_ids_s})
     """
 
-    with engine.connect() as connection:
+    with engine.begin() as connection:
         df_sentences = pd.read_sql(sql_query, connection)
 
     if keep_order:
