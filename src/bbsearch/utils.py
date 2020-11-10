@@ -189,8 +189,9 @@ class H5:
                         )
 
                 if all_indices & current_indices:
+                    inters = all_indices & current_indices
                     raise ValueError(
-                        f"The file {path_temp} introduces an overlapping index"
+                            f"The file {path_temp} introduces an overlapping index: {inters}"
                     )
 
                 all_indices |= current_indices

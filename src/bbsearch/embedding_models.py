@@ -4,6 +4,8 @@ import multiprocessing as mp
 import os
 import pathlib
 import string
+import time
+import traceback
 from abc import ABC, abstractmethod
 
 import joblib
@@ -122,6 +124,7 @@ class SBioBERT(EmbeddingModel):
             self.device
         )
         self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
+        self.max_position_embeddings = self.sbiobert_model.config.to_dict()["max_position_embeddings"]
 
     @property
     def dim(self):
@@ -151,7 +154,12 @@ class SBioBERT(EmbeddingModel):
 
         """
         encoding = self.tokenizer(
-            raw_sentence, pad_to_max_length=True, return_tensors="pt"
+            raw_sentence,
+            #pad_to_max_length=True,
+            padding="max_length",
+            return_tensors="pt",
+            max_length=self.max_position_embeddings,
+            truncation=True
         )
         return encoding
 
@@ -740,8 +748,8 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         all_ids.extend(sentences_id)
         all_embeddings.append(embeddings)
 
-        if batch_ix % 10 == 0:
-            logger.info(f"Embedded {batch_ix} batches with {num_errors} errors")
+        #if batch_ix % 10 == 0:
+        #    logger.info(f"Embedded {batch_ix} batches with {num_errors} errors")
 
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
@@ -854,6 +862,7 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
+        self.logger = logging.getLogger(f"{self.__class__.__name__}[{model_name}]")
 
         if gpus is not None and len(gpus) != n_processes:
             raise ValueError("One needs to specify the GPU for each process separately")
@@ -862,6 +871,7 @@ class MPEmbedder:
 
     def do_embedding(self):
         """Do the parallelized embedding."""
+        self.logger.info("Starting multiprocessing")
         output_folder = self.temp_folder or self.h5_path_output.parent
 
         worker_processes = []
@@ -892,10 +902,12 @@ class MPEmbedder:
             worker_processes.append(worker_process)
             h5_paths_temp.append(temp_h5_path)
 
+        self.logger.info("Waiting for children to be done")
         # Wait for the temporary
         for process in worker_processes:
             process.join()
 
+        self.logger.info("Concatenating children temp h5")
         # Create a big h5 file from the temporary h5 files
         H5.concatenate(
             self.h5_path_output,
@@ -904,6 +916,7 @@ class MPEmbedder:
             delete_inputs=self.delete_temp,
             batch_size=self.batch_size_transfer,
         )
+        self.logger.info("Concatenation done!")
 
     @staticmethod
     def create_and_embed(
@@ -936,38 +949,63 @@ class MPEmbedder:
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
         """
+        worker_ix = temp_h5_path.stem.partition("temp")[2]
+        logger = logging.getLogger(f"Worker {worker_ix}({os.getpid()})")
+        logger.info(f"First index={indices[0]}")
+
+        
+        if gpu is not None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+
+        logger.info(f"Loading model")
         model = get_embedding_model(
             model_name,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )
-
+        logger.info(f"Get sentences from the database")
         engine = sqlalchemy.create_engine(database_url)
         engine.dispose()
 
-        if gpu is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
 
         if temp_h5_path.exists():
             raise FileExistsError(f"{temp_h5_path} already exists")
 
         n_indices = len(indices)
+        logger.info(f"Create temporary h5 files.")
         H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
         H5.create(temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1),  dtype="int32")
 
         batch_size = min(n_indices, batch_size)
 
-        for pos_indices in np.array_split(np.arange(n_indices), n_indices / batch_size):
+        logger.info(f"Populating h5 files")
+        splits = np.array_split(np.arange(n_indices), n_indices / batch_size)
+        for split_ix, pos_indices in enumerate(splits):
             batch_indices = indices[pos_indices]
-            embeddings, retrieved_indices = compute_database_embeddings(
-                engine, model, batch_indices, batch_size=len(batch_indices)
-            )
 
-            if not np.array_equal(retrieved_indices, batch_indices):
-                raise ValueError("The retrieved and requested indices do not agree.")
+            try:
+                embeddings, retrieved_indices = compute_database_embeddings(
+                    engine, model, batch_indices, batch_size=len(batch_indices)
+                )
 
-            H5.write(temp_h5_path, model_name, embeddings, pos_indices)
+                if not np.array_equal(retrieved_indices, batch_indices):
+                    raise ValueError("The retrieved and requested indices do not agree.")
+
+                H5.write(temp_h5_path, model_name, embeddings, pos_indices)
+
+            except Exception as e:
+                logger.error(
+                    f"Issues raised for sentence_ids[{batch_indices}]"
+                )
+                logger.error(e)
+                logger.error(traceback.format_exc())
+
             H5.write(temp_h5_path,
                     f"{model_name}_indices",
                     batch_indices.reshape(-1, 1),
                     pos_indices)
+            
+            logger.info(f"Finished {(split_ix + 1) / len(splits):.2%}")
+
+
+        logger.info(f"CHILD IS DONE")
