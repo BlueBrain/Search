@@ -390,7 +390,6 @@ class TestMPEmbedder:
     @pytest.mark.parametrize("dim", [2, 5])
     @pytest.mark.parametrize("batch_size", [1, 2, 10])
     def test_create_and_embed(self, fake_sqlalchemy_engine, monkeypatch, tmpdir, dim, batch_size):
-
         class Random(EmbeddingModel):
             def __init__(self, _dim):
                 self._dim = _dim
@@ -448,3 +447,38 @@ class TestMPEmbedder:
                 gpu=None,
                 checkpoint_path=None
             )
+
+    @pytest.mark.parametrize("n_processes", [1, 2, 5])
+    def test_do_embedding(self, monkeypatch, n_processes):
+        # test 1 gpu per process or not specified
+        with pytest.raises(ValueError):
+            MPEmbedder(
+                "some_url",
+                "some_model",
+                np.array([2, 5, 11]),
+                Path("some/path"),
+                n_processes=2,
+                gpus=[1, 4, 8]
+            )
+
+        mpe = MPEmbedder(
+            "some_url",
+            "some_model",
+            np.array([2, 5, 11, 523, 523523, 3243223, 23424234]),
+            Path("some/path"),
+            n_processes=n_processes,
+        )
+
+        fake_multiprocessing = Mock()
+        fake_h5 = Mock()
+        monkeypatch.setattr("bbsearch.embedding_models.mp", fake_multiprocessing)
+        monkeypatch.setattr("bbsearch.embedding_models.H5", fake_h5)
+
+        mpe.do_embedding()
+
+        # checks
+        assert fake_multiprocessing.Process.call_count == n_processes
+        fake_h5.concatenate.assert_called_once()
+
+        args, _ = fake_h5.concatenate.call_args
+        assert len(args[2]) == n_processes
