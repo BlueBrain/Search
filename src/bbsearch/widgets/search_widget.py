@@ -133,6 +133,12 @@ class SearchWidget(widgets.VBox):
             description="Only articles in English", value=True, style=self.widgets_style
         )
 
+        self.widgets["discard_bad_sentences"] = widgets.Checkbox(
+            description="Discard sentences flagged as bad quality",
+            value=True,
+            style=self.widgets_style,
+        )
+
         self.widgets["date_range"] = widgets.IntRangeSlider(
             description="Date Range:",
             continuous_update=False,
@@ -164,10 +170,11 @@ class SearchWidget(widgets.VBox):
 
         # Enter Substrings Exclusions
         self.widgets["exclusion_text"] = widgets.Textarea(
-            layout=widgets.Layout(width="90%", height="80px"),
+            layout=widgets.Layout(width="90%"),
             value="",
             style=self.widgets_style,
             description="Substring Exclusion (newline separated): ",
+            rows=5,
         )
         self.widgets["exclusion_text"].layout.display = "none"
 
@@ -248,28 +255,31 @@ class SearchWidget(widgets.VBox):
         )
 
         # Put advanced settings to a tab
-        self.widgets["advanced_settings"] = widgets.Tab(
-            children=[
-                widgets.VBox(
-                    [
-                        self.widgets["sent_embedder"],
-                        self.widgets["granularity"],
-                        self.widgets["top_results"],
-                        self.widgets["print_paragraph"],
-                        self.widgets["has_journal"],
-                        self.widgets["is_english"],
-                        self.widgets["date_range"],
-                        self.widgets["deprioritize_text"],
-                        self.widgets["deprioritize_strength"],
-                        self.widgets["exclusion_text"],
-                        self.widgets["inclusion_text"],
-                        self.widgets["default_value_article_saver"],
-                    ]
-                )
-            ]
+        tabs = (
+            ("Search / View", [
+                self.widgets["sent_embedder"],
+                self.widgets["granularity"],
+                self.widgets["top_results"],
+                self.widgets["print_paragraph"],
+                self.widgets["default_value_article_saver"],
+            ]),
+            ("Filtering", [
+                self.widgets["has_journal"],
+                self.widgets["is_english"],
+                self.widgets["discard_bad_sentences"],
+                self.widgets["date_range"],
+                self.widgets["deprioritize_text"],
+                self.widgets["deprioritize_strength"],
+                self.widgets["exclusion_text"],
+                self.widgets["inclusion_text"],
+            ]),
         )
-        self.widgets["advanced_settings"].set_title(0, "Advanced Settings")
-        self.widgets["advanced_settings"].layout.display = "none"
+        tab_widget = widgets.Tab(children=[])
+        tab_widget.layout.display = "none"
+        for i, (tab_name, tab_children) in enumerate(tabs):
+            tab_widget.children = tab_widget.children + (widgets.VBox(tab_children),)
+            tab_widget.set_title(i, tab_name)
+        self.widgets["advanced_settings"] = tab_widget
 
         # Disable advanced settings checkbox
         self.widgets["show_advanced_chb"] = widgets.Checkbox(
@@ -479,6 +489,7 @@ class SearchWidget(widgets.VBox):
             "granularity": self.widgets["granularity"].value,
             "has_journal": self.widgets["has_journal"].value,
             "is_english": self.widgets["is_english"].value,
+            "discard_bad_sentences": self.widgets["discard_bad_sentences"].value,
             "date_range": self.widgets["date_range"].value,
             "deprioritize_text": self.widgets["deprioritize_text"].value,
             "deprioritize_strength": self.widgets["deprioritize_strength"].value,
