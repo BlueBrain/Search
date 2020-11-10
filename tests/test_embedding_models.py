@@ -40,12 +40,13 @@ class TestEmbeddingModels:
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
-        torch_model = MagicMock(spec=torch.nn.Module)
+        torch_model = MagicMock()
         torch_model.return_value = (
             torch.ones([n_sentences, 10, 768]),
             None,
         )  # 10 tokens
 
+        torch_model.config.to_dict.return_value = {"max_position_embeddings": 23}
         auto_model = Mock()
         auto_model.from_pretrained().to.return_value = torch_model
 
