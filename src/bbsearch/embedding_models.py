@@ -155,8 +155,7 @@ class SBioBERT(EmbeddingModel):
         """
         encoding = self.tokenizer(
             raw_sentence,
-            #pad_to_max_length=True,
-            padding="max_length",
+            padding=True,
             return_tensors="pt",
             max_length=self.max_position_embeddings,
             truncation=True
