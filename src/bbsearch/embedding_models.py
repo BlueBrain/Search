@@ -955,6 +955,8 @@ class MPEmbedder:
         H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
         H5.create(temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1),  dtype="int32")
 
+        batch_size = min(n_indices, batch_size)
+
         for pos_indices in np.array_split(np.arange(n_indices), n_indices / batch_size):
             batch_indices = indices[pos_indices]
             embeddings, retrieved_indices = compute_database_embeddings(

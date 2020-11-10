@@ -201,8 +201,11 @@ class H5:
         for path_temp in h5_paths_temp:
             with h5py.File(path_temp, "r") as f:
                 current_indices = f[f"{dataset_name}_indices"][:, 0]
+                n_current_indices = len(current_indices)
+                batch_size = min(n_current_indices, batch_size)
+
                 batches = np.array_split(
-                    np.arange(len(current_indices)), len(current_indices) / batch_size
+                    np.arange(n_current_indices), n_current_indices / batch_size
                 )
                 h5_data = f[f"{dataset_name}"]
                 for batch in batches:

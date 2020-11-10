@@ -98,7 +98,7 @@ class TestH5:
 
         assert np.allclose(res, data, equal_nan=True)
 
-    @pytest.mark.parametrize("batch_size", [1, 2, 3])
+    @pytest.mark.parametrize("batch_size", [1, 3, 10])
     @pytest.mark.parametrize("delete_inputs", [True, False])
     def test_concatenate(self, tmpdir, batch_size, delete_inputs):
         tmpdir = pathlib.Path(str(tmpdir))

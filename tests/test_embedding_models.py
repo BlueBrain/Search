@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
+import h5py
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,6 +17,7 @@ from bbsearch.embedding_models import (
     BSV,
     USE,
     EmbeddingModel,
+    MPEmbedder,
     SBioBERT,
     Sent2VecModel,
     SentTransformer,
@@ -382,3 +384,67 @@ def test_compute_database(
     assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(
         n_sentences % batch_size != 0
     )
+
+
+class TestMPEmbedder:
+    @pytest.mark.parametrize("dim", [2, 5])
+    @pytest.mark.parametrize("batch_size", [1, 2, 10])
+    def test_create_and_embed(self, fake_sqlalchemy_engine, monkeypatch, tmpdir, dim, batch_size):
+
+        class Random(EmbeddingModel):
+            def __init__(self, _dim):
+                self._dim = _dim
+
+            @property
+            def dim(self):
+                return self._dim
+
+            def embed(self, *args):
+                return np.random.random(self.dim)
+
+        temp_h5_path = Path(str(tmpdir)) / "temp.h5"
+        indices = np.array([1, 4, 5])
+
+        fake_get_embedding_model = Mock(return_value=Random(dim))
+
+        monkeypatch.setattr(
+            "bbsearch.embedding_models.get_embedding_model", fake_get_embedding_model
+        )
+
+        MPEmbedder.create_and_embed(
+            database_url=fake_sqlalchemy_engine.url,
+            model_name="some_model",
+            indices=indices,
+            temp_h5_path=temp_h5_path,
+            batch_size=batch_size,
+            gpu=3,
+            checkpoint_path=None
+        )
+
+        assert temp_h5_path.exists()
+        with h5py.File(temp_h5_path, "r") as f:
+            assert "some_model" in f.keys()
+            assert "some_model_indices" in f.keys()
+
+            # data checks
+            assert f["some_model"].shape == (len(indices), dim)
+            assert f["some_model"].dtype == "float32"
+
+            assert not np.any(np.isnan(f["some_model"][:]))
+
+            # indices checks
+            assert f["some_model_indices"].shape == (len(indices), 1)
+            assert f["some_model_indices"].dtype == "int32"
+
+            assert not np.any(np.isnan(f["some_model_indices"][:]))
+
+        with pytest.raises(FileExistsError):
+            MPEmbedder.create_and_embed(
+                database_url=fake_sqlalchemy_engine.url,
+                model_name="some_model",
+                indices=indices,
+                temp_h5_path=temp_h5_path,
+                batch_size=batch_size,
+                gpu=None,
+                checkpoint_path=None
+            )
