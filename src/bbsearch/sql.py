@@ -79,15 +79,18 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
     FROM sentences
     WHERE sentence_id IN ({sentence_ids_s})
     """
-    df_sentences = pd.read_sql(sql_query, engine)
+
+    with engine.connect() as connection:
+        df_sentences = pd.read_sql(sql_query, connection)
 
     if keep_order:
-        which_row = {
-            sentence_id: i for i, sentence_id in df_sentences["sentence_id"].iteritems()
-        }
-        correct_order = [which_row[sentence_id] for sentence_id in sentence_ids]
-        df_sentences = df_sentences.reindex(correct_order)
-        df_sentences.reset_index(drop=True, inplace=True)
+        # Remove sentence IDs that were not found, otherwise df.loc will fail.
+        found_sentence_ids = set(df_sentences["sentence_id"])
+        sentence_ids = filter(lambda x: x in found_sentence_ids, sentence_ids)
+
+        # Sort the dataframe by sentence_ids
+        df_sentences = df_sentences.set_index("sentence_id").loc[sentence_ids]
+        df_sentences.reset_index(inplace=True)
 
     return df_sentences
 
