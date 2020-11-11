@@ -8,6 +8,7 @@ import pytest
 
 from bbsearch.sql import (
     SentenceFilter,
+    get_titles,
     retrieve_article_ids,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
@@ -43,6 +44,11 @@ class TestNoSQL:
 
 
 class TestSQLQueries:
+    @pytest.mark.parametrize("article_ids", [[], [1, 4], [4, 2, 3, 1]])
+    def test_get_titles(self, article_ids, fake_sqlalchemy_engine):
+        titles = get_titles(article_ids, fake_sqlalchemy_engine)
+        assert len(titles) == len(article_ids)
+
     @pytest.mark.parametrize("sentence_id", [[], [7], [7, 9], [-1], [9, 9]])
     def test_retrieve_sentence_from_sentence_ids(
         self, sentence_id, fake_sqlalchemy_engine

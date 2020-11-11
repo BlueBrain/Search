@@ -571,3 +571,66 @@ def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     assert "Creating the saved results PDF report... " in bot.stdout_cached
 
     assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1
+
+
+def get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys):
+    http_address = activate_responses(fake_sqlalchemy_engine)
+
+    responses.add_callback(
+        responses.POST,
+        "http://test/help",
+        callback=request_callback_help,
+        content_type="application/json",
+    )
+
+    widget = SearchWidget(
+        bbs_search_url=http_address,
+        bbs_mysql_engine=fake_sqlalchemy_engine,
+        article_saver=ArticleSaver(fake_sqlalchemy_engine),
+    )
+
+    bot = SearchWidgetBot(widget, capsys, monkeypatch)
+
+    return bot
+
+
+@responses.activate
+def test_saved_results(fake_sqlalchemy_engine, monkeypatch, capsys):
+    # Test saving with the default setting of saving entire articles
+    bot = get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys)
+    bot.click("investigate_button")
+    displayed = bot.display_cached
+    # Make sure some results were displayed
+    assert len(displayed) > 0
+    # For each item in the search history there should be a row in saved results
+    saved_results = bot.search_widget.saved_results()
+    assert len(saved_results) == len(bot.search_widget.history)
+    # Check that no paragraphs were saved
+    assert all(value == "" for value in saved_results["Paragraph"])
+    # Check that no paragraph position is shown if paragraph is not saved
+    assert all(value == "" for value in saved_results["Paragraph #"])
+
+    # Test not saving because article saver is None
+    bot = get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys)
+    bot.search_widget.article_saver = None
+    bot.click("investigate_button")
+    displayed = bot.display_cached
+    # Make sure some results were displayed
+    assert len(displayed) > 0
+    saved_results = bot.search_widget.saved_results()
+    assert len(saved_results) == 0
+
+    # Test not saving because article saver is None
+    bot = get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys)
+    bot.set_value("default_value_article_saver", _Save.PARAGRAPH)
+    bot.click("investigate_button")
+    displayed = bot.display_cached
+    # Make sure some results were displayed
+    assert len(displayed) > 0
+    # For each item in the search history there should be a row in saved results
+    saved_results = bot.search_widget.saved_results()
+    assert len(saved_results) == len(bot.search_widget.history)
+    # Check that all paragraphs were saved
+    assert all(value != "" for value in saved_results["Paragraph"])
+    # Check that the paragraph position is shown if paragraph is saved
+    assert all(value != "" for value in saved_results["Paragraph #"])
