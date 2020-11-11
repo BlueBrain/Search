@@ -5,176 +5,169 @@ import logging
 import os
 import pathlib
 
-import torch
+import numpy as np
+import sqlalchemy
 
 from ._helper import configure_logging
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--db_type",
-    default="mysql",
-    type=str,
-    help="Type of the database. Possible values: (sqlite, " "mysql)",
-)
-parser.add_argument(
-    "--out_dir",
-    default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/",
-    type=str,
-    help="The directory path where the embeddings are saved.",
-)
-parser.add_argument(
-    "--log_dir",
-    default="/raid/projects/bbs/logs/",
-    type=str,
-    help="The directory path where to save the logs.",
-)
-parser.add_argument(
-    "--log_name",
-    default="embeddings_computation.log",
-    type=str,
-    help="The name of the log file.",
-)
-parser.add_argument(
-    "--models",
-    default="USE,SBERT,SBioBERT,BSV,Sent2Vec,BIOBERT NLI+STS",
-    type=str,
-    help="Models for which we need to compute the embeddings. "
-    "Format should be comma separated list.",
-)
-parser.add_argument(
-    "--bsv_checkpoints",
-    default=(
-        "/raid/sync/proj115/bbs_data/trained_models/"
-        "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-    ),
-    type=str,
-    help="Path to file containing the checkpoints for the BSV model.",
-)
-parser.add_argument(
-    "--sent2vec_checkpoints",
-    default="/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin",
-    type=str,
-    help="Path to file containing the checkpoints for the sent2vec model.",
-)
-parser.add_argument(
-    "--step", default="1000", type=int, help="Batch size for the embeddings computation"
-)
-args = parser.parse_args()
 
+def main(argv=None):
+    # CLI setup
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        "model", type=str, help="Model for which we want to compute the embeddings"
+    )
+    parser.add_argument(
+        "--batch-size-inference",
+        default=1000,
+        type=int,
+        help="Batch size for embeddings computation",
+    )
+    parser.add_argument(
+        "--batch-size-transfer",
+        default=1000,
+        type=int,
+        help="Batch size for transferring from temporary h5 files to the " "final one",
+    )
+    parser.add_argument(
+        "--bsv-checkpoints",
+        default=(
+            "/raid/sync/proj115/bbs_data/trained_models/"
+            "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
+        ),
+        type=str,
+        help="Path to file containing the checkpoints for the BSV model.",
+    )
+    parser.add_argument(
+        "--db-url",
+        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
+        type=str,
+        help="Url of the database",
+    )
+    parser.add_argument(
+        "--gpus",
+        type=str,
+        help="Comma seperated list of GPU indices for each process. To only "
+        "run on a CPU leave blank. For example '2,,3,' will use GPU 2 and 3 "
+        "for the 1st and 3rd process respectively. The processes 2 and 4 will "
+        "be run on a CPU. By default using CPU for all processes.",
+    )
+    parser.add_argument(
+        "--indices-path",
+        type=str,
+        help="Path to .npy file containing sentence ids to embed. If not "
+        "specified we embedd all sentences in the database.",
+    )
+    parser.add_argument(
+        "--log-dir",
+        default="/raid/projects/bbs/logs/",
+        type=str,
+        help="The directory path where to save the logs",
+    )
+    parser.add_argument(
+        "--log-name",
+        default="embeddings_computation.log",
+        type=str,
+        help="The name of the log file",
+    )
+    parser.add_argument(
+        "-n",
+        "--n-processes",
+        default=1000,
+        type=int,
+        help="Batch size for embeddings computation",
+    )
+    parser.add_argument(
+        "-o",
+        "--out-file",
+        default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5",
+        type=str,
+        help="The path to where the embeddings are saved",
+    )
+    parser.add_argument(
+        "--sent2vec-checkpoints",
+        default="/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin",
+        type=str,
+        help="Path to file containing the checkpoints for the sent2vec model",
+    )
+    parser.add_argument(
+        "--temp-dir",
+        type=str,
+        help="The path to where temporary h5 files are saved. If not "
+        "specified then identical to the out_dir",
+    )
+    args = parser.parse_args(argv)
 
-def main():
-    """Compute Embeddings."""
+    # Imports (they are here to make --help quick)
+    from ..embedding_models import MPEmbedder
+    from ..utils import H5
+
+    print(args)
     # Configure logging
     log_file = pathlib.Path(args.log_dir) / args.log_name
     configure_logging(log_file, logging.INFO)
     logger = logging.getLogger(__name__)
 
-    import pandas as pd
-    import sqlalchemy
+    # Database related
+    logger.info("SQL Alchemy Engine creation ....")
+    full_url = f"mysql+pymysql://guest:guest@{args.db_url}"
+    engine = sqlalchemy.create_engine(full_url)
 
-    from .. import embedding_models
-    from ..utils import H5
-
-    out_dir = pathlib.Path(args.out_dir)
+    # Path preparation and checking
+    out_file = pathlib.Path(args.out_file)
+    out_dir = out_file.parent
+    temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
     bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)
     sent2vec_checkpoints = pathlib.Path(args.sent2vec_checkpoints)
-
-    if not out_dir.exists():
-        raise FileNotFoundError(f"The output directory {out_dir} does not exist!")
-    if not bsv_checkpoints.exists():
-        raise FileNotFoundError(
-            f"The BSV checkpoints {bsv_checkpoints} does " f"not exist!"
-        )
-
-    embeddings_path = out_dir / "embeddings.h5"
-
-    logger.info("SQL Alchemy Engine creation ....")
-
-    if args.db_type == "sqlite":
-        database_path = "/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db"
-        if not pathlib.Path(database_path).exists():
-            pathlib.Path(database_path).touch()
-        engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
-    elif args.db_type == "mysql":
-        password = getpass.getpass("Password:")
-        engine = sqlalchemy.create_engine(
-            f"mysql+pymysql://guest:{password}" f"@dgx1.bbp.epfl.ch:8853/cord19_v47"
-        )
-    else:
-        raise ValueError("This is not an handled db_type.")
-
-    logger.info("Sentences IDs retrieving....")
-
-    sql_query = """SELECT sentence_id
-                   FROM sentences"""
-
-    sentence_ids = pd.read_sql(sql_query, engine)["sentence_id"].to_list()
-
-    logger.info("Counting Number Total of sentences....")
-
-    sql_query = """SELECT COUNT(*)
-                   FROM sentences"""
-
-    n_sentences = pd.read_sql(sql_query, engine).iloc[0, 0]
-
-    logger.info(
-        f"{len(sentence_ids)} to embed / Total Number of sentences {n_sentences}"
+    indices_path = (
+        None if args.indices_path is None else pathlib.Path(args.indices_path)
     )
 
-    device = "cpu"
-    if torch.cuda.is_available():
-        try:
-            if os.environ["CUDA_VISIBLE_DEVICES"]:
-                device = "cuda"
-        except KeyError:
-            logger.info(
-                "The environment variable CUDA_VISIBLE_DEVICES seems not specified."
-            )
-
-    logger.info(f"The device used for the embeddings computation is {device}.")
-
-    for model in args.models.split(","):
-        model = model.strip()
-
-        logger.info(f"Loading of the embedding model {model}")
-
+    # Determine checkpoint_path
+    if args.model == "BSV":
+        checkpoint_path = bsv_checkpoints
+    elif args.model == "Sent2Vec":
+        checkpoint_path = sent2vec_checkpoints
+    else:
         checkpoint_path = None
-        if model == "BSV":
-            checkpoint_path = bsv_checkpoints
-        elif model == "Sent2Vec":
-            checkpoint_path = sent2vec_checkpoints
 
-        try:
-            embedding_model = embedding_models.get_embedding_model(
-                model, checkpoint_path=checkpoint_path, device=device
-            )
-        except ValueError:
-            logger.warning(f"The model {model} is not supported.")
-            continue
+    # Parse GPUs
+    if args.gpus is None:
+        gpus = None
+    else:
+        gpus = [None if x == "" else int(x) for x in args.gpus.split(",")]
 
-        logger.info(f"Creation of the H5 dataset for {model} ...")
-        H5.create(embeddings_path, model, (n_sentences + 1, embedding_model.dim))
+    if out_file.exists():
+        raise FileExistsError(f"The file {out_file} already exists")
 
-        logger.info(f"Computation of the embeddings for {model} ...")
-        for index in range(0, len(sentence_ids), args.step):
-            try:
-                (
-                    final_embeddings,
-                    retrieved_indices,
-                ) = embedding_models.compute_database_embeddings(
-                    engine,
-                    embedding_model,
-                    sentence_ids[index : index + args.step],
-                    batch_size=args.step,
-                )
-                H5.write(embeddings_path, model, final_embeddings, retrieved_indices)
+    if indices_path is not None:
+        if indices_path.exists():
+            indices = np.load(str(indices_path))
+        else:
+            raise FileNotFoundError(f"Indices file {indices_path} does not exist!")
 
-            except Exception as e:
-                logger.error(
-                    f"Issues raised for sentence_ids[{index}:{index+args.step}]"
-                )
-                logger.error(e)
-            logger.info(f"{index+args.step} sentences embeddings computed.")
+    else:
+        n_sentences = list(engine.execute("SELECT COUNT(*) FROM sentences"))[0][0]
+        indices = np.arange(1, n_sentences + 1)
+
+    logger.info("Instantiating MPEmbedder")
+    mpe = MPEmbedder(
+        engine.url,
+        args.model,
+        indices,
+        out_file,
+        batch_size_inference=args.batch_size_inference,
+        batch_size_transfer=args.batch_size_transfer,
+        n_processes=args.n_processes,
+        checkpoint_path=checkpoint_path,
+        gpus=gpus,
+        temp_folder=temp_dir,
+    )
+
+    logger.info("Starting embedding")
+    mpe.do_embedding()
 
 
 if __name__ == "__main__":
