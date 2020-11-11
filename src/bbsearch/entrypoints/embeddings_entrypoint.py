@@ -104,7 +104,6 @@ def main(argv=None):
     from ..embedding_models import MPEmbedder
     from ..utils import H5
 
-    print(args)
     # Configure logging
     log_file = pathlib.Path(args.log_dir) / args.log_name
     configure_logging(log_file, logging.INFO)
