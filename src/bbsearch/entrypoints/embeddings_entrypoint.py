@@ -21,7 +21,7 @@ def main(argv=None):
     )
     parser.add_argument(
         "--batch-size-inference",
-        default=1000,
+        default=256,
         type=int,
         help="Batch size for embeddings computation",
     )
