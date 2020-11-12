@@ -747,9 +747,6 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         all_ids.extend(sentences_id)
         all_embeddings.append(embeddings)
 
-        # if batch_ix % 10 == 0:
-        #    logger.info(f"Embedded {batch_ix} batches with {num_errors} errors")
-
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
     return final_embeddings, retrieved_indices
