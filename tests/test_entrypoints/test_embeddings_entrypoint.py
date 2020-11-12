@@ -9,14 +9,16 @@ from bbsearch.entrypoints.embeddings_entrypoint import main
 
 
 @pytest.mark.parametrize(
-    "batch_size_inference,"
-    "batch_size_transfer,"
-    "gpus,"
-    "custom_ixs,"
-    "model,"
-    "n_processes,"
-    "outfile,"
-    "temp_dir",
+    (
+        "batch_size_inference",
+        "batch_size_transfer",
+        "gpus",
+        "custom_ixs",
+        "model",
+        "n_processes",
+        "outfile",
+        "temp_dir",
+    ),
     [
         (11, 22, [0, 3], True, "BSV", 2, "some_out_dir/emb.h5", "some_temp_dir"),
         (1, 5, None, False, "Sent2Vec", 3, "new_out_dir/emb.h5", "new_temp_dir"),
