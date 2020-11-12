@@ -36,13 +36,12 @@ def main(argv=None):
         help="Batch size for transferring from temporary h5 files to the " "final one",
     )
     parser.add_argument(
-        "--bsv-checkpoints",
-        default=(
-            "/raid/sync/proj115/bbs_data/trained_models/"
-            "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-        ),
+        "-c",
+        "--checkpoint",
         type=str,
-        help="Path to file containing the checkpoints for the BSV model.",
+        help="Path to file containing the checkpointed model. "
+        "Note that one needs to specify it for BSV, Sent2Vec and potentially "
+        "other models.",
     )
     parser.add_argument(
         "--db-url",
@@ -84,12 +83,6 @@ def main(argv=None):
         help="Batch size for embeddings computation",
     )
     parser.add_argument(
-        "--sent2vec-checkpoints",
-        default="/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin",
-        type=str,
-        help="Path to file containing the checkpoints for the sent2vec model",
-    )
-    parser.add_argument(
         "--temp-dir",
         type=str,
         help="The path to where temporary h5 files are saved. If not "
@@ -113,19 +106,13 @@ def main(argv=None):
     # Path preparation and checking
     out_file = pathlib.Path(args.outfile)
     temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
-    bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)
-    sent2vec_checkpoints = pathlib.Path(args.sent2vec_checkpoints)
+    if args.checkpoint is not None:
+        checkpoint_path = pathlib.Path(args.checkpoint)
+    else:
+        checkpoint_path = None
     indices_path = (
         None if args.indices_path is None else pathlib.Path(args.indices_path)
     )
-
-    # Determine checkpoint_path
-    if args.model == "BSV":
-        checkpoint_path = bsv_checkpoints
-    elif args.model == "Sent2Vec":
-        checkpoint_path = sent2vec_checkpoints
-    else:
-        checkpoint_path = None
 
     # Parse GPUs
     if args.gpus is None:
