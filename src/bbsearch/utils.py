@@ -162,9 +162,9 @@ class H5:
         dataset_name : str
             Name of the dataset.
         h5_paths_temp : list
-            Paths to the the input h5 files. Note that each of them will have 2 datasets:
-            * `{dataset_name}` - dtype = float and shape (length, dim)
-            * `{dataset_name}_indices` - dtype = int and shape (length, 1)
+            Paths to the input h5 files. Note that each of them will have 2 datasets.
+                - `{dataset_name}` - dtype = float and shape (length, dim)
+                - `{dataset_name}_indices` - dtype = int and shape (length, 1)
         delete_inputs : bool
             If True, then all input h5 files are deleted once the concatenation is done.
         batch_size : int
@@ -191,7 +191,7 @@ class H5:
                 if all_indices & current_indices:
                     inters = all_indices & current_indices
                     raise ValueError(
-                            f"The file {path_temp} introduces an overlapping index: {inters}"
+                        f"{path_temp} introduces an overlapping index: {inters}"
                     )
 
                 all_indices |= current_indices

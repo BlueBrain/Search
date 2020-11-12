@@ -1,8 +1,6 @@
 """EntryPoint for the computation and saving of the embeddings."""
 import argparse
-import getpass
 import logging
-import os
 import pathlib
 
 import numpy as np
@@ -12,6 +10,7 @@ from ._helper import configure_logging
 
 
 def main(argv=None):
+    """Run CLI."""
     # CLI setup
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -100,7 +99,6 @@ def main(argv=None):
 
     # Imports (they are here to make --help quick)
     from ..embedding_models import MPEmbedder
-    from ..utils import H5
 
     # Configure logging
     log_file = pathlib.Path(args.log_dir) / args.log_name
@@ -114,7 +112,6 @@ def main(argv=None):
 
     # Path preparation and checking
     out_file = pathlib.Path(args.outfile)
-    out_dir = out_file.parent
     temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
     bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)
     sent2vec_checkpoints = pathlib.Path(args.sent2vec_checkpoints)

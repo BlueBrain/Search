@@ -4,7 +4,6 @@ import multiprocessing as mp
 import os
 import pathlib
 import string
-import time
 import traceback
 from abc import ABC, abstractmethod
 
@@ -834,9 +833,8 @@ class MPEmbedder:
         If True, the temporary h5 files are deleted after the final h5 is created.
         Disabling this flag is useful for testing and debugging purposes.
     temp_folder : None or pathlib.Path
-        If None, then all temporary h5 files stored into the same folders as the the ouput h5.
-        Otherwise they are stored in the specified folder.
-
+        If None, then all temporary h5 files stored into the same folder as the output
+        h5 file. Otherwise they are stored in the specified folder.
     """
 
     def __init__(
@@ -960,13 +958,13 @@ class MPEmbedder:
         if gpu is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
 
-        logger.info(f"Loading model")
+        logger.info("Loading model")
         model = get_embedding_model(
             model_name,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )
-        logger.info(f"Get sentences from the database")
+        logger.info("Get sentences from the database")
         engine = sqlalchemy.create_engine(database_url)
         engine.dispose()
 
@@ -974,7 +972,7 @@ class MPEmbedder:
             raise FileExistsError(f"{temp_h5_path} already exists")
 
         n_indices = len(indices)
-        logger.info(f"Create temporary h5 files.")
+        logger.info("Create temporary h5 files.")
         H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
         H5.create(
             temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1), dtype="int32"
@@ -982,7 +980,7 @@ class MPEmbedder:
 
         batch_size = min(n_indices, batch_size)
 
-        logger.info(f"Populating h5 files")
+        logger.info("Populating h5 files")
         splits = np.array_split(np.arange(n_indices), n_indices / batch_size)
         for split_ix, pos_indices in enumerate(splits):
             batch_indices = indices[pos_indices]
@@ -1013,4 +1011,4 @@ class MPEmbedder:
 
             logger.info(f"Finished {(split_ix + 1) / len(splits):.2%}")
 
-        logger.info(f"CHILD IS DONE")
+        logger.info("CHILD IS DONE")
