@@ -4,7 +4,6 @@ import multiprocessing as mp
 import os
 import pathlib
 import string
-import traceback
 from abc import ABC, abstractmethod
 
 import joblib
@@ -1000,7 +999,6 @@ class MPEmbedder:
             except Exception as e:
                 logger.error(f"Issues raised for sentence_ids[{batch_indices}]")
                 logger.error(e)
-                logger.error(traceback.format_exc())
 
             H5.write(
                 temp_h5_path,
