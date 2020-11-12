@@ -945,8 +945,11 @@ class MPEmbedder:
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
         """
-        worker_ix = temp_h5_path.stem.partition("temp")[2]
-        logger = logging.getLogger(f"Worker {worker_ix}({os.getpid()})")
+        current_process = mp.current_process()
+        cname = current_process.name
+        cpid = current_process.pid
+
+        logger = logging.getLogger(f"{cname}({cpid})")
         logger.info(f"First index={indices[0]}")
 
         if gpu is not None:
