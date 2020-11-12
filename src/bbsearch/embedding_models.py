@@ -901,12 +901,10 @@ class MPEmbedder:
             h5_paths_temp.append(temp_h5_path)
 
         self.logger.info("Waiting for children to be done")
-        # Wait for the temporary
         for process in worker_processes:
             process.join()
 
         self.logger.info("Concatenating children temp h5")
-        # Create a big h5 file from the temporary h5 files
         H5.concatenate(
             self.h5_path_output,
             self.model_name,
