@@ -121,9 +121,6 @@ def main(argv=None):
     else:
         gpus = [None if x == "" else int(x) for x in args.gpus.split(",")]
 
-    if out_file.exists():
-        raise FileExistsError(f"The file {out_file} already exists")
-
     if indices_path is not None:
         if indices_path.exists():
             indices = np.load(str(indices_path))
