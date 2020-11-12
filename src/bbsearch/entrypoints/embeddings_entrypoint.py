@@ -33,7 +33,7 @@ def main(argv=None):
         "--batch-size-transfer",
         default=1000,
         type=int,
-        help="Batch size for transferring from temporary h5 files to the " "final one",
+        help="Batch size for the concatenation of temp h5 files",
     )
     parser.add_argument(
         "-c",
@@ -60,8 +60,9 @@ def main(argv=None):
     parser.add_argument(
         "--indices-path",
         type=str,
-        help="Path to .npy file containing sentence ids to embed. If not "
-        "specified we embedd all sentences in the database.",
+        help="Path to a .npy file containing sentence ids to embed. Specifically, "
+        "it is a 1D numpy array of integers representing the sentence ids. If "
+        "not specified we embedd all sentences in the database.",
     )
     parser.add_argument(
         "--log-dir",
@@ -78,9 +79,9 @@ def main(argv=None):
     parser.add_argument(
         "-n",
         "--n-processes",
-        default=1000,
+        default=4,
         type=int,
-        help="Batch size for embeddings computation",
+        help="Number of processes to use",
     )
     parser.add_argument(
         "--temp-dir",
