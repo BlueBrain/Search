@@ -100,7 +100,7 @@ def main(argv=None):
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")
-    full_url = f"mysql+pymysql://guest:guest@{args.db_url}"
+    full_url = f"mysql+mysqldb://guest:guest@{args.db_url}?charset=utf8mb4"
     engine = sqlalchemy.create_engine(full_url)
 
     # Path preparation and checking
