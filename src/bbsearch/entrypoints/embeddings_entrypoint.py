@@ -86,7 +86,8 @@ def main(argv=None):
         "--temp-dir",
         type=str,
         help="The path to where temporary h5 files are saved. If not "
-        "specified then identical to the out_dir",
+        "specified then identical to the folder in which the output h5 "
+        "file is placed.",
     )
     args = parser.parse_args(argv)
 
