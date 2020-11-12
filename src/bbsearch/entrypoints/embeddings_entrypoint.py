@@ -20,6 +20,11 @@ def main(argv=None):
         "model", type=str, help="Model for which we want to compute the embeddings"
     )
     parser.add_argument(
+        "outfile",
+        type=str,
+        help="The path to where the embeddings are saved (h5 file)",
+    )
+    parser.add_argument(
         "--batch-size-inference",
         default=256,
         type=int,
@@ -80,13 +85,6 @@ def main(argv=None):
         help="Batch size for embeddings computation",
     )
     parser.add_argument(
-        "-o",
-        "--out-file",
-        default="/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5",
-        type=str,
-        help="The path to where the embeddings are saved",
-    )
-    parser.add_argument(
         "--sent2vec-checkpoints",
         default="/raid/sync/proj115/bbs_data/trained_models/new_s2v_model.bin",
         type=str,
@@ -115,7 +113,7 @@ def main(argv=None):
     engine = sqlalchemy.create_engine(full_url)
 
     # Path preparation and checking
-    out_file = pathlib.Path(args.out_file)
+    out_file = pathlib.Path(args.outfile)
     out_dir = out_file.parent
     temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
     bsv_checkpoints = pathlib.Path(args.bsv_checkpoints)

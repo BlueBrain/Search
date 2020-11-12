@@ -15,7 +15,7 @@ from bbsearch.entrypoints.embeddings_entrypoint import main
     "custom_ixs,"
     "model,"
     "n_processes,"
-    "out_file,"
+    "outfile,"
     "temp_dir",
     [
         (11, 22, [0, 3], True, "BSV", 2, "some_out_dir/emb.h5", "some_temp_dir"),
@@ -32,7 +32,7 @@ def test_sendthrough(
     custom_ixs,
     model,
     n_processes,
-    out_file,
+    outfile,
     temp_dir,
 ):
     """Check that CLI parameters correctly send through to __init__."""
@@ -50,12 +50,12 @@ def test_sendthrough(
     # Prepare CLI input
     args_and_opts = [
         model,
+        outfile,
         f"--batch-size-inference={batch_size_inference}",
         f"--batch-size-transfer={batch_size_transfer}",
         f"--log-dir={str(tmpdir)}",
         f"--n-processes={n_processes}",
         f"--temp-dir={temp_dir}",
-        f"--out-file={out_file}",
     ]
 
     if gpus is not None:
@@ -88,7 +88,7 @@ def test_sendthrough(
 
     assert args[1] == model
     np.testing.assert_array_equal(args[2], indices)
-    assert args[3] == pathlib.Path(out_file)
+    assert args[3] == pathlib.Path(outfile)
 
     assert kwargs["batch_size_inference"] == batch_size_inference
     assert kwargs["batch_size_transfer"] == batch_size_transfer
