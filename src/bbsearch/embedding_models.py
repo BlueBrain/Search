@@ -1,4 +1,5 @@
 """Model handling sentences embeddings."""
+import importlib
 import logging
 import multiprocessing as mp
 import os
@@ -100,180 +101,6 @@ class EmbeddingModel(ABC):
             Each row is an embedding of a sentence in `preprocessed_sentences`.
         """
         return np.array([self.embed(sentence) for sentence in preprocessed_sentences])
-
-
-class SBioBERT(EmbeddingModel):
-    """Sentence BioBERT.
-
-    Parameters
-    ----------
-    device : str
-        Available device for the model. Can be {'cuda', 'cpu', None}
-
-    References
-    ----------
-    https://huggingface.co/gsarti/biobert-nli
-    """
-
-    def __init__(self, device=None):
-        available_device = device or "cpu"
-        self.device = torch.device(available_device)
-        self.sbiobert_model = AutoModel.from_pretrained("gsarti/biobert-nli").to(
-            self.device
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained("gsarti/biobert-nli")
-        self.max_position_embeddings = self.sbiobert_model.config.to_dict()[
-            "max_position_embeddings"
-        ]
-
-    @property
-    def dim(self):
-        """Return dimension of the embedding."""
-        return 768
-
-    def preprocess(self, raw_sentence):
-        """Preprocess the sentence - tokenization and determining of token ids.
-
-        Note that this method already works in batched way if we pass a list.
-
-        Parameters
-        ----------
-        raw_sentence : str or list of str
-            Raw sentence to embed. One can also provide multiple sentences.
-
-        Returns
-        -------
-        encoding : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids',
-            'token_type_ids' and 'attention_mask'. All of the corresponding
-            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
-
-        References
-        ----------
-        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
-
-        """
-        encoding = self.tokenizer(
-            raw_sentence,
-            padding=True,
-            return_tensors="pt",
-            max_length=self.max_position_embeddings,
-            truncation=True,
-        )
-        return encoding
-
-    def preprocess_many(self, raw_sentences):
-        """Preprocess multiple sentences - tokenization and determining of token ids.
-
-        Parameters
-        ----------
-        raw_sentences : list of str
-            List of raw sentence to embed.
-
-        Returns
-        -------
-        encodings : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids',
-            'token_type_ids' and 'attention_mask'. All of the corresponding
-            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
-
-        References
-        ----------
-        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
-
-        """
-        return self.preprocess(raw_sentences)
-
-    def embed(self, preprocessed_sentence):
-        """Compute the sentence embedding for a given sentence.
-
-        Note that this method already works in batched way if we pass a
-        `BatchEncoding` that contains batches.
-
-        Parameters
-        ----------
-        preprocessed_sentence : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids',
-            'token_type_ids' and 'attention_mask'. All of the corresponding
-            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentence of shape (768,) if only a single
-            sample in the batch. Otherwise `(len(preprocessed_sentences), 768)`.
-
-        References
-        ----------
-        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
-        """
-        with torch.no_grad():
-            last_hidden_state = self.sbiobert_model(
-                **preprocessed_sentence.to(self.device)
-            )[0]
-            embedding = self.masked_mean(
-                last_hidden_state, preprocessed_sentence["attention_mask"]
-            )
-
-        return embedding.squeeze().cpu().numpy()
-
-    def embed_many(self, preprocessed_sentences):
-        """Compute the sentences embeddings for multiple sentences.
-
-        Parameters
-        ----------
-        preprocessed_sentences : transformers.BatchEncoding
-            Dictionary like object that holds the following keys: 'input_ids',
-            'token_type_ids' and 'attention_mask'. All of the corresponding
-            values are going to be ``torch.Tensor`` of shape `(n_sentences, n_tokens)`.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentence of shape
-            `(len(preprocessed_sentences), 768)`
-
-        References
-        ----------
-        https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
-        """
-        return self.embed(preprocessed_sentences)
-
-    @staticmethod
-    def masked_mean(last_hidden_state, attention_mask):
-        """Compute the mean of token embeddings while taking into account the padding.
-
-        Note that the `sequence_length` is going to be the number of tokens of
-        the longest sentence + 2 (CLS and SEP are added).
-
-        Parameters
-        ----------
-        last_hidden_state : torch.Tensor
-            Per sample and per token embeddings as returned by the model. Shape
-            `(n_sentences, sequence_length, dim)`.
-        attention_mask : torch.Tensor
-            Boolean mask of what tokens were padded (0) or not (1). The dtype
-            is `torch.int64` and the shape is `(n_sentences, sequence_length)`.
-
-        Returns
-        -------
-        sentence_embeddings : torch.Tensor
-            Mean of token embeddings taking into account the padding. The shape
-            is `(n_sentences, dim)`.
-
-        References
-        ----------
-        https://github.com/huggingface/transformers/blob/82dd96cae74797be0c1d330566df7f929214b278/model_cards/sentence-transformers/bert-base-nli-mean-tokens/README.md
-        """
-        token_embeddings = last_hidden_state
-        input_mask_expanded = (
-            attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-        )
-        sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
-        sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-        sentence_embeddings = sum_embeddings / sum_mask
-        return sentence_embeddings
 
 
 class Sent2VecModel(EmbeddingModel):
@@ -425,7 +252,7 @@ class BSV(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_model_path : pathlib.Path or str
+    checkpoint_path : pathlib.Path or str
         Path to the file of the stored model BSV.
 
     References
@@ -433,9 +260,9 @@ class BSV(EmbeddingModel):
     https://github.com/ncbi-nlp/BioSentVec
     """
 
-    def __init__(self, checkpoint_model_path):
-        checkpoint_model_path = pathlib.Path(checkpoint_model_path)
-        self.checkpoint_model_path = checkpoint_model_path
+    def __init__(self, checkpoint_path):
+        checkpoint_path = pathlib.Path(checkpoint_path)
+        self.checkpoint_model_path = checkpoint_path
         if not self.checkpoint_model_path.is_file():
             raise FileNotFoundError(
                 f"The file {self.checkpoint_model_path} was not found."
@@ -512,21 +339,18 @@ class SentTransformer(EmbeddingModel):
 
     Parameters
     ----------
-    model_name : str
-        Name of the model to use for the embeddings.
-        Currently:
-        - 'bert-base-nli-mean-tokens' is the one we use as SBERT
-        - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
+    model_name_or_path : str
+        The name or the path of the model to use for the embeddings.
 
     References
     ----------
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
+    def __init__(self, model_name_or_path, device=None):
 
         self.senttransf_model = sentence_transformers.SentenceTransformer(
-            model_name, device=device
+            model_name_or_path, device=device
         )
 
     @property
@@ -747,42 +571,52 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     return final_embeddings, retrieved_indices
 
 
-def get_embedding_model(model_name, checkpoint_path=None, device=None):
-    """Construct an embedding model from its name.
+def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
+    """Load a sentence embedding model from its name or its class and checkpoint.
+
+    Usage:
+    - My Transformer model: ('SentTransformer', <checkpoint_path>, <device>)
+    - BioBERT NLI+STS: ('BioBERT_NLI+STS', <device>)
+    - SBioBERT: ('SBioBERT', <device>)
+    - SBERT: ('SBERT', <device>)
+    - USE: ('USE')
+    - BSV: ('Sent2VecModel', <checkpoint_path>)
+    - Sent2Vec: ('Sent2VecModel', <checkpoint_path>)
 
     Parameters
     ----------
-    model_name : str
-        The name of the model.
+    model_name_or_class : str
+        The name or the class of the model to load.
     checkpoint_path : pathlib.Path
-        Path to load the embedding models (Needed for BSV and Sent2Vec).
+        When {model_name_or_class} is the model name, the path to the checkpoint to load.
     device : str
-        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS,
-        SBioBERT, SBERT).
+        The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
 
     Returns
     -------
     bbsearch.embedding_models.EmbeddingModel
-        The embedding model instance.
+        The sentence embedding model instance.
     """
-    model_factories = {
-        "BSV": lambda: BSV(checkpoint_model_path=checkpoint_path),
-        "SBioBERT": lambda: SBioBERT(device=device),
-        "USE": lambda: USE(),
-        "SBERT": lambda: SentTransformer(
-            model_name="bert-base-nli-mean-tokens", device=device
-        ),
-        "BIOBERT NLI+STS": lambda: SentTransformer(
-            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device
-        ),
-        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path),
+    configs = {
+        'SBERT': ('SentTransformer', 'bert-base-nli-mean-tokens'),
+        'SBioBERT': ('SentTransformer', 'gsarti/biobert-nli'),
+        'BIOBERT NLI+STS': ('SentTransformer', 'clagator/biobert_v1.1_pubmed_nli_sts'),
     }
-
-    if model_name not in model_factories:
-        raise ValueError(f"Unknown model name: {model_name}")
-    selected_factory = model_factories[model_name]
-
-    return selected_factory()
+    kwargs = {'device': device} if device else {}
+    if model_name_or_class in configs:
+        if checkpoint_path is not None:
+            raise ValueError(f"Cannot use 'checkpoint_path' when using a model name!")
+        model_class, model_path = configs[model_name_or_class]
+        kwargs['checkpoint_path'] = pathlib.Path(model_path)
+    else:
+        model_class = model_name_or_class
+        kwargs['checkpoint_path'] = checkpoint_path
+    try:
+        module = importlib.import_module('bsearch.embedding_models')
+        model = getattr(module, model_class)
+        return model(**kwargs)
+    except AttributeError:
+        raise ValueError(f'Unknown model name or class: {model_name_or_class}')
 
 
 class MPEmbedder:

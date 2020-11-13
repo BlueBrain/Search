@@ -97,7 +97,7 @@ class TestEmbeddingModels:
         new_file_path = Path(str(tmpdir)) / "test.txt"
         new_file_path.touch()
         with pytest.raises(FileNotFoundError):
-            BSV(checkpoint_model_path=Path(""))
+            BSV(checkpoint_path=Path(""))
         bsv = BSV(Path(new_file_path))
 
         # Preparation
