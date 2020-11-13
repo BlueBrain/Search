@@ -339,7 +339,7 @@ class SentTransformer(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_path : str
+    checkpoint_path : pathlib.Path or str
         The name or the path of the model to use for the embeddings.
 
     References
@@ -350,7 +350,7 @@ class SentTransformer(EmbeddingModel):
     def __init__(self, checkpoint_path, device=None):
 
         self.senttransf_model = sentence_transformers.SentenceTransformer(
-            checkpoint_path, device=device
+            str(checkpoint_path), device=device
         )
 
     @property
