@@ -98,6 +98,91 @@ class TestH5:
 
         assert np.allclose(res, data, equal_nan=True)
 
+    @pytest.mark.parametrize("batch_size", [1, 3, 10])
+    @pytest.mark.parametrize("delete_inputs", [True, False])
+    def test_concatenate(self, tmpdir, batch_size, delete_inputs):
+        tmpdir = pathlib.Path(str(tmpdir))
+
+        temp_path_1 = tmpdir / "temp_1.h5"
+        temp_path_2 = tmpdir / "temp_2.h5"
+
+        final_path = tmpdir / "final_1.h5"
+
+        # Create temporary files
+        indices_1 = [2, 5, 7]
+        indices_2 = [1, 3, 8, 11]
+        dim = 4
+        shape_1 = (len(indices_1), dim)
+        shape_2 = (len(indices_2), dim)
+
+        array_1 = np.random.random(shape_1)
+        array_2 = np.random.random(shape_2)
+        dataset_name = "some_dataset"
+        dataset_name_indices = f"{dataset_name}_indices"
+
+        with h5py.File(temp_path_1, "w") as f_1:
+            f_1.create_dataset(
+                dataset_name,
+                shape=shape_1,
+            )
+            f_1.create_dataset(
+                dataset_name_indices,
+                dtype="int32",
+                shape=(len(indices_1), 1),
+            )
+            f_1[dataset_name][:] = array_1
+            f_1[dataset_name_indices][:, 0] = np.array(indices_1, dtype=np.int32)
+
+        with h5py.File(temp_path_2, "w") as f_2:
+            f_2.create_dataset(
+                dataset_name,
+                shape=shape_2,
+            )
+            f_2.create_dataset(
+                dataset_name_indices,
+                dtype="int32",
+                shape=(len(indices_2), 1),
+            )
+            f_2[dataset_name][:] = array_2
+            f_2[dataset_name_indices][:, 0] = np.array(indices_2, dtype=np.int32)
+
+        # No paths
+        with pytest.raises(ValueError):
+            H5.concatenate(final_path, dataset_name, [])
+
+        # Overlapping indices
+        with pytest.raises(ValueError):
+            H5.concatenate(final_path, dataset_name, [temp_path_1, temp_path_1])
+
+        H5.concatenate(
+            final_path,
+            dataset_name,
+            [temp_path_1, temp_path_2],
+            delete_inputs=delete_inputs,
+            batch_size=batch_size,
+        )
+
+        if delete_inputs:
+            assert not temp_path_1.exists()
+            assert not temp_path_2.exists()
+        else:
+            assert temp_path_1.exists()
+            assert temp_path_2.exists()
+
+        assert final_path.exists()
+
+        with h5py.File(final_path, "r") as f:
+            data = f[dataset_name][:]
+
+        assert data.shape == (max(indices_1 + indices_2) + 1, dim)
+        np.testing.assert_array_almost_equal(data[indices_1], array_1)
+        np.testing.assert_array_almost_equal(data[indices_2], array_2)
+
+        assert np.all(
+            H5.find_populated_rows(final_path, dataset_name)
+            == np.array(sorted(indices_1 + indices_2))
+        )
+
     def test_create(self, tmpdir):
         h5_path = pathlib.Path(str(tmpdir)) / "to_be_created.h5"
 

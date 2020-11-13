@@ -3,6 +3,7 @@ import pickle
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
+import h5py
 import numpy as np
 import pandas as pd
 import pytest
@@ -16,6 +17,7 @@ from bbsearch.embedding_models import (
     BSV,
     USE,
     EmbeddingModel,
+    MPEmbedder,
     SBioBERT,
     Sent2VecModel,
     SentTransformer,
@@ -38,12 +40,13 @@ class TestEmbeddingModels:
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
-        torch_model = MagicMock(spec=torch.nn.Module)
+        torch_model = MagicMock()
         torch_model.return_value = (
             torch.ones([n_sentences, 10, 768]),
             None,
         )  # 10 tokens
 
+        torch_model.config.to_dict.return_value = {"max_position_embeddings": 23}
         auto_model = Mock()
         auto_model.from_pretrained().to.return_value = torch_model
 
@@ -382,3 +385,103 @@ def test_compute_database(
     assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(
         n_sentences % batch_size != 0
     )
+
+
+class TestMPEmbedder:
+    @pytest.mark.parametrize("dim", [2, 5])
+    @pytest.mark.parametrize("batch_size", [1, 2, 10])
+    def test_run_embedding_worker(
+        self, fake_sqlalchemy_engine, monkeypatch, tmpdir, dim, batch_size
+    ):
+        class Random(EmbeddingModel):
+            def __init__(self, _dim):
+                self._dim = _dim
+
+            @property
+            def dim(self):
+                return self._dim
+
+            def embed(self, *args):
+                return np.random.random(self.dim)
+
+        temp_h5_path = Path(str(tmpdir)) / "temp.h5"
+        indices = np.array([1, 4, 5])
+
+        fake_get_embedding_model = Mock(return_value=Random(dim))
+
+        monkeypatch.setattr(
+            "bbsearch.embedding_models.get_embedding_model", fake_get_embedding_model
+        )
+
+        MPEmbedder.run_embedding_worker(
+            database_url=fake_sqlalchemy_engine.url,
+            model_name="some_model",
+            indices=indices,
+            temp_h5_path=temp_h5_path,
+            batch_size=batch_size,
+            gpu=3,
+            checkpoint_path=None,
+        )
+
+        assert temp_h5_path.exists()
+        with h5py.File(temp_h5_path, "r") as f:
+            assert "some_model" in f.keys()
+            assert "some_model_indices" in f.keys()
+
+            # data checks
+            assert f["some_model"].shape == (len(indices), dim)
+            assert f["some_model"].dtype == "float32"
+
+            assert not np.any(np.isnan(f["some_model"][:]))
+
+            # indices checks
+            assert f["some_model_indices"].shape == (len(indices), 1)
+            assert f["some_model_indices"].dtype == "int32"
+
+            assert not np.any(np.isnan(f["some_model_indices"][:]))
+
+        with pytest.raises(FileExistsError):
+            MPEmbedder.run_embedding_worker(
+                database_url=fake_sqlalchemy_engine.url,
+                model_name="some_model",
+                indices=indices,
+                temp_h5_path=temp_h5_path,
+                batch_size=batch_size,
+                gpu=None,
+                checkpoint_path=None,
+            )
+
+    @pytest.mark.parametrize("n_processes", [1, 2, 5])
+    def test_do_embedding(self, monkeypatch, n_processes):
+        # test 1 gpu per process or not specified
+        with pytest.raises(ValueError):
+            MPEmbedder(
+                "some_url",
+                "some_model",
+                np.array([2, 5, 11]),
+                Path("some/path"),
+                n_processes=2,
+                gpus=[1, 4, 8],
+            )
+
+        mpe = MPEmbedder(
+            "some_url",
+            "some_model",
+            np.array([2, 5, 11, 523, 523523, 3243223, 23424234]),
+            Path("some/path"),
+            n_processes=n_processes,
+        )
+
+        fake_multiprocessing = Mock()
+        fake_h5 = Mock()
+        monkeypatch.setattr("bbsearch.embedding_models.mp", fake_multiprocessing)
+        monkeypatch.setattr("bbsearch.embedding_models.H5", fake_h5)
+
+        mpe.do_embedding()
+
+        # checks
+        assert fake_multiprocessing.Process.call_count == n_processes
+        fake_h5.concatenate.assert_called_once()
+
+        args, _ = fake_h5.concatenate.call_args
+        assert len(args[2]) == n_processes
