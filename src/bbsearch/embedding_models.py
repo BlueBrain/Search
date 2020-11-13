@@ -885,7 +885,7 @@ class MPEmbedder:
 
             worker_process = mp.Process(
                 name=f"worker_{process_ix}",
-                target=self.create_and_embed,
+                target=self.run_embedding_worker,
                 kwargs={
                     "database_url": self.database_url,
                     "model_name": self.model_name,
@@ -915,7 +915,7 @@ class MPEmbedder:
         self.logger.info("Concatenation done!")
 
     @staticmethod
-    def create_and_embed(
+    def run_embedding_worker(
         database_url,
         model_name,
         indices,

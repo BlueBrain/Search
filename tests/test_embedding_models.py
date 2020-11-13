@@ -390,7 +390,7 @@ def test_compute_database(
 class TestMPEmbedder:
     @pytest.mark.parametrize("dim", [2, 5])
     @pytest.mark.parametrize("batch_size", [1, 2, 10])
-    def test_create_and_embed(
+    def test_run_embedding_worker(
         self, fake_sqlalchemy_engine, monkeypatch, tmpdir, dim, batch_size
     ):
         class Random(EmbeddingModel):
@@ -413,7 +413,7 @@ class TestMPEmbedder:
             "bbsearch.embedding_models.get_embedding_model", fake_get_embedding_model
         )
 
-        MPEmbedder.create_and_embed(
+        MPEmbedder.run_embedding_worker(
             database_url=fake_sqlalchemy_engine.url,
             model_name="some_model",
             indices=indices,
@@ -441,7 +441,7 @@ class TestMPEmbedder:
             assert not np.any(np.isnan(f["some_model_indices"][:]))
 
         with pytest.raises(FileExistsError):
-            MPEmbedder.create_and_embed(
+            MPEmbedder.run_embedding_worker(
                 database_url=fake_sqlalchemy_engine.url,
                 model_name="some_model",
                 indices=indices,
