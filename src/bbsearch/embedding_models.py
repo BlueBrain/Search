@@ -724,7 +724,6 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
 
     all_embeddings = list()
     all_ids = list()
-    num_errors = 0
 
     for batch_ix in range((n_sentences // batch_size) + 1):
         start_ix = batch_ix * batch_size
@@ -736,19 +735,15 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
         sentences_text = sentences.iloc[start_ix:end_ix]["text"].to_list()
         sentences_id = sentences.iloc[start_ix:end_ix]["sentence_id"].to_list()
 
-        try:
-            preprocessed_sentences = model.preprocess_many(sentences_text)
-            embeddings = model.embed_many(preprocessed_sentences)
-        except IndexError:
-            # This could happen when the sentence is too long for example
-            num_errors += 1
-            continue
+        preprocessed_sentences = model.preprocess_many(sentences_text)
+        embeddings = model.embed_many(preprocessed_sentences)
 
         all_ids.extend(sentences_id)
         all_embeddings.append(embeddings)
 
     final_embeddings = np.concatenate(all_embeddings, axis=0)
     retrieved_indices = np.array(all_ids)
+
     return final_embeddings, retrieved_indices
 
 
@@ -979,6 +974,8 @@ class MPEmbedder:
 
         logger.info("Populating h5 files")
         splits = np.array_split(np.arange(n_indices), n_indices / batch_size)
+        splits = [split for split in splits if len(split) > 0]
+
         for split_ix, pos_indices in enumerate(splits):
             batch_indices = indices[pos_indices]
 
@@ -997,6 +994,7 @@ class MPEmbedder:
             except Exception as e:
                 logger.error(f"Issues raised for sentence_ids[{batch_indices}]")
                 logger.error(e)
+                raise  # any error will lead to the child being stopped
 
             H5.write(
                 temp_h5_path,
