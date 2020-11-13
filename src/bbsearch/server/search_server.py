@@ -116,9 +116,9 @@ class SearchServer(Flask):
             "BSV": lambda: BSV(checkpoint_path=bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
             "USE": lambda: USE(),
-            "SBERT": lambda: SentTransformer(model_name_or_path="bert-base-nli-mean-tokens"),
+            "SBERT": lambda: SentTransformer(checkpoint_path="bert-base-nli-mean-tokens"),
             "BIOBERT NLI+STS": lambda: SentTransformer(
-                model_name_or_path="clagator/biobert_v1.1_pubmed_nli_sts"
+                checkpoint_path="clagator/biobert_v1.1_pubmed_nli_sts"
             ),
             "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path),
         }
