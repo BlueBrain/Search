@@ -612,7 +612,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         model_class = model_name_or_class
         kwargs['checkpoint_path'] = checkpoint_path
     try:
-        module = importlib.import_module('bsearch.embedding_models')
+        module = importlib.import_module('bbsearch.embedding_models')
         model = getattr(module, model_class)
         return model(**kwargs)
     except AttributeError:
