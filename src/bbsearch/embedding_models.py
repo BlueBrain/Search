@@ -610,7 +610,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
     kwargs = {"device": device} if device else {}
     if model_name_or_class in configs:
         if checkpoint_path is not None:
-            raise ValueError(f"Cannot use 'checkpoint_path' when using a model name!")
+            raise ValueError("Cannot use 'checkpoint_path' when using a model name!")
         model_class, model_path = configs[model_name_or_class]
         kwargs["checkpoint_path"] = pathlib.Path(model_path)
     else:
