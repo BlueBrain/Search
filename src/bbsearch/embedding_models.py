@@ -575,13 +575,19 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     """Load a sentence embedding model from its name or its class and checkpoint.
 
     Usage:
-    - My Transformer model: ('SentTransformer', <checkpoint_path>, <device>)
-    - BioBERT NLI+STS: ('BioBERT_NLI+STS', <device>)
-    - SBioBERT: ('SBioBERT', <device>)
-    - SBERT: ('SBERT', <device>)
-    - USE: ('USE')
-    - BSV: ('Sent2VecModel', <checkpoint_path>)
-    - Sent2Vec: ('Sent2VecModel', <checkpoint_path>)
+
+    - For defined models:
+        - BioBERT NLI+STS: `get_embedding_model('BioBERT_NLI+STS', <device>)`
+        - SBioBERT: `get_embedding_model('SBioBERT', <device>)`
+        - SBERT: `get_embedding_model('SBERT', <device>)`
+        - USE: `get_embedding_model('USE')`
+        - BSV: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - Sent2Vec: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+
+    - For arbitrary models:
+        - My Transformer model: `get_embedding_model('SentTransformer', <checkpoint_path>, <device>)`
+        - My Sent2Vec model: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - My scikit-learn model: `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
 
     Parameters
     ----------
@@ -598,9 +604,9 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         The sentence embedding model instance.
     """
     configs = {
-        'SBERT': ('SentTransformer', 'bert-base-nli-mean-tokens'),
+        'BioBERT_NLI+STS': ('SentTransformer', 'clagator/biobert_v1.1_pubmed_nli_sts'),
         'SBioBERT': ('SentTransformer', 'gsarti/biobert-nli'),
-        'BIOBERT NLI+STS': ('SentTransformer', 'clagator/biobert_v1.1_pubmed_nli_sts'),
+        'SBERT': ('SentTransformer', 'bert-base-nli-mean-tokens'),
     }
     kwargs = {'device': device} if device else {}
     if model_name_or_class in configs:
