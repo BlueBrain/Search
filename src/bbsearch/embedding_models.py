@@ -1,5 +1,4 @@
 """Model handling sentences embeddings."""
-import importlib
 import logging
 import multiprocessing as mp
 import os
@@ -741,7 +740,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     return final_embeddings, retrieved_indices
 
 
-def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
+def get_embedding_model(model_name_or_class, checkpoint_path, device):
     """Load a sentence embedding model from its name or its class and checkpoint.
 
     Usage:
@@ -750,9 +749,9 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
         - BioBERT NLI+STS: `get_embedding_model('BioBERT_NLI+STS', <device>)`
         - SBioBERT: `get_embedding_model('SBioBERT', <device>)`
         - SBERT: `get_embedding_model('SBERT', <device>)`
-        - USE: `get_embedding_model('USE')`
         - BSV: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
         - Sent2Vec: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - USE: `get_embedding_model('USE')`
 
     - For arbitrary models:
         - My Transformer model:
@@ -766,7 +765,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
     ----------
     model_name_or_class : str
         The name or class of the embedding model to load.
-    checkpoint_path : pathlib.Path or None
+    checkpoint_path : pathlib.Path or str
         If 'model_name_or_class' is the class, the path of the embedding model to load.
     device : str
         The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
@@ -777,25 +776,23 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
         The sentence embedding model instance.
     """
     configs = {
-        "BioBERT_NLI+STS": ("SentTransformer", "clagator/biobert_v1.1_pubmed_nli_sts"),
-        "SBioBERT": ("SBioBERT", None),
-        "SBERT": ("SentTransformer", "bert-base-nli-mean-tokens"),
+        # Transformer models.
+        "SentTransformer": lambda: SentTransformer(checkpoint_path, device),
+        "BioBERT_NLI+STS": lambda: SentTransformer(
+            "clagator/biobert_v1.1_pubmed_nli_sts", device
+        ),
+        "SBioBERT": lambda: SBioBERT(device),
+        "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
+        # Sent2Vec models.
+        "Sent2VecModel": lambda: Sent2VecModel(checkpoint_path),
+        # Scikit-learn models.
+        "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
+        # Other models.
+        "USE": lambda: USE(),
     }
-    kwargs = {"device": device} if device else {}
-    if model_name_or_class in configs:
-        if checkpoint_path is not None:
-            raise ValueError("Cannot use 'checkpoint_path' when using a model name!")
-        model_class, model_path = configs[model_name_or_class]
-        if model_path is not None:
-            kwargs["checkpoint_path"] = pathlib.Path(model_path)
-    else:
-        model_class = model_name_or_class
-        kwargs["checkpoint_path"] = checkpoint_path
     try:
-        module = importlib.import_module("bbsearch.embedding_models")
-        model = getattr(module, model_class)
-        return model(**kwargs)
-    except AttributeError:
+        return configs[model_name_or_class]
+    except KeyError:
         raise ValueError(f"Unknown model name or class: {model_name_or_class}")
 
 
