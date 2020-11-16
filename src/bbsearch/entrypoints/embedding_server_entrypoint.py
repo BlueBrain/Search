@@ -7,7 +7,7 @@ from ._helper import configure_logging, get_var, run_server
 
 def get_embedding_app():
     """Construct the embedding flask app."""
-    from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
+    from ..embedding_models import BSV, USE, Sent2VecModel, SentTransformer
     from ..server.embedding_server import EmbeddingServer
 
     # Read configuration
@@ -31,7 +31,7 @@ def get_embedding_app():
         ),
         "Sent2Vec": Sent2VecModel(checkpoint_path=pathlib.Path(sent2vec_checkpoint)),
         "BSV": BSV(checkpoint_path=pathlib.Path(bsv_checkpoint)),
-        "SBioBERT": SBioBERT(),
+        "SBioBERT": SentTransformer(checkpoint_path="gsarti/biobert-nli"),
     }
 
     # Create Server app

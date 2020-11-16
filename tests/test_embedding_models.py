@@ -18,7 +18,6 @@ from bbsearch.embedding_models import (
     USE,
     EmbeddingModel,
     MPEmbedder,
-    SBioBERT,
     Sent2VecModel,
     SentTransformer,
     SklearnVectorizer,
@@ -62,7 +61,7 @@ class TestEmbeddingModels:
         monkeypatch.setattr("bbsearch.embedding_models.AutoTokenizer", auto_tokenizer)
         monkeypatch.setattr("bbsearch.embedding_models.AutoModel", auto_model)
 
-        sbiobert = SBioBERT()
+        sbiobert = SentTransformer("gsarti/biobert-nli")
 
         # Preparations
         dummy_sentence = "This is a dummy sentence"

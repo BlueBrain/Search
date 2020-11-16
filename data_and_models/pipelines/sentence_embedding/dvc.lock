@@ -191,8 +191,9 @@ eval_sbiobert:
   params:
     params.yaml:
       eval.sbiobert:
-        class: SBioBERT
-        init_kwargs: {}
+        class: SentTransformer
+        init_kwargs:
+          checkpoint_path: gsarti/biobert-nli
   outs:
   - path: ../../metrics/sentence_embedding/sbiobert.csv
     md5: e1b06106de5f9b4d19bb5944254c1615

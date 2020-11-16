@@ -7,7 +7,7 @@ from flask import Flask, jsonify, request
 
 import bbsearch
 
-from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
+from ..embedding_models import BSV, USE, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -114,7 +114,7 @@ class SearchServer(Flask):
 
         model_factories = {
             "BSV": lambda: BSV(checkpoint_path=bsv_model_path),
-            "SBioBERT": lambda: SBioBERT(),
+            "SBioBERT": lambda: SentTransformer("gsarti/biobert-nli"),
             "USE": lambda: USE(),
             "SBERT": lambda: SentTransformer(
                 checkpoint_path="bert-base-nli-mean-tokens"
