@@ -791,7 +791,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device):
         "USE": lambda: USE(),
     }
     try:
-        return configs[model_name_or_class]
+        return configs[model_name_or_class]()
     except KeyError:
         raise ValueError(f"Unknown model name or class: {model_name_or_class}")
 
