@@ -135,7 +135,7 @@ def main(argv=None):
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
         engine.url,
-        args.model,
+        args.model,  # FIXME use folder name if --checkpoint
         indices,
         out_file,
         batch_size_inference=args.batch_size_inference,

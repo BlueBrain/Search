@@ -109,7 +109,7 @@ class Sent2VecModel(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        Location of the model checkpoint.
+        The path of the Sent2Vec model to use for the embeddings.
     """
 
     def __init__(self, checkpoint_path):
@@ -253,7 +253,7 @@ class BSV(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        Path to the file of the stored model BSV.
+        The path of the BioSentVec (BSV) model to use for the embeddings.
 
     References
     ----------
@@ -262,13 +262,13 @@ class BSV(EmbeddingModel):
 
     def __init__(self, checkpoint_path):
         checkpoint_path = pathlib.Path(checkpoint_path)
-        self.checkpoint_model_path = checkpoint_path
-        if not self.checkpoint_model_path.is_file():
+        self.checkpoint_path = checkpoint_path
+        if not self.checkpoint_path.is_file():
             raise FileNotFoundError(
-                f"The file {self.checkpoint_model_path} was not found."
+                f"The file {self.checkpoint_path} was not found."
             )
         self.bsv_model = sent2vec.Sent2vecModel()
-        self.bsv_model.load_model(str(self.checkpoint_model_path))
+        self.bsv_model.load_model(str(self.checkpoint_path))
         self.bsv_stopwords = set(stopwords.words("english"))
 
     @property
@@ -340,7 +340,7 @@ class SentTransformer(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        The name or the path of the model to use for the embeddings.
+        The name or the path of the Transformer model to use for the embeddings.
 
     References
     ----------
@@ -450,7 +450,7 @@ class SklearnVectorizer(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        Location of the model checkpoint in pickle format.
+        The path of the scikit-learn model to use for the embeddings in Pickle format.
     """
 
     def __init__(self, checkpoint_path):
@@ -588,7 +588,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     model_name_or_class : str
         The name or the class of the model to load.
     checkpoint_path : pathlib.Path
-        When {model_name_or_class} is the model name, the path to the checkpoint to load.
+        When {model_name_or_class} is the model name, the path of the model to load.
     device : str
         The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
 
@@ -786,7 +786,7 @@ class MPEmbedder:
 
         logger.info("Loading model")
         model = get_embedding_model(
-            model_name,
+            model_name,  # FIXME model_name_or_class
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )

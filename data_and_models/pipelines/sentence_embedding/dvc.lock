@@ -13,7 +13,7 @@ eval_biobert_nli_sts:
       eval.biobert_nli_sts:
         class: SentTransformer
         init_kwargs:
-          model_name: clagator/biobert_v1.1_pubmed_nli_sts
+          checkpoint_path: clagator/biobert_v1.1_pubmed_nli_sts
   outs:
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.csv
     md5: fae1c6d3a8efb3354dc3d81682491a07
@@ -38,7 +38,7 @@ eval_bsv:
       eval.bsv:
         class: BSV
         init_kwargs:
-          checkpoint_model_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+          checkpoint_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
   outs:
   - path: ../../metrics/sentence_embedding/bsv.csv
     md5: 5849682de58ae1b1fc345c446ac60af3
@@ -170,7 +170,7 @@ eval_sbert:
       eval.sbert:
         class: SentTransformer
         init_kwargs:
-          model_name: bert-base-nli-mean-tokens
+          checkpoint_path: bert-base-nli-mean-tokens
   outs:
   - path: ../../metrics/sentence_embedding/sbert.csv
     md5: 122f6acb30f412302775c51486c27ed4
