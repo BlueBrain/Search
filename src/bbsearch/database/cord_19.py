@@ -29,10 +29,10 @@ def mark_bad_sentences(engine, sentences_table_name):
     """
     logger.info("Verifying the column \"is_bad\" is present")
     with engine.begin() as connection:
-        query = f"SHOW COLUMNS FROM {sentences_table_name}"
-        column_info = connection.execute(query).fetchall()
-    columns = [row[0] for row in column_info]
-    if "is_bad" not in columns:
+        inspector = sqlalchemy.inspect(connection)
+        columns = inspector.get_columns(sentences_table_name)
+    columns_name = [col['name'] for col in columns]
+    if "is_bad" not in columns_name:
         raise RuntimeError("Column is_bad not found in given table")
 
     logger.info("Getting all sentences")
@@ -181,7 +181,8 @@ class CORD19DatabaseCreation:
                 "sentence_pos_in_paragraph",
                 name="sentence_unique_identifier",
             ),
-            sqlalchemy.Column("is_bad", sqlalchemy.Boolean(), default=False),
+            sqlalchemy.Column("is_bad", sqlalchemy.Boolean(),
+                              server_default='0'),
         )
 
         with self.engine.begin() as connection:

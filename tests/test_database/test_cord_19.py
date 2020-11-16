@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bbsearch.database import CORD19DatabaseCreation
+from bbsearch.database import CORD19DatabaseCreation, mark_bad_sentences
 
 
 @pytest.fixture()
@@ -92,6 +92,7 @@ class TestDatabaseCreation:
             "text",
             "paragraph_pos_in_article",
             "sentence_pos_in_paragraph",
+            "is_bad"
         }
         sentences_columns = set(
             pd.read_sql(
@@ -152,6 +153,13 @@ class TestDatabaseCreation:
             db = CORD19DatabaseCreation(data_path=jsons_path, engine=engine)
             db.construct()
             db.construct()
+
+    def test_boolean_columns(self, real_sqlalchemy_engine):
+        """Test that boolean columns only contain boolean."""
+        is_english = pd.read_sql("""SELECT is_english FROM articles""", real_sqlalchemy_engine)
+        is_bad = pd.read_sql("""SELECT is_bad FROM sentences""", real_sqlalchemy_engine)
+        assert set(is_english['is_english'].unique()).issubset({0, 1})
+        assert set(is_bad['is_bad'].unique()).issubset({0, 1})
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Test real vs. fake database.

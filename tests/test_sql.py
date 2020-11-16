@@ -308,3 +308,24 @@ class TestSentenceFilter:
         # Running and iterating should give the same results
         assert len(ids_from_run) == len(ids_from_iterate) == len(ids_from_pandas)
         assert set(ids_from_run) == set(ids_from_iterate) == set(ids_from_pandas)
+
+    @pytest.mark.parametrize("filtering_bad", [True, False])
+    def test_bad_sentence_filter(self, filtering_bad, fake_sqlalchemy_engine):
+        """Check that filtering the bad sentences is working fine."""
+        df_all_sentences = pd.read_sql(
+            "SELECT * FROM sentences", fake_sqlalchemy_engine
+        )
+        good_sentences = df_all_sentences[df_all_sentences['is_bad'] == 0]
+        good_sentences_ids = good_sentences['sentence_id'].tolist()
+
+        sentence_filter = (
+            SentenceFilter(fake_sqlalchemy_engine)
+            .discard_bad_sentences(filtering_bad)
+        )
+        ids_from_run = sentence_filter.run()
+
+        if filtering_bad:
+            assert len(ids_from_run) == len(good_sentences_ids)
+            assert set(ids_from_run) == set(good_sentences_ids)
+        else:
+            assert len(ids_from_run) == len(df_all_sentences)

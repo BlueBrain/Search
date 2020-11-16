@@ -96,6 +96,7 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
         sqlalchemy.Column(
             "sentence_pos_in_paragraph", sqlalchemy.Integer(), nullable=False
         ),
+        sqlalchemy.Column("is_bad", sqlalchemy.Boolean(), server_default='0'),
         sqlalchemy.UniqueConstraint(
             "article_id",
             "paragraph_pos_in_article",
@@ -163,6 +164,7 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                         "article_id": article_id,
                         "paragraph_pos_in_article": sec_ix,
                         "sentence_pos_in_paragraph": sen_ix,
+                        "is_bad": sen_ix % 2
                     }
                 )
                 temp_s.append(s)
