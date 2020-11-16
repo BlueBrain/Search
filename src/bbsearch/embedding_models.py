@@ -740,7 +740,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     return final_embeddings, retrieved_indices
 
 
-def get_embedding_model(model_name_or_class, checkpoint_path, device):
+def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     """Load a sentence embedding model from its name or its class and checkpoint.
 
     Usage:
@@ -765,10 +765,10 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device):
     ----------
     model_name_or_class : str
         The name or class of the embedding model to load.
-    checkpoint_path : pathlib.Path or str
+    checkpoint_path : pathlib.Path or str or None
         If 'model_name_or_class' is the class, the path of the embedding model to load.
-    device : str
-        The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
+    device : str or None
+        The target device to which load the model ('cpu' or 'cuda').
 
     Returns
     -------
@@ -791,7 +791,8 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device):
         "USE": lambda: USE(),
     }
     try:
-        return configs[model_name_or_class]()
+        model = configs[model_name_or_class]
+        return model()
     except KeyError:
         raise ValueError(f"Unknown model name or class: {model_name_or_class}")
 

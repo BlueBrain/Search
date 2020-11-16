@@ -19,7 +19,7 @@ def main(argv=None):
         "model_name_or_class",
         type=str,
         help="The name or class of the model for which to compute the embeddings."
-        "Recognized model names are: 'BioBERT_NLI+STS', 'SBioBERT', 'SBERT'."
+        "Recognized model names are: 'BioBERT_NLI+STS', 'SBioBERT', 'SBERT', 'USE'."
         "Recognized model classes are: 'SentTransformer', 'Sent2VecModel',"
         "'SklearnVectorizer'."
         "See also 'get_embedding_model(...)'.",
