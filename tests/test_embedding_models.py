@@ -190,7 +190,7 @@ class TestEmbeddingModels:
             "bbsearch.embedding_models.sentence_transformers.SentenceTransformer",
             sentence_transormer_class,
         )
-        sbert = SentTransformer()
+        sbert = SentTransformer("bert-base-nli-mean-tokens")
 
         # Preparations
         dummy_sentence = "This is a dummy sentence/test."
