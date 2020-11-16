@@ -32,6 +32,5 @@ eval:
     init_kwargs:
       checkpoint_path: bert-base-nli-mean-tokens
   sbiobert:
-    class: SentTransformer
-    init_kwargs:
-      checkpoint_path: gsarti/biobert-nli
+    class: SBioBERT
+    init_kwargs: {}
