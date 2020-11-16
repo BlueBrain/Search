@@ -262,9 +262,7 @@ class BSV(EmbeddingModel):
         checkpoint_path = pathlib.Path(checkpoint_path)
         self.checkpoint_path = checkpoint_path
         if not self.checkpoint_path.is_file():
-            raise FileNotFoundError(
-                f"The file {self.checkpoint_path} was not found."
-            )
+            raise FileNotFoundError(f"The file {self.checkpoint_path} was not found.")
         self.bsv_model = sent2vec.Sent2vecModel()
         self.bsv_model.load_model(str(self.checkpoint_path))
         self.bsv_stopwords = set(stopwords.words("english"))
@@ -602,25 +600,25 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
         The sentence embedding model instance.
     """
     configs = {
-        'BioBERT_NLI+STS': ('SentTransformer', 'clagator/biobert_v1.1_pubmed_nli_sts'),
-        'SBioBERT': ('SentTransformer', 'gsarti/biobert-nli'),
-        'SBERT': ('SentTransformer', 'bert-base-nli-mean-tokens'),
+        "BioBERT_NLI+STS": ("SentTransformer", "clagator/biobert_v1.1_pubmed_nli_sts"),
+        "SBioBERT": ("SentTransformer", "gsarti/biobert-nli"),
+        "SBERT": ("SentTransformer", "bert-base-nli-mean-tokens"),
     }
-    kwargs = {'device': device} if device else {}
+    kwargs = {"device": device} if device else {}
     if model_name_or_class in configs:
         if checkpoint_path is not None:
             raise ValueError(f"Cannot use 'checkpoint_path' when using a model name!")
         model_class, model_path = configs[model_name_or_class]
-        kwargs['checkpoint_path'] = pathlib.Path(model_path)
+        kwargs["checkpoint_path"] = pathlib.Path(model_path)
     else:
         model_class = model_name_or_class
-        kwargs['checkpoint_path'] = checkpoint_path
+        kwargs["checkpoint_path"] = checkpoint_path
     try:
-        module = importlib.import_module('bbsearch.embedding_models')
+        module = importlib.import_module("bbsearch.embedding_models")
         model = getattr(module, model_class)
         return model(**kwargs)
     except AttributeError:
-        raise ValueError(f'Unknown model name or class: {model_name_or_class}')
+        raise ValueError(f"Unknown model name or class: {model_name_or_class}")
 
 
 class MPEmbedder:
