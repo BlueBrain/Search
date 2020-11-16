@@ -632,8 +632,8 @@ class MPEmbedder:
     ----------
     database_url : str
         URL of the database.
-    model_name : str
-        Name of the embedding model to be used.
+    model_name_or_class : str
+        Name or class of the embedding model to use.
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to compute the
         embedding.
@@ -671,7 +671,7 @@ class MPEmbedder:
     def __init__(
         self,
         database_url,
-        model_name,
+        model_name_or_class,
         indices,
         h5_path_output,
         batch_size_inference=16,
@@ -683,7 +683,6 @@ class MPEmbedder:
         temp_folder=None,
     ):
         self.database_url = database_url
-        self.model_name = model_name
         self.indices = indices
         self.h5_path_output = h5_path_output
         self.batch_size_inference = batch_size_inference
@@ -692,7 +691,15 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
-        self.logger = logging.getLogger(f"{self.__class__.__name__}[{model_name}]")
+
+        if checkpoint_path is None:
+            self.model_name = model_name_or_class
+            self.model_class = None
+        else:
+            self.model_name = checkpoint_path.stem
+            self.model_class = model_name_or_class
+
+        self.logger = logging.getLogger(f"{self.__class__.__name__}[{self.model_name}]")
 
         if gpus is not None and len(gpus) != n_processes:
             raise ValueError("One needs to specify the GPU for each process separately")
@@ -722,12 +729,13 @@ class MPEmbedder:
                 name=f"worker_{process_ix}",
                 target=self.run_embedding_worker,
                 kwargs={
-                    "database_url": self.database_url,
                     "model_name": self.model_name,
+                    "model_class": self.model_class,
+                    "checkpoint_path": self.checkpoint_path,
+                    "database_url": self.database_url,
                     "indices": split,
                     "temp_h5_path": temp_h5_path,
                     "batch_size": self.batch_size_inference,
-                    "checkpoint_path": self.checkpoint_path,
                     "gpu": None if self.gpus is None else self.gpus[process_ix],
                 },
             )
@@ -751,22 +759,27 @@ class MPEmbedder:
 
     @staticmethod
     def run_embedding_worker(
-        database_url,
         model_name,
+        model_class,
+        checkpoint_path,
+        database_url,
         indices,
         temp_h5_path,
         batch_size,
-        checkpoint_path,
         gpu,
     ):
         """Run per worker function.
 
         Parameters
         ----------
+        model_name : str
+            Name of the model to use. `None` when using `model_class` and `checkpoint_path`.
+        model_class : str
+            Class of the model to use. `None` when using `model_name`.
+        checkpoint_path : pathlib.Path
+            Path of the model to use. `None` when using `model_name`.
         database_url : str
             URL of the database.
-        model_name : str
-            Name of the model to use for embedding.
         indices : np.ndarray
             1D array of sentences ids indices representing what
             the worker needs to embed.
@@ -774,8 +787,6 @@ class MPEmbedder:
             Path to where we store the temporary h5 file.
         batch_size : int
             Number of sentences in the batch.
-        checkpoint_path : None or pathlib.Path
-            If provided, then used to load the pretrained embedding model.
         gpu : int or None
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
@@ -792,7 +803,7 @@ class MPEmbedder:
 
         logger.info("Loading model")
         model = get_embedding_model(
-            model_name,  # FIXME model_name_or_class
+            model_name or model_class,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )

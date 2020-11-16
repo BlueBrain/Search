@@ -414,13 +414,14 @@ class TestMPEmbedder:
         )
 
         MPEmbedder.run_embedding_worker(
-            database_url=fake_sqlalchemy_engine.url,
             model_name="some_model",
+            model_class=None,
+            checkpoint_path=None,
+            database_url=fake_sqlalchemy_engine.url,
             indices=indices,
             temp_h5_path=temp_h5_path,
             batch_size=batch_size,
             gpu=3,
-            checkpoint_path=None,
         )
 
         assert temp_h5_path.exists()
@@ -442,13 +443,14 @@ class TestMPEmbedder:
 
         with pytest.raises(FileExistsError):
             MPEmbedder.run_embedding_worker(
-                database_url=fake_sqlalchemy_engine.url,
                 model_name="some_model",
+                model_class=None,
+                checkpoint_path=None,
+                database_url=fake_sqlalchemy_engine.url,
                 indices=indices,
                 temp_h5_path=temp_h5_path,
                 batch_size=batch_size,
                 gpu=None,
-                checkpoint_path=None,
             )
 
     @pytest.mark.parametrize("n_processes", [1, 2, 5])
