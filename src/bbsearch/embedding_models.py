@@ -778,7 +778,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
     """
     configs = {
         "BioBERT_NLI+STS": ("SentTransformer", "clagator/biobert_v1.1_pubmed_nli_sts"),
-        "SBioBERT": ("SBioBert", None),
+        "SBioBERT": ("SBioBERT", None),
         "SBERT": ("SentTransformer", "bert-base-nli-mean-tokens"),
     }
     kwargs = {"device": device} if device else {}
@@ -976,7 +976,7 @@ class MPEmbedder:
 
         logger.info("Loading model")
         model = get_embedding_model(
-            model_name or model_class,
+            model_class or model_name,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )
