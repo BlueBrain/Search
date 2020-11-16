@@ -746,12 +746,16 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     Usage:
 
     - For defined models:
-        - BioBERT NLI+STS: `get_embedding_model('BioBERT_NLI+STS', <device>)`
-        - SBioBERT: `get_embedding_model('SBioBERT', <device>)`
-        - SBERT: `get_embedding_model('SBERT', <device>)`
-        - BSV: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
-        - Sent2Vec: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
-        - USE: `get_embedding_model('USE')`
+        - BioBERT NLI+STS:
+          `get_embedding_model('BioBERT_NLI+STS', device=<device>)`
+        - SBioBERT:
+          `get_embedding_model('SBioBERT', device=<device>)`
+        - SBERT:
+          `get_embedding_model('SBERT', device=<device>)`
+        - BSV and Sent2Vec:
+          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - USE:
+          `get_embedding_model('USE')`
 
     - For arbitrary models:
         - My Transformer model:
