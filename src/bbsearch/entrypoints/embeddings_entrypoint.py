@@ -138,7 +138,7 @@ def main(argv=None):
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
         args.model_name_or_class,
-        checkpoint_path=checkpoint_path,
+        checkpoint_path,
         engine.url,
         indices,
         out_file,

@@ -14,10 +14,8 @@ import sentence_transformers
 import spacy
 import sqlalchemy
 import tensorflow_hub as hub
-import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
-from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
 from .utils import H5
@@ -109,7 +107,7 @@ class Sent2VecModel(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        The path of the Sent2Vec model to use for the embeddings.
+        The path of the Sent2Vec model to load.
     """
 
     def __init__(self, checkpoint_path):
@@ -253,7 +251,7 @@ class BSV(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        The path of the BioSentVec (BSV) model to use for the embeddings.
+        The path of the BioSentVec (BSV) model to load.
 
     References
     ----------
@@ -340,7 +338,7 @@ class SentTransformer(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        The name or the path of the Transformer model to use for the embeddings.
+        The name or the path of the Transformer model to load.
 
     References
     ----------
