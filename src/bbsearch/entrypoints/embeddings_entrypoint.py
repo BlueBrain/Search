@@ -18,9 +18,10 @@ def main(argv=None):
     parser.add_argument(
         "model_name_or_class",
         type=str,
-        help="The name or class of the model for which we want to compute the embeddings."
+        help="The name or class of the model for which to compute the embeddings."
         "Recognized model names are: 'BioBERT_NLI+STS', 'SBioBERT', 'SBERT'."
-        "Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'SklearnVectorizer'."
+        "Recognized model classes are: 'SentTransformer', 'Sent2VecModel',"
+        "'SklearnVectorizer'."
         "See also 'get_embedding_model(...)'.",
     )
     parser.add_argument(
@@ -32,7 +33,7 @@ def main(argv=None):
         "-c",
         "--checkpoint",
         type=str,
-        help="When 'model_name_or_class' is the model class, the path of the model to load.",
+        help="If 'model_name_or_class' is the class, the path of the model to load.",
     )
     parser.add_argument(
         "--batch-size-inference",

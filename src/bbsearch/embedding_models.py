@@ -581,16 +581,19 @@ def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
         - Sent2Vec: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
 
     - For arbitrary models:
-        - My Transformer model: `get_embedding_model('SentTransformer', <checkpoint_path>, <device>)`
-        - My Sent2Vec model: `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
-        - My scikit-learn model: `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
+        - My Transformer model:
+          `get_embedding_model('SentTransformer', <checkpoint_path>, <device>)`
+        - My Sent2Vec model:
+          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - My scikit-learn model:
+          `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
 
     Parameters
     ----------
     model_name_or_class : str
         The name or class of the embedding model to load.
     checkpoint_path : pathlib.Path or None
-        When 'model_name_or_class' is the model class, the path of the embedding model to load.
+        If 'model_name_or_class' is the class, the path of the embedding model to load.
     device : str
         The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
 
@@ -627,9 +630,9 @@ class MPEmbedder:
     Parameters
     ----------
     model_name_or_class : str
-        The name or class of the model for which we want to compute the embeddings.
+        The name or class of the model for which to compute the embeddings.
     checkpoint_path : pathlib.Path or None
-        When 'model_name_or_class' is the model class, the path of the model to load.
+        If 'model_name_or_class' is the class, the path of the model to load.
     database_url : str
         URL of the database.
     indices : np.ndarray
@@ -766,9 +769,11 @@ class MPEmbedder:
         Parameters
         ----------
         model_name : str
-            The name of the model for which we want to compute the embeddings. `None` when using `model_class` and `checkpoint_path`.
+            The name of the model for which to compute the embeddings.
+            `None` when using `model_class` and `checkpoint_path`.
         model_class : str
-            The class of the model for which we want to compute the embeddings. `None` when using `model_name`.
+            The class of the model for which to compute the embeddings.
+            `None` when using `model_name`.
         checkpoint_path : pathlib.Path
             When 'model_class' is defined, the path of the model to load.
         database_url : str
