@@ -571,7 +571,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     return final_embeddings, retrieved_indices
 
 
-def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
+def get_embedding_model(model_name_or_class, checkpoint_path, device=None):
     """Load a sentence embedding model from its name or its class and checkpoint.
 
     Usage:
@@ -592,9 +592,9 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     Parameters
     ----------
     model_name_or_class : str
-        The name or the class of the model to load.
-    checkpoint_path : pathlib.Path
-        When {model_name_or_class} is the model name, the path of the model to load.
+        The name or class of the embedding model to load.
+    checkpoint_path : pathlib.Path or None
+        When 'model_name_or_class' is the model class, the path of the embedding model to load.
     device : str
         The target device to which load the model. Can be {None, 'cpu', 'cuda'}.
 
@@ -630,10 +630,12 @@ class MPEmbedder:
 
     Parameters
     ----------
+    model_name_or_class : str
+        The name or class of the model for which we want to compute the embeddings.
+    checkpoint_path : pathlib.Path or None
+        When 'model_name_or_class' is the model class, the path of the model to load.
     database_url : str
         URL of the database.
-    model_name_or_class : str
-        Name or class of the embedding model to use.
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to compute the
         embedding.
@@ -651,10 +653,6 @@ class MPEmbedder:
     n_processes : int
         Number of processes to use. Note that each process gets
         `len(indices) / n_processes` sentences to embed.
-    checkpoint_path : pathlib.Path or None
-        If provided, it represents the path to the trained model. Note
-        that for some embedding models it is not necessary (they have
-        a standard caching directory).
     gpus : None or list
         If not specified, all processes will be using CPU. If not None, then
         it needs to be a list of length `n_processes` where each element
@@ -670,34 +668,33 @@ class MPEmbedder:
 
     def __init__(
         self,
-        database_url,
         model_name_or_class,
+        checkpoint_path,
+        database_url,
         indices,
         h5_path_output,
         batch_size_inference=16,
         batch_size_transfer=1000,
         n_processes=2,
-        checkpoint_path=None,
         gpus=None,
         delete_temp=True,
         temp_folder=None,
     ):
-        self.database_url = database_url
-        self.indices = indices
-        self.h5_path_output = h5_path_output
-        self.batch_size_inference = batch_size_inference
-        self.batch_size_transfer = batch_size_transfer
-        self.n_processes = n_processes
-        self.checkpoint_path = checkpoint_path
-        self.delete_temp = delete_temp
-        self.temp_folder = temp_folder
-
         if checkpoint_path is None:
             self.model_name = model_name_or_class
             self.model_class = None
         else:
             self.model_name = checkpoint_path.stem
             self.model_class = model_name_or_class
+        self.checkpoint_path = checkpoint_path
+        self.database_url = database_url
+        self.indices = indices
+        self.h5_path_output = h5_path_output
+        self.batch_size_inference = batch_size_inference
+        self.batch_size_transfer = batch_size_transfer
+        self.n_processes = n_processes
+        self.delete_temp = delete_temp
+        self.temp_folder = temp_folder
 
         self.logger = logging.getLogger(f"{self.__class__.__name__}[{self.model_name}]")
 
@@ -773,11 +770,11 @@ class MPEmbedder:
         Parameters
         ----------
         model_name : str
-            Name of the model to use. `None` when using `model_class` and `checkpoint_path`.
+            The name of the model for which we want to compute the embeddings. `None` when using `model_class` and `checkpoint_path`.
         model_class : str
-            Class of the model to use. `None` when using `model_name`.
+            The class of the model for which we want to compute the embeddings. `None` when using `model_name`.
         checkpoint_path : pathlib.Path
-            Path of the model to use. `None` when using `model_name`.
+            When 'model_class' is defined, the path of the model to load.
         database_url : str
             URL of the database.
         indices : np.ndarray

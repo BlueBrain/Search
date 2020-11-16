@@ -16,12 +16,23 @@ def main(argv=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        "model", type=str, help="Model for which we want to compute the embeddings"
+        "model_name_or_class",
+        type=str,
+        help="The name or class of the model for which we want to compute the embeddings."
+             "Recognized model names are: 'BioBERT_NLI+STS', 'SBioBERT', 'SBERT'."
+             "Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'SklearnVectorizer'."
+             "See also 'get_embedding_model(...)'."
     )
     parser.add_argument(
         "outfile",
         type=str,
         help="The path to where the embeddings are saved (h5 file)",
+    )
+    parser.add_argument(
+        "-c",
+        "--checkpoint",
+        type=str,
+        help="When 'model_name_or_class' is the model class, the path of the model to load."
     )
     parser.add_argument(
         "--batch-size-inference",
@@ -34,14 +45,6 @@ def main(argv=None):
         default=1000,
         type=int,
         help="Batch size for the concatenation of temp h5 files",
-    )
-    parser.add_argument(
-        "-c",
-        "--checkpoint",
-        type=str,
-        help="Path to file containing the checkpointed model. "
-        "Note that one needs to specify it for BSV, Sent2Vec and potentially "
-        "other models.",
     )
     parser.add_argument(
         "--db-url",
@@ -134,14 +137,14 @@ def main(argv=None):
 
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
+        args.model_name_or_class,
+        checkpoint_path=checkpoint_path,
         engine.url,
-        args.model,  # FIXME use folder name if --checkpoint
         indices,
         out_file,
         batch_size_inference=args.batch_size_inference,
         batch_size_transfer=args.batch_size_transfer,
         n_processes=args.n_processes,
-        checkpoint_path=checkpoint_path,
         gpus=gpus,
         temp_folder=temp_dir,
     )

@@ -458,8 +458,9 @@ class TestMPEmbedder:
         # test 1 gpu per process or not specified
         with pytest.raises(ValueError):
             MPEmbedder(
-                "some_url",
                 "some_model",
+                None,
+                "some_url",
                 np.array([2, 5, 11]),
                 Path("some/path"),
                 n_processes=2,
@@ -467,8 +468,9 @@ class TestMPEmbedder:
             )
 
         mpe = MPEmbedder(
-            "some_url",
             "some_model",
+            None,
+            "some_url",
             np.array([2, 5, 11, 523, 523523, 3243223, 23424234]),
             Path("some/path"),
             n_processes=n_processes,
