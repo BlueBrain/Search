@@ -315,12 +315,11 @@ class TestSentenceFilter:
         df_all_sentences = pd.read_sql(
             "SELECT * FROM sentences", fake_sqlalchemy_engine
         )
-        good_sentences = df_all_sentences[df_all_sentences['is_bad'] == 0]
-        good_sentences_ids = good_sentences['sentence_id'].tolist()
+        good_sentences = df_all_sentences[df_all_sentences["is_bad"] == 0]
+        good_sentences_ids = good_sentences["sentence_id"].tolist()
 
-        sentence_filter = (
-            SentenceFilter(fake_sqlalchemy_engine)
-            .discard_bad_sentences(filtering_bad)
+        sentence_filter = SentenceFilter(fake_sqlalchemy_engine).discard_bad_sentences(
+            filtering_bad
         )
         ids_from_run = sentence_filter.run()
 

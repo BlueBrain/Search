@@ -39,6 +39,41 @@ def real_sqlalchemy_engine(
     return engine
 
 
+def test_mark_bad_sentences(fake_sqlalchemy_engine):
+    # Create a fake database
+    df = pd.read_sql("select * from sentences", fake_sqlalchemy_engine)
+    short_sentence = "hello"
+    long_sentence = "a" * 3000
+    latex_sentence = "\\documentclass{article}"
+
+    # Test without bad sentences
+    df["is_bad"] = 0
+    df.to_sql("sentences_new", fake_sqlalchemy_engine, index=False)
+    mark_bad_sentences(fake_sqlalchemy_engine, "sentences_new")
+    df = pd.read_sql("select * from sentences_new", fake_sqlalchemy_engine)
+    is_bad_nothing = df["is_bad"].copy()
+
+    # Test with bad sentences
+    df["is_bad"] = 0
+    df.loc[0, "text"] = short_sentence
+    df.loc[1, "text"] = long_sentence
+    df.loc[2, "text"] = latex_sentence
+    df.to_sql("sentences_new", fake_sqlalchemy_engine, index=False, if_exists="replace")
+
+    # Mark bad sentences
+    mark_bad_sentences(fake_sqlalchemy_engine, "sentences_new")
+
+    df = pd.read_sql("select * from sentences_new", fake_sqlalchemy_engine)
+    is_bad_3 = df["is_bad"].copy()
+
+    with fake_sqlalchemy_engine.begin() as connection:
+        connection.execute("drop table sentences_new")
+
+    assert is_bad_nothing.sum() == 0
+    assert is_bad_3.sum() == 3
+    assert all(is_bad_3[:3])
+
+
 class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
@@ -92,7 +127,7 @@ class TestDatabaseCreation:
             "text",
             "paragraph_pos_in_article",
             "sentence_pos_in_paragraph",
-            "is_bad"
+            "is_bad",
         }
         sentences_columns = set(
             pd.read_sql(
@@ -156,10 +191,12 @@ class TestDatabaseCreation:
 
     def test_boolean_columns(self, real_sqlalchemy_engine):
         """Test that boolean columns only contain boolean."""
-        is_english = pd.read_sql("""SELECT is_english FROM articles""", real_sqlalchemy_engine)
+        is_english = pd.read_sql(
+            """SELECT is_english FROM articles""", real_sqlalchemy_engine
+        )
         is_bad = pd.read_sql("""SELECT is_bad FROM sentences""", real_sqlalchemy_engine)
-        assert set(is_english['is_english'].unique()).issubset({0, 1})
-        assert set(is_bad['is_bad'].unique()).issubset({0, 1})
+        assert set(is_english["is_english"].unique()).issubset({0, 1})
+        assert set(is_bad["is_bad"].unique()).issubset({0, 1})
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Test real vs. fake database.

@@ -256,23 +256,29 @@ class SearchWidget(widgets.VBox):
 
         # Put advanced settings to a tab
         tabs = (
-            ("Search / View", [
-                self.widgets["sent_embedder"],
-                self.widgets["granularity"],
-                self.widgets["top_results"],
-                self.widgets["print_paragraph"],
-                self.widgets["default_value_article_saver"],
-            ]),
-            ("Filtering", [
-                self.widgets["has_journal"],
-                self.widgets["is_english"],
-                self.widgets["discard_bad_sentences"],
-                self.widgets["date_range"],
-                self.widgets["deprioritize_text"],
-                self.widgets["deprioritize_strength"],
-                self.widgets["exclusion_text"],
-                self.widgets["inclusion_text"],
-            ]),
+            (
+                "Search / View",
+                [
+                    self.widgets["sent_embedder"],
+                    self.widgets["granularity"],
+                    self.widgets["top_results"],
+                    self.widgets["print_paragraph"],
+                    self.widgets["default_value_article_saver"],
+                ],
+            ),
+            (
+                "Filtering",
+                [
+                    self.widgets["has_journal"],
+                    self.widgets["is_english"],
+                    self.widgets["discard_bad_sentences"],
+                    self.widgets["date_range"],
+                    self.widgets["deprioritize_text"],
+                    self.widgets["deprioritize_strength"],
+                    self.widgets["exclusion_text"],
+                    self.widgets["inclusion_text"],
+                ],
+            ),
         )
         tab_widget = widgets.Tab(children=[])
         tab_widget.layout.display = "none"
