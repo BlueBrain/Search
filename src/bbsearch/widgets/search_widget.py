@@ -107,7 +107,7 @@ class SearchWidget(widgets.VBox):
 
         # Select n. of top results to return
         self.widgets["top_results"] = widgets.widgets.IntText(
-            value=20, description="Show top N", style=self.widgets_style
+            value=20, description="Show top ", style=self.widgets_style
         )
 
         # Choose whether to print whole paragraph containing sentence
