@@ -69,9 +69,7 @@ class SearchWidget(widgets.VBox):
         self.current_sentence_ids = []
         self.history = []
 
-        response = requests.post(
-            self.bbs_search_url + "/help",
-        )
+        response = requests.post(self.bbs_search_url + "/help",)
         if not response.ok:
             raise Exception(
                 f"It seems there is an issue with the bbs search server. Response "
@@ -254,10 +252,12 @@ class SearchWidget(widgets.VBox):
                 widgets.VBox(
                     [
                         self.widgets["sent_embedder"],
-                        widgets.HBox(children=[
-                            self.widgets["top_results"],
-                            self.widgets["granularity"]
-                        ]),
+                        widgets.HBox(
+                            children=[
+                                self.widgets["top_results"],
+                                self.widgets["granularity"],
+                            ]
+                        ),
                         self.widgets["print_paragraph"],
                         self.widgets["has_journal"],
                         self.widgets["is_english"],
@@ -276,8 +276,7 @@ class SearchWidget(widgets.VBox):
 
         # Disable advanced settings checkbox
         self.widgets["show_advanced_chb"] = widgets.Checkbox(
-            value=False,
-            description="Show advanced settings",
+            value=False, description="Show advanced settings",
         )
 
         # Callbacks
