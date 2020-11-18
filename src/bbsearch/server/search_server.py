@@ -6,8 +6,7 @@ import torch
 from flask import Flask, jsonify, request
 
 import bbsearch
-
-from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
+from ..embedding_models import BSV, SBioBERT, Sent2VecModel, SentTransformer, USE
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -126,7 +125,7 @@ class SearchServer(Flask):
             ),
             "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path),
             "BioBERT NLI+STS CORD-19 v1": lambda: SentTransformer(
-                biobert_nli_sts_cord19_v1_model_path
+                str(biobert_nli_sts_cord19_v1_model_path)
             ),
         }
 
