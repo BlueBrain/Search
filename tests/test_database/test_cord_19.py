@@ -143,17 +143,22 @@ class TestDatabaseCreation:
         assert not indexes_articles
         if real_sqlalchemy_engine.url.drivername.startswith("mysql"):
             assert (
-                len(indexes_sentences) == 3
+                len(indexes_sentences) == 4
             )  # article_id, FULLTEXT index, unique_identifier
             for index in indexes_sentences:
                 assert index["name"] in {
                     "sentence_unique_identifier",
                     "article_id_index",
+                    "is_bad_article_id_index",
                     "fulltext_text",
                 }
         else:
-            assert len(indexes_sentences) == 1
-            assert indexes_sentences[0]["column_names"][0] == "article_id"
+            assert len(indexes_sentences) == 2
+            for index in indexes_sentences:
+                assert index["name"] in {
+                    "article_id_index",
+                    "is_bad_article_id_index",
+                }
 
         duplicates_query = """
         SELECT COUNT(
