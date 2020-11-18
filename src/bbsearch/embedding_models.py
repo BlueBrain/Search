@@ -752,8 +752,10 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
           `get_embedding_model('SBioBERT', device=<device>)`
         - SBERT:
           `get_embedding_model('SBERT', device=<device>)`
-        - BSV and Sent2Vec:
+        - Sent2Vec:
           `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - BSV:
+          `get_embedding_model('BSV', <checkpoint_path>)`
         - USE:
           `get_embedding_model('USE')`
 
@@ -789,6 +791,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
         # Sent2Vec models.
         "Sent2VecModel": lambda: Sent2VecModel(checkpoint_path),
+        "BSV": lambda: BSV(checkpoint_path),
         # Scikit-learn models.
         "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
         # Other models.
