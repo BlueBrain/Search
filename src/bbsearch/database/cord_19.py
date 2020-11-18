@@ -392,9 +392,11 @@ class CORD19DatabaseCreation:
         mymodel_url_index.create(bind=self.engine)
 
         # Create is_bad and article_id index
-        sqlalchemy.Index("is_bad_article_id_index",
-                         self.sentences_table.c.article_id,
-                         self.sentences_table.c.is_bad).create(bind=self.engine)
+        sqlalchemy.Index(
+            "is_bad_article_id_index",
+            self.sentences_table.c.article_id,
+            self.sentences_table.c.is_bad,
+        ).create(bind=self.engine)
 
         # Create FULLTEXT INDEX
         if self.engine.url.drivername.startswith("mysql"):
