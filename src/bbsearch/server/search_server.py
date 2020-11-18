@@ -6,7 +6,8 @@ import torch
 from flask import Flask, jsonify, request
 
 import bbsearch
-from ..embedding_models import BSV, SBioBERT, Sent2VecModel, SentTransformer, USE
+
+from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
