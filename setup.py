@@ -26,6 +26,7 @@ install_requires = [
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
+    "python-dotenv",
     "rdflib-jsonld",
     "requests",
     "scibert @ git+https://github.com/allenai/scibert",

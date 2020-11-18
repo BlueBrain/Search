@@ -216,11 +216,11 @@ def backend_database(request):
     backend = request.param
     if backend == "mysql":
         # check docker daemon running
-        client = docker.from_env()
         try:
+            client = docker.from_env()
             client.ping()
 
-        except Exception:
+        except docker.errors.DockerException:
             pytest.skip()
 
     return backend
