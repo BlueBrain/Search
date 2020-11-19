@@ -51,6 +51,7 @@ class SearchEngine:
         granularity="sentences",
         has_journal=False,
         is_english=True,
+        discard_bad_sentences=False,
         date_range=None,
         deprioritize_strength="None",
         exclusion_text="",
@@ -74,6 +75,9 @@ class SearchEngine:
             If True, only consider papers that have a journal information.
         is_english : bool
             If True, only consider papers that are in English.
+        discard_bad_sentences : bool
+            If True, then all sentences with marked as bad quality will be
+            discarded.
         date_range : tuple
             Tuple of form (start_year, end_year) representing the considered
             time range.
@@ -166,6 +170,7 @@ class SearchEngine:
                     SentenceFilter(self.connection)
                     .only_english(is_english)
                     .only_with_journal(has_journal)
+                    .discard_bad_sentences(discard_bad_sentences)
                     .date_range(date_range)
                     .exclude_strings(exclusion_text.split("\n"))
                     .include_strings(inclusion_text.split("\n"))
