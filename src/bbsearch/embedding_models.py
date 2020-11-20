@@ -809,12 +809,10 @@ class MPEmbedder:
 
     Parameters
     ----------
-    model_name_or_class : str
-        The name or class of the model for which to compute the embeddings.
-    checkpoint_path : pathlib.Path or None
-        If 'model_name_or_class' is the class, the path of the model to load.
     database_url : str
         URL of the database.
+    model_name_or_class : str
+        The name or class of the model for which to compute the embeddings.
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to compute the
         embedding.
@@ -832,6 +830,8 @@ class MPEmbedder:
     n_processes : int
         Number of processes to use. Note that each process gets
         `len(indices) / n_processes` sentences to embed.
+    checkpoint_path : pathlib.Path or None
+        If 'model_name_or_class' is the class, the path of the model to load.
     gpus : None or list
         If not specified, all processes will be using CPU. If not None, then
         it needs to be a list of length `n_processes` where each element
@@ -847,14 +847,14 @@ class MPEmbedder:
 
     def __init__(
         self,
-        model_name_or_class,
-        checkpoint_path,
         database_url,
+        model_name_or_class,
         indices,
         h5_path_output,
         batch_size_inference=16,
         batch_size_transfer=1000,
         n_processes=2,
+        checkpoint_path=None,
         gpus=None,
         delete_temp=True,
         temp_folder=None,
@@ -865,13 +865,13 @@ class MPEmbedder:
         else:
             self.model_name = checkpoint_path.stem
             self.model_class = model_name_or_class
-        self.checkpoint_path = checkpoint_path
         self.database_url = database_url
         self.indices = indices
         self.h5_path_output = h5_path_output
         self.batch_size_inference = batch_size_inference
         self.batch_size_transfer = batch_size_transfer
         self.n_processes = n_processes
+        self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
 
@@ -905,13 +905,13 @@ class MPEmbedder:
                 name=f"worker_{process_ix}",
                 target=self.run_embedding_worker,
                 kwargs={
+                    "database_url": self.database_url,
                     "model_name": self.model_name,
                     "model_class": self.model_class,
-                    "checkpoint_path": self.checkpoint_path,
-                    "database_url": self.database_url,
                     "indices": split,
                     "temp_h5_path": temp_h5_path,
                     "batch_size": self.batch_size_inference,
+                    "checkpoint_path": self.checkpoint_path,
                     "gpu": None if self.gpus is None else self.gpus[process_ix],
                 },
             )
@@ -935,29 +935,27 @@ class MPEmbedder:
 
     @staticmethod
     def run_embedding_worker(
+        database_url,
         model_name,
         model_class,
-        checkpoint_path,
-        database_url,
         indices,
         temp_h5_path,
         batch_size,
+        checkpoint_path,
         gpu,
     ):
         """Run per worker function.
 
         Parameters
         ----------
+        database_url : str
+            URL of the database.
         model_name : str
             The name of the model for which to compute the embeddings.
             `None` when using `model_class` and `checkpoint_path`.
         model_class : str
             The class of the model for which to compute the embeddings.
             `None` when using `model_name`.
-        checkpoint_path : pathlib.Path
-            When 'model_class' is defined, the path of the model to load.
-        database_url : str
-            URL of the database.
         indices : np.ndarray
             1D array of sentences ids indices representing what
             the worker needs to embed.
@@ -965,6 +963,8 @@ class MPEmbedder:
             Path to where we store the temporary h5 file.
         batch_size : int
             Number of sentences in the batch.
+        checkpoint_path : pathlib.Path or None
+            When 'model_class' is defined, the path of the model to load.
         gpu : int or None
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
