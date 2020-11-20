@@ -747,7 +747,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
 
     - For defined models:
         - BioBERT NLI+STS:
-          `get_embedding_model('BioBERT_NLI+STS', device=<device>)`
+          `get_embedding_model('BioBERT NLI+STS', device=<device>)`
         - SBioBERT:
           `get_embedding_model('SBioBERT', device=<device>)`
         - SBERT:
@@ -784,7 +784,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
     configs = {
         # Transformer models.
         "SentTransformer": lambda: SentTransformer(checkpoint_path, device),
-        "BioBERT_NLI+STS": lambda: SentTransformer(
+        "BioBERT NLI+STS": lambda: SentTransformer(
             "clagator/biobert_v1.1_pubmed_nli_sts", device
         ),
         "SBioBERT": lambda: SBioBERT(device),

@@ -19,10 +19,10 @@ def main(argv=None):
         "model_name_or_class",
         type=str,
         help="The name or class of the model for which to compute the embeddings."
-        "Recognized model names are: 'BioBERT_NLI+STS', 'SBioBERT', 'SBERT', 'USE'."
-        "Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',"
-        "'SklearnVectorizer'."
-        "See also 'get_embedding_model(...)'.",
+        " Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT', 'USE'."
+        " Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',"
+        " 'SklearnVectorizer'."
+        " See also 'get_embedding_model(...)'.",
     )
     parser.add_argument(
         "outfile",
@@ -46,7 +46,7 @@ def main(argv=None):
         "--checkpoint",
         type=str,
         help="If 'model_name_or_class' is the class, the path of the model to load."
-        "Otherwise, this argument is ignored.",
+        " Otherwise, this argument is ignored.",
     )
     parser.add_argument(
         "--db-url",
@@ -66,7 +66,7 @@ def main(argv=None):
         "--h5_dataset_name",
         type=str,
         help="The name of the dataset in the H5 file."
-        "Otherwise, the value of 'model_name_or_class' is used.",
+        " Otherwise, the value of 'model_name_or_class' is used.",
     )
     parser.add_argument(
         "--indices-path",
