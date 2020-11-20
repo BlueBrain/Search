@@ -508,7 +508,7 @@ class SentTransformer(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_path : pathlib.Path or str
+    model_name_or_path : pathlib.Path or str
         The name or the path of the Transformer model to load.
 
     References
@@ -516,10 +516,10 @@ class SentTransformer(EmbeddingModel):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, checkpoint_path, device=None):
+    def __init__(self, model_name_or_path, device=None):
 
         self.senttransf_model = sentence_transformers.SentenceTransformer(
-            str(checkpoint_path), device=device
+            str(model_name_or_path), device=device
         )
 
     @property
@@ -761,7 +761,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
 
     - For arbitrary models:
         - My Transformer model:
-          `get_embedding_model('SentTransformer', <checkpoint_path>, <device>)`
+          `get_embedding_model('SentTransformer', <model_name_or_path>, <device>)`
         - My Sent2Vec model:
           `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
         - My scikit-learn model:
