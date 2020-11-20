@@ -421,6 +421,7 @@ class TestMPEmbedder:
             batch_size=batch_size,
             gpu=3,
             checkpoint_path=None,
+            h5_dataset_name="some_model",
         )
 
         assert temp_h5_path.exists()
@@ -449,6 +450,7 @@ class TestMPEmbedder:
                 batch_size=batch_size,
                 gpu=None,
                 checkpoint_path=None,
+                h5_dataset_name="some_model",
             )
 
     @pytest.mark.parametrize("n_processes", [1, 2, 5])
