@@ -13,17 +13,10 @@ import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
-from bbsearch.embedding_models import (
-    BSV,
-    USE,
-    EmbeddingModel,
-    MPEmbedder,
-    SBioBERT,
-    Sent2VecModel,
-    SentTransformer,
-    SklearnVectorizer,
-    compute_database_embeddings,
-)
+from bbsearch.embedding_models import (BSV, EmbeddingModel, MPEmbedder, SBioBERT,
+                                       Sent2VecModel, SentTransformer,
+                                       SklearnVectorizer, USE,
+                                       compute_database_embeddings)
 
 
 class TestEmbeddingModels:
@@ -414,14 +407,14 @@ class TestMPEmbedder:
         )
 
         MPEmbedder.run_embedding_worker(
+            database_url=fake_sqlalchemy_engine.url,
             model_name="some_model",
             model_class=None,
-            checkpoint_path=None,
-            database_url=fake_sqlalchemy_engine.url,
             indices=indices,
             temp_h5_path=temp_h5_path,
             batch_size=batch_size,
             gpu=3,
+            checkpoint_path=None,
         )
 
         assert temp_h5_path.exists()
@@ -443,14 +436,14 @@ class TestMPEmbedder:
 
         with pytest.raises(FileExistsError):
             MPEmbedder.run_embedding_worker(
+                database_url=fake_sqlalchemy_engine.url,
                 model_name="some_model",
                 model_class=None,
-                checkpoint_path=None,
-                database_url=fake_sqlalchemy_engine.url,
                 indices=indices,
                 temp_h5_path=temp_h5_path,
                 batch_size=batch_size,
                 gpu=None,
+                checkpoint_path=None,
             )
 
     @pytest.mark.parametrize("n_processes", [1, 2, 5])
@@ -458,9 +451,8 @@ class TestMPEmbedder:
         # test 1 gpu per process or not specified
         with pytest.raises(ValueError):
             MPEmbedder(
-                "some_model",
-                None,
                 "some_url",
+                "some_model",
                 np.array([2, 5, 11]),
                 Path("some/path"),
                 n_processes=2,
@@ -468,9 +460,8 @@ class TestMPEmbedder:
             )
 
         mpe = MPEmbedder(
-            "some_model",
-            None,
             "some_url",
+            "some_model",
             np.array([2, 5, 11, 523, 523523, 3243223, 23424234]),
             Path("some/path"),
             n_processes=n_processes,

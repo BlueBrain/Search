@@ -953,7 +953,7 @@ class MPEmbedder:
         model_name : str
             The name of the model for which to compute the embeddings.
             `None` when using `model_class` and `checkpoint_path`.
-        model_class : str
+        model_class : str or None
             The class of the model for which to compute the embeddings.
             `None` when using `model_name`.
         indices : np.ndarray
