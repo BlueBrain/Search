@@ -30,13 +30,6 @@ def main(argv=None):
         help="The path to where the embeddings are saved (h5 file)",
     )
     parser.add_argument(
-        "-c",
-        "--checkpoint",
-        type=str,
-        help="If 'model_name_or_class' is the class, the path of the model to load."
-        "Otherwise, this argument is ignored.",
-    )
-    parser.add_argument(
         "--batch-size-inference",
         default=256,
         type=int,
@@ -47,6 +40,13 @@ def main(argv=None):
         default=1000,
         type=int,
         help="Batch size for the concatenation of temp h5 files",
+    )
+    parser.add_argument(
+        "-c",
+        "--checkpoint",
+        type=str,
+        help="If 'model_name_or_class' is the class, the path of the model to load."
+        "Otherwise, this argument is ignored.",
     )
     parser.add_argument(
         "--db-url",
@@ -61,6 +61,12 @@ def main(argv=None):
         "run on a CPU leave blank. For example '2,,3,' will use GPU 2 and 3 "
         "for the 1st and 3rd process respectively. The processes 2 and 4 will "
         "be run on a CPU. By default using CPU for all processes.",
+    )
+    parser.add_argument(
+        "--h5_dataset_name",
+        type=str,
+        help="The name of the dataset in the H5 file."
+        "Otherwise, the value of 'model_name_or_class' is used.",
     )
     parser.add_argument(
         "--indices-path",
@@ -149,6 +155,7 @@ def main(argv=None):
         checkpoint_path=checkpoint_path,
         gpus=gpus,
         temp_folder=temp_dir,
+        h5_dataset_name=args.h5_dataset_name,
     )
 
     logger.info("Starting embedding")

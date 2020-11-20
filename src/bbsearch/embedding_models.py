@@ -832,6 +832,7 @@ class MPEmbedder:
         `len(indices) / n_processes` sentences to embed.
     checkpoint_path : pathlib.Path or None
         If 'model_name_or_class' is the class, the path of the model to load.
+        Otherwise, this argument is ignored.
     gpus : None or list
         If not specified, all processes will be using CPU. If not None, then
         it needs to be a list of length `n_processes` where each element
@@ -843,6 +844,9 @@ class MPEmbedder:
     temp_folder : None or pathlib.Path
         If None, then all temporary h5 files stored into the same folder as the output
         h5 file. Otherwise they are stored in the specified folder.
+    h5_dataset_name : str or None
+        The name of the dataset in the H5 file.
+        Otherwise, the value of 'model_name_or_class' is used.
     """
 
     def __init__(
@@ -858,14 +862,10 @@ class MPEmbedder:
         gpus=None,
         delete_temp=True,
         temp_folder=None,
+        h5_dataset_name=None,
     ):
-        if checkpoint_path is None:
-            self.model_name = model_name_or_class
-            self.model_class = None
-        else:
-            self.model_name = checkpoint_path.stem
-            self.model_class = model_name_or_class
         self.database_url = database_url
+        self.model_name_or_class = model_name_or_class
         self.indices = indices
         self.h5_path_output = h5_path_output
         self.batch_size_inference = batch_size_inference
@@ -874,8 +874,14 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
+        if h5_dataset_name is None:
+            self.h5_dataset_name = model_name_or_class
+        else:
+            self.h5_dataset_name = h5_dataset_name
 
-        self.logger = logging.getLogger(f"{self.__class__.__name__}[{self.model_name}]")
+        self.logger = logging.getLogger(
+            f"{self.__class__.__name__}[{self.h5_dataset_name}]"
+        )
 
         if gpus is not None and len(gpus) != n_processes:
             raise ValueError("One needs to specify the GPU for each process separately")
@@ -906,13 +912,13 @@ class MPEmbedder:
                 target=self.run_embedding_worker,
                 kwargs={
                     "database_url": self.database_url,
-                    "model_name": self.model_name,
-                    "model_class": self.model_class,
+                    "model_name_or_class": self.model_name_or_class,
                     "indices": split,
                     "temp_h5_path": temp_h5_path,
                     "batch_size": self.batch_size_inference,
                     "checkpoint_path": self.checkpoint_path,
                     "gpu": None if self.gpus is None else self.gpus[process_ix],
+                    "h5_dataset_name": self.h5_dataset_name,
                 },
             )
             worker_process.start()
@@ -926,7 +932,7 @@ class MPEmbedder:
         self.logger.info("Concatenating children temp h5")
         H5.concatenate(
             self.h5_path_output,
-            self.model_name,
+            self.h5_dataset_name,
             h5_paths_temp,
             delete_inputs=self.delete_temp,
             batch_size=self.batch_size_transfer,
@@ -936,13 +942,13 @@ class MPEmbedder:
     @staticmethod
     def run_embedding_worker(
         database_url,
-        model_name,
-        model_class,
+        model_name_or_class,
         indices,
         temp_h5_path,
         batch_size,
         checkpoint_path,
         gpu,
+        h5_dataset_name,
     ):
         """Run per worker function.
 
@@ -950,12 +956,8 @@ class MPEmbedder:
         ----------
         database_url : str
             URL of the database.
-        model_name : str
-            The name of the model for which to compute the embeddings.
-            `None` when using `model_class` and `checkpoint_path`.
-        model_class : str or None
-            The class of the model for which to compute the embeddings.
-            `None` when using `model_name`.
+        model_name_or_class : str
+            The name or class of the model for which to compute the embeddings.
         indices : np.ndarray
             1D array of sentences ids indices representing what
             the worker needs to embed.
@@ -964,10 +966,13 @@ class MPEmbedder:
         batch_size : int
             Number of sentences in the batch.
         checkpoint_path : pathlib.Path or None
-            When 'model_class' is defined, the path of the model to load.
+            If 'model_name_or_class' is the class, the path of the model to load.
+            Otherwise, this argument is ignored.
         gpu : int or None
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
+        h5_dataset_name : str or None
+            The name of the dataset in the H5 file.
         """
         current_process = mp.current_process()
         cname = current_process.name
@@ -981,7 +986,7 @@ class MPEmbedder:
 
         logger.info("Loading model")
         model = get_embedding_model(
-            model_class or model_name,
+            model_name_or_class,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )
@@ -994,9 +999,12 @@ class MPEmbedder:
 
         n_indices = len(indices)
         logger.info("Create temporary h5 files.")
-        H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
+        H5.create(temp_h5_path, h5_dataset_name, shape=(n_indices, model.dim))
         H5.create(
-            temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1), dtype="int32"
+            temp_h5_path,
+            f"{h5_dataset_name}_indices",
+            shape=(n_indices, 1),
+            dtype="int32",
         )
 
         batch_size = min(n_indices, batch_size)
@@ -1018,7 +1026,7 @@ class MPEmbedder:
                         "The retrieved and requested indices do not agree."
                     )
 
-                H5.write(temp_h5_path, model_name, embeddings, pos_indices)
+                H5.write(temp_h5_path, h5_dataset_name, embeddings, pos_indices)
 
             except Exception as e:
                 logger.error(f"Issues raised for sentence_ids[{batch_indices}]")
@@ -1027,7 +1035,7 @@ class MPEmbedder:
 
             H5.write(
                 temp_h5_path,
-                f"{model_name}_indices",
+                f"{h5_dataset_name}_indices",
                 batch_indices.reshape(-1, 1),
                 pos_indices,
             )

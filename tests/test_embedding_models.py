@@ -415,8 +415,7 @@ class TestMPEmbedder:
 
         MPEmbedder.run_embedding_worker(
             database_url=fake_sqlalchemy_engine.url,
-            model_name="some_model",
-            model_class=None,
+            model_name_or_class="some_model",
             indices=indices,
             temp_h5_path=temp_h5_path,
             batch_size=batch_size,
@@ -444,8 +443,7 @@ class TestMPEmbedder:
         with pytest.raises(FileExistsError):
             MPEmbedder.run_embedding_worker(
                 database_url=fake_sqlalchemy_engine.url,
-                model_name="some_model",
-                model_class=None,
+                model_name_or_class="some_model",
                 indices=indices,
                 temp_h5_path=temp_h5_path,
                 batch_size=batch_size,
