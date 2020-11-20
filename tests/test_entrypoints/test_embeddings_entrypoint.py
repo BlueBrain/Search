@@ -89,7 +89,7 @@ def test_sendthrough(
     args, kwargs = fake_mpe_class.call_args
 
     assert args[1] == model
-    np.testing.assert_array_equal(args[3], indices)
+    np.testing.assert_array_equal(args[2], indices)
     assert args[3] == pathlib.Path(outfile)
 
     assert kwargs["batch_size_inference"] == batch_size_inference
