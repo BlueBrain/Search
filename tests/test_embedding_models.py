@@ -13,10 +13,17 @@ import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
-from bbsearch.embedding_models import (BSV, EmbeddingModel, MPEmbedder, SBioBERT,
-                                       Sent2VecModel, SentTransformer,
-                                       SklearnVectorizer, USE,
-                                       compute_database_embeddings)
+from bbsearch.embedding_models import (
+    BSV,
+    USE,
+    EmbeddingModel,
+    MPEmbedder,
+    SBioBERT,
+    Sent2VecModel,
+    SentTransformer,
+    SklearnVectorizer,
+    compute_database_embeddings,
+)
 
 
 class TestEmbeddingModels:
