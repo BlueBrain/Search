@@ -32,10 +32,10 @@ def get_search_app():
     logger.info("Creating the Flask app")
     models_path = pathlib.Path(models_path)
     embeddings_path = pathlib.Path(embeddings_path)
-    indices = H5.find_populated_rows(embeddings_path, "BSV")
     engine_url = f"mysql://{mysql_user}:{mysql_password}@{mysql_url}"
-    engine = sqlalchemy.create_engine(engine_url)
+    engine = sqlalchemy.create_engine(engine_url, pool_recycle=14400)
     models_list = [model.strip() for model in which_models.split(",")]
+    indices = H5.find_populated_rows(embeddings_path, models_list[0])
 
     server_app = SearchServer(
         models_path, embeddings_path, indices, engine, models_list
