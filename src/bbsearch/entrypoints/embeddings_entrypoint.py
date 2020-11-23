@@ -16,7 +16,13 @@ def main(argv=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        "model", type=str, help="Model for which we want to compute the embeddings"
+        "model_name_or_class",
+        type=str,
+        help="The name or class of the model for which to compute the embeddings."
+        " Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT', 'USE'."
+        " Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',"
+        " 'SklearnVectorizer'."
+        " See also 'get_embedding_model(...)'.",
     )
     parser.add_argument(
         "outfile",
@@ -39,9 +45,8 @@ def main(argv=None):
         "-c",
         "--checkpoint",
         type=str,
-        help="Path to file containing the checkpointed model. "
-        "Note that one needs to specify it for BSV, Sent2Vec and potentially "
-        "other models.",
+        help="If 'model_name_or_class' is the class, the path of the model to load."
+        " Otherwise, this argument is ignored.",
     )
     parser.add_argument(
         "--db-url",
@@ -56,6 +61,12 @@ def main(argv=None):
         "run on a CPU leave blank. For example '2,,3,' will use GPU 2 and 3 "
         "for the 1st and 3rd process respectively. The processes 2 and 4 will "
         "be run on a CPU. By default using CPU for all processes.",
+    )
+    parser.add_argument(
+        "--h5_dataset_name",
+        type=str,
+        help="The name of the dataset in the H5 file."
+        " Otherwise, the value of 'model_name_or_class' is used.",
     )
     parser.add_argument(
         "--indices-path",
@@ -135,7 +146,7 @@ def main(argv=None):
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
         engine.url,
-        args.model,
+        args.model_name_or_class,
         indices,
         out_file,
         batch_size_inference=args.batch_size_inference,
@@ -144,6 +155,7 @@ def main(argv=None):
         checkpoint_path=checkpoint_path,
         gpus=gpus,
         temp_folder=temp_dir,
+        h5_dataset_name=args.h5_dataset_name,
     )
 
     logger.info("Starting embedding")
