@@ -79,38 +79,39 @@ class MiningWidget(widgets.VBox):
         self.widgets["mine_articles"].on_click(self._mine_articles_clicked)
         self.widgets["mine_articles"].add_class("bbs_button")
 
-        self.widgets["show_mine_text_buttons"] = widgets.Checkbox(
-            value=False,
-            description="I would like to mine a specific piece of text!",
-            layout=widgets.Layout(width="450px", height="50px"),
-        )
-        self.widgets["show_mine_text_buttons"].observe(
-            self._cb_chkb_show_mine_text_fct, names="value"
-        )
         # "Output Area" Widget
         self.widgets["out"] = widgets.Output(layout={"border": "0.5px solid black"})
+
+        tabs = (
+            (
+                "Mine Articles",
+                [
+                    self.widgets["mine_articles"],
+                ],
+            ),
+            (
+                "Mine Text",
+                [
+                    self.widgets["input_text"],
+                    self.widgets["mine_text"]
+                ],
+            ),
+        )
+
+        tab_widget = widgets.Tab(children=[])
+        for i, (tab_name, tab_children) in enumerate(tabs):
+            tab_widget.children = tab_widget.children + (widgets.VBox(tab_children),)
+            tab_widget.set_title(i, tab_name)
+        self.widgets["mining"] = tab_widget
 
     def _init_ui(self):
         css_style = style.get_css_style()
         display(HTML(f"<style> {css_style} </style>"))
 
-        self.widgets["mine_text_fct"] = widgets.Tab(
-            children=[
-                widgets.VBox(
-                    children=[self.widgets["input_text"], self.widgets["mine_text"]]
-                )
-            ]
-        )
-        self.widgets["mine_text_fct"].set_title(0, "Mine text")
-
         self.children = [
-            self.widgets["mine_articles"],
-            self.widgets["show_mine_text_buttons"],
-            self.widgets["mine_text_fct"],
+            self.widgets["mining"],
             self.widgets["out"],
         ]
-
-        self.widgets["mine_text_fct"].layout.display = "none"
 
     def textmining_pipeline(self, information, schema_df, debug=False):
         """Handle text mining server requests depending on the type of information.
