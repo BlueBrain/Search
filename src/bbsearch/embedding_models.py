@@ -797,11 +797,9 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         # Other models.
         "USE": lambda: USE(),
     }
-    try:
-        model = configs[model_name_or_class]
-        return model()
-    except KeyError:
+    if model_name_or_class not in configs:
         raise ValueError(f"Unknown model name or class: {model_name_or_class}")
+    return configs[model_name_or_class]
 
 
 class MPEmbedder:
