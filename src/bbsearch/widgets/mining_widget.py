@@ -91,10 +91,7 @@ class MiningWidget(widgets.VBox):
             ),
             (
                 "Mine Text",
-                [
-                    self.widgets["input_text"],
-                    self.widgets["mine_text"]
-                ],
+                [self.widgets["input_text"], self.widgets["mine_text"]],
             ),
         )
 
