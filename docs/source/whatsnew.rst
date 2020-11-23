@@ -13,16 +13,28 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
+Verions 0.0.7
+=============
+**November 16, 2020**
+
+Changes
+-------
+- |Add| parallelization of embedding computations.
+- |Change| "Saved Articles" summary in the Search Widget.
+- |Fix| undesired timeout of MySQL connection in the Search Server.
+
+
 Verions 0.0.6
 =============
 **November 3, 2020**
 
 Changes
 -------
-- |Add| Inter-rater agreement with DVC.
-- |Add| Introduce Advanced Features section in the Search Widget.
-- |Change| Rewriting the mining schema.
-- |Change| Run `black` on the source code.
+- |Add| inter-rater agreement with DVC.
+- |Add| Advanced Features section in the Search Widget.
+- |Change| mining schema logic.
+- |Change| code formatting - run `black` on everything.
+
 
 Verions 0.0.5
 =============
