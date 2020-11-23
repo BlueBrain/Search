@@ -408,7 +408,7 @@ class SearchWidget(widgets.VBox):
         except AttributeError:
             article_auth = ""
 
-        ref = ref or ""
+        ref = ref.split(';')[0] or ""
         section_name = section_name or ""
 
         result_info = {
