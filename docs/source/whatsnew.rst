@@ -13,6 +13,16 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
+Verions 0.0.6
+=============
+**November 3, 2020**
+
+Changes
+-------
+- |Add| Inter-rater agreement with DVC.
+- |Add| Introduce Advanced Features section in the Search Widget.
+- |Change| Rewriting the mining schema.
+- |Change| Run `black` on the source code.
 
 Verions 0.0.5
 =============
