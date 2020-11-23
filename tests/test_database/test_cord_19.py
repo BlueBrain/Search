@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bbsearch.database import CORD19DatabaseCreation
+from bbsearch.database import CORD19DatabaseCreation, mark_bad_sentences
 
 
 @pytest.fixture()
@@ -37,6 +37,41 @@ def real_sqlalchemy_engine(
     fake_load.assert_called_once()
 
     return engine
+
+
+def test_mark_bad_sentences(fake_sqlalchemy_engine):
+    # Create a fake database
+    df = pd.read_sql("select * from sentences", fake_sqlalchemy_engine)
+    short_sentence = "hello"
+    long_sentence = "a" * 3000
+    latex_sentence = "\\documentclass{article}"
+
+    # Test without bad sentences
+    df["is_bad"] = 0
+    df.to_sql("sentences_new", fake_sqlalchemy_engine, index=False)
+    mark_bad_sentences(fake_sqlalchemy_engine, "sentences_new")
+    df = pd.read_sql("select * from sentences_new", fake_sqlalchemy_engine)
+    is_bad_nothing = df["is_bad"].copy()
+
+    # Test with bad sentences
+    df["is_bad"] = 0
+    df.loc[0, "text"] = short_sentence
+    df.loc[1, "text"] = long_sentence
+    df.loc[2, "text"] = latex_sentence
+    df.to_sql("sentences_new", fake_sqlalchemy_engine, index=False, if_exists="replace")
+
+    # Mark bad sentences
+    mark_bad_sentences(fake_sqlalchemy_engine, "sentences_new")
+
+    df = pd.read_sql("select * from sentences_new", fake_sqlalchemy_engine)
+    is_bad_3 = df["is_bad"].copy()
+
+    with fake_sqlalchemy_engine.begin() as connection:
+        connection.execute("drop table sentences_new")
+
+    assert is_bad_nothing.sum() == 0
+    assert is_bad_3.sum() == 3
+    assert all(is_bad_3[:3])
 
 
 class TestDatabaseCreation:
@@ -92,6 +127,7 @@ class TestDatabaseCreation:
             "text",
             "paragraph_pos_in_article",
             "sentence_pos_in_paragraph",
+            "is_bad",
         }
         sentences_columns = set(
             pd.read_sql(
@@ -107,17 +143,22 @@ class TestDatabaseCreation:
         assert not indexes_articles
         if real_sqlalchemy_engine.url.drivername.startswith("mysql"):
             assert (
-                len(indexes_sentences) == 3
+                len(indexes_sentences) == 4
             )  # article_id, FULLTEXT index, unique_identifier
             for index in indexes_sentences:
                 assert index["name"] in {
                     "sentence_unique_identifier",
                     "article_id_index",
+                    "is_bad_article_id_index",
                     "fulltext_text",
                 }
         else:
-            assert len(indexes_sentences) == 1
-            assert indexes_sentences[0]["column_names"][0] == "article_id"
+            assert len(indexes_sentences) == 2
+            for index in indexes_sentences:
+                assert index["name"] in {
+                    "article_id_index",
+                    "is_bad_article_id_index",
+                }
 
         duplicates_query = """
         SELECT COUNT(
@@ -152,6 +193,15 @@ class TestDatabaseCreation:
             db = CORD19DatabaseCreation(data_path=jsons_path, engine=engine)
             db.construct()
             db.construct()
+
+    def test_boolean_columns(self, real_sqlalchemy_engine):
+        """Test that boolean columns only contain boolean."""
+        is_english = pd.read_sql(
+            """SELECT is_english FROM articles""", real_sqlalchemy_engine
+        )
+        is_bad = pd.read_sql("""SELECT is_bad FROM sentences""", real_sqlalchemy_engine)
+        assert set(is_english["is_english"].unique()).issubset({0, 1})
+        assert set(is_bad["is_bad"].unique()).issubset({0, 1})
 
     def test_real_equals_fake_db(self, real_sqlalchemy_engine, fake_sqlalchemy_engine):
         """Test real vs. fake database.

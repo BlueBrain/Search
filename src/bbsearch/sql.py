@@ -372,11 +372,31 @@ class SentenceFilter:
 
         self.only_english_flag = False
         self.only_with_journal_flag = False
+        self.discard_bad_sentences_flag = False
         self.year_from = None
         self.year_to = None
         self.string_exclusions = []
         self.string_inclusions = []
         self.restricted_sentence_ids = None
+
+    def discard_bad_sentences(self, flag=True):
+        """Discard sentences that are flagged as bad.
+
+        Parameters
+        ----------
+        flag : bool
+            If True, then all sentences with `True` in the `is_bad`
+            column are discarded.
+
+        Returns
+        -------
+        self : SentenceFilter
+            The instance of `SentenceFilter` itself. Useful for
+            chained applications of filters.
+        """
+        self.logger.info(f"Discard bad: {flag}")
+        self.discard_bad_sentences_flag = flag
+        return self
 
     def only_english(self, flag=True):
         """Only select articles that are in English.
@@ -504,6 +524,10 @@ class SentenceFilter:
     def _build_query(self):
         article_conditions = []
         sentence_conditions = []
+
+        # Discard bad condition
+        if self.discard_bad_sentences_flag:
+            sentence_conditions.append("is_bad = 0")
 
         # In English condition
         if self.only_english_flag:
