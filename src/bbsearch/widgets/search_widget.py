@@ -99,7 +99,7 @@ class SearchWidget(widgets.VBox):
         # Select granularity of the search
         self.widgets["granularity"] = widgets.ToggleButtons(
             options=["sentences", "articles"],
-            value="sentences",
+            value="articles",
             disabled=False,
             style={"description_width": "initial", "button_width": "80px"},
             description="",
