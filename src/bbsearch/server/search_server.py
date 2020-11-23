@@ -109,8 +109,12 @@ class SearchServer(Flask):
         """
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
         s2v_model_name = "new_s2v_model.bin"
+        biobert_nli_sts_cord19_v1_model_name = "biobert_nli_sts_cord19_v1"
         bsv_model_path = self.trained_models_path / bsv_model_name
         s2v_model_path = self.trained_models_path / s2v_model_name
+        biobert_nli_sts_cord19_v1_model_path = (
+            self.trained_models_path / biobert_nli_sts_cord19_v1_model_name
+        )
 
         model_factories = {
             "BSV": lambda: BSV(checkpoint_model_path=bsv_model_path),
@@ -121,6 +125,9 @@ class SearchServer(Flask):
                 model_name="clagator/biobert_v1.1_pubmed_nli_sts"
             ),
             "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=s2v_model_path),
+            "BioBERT NLI+STS CORD-19 v1": lambda: SentTransformer(
+                str(biobert_nli_sts_cord19_v1_model_path)
+            ),
         }
 
         if model_name not in model_factories:
