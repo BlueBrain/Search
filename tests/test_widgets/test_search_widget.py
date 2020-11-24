@@ -218,7 +218,7 @@ def test_paging(
     assert not bot.display_cached
 
     bot.set_value("top_results", k)
-    bot.set_value("granularity", 'sentences')
+    bot.set_value("granularity", "sentences")
     bot.set_value("query_text", query_text)
     bot.click("investigate_button")
     assert (
