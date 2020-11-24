@@ -97,7 +97,7 @@ class TestEmbeddingModels:
         new_file_path = Path(str(tmpdir)) / "test.txt"
         new_file_path.touch()
         with pytest.raises(FileNotFoundError):
-            BSV(checkpoint_model_path=Path(""))
+            BSV(checkpoint_path=Path(""))
         bsv = BSV(Path(new_file_path))
 
         # Preparation
@@ -190,7 +190,7 @@ class TestEmbeddingModels:
             "bbsearch.embedding_models.sentence_transformers.SentenceTransformer",
             sentence_transormer_class,
         )
-        sbert = SentTransformer()
+        sbert = SentTransformer("bert-base-nli-mean-tokens")
 
         # Preparations
         dummy_sentence = "This is a dummy sentence/test."
@@ -415,12 +415,13 @@ class TestMPEmbedder:
 
         MPEmbedder.run_embedding_worker(
             database_url=fake_sqlalchemy_engine.url,
-            model_name="some_model",
+            model_name_or_class="some_model",
             indices=indices,
             temp_h5_path=temp_h5_path,
             batch_size=batch_size,
             gpu=3,
             checkpoint_path=None,
+            h5_dataset_name="some_model",
         )
 
         assert temp_h5_path.exists()
@@ -443,12 +444,13 @@ class TestMPEmbedder:
         with pytest.raises(FileExistsError):
             MPEmbedder.run_embedding_worker(
                 database_url=fake_sqlalchemy_engine.url,
-                model_name="some_model",
+                model_name_or_class="some_model",
                 indices=indices,
                 temp_h5_path=temp_h5_path,
                 batch_size=batch_size,
                 gpu=None,
                 checkpoint_path=None,
+                h5_dataset_name="some_model",
             )
 
     @pytest.mark.parametrize("n_processes", [1, 2, 5])

@@ -151,7 +151,6 @@ class SBioBERT(EmbeddingModel):
         References
         ----------
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
-
         """
         encoding = self.tokenizer(
             raw_sentence,
@@ -180,7 +179,6 @@ class SBioBERT(EmbeddingModel):
         References
         ----------
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertTokenizer
-
         """
         return self.preprocess(raw_sentences)
 
@@ -282,7 +280,7 @@ class Sent2VecModel(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        Location of the model checkpoint.
+        The path of the Sent2Vec model to load.
     """
 
     def __init__(self, checkpoint_path):
@@ -425,23 +423,21 @@ class BSV(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_model_path : pathlib.Path or str
-        Path to the file of the stored model BSV.
+    checkpoint_path : pathlib.Path or str
+        The path of the BioSentVec (BSV) model to load.
 
     References
     ----------
     https://github.com/ncbi-nlp/BioSentVec
     """
 
-    def __init__(self, checkpoint_model_path):
-        checkpoint_model_path = pathlib.Path(checkpoint_model_path)
-        self.checkpoint_model_path = checkpoint_model_path
-        if not self.checkpoint_model_path.is_file():
-            raise FileNotFoundError(
-                f"The file {self.checkpoint_model_path} was not found."
-            )
+    def __init__(self, checkpoint_path):
+        checkpoint_path = pathlib.Path(checkpoint_path)
+        self.checkpoint_path = checkpoint_path
+        if not self.checkpoint_path.is_file():
+            raise FileNotFoundError(f"The file {self.checkpoint_path} was not found.")
         self.bsv_model = sent2vec.Sent2vecModel()
-        self.bsv_model.load_model(str(self.checkpoint_model_path))
+        self.bsv_model.load_model(str(self.checkpoint_path))
         self.bsv_stopwords = set(stopwords.words("english"))
 
     @property
@@ -512,21 +508,18 @@ class SentTransformer(EmbeddingModel):
 
     Parameters
     ----------
-    model_name : str
-        Name of the model to use for the embeddings.
-        Currently:
-        - 'bert-base-nli-mean-tokens' is the one we use as SBERT
-        - 'clagator/biobert_v1.1_pubmed_nli_sts' is the one we named BIOBERT NLI+STS
+    model_name_or_path : pathlib.Path or str
+        The name or the path of the Transformer model to load.
 
     References
     ----------
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(self, model_name="bert-base-nli-mean-tokens", device=None):
+    def __init__(self, model_name_or_path, device=None):
 
         self.senttransf_model = sentence_transformers.SentenceTransformer(
-            model_name, device=device
+            str(model_name_or_path), device=device
         )
 
     @property
@@ -626,7 +619,7 @@ class SklearnVectorizer(EmbeddingModel):
     Parameters
     ----------
     checkpoint_path : pathlib.Path or str
-        Location of the model checkpoint in pickle format.
+        The path of the scikit-learn model to use for the embeddings in Pickle format.
     """
 
     def __init__(self, checkpoint_path):
@@ -747,42 +740,66 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     return final_embeddings, retrieved_indices
 
 
-def get_embedding_model(model_name, checkpoint_path=None, device=None):
-    """Construct an embedding model from its name.
+def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
+    """Load a sentence embedding model from its name or its class and checkpoint.
+
+    Usage:
+
+    - For defined models:
+        - BioBERT NLI+STS:
+          `get_embedding_model('BioBERT NLI+STS', device=<device>)`
+        - SBioBERT:
+          `get_embedding_model('SBioBERT', device=<device>)`
+        - SBERT:
+          `get_embedding_model('SBERT', device=<device>)`
+        - Sent2Vec:
+          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - BSV:
+          `get_embedding_model('BSV', <checkpoint_path>)`
+        - USE:
+          `get_embedding_model('USE')`
+
+    - For arbitrary models:
+        - My Transformer model:
+          `get_embedding_model('SentTransformer', <model_name_or_path>, <device>)`
+        - My Sent2Vec model:
+          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
+        - My scikit-learn model:
+          `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
 
     Parameters
     ----------
-    model_name : str
-        The name of the model.
-    checkpoint_path : pathlib.Path
-        Path to load the embedding models (Needed for BSV and Sent2Vec).
-    device : str
-        If GPU are available, device='cuda' (Useful for BIOBERT NLI+STS,
-        SBioBERT, SBERT).
+    model_name_or_class : str
+        The name or class of the embedding model to load.
+    checkpoint_path : pathlib.Path or str or None
+        If 'model_name_or_class' is the class, the path of the embedding model to load.
+    device : str or None
+        The target device to which load the model ('cpu' or 'cuda').
 
     Returns
     -------
     bbsearch.embedding_models.EmbeddingModel
-        The embedding model instance.
+        The sentence embedding model instance.
     """
-    model_factories = {
-        "BSV": lambda: BSV(checkpoint_model_path=checkpoint_path),
-        "SBioBERT": lambda: SBioBERT(device=device),
+    configs = {
+        # Transformer models.
+        "SentTransformer": lambda: SentTransformer(checkpoint_path, device),
+        "BioBERT NLI+STS": lambda: SentTransformer(
+            "clagator/biobert_v1.1_pubmed_nli_sts", device
+        ),
+        "SBioBERT": lambda: SBioBERT(device),
+        "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
+        # Sent2Vec models.
+        "Sent2VecModel": lambda: Sent2VecModel(checkpoint_path),
+        "BSV": lambda: BSV(checkpoint_path),
+        # Scikit-learn models.
+        "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
+        # Other models.
         "USE": lambda: USE(),
-        "SBERT": lambda: SentTransformer(
-            model_name="bert-base-nli-mean-tokens", device=device
-        ),
-        "BIOBERT NLI+STS": lambda: SentTransformer(
-            model_name="clagator/biobert_v1.1_pubmed_nli_sts", device=device
-        ),
-        "Sent2Vec": lambda: Sent2VecModel(checkpoint_path=checkpoint_path),
     }
-
-    if model_name not in model_factories:
-        raise ValueError(f"Unknown model name: {model_name}")
-    selected_factory = model_factories[model_name]
-
-    return selected_factory()
+    if model_name_or_class not in configs:
+        raise ValueError(f"Unknown model name or class: {model_name_or_class}")
+    return configs[model_name_or_class]
 
 
 class MPEmbedder:
@@ -792,8 +809,8 @@ class MPEmbedder:
     ----------
     database_url : str
         URL of the database.
-    model_name : str
-        Name of the embedding model to be used.
+    model_name_or_class : str
+        The name or class of the model for which to compute the embeddings.
     indices : np.ndarray
         1D array storing the sentence_ids for which we want to compute the
         embedding.
@@ -812,9 +829,8 @@ class MPEmbedder:
         Number of processes to use. Note that each process gets
         `len(indices) / n_processes` sentences to embed.
     checkpoint_path : pathlib.Path or None
-        If provided, it represents the path to the trained model. Note
-        that for some embedding models it is not necessary (they have
-        a standard caching directory).
+        If 'model_name_or_class' is the class, the path of the model to load.
+        Otherwise, this argument is ignored.
     gpus : None or list
         If not specified, all processes will be using CPU. If not None, then
         it needs to be a list of length `n_processes` where each element
@@ -826,12 +842,15 @@ class MPEmbedder:
     temp_folder : None or pathlib.Path
         If None, then all temporary h5 files stored into the same folder as the output
         h5 file. Otherwise they are stored in the specified folder.
+    h5_dataset_name : str or None
+        The name of the dataset in the H5 file.
+        Otherwise, the value of 'model_name_or_class' is used.
     """
 
     def __init__(
         self,
         database_url,
-        model_name,
+        model_name_or_class,
         indices,
         h5_path_output,
         batch_size_inference=16,
@@ -841,9 +860,10 @@ class MPEmbedder:
         gpus=None,
         delete_temp=True,
         temp_folder=None,
+        h5_dataset_name=None,
     ):
         self.database_url = database_url
-        self.model_name = model_name
+        self.model_name_or_class = model_name_or_class
         self.indices = indices
         self.h5_path_output = h5_path_output
         self.batch_size_inference = batch_size_inference
@@ -852,7 +872,14 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
-        self.logger = logging.getLogger(f"{self.__class__.__name__}[{model_name}]")
+        if h5_dataset_name is None:
+            self.h5_dataset_name = model_name_or_class
+        else:
+            self.h5_dataset_name = h5_dataset_name
+
+        self.logger = logging.getLogger(
+            f"{self.__class__.__name__}[{self.h5_dataset_name}]"
+        )
 
         if gpus is not None and len(gpus) != n_processes:
             raise ValueError("One needs to specify the GPU for each process separately")
@@ -883,12 +910,13 @@ class MPEmbedder:
                 target=self.run_embedding_worker,
                 kwargs={
                     "database_url": self.database_url,
-                    "model_name": self.model_name,
+                    "model_name_or_class": self.model_name_or_class,
                     "indices": split,
                     "temp_h5_path": temp_h5_path,
                     "batch_size": self.batch_size_inference,
                     "checkpoint_path": self.checkpoint_path,
                     "gpu": None if self.gpus is None else self.gpus[process_ix],
+                    "h5_dataset_name": self.h5_dataset_name,
                 },
             )
             worker_process.start()
@@ -902,7 +930,7 @@ class MPEmbedder:
         self.logger.info("Concatenating children temp h5")
         H5.concatenate(
             self.h5_path_output,
-            self.model_name,
+            self.h5_dataset_name,
             h5_paths_temp,
             delete_inputs=self.delete_temp,
             batch_size=self.batch_size_transfer,
@@ -912,12 +940,13 @@ class MPEmbedder:
     @staticmethod
     def run_embedding_worker(
         database_url,
-        model_name,
+        model_name_or_class,
         indices,
         temp_h5_path,
         batch_size,
         checkpoint_path,
         gpu,
+        h5_dataset_name,
     ):
         """Run per worker function.
 
@@ -925,8 +954,8 @@ class MPEmbedder:
         ----------
         database_url : str
             URL of the database.
-        model_name : str
-            Name of the model to use for embedding.
+        model_name_or_class : str
+            The name or class of the model for which to compute the embeddings.
         indices : np.ndarray
             1D array of sentences ids indices representing what
             the worker needs to embed.
@@ -934,11 +963,14 @@ class MPEmbedder:
             Path to where we store the temporary h5 file.
         batch_size : int
             Number of sentences in the batch.
-        checkpoint_path : None or pathlib.Path
-            If provided, then used to load the pretrained embedding model.
+        checkpoint_path : pathlib.Path or None
+            If 'model_name_or_class' is the class, the path of the model to load.
+            Otherwise, this argument is ignored.
         gpu : int or None
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
+        h5_dataset_name : str or None
+            The name of the dataset in the H5 file.
         """
         current_process = mp.current_process()
         cname = current_process.name
@@ -952,7 +984,7 @@ class MPEmbedder:
 
         logger.info("Loading model")
         model = get_embedding_model(
-            model_name,
+            model_name_or_class,
             checkpoint_path=checkpoint_path,
             device="cpu" if gpu is None else "cuda",
         )
@@ -965,9 +997,12 @@ class MPEmbedder:
 
         n_indices = len(indices)
         logger.info("Create temporary h5 files.")
-        H5.create(temp_h5_path, model_name, shape=(n_indices, model.dim))
+        H5.create(temp_h5_path, h5_dataset_name, shape=(n_indices, model.dim))
         H5.create(
-            temp_h5_path, f"{model_name}_indices", shape=(n_indices, 1), dtype="int32"
+            temp_h5_path,
+            f"{h5_dataset_name}_indices",
+            shape=(n_indices, 1),
+            dtype="int32",
         )
 
         batch_size = min(n_indices, batch_size)
@@ -989,7 +1024,7 @@ class MPEmbedder:
                         "The retrieved and requested indices do not agree."
                     )
 
-                H5.write(temp_h5_path, model_name, embeddings, pos_indices)
+                H5.write(temp_h5_path, h5_dataset_name, embeddings, pos_indices)
 
             except Exception as e:
                 logger.error(f"Issues raised for sentence_ids[{batch_indices}]")
@@ -998,7 +1033,7 @@ class MPEmbedder:
 
             H5.write(
                 temp_h5_path,
-                f"{model_name}_indices",
+                f"{h5_dataset_name}_indices",
                 batch_indices.reshape(-1, 1),
                 pos_indices,
             )
