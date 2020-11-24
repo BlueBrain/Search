@@ -6,6 +6,7 @@ import logging
 import math
 import sys
 import textwrap
+from urllib.parse import quote
 
 import ipywidgets as widgets
 import pandas as pd
@@ -408,7 +409,11 @@ class SearchWidget(widgets.VBox):
         except AttributeError:
             article_auth = ""
 
-        ref = ref or ""
+        ref = (
+            ref.split(";")[0]
+            if ref is not None
+            else "https://www.google.com/search?q=" + quote(article_title)
+        )
         section_name = section_name or ""
 
         result_info = {
