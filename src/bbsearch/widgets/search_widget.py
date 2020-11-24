@@ -98,17 +98,17 @@ class SearchWidget(widgets.VBox):
         )
 
         # Select granularity of the search
-        self.widgets["granularity"] = widgets.RadioButtons(
+        self.widgets["granularity"] = widgets.ToggleButtons(
             options=["sentences", "articles"],
-            value="sentences",
+            value="articles",
             disabled=False,
             style={"description_width": "initial", "button_width": "80px"},
-            description="Granularity of search: ",
+            description="",
         )
 
         # Select n. of top results to return
         self.widgets["top_results"] = widgets.widgets.IntText(
-            value=20, description="Top N results", style=self.widgets_style
+            value=20, description="Show top ", style=self.widgets_style
         )
 
         # Choose whether to print whole paragraph containing sentence
@@ -262,8 +262,12 @@ class SearchWidget(widgets.VBox):
                 "Search / View",
                 [
                     self.widgets["sent_embedder"],
-                    self.widgets["granularity"],
-                    self.widgets["top_results"],
+                    widgets.HBox(
+                        children=[
+                            self.widgets["top_results"],
+                            self.widgets["granularity"],
+                        ]
+                    ),
                     self.widgets["print_paragraph"],
                     self.widgets["default_value_article_saver"],
                 ],

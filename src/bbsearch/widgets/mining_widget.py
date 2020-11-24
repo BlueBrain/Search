@@ -82,15 +82,31 @@ class MiningWidget(widgets.VBox):
         # "Output Area" Widget
         self.widgets["out"] = widgets.Output(layout={"border": "0.5px solid black"})
 
+        tabs = (
+            (
+                "Mine Articles",
+                [
+                    self.widgets["mine_articles"],
+                ],
+            ),
+            (
+                "Mine Text",
+                [self.widgets["input_text"], self.widgets["mine_text"]],
+            ),
+        )
+
+        tab_widget = widgets.Tab(children=[])
+        for i, (tab_name, tab_children) in enumerate(tabs):
+            tab_widget.children = tab_widget.children + (widgets.VBox(tab_children),)
+            tab_widget.set_title(i, tab_name)
+        self.widgets["mining"] = tab_widget
+
     def _init_ui(self):
         css_style = style.get_css_style()
         display(HTML(f"<style> {css_style} </style>"))
 
         self.children = [
-            self.widgets["input_text"],
-            widgets.HBox(
-                children=[self.widgets["mine_text"], self.widgets["mine_articles"]]
-            ),
+            self.widgets["mining"],
             self.widgets["out"],
         ]
 
@@ -193,6 +209,12 @@ class MiningWidget(widgets.VBox):
                 information=text, schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
+
+    def _cb_chkb_show_mine_text_fct(self, change_dict):
+        if change_dict["new"]:
+            self.widgets["mine_text_fct"].layout.display = "block"
+        else:
+            self.widgets["mine_text_fct"].layout.display = "none"
 
     def get_extracted_table(self):
         """Retrieve the table with the mining results.
