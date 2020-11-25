@@ -23,6 +23,7 @@ from bbsearch.embedding_models import (
     SentTransformer,
     SklearnVectorizer,
     compute_database_embeddings,
+    get_embedding_model,
 )
 
 
@@ -385,6 +386,35 @@ def test_compute_database(
     assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(
         n_sentences % batch_size != 0
     )
+
+
+class TestGetEmbeddingModel:
+    def test_invalid_key(self):
+        with pytest.raises(ValueError):
+            get_embedding_model("wrong_model_name")
+
+    @pytest.mark.parametrize(
+        "name, underlying_class",
+        [
+            ("BioBERT NLI+STS", "SentTransformer"),
+            ("BSV", "BSV"),
+            ("Sent2VecModel", "Sent2VecModel"),
+            ("SentTransformer", "SentTransformer"),
+            ("SklearnVectorizer", "SklearnVectorizer"),
+            ("SBioBERT", "SBioBERT"),
+            ("SBERT", "SentTransformer"),
+            ("USE", "USE"),
+        ],
+    )
+    def test_returns_instance(self, monkeypatch, name, underlying_class):
+        fake_instance = Mock()
+        fake_class = Mock(return_value=fake_instance)
+
+        monkeypatch.setattr(f"bbsearch.embedding_models.{underlying_class}", fake_class)
+
+        returned_instance = get_embedding_model(name)
+
+        assert returned_instance is fake_instance
 
 
 class TestMPEmbedder:
