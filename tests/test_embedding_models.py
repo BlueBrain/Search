@@ -512,6 +512,7 @@ class TestMPEmbedder:
         mpe.do_embedding()
 
         # checks
+        fake_multiprocessing.set_start_method.asset_called_once()
         assert fake_multiprocessing.Process.call_count == n_processes
         fake_h5.concatenate.assert_called_once()
 

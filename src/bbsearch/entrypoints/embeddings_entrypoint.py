@@ -96,7 +96,7 @@ def main(argv=None):
     )
     parser.add_argument(
         "--start-method",
-        default="fork",
+        default="forkserver",
         type=str,
         help="Start method for multiprocessing. Options are fork, forkserver "
         "and spawn.",

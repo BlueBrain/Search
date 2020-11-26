@@ -875,6 +875,7 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
+        self.start_method = start_method
         if h5_dataset_name is None:
             self.h5_dataset_name = model_name_or_class
         else:
@@ -889,11 +890,11 @@ class MPEmbedder:
 
         self.gpus = gpus
 
-        mp.set_start_method(start_method)
-
     def do_embedding(self):
         """Do the parallelized embedding."""
         self.logger.info("Starting multiprocessing")
+        mp.set_start_method(self.start_method)
+
         output_folder = self.temp_folder or self.h5_path_output.parent
 
         self.h5_path_output.parent.mkdir(parents=True, exist_ok=True)
