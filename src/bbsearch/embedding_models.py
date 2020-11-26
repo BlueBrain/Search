@@ -845,6 +845,8 @@ class MPEmbedder:
     h5_dataset_name : str or None
         The name of the dataset in the H5 file.
         Otherwise, the value of 'model_name_or_class' is used.
+    start_method : str, {"fork", "forkserver", "spawn"}
+        Start method for multiprocessing.
     """
 
     def __init__(
@@ -861,6 +863,7 @@ class MPEmbedder:
         delete_temp=True,
         temp_folder=None,
         h5_dataset_name=None,
+        start_method="fork"
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -885,6 +888,8 @@ class MPEmbedder:
             raise ValueError("One needs to specify the GPU for each process separately")
 
         self.gpus = gpus
+
+        mp.set_start_method(start_method)
 
     def do_embedding(self):
         """Do the parallelized embedding."""
