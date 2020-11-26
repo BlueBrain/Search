@@ -129,6 +129,7 @@ class MiningServer(Flask):
             self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
             self.logger.info(f"use_cache   : {use_cache}")
+            self.logger.info(f"Mining starting...")
 
             args_err_response = self.check_args_not_null(
                 identifiers=identifiers, schema=schema_str
@@ -203,6 +204,7 @@ class MiningServer(Flask):
                     texts=texts, schema_request=schema_df, debug=debug
                 )
             response = self.create_response(df_all, etypes_na)
+            self.logger.info(f"Mining completed, extracted {len(df_all)} elements.")
         else:
             self.logger.info("Request is not JSON. Not processing.")
             response = self.create_error_response(
