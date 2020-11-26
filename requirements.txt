@@ -48,7 +48,7 @@ scikit-learn==0.23.2
 scipy==1.5.2
 scispacy==0.2.5
 sent2vec-prebuilt>=0.0.2
-sentence-transformers==0.3.5
+sentence-transformers==0.3.9
 spacy==2.3.1
 sphinx-bluebrain-theme==0.2.3
 sseclient==0.0.27
@@ -56,5 +56,5 @@ tensorflow-hub==0.9.0
 tensorflow==2.3.1
 torch==1.7.0
 tox==3.20.0
-transformers==3.0.2
+transformers==3.5.1
 pyarrow==1.0.1
