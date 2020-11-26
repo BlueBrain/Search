@@ -9,20 +9,21 @@ from IPython.display import HTML, display
 from .._css import style
 from ..utils import Timer
 
-
-DEFAULT_MINING_TEXT = """Autophagy maintains tumour growth through circulating 
-arginine. Autophagy captures intracellular components and delivers them to 
-lysosomes, where they are degraded and recycled to sustain metabolism and to 
-enable survival during starvation. Acute, whole-body deletion of the essential 
-autophagy gene Atg7 in adult mice causes a systemic metabolic defect that 
-manifests as starvation intolerance and gradual loss of white adipose tissue, 
-liver glycogen and muscle mass. Cancer cells also benefit from autophagy. 
-Deletion of essential autophagy genes impairs the metabolism, proliferation, 
-survival and malignancy of spontaneous tumours in models of autochthonous 
-cancer. Acute, systemic deletion of Atg7 or acute, systemic expression of a 
-dominant-negative ATG4b in mice induces greater regression of KRAS-driven 
-cancers than does tumour-specific autophagy deletion, which suggests that host 
-autophagy promotes tumour growth.""".replace("\n", "")
+DEFAULT_MINING_TEXT = """Autophagy maintains tumour growth through circulating
+ arginine. Autophagy captures intracellular components and delivers them to
+ lysosomes, where they are degraded and recycled to sustain metabolism and to
+ enable survival during starvation. Acute, whole-body deletion of the essential
+ autophagy gene Atg7 in adult mice causes a systemic metabolic defect that
+ manifests as starvation intolerance and gradual loss of white adipose tissue,
+ liver glycogen and muscle mass. Cancer cells also benefit from autophagy.
+ Deletion of essential autophagy genes impairs the metabolism, proliferation,
+ survival and malignancy of spontaneous tumours in models of autochthonous
+ cancer. Acute, systemic deletion of Atg7 or acute, systemic expression of a
+ dominant-negative ATG4b in mice induces greater regression of KRAS-driven
+ cancers than does tumour-specific autophagy deletion, which suggests that host
+ autophagy promotes tumour growth.""".replace(
+    "\n", ""
+)
 
 
 class MiningWidget(widgets.VBox):

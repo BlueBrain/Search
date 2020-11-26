@@ -129,7 +129,7 @@ class MiningServer(Flask):
             self.logger.info(f"schema      : {schema_str}")
             self.logger.info(f"debug       : {debug}")
             self.logger.info(f"use_cache   : {use_cache}")
-            self.logger.info(f"Mining starting...")
+            self.logger.info("Mining starting...")
 
             args_err_response = self.check_args_not_null(
                 identifiers=identifiers, schema=schema_str
