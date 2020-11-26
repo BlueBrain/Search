@@ -863,7 +863,7 @@ class MPEmbedder:
         delete_temp=True,
         temp_folder=None,
         h5_dataset_name=None,
-        start_method="fork"
+        start_method="fork",
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class

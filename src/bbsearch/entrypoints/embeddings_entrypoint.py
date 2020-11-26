@@ -99,7 +99,7 @@ def main(argv=None):
         default="fork",
         type=str,
         help="Start method for multiprocessing. Options are fork, forkserver "
-        "and spawn."
+        "and spawn.",
     )
     parser.add_argument(
         "--temp-dir",
@@ -163,7 +163,7 @@ def main(argv=None):
         gpus=gpus,
         temp_folder=temp_dir,
         h5_dataset_name=args.h5_dataset_name,
-        start_method=args.start_method
+        start_method=args.start_method,
     )
 
     logger.info("Starting embedding")
