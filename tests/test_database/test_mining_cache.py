@@ -5,6 +5,7 @@ import time
 
 import pandas as pd
 import pytest
+import sqlalchemy
 
 from bbsearch.database import CreateMiningCache
 from bbsearch.database.mining_cache import Miner
@@ -277,12 +278,17 @@ class TestCreateMiningCache:
                 continue
 
     def test_do_mining(self, cache_creator, monkeypatch):
+        cache_creator._schema_creation()
+
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.Miner.create_and_mine",
             self.fake_queue_miner,
         )
-
         cache_creator.do_mining()
+        cache_creator.engine.execute(f"drop table {cache_creator.target_table}")
+        inspector = sqlalchemy.inspect(cache_creator.engine)
+        indexes = inspector.get_indexes("mining_cache")
+        assert len(indexes) == 1
 
     def test_construct(self, cache_creator, monkeypatch):
         monkeypatch.setattr(
@@ -291,3 +297,4 @@ class TestCreateMiningCache:
         )
 
         cache_creator.construct()
+        cache_creator.engine.execute(f"drop table {cache_creator.target_table}")
