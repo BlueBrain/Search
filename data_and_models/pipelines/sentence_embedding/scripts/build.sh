@@ -1,7 +1,5 @@
 #!/bin/bash
-#
-# Usage: time bash build.sh <path to data directory>
-#
+
 # Tested on Python 3.6.12 with:
 #   - sentence-transformers v0.3.9
 #   - transformers v3.4.0
