@@ -4,10 +4,13 @@ train_model1:
   deps:
   - path: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     md5: 613308ed830d86284a1aee2747d911d0
+    size: 324136
   - path: Dockerfile
     md5: 52af30d575bdab4eed0c6752e9f682f7
+    size: 1386
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
+    size: 1694
   params:
     params.yaml:
       train.model1:
@@ -25,10 +28,13 @@ train_model2:
   deps:
   - path: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     md5: 2459e49418599ff96ab9db60a29b757b
+    size: 953728
   - path: Dockerfile
     md5: 52af30d575bdab4eed0c6752e9f682f7
+    size: 1386
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
+    size: 1694
   params:
     params.yaml:
       train.model2:
@@ -70,10 +76,13 @@ train_model4:
   deps:
   - path: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     md5: ec5d6b86181b9e4cdefb2b2198d5ae4f
+    size: 267307
   - path: Dockerfile
     md5: 52af30d575bdab4eed0c6752e9f682f7
+    size: 1386
   - path: train.py
     md5: 4325105b8bc3fc1cbc0de53ede30c9ef
+    size: 1694
   params:
     params.yaml:
       train.model4:
@@ -509,16 +518,22 @@ interrater:
   deps:
   - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     md5: 563441b77b5c39063cda3fa0fb03803c
+    size: 883041
   - path: ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
     md5: 735cba4532a4c2c5e928399eafc1000f
+    size: 806212
   - path: ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     md5: 117da032ef2e2792429dff88c06c90b7
+    size: 62653
   - path: ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
     md5: 6e248863604ce14861f38e7c9a8281bb
+    size: 64285
   - path: Dockerfile
     md5: 52af30d575bdab4eed0c6752e9f682f7
+    size: 1386
   - path: interrater.py
     md5: 2eb95172eb166408b9d6900a62e00578
+    size: 2195
   outs:
   - path: ../../metrics/ner/interrater/cell_compartment.json
     md5: 1c5c2f5fb7dc7f792f4a3a974fe753f8
