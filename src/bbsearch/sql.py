@@ -113,19 +113,23 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
         sentence_id. If None then the `sentence_id` was not found in the
         sentences table.
     """
-    sql_query = f"""SELECT text
+    sql_query = sql.text(
+        """SELECT text
                     FROM sentences
                     WHERE article_id =
                         (SELECT article_id
                         FROM sentences
-                        WHERE sentence_id = {sentence_id})
+                        WHERE sentence_id = :sentence_id )
                     AND paragraph_pos_in_article =
                         (SELECT paragraph_pos_in_article
                         FROM sentences
-                        WHERE sentence_id = {sentence_id})
+                        WHERE sentence_id = :sentence_id )
                     ORDER BY sentence_pos_in_paragraph ASC"""
+    )
 
-    all_sentences = pd.read_sql(sql_query, engine)["text"].to_list()
+    all_sentences = pd.read_sql(sql_query, engine, params={"sentence_id": sentence_id})[
+        "text"
+    ].to_list()
     if not all_sentences:
         paragraph = None
     else:
