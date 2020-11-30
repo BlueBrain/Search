@@ -198,6 +198,8 @@ class PatternCreator:
 
         Parameters
         ----------
+        path : pathlib.Path
+            File where to save it.
         sort_by : None or list
             If None, then no sorting taking place. If ``list``, then the
             names of columns along which to sort.
