@@ -1,6 +1,7 @@
 """Module for the Database Creation."""
 import json
 import logging
+import pathlib
 import time
 
 import langdetect
@@ -76,6 +77,14 @@ def mark_bad_sentences(engine, sentences_table_name):
 class CORD19DatabaseCreation:
     """Create SQL database from a specified dataset.
 
+    Parameters
+    ----------
+    data_path : str or pathlib.Path
+        Directory to the dataset where metadata.csv and all jsons file
+        are located.
+    engine : SQLAlchemy.Engine
+        Engine linked to the database.
+
     Attributes
     ----------
     max_text_length : int
@@ -85,17 +94,7 @@ class CORD19DatabaseCreation:
     """
 
     def __init__(self, data_path, engine):
-        """Create SQL database object.
-
-        Parameters
-        ----------
-        data_path : pathlib.Path
-            Directory to the dataset where metadata.csv and all jsons file
-            are located.
-        engine : SQLAlchemy.Engine
-            Engine linked to the database.
-        """
-        self.data_path = data_path
+        self.data_path = pathlib.Path(data_path)
         if not self.data_path.exists():
             raise NotADirectoryError(
                 f"The data directory {self.data_path} does not exit"
