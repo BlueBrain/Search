@@ -444,7 +444,7 @@ def ner_errors(
     if not (len(iob_true) == len(iob_pred) == len(tokens)):
         raise ValueError(
             f"Inputs iob_true (len={len(iob_true)}), iob_pred (len={len(iob_pred)}), "
-            f"tokens (len={len(tokens)}) should have equal lenght."
+            f"tokens (len={len(tokens)}) should have equal length."
         )
     etypes = unique_etypes(iob_true)
 

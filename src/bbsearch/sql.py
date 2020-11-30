@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import sqlalchemy.sql as sql
 
 
 def get_titles(article_ids, engine):
@@ -151,13 +152,22 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
         pd.DataFrame with the paragraph and its metadata:
         article_id, text, section_name, paragraph_pos_in_article.
     """
-    sql_query = f"""SELECT section_name, text
+    sql_query = sql.text(
+        """SELECT section_name, text
                     FROM sentences
-                    WHERE article_id = {article_id}
-                    AND paragraph_pos_in_article = {paragraph_pos_in_article}
+                    WHERE article_id = :article_id
+                    AND paragraph_pos_in_article = :paragraph_pos_in_article
                     ORDER BY sentence_pos_in_paragraph ASC"""
+    )
 
-    sentences = pd.read_sql(sql_query, engine)
+    sentences = pd.read_sql(
+        sql_query,
+        engine,
+        params={
+            "article_id": article_id,
+            "paragraph_pos_in_article": paragraph_pos_in_article,
+        },
+    )
     if sentences.empty:
         paragraph = pd.DataFrame(
             columns=["article_id", "text", "section_name", "paragraph_pos_in_article"]
@@ -199,10 +209,12 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
         'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
         'pdf_json_files', 'pmc_json_files', 'url', 's2_id'.
     """
-    sql_query = f"""SELECT *
+    sql_query = sql.text(
+        """SELECT *
                     FROM articles
-                    WHERE article_id = {article_id}"""
-    article = pd.read_sql(sql_query, engine)
+                    WHERE article_id = :article_id"""
+    )
+    article = pd.read_sql(sql_query, engine, params={"article_id": article_id})
     return article
 
 
