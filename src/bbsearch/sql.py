@@ -31,6 +31,9 @@ def get_titles(article_ids, engine):
     WHERE article_id IN :article_ids
     """
     )
+    query = query.bindparams(sql.bindparam("article_ids", expanding=True))
+
+
     with engine.begin() as connection:
         response = connection.execute(query, {"article_ids": article_ids}).fetchall()
         titles = {article_id: title for article_id, title in response}
@@ -175,8 +178,8 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
         sql_query,
         engine,
         params={
-            "article_id": article_id,
-            "paragraph_pos_in_article": paragraph_pos_in_article,
+            "article_id": int(article_id),
+            "paragraph_pos_in_article": int(paragraph_pos_in_article),
         },
     )
     if sentences.empty:
@@ -225,7 +228,7 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
                     FROM articles
                     WHERE article_id = :article_id"""
     )
-    article = pd.read_sql(sql_query, engine, params={"article_id": article_id})
+    article = pd.read_sql(sql_query, engine, params={"article_id": int(article_id)})
     return article
 
 
