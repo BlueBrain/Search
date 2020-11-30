@@ -24,13 +24,15 @@ def get_titles(article_ids, engine):
     if len(article_ids) == 0:
         return {}
 
-    query = f"""\
+    query = sql.text(
+        f"""\
     SELECT article_id, title
     FROM articles
-    WHERE article_id IN ({",".join(map(str, article_ids))})
+    WHERE article_id IN :article_ids
     """
+    )
     with engine.begin() as connection:
-        response = connection.execute(query).fetchall()
+        response = connection.execute(query, {"article_ids": article_ids}).fetchall()
         titles = {article_id: title for article_id, title in response}
 
     return titles
