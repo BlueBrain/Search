@@ -580,7 +580,7 @@ class AttributeExtractor:
             response = requests.post(
                 self.core_nlp_url + request_params, data=request_data
             )
-            assert response.status_code == 200
+            response.raise_for_status()
             response_json = json.loads(response.text)
         except requests.exceptions.RequestException:
             warnings.warn("There was a problem contacting the CoreNLP server.")
@@ -801,7 +801,8 @@ class TextCollectionWidget(widgets.VBox):
         """
         super().__init__()
 
-        assert len(texts) > 0
+        if not texts:
+            raise ValueError(f"The list of texts to be annotated shoud be nonempty, but got texts = {texts}")
         self.texts = texts
 
         self.idx_slider = widgets.IntSlider(

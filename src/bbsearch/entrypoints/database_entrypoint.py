@@ -5,6 +5,11 @@ import pathlib
 
 from ._helper import configure_logging
 
+try:
+    rinput = raw_input
+except NameError:
+    rinput = input
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--log_dir",
@@ -54,7 +59,7 @@ def main():
         engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
     elif args.db_type == "mysql":
         # We assume the database `cord19_v35` already exists
-        mysql_uri = input("MySQL URI:")
+        mysql_uri = rinput("MySQL URI:")
         password = getpass.getpass("Password:")
         engine = sqlalchemy.create_engine(
             f"mysql+pymysql://root:{password}" f"@{mysql_uri}/cord19_v47"
