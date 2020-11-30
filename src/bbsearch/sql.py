@@ -77,14 +77,19 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
     """
     sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
     sentence_ids_s = sentence_ids_s or "NULL"
-    sql_query = f"""
+    sql_query = sql.text(
+        f"""
     SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
     FROM sentences
-    WHERE sentence_id IN ({sentence_ids_s})
+    WHERE sentence_id IN :sentence_ids_s
     """
+    )
+    sql_query = sql_query.bindparams(sql.bindparam("sentence_ids_s", expanding=True))
 
     with engine.begin() as connection:
-        df_sentences = pd.read_sql(sql_query, connection)
+        df_sentences = pd.read_sql(
+            sql_query, params={"sentence_ids_s": sentence_ids_s}, con=connection
+        )
 
     if keep_order:
         # Remove sentence IDs that were not found, otherwise df.loc will fail.
