@@ -441,9 +441,11 @@ def ner_errors(
               ...
             }
     """
-    if not len(iob_true) == len(iob_pred) == len(tokens):
-        raise ValueError("iob_true, iob_pred and tokens "
-                         "should have the same length")
+    if not (len(iob_true) == len(iob_pred) == len(tokens)):
+        raise ValueError(
+            f"Inputs iob_true (len={len(iob_true)}), iob_pred (len={len(iob_pred)}), "
+            f"tokens (len={len(tokens)}) should have equal lenght."
+        )
     etypes = unique_etypes(iob_true)
 
     etypes_map = etypes_map if etypes_map is not None else dict()
