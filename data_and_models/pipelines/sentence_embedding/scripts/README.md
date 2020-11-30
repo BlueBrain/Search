@@ -1,14 +1,14 @@
 In order to build BioBERT NLI+STS CORD-19 v1, one could execute the following
-command in a terminal:
+commands in a terminal:
 
 ```
-time bash build.sh <path to data directory>
+dvc pull
+time bash build.sh
 ```
 
-The placeholder `<path to data directory>` needs to be replaced by the path to
-the directory where the files `sentences-filtered_11-527-877.txt` and
-`biosses_sentences.txt` are located. Until integrated in DVC, these files are
-on DGX-1.
+The command `dvc pull` retrieves the files `sentences-filtered_11-527-877.txt`
+and `biosses_sentences.txt` needed by the script `build.sh`. These three files
+need to be located in the same directory.
 
 The script `build.sh` needs to be run on a machine with at least one GPU. All
 GPUs available on the machine will be automatically used. 

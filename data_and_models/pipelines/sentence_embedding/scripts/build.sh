@@ -9,9 +9,8 @@
 export MODEL=biobert_nli_sts_cord19_v1
 export TEMP=biobert_cord19_v1
 export BASE=clagator/biobert_v1.1_pubmed_nli_sts
-export DATA="$1"
-export TRAIN=$DATA/sentences-filtered_11-527-877.txt
-export DEV=$DATA/biosses_sentences.txt
+export TRAIN=sentences-filtered_11-527-877.txt
+export DEV=biosses_sentences.txt
 
 echo -e "\n\nTrain...\n\n"
 time python train.py \
