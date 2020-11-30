@@ -1,5 +1,6 @@
 """Classes and functions for entity extraction (aka named entity recognition)."""
 
+import ast
 import copy
 
 import numpy as np
@@ -328,11 +329,16 @@ class PatternCreator:
                 ):
                     raise KeyError()
 
-                value = (
-                    eval(f"{value_type}({value_str})")
-                    if value_type != "str"
-                    else value_str
-                )
+                if value_type != "str":
+                    try:
+                        value = ast.literal_eval(value_str)
+                    except ValueError as ve:
+                        if str(ve).startswith("malformed node or string"):
+                            raise NameError(str(ve))
+                        else:
+                            raise
+                else:
+                    value = value_str
 
                 token_pattern = {attribute: value}
                 if op:
