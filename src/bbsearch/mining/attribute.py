@@ -802,9 +802,7 @@ class TextCollectionWidget(widgets.VBox):
         super().__init__()
 
         if not texts:
-            raise ValueError(
-                f"Texts to be annotated shoud be nonempty, got texts = {texts}"
-            )
+            raise TypeError("texts must be a non-empty list.")
         self.texts = texts
 
         self.idx_slider = widgets.IntSlider(
