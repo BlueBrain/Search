@@ -39,7 +39,7 @@ def main(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--mark-bad-sentences-only",
+        "--only-mark-bad-sentences",
         default=False,
         action="store_true",
         help=(
@@ -49,10 +49,11 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
     print(" Configuration ".center(80, "-"))
-    print(f"log-dir   : {args.log_dir}")
-    print(f"log-name  : {args.log_name}")
-    print(f"data-path : {args.data_path}")
-    print(f"db-type   : {args.db_type}")
+    print(f"log-dir                 : {args.log_dir}")
+    print(f"log-name                : {args.log_name}")
+    print(f"data-path               : {args.data_path}")
+    print(f"db-type                 : {args.db_type}")
+    print(f"only-mark-bad-sentences : {args.only_mark_bad_sentences}")
     print("-" * 80)
     input("Press any key to continue... ")
 
@@ -89,7 +90,7 @@ def main(argv=None):
 
     # Launch database creation
     logger.info("Starting the database creation")
-    if not args.mark_bad_sentences_only:
+    if not args.only_mark_bad_sentences:
         db = CORD19DatabaseCreation(data_path=args.data_path, engine=engine)
         db.construct()
     mark_bad_sentences(engine, "sentences")
