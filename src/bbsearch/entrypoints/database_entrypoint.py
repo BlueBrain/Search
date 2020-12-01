@@ -38,6 +38,15 @@ def main(argv=None):
         choices=("mysql", "sqlite"),
         help="Type of the database.",
     )
+    parser.add_argument(
+        "--mark-bad-sentences-only",
+        default=False,
+        action="store_true",
+        help=(
+            "If set, then the database creation will be skipped and only the "
+            "routine for marking bad sentences will be run"
+        )
+    )
     args = parser.parse_args(argv)
     print(" Configuration ".center(80, "-"))
     print(f"log-dir   : {args.log_dir}")
@@ -56,7 +65,7 @@ def main(argv=None):
     logger.info("Loading libraries")
     import sqlalchemy
 
-    from ..database import CORD19DatabaseCreation
+    from ..database import CORD19DatabaseCreation, mark_bad_sentences
 
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")
@@ -80,8 +89,10 @@ def main(argv=None):
 
     # Launch database creation
     logger.info("Starting the database creation")
-    db = CORD19DatabaseCreation(data_path=args.data_path, engine=engine)
-    db.construct()
+    if not args.mark_bad_sentences_only:
+        db = CORD19DatabaseCreation(data_path=args.data_path, engine=engine)
+        db.construct()
+    mark_bad_sentences(engine, "sentences")
 
 
 if __name__ == "__main__":
