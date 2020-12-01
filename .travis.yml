@@ -11,6 +11,10 @@ cache:
     directories:
         - $HOME/.cache/pip
 
+env:
+  global:
+    - VIRTUALENV_PIP="20.2.4"
+
 matrix:
   include:
     - stage: Lint and Code Style

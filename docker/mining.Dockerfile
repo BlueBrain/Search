@@ -25,5 +25,5 @@ ENTRYPOINT [\
 "gunicorn", \
 "--bind", "0.0.0.0:8080", \
 "--workers", "1", \
-"--timeout", "180", \
+"--timeout", "7200", \
 "bbsearch.entrypoints:get_mining_app()"]

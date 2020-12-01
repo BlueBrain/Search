@@ -10,7 +10,7 @@ dash-cytoscape==0.2.0
 dash-daq==0.5.0
 dash-table==4.10.1
 docker==4.3.1
-dvc[ssh]==1.8.0
+dvc[ssh]==1.10.2
 faiss-cpu==1.6.3
 flake8==3.8.3
 frozendict==1.2
