@@ -89,10 +89,13 @@ def main(argv=None):
         raise ValueError(f'"{args.db_type}" is not a supported db_type.')
 
     # Launch database creation
-    logger.info("Starting the database creation")
     if not args.only_mark_bad_sentences:
+        logger.info("Starting the database creation")
         db = CORD19DatabaseCreation(data_path=args.data_path, engine=engine)
         db.construct()
+
+    # Mark bad sentences
+    logger.info("Marking bad sentences")
     mark_bad_sentences(engine, "sentences")
 
 
