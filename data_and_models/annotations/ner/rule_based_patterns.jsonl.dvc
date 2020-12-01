@@ -1,3 +1,4 @@
 outs:
-- md5: bfd6d361397cbe4a80261ffacdd35885
+- md5: 044c1a326c2472aa4eb72c4c98a7400b
+  size: 1709
   path: rule_based_patterns.jsonl
