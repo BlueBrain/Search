@@ -498,7 +498,18 @@ class CreateMiningCache:
                 if process in worker_processes:
                     worker_processes.remove(process)
 
-        self.logger.info("Finished.")
+        self.logger.info("Finished mining.")
+
+        # Create index on (article_id, paragraph_pos_in_article, start_char)
+        # to speed up ORDER BY clause.
+        self.logger.info("Start creating index on (par, art, char)...")
+        sqlalchemy.Index(
+            "index_art_par_char",
+            self.mining_cache_table.c.article_id,
+            self.mining_cache_table.c.paragraph_pos_in_article,
+            self.mining_cache_table.c.start_char,
+        ).create(bind=self.engine)
+        self.logger.info("Done creating index on (par, art, char).")
 
     def _load_model_schemas(self):
         """Load the model schemas from a file.

@@ -23,9 +23,9 @@ Changes
 - |Add| column `is_bad` in table `sentences` for quality filtering (too long, too short, LaTeX code).
 - |Add| embedding model `BioBERT NLI+STS CORD-19 v1`.
 - |Change| `embedding_models.get_embedding_model()` to support any model class and checkpoint path without having to
-modify the source code of BBS.
+  modify the source code of BBS.
 - |Fix| bug in hyperlinks of SearchWidget. We now take the first URL if there are several, and add Google search if
-there is none.
+  there is none.
 - |Change| widgets UIs with tabs to improve usability.
 
 
