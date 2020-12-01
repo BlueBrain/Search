@@ -135,9 +135,9 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
                     ORDER BY sentence_pos_in_paragraph ASC"""
     )
 
-    all_sentences = pd.read_sql(sql_query, engine, params={"sentence_id": sentence_id})[
-        "text"
-    ].to_list()
+    all_sentences = pd.read_sql(
+        sql_query, engine, params={"sentence_id": int(sentence_id)}
+    )["text"].to_list()
     if not all_sentences:
         paragraph = None
     else:
