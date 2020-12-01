@@ -287,21 +287,27 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     result : pd.DataFrame
         Selected rows of the `mining_cache` table.
     """
-    model_names = tuple(set(model_names))
-    if len(model_names) == 1:
-        model_names = f"('{model_names[0]}')"
+    model_names = list(set(model_names))
+    identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 
-    identifiers_arts = tuple(a for a, p in identifiers if p == -1)
-    if len(identifiers_arts) == 1:
-        identifiers_arts = f"({identifiers_arts[0]})"
     if identifiers_arts:
-        query_arts = f"""
+        query_arts = sql.text(
+            """
         SELECT *
         FROM mining_cache
-        WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
+        WHERE article_id IN :identifiers_arts AND mining_model IN :model_names
         ORDER BY article_id, paragraph_pos_in_article, start_char
         """
-        df_arts = pd.read_sql(query_arts, con=engine)
+        )
+        query_arts = query_arts.bindparams(
+            sql.bindparam("identifiers_arts", expanding=True),
+            sql.bindparam("model_names", expanding=True),
+        )
+        df_arts = pd.read_sql(
+            query_arts,
+            con=engine,
+            params={"identifiers_arts": identifiers_arts, "model_names": model_names},
+        )
     else:
         df_arts = pd.DataFrame()
 
@@ -314,6 +320,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         # 3. If `len(identifiers_pars)` is too large, we may have a too long
         #    SQL statement which overflows the max length. So we break it down.
 
+        if len(model_names) == 1:
+            model_names = f"('{model_names[0]}')"
         batch_size = 1000
         dfs_pars = []
         d, r = divmod(len(identifiers_pars), batch_size)
@@ -323,14 +331,14 @@ def retrieve_mining_cache(identifiers, model_names, engine):
                 SELECT *
                 FROM mining_cache
                 WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
-                """
+                """  # nosec
                 for a, p in identifiers_pars[i * batch_size : (i + 1) * batch_size]
             )
             query_pars = f"""
             SELECT *
             FROM ({query_pars}) tt
             WHERE tt.mining_model IN {model_names}
-            """
+            """  # nosec
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
         df_pars = df_pars.sort_values(
@@ -580,7 +588,7 @@ class SentenceFilter:
                 FROM articles
                 WHERE {" AND ".join(article_conditions)}
             )
-            """.strip()
+            """.strip()  # nosec
             sentence_conditions.append(article_condition_query)
 
         # Restricted sentence IDs

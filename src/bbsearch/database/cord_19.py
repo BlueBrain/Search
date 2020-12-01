@@ -37,7 +37,7 @@ def mark_bad_sentences(engine, sentences_table_name):
 
     logger.info("Getting all sentences")
     with engine.begin() as connection:
-        query = f"SELECT sentence_id, text FROM {sentences_table_name}"
+        query = f"SELECT sentence_id, text FROM {sentences_table_name}"  # nosec
         df_sentences = pd.read_sql(query, connection)
 
     logger.info("Computing text lengths")

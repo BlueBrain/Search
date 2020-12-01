@@ -285,7 +285,7 @@ class CreateMiningCache:
             DELETE
             FROM {self.target_table}
             WHERE mining_model = :mining_model
-            """
+            """  # nosec
             self.engine.execute(
                 sqlalchemy.sql.text(query),
                 mining_model=model_schema["model_path"],
