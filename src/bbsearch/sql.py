@@ -76,8 +76,6 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
-    # sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
-    # sentence_ids_s = sentence_ids_s or "NULL"
     sql_query = sql.text(
         """
         SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
@@ -248,14 +246,17 @@ def retrieve_articles(article_ids, engine):
         DataFrame containing the articles divided into paragraphs. The columns are
         'article_id', 'paragraph_pos_in_article', 'text', 'section_name'.
     """
-    articles_str = ", ".join(str(id_) for id_ in article_ids)
-    sql_query = f"""SELECT *
+    article_ids = [int(id_) for id_ in article_ids]
+    sql_query = sql.text(
+        """SELECT *
                     FROM sentences
-                    WHERE article_id IN ({articles_str})
+                    WHERE article_id IN :articles_ids
                     ORDER BY article_id ASC,
                     paragraph_pos_in_article ASC,
                     sentence_pos_in_paragraph ASC"""
-    all_sentences = pd.read_sql(sql_query, engine)
+    )
+    sql_query = sql_query.bindparams(sql.bindparam("articles_ids", expanding=True))
+    all_sentences = pd.read_sql(sql_query, engine, params={"articles_ids": article_ids})
 
     groupby_var = all_sentences.groupby(by=["article_id", "paragraph_pos_in_article"])
     paragraphs = groupby_var["text"].apply(lambda x: " ".join(x))
