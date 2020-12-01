@@ -25,14 +25,12 @@ def get_titles(article_ids, engine):
         return {}
 
     query = sql.text(
-        f"""\
-    SELECT article_id, title
-    FROM articles
-    WHERE article_id IN :article_ids
-    """
+        """SELECT article_id, title
+        FROM articles
+        WHERE article_id IN :article_ids
+        """
     )
     query = query.bindparams(sql.bindparam("article_ids", expanding=True))
-
 
     with engine.begin() as connection:
         response = connection.execute(query, {"article_ids": article_ids}).fetchall()
@@ -78,20 +76,22 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
-    sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
-    sentence_ids_s = sentence_ids_s or "NULL"
+    # sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
+    # sentence_ids_s = sentence_ids_s or "NULL"
     sql_query = sql.text(
-        f"""
-    SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
-    FROM sentences
-    WHERE sentence_id IN :sentence_ids_s
-    """
+        """
+        SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
+        FROM sentences
+        WHERE sentence_id IN :sentence_ids
+        """
     )
-    sql_query = sql_query.bindparams(sql.bindparam("sentence_ids_s", expanding=True))
+    sql_query = sql_query.bindparams(sql.bindparam("sentence_ids", expanding=True))
 
     with engine.begin() as connection:
         df_sentences = pd.read_sql(
-            sql_query, params={"sentence_ids_s": sentence_ids_s}, con=connection
+            sql_query,
+            params={"sentence_ids": [int(id_) for id_ in sentence_ids]},
+            con=connection,
         )
 
     if keep_order:
