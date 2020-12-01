@@ -12,7 +12,8 @@ cache:
         - $HOME/.cache/pip
 
 env:
-  - VIRTUALENV_PIP="20.2.4"
+  global:
+    - VIRTUALENV_PIP="20.2.4"
 
 matrix:
   include:
