@@ -45,7 +45,7 @@ def main(argv=None):
         help=(
             "If set, then the database creation will be skipped and only the "
             "routine for marking bad sentences will be run"
-        )
+        ),
     )
     args = parser.parse_args(argv)
     print(" Configuration ".center(80, "-"))
