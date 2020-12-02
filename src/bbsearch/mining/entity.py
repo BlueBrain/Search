@@ -334,7 +334,7 @@ class PatternCreator:
                         value = ast.literal_eval(value_str)
                     except ValueError as ve:
                         if str(ve).startswith("malformed node or string"):
-                            raise NameError(str(ve))
+                            raise NameError(str(ve)) from ve
                         else:
                             raise
                 else:
