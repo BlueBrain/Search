@@ -14,7 +14,6 @@ dvc[ssh]==1.10.2
 faiss-cpu==1.6.3
 flake8==3.8.3
 frozendict==1.2
-git+https://github.com/allenai/scibert
 git+https://github.com/BlueBrain/nexus-forge#egg=nexusforge
 gunicorn==20.0.4
 h5py==2.10.0

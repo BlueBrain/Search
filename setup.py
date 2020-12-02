@@ -29,7 +29,6 @@ install_requires = [
     "python-dotenv",
     "rdflib-jsonld",
     "requests",
-    "scibert @ git+https://github.com/allenai/scibert",
     "scikit-learn",
     "scipy",
     "scispacy",

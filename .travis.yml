@@ -13,7 +13,6 @@ cache:
 
 env:
   global:
-    - VIRTUALENV_PIP="20.2.4"
 
 matrix:
   include:

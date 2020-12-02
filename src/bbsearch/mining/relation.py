@@ -5,7 +5,6 @@ from collections import defaultdict
 
 import pandas as pd
 from allennlp.predictors import Predictor
-from scibert.models.text_classifier import TextClassifier  # noqa
 
 
 class REModel(ABC):
