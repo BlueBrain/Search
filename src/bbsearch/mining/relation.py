@@ -1,10 +1,15 @@
 """Classes and functions for relation extraction."""
 
+import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
 import pandas as pd
-from allennlp.predictors import Predictor
+
+try:
+    from allennlp.predictors import Predictor
+except ImportError:
+    warnings.warn("AllenNLP not installed")
 
 
 class REModel(ABC):
