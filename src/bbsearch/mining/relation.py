@@ -176,8 +176,8 @@ class ChemProt(REModel):
 
     Notes
     -----
-    This model depends on a package named `scibert` and we do specify it in
-    the `setup.py` since it introduces dependency conflicts. One needs to
+    This model depends on a package named `scibert` which is not we specified in
+    the `setup.py` since it introduces dependency conflicts. One can
     install it manually with the following command.
 
     ```bash
