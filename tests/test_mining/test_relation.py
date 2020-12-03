@@ -74,6 +74,21 @@ def test_annotate(model_entities):
 
 @pytest.mark.parametrize("return_prob", [True, False])
 def test_chemprot(monkeypatch, return_prob):
+    """Run only if scibert installed.
+
+    By default this test will be skipped by the CI since `scibert` introduces
+    conflicts. However, one can use it locally to test whether the
+    `ChemProt` class works as expected.
+    """
+    pytest.importorskip("allennlp")
+    pytest.importorskip("scibert")  # note that the import itself has a side effect
+
+    # Test scibert import side-effect
+    from allennlp.models.model import Model
+
+    assert "text_classifier" in Model.list_available()
+
+    # Prepare test
     class_probs = 13 * [0]
     class_probs[7] = 1
 
@@ -82,10 +97,11 @@ def test_chemprot(monkeypatch, return_prob):
 
     fake_predictor = Mock()
     fake_predictor.from_path.return_value = fake_model
-
-    monkeypatch.setattr("bbsearch.mining.relation.Predictor", fake_predictor)
+    monkeypatch.setattr("allennlp.predictors.Predictor", fake_predictor)
 
     re_model = ChemProt("")
+
+    # Check REModel logic
     annotated_sentence = (
         "The selective << betaAR >> agonist [[ isoproterenol ]] caused an"
         " enhancement of hippocampal CA3 network activity"

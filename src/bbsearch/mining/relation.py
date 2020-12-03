@@ -1,15 +1,8 @@
 """Classes and functions for relation extraction."""
-
-import warnings
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
 import pandas as pd
-
-try:
-    from allennlp.predictors import Predictor
-except ImportError:
-    warnings.warn("AllenNLP not installed")
 
 
 class REModel(ABC):
@@ -180,9 +173,22 @@ class ChemProt(REModel):
     ----------
     model_ : allennlp.predictors.text_classifier.TextClassifierPredictor
         The actual model in the backend.
+
+    Notes
+    -----
+    This model depends on a package named `scibert` and we do specify it in
+    the `setup.py` since it introduces dependency conflicts. One needs to
+    install it manually with the following command.
+
+    ```bash
+    pip install git+https://github.com/allenai/scibert
+    ```
     """
 
     def __init__(self, model_path):
+        import scibert  # noqa, it has a side effect
+        from allennlp.predictors import Predictor
+
         self.model_ = Predictor.from_path(model_path, predictor_name="text_classifier")
 
     @property
