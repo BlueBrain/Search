@@ -110,7 +110,7 @@ def request_callback(request):
 
 
 def request_callback_help(request):
-    resp_body = {"database": "test_database"}
+    resp_body = {"database": "test_database", "version": "1.2.3"}
     headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response

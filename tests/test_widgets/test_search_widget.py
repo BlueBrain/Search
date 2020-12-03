@@ -177,7 +177,11 @@ def request_callback(request, searcher):
 
 
 def request_callback_help(request):
-    resp_body = {"database": "test_database", "supported_models": ["BSV"]}
+    resp_body = {
+        "database": "test_database",
+        "supported_models": ["BSV"],
+        "version": "1.2.3",
+    }
     headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response
