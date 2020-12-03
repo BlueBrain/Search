@@ -1,5 +1,7 @@
 """Module for the mining widget."""
 import io
+import json
+import pathlib
 
 import ipywidgets as widgets
 import pandas as pd
@@ -71,7 +73,24 @@ class MiningWidget(widgets.VBox):
         response = requests.post(
             self.mining_server_url + "/help",
         )
-        self.database_name = response.json()["database"] if response.ok else None
+        if not response.ok:
+            raise Exception(
+                f"It seems there is an issue with the bbs mining server. Response "
+                f"status is {response.status_code} : {response.content}"
+            )
+
+        response_json = response.json()
+
+        self.database_name = response_json["database"]  # e.g "cord19_v47"
+        self.mining_server_version = response_json["version"]  # e.g. "0.0.9.dev2+g69"
+
+        self.checkpoint_path = (
+            pathlib.Path.cwd()
+            / "untracked"
+            / ".widgets_checkpoints"
+            / "bbs_mining.json"
+        )
+        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _init_widgets(self, default_text):
         # "Input Text" Widget
@@ -94,6 +113,22 @@ class MiningWidget(widgets.VBox):
         )
         self.widgets["mine_articles"].on_click(self._mine_articles_clicked)
         self.widgets["mine_articles"].add_class("bbs_button")
+
+        # Click to Save results
+        self.widgets["save_button"] = widgets.Button(
+            description="⏬ Save",
+            layout=widgets.Layout(width="172px", height="40px"),
+        )
+        self.widgets["save_button"].on_click(self._cb_bt_save)
+        self.widgets["save_button"].add_class("bbs_button")
+
+        # Click to Load results
+        self.widgets["load_button"] = widgets.Button(
+            description="⏫ Load",
+            layout=widgets.Layout(width="172px", height="40px"),
+        )
+        self.widgets["load_button"].on_click(self._cb_bt_load)
+        self.widgets["load_button"].add_class("bbs_button")
 
         # "Output Area" Widget
         self.widgets["out"] = widgets.Output(layout={"border": "0.5px solid black"})
@@ -123,6 +158,9 @@ class MiningWidget(widgets.VBox):
 
         self.children = [
             self.widgets["mining"],
+            widgets.HBox(
+                children=(self.widgets["save_button"], self.widgets["load_button"])
+            ),
             self.widgets["out"],
         ]
 
@@ -225,6 +263,51 @@ class MiningWidget(widgets.VBox):
                 information=text, schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
+
+    def _cb_bt_save(self, change_dict):
+        with self.widgets["out"]:
+            self.widgets["out"].clear_output()
+            print("Saving search results to disk...   ", end="")
+            data = {
+                "mining_widget_extractions": self.table_extractions.to_dict(),
+                "database_name": self.database_name,
+                "mining_server_version": self.mining_server_version,
+            }
+            with self.checkpoint_path.open("w") as f:
+                json.dump(data, f)
+            print("done!")
+
+    def _cb_bt_load(self, change_dict):
+        with self.widgets["out"]:
+            self.widgets["out"].clear_output()
+            print("Loading search results from disk...   ", end="")
+            with self.checkpoint_path.open("r") as f:
+                data = json.load(f)
+            self.table_extractions = pd.DataFrame(data["mining_widget_extractions"])
+            print("done!")
+
+            vers_load = data["mining_server_version"]
+            vers_curr = self.mining_server_version
+            db_load = data["database_name"]
+            db_curr = self.database_name
+            if db_load != db_curr or vers_load != vers_curr:
+                message = f"""Loaded data from
+                        <ul>
+                            <li> mining server version = {vers_load} </li>
+                            <li> database version = {db_load} </li>
+                        </ul>
+                        but current widget is connected to
+                        <ul>
+                            <li> mining server version = {vers_curr} </li>
+                            <li> database version = {db_curr} </li>
+                        </ul>
+                        """
+                display(
+                    HTML(
+                        f'<div class="bbs_warning"> '
+                        f"<b>WARNING!</b> {message} </div>"
+                    )
+                )
 
     def _cb_chkb_show_mine_text_fct(self, change_dict):
         if change_dict["new"]:
