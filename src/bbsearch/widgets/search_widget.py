@@ -2,8 +2,10 @@
 import datetime
 import enum
 import functools
+import json
 import logging
 import math
+import pathlib
 import sys
 import textwrap
 from urllib.parse import quote
@@ -79,13 +81,24 @@ class SearchWidget(widgets.VBox):
                 f"status is {response.status_code} : {response.content}"
             )
 
-        self.supported_models = response.json()["supported_models"]
-        self.database_name = response.json()["database"]
+        response_json = response.json()
+
+        self.supported_models = response_json["supported_models"]
+        self.database_name = response_json["database"]  # e.g "cord19_v47"
+        self.search_server_version = response_json["version"]  # e.g. "0.0.9.dev2+g69"
 
         self.widgets_style = {"description_width": "initial"}
         self.widgets = dict()
         self._init_widgets()
         self._init_ui()
+
+        self.checkpoint_path = (
+            pathlib.Path.cwd()
+            / "untracked"
+            / ".widgets_checkpoints"
+            / "bbs_search.json"
+        )
+        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _init_widgets(self):
         """Initialize widget dictionary."""
@@ -216,6 +229,20 @@ class SearchWidget(widgets.VBox):
         )
         self.widgets["investigate_button"].add_class("bbs_button")
 
+        # Click to Save results
+        self.widgets["save_button"] = widgets.Button(
+            description="⏬ Save",
+            layout=widgets.Layout(width="172px", height="40px"),
+        )
+        self.widgets["save_button"].add_class("bbs_button")
+
+        # Click to Load results
+        self.widgets["load_button"] = widgets.Button(
+            description="⏫ Load",
+            layout=widgets.Layout(width="172px", height="40px"),
+        )
+        self.widgets["load_button"].add_class("bbs_button")
+
         # Click to run Generate Report!
         self.widgets["report_button"] = widgets.Button(
             description="Generate Report of Search Results",
@@ -301,6 +328,8 @@ class SearchWidget(widgets.VBox):
 
         # Callbacks
         self.widgets["investigate_button"].on_click(self._cb_bt_investigate)
+        self.widgets["save_button"].on_click(self._cb_bt_save)
+        self.widgets["load_button"].on_click(self._cb_bt_load)
         self.widgets["report_button"].on_click(self._cb_bt_pdf_report_search)
         self.widgets["articles_button"].on_click(self._cb_bt_pdf_report_article_saver)
         self.widgets["show_advanced_chb"].observe(self._cb_chkb_advanced, names="value")
@@ -322,6 +351,9 @@ class SearchWidget(widgets.VBox):
             self.widgets["show_advanced_chb"],
             self.widgets["advanced_settings"],
             self.widgets["investigate_button"],
+            widgets.HBox(
+                children=(self.widgets["save_button"], self.widgets["load_button"])
+            ),
             page_selection,
             self.widgets["out"],
             page_selection,
@@ -583,6 +615,53 @@ class SearchWidget(widgets.VBox):
             print(f'{timer["update page"]:7.2f} seconds')
 
             print("Done.")
+
+    def _cb_bt_save(self, change_dict):
+        with self.widgets["status"]:
+            self.widgets["status"].clear_output()
+            print("Saving search results to disk...   ", end="")
+            data = {
+                "article_saver_state": list(self.article_saver.state),
+                "search_widget_history": self.history,
+                "database_name": self.database_name,
+                "search_server_version": self.search_server_version,
+            }
+            with self.checkpoint_path.open("w") as f:
+                json.dump(data, f)
+            print("done!")
+
+    def _cb_bt_load(self, change_dict):
+        with self.widgets["status"]:
+            self.widgets["status"].clear_output()
+            print("Loading search results from disk...   ", end="")
+            with self.checkpoint_path.open("r") as f:
+                data = json.load(f)
+            self.article_saver.state = {tuple(t) for t in data["article_saver_state"]}
+            self.history = data["search_widget_history"]
+            print("done!")
+
+            vers_load = data["search_server_version"]
+            vers_curr = self.search_server_version
+            db_load = data["database_name"]
+            db_curr = self.database_name
+            if db_load != db_curr or vers_load != vers_curr:
+                message = f"""Loaded data from
+                        <ul>
+                            <li> search server version = {vers_load} </li>
+                            <li> database version = {db_load} </li>
+                        </ul>
+                        but current widget is connected to
+                        <ul>
+                            <li> search server version = {vers_curr} </li>
+                            <li> database version = {db_curr} </li>
+                        </ul>
+                        """
+                display(
+                    HTML(
+                        f'<div class="bbs_warning"> '
+                        f"<b>WARNING!</b> {message} </div>"
+                    )
+                )
 
     def _process_search_results(self):
         """Flag items corresponding to sentence IDs for saving.

@@ -174,7 +174,7 @@ class MiningWidget(widgets.VBox):
             for warning_msg in response_dict["warnings"]:
                 display(
                     HTML(
-                        f'<div style="color:#BA4A00"> '
+                        f'<div class="bbs_warning"> '
                         f"<b>WARNING!</b> {warning_msg} </div>"
                     )
                 )
