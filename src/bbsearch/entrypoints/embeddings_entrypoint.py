@@ -103,13 +103,14 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
-    # Imports (they are here to make --help quick)
-    from ..embedding_models import MPEmbedder
-
     # Configure logging
     log_file = pathlib.Path(args.log_dir) / args.log_name
     configure_logging(log_file, logging.INFO)
     logger = logging.getLogger(__name__)
+
+    # Imports (they are here to make --help quick)
+    logger.info("Loading libraries")
+    from ..embedding_models import MPEmbedder
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")

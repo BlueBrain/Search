@@ -30,6 +30,14 @@
     background-color: #3176d2;
 }
 
+.jupyter-button:active, .jupyter-button.mod-active {
+    color: #FFF;
+    background-color: #3c96f3;
+}
+.jupyter-button:hover {
+    color: #FFF;
+    background-color: #3176d2;
+}
 
 /* attribute extraction */
 

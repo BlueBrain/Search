@@ -107,6 +107,7 @@ class SearchEngine:
             sentences. Note that this will include the deprioritization part.
         stats : dict
             Various statistics. There are following keys:
+
             - 'query_embed_time' - how much time it took to embed the
               `query_text` in seconds
             - 'deprioritize_embed_time' - how much time it took to embed the

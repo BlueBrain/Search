@@ -13,7 +13,23 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
-Verions 0.0.7
+
+Version 0.0.8
+=============
+**November 24, 2020**
+
+Changes
+-------
+- |Add| column `is_bad` in table `sentences` for quality filtering (too long, too short, LaTeX code).
+- |Add| embedding model `BioBERT NLI+STS CORD-19 v1`.
+- |Change| `embedding_models.get_embedding_model()` to support any model class and checkpoint path without having to
+  modify the source code of BBS.
+- |Fix| bug in hyperlinks of SearchWidget. We now take the first URL if there are several, and add Google search if
+  there is none.
+- |Change| widgets UIs with tabs to improve usability.
+
+
+Version 0.0.7
 =============
 **November 16, 2020**
 
@@ -24,7 +40,7 @@ Changes
 - |Fix| undesired timeout of MySQL connection in the Search Server.
 
 
-Verions 0.0.6
+Version 0.0.6
 =============
 **November 3, 2020**
 
@@ -36,9 +52,9 @@ Changes
 - |Change| code formatting - run `black` on everything.
 
 
-Verions 0.0.5
+Version 0.0.5
 =============
-**Ocober 26, 2020**
+**October 26, 2020**
 
 Changes
 -------
@@ -46,9 +62,9 @@ Changes
   including entity rulers.
 
 
-Verions 0.0.4
+Version 0.0.4
 =============
-**Ocober 20, 2020**
+**October 20, 2020**
 
 Changes
 -------

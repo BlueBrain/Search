@@ -9,6 +9,22 @@ from IPython.display import HTML, display
 from .._css import style
 from ..utils import Timer
 
+DEFAULT_MINING_TEXT = """Autophagy maintains tumour growth through circulating
+ arginine. Autophagy captures intracellular components and delivers them to
+ lysosomes, where they are degraded and recycled to sustain metabolism and to
+ enable survival during starvation. Acute, whole-body deletion of the essential
+ autophagy gene Atg7 in adult mice causes a systemic metabolic defect that
+ manifests as starvation intolerance and gradual loss of white adipose tissue,
+ liver glycogen and muscle mass. Cancer cells also benefit from autophagy.
+ Deletion of essential autophagy genes impairs the metabolism, proliferation,
+ survival and malignancy of spontaneous tumours in models of autochthonous
+ cancer. Acute, systemic deletion of Atg7 or acute, systemic expression of a
+ dominant-negative ATG4b in mice induces greater regression of KRAS-driven
+ cancers than does tumour-specific autophagy deletion, which suggests that host
+ autophagy promotes tumour growth.""".replace(
+    "\n", ""
+)
+
 
 class MiningWidget(widgets.VBox):
     """The mining widget.
@@ -33,7 +49,7 @@ class MiningWidget(widgets.VBox):
         mining_server_url,
         mining_schema,
         article_saver=None,
-        default_text="",
+        default_text=DEFAULT_MINING_TEXT,
         use_cache=True,
     ):
         super().__init__()
@@ -82,15 +98,31 @@ class MiningWidget(widgets.VBox):
         # "Output Area" Widget
         self.widgets["out"] = widgets.Output(layout={"border": "0.5px solid black"})
 
+        tabs = (
+            (
+                "Mine Articles",
+                [
+                    self.widgets["mine_articles"],
+                ],
+            ),
+            (
+                "Mine Text",
+                [self.widgets["input_text"], self.widgets["mine_text"]],
+            ),
+        )
+
+        tab_widget = widgets.Tab(children=[])
+        for i, (tab_name, tab_children) in enumerate(tabs):
+            tab_widget.children = tab_widget.children + (widgets.VBox(tab_children),)
+            tab_widget.set_title(i, tab_name)
+        self.widgets["mining"] = tab_widget
+
     def _init_ui(self):
         css_style = style.get_css_style()
         display(HTML(f"<style> {css_style} </style>"))
 
         self.children = [
-            self.widgets["input_text"],
-            widgets.HBox(
-                children=[self.widgets["mine_text"], self.widgets["mine_articles"]]
-            ),
+            self.widgets["mining"],
             self.widgets["out"],
         ]
 
@@ -193,6 +225,12 @@ class MiningWidget(widgets.VBox):
                 information=text, schema_df=self.mining_schema.df
             )
             display(self.table_extractions)
+
+    def _cb_chkb_show_mine_text_fct(self, change_dict):
+        if change_dict["new"]:
+            self.widgets["mine_text_fct"].layout.display = "block"
+        else:
+            self.widgets["mine_text_fct"].layout.display = "none"
 
     def get_extracted_table(self):
         """Retrieve the table with the mining results.
