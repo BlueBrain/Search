@@ -560,6 +560,8 @@ def test_ner_errors(ner_annotations, dataset, mode, errors_expected):
     )
     errors_expected = OrderedDict(errors_expected)
     assert errors_out == errors_expected
+    with pytest.raises(ValueError):
+        ner_errors(iob_true, iob_pred[:-1], tokens)
 
 
 def test_remove_punctuation(punctuation_annotations):

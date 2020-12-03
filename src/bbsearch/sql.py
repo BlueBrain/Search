@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import sqlalchemy.sql as sql
 
 
 def get_titles(article_ids, engine):
@@ -23,13 +24,16 @@ def get_titles(article_ids, engine):
     if len(article_ids) == 0:
         return {}
 
-    query = f"""\
-    SELECT article_id, title
-    FROM articles
-    WHERE article_id IN ({",".join(map(str, article_ids))})
-    """
+    query = sql.text(
+        """SELECT article_id, title
+        FROM articles
+        WHERE article_id IN :article_ids
+        """
+    )
+    query = query.bindparams(sql.bindparam("article_ids", expanding=True))
+
     with engine.begin() as connection:
-        response = connection.execute(query).fetchall()
+        response = connection.execute(query, {"article_ids": article_ids}).fetchall()
         titles = {article_id: title for article_id, title in response}
 
     return titles
@@ -72,16 +76,21 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
         Pandas DataFrame containing all sentences and their corresponding metadata:
         article_id, sentence_id, section_name, text, paragraph_pos_in_article.
     """
-    sentence_ids_s = ", ".join(str(id_) for id_ in sentence_ids)
-    sentence_ids_s = sentence_ids_s or "NULL"
-    sql_query = f"""
-    SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
-    FROM sentences
-    WHERE sentence_id IN ({sentence_ids_s})
-    """
+    sql_query = sql.text(
+        """
+        SELECT article_id, sentence_id, section_name, text, paragraph_pos_in_article
+        FROM sentences
+        WHERE sentence_id IN :sentence_ids
+        """
+    )
+    sql_query = sql_query.bindparams(sql.bindparam("sentence_ids", expanding=True))
 
     with engine.begin() as connection:
-        df_sentences = pd.read_sql(sql_query, connection)
+        df_sentences = pd.read_sql(
+            sql_query,
+            params={"sentence_ids": [int(id_) for id_ in sentence_ids]},
+            con=connection,
+        )
 
     if keep_order:
         # Remove sentence IDs that were not found, otherwise df.loc will fail.
@@ -112,19 +121,23 @@ def retrieve_paragraph_from_sentence_id(sentence_id, engine):
         sentence_id. If None then the `sentence_id` was not found in the
         sentences table.
     """
-    sql_query = f"""SELECT text
+    sql_query = sql.text(
+        """SELECT text
                     FROM sentences
                     WHERE article_id =
                         (SELECT article_id
                         FROM sentences
-                        WHERE sentence_id = {sentence_id})
+                        WHERE sentence_id = :sentence_id )
                     AND paragraph_pos_in_article =
                         (SELECT paragraph_pos_in_article
                         FROM sentences
-                        WHERE sentence_id = {sentence_id})
+                        WHERE sentence_id = :sentence_id )
                     ORDER BY sentence_pos_in_paragraph ASC"""
+    )
 
-    all_sentences = pd.read_sql(sql_query, engine)["text"].to_list()
+    all_sentences = pd.read_sql(
+        sql_query, engine, params={"sentence_id": int(sentence_id)}
+    )["text"].to_list()
     if not all_sentences:
         paragraph = None
     else:
@@ -151,13 +164,22 @@ def retrieve_paragraph(article_id, paragraph_pos_in_article, engine):
         pd.DataFrame with the paragraph and its metadata:
         article_id, text, section_name, paragraph_pos_in_article.
     """
-    sql_query = f"""SELECT section_name, text
+    sql_query = sql.text(
+        """SELECT section_name, text
                     FROM sentences
-                    WHERE article_id = {article_id}
-                    AND paragraph_pos_in_article = {paragraph_pos_in_article}
+                    WHERE article_id = :article_id
+                    AND paragraph_pos_in_article = :paragraph_pos_in_article
                     ORDER BY sentence_pos_in_paragraph ASC"""
+    )
 
-    sentences = pd.read_sql(sql_query, engine)
+    sentences = pd.read_sql(
+        sql_query,
+        engine,
+        params={
+            "article_id": int(article_id),
+            "paragraph_pos_in_article": int(paragraph_pos_in_article),
+        },
+    )
     if sentences.empty:
         paragraph = pd.DataFrame(
             columns=["article_id", "text", "section_name", "paragraph_pos_in_article"]
@@ -199,10 +221,12 @@ def retrieve_article_metadata_from_article_id(article_id, engine):
         'authors', 'journal', 'mag_id', 'who_covidence_id', 'arxiv_id',
         'pdf_json_files', 'pmc_json_files', 'url', 's2_id'.
     """
-    sql_query = f"""SELECT *
+    sql_query = sql.text(
+        """SELECT *
                     FROM articles
-                    WHERE article_id = {article_id}"""
-    article = pd.read_sql(sql_query, engine)
+                    WHERE article_id = :article_id"""
+    )
+    article = pd.read_sql(sql_query, engine, params={"article_id": int(article_id)})
     return article
 
 
@@ -222,14 +246,17 @@ def retrieve_articles(article_ids, engine):
         DataFrame containing the articles divided into paragraphs. The columns are
         'article_id', 'paragraph_pos_in_article', 'text', 'section_name'.
     """
-    articles_str = ", ".join(str(id_) for id_ in article_ids)
-    sql_query = f"""SELECT *
+    article_ids = [int(id_) for id_ in article_ids]
+    sql_query = sql.text(
+        """SELECT *
                     FROM sentences
-                    WHERE article_id IN ({articles_str})
+                    WHERE article_id IN :articles_ids
                     ORDER BY article_id ASC,
                     paragraph_pos_in_article ASC,
                     sentence_pos_in_paragraph ASC"""
-    all_sentences = pd.read_sql(sql_query, engine)
+    )
+    sql_query = sql_query.bindparams(sql.bindparam("articles_ids", expanding=True))
+    all_sentences = pd.read_sql(sql_query, engine, params={"articles_ids": article_ids})
 
     groupby_var = all_sentences.groupby(by=["article_id", "paragraph_pos_in_article"])
     paragraphs = groupby_var["text"].apply(lambda x: " ".join(x))
@@ -260,21 +287,27 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     result : pd.DataFrame
         Selected rows of the `mining_cache` table.
     """
-    model_names = tuple(set(model_names))
-    if len(model_names) == 1:
-        model_names = f"('{model_names[0]}')"
+    model_names = list(set(model_names))
+    identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 
-    identifiers_arts = tuple(a for a, p in identifiers if p == -1)
-    if len(identifiers_arts) == 1:
-        identifiers_arts = f"({identifiers_arts[0]})"
     if identifiers_arts:
-        query_arts = f"""
+        query_arts = sql.text(
+            """
         SELECT *
         FROM mining_cache
-        WHERE article_id IN {identifiers_arts} AND mining_model IN {model_names}
+        WHERE article_id IN :identifiers_arts AND mining_model IN :model_names
         ORDER BY article_id, paragraph_pos_in_article, start_char
         """
-        df_arts = pd.read_sql(query_arts, con=engine)
+        )
+        query_arts = query_arts.bindparams(
+            sql.bindparam("identifiers_arts", expanding=True),
+            sql.bindparam("model_names", expanding=True),
+        )
+        df_arts = pd.read_sql(
+            query_arts,
+            con=engine,
+            params={"identifiers_arts": identifiers_arts, "model_names": model_names},
+        )
     else:
         df_arts = pd.DataFrame()
 
@@ -287,6 +320,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         # 3. If `len(identifiers_pars)` is too large, we may have a too long
         #    SQL statement which overflows the max length. So we break it down.
 
+        if len(model_names) == 1:
+            model_names = f"('{model_names[0]}')"
         batch_size = 1000
         dfs_pars = []
         d, r = divmod(len(identifiers_pars), batch_size)
@@ -296,14 +331,14 @@ def retrieve_mining_cache(identifiers, model_names, engine):
                 SELECT *
                 FROM mining_cache
                 WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
-                """
+                """  # nosec
                 for a, p in identifiers_pars[i * batch_size : (i + 1) * batch_size]
             )
             query_pars = f"""
             SELECT *
             FROM ({query_pars}) tt
             WHERE tt.mining_model IN {model_names}
-            """
+            """  # nosec
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
         df_pars = df_pars.sort_values(
@@ -553,7 +588,7 @@ class SentenceFilter:
                 FROM articles
                 WHERE {" AND ".join(article_conditions)}
             )
-            """.strip()
+            """.strip()  # nosec
             sentence_conditions.append(article_condition_query)
 
         # Restricted sentence IDs

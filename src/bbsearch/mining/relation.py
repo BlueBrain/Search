@@ -137,11 +137,11 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
     tokens = []
     i = sent.start
     while i < sent.end:
-        new_token = " "  # hack to keep the punctuation nice
+        new_tkn = " "  # hack to keep the punctuation nice
 
         if ent_1.start == i:
             start, end = ent_1.start, ent_1.end
-            new_token += (
+            new_tkn += (
                 etype_symbols[etype_1][0]
                 + doc[start:end].text
                 + etype_symbols[etype_1][1]
@@ -149,7 +149,7 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
 
         elif ent_2.start == i:
             start, end = ent_2.start, ent_2.end
-            new_token += (
+            new_tkn += (
                 etype_symbols[etype_2][0]
                 + doc[start:end].text
                 + etype_symbols[etype_2][1]
@@ -157,9 +157,9 @@ def annotate(doc, sent, ent_1, ent_2, etype_symbols):
 
         else:
             start, end = i, i + 1
-            new_token = doc[i].text if doc[i].is_punct else new_token + doc[i].text
+            new_tkn = doc[i].text if doc[i].is_punct else new_tkn + doc[i].text
 
-        tokens.append(new_token)
+        tokens.append(new_tkn)
         i += end - start
 
     return "".join(tokens).strip()
