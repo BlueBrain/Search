@@ -267,6 +267,14 @@ class MiningWidget(widgets.VBox):
     def _cb_bt_save(self, change_dict):
         with self.widgets["out"]:
             self.widgets["out"].clear_output()
+            if not self.table_extractions:
+                message = """No mining results available. Did you forget 
+                             to run the mining pipeline on your selected 
+                             articles or text?"""
+                display(
+                    HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
+                )
+                return
             print("Saving search results to disk...   ", end="")
             data = {
                 "mining_widget_extractions": self.table_extractions.to_dict(),
@@ -280,6 +288,13 @@ class MiningWidget(widgets.VBox):
     def _cb_bt_load(self, change_dict):
         with self.widgets["out"]:
             self.widgets["out"].clear_output()
+            if not self.checkpoint_path.exists():
+                message = """No checkpoint file found to load. Did you forget to 
+                            save your mining results?"""
+                display(
+                    HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
+                )
+                return
             print("Loading search results from disk...   ", end="")
             with self.checkpoint_path.open("r") as f:
                 data = json.load(f)
