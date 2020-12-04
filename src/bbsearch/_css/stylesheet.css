@@ -17,6 +17,11 @@
     color: #006621;
 }
 
+/* success */
+.bbs_success {
+    color : #388E3B
+}
+
 /* warnings */
 .bbs_warning {
     color: #DDB62C

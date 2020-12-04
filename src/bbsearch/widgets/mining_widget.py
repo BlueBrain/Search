@@ -266,8 +266,7 @@ class MiningWidget(widgets.VBox):
 
     def _cb_bt_save(self, change_dict):
         with self.widgets["out"]:
-            self.widgets["out"].clear_output()
-            if not self.table_extractions:
+            if self.table_extractions is None:
                 message = """No mining results available. Did you forget
                              to run the mining pipeline on your selected
                              articles or text?"""
@@ -275,7 +274,7 @@ class MiningWidget(widgets.VBox):
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
                 )
                 return
-            print("Saving search results to disk...   ", end="")
+            display(HTML("Saving mining results to disk...   "))
             data = {
                 "mining_widget_extractions": self.table_extractions.to_dict(),
                 "database_name": self.database_name,
@@ -283,7 +282,7 @@ class MiningWidget(widgets.VBox):
             }
             with self.checkpoint_path.open("w") as f:
                 json.dump(data, f)
-            print("done!")
+            display(HTML('<b class="bbs_success"> DONE!</b></br>'))
 
     def _cb_bt_load(self, change_dict):
         with self.widgets["out"]:
@@ -295,11 +294,11 @@ class MiningWidget(widgets.VBox):
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
                 )
                 return
-            print("Loading search results from disk...   ", end="")
+            display(HTML("Loading mining results to disk...   "))
             with self.checkpoint_path.open("r") as f:
                 data = json.load(f)
             self.table_extractions = pd.DataFrame(data["mining_widget_extractions"])
-            print("done!")
+            display(HTML('<b class="bbs_success"> DONE!</b></br>'))
 
             vers_load = data["mining_server_version"]
             vers_curr = self.mining_server_version
@@ -323,6 +322,9 @@ class MiningWidget(widgets.VBox):
                         f"<b>WARNING!</b> {message} </div>"
                     )
                 )
+
+            display(self.table_extractions)
+
 
     def _cb_chkb_show_mine_text_fct(self, change_dict):
         if change_dict["new"]:

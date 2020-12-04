@@ -619,14 +619,14 @@ class SearchWidget(widgets.VBox):
     def _cb_bt_save(self, change_dict):
         with self.widgets["status"]:
             self.widgets["status"].clear_output()
-            if not self.article_saver.state:
+            if not self.article_saver.state or not self.history:
                 message = """No articles or paragraphs selected. Did you forget
                              to run your query or select some search results?"""
                 display(
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
                 )
                 return
-            print("Saving search results to disk...   ", end="")
+            display(HTML("Saving search results to disk...   "))
             data = {
                 "article_saver_state": list(self.article_saver.state),
                 "search_widget_history": self.history,
@@ -635,7 +635,13 @@ class SearchWidget(widgets.VBox):
             }
             with self.checkpoint_path.open("w") as f:
                 json.dump(data, f)
-            print("done!")
+            self.widgets["status"].clear_output()
+            display(
+                HTML(
+                    "Saving search results to disk... "
+                    '<b class="bbs_success"> DONE!</b></br>'
+                )
+            )
 
     def _cb_bt_load(self, change_dict):
         with self.widgets["status"]:
@@ -647,12 +653,18 @@ class SearchWidget(widgets.VBox):
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
                 )
                 return
-            print("Loading search results from disk...   ", end="")
+            display(HTML("Loading search results from disk...   "))
             with self.checkpoint_path.open("r") as f:
                 data = json.load(f)
             self.article_saver.state = {tuple(t) for t in data["article_saver_state"]}
             self.history = data["search_widget_history"]
-            print("done!")
+            self.widgets["status"].clear_output()
+            display(
+                HTML(
+                    "Loading search results from disk...   "
+                    '<b class="bbs_success"> DONE!</b></br>'
+                )
+            )
 
             vers_load = data["search_server_version"]
             vers_curr = self.search_server_version
