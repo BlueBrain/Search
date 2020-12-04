@@ -325,7 +325,6 @@ class MiningWidget(widgets.VBox):
 
             display(self.table_extractions)
 
-
     def _cb_chkb_show_mine_text_fct(self, change_dict):
         if change_dict["new"]:
             self.widgets["mine_text_fct"].layout.display = "block"
