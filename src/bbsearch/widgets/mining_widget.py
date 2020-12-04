@@ -268,8 +268,8 @@ class MiningWidget(widgets.VBox):
         with self.widgets["out"]:
             self.widgets["out"].clear_output()
             if not self.table_extractions:
-                message = """No mining results available. Did you forget 
-                             to run the mining pipeline on your selected 
+                message = """No mining results available. Did you forget
+                             to run the mining pipeline on your selected
                              articles or text?"""
                 display(
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
@@ -289,7 +289,7 @@ class MiningWidget(widgets.VBox):
         with self.widgets["out"]:
             self.widgets["out"].clear_output()
             if not self.checkpoint_path.exists():
-                message = """No checkpoint file found to load. Did you forget to 
+                message = """No checkpoint file found to load. Did you forget to
                             save your mining results?"""
                 display(
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")

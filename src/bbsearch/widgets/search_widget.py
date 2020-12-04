@@ -620,7 +620,7 @@ class SearchWidget(widgets.VBox):
         with self.widgets["status"]:
             self.widgets["status"].clear_output()
             if not self.article_saver.state:
-                message = """No articles or paragraphs selected. Did you forget 
+                message = """No articles or paragraphs selected. Did you forget
                              to run your query or select some search results?"""
                 display(
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
@@ -641,7 +641,7 @@ class SearchWidget(widgets.VBox):
         with self.widgets["status"]:
             self.widgets["status"].clear_output()
             if not self.checkpoint_path.exists():
-                message = """No checkpoint file found to load. Did you forget to 
+                message = """No checkpoint file found to load. Did you forget to
                             save your search results?"""
                 display(
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
