@@ -240,14 +240,16 @@ class SearchWidget(widgets.VBox):
 
         # Click to Save results
         self.widgets["save_button"] = widgets.Button(
-            description="⏬ Save",
+            description="Save",
+            icon="download",
             layout=widgets.Layout(width="172px", height="40px"),
         )
         self.widgets["save_button"].add_class("bbs_button")
 
         # Click to Load results
         self.widgets["load_button"] = widgets.Button(
-            description="⏫ Load",
+            description="Load",
+            icon="upload",
             layout=widgets.Layout(width="172px", height="40px"),
         )
         self.widgets["load_button"].add_class("bbs_button")
@@ -631,9 +633,7 @@ class SearchWidget(widgets.VBox):
             if not self.article_saver.state or not self.history:
                 message = """No articles or paragraphs selected. Did you forget
                              to run your query or select some search results?"""
-                display(
-                    HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
-                )
+                display(HTML(f'<div class="bbs_error"> <b>ERROR!</b> {message} </div>'))
                 return
             display(HTML("Saving search results to disk...   "))
             data = {

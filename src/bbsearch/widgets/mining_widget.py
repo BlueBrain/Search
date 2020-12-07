@@ -121,7 +121,8 @@ class MiningWidget(widgets.VBox):
 
         # Click to Save results
         self.widgets["save_button"] = widgets.Button(
-            description="⏬ Save",
+            description="Save",
+            icon="download",
             layout=widgets.Layout(width="172px", height="40px"),
         )
         self.widgets["save_button"].on_click(self._cb_bt_save)
@@ -129,7 +130,8 @@ class MiningWidget(widgets.VBox):
 
         # Click to Load results
         self.widgets["load_button"] = widgets.Button(
-            description="⏫ Load",
+            description="Load",
+            icon="upload",
             layout=widgets.Layout(width="172px", height="40px"),
         )
         self.widgets["load_button"].on_click(self._cb_bt_load)
@@ -275,9 +277,7 @@ class MiningWidget(widgets.VBox):
                 message = """No mining results available. Did you forget
                              to run the mining pipeline on your selected
                              articles or text?"""
-                display(
-                    HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
-                )
+                display(HTML(f'<div class="bbs_error"> <b>ERROR!</b> {message} </div>'))
                 return
             display(HTML("Saving mining results to disk...   "))
             data = {
