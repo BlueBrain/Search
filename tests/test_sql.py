@@ -74,7 +74,7 @@ class TestSQLQueries:
             ]
         )
 
-    @pytest.mark.parametrize("sentence_id", [1, 2, 3, 0, -100])
+    @pytest.mark.parametrize("sentence_id", [1, 2, 3, 0, -100, -1, np.int64(2)])
     def test_retrieve_paragraph_from_sentence_id(
         self, sentence_id, fake_sqlalchemy_engine
     ):
@@ -85,7 +85,7 @@ class TestSQLQueries:
         sentence_text = retrieve_sentences_from_sentence_ids(
             sentence_ids=(sentence_id,), engine=fake_sqlalchemy_engine
         )
-        if sentence_id == 0 or sentence_id == -100:  # invalid sentence_id
+        if sentence_id in [0, -100, -1]:  # invalid sentence_id
             assert paragraph is None
         else:
             assert isinstance(paragraph, str)
