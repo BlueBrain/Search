@@ -299,7 +299,7 @@ class MiningWidget(widgets.VBox):
                     HTML(f'<div class="bbs_error"> ' f"<b>ERROR!</b> {message} </div>")
                 )
                 return
-            display(HTML("Loading mining results to disk...   "))
+            display(HTML("Loading mining results from disk...   "))
             with self.checkpoint_path.open("r") as f:
                 data = json.load(f)
             self.table_extractions = pd.DataFrame(data["mining_widget_extractions"])

@@ -2,6 +2,7 @@ import json
 from copy import copy
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import responses
 from IPython.display import HTML
@@ -216,3 +217,84 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine, mining_sch
     assert display_objs[0].equals(mining_schema_df)
     assert isinstance(display_objs[1], HTML)
     assert display_objs[2].equals(table_extractions)
+
+
+@responses.activate
+def test_save_load_checkpoint(monkeypatch, capsys, mining_schema_df, tmpdir):
+    mining_schema_df = mining_schema_df.drop_duplicates(ignore_index=True)
+    responses.add_callback(
+        responses.POST,
+        "http://test/text",
+        callback=request_callback,
+        content_type="application/json",
+    )
+
+    responses.add_callback(
+        responses.POST,
+        "http://test/help",
+        callback=request_callback_help,
+        content_type="application/json",
+    )
+
+    mining_schema = MiningSchema()
+    mining_schema.add_from_df(mining_schema_df)
+    mining_widget = MiningWidget(
+        mining_server_url="http://test",
+        mining_schema=mining_schema,
+        checkpoint_path=tmpdir,
+    )
+
+    bot = MiningWidgetBot(mining_widget, capsys, monkeypatch)
+    bot.set_value("input_text", "HELLO")
+
+    # Try saving data, but no results to save
+    bot.click("save_button")
+    last_displayed = bot.display_cached[-1].data
+    assert "ERROR!" in last_displayed
+    assert "No mining results available." in last_displayed
+
+    # Click on "investigate"
+    bot.click("mine_text")
+
+    # Try loading data, but no checkpoint was saved there
+    bot.click("load_button")
+    last_displayed = bot.display_cached[-1].data
+    assert "ERROR!" in last_displayed
+    assert "No checkpoint file found to load." in last_displayed
+
+    # Now there are some results, so we can save a checkpoint
+    bot.click("save_button")
+    displayed = bot.display_cached
+    with bot.mining_widget.checkpoint_path.open("r") as f:
+        data = json.load(f)
+    assert np.array_equal(
+        pd.DataFrame(data["mining_widget_extractions"]).values,
+        bot.mining_widget.table_extractions.values,
+    )
+    assert data["database_name"] == bot.mining_widget.database_name
+    assert data["mining_server_version"] == bot.mining_widget.mining_server_version
+    assert "DONE" in displayed[-1].data
+    assert "Saving mining results to disk..." in displayed[-2].data
+
+    # Now there is a checkpoint, so we can load it
+    # Note: if the database name or the server name is different, data is loaded
+    # but we raise a warning.
+    for db_name in ("test_database", "test_database_2"):
+        bot.mining_widget.database_name = db_name
+        del bot.mining_widget.table_extractions
+        bot.click("load_button")
+        assert np.array_equal(
+            pd.DataFrame(data["mining_widget_extractions"]).values,
+            bot.mining_widget.table_extractions.values,
+        )
+
+        displayed = bot.display_cached
+        if db_name != "test_database":
+            assert isinstance(displayed[-1], pd.DataFrame)
+            assert "WARNING" in displayed[-2].data
+            assert "DONE" in displayed[-3].data
+            assert "Loading mining results from disk..." in displayed[-4].data
+        else:
+            assert isinstance(displayed[-1], pd.DataFrame)
+            assert "DONE" in displayed[-2].data
+            assert "Loading mining results from disk..." in displayed[-3].data
