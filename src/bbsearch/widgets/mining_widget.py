@@ -44,6 +44,9 @@ class MiningWidget(widgets.VBox):
     use_cache : bool
         If True the mining server will use cached mining results stored in an
         SQL database. Should lead to major speedups.
+    checkpoint_path : str or pathlib.Path, optional
+        Path where checkpoints are saved to and loaded from. If `None`, defaults
+        to `$PWD/untracked/.widgets_checkpoints`.
     """
 
     def __init__(
@@ -53,6 +56,7 @@ class MiningWidget(widgets.VBox):
         article_saver=None,
         default_text=DEFAULT_MINING_TEXT,
         use_cache=True,
+        checkpoint_path=None
     ):
         super().__init__()
 
@@ -84,12 +88,15 @@ class MiningWidget(widgets.VBox):
         self.database_name = response_json["database"]  # e.g "cord19_v47"
         self.mining_server_version = response_json["version"]  # e.g. "0.0.9.dev2+g69"
 
-        self.checkpoint_path = (
-            pathlib.Path.cwd()
-            / "untracked"
-            / ".widgets_checkpoints"
-            / "bbs_mining.json"
-        )
+        if checkpoint_path is not None:
+            self.checkpoint_path = pathlib.Path(checkpoint_path)
+        else:
+            self.checkpoint_path = (
+                pathlib.Path.cwd()
+                / "untracked"
+                / ".widgets_checkpoints"
+                / "bbs_mining.json"
+            )
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _init_widgets(self, default_text):
