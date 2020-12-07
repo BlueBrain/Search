@@ -56,7 +56,7 @@ class MiningWidget(widgets.VBox):
         article_saver=None,
         default_text=DEFAULT_MINING_TEXT,
         use_cache=True,
-        checkpoint_path=None
+        checkpoint_path=None,
     ):
         super().__init__()
 
@@ -92,9 +92,7 @@ class MiningWidget(widgets.VBox):
             self.checkpoint_path = pathlib.Path(checkpoint_path)
         else:
             self.checkpoint_path = (
-                pathlib.Path.cwd()
-                / "untracked"
-                / ".widgets_checkpoints"
+                pathlib.Path.cwd() / "untracked" / ".widgets_checkpoints"
             )
         self.checkpoint_path = self.checkpoint_path / "bbs_mining.json"
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
