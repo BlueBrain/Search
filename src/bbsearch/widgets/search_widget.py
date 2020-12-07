@@ -107,8 +107,8 @@ class SearchWidget(widgets.VBox):
                 pathlib.Path.cwd()
                 / "untracked"
                 / ".widgets_checkpoints"
-                / "bbs_search.json"
             )
+        self.checkpoint_path = self.checkpoint_path / "bbs_search.json"
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _init_widgets(self):
