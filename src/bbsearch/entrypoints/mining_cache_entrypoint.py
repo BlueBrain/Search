@@ -6,6 +6,8 @@ import pathlib
 
 from ._helper import configure_logging
 
+ROOT_PATH = pathlib.Path(__file__).resolve().parent.parent.parent  # repository root
+
 
 def run_create_mining_cache(argv=None):  # pragma: no cover
     """Mine all texts in database and save results in a cache.
@@ -37,12 +39,6 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         default="mining_cache_temporary",
         type=str,
         help="The name of the target mining cache table",
-    )
-    parser.add_argument(
-        "--ee_models_library_file",
-        default="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv",
-        type=str,
-        help="The csv file with info on which model to use to mine which entity type.",
     )
     parser.add_argument(
         "--n_processes_per_model",
@@ -98,7 +94,6 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     logger.info(f"db_type                : {args.db_type}")
     logger.info(f"database_uri           : {args.database_uri}")
     logger.info(f"target_table_name      : {args.target_table_name}")
-    logger.info(f"ee_models_library_file : {args.ee_models_library_file}")
     logger.info(f"n_processes_per_model  : {args.n_processes_per_model}")
     logger.info(f"restrict_to_models     : {args.restrict_to_models}")
     logger.info(f"log_file               : {args.log_file}")
@@ -119,7 +114,14 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
     # Load the models library
     logger.info("Loading the models library")
-    ee_models_library = pd.read_csv(args.ee_models_library_file)
+    ee_models_library_path = (
+        ROOT_PATH / "data_and_models" / "pipelines" / "ner" / "ee_models_library.csv"
+    )
+    models_path = ROOT_PATH / "data_and_models" / "models" / "ner_er"
+    ee_models_library = pd.read_csv(ee_models_library_path)
+    ee_models_library["model"] = ee_models_library["model"].apply(
+        lambda x: models_path / x
+    )
 
     # Restrict to given models
     if args.restrict_to_models is not None:
