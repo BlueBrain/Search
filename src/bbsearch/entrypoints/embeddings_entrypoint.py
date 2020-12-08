@@ -2,6 +2,7 @@
 import argparse
 import logging
 import pathlib
+import sys
 
 import numpy as np
 import sqlalchemy
@@ -163,5 +164,5 @@ def main(argv=None):
     mpe.do_embedding()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(main())

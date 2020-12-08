@@ -1,6 +1,7 @@
 """The entrypoint script for the mining server."""
 import logging
 import pathlib
+import sys
 
 from ._helper import configure_logging, get_var, run_server
 
@@ -53,5 +54,5 @@ def run_mining_server():
     run_server(get_mining_app, "mining")
 
 
-if __name__ == "__main__":
-    exit(run_mining_server())
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(run_mining_server())

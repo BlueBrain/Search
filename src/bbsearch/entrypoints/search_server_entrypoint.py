@@ -1,6 +1,7 @@
 """The entrypoint script for the search server."""
 import logging
 import pathlib
+import sys
 
 from ._helper import configure_logging, get_var, run_server
 
@@ -50,4 +51,4 @@ def run_search_server():
 
 
 if __name__ == "__main__":
-    exit(run_search_server())
+    sys.exit(run_search_server())

@@ -1,6 +1,7 @@
 """Entrypoint for launching an embedding server."""
 import logging
 import pathlib
+import sys
 
 from ._helper import configure_logging, get_var, run_server
 
@@ -44,5 +45,5 @@ def run_embedding_server():
     run_server(get_embedding_app, "embedding")
 
 
-if __name__ == "__main__":
-    exit(run_embedding_server)
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(run_embedding_server)

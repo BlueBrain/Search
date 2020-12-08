@@ -2,39 +2,40 @@
 import argparse
 import logging
 import pathlib
+import sys
 
 from ._helper import configure_logging
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--log_dir",
-    default="/raid/projects/bbs/logs/",
-    type=str,
-    help="The directory path where to save the logs.",
-)
-parser.add_argument(
-    "--log_name",
-    default="database_creation.log",
-    type=str,
-    help="The name of the log file.",
-)
-parser.add_argument(
-    "--data_path",
-    default="/raid/sync/proj115/bbs_data/cord19_v47",
-    type=str,
-    help="The directory path where the metadata.csv and json files are located, "
-    "files needed to create the database",
-)
-parser.add_argument(
-    "--db_type",
-    default="sqlite",
-    type=str,
-    help="Type of database. Possible values: (sqlite, mysql)",
-)
-args = parser.parse_args()
 
+def main(argv=None):
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--log_dir",
+        default="/raid/projects/bbs/logs/",
+        type=str,
+        help="The directory path where to save the logs.",
+    )
+    parser.add_argument(
+        "--log_name",
+        default="database_creation.log",
+        type=str,
+        help="The name of the log file.",
+    )
+    parser.add_argument(
+        "--data_path",
+        default="/raid/sync/proj115/bbs_data/cord19_v47",
+        type=str,
+        help="The directory path where the metadata.csv and json files are located, "
+             "files needed to create the database",
+    )
+    parser.add_argument(
+        "--db_type",
+        default="sqlite",
+        type=str,
+        help="Type of database. Possible values: (sqlite, mysql)",
+    )
+    args = parser.parse_args(argv)
 
-def main():
     """Run database construction."""
     # Configure logging
     log_file = pathlib.Path(args.log_dir) / args.log_name
@@ -66,5 +67,5 @@ def main():
     db.construct()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(main())

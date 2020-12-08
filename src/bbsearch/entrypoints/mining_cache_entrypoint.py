@@ -3,11 +3,12 @@ import argparse
 import getpass
 import logging
 import pathlib
+import sys
 
 from ._helper import configure_logging
 
 
-def run_create_mining_cache(argv=None):  # pragma: no cover
+def run_create_mining_cache(argv=None):
     """Mine all texts in database and save results in a cache.
 
     Parameters
@@ -158,4 +159,4 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    exit(run_create_mining_cache())
+    sys.exit(run_create_mining_cache())
