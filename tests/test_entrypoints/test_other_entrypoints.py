@@ -6,11 +6,12 @@ import pytest
 @pytest.mark.parametrize(
     "entrypoint_name",
     [
-        "embedding_server",
-        "create_database",
         "compute_embeddings",
-        "search_server",
+        "create_database",
+        "create_mining_cache",
+        "embedding_server",
         "mining_server",
+        "search_server",
     ],
 )
 def test_entrypoint(entrypoint_name):
