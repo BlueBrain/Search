@@ -8,6 +8,13 @@ from ._helper import configure_logging
 
 
 def run_create_database(argv=None):
+    """Run the CLI entry point.
+
+    Parameters
+    ----------
+    argv : list_like of str
+        The command line arguments.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--log-dir",
