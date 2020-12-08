@@ -7,7 +7,7 @@ import sys
 from ._helper import configure_logging
 
 
-def main(argv=None):
+def run_create_database(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--log-dir",
@@ -70,4 +70,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
+    sys.exit(run_create_database())

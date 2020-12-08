@@ -10,7 +10,7 @@ import sqlalchemy
 from ._helper import configure_logging
 
 
-def main(argv=None):
+def run_compute_embeddings(argv=None):
     """Run CLI."""
     # CLI setup
     parser = argparse.ArgumentParser(
@@ -165,4 +165,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(main())
+    sys.exit(run_compute_embeddings())

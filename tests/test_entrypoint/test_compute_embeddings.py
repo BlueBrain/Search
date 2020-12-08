@@ -5,7 +5,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.entrypoints.embeddings_entrypoint import main
+from bbsearch.entrypoint import run_compute_embeddings
 
 
 @pytest.mark.parametrize(
@@ -25,7 +25,7 @@ from bbsearch.entrypoints.embeddings_entrypoint import main
         (3, 52, [1, None, 5, None], True, "SBioBERT", 4, "dir/emb.h5", "temp_dir"),
     ],
 )
-def test_sendthrough(
+def test_send_through(
     monkeypatch,
     tmpdir,
     batch_size_inference,
@@ -46,7 +46,7 @@ def test_sendthrough(
 
     monkeypatch.setattr("bbsearch.embedding_models.MPEmbedder", fake_mpe_class)
     monkeypatch.setattr(
-        "bbsearch.entrypoints.embeddings_entrypoint.sqlalchemy", fake_sqlalchemy
+        "bbsearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
     )
 
     # Prepare CLI input
@@ -78,7 +78,7 @@ def test_sendthrough(
         fake_sqlalchemy.create_engine().execute.return_value = [(n_sentences,)]
 
     # Run CLI
-    main(args_and_opts)
+    run_compute_embeddings(args_and_opts)
 
     # Checks
     if not custom_ixs:

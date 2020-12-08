@@ -5,6 +5,10 @@ import logging
 import pathlib
 import sys
 
+import pandas as pd
+import sqlalchemy
+from sqlalchemy.pool import NullPool
+
 from ._helper import configure_logging
 
 
@@ -31,7 +35,14 @@ def run_create_mining_cache(argv=None):
         "--database-url",
         default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
-        help="The URL to the MySQL database.",
+        help=(
+            "The location of the database depending on the database type. "
+            "For MySQL the server URL should be provided, for SQLite the "
+            "location of the database file. Generally, the scheme part of "
+            "the URL should be omitted, e.g. for MySQL the URL should be "
+            "of the form 'my_sql_server.ch:1234/my_database' and for SQLite "
+            "of the form '/path/to/the/local/database.db'."
+        ),
     )
     parser.add_argument(
         "--target-table-name",
@@ -78,12 +89,6 @@ def run_create_mining_cache(argv=None):
     )
     args = parser.parse_args(argv)
 
-    import pandas as pd
-    import sqlalchemy
-    from sqlalchemy.pool import NullPool
-
-    from ..database import CreateMiningCache
-
     # Configure logging
     if args.verbose == 1:
         level = logging.INFO
@@ -105,18 +110,28 @@ def run_create_mining_cache(argv=None):
     logger.info(f"log-file               : {args.log_file}")
     logger.info(f"verbose                : {args.verbose}")
 
+    # Loading libraries
+    logger.info("Loading libraries")
+    from ..database import CreateMiningCache
+
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = "/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db"
-        if not pathlib.Path(database_path).exists():
+        database_path = pathlib.Path(args.database_url)
+        if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass()
         database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
     else:
-        raise ValueError("This is not a valid db_type.")
+        raise ValueError("Invalid database type specified under --db-type")
+
+    # Create the database engine
+    logger.info("Creating the database engine")
+    # The NullPool prevents the Engine from using any connection more than once
+    # This is important for multiprocessing
+    database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Load the models library
     logger.info("Loading the models library")
@@ -136,12 +151,6 @@ def run_create_mining_cache(argv=None):
                 )
         keep_rows = ee_models_library["model"].isin(model_selection)
         ee_models_library = ee_models_library[keep_rows]
-
-    # Create the database engine
-    logger.info("Creating the database engine")
-    # The NullPool prevents the Engine from using any connection more than once
-    # This is important for multiprocessing
-    database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Create the cache creation class and run the cache creation
     logger.info("Creating the cache miner")
