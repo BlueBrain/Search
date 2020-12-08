@@ -29,7 +29,8 @@ def run_create_mining_cache(argv=None):
         "--db-type",
         default="mysql",
         type=str,
-        help="Type of the database. Possible values: (sqlite, mysql)",
+        choices=("mysql", "sqlite"),
+        help="Type of the database.",
     )
     parser.add_argument(
         "--database-url",
@@ -122,7 +123,7 @@ def run_create_mining_cache(argv=None):
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
-        password = getpass.getpass()
+        password = getpass.getpass("MySQL root password: ")
         database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
     else:
         raise ValueError("Invalid database type specified under --db-type")
