@@ -4,6 +4,7 @@ import getpass
 import logging
 import pathlib
 
+from ..utils import DVC
 from ._helper import configure_logging
 
 ROOT_PATH = pathlib.Path(__file__).resolve().parent.parent.parent  # repository root
@@ -114,14 +115,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
     # Load the models library
     logger.info("Loading the models library")
-    ee_models_library_path = (
-        ROOT_PATH / "data_and_models" / "pipelines" / "ner" / "ee_models_library.csv"
-    )
-    models_path = ROOT_PATH / "data_and_models" / "models" / "ner_er"
-    ee_models_library = pd.read_csv(ee_models_library_path)
-    ee_models_library["model"] = ee_models_library["model"].apply(
-        lambda x: models_path / x
-    )
+    ee_models_library = DVC.load_ee_models_library()
 
     # Restrict to given models
     if args.restrict_to_models is not None:
