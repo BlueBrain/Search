@@ -17,9 +17,22 @@
     color: #006621;
 }
 
+/* success */
+.bbs_success {
+    color : #388E3B
+}
+
+/* warnings */
+.bbs_warning {
+    color: #DDB62C
+}
+
+/* errors */
+.bbs_error {
+    color: #E75C58
+}
 
 /* widgets buttons */
-
 .bbs_button {
     background-color: #3c96f3;
     color: #FFF;
