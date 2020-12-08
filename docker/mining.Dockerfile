@@ -12,7 +12,7 @@ LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes
 LABEL description="REST API Server for Test Mining"
 
 # Add a user
-RUN useradd --create-home serveruser
+RUN useradd --create-home -g 10067 serveruser
 WORKDIR /home/serveruser
 USER serveruser
 
