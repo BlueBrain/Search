@@ -488,6 +488,14 @@ class DVC:
 
     @staticmethod
     def load_ee_models_library():
+        """Load the models library csv file.
+
+        Returns
+        -------
+        ee_models_library : pd.DataFrame
+            A table with the columns "entity_type", "model" and "entity_type_name".
+
+        """
         root_path = get_root_path()
         ee_models_library_path = (
             root_path
