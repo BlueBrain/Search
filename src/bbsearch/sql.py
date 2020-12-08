@@ -326,19 +326,19 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         dfs_pars = []
         d, r = divmod(len(identifiers_pars), batch_size)
         for i in range(0, d + (r > 0)):
-            query_pars = " UNION ".join(
-                f"""
-                SELECT *
-                FROM mining_cache
-                WHERE (article_id = {a} AND paragraph_pos_in_article = {p})
-                """  # nosec
+            # Reformatted due to this bandit bug in python3.8:
+            # https://github.com/PyCQA/bandit/issues/658
+            query_pars = " UNION ".join(  # nosec
+                "SELECT * FROM mining_cache "
+                f"WHERE (article_id = {a} AND paragraph_pos_in_article = {p})"
                 for a, p in identifiers_pars[i * batch_size : (i + 1) * batch_size]
             )
-            query_pars = f"""
-            SELECT *
-            FROM ({query_pars}) tt
-            WHERE tt.mining_model IN {model_names}
-            """  # nosec
+            # Reformatted due to this bandit bug in python3.8:
+            # https://github.com/PyCQA/bandit/issues/658
+            query_pars = (  # nosec
+                f"SELECT * FROM ({query_pars}) tt "
+                f"WHERE tt.mining_model IN {model_names}"
+            )
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
         df_pars = df_pars.sort_values(
@@ -582,13 +582,15 @@ class SentenceFilter:
 
         # Add article conditions to sentence conditions
         if len(article_conditions) > 0:
-            article_condition_query = f"""
-            article_id IN (
-                SELECT article_id
-                FROM articles
-                WHERE {" AND ".join(article_conditions)}
-            )
-            """.strip()  # nosec
+            # Reformatted due to this bandit bug in python3.8:
+            # https://github.com/PyCQA/bandit/issues/658
+            article_condition_query = (  # nosec
+                "article_id IN ( "
+                "    SELECT article_id "
+                "    FROM articles "
+                f'    WHERE {" AND ".join(article_conditions)} '
+                ")"
+            ).strip()  # nosec
             sentence_conditions.append(article_condition_query)
 
         # Restricted sentence IDs
