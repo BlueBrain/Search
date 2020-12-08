@@ -281,11 +281,11 @@ class CreateMiningCache:
     def _delete_rows(self):
         """Delete rows in the target table that will be re-populated."""
         for model_name, model_schema in self.model_schemas.items():
-            query = f"""
-            DELETE
-            FROM {self.target_table}
-            WHERE mining_model = :mining_model
-            """  # nosec
+            # Reformatted due to this bandit bug in python3.8:
+            # https://github.com/PyCQA/bandit/issues/658
+            query = (  # nosec
+                f"DELETE FROM {self.target_table} WHERE mining_model = :mining_model"
+            )
             self.engine.execute(
                 sqlalchemy.sql.text(query),
                 mining_model=model_schema["model_path"],
