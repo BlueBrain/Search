@@ -482,7 +482,7 @@ class DVC:
     """Collection of utility functions related to DVC.
 
     We are making an assumption about the folder structure. Namely, all
-    the dvc models and datasets are lying inside of `ROOT_PATH \ "data_and_models"`.
+    the dvc models and datasets are lying inside of `ROOT_PATH / "data_and_models"`.
 
     """
 

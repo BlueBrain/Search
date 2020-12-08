@@ -7,8 +7,6 @@ import pathlib
 from ..utils import DVC
 from ._helper import configure_logging
 
-ROOT_PATH = pathlib.Path(__file__).resolve().parent.parent.parent  # repository root
-
 
 def run_create_mining_cache(argv=None):  # pragma: no cover
     """Mine all texts in database and save results in a cache.
@@ -74,7 +72,6 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     )
     args = parser.parse_args(argv)
 
-    import pandas as pd
     import sqlalchemy
     from sqlalchemy.pool import NullPool
 
