@@ -1,10 +1,25 @@
 """Generic Utils."""
 import json
+import pathlib
 import time
 
 import h5py
 import numpy as np
+import pandas as pd
 import tqdm
+
+
+def get_root_path():
+    """Return the root path of the repository.
+
+    Returns
+    -------
+    root_path : pathlib.Path
+        Root path of the repository.
+    """
+    root_path = pathlib.Path(__file__).resolve().parent.parent.parent
+
+    return root_path
 
 
 class Timer:
@@ -461,3 +476,30 @@ class JSONL:
             data = [json.loads(jline) for jline in text.splitlines()]
 
         return data
+
+
+class DVC:
+    """Collection of utility functions related to DVC.
+
+    We are making an assumption about the folder structure. Namely, all
+    the dvc models and datasets are lying inside of `ROOT_PATH \ "data_and_models"`.
+
+    """
+
+    @staticmethod
+    def load_ee_models_library():
+        root_path = get_root_path()
+        ee_models_library_path = (
+            root_path
+            / "data_and_models"
+            / "pipelines"
+            / "ner"
+            / "ee_models_library.csv"
+        )
+        models_path = root_path / "data_and_models" / "models" / "ner_er"
+        ee_models_library = pd.read_csv(ee_models_library_path)
+        ee_models_library["model"] = ee_models_library["model"].apply(
+            lambda x: str(models_path / x)
+        )
+
+        return ee_models_library
