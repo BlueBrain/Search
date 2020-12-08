@@ -17,11 +17,6 @@ def test_help(capsys):
     assert stderr == ""
 
 
-def test_invalid_db_type():
-    with pytest.raises(ValueError, match="^Invalid database type"):
-        run_create_mining_cache(["--db-type", "wrong-type"])
-
-
 def test_missing_sqlite_db():
     with pytest.raises(FileNotFoundError, match="^No database found"):
         run_create_mining_cache(
@@ -87,7 +82,7 @@ def test_send_through(
     monkeypatch.setattr("bbsearch.database.CreateMiningCache", fake_create_mining_cache)
     monkeypatch.setattr(
         "bbsearch.entrypoint.create_mining_cache.getpass.getpass",
-        lambda: "fake_password",
+        lambda _: "fake_password",
     )
 
     # Create temporary sqlite database

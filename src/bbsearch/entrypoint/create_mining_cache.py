@@ -126,6 +126,9 @@ def run_create_mining_cache(argv=None):
         password = getpass.getpass("MySQL root password: ")
         database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
     else:
+        # Will never get here because `parser.parse_args()` will fail first.
+        # This is because we have choices=("mysql", "sqlite") in the
+        # argparse parameters
         raise ValueError("Invalid database type specified under --db-type")
 
     # Create the database engine
