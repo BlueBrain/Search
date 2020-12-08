@@ -10,26 +10,28 @@ from ._helper import configure_logging
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--log_dir",
+        "--log-dir",
         default="/raid/projects/bbs/logs/",
         type=str,
         help="The directory path where to save the logs.",
     )
     parser.add_argument(
-        "--log_name",
+        "--log-name",
         default="database_creation.log",
         type=str,
         help="The name of the log file.",
     )
     parser.add_argument(
-        "--data_path",
+        "--data-path",
         default="/raid/sync/proj115/bbs_data/cord19_v47",
         type=str,
-        help="The directory path where the metadata.csv and json files are located, "
-             "files needed to create the database",
+        help=(
+            "The directory path where the metadata.csv and json files are "
+            "located. Files needed to create the database."
+        ),
     )
     parser.add_argument(
-        "--db_type",
+        "--db-type",
         default="sqlite",
         type=str,
         help="Type of database. Possible values: (sqlite, mysql)",

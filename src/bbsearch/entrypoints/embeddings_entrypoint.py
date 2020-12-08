@@ -64,7 +64,7 @@ def main(argv=None):
         "be run on a CPU. By default using CPU for all processes.",
     )
     parser.add_argument(
-        "--h5_dataset_name",
+        "--h5-dataset-name",
         type=str,
         help="The name of the dataset in the H5 file."
         " Otherwise, the value of 'model_name_or_class' is used.",
