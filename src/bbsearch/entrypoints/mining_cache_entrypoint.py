@@ -3,6 +3,7 @@ import argparse
 import getpass
 import logging
 import pathlib
+import sys
 
 from ..utils import DVC
 from ._helper import configure_logging
@@ -22,19 +23,20 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument(
-        "--db_type",
+        "--db-type",
         default="mysql",
         type=str,
-        help="Type of the database. Possible values: (sqlite, mysql)",
+        choices=("mysql", "sqlite"),
+        help="Type of the database.",
     )
     parser.add_argument(
-        "--database_uri",
+        "--database-uri",
         default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
         help="The URI to the MySQL database.",
     )
     parser.add_argument(
-        "--target_table_name",
+        "--target-table-name",
         default="mining_cache_temporary",
         type=str,
         help="The name of the target mining cache table",
@@ -48,7 +50,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         "a single mining model.",
     )
     parser.add_argument(
-        "--restrict_to_models",
+        "--restrict-to-models",
         type=str,
         default=None,
         help="Comma-separated list of models (as called in ee_models_library_file)"
@@ -56,7 +58,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         "ee_models_library_file are run.",
     )
     parser.add_argument(
-        "--log_file",
+        "--log-file",
         "-l",
         type=str,
         metavar="<filename>",
@@ -105,7 +107,7 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
-        password = getpass.getpass()
+        password = getpass.getpass("MySQL root password: ")
         database_url = f"mysql+pymysql://root:{password}@{args.database_uri}"
     else:
         raise ValueError("This is not a valid db_type.")
@@ -151,4 +153,4 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover
-    exit(run_create_mining_cache())
+    sys.exit(run_create_mining_cache())

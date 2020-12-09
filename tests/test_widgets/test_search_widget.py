@@ -177,7 +177,11 @@ def request_callback(request, searcher):
 
 
 def request_callback_help(request):
-    resp_body = {"database": "test_database", "supported_models": ["BSV"]}
+    resp_body = {
+        "database": "test_database",
+        "supported_models": ["BSV"],
+        "version": "1.2.3",
+    }
     headers = {"request-id": "1234abcdeABCDE"}
     response = (200, headers, json.dumps(resp_body))
     return response
@@ -574,7 +578,9 @@ def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1
 
 
-def get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys):
+def get_search_widget_bot(
+    fake_sqlalchemy_engine, monkeypatch, capsys, checkpoint_path=None
+):
     http_address = activate_responses(fake_sqlalchemy_engine)
 
     responses.add_callback(
@@ -588,6 +594,7 @@ def get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys):
         bbs_search_url=http_address,
         bbs_mysql_engine=fake_sqlalchemy_engine,
         article_saver=ArticleSaver(fake_sqlalchemy_engine),
+        checkpoint_path=checkpoint_path,
     )
 
     bot = SearchWidgetBot(widget, capsys, monkeypatch)
@@ -635,3 +642,66 @@ def test_saved_results(fake_sqlalchemy_engine, monkeypatch, capsys):
     assert all(value != "" for value in saved_results["Paragraph"])
     # Check that the paragraph position is shown if paragraph is saved
     assert all(value != "" for value in saved_results["Paragraph #"])
+
+
+@responses.activate
+def test_save_load_checkpoint(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    # Test saving with the default setting of saving entire articles
+    bot = get_search_widget_bot(
+        fake_sqlalchemy_engine, monkeypatch, capsys, checkpoint_path=tmpdir
+    )
+
+    # Try saving data, but no results to save
+    bot.click("save_button")
+    last_displayed = bot.display_cached[-1].data
+    assert "ERROR!" in last_displayed
+    assert "No articles or paragraphs selected." in last_displayed
+
+    # Click on "investigate"
+    bot.click("investigate_button")
+
+    # Try loading data, but no checkpoint was saved there
+    bot.click("load_button")
+    last_displayed = bot.display_cached[-1].data
+    assert "ERROR!" in last_displayed
+    assert "No checkpoint file found to load." in last_displayed
+
+    # Now there are some results, so we can save a checkpoint
+    bot.click("save_button")
+    last_displayed = bot.display_cached[-1].data
+    with bot.search_widget.checkpoint_path.open("r") as f:
+        data = json.load(f)
+    assert {
+        tuple(x) for x in data["article_saver_state"]
+    } == bot.search_widget.article_saver.state
+    assert [
+        tuple(x) for x in data["search_widget_history"]
+    ] == bot.search_widget.history
+    assert data["database_name"] == bot.search_widget.database_name
+    assert data["search_server_version"] == bot.search_widget.search_server_version
+    assert "DONE" in last_displayed
+    assert "Saving search results to disk..." in last_displayed
+
+    # Now there is a checkpoint, so we can load it
+    # Note: if the database name or the server name is different, data is loaded
+    # but we raise a warning.
+    for db_name in ("test_database", "test_database_2"):
+        bot.search_widget.database_name = db_name
+        del bot.search_widget.article_saver.state
+        del bot.search_widget.history
+        bot.click("load_button")
+        assert {
+            tuple(x) for x in data["article_saver_state"]
+        } == bot.search_widget.article_saver.state
+        assert [
+            list(x) for x in data["search_widget_history"]
+        ] == bot.search_widget.history
+
+        displayed = bot.display_cached
+        if db_name != "test_database":
+            assert "WARNING" in displayed[-1].data
+            assert "DONE" in displayed[-2].data
+            assert "Loading search results from disk..." in displayed[-2].data
+        else:
+            assert "DONE" in displayed[-1].data
+            assert "Loading search results from disk..." in displayed[-1].data
