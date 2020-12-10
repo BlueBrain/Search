@@ -70,6 +70,7 @@ Create the MySQL database
 -------------------------
 
 We will create the MySQL database:
+
 * for CORD-19 version 65,
 * on DGX-1.
 
