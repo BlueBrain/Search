@@ -8,6 +8,7 @@ Compute sentence embeddings
 ---------------------------
 
 We will compute sentence embeddings:
+
 * with the model BioBERT NLI+STS CORD-19 v1,
 * for CORD-19 version 47,
 * using 4 GPUs,
