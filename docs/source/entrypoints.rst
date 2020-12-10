@@ -48,7 +48,7 @@ other number of used GPUs, and other platforms than DGX-1.
 
     export EMBEDDINGS=/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5
 
-6 - If embeddings where computed for other models, backup the existing embeddings:
+6 - [optional] If embeddings where computed for other models, backup the existing embeddings:
 
 .. code-block:: bash
 
