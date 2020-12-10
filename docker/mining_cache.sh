@@ -1,13 +1,18 @@
 #!/bin/bash
 
-# DVC pulling logic
+# Ensure that the correct username is used for ssh
+if [[ -z "$BBS_SSH_USERNAME" ]]; then
+  echo "Env var BBS_SSH_USERNAME unset!" 1>&2
+  exit 1
+fi
+mkdir ~/.ssh
+printf "Host *\n    User %s" "$BBS_SSH_USERNAME"> ~/.ssh/config
+
+# Pull models with DVC
+dvc remote modify gpfs_ssh ask_password true
 cd /src/data_and_models/pipelines/ner/ || exit
-
-dvc remote default gpfs_local
-
-dvc pull ee_models_library.csv.dvc 
-dvc pull add_er_1 add_er_2 add_er_3 add_er_4 add_er_5
-# dvc pull $(cat dvc.yaml | egrep '^ *add_er_[0-9]+' | sed -e 's/://g' |  xargs)
+dvc pull ee_models_library.csv.dvc
+dvc pull "$(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)"
 
 # Launch mining cache creation, using arguments only if defined
 create_mining_cache \
