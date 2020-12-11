@@ -1,7 +1,7 @@
-Entrypoints
+Entry points
 ===========
 
-This section describes how to use the entrypoints for common operations.
+This section describes how to use the entry points for common operations.
 
 
 Compute sentence embeddings
