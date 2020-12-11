@@ -14,6 +14,23 @@ Legend
 - |Remove| denotes removed features.
 
 
+Version 0.0.9
+=============
+**December 11, 2020**
+
+Changes
+-------
+- |Add| saving and loading of the results from the literature search and mining widgets.
+- |Add| mining for more than 1,000 articles.
+- |Add| :code:`BioBERT NLI+STS CORD-19 v1` training scripts and data.
+- |Add| CORD-19 version 65 database, embeddings, and entities.
+- |Add| security checks with :code:`bandit`.
+- |Fix| NER false positive for :code:`abstract`.
+- |Fix| refactoring issue in :code:`get_embedding_model`.
+- |Change| warnings when generating the documentation into errors.
+- |Remove| :code:`scibert` from :code:`setup.py` and :code:`requirements.txt`.
+
+
 Version 0.0.8
 =============
 **November 24, 2020**
