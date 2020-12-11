@@ -192,8 +192,9 @@ class ChemProt(REModel):
     """
 
     def __init__(self, model_path):
-        import scibert  # noqa, it has a side effect
         from allennlp.predictors import Predictor
+
+        import scibert  # noqa, it has a side effect
 
         self.model_ = Predictor.from_path(model_path, predictor_name="text_classifier")
 
