@@ -5,6 +5,8 @@ import logging
 import pathlib
 import sys
 
+import sqlalchemy
+
 from ._helper import configure_logging
 
 
@@ -70,7 +72,6 @@ def run_create_database(argv=None):
 
     # Import libraries
     logger.info("Loading libraries")
-    import sqlalchemy
 
     from ..database import CORD19DatabaseCreation, mark_bad_sentences
 
