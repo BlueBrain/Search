@@ -4,11 +4,11 @@ FAQ
 This section describes how to handle common issues.
 
 
-MySQL encoding issues
+MySQL encoding issue
 ---------------------
 
 When interacting in Python with the MySQL database, using SQLAlchemy and the
-MySQL driver :code:`mysqldb`, one might ran into the following issue when
+MySQL driver :code:`mysqldb`, one might run into the following error when
 retrieving columns with text:
 
 .. code-block:: bash
@@ -37,3 +37,20 @@ The database URL is what is passed as a first argument to create the engine:
     import sqlalchemy
 
     engine = sqlalchemy.create_engine(f"{dialect}+{driver}://{username}:{password}@{host}:{port}/{database}")
+
+
+DVC dataclasses issue
+----------------------
+
+When in a Python 3.7+ environment the package :code:`dataclasses` is installed,
+one might run into the following error when doing :code:`dvc pull`:
+
+.. code-block:: bash
+
+    AttributeError: module 'typing' has no attribute '_ClassVar'
+
+The solution is to uninstall the package :code:`dataclasses`:
+
+.. code-block:: bash
+
+    pip uninstall dataclasses
