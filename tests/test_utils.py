@@ -394,5 +394,4 @@ class TestDVC:
         assert isinstance(dvc_hash, str)
         assert dvc_hash == "4c687b7dd44d0f7adc2d3df2e2e4f624.dir"
 
-        with pytest.raises(ValueError):
-            DVC.grep_dvc_hash("not_existing_filename")
+        assert DVC.grep_dvc_hash("invalid_filename") is None

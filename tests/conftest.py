@@ -130,6 +130,9 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
             "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
         ),
         sqlalchemy.Column("mining_model", sqlalchemy.Text()),
+        sqlalchemy.Column("mining_model_version", sqlalchemy.Text(), nullable=False),
+        sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False),
+        sqlalchemy.Column("mining_model_dvc_hash", sqlalchemy.Text()),
     )
 
     # Construction of the tables
@@ -198,6 +201,9 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                     "paragraph_pos_in_article": sec_ix,
                     # from data/mining/request/ee_models_library.csv
                     "mining_model": "en_ner_craft_md",
+                    "mining_model_version": "0.2.5",
+                    "spacy_version": "2.3.1",
+                    "mining_model_dvc_hash": "4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
                 }
                 temp_m.append(pd.Series(s))
 

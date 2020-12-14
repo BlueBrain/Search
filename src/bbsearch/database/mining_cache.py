@@ -344,9 +344,7 @@ class CreateMiningCache:
                 "mining_model_version", sqlalchemy.Text(), nullable=False
             ),
             sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False),
-            sqlalchemy.Column(
-                "mining_model_dvc_hash", sqlalchemy.Text(), nullable=False
-            ),
+            sqlalchemy.Column("mining_model_dvc_hash", sqlalchemy.Text()),
         )
 
         with self.engine.begin() as connection:
@@ -565,12 +563,9 @@ class CreateMiningCache:
             if model_name not in model_schemas:
                 model_schemas[model_name] = dict()
                 model_schemas[model_name]["model_path"] = model_path
-                try:
-                    model_schemas[model_name]["model_dvc_hash"] = DVC.grep_dvc_hash(
-                        str(model_path).split("data_and_models")[-1]
-                    )
-                except ValueError:
-                    model_schemas[model_name]["model_dvc_hash"] = None
+                model_schemas[model_name]["model_dvc_hash"] = DVC.grep_dvc_hash(
+                    str(model_path).split("data_and_models/")[-1]
+                )
                 model_schemas[model_name]["entity_map"] = dict()
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to

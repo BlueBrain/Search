@@ -529,18 +529,13 @@ class DVC:
         -------
         dvc_hash: str
             Corresponding DVC hash from dvc.lock.
-
-        Raises
-        ------
-        ValueError
-            The dvc lock does not seem to contain the given filename.
         """
         root_path = get_root_path()
         dvc_lock_path = (
             root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
         )
 
-        with open(dvc_lock_path, "r") as f:
+        with open(str(dvc_lock_path), "r") as f:
             for line in f:
                 if re.search(filename, line) and re.search("path", line):
                     md5_line = next(f)
@@ -548,7 +543,4 @@ class DVC:
                         dvc_hash = md5_line.replace("md5: ", "")
                         return dvc_hash.strip()
 
-            raise ValueError(
-                f"The filename {filename} was not found in "
-                f"the dvc lock located at {dvc_lock_path}"
-            )
+            return None

@@ -10,6 +10,7 @@ import bbsearch
 
 from ..mining import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
+from ..utils import DVC
 
 
 class MiningServer(Flask):
@@ -52,10 +53,13 @@ class MiningServer(Flask):
 
         self.logger.info("Loading the NER models")
         self.ee_models = {}
+        self.mining_cache_dvc_hashes = set()
         for model_name in self.models_libs["ee"]["model"]:
             self.logger.info(f"Loading model {model_name}")
             self.ee_models[model_name] = spacy.load(model_name)
-
+            self.mining_cache_dvc_hashes.add(
+                DVC.grep_dvc_hash(str(model_name).split("data_and_models/")[-1])
+            )
         self.connection = connection
 
         self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
@@ -137,6 +141,7 @@ class MiningServer(Flask):
             if args_err_response:
                 return args_err_response
 
+            warnings = []
             schema_df = self.read_df_from_str(schema_str)
 
             if use_cache:
@@ -167,6 +172,16 @@ class MiningServer(Flask):
                     lambda x: os_mapping[x]
                 )
 
+                # check the consistency with the dvc hashes of the mining models
+                if not set(df_all["mining_model_dvc_hash"].unique()).issubset(
+                    self.mining_cache_dvc_hashes
+                ):
+                    warnings += [
+                        f"It seems the model used by the mining server "
+                        f"{self.mining_cache_dvc_hashes} are not the same "
+                        f"as the ones in the mining cache "
+                        f"{set(df_all['mining_model_dvc_hash'].unique())}"
+                    ]
                 # apply specs if not debug
                 if not debug:
                     df_all = pd.DataFrame(df_all, columns=SPECS)
@@ -203,7 +218,7 @@ class MiningServer(Flask):
                 df_all, etypes_na = self.mine_texts(
                     texts=texts, schema_request=schema_df, debug=debug
                 )
-            response = self.create_response(df_all, etypes_na)
+            response = self.create_response(df_all, etypes_na, warnings)
             self.logger.info(f"Mining completed, extracted {len(df_all)} elements.")
         else:
             self.logger.info("Request is not JSON. Not processing.")
@@ -329,7 +344,7 @@ class MiningServer(Flask):
         return response, 400
 
     @staticmethod
-    def create_response(df_extractions, etypes_na):
+    def create_response(df_extractions, etypes_na, warnings=None):
         """Create the response thanks to dataframe.
 
         Parameters
@@ -339,6 +354,8 @@ class MiningServer(Flask):
         etypes_na : list[str]
             Entity types found in the request CSV file for which no available
             model was found in the library.
+        warnings : list[str] or None
+            Warnings to show to the user discovered along the pipeline.
 
         Returns
         -------
@@ -346,9 +363,11 @@ class MiningServer(Flask):
             Response containing the dataframe converted in csv table.
         """
         csv_extractions = df_extractions.to_csv(index=False)
-        warnings = [
+        if warnings is None:
+            warnings = []
+        all_warnings = warnings + [
             f'No text mining model was found in the library for "{etype}".'
             for etype in etypes_na
         ]
 
-        return jsonify(csv_extractions=csv_extractions, warnings=warnings), 200
+        return jsonify(csv_extractions=csv_extractions, warnings=all_warnings), 200
