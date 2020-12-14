@@ -3,13 +3,13 @@ import logging
 import pathlib
 import sys
 
+import sqlalchemy
+
 from ._helper import configure_logging, get_var, run_server
 
 
 def get_mining_app():
     """Construct the mining flask app."""
-    import sqlalchemy
-
     from ..server.mining_server import MiningServer
 
     # Read configuration
