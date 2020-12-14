@@ -3,13 +3,13 @@ import logging
 import pathlib
 import sys
 
+import sqlalchemy
+
 from ._helper import configure_logging, get_var, run_server
 
 
 def get_search_app():
     """Construct the search flask app."""
-    import sqlalchemy
-
     from ..server.search_server import SearchServer
     from ..utils import H5
 
@@ -41,7 +41,6 @@ def get_search_app():
     server_app = SearchServer(
         models_path, embeddings_path, indices, engine, models_list
     )
-
     return server_app
 
 
