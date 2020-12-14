@@ -517,7 +517,6 @@ class DVC:
     def grep_dvc_hash(filename, pipeline="ner"):
         """Return dvc hash of a given filename.
 
-
         Parameters
         ----------
         filename: str
@@ -550,5 +549,6 @@ class DVC:
                         return dvc_hash.strip()
 
             raise ValueError(
-                f"The filename {filename} was not found in the dvc lock located at {dvc_lock_path}"
+                f"The filename {filename} was not found in "
+                f"the dvc lock located at {dvc_lock_path}"
             )

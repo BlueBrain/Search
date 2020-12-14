@@ -225,7 +225,7 @@ class TestCreateMiningCache:
             "mining_model",
             "mining_model_version",
             "spacy_version",
-            "mining_model_dvc_hash"
+            "mining_model_dvc_hash",
         }
 
         # Test calling with the table already existing.
