@@ -10,6 +10,7 @@ import sqlalchemy
 
 from ..mining.pipeline import run_pipeline
 from ..sql import retrieve_articles
+from ..utils import DVC
 
 
 class Miner:
@@ -24,6 +25,9 @@ class Miner:
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
+    model_dvc_hash : str
+        The hash of the specific spacy model that will perform the named
+        entity extraction.
     entity_map : dict[str, str]
         A map from entity types produced by the model to new
         entity types that should appear in the cached results.
@@ -41,6 +45,7 @@ class Miner:
         self,
         database_url,
         model_path,
+        model_dvc_hash,
         entity_map,
         target_table,
         task_queue,
@@ -49,6 +54,7 @@ class Miner:
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
         self.model_path = model_path
+        self.model_dvc_hash = model_dvc_hash
         self.entity_map = entity_map
         self.target_table_name = target_table
         self.task_queue = task_queue
@@ -70,6 +76,7 @@ class Miner:
         cls,
         database_url,
         model_path,
+        model_dvc_hash,
         entity_map,
         target_table,
         task_queue,
@@ -86,6 +93,9 @@ class Miner:
         model_path : str
             The path for loading the spacy model that will perform the
             named entity extraction.
+        model_dvc_hash : str
+            The hash of the specific spacy model that will perform the named
+            entity extraction.
         entity_map : dict[str, str]
             A map from entity types produced by the model to new
             entity types that should appear in the cached results.
@@ -101,6 +111,7 @@ class Miner:
         miner = cls(
             database_url=database_url,
             model_path=model_path,
+            model_dvc_hash=model_dvc_hash,
             entity_map=entity_map,
             target_table=target_table,
             task_queue=task_queue,
@@ -198,6 +209,7 @@ class Miner:
         )
 
         df_results["mining_model"] = self.model_path
+        df_results["mining_model_dvc_hash"] = self.model_dvc_hash
         df_results["mining_model_version"] = self.model.meta["version"]
         df_results["spacy_version"] = self.model.meta["spacy_version"]
 
@@ -332,6 +344,9 @@ class CreateMiningCache:
                 "mining_model_version", sqlalchemy.Text(), nullable=False
             ),
             sqlalchemy.Column("spacy_version", sqlalchemy.Text(), nullable=False),
+            sqlalchemy.Column(
+                "mining_model_dvc_hash", sqlalchemy.Text(), nullable=False
+            ),
         )
 
         with self.engine.begin() as connection:
@@ -415,6 +430,7 @@ class CreateMiningCache:
                     kwargs={
                         "database_url": self.engine.url,
                         "model_path": model_schema["model_path"],
+                        "model_dvc_hash": model_schema["model_dvc_hash"],
                         "entity_map": model_schema["entity_map"],
                         "target_table": self.target_table,
                         "task_queue": task_queues[model_name],
@@ -549,6 +565,12 @@ class CreateMiningCache:
             if model_name not in model_schemas:
                 model_schemas[model_name] = dict()
                 model_schemas[model_name]["model_path"] = model_path
+                try:
+                    model_schemas[model_name]["model_dvc_hash"] = DVC.grep_dvc_hash(
+                        str(model_path).split("data_and_models")[-1]
+                    )
+                except ValueError:
+                    model_schemas[model_name]["model_dvc_hash"] = None
                 model_schemas[model_name]["entity_map"] = dict()
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to

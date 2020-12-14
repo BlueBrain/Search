@@ -25,6 +25,7 @@ class TestMiner:
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
+            model_dvc_hash="4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
             task_queue=task_queue,
@@ -47,6 +48,7 @@ class TestMiner:
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
+            model_dvc_hash="4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
             entity_map={},
             target_table="",
             task_queue=task_queue,
@@ -102,6 +104,7 @@ class TestMiner:
         )
         assert "mining_model" in df_result.columns
         assert "mining_model_version" in df_result.columns
+        assert "mining_model_dvc_hash" in df_result.columns
 
         miner.engine.execute(f"drop table {miner.target_table_name}")
 
@@ -222,6 +225,7 @@ class TestCreateMiningCache:
             "mining_model",
             "mining_model_version",
             "spacy_version",
+            "mining_model_dvc_hash"
         }
 
         # Test calling with the table already existing.
@@ -236,6 +240,7 @@ class TestCreateMiningCache:
         assert len(model_schemas) == 1
         assert model_schemas["model_1"]["model_path"] == "model_1"
         assert model_schemas["model_1"]["entity_map"] == {"type_1": "type_1_public"}
+        assert model_schemas["model_1"]["model_dvc_hash"] is None
 
     @staticmethod
     def fake_wait_miner(stop_now):

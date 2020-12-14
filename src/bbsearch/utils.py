@@ -514,7 +514,7 @@ class DVC:
         return ee_models_library
 
     @staticmethod
-    def grep_dvc_hash(filename, pipeline='ner'):
+    def grep_dvc_hash(filename, pipeline="ner"):
         """Return dvc hash of a given filename.
 
 
@@ -537,14 +537,18 @@ class DVC:
             The dvc lock does not seem to contain the given filename.
         """
         root_path = get_root_path()
-        dvc_lock_path = root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
+        dvc_lock_path = (
+            root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
+        )
 
-        with open(dvc_lock_path, 'r') as f:
+        with open(dvc_lock_path, "r") as f:
             for line in f:
-                if re.search(filename, line) and re.search('path', line):
+                if re.search(filename, line) and re.search("path", line):
                     md5_line = next(f)
-                    if re.search('md5:', md5_line):
-                        dvc_hash = md5_line.replace('md5: ', '')
+                    if re.search("md5:", md5_line):
+                        dvc_hash = md5_line.replace("md5: ", "")
                         return dvc_hash.strip()
 
-            raise ValueError(f'The filename {filename} was not found in the dvc lock located at {dvc_lock_path}')
+            raise ValueError(
+                f"The filename {filename} was not found in the dvc lock located at {dvc_lock_path}"
+            )
