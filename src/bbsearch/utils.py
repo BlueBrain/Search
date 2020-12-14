@@ -1,6 +1,7 @@
 """Generic Utils."""
 import json
 import pathlib
+import re
 import time
 
 import h5py
@@ -511,3 +512,39 @@ class DVC:
         )
 
         return ee_models_library
+
+    @staticmethod
+    def grep_dvc_hash(filename, pipeline='ner'):
+        """Return dvc hash of a given filename.
+
+
+        Parameters
+        ----------
+        filename: str
+            Name of the file for which to find DVC hash.
+        pipeline: str
+            Pipeline where filename is created/used. Currently, possible
+            values are {'ner', 'sentence_embedding'}.
+
+        Returns
+        -------
+        dvc_hash: str
+            Corresponding DVC hash from dvc.lock.
+
+        Raises
+        ------
+        ValueError
+            The dvc lock does not seem to contain the given filename.
+        """
+        root_path = get_root_path()
+        dvc_lock_path = root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
+
+        with open(dvc_lock_path, 'r') as f:
+            for line in f:
+                if re.search(filename, line) and re.search('path', line):
+                    md5_line = next(f)
+                    if re.search('md5:', md5_line):
+                        dvc_hash = md5_line.replace('md5: ', '')
+                        return dvc_hash.strip()
+
+            raise ValueError(f'The filename {filename} was not found in the dvc lock located at {dvc_lock_path}')

@@ -365,3 +365,38 @@ class TestDVC:
             fake_root_path / "data_and_models" / "models" / "ner_er" / "model_1"
         )
         assert df["entity_type_name"][0] == "B"
+
+    def test_grep_dvc_hash(self, tmpdir, monkeypatch):
+        fake_root_path = pathlib.Path(str(tmpdir))
+
+        # Create directory structure and files
+        fake_dvc_lock = """
+        train_model1:
+            outs:
+                - path: ../../models/ner/model1
+                    md5: 4c687b7dd44d0f7adc2d3df2e2e4f624.dir"""
+
+        dvc_lock_path = (
+            fake_root_path
+            / "data_and_models"
+            / "pipelines"
+            / "ner"
+            / "dvc.lock"
+        )
+        dvc_lock_path.parent.mkdir(parents=True)
+
+        save_text = open(dvc_lock_path, 'w')
+        save_text.write(fake_dvc_lock)
+        save_text.close()
+
+        # Patch
+        monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_root_path)
+
+        dvc_hash = DVC.grep_dvc_hash('models/ner/model1')
+
+        # Checks
+        assert isinstance(dvc_hash, str)
+        assert dvc_hash == "4c687b7dd44d0f7adc2d3df2e2e4f624.dir"
+
+        with pytest.raises(ValueError):
+            DVC.grep_dvc_hash('not_existing_filename')
