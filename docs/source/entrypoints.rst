@@ -1,5 +1,5 @@
 Entry points
-===========
+============
 
 This section describes how to use the entry points for common operations.
 

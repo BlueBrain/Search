@@ -11,7 +11,7 @@ When interacting in Python with the MySQL database, using SQLAlchemy and the
 MySQL driver :code:`mysqldb`, one might run into the following error when
 retrieving columns with text:
 
-.. code-block:: bash
+.. code-block::
 
     UnicodeDecodeError: 'charmap' codec can't decode byte 0x81 in position 239:
     character maps to <undefined>
