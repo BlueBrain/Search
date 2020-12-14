@@ -9,7 +9,7 @@ RUN pip install -e .
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
-LABEL description="REST API Server for Test Mining"
+LABEL description="Creation of a Mining Cache for the Mining Server"
 
 
 RUN chmod 777 -R /src/
@@ -18,5 +18,4 @@ RUN chmod 777 -R /src/
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
-EXPOSE 8080
-ENTRYPOINT ["/src/docker/mining.sh"]
+ENTRYPOINT ["/src/docker/mining_cache.sh"]
