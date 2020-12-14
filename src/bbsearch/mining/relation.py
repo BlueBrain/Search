@@ -192,6 +192,8 @@ class ChemProt(REModel):
     """
 
     def __init__(self, model_path):
+        # Note: SciBERT is imported but unused. This is because the import has
+        # a side-effect of registering the SciBERT model, which we use later on.
         import scibert  # NOQA
         from allennlp.predictors import Predictor
 
