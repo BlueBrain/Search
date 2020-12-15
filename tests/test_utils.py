@@ -366,7 +366,9 @@ class TestDVC:
         )
         assert df["entity_type_name"][0] == "B"
 
-    def test_grep_dvc_hash(self, tmpdir, fake_dvc_root_path, fake_dvc_hash, monkeypatch):
+    def test_grep_dvc_hash(
+        self, tmpdir, fake_dvc_root_path, fake_dvc_hash, monkeypatch
+    ):
         monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_dvc_root_path)
 
         dvc_hash = DVC.grep_dvc_hash("models/ner/model1")

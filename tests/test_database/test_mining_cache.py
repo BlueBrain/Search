@@ -13,7 +13,9 @@ from bbsearch.database.mining_cache import Miner
 
 class TestMiner:
     @pytest.fixture
-    def miner_env(self, fake_sqlalchemy_engine, monkeypatch, fake_dvc_hash, model_entities):
+    def miner_env(
+        self, fake_sqlalchemy_engine, monkeypatch, fake_dvc_hash, model_entities
+    ):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.spacy.load",
@@ -34,7 +36,9 @@ class TestMiner:
 
         return miner, task_queue, can_finish
 
-    def test_create_and_mine(self, fake_dvc_hash, fake_sqlalchemy_engine, monkeypatch, model_entities):
+    def test_create_and_mine(
+        self, fake_dvc_hash, fake_sqlalchemy_engine, monkeypatch, model_entities
+    ):
         task_queue = mp.Queue()
         can_finish = mp.Event()
         can_finish.set()

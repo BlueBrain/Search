@@ -424,12 +424,14 @@ def mining_schema_df():
 
 @pytest.fixture()
 def fake_dvc_hash():
+    """Fake dvc hash in dvc.lock."""
     fake_dvc_hash = "4c687b7dd44d0f7adc2d3df2e2e4f624.dir"
     return fake_dvc_hash
 
 
 @pytest.fixture()
 def fake_dvc_root_path(tmpdir, fake_dvc_hash):
+    """Create a fake dvc.lock and return fake root path of the project."""
     fake_root_path = Path(str(tmpdir))
 
     # Create directory structure and dvc.lock file
