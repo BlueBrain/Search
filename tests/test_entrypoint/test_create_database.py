@@ -8,15 +8,16 @@ from bbsearch.entrypoint.create_database import run_create_database
 
 
 @pytest.mark.parametrize(
-    ("data_path", "db_type", "log_dir", "log_name", "only_mark_bad_sentences"),
+    ("data_path", "db_type", "database_url", "sqlite_exists", "log_dir", "log_name", "only_mark_bad_sentences"),
     [
-        ("data_1", "mysql", "folder_1", "a.log", True),
-        ("data_2", "mysql", "folder_2", "b.log", False),
-        ("data_3", "wrong", "folder_3", "c.log", False),
+        ("data_1", "mysql", "my_server.ch/my_database", False, "folder_1", "a.log", True),
+        ("data_2", "sqlite", "database.db", False, "folder_2", "b.log", False),
+        ("data_3", "sqlite", "database.db", True, "folder_2", "b.log", False),
+        ("data_4", "wrong", "no_database_here", False, "folder_3", "c.log", False),
     ],
 )
 def test_send_through(
-    monkeypatch, tmpdir, data_path, db_type, log_dir, log_name, only_mark_bad_sentences
+    monkeypatch, tmpdir, data_path, db_type, database_url, sqlite_exists, log_dir, log_name, only_mark_bad_sentences
 ):
     # Preparations
     tmpdir = pathlib.Path(str(tmpdir))
@@ -29,6 +30,11 @@ def test_send_through(
     fake_sqlalchemy = Mock()
     fake_database_creation = Mock()
     fake_mark_bad_sentences = Mock()
+
+    if db_type == "sqlite":
+        database_url = tmpdir / database_url
+        if sqlite_exists:
+            database_url.touch()
 
     monkeypatch.setattr("builtins.input", Mock())
     monkeypatch.setattr("bbsearch.entrypoint.create_database.getpass", fake_getpass)
@@ -43,6 +49,7 @@ def test_send_through(
     argv = [
         f"--data-path={data_path}",
         f"--db-type={db_type}",
+        f"--database-url={database_url}",
         f"--log-dir={log_dir}",
         f"--log-name={log_name}",
     ]

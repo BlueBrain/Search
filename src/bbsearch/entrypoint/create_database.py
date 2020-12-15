@@ -47,6 +47,19 @@ def run_create_database(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
+        "--database-url",
+        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
+        type=str,
+        help=(
+            "The location of the database depending on the database type. "
+            "For MySQL the server URL should be provided, for SQLite the "
+            "location of the database file. Generally, the scheme part of "
+            "the URL should be omitted, e.g. for MySQL the URL should be "
+            "of the form 'my_sql_server.ch:1234/my_database' and for SQLite "
+            "of the form '/path/to/the/local/database.db'."
+        ),
+    )
+    parser.add_argument(
         "--only-mark-bad-sentences",
         default=False,
         action="store_true",
@@ -78,22 +91,24 @@ def run_create_database(argv=None):
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(
-            "/raid/sync/proj115/bbs_data/cord19_v65/databases/cord19.db"
-        )
+        database_path = pathlib.Path(args.database_url)
         if not database_path.exists():
             database_path.parent.mkdir(exist_ok=True, parents=True)
             database_path.touch()
-        engine = sqlalchemy.create_engine(f"sqlite:///{database_path}")
+        database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
-        # We assume the database `cord19_v65` already exists
-        mysql_uri = input("MySQL URL: ")
+        # We assume the database already exists
         password = getpass.getpass("MySQL root password: ")
-        engine = sqlalchemy.create_engine(
-            f"mysql+pymysql://root:{password}@{mysql_uri}/cord19_v65"
-        )
-    else:
+        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+    else:  # pragma: no cover
+        # This is unreachable because of choices=("mysql", "sqlite") in argparse
         raise ValueError(f'"{args.db_type}" is not a supported db_type.')
+
+    # Create the database engine
+    logger.info("Creating the database engine")
+    # The NullPool prevents the Engine from using any connection more than once
+    # This is important for multiprocessing
+    engine = sqlalchemy.create_engine(database_url)
 
     # Launch database creation
     if not args.only_mark_bad_sentences:
