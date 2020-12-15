@@ -5,10 +5,10 @@ import logging
 import pathlib
 import sys
 
-import pandas as pd
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
+from ..utils import DVC
 from ._helper import configure_logging
 
 
@@ -52,17 +52,11 @@ def run_create_mining_cache(argv=None):
         help="The name of the target mining cache table",
     )
     parser.add_argument(
-        "--ee-models-library-file",
-        default="/raid/sync/proj115/bbs_data/models_libraries/ee_models_library.csv",
-        type=str,
-        help="The csv file with info on which model to use to mine which entity type.",
-    )
-    parser.add_argument(
         "--n-processes-per-model",
         default=1,
         type=int,
         help="Each mining model is run in parallel with respect to the others. In "
-        "addition to that, n_processes_per_model are used to run in parallel"
+        "addition to that, n-processes-per-model are used to run in parallel"
         "a single mining model.",
     )
     parser.add_argument(
@@ -105,7 +99,6 @@ def run_create_mining_cache(argv=None):
     logger.info(f"db-type                : {args.db_type}")
     logger.info(f"database-url           : {args.database_url}")
     logger.info(f"target-table-name      : {args.target_table_name}")
-    logger.info(f"ee-models-library-file : {args.ee_models_library_file}")
     logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
     logger.info(f"restrict-to-models     : {args.restrict_to_models}")
     logger.info(f"log-file               : {args.log_file}")
@@ -139,7 +132,7 @@ def run_create_mining_cache(argv=None):
 
     # Load the models library
     logger.info("Loading the models library")
-    ee_models_library = pd.read_csv(args.ee_models_library_file)
+    ee_models_library = DVC.load_ee_models_library()
 
     # Restrict to given models
     if args.restrict_to_models is not None:
@@ -150,8 +143,7 @@ def run_create_mining_cache(argv=None):
             if model_path not in ee_models_library["model"].values:
                 logger.warning(
                     f"Can't restrict to model {model_path} because it is not "
-                    f"listed in the models library file {args.ee_models_library_file}. "
-                    "This entry will be ignored."
+                    f"listed in the models library file. This entry will be ignored."
                 )
         keep_rows = ee_models_library["model"].isin(model_selection)
         ee_models_library = ee_models_library[keep_rows]

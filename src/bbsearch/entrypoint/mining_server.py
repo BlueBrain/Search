@@ -2,9 +2,11 @@
 import logging
 import pathlib
 import sys
+import tempfile
 
 import sqlalchemy
 
+from ..utils import DVC
 from ._helper import configure_logging, get_var, run_server
 
 
@@ -15,8 +17,6 @@ def get_mining_app():
     # Read configuration
     log_file = get_var("BBS_MINING_LOG_FILE", check_not_set=False)
     log_level = get_var("BBS_MINING_LOG_LEVEL", logging.INFO, var_type=int)
-
-    ee_models_library = get_var("BBS_MINING_EE_MODEL_LIBRARY")
     db_type = get_var("BBS_MINING_DB_TYPE")
 
     # Configure logging
@@ -43,8 +43,14 @@ def get_mining_app():
         raise ValueError(f"This is not a valid database type: {db_type}.")
 
     # Create the server app
-    logger.info("Creating the server app")
-    mining_app = MiningServer(models_libs={"ee": ee_models_library}, connection=engine)
+    with tempfile.TemporaryDirectory() as tmpdir_name:
+        tmpdir = pathlib.Path(tmpdir_name)
+        tmp_csv = tmpdir / "temp.csv"
+
+        DVC.load_ee_models_library().to_csv(tmp_csv)
+
+        logger.info("Creating the server app")
+        mining_app = MiningServer(models_libs={"ee": tmp_csv}, connection=engine)
 
     return mining_app
 
