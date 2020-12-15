@@ -12,7 +12,7 @@ LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes
 LABEL description="REST API Server for Test Mining"
 
 
-RUN chmod 777 -R /src/
+RUN chmod -R a+rwX /src
 
 # Download the NLTK libraries (for the current user)
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
