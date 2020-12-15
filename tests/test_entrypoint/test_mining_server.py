@@ -8,11 +8,23 @@ import pytest
 from bbsearch.entrypoint import get_mining_app
 
 
-@pytest.mark.parametrize("db_type", ["sqlite", "mysql", "wrong"])
-def test_send_through(tmpdir, monkeypatch, db_type):
+@pytest.mark.parametrize(
+    ("db_type", "sqlite_db_exists"),
+    (
+        ("sqlite", True),
+        ("sqlite", False),
+        ("mysql", False),
+        ("wrong", False),
+    ),
+)
+def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     tmpdir = pathlib.Path(str(tmpdir))
     logfile = tmpdir / "log.txt"
     db_path = tmpdir / "something.db"
+
+    if sqlite_db_exists:
+        db_path.parent.mkdir(exist_ok=True, parents=True)
+        db_path.touch()
 
     monkeypatch.setenv("BBS_MINING_LOG_FILE", str(logfile))
     monkeypatch.setenv("BBS_MINING_DB_TYPE", db_type)

@@ -49,5 +49,5 @@ def run_search_server():
     run_server(get_search_app, "search")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(run_search_server())

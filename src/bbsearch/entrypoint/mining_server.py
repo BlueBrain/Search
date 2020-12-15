@@ -29,6 +29,7 @@ def get_mining_app():
         sqlite_db_path = get_var("BBS_MINING_SQLITE_DB_PATH")
         sqlite_db_path = pathlib.Path(sqlite_db_path)
         if not sqlite_db_path.exists():
+            sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
     elif db_type == "mysql":
