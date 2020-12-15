@@ -42,11 +42,11 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         help="The name of the target mining cache table",
     )
     parser.add_argument(
-        "--n_processes_per_model",
+        "--n-processes-per-model",
         default=1,
         type=int,
         help="Each mining model is run in parallel with respect to the others. In "
-        "addition to that, n_processes_per_model are used to run in parallel"
+        "addition to that, n-processes-per-model are used to run in parallel"
         "a single mining model.",
     )
     parser.add_argument(
