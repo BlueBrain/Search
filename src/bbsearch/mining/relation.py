@@ -192,7 +192,9 @@ class ChemProt(REModel):
     """
 
     def __init__(self, model_path):
-        import scibert  # noqa, it has a side effect
+        # Note: SciBERT is imported but unused. This is because the import has
+        # a side-effect of registering the SciBERT model, which we use later on.
+        import scibert  # NOQA
         from allennlp.predictors import Predictor
 
         self.model_ = Predictor.from_path(model_path, predictor_name="text_classifier")

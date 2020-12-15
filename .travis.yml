@@ -17,7 +17,7 @@ env:
 matrix:
   include:
     - stage: Lint and Code Style
-      python: 3.8
+      python: 3.6
       env: TOXENV=lint
 
     - stage: Tests and Coverage
@@ -29,11 +29,11 @@ matrix:
       env: TOXENV=py38
 
     - stage: Docs
-      python: 3.8
+      python: 3.6
       env: TOXENV=docs
 
     - stage: Packaging
-      python: 3.8
+      python: 3.6
       env: TOXENV=check-packaging
 
 before_install:
