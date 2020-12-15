@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=.
-source "$($0)"/utils.sh
+source /src/docker/utils.sh
 ssh_setup
 dvc_pull_models
 
