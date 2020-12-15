@@ -534,13 +534,13 @@ class DVC:
         dvc_lock_path = (
             root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
         )
+        if dvc_lock_path.exists():
+            with open(str(dvc_lock_path), "r") as f:
+                for line in f:
+                    if re.search(filename, line) and re.search("path", line):
+                        md5_line = next(f)
+                        if re.search("md5:", md5_line):
+                            dvc_hash = md5_line.replace("md5: ", "")
+                            return dvc_hash.strip()
 
-        with open(str(dvc_lock_path), "r") as f:
-            for line in f:
-                if re.search(filename, line) and re.search("path", line):
-                    md5_line = next(f)
-                    if re.search("md5:", md5_line):
-                        dvc_hash = md5_line.replace("md5: ", "")
-                        return dvc_hash.strip()
-
-            return None
+        return None
