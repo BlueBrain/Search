@@ -10,12 +10,10 @@ import sqlalchemy
 from bbsearch.database import CreateMiningCache
 from bbsearch.database.mining_cache import Miner
 
-from ..conftest import FAKE_DVC_HASH
-
 
 class TestMiner:
     @pytest.fixture
-    def miner_env(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
+    def miner_env(self, fake_sqlalchemy_engine, monkeypatch, fake_dvc_hash, model_entities):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bbsearch.database.mining_cache.spacy.load",
@@ -27,7 +25,7 @@ class TestMiner:
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
-            model_dvc_hash=FAKE_DVC_HASH,
+            model_dvc_hash=fake_dvc_hash,
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
             task_queue=task_queue,
@@ -36,7 +34,7 @@ class TestMiner:
 
         return miner, task_queue, can_finish
 
-    def test_create_and_mine(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
+    def test_create_and_mine(self, fake_dvc_hash, fake_sqlalchemy_engine, monkeypatch, model_entities):
         task_queue = mp.Queue()
         can_finish = mp.Event()
         can_finish.set()
@@ -50,7 +48,7 @@ class TestMiner:
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
-            model_dvc_hash=FAKE_DVC_HASH,
+            model_dvc_hash=fake_dvc_hash,
             entity_map={},
             target_table="",
             task_queue=task_queue,
@@ -74,7 +72,7 @@ class TestMiner:
         assert "Traceback" in text
         assert "ZeroDivisionError" in text
 
-    def test_work_loop_and_mine(self, miner_env, monkeypatch):
+    def test_work_loop_and_mine(self, fake_dvc_hash, miner_env, monkeypatch):
         miner, task_queue, can_finish = miner_env
         article_id = 0
 
@@ -107,7 +105,7 @@ class TestMiner:
         assert "mining_model" in df_result.columns
         assert "mining_model_version" in df_result.columns
         assert "mining_model_dvc_hash" in df_result.columns
-        assert df_result.iloc[0]["mining_model_dvc_hash"] == FAKE_DVC_HASH
+        assert df_result.iloc[0]["mining_model_dvc_hash"] == fake_dvc_hash
 
         miner.engine.execute(f"drop table {miner.target_table_name}")
 
