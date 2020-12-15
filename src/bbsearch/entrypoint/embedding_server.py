@@ -46,4 +46,4 @@ def run_embedding_server():
 
 
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(run_embedding_server)
+    sys.exit(run_embedding_server())
