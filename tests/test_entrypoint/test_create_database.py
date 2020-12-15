@@ -8,16 +8,40 @@ from bbsearch.entrypoint.create_database import run_create_database
 
 
 @pytest.mark.parametrize(
-    ("data_path", "db_type", "database_url", "sqlite_exists", "log_dir", "log_name", "only_mark_bad_sentences"),
+    (
+        "data_path",
+        "db_type",
+        "database_url",
+        "sqlite_exists",
+        "log_dir",
+        "log_name",
+        "only_mark_bad_sentences",
+    ),
     [
-        ("data_1", "mysql", "my_server.ch/my_database", False, "folder_1", "a.log", True),
+        (
+            "data_1",
+            "mysql",
+            "my_server.ch/my_database",
+            False,
+            "folder_1",
+            "a.log",
+            True,
+        ),
         ("data_2", "sqlite", "database.db", False, "folder_2", "b.log", False),
         ("data_3", "sqlite", "database.db", True, "folder_2", "b.log", False),
         ("data_4", "wrong", "no_database_here", False, "folder_3", "c.log", False),
     ],
 )
 def test_send_through(
-    monkeypatch, tmpdir, data_path, db_type, database_url, sqlite_exists, log_dir, log_name, only_mark_bad_sentences
+    monkeypatch,
+    tmpdir,
+    data_path,
+    db_type,
+    database_url,
+    sqlite_exists,
+    log_dir,
+    log_name,
+    only_mark_bad_sentences,
 ):
     # Preparations
     tmpdir = pathlib.Path(str(tmpdir))

@@ -29,7 +29,6 @@ def test_missing_sqlite_db():
         "db_type",
         "database_url",
         "target_table_name",
-        "ee_models_library_file",
         "n_processes_per_model",
         "restrict_to_models",
     ),
@@ -38,7 +37,6 @@ def test_missing_sqlite_db():
             "mysql",
             "my_url",
             "mysql_cache_table",
-            "models_1.csv",
             4,
             "/path/to/model_1,/path/to/model_2",
         ),
@@ -46,7 +44,6 @@ def test_missing_sqlite_db():
             "sqlite",
             "my_url",
             "sqlite_cache_table",
-            "models_2.csv",
             12,
             "/path/to/model_3,invalid",
         ),
@@ -58,7 +55,6 @@ def test_send_through(
     db_type,
     database_url,
     target_table_name,
-    ee_models_library_file,
     n_processes_per_model,
     restrict_to_models,
 ):
@@ -71,14 +67,14 @@ def test_send_through(
             ["CHEMICAL", "/path/to/model_3", "CHEBI"],
         ],
     )
-    fake_pandas = Mock()
-    fake_pandas.read_csv.return_value = df_model_library
+    fake_dvc = Mock()
+    fake_dvc.load_ee_models_library.return_value = df_model_library
     fake_sqlalchemy = Mock()
     fake_create_mining_cache = Mock()
-    monkeypatch.setattr("bbsearch.entrypoint.create_mining_cache.pd", fake_pandas)
     monkeypatch.setattr(
         "bbsearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
     )
+    monkeypatch.setattr("bbsearch.entrypoint.create_mining_cache.DVC", fake_dvc)
     monkeypatch.setattr("bbsearch.database.CreateMiningCache", fake_create_mining_cache)
     monkeypatch.setattr(
         "bbsearch.entrypoint.create_mining_cache.getpass.getpass",
@@ -95,7 +91,6 @@ def test_send_through(
         f"--db-type={db_type}",
         f"--database-url={database_url}",
         f"--target-table-name={target_table_name}",
-        f"--ee-models-library-file={ee_models_library_file}",
         f"--n-processes-per-model={n_processes_per_model}",
         f"--restrict-to-models={restrict_to_models}",
     ]
