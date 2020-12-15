@@ -11,6 +11,7 @@ RUN pip install -e .
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
 LABEL description="REST API Server for Test Mining"
 
+
 RUN chmod -R a+rwX /src
 
 # Download the NLTK libraries (for the current user)
