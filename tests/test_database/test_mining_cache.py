@@ -10,6 +10,8 @@ import sqlalchemy
 from bbsearch.database import CreateMiningCache
 from bbsearch.database.mining_cache import Miner
 
+from ..conftest import FAKE_DVC_HASH
+
 
 class TestMiner:
     @pytest.fixture
@@ -25,7 +27,7 @@ class TestMiner:
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
-            model_dvc_hash="4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
+            model_dvc_hash=FAKE_DVC_HASH,
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
             task_queue=task_queue,
@@ -48,7 +50,7 @@ class TestMiner:
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
             model_path="en_core_web_sm",
-            model_dvc_hash="4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
+            model_dvc_hash=FAKE_DVC_HASH,
             entity_map={},
             target_table="",
             task_queue=task_queue,
@@ -105,6 +107,7 @@ class TestMiner:
         assert "mining_model" in df_result.columns
         assert "mining_model_version" in df_result.columns
         assert "mining_model_dvc_hash" in df_result.columns
+        assert df_result.iloc[0]["mining_model_dvc_hash"] == FAKE_DVC_HASH
 
         miner.engine.execute(f"drop table {miner.target_table_name}")
 

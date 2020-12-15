@@ -13,9 +13,11 @@ TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
 
 @pytest.fixture
-def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
+def mining_client(
+    fake_sqlalchemy_engine, model_entities, fake_dvc_root_path, monkeypatch
+):
     """Fixture to create a client for mining_server."""
-
+    monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_dvc_root_path)
     spacy_mock = Mock()
     spacy_mock.load.return_value = model_entities
 

@@ -13,6 +13,7 @@ from sqlalchemy.exc import OperationalError
 import docker
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
+FAKE_DVC_HASH = "4c687b7dd44d0f7adc2d3df2e2e4f624.dir"
 
 
 def pytest_addoption(parser):
@@ -420,3 +421,29 @@ def mining_schema_df():
     schema_file = ROOT_PATH / "tests" / "data" / "mining" / "request" / "request.csv"
     df = pd.read_csv(schema_file)
     return df
+
+
+@pytest.fixture()
+def fake_dvc_root_path(tmpdir):
+    fake_root_path = Path(str(tmpdir))
+
+    # Create directory structure and files
+    dvc_lock_text = f"""
+    train_model1:
+        outs:
+            - path: ../../models/ner/model1
+                md5: {FAKE_DVC_HASH}
+        outs:
+            - path: en_ner_craft_md
+                md5: {FAKE_DVC_HASH}"""
+
+    dvc_lock_path = (
+        fake_root_path / "data_and_models" / "pipelines" / "ner" / "dvc.lock"
+    )
+    dvc_lock_path.parent.mkdir(parents=True)
+
+    save_text = open(dvc_lock_path, "w")
+    save_text.write(dvc_lock_text)
+    save_text.close()
+
+    return fake_root_path
