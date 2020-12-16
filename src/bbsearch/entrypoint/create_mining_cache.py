@@ -118,7 +118,7 @@ def run_create_mining_cache(argv=None):
     elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
         database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
-    else:  # pragma: no covers
+    else:  # pragma: no cover
         # Will never get here because `parser.parse_args()` will fail first.
         # This is because we have choices=("mysql", "sqlite") in the
         # argparse parameters
