@@ -5,11 +5,14 @@ import logging
 import pathlib
 import sys
 
+import sqlalchemy
+from sqlalchemy.pool import NullPool
+
 from ..utils import DVC
 from ._helper import configure_logging
 
 
-def run_create_mining_cache(argv=None):  # pragma: no cover
+def run_create_mining_cache(argv=None):
     """Mine all texts in database and save results in a cache.
 
     Parameters
@@ -30,10 +33,17 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-uri",
+        "--database-url",
         default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
-        help="The URI to the MySQL database.",
+        help=(
+            "The location of the database depending on the database type. "
+            "For MySQL the server URL should be provided, for SQLite the "
+            "location of the database file. Generally, the scheme part of "
+            "the URL should be omitted, e.g. for MySQL the URL should be "
+            "of the form 'my_sql_server.ch:1234/my_database' and for SQLite "
+            "of the form '/path/to/the/local/database.db'."
+        ),
     )
     parser.add_argument(
         "--target-table-name",
@@ -74,11 +84,6 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     )
     args = parser.parse_args(argv)
 
-    import sqlalchemy
-    from sqlalchemy.pool import NullPool
-
-    from ..database import CreateMiningCache
-
     # Configure logging
     if args.verbose == 1:
         level = logging.INFO
@@ -91,26 +96,39 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
     logger = logging.getLogger("Mining cache entrypoint")
     logger.info("Welcome to the mining cache creation")
     logger.info("Parameters:")
-    logger.info(f"db_type                : {args.db_type}")
-    logger.info(f"database_uri           : {args.database_uri}")
-    logger.info(f"target_table_name      : {args.target_table_name}")
-    logger.info(f"n_processes_per_model  : {args.n_processes_per_model}")
-    logger.info(f"restrict_to_models     : {args.restrict_to_models}")
-    logger.info(f"log_file               : {args.log_file}")
+    logger.info(f"db-type                : {args.db_type}")
+    logger.info(f"database-url           : {args.database_url}")
+    logger.info(f"target-table-name      : {args.target_table_name}")
+    logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
+    logger.info(f"restrict-to-models     : {args.restrict_to_models}")
+    logger.info(f"log-file               : {args.log_file}")
     logger.info(f"verbose                : {args.verbose}")
+
+    # Loading libraries
+    logger.info("Loading libraries")
+    from ..database import CreateMiningCache
 
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = "/raid/sync/proj115/bbs_data/cord19_v47/databases/cord19.db"
-        if not pathlib.Path(database_path).exists():
+        database_path = pathlib.Path(args.database_url)
+        if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_uri}"
-    else:
-        raise ValueError("This is not a valid db_type.")
+        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+    else:  # pragma: no cover
+        # Will never get here because `parser.parse_args()` will fail first.
+        # This is because we have choices=("mysql", "sqlite") in the
+        # argparse parameters
+        raise ValueError("Invalid database type specified under --db-type")
+
+    # Create the database engine
+    logger.info("Creating the database engine")
+    # The NullPool prevents the Engine from using any connection more than once
+    # This is important for multiprocessing
+    database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Load the models library
     logger.info("Loading the models library")
@@ -125,17 +143,10 @@ def run_create_mining_cache(argv=None):  # pragma: no cover
             if model_path not in ee_models_library["model"].values:
                 logger.warning(
                     f"Can't restrict to model {model_path} because it is not "
-                    f"listed in the models library file {args.ee_models_library_file}. "
-                    "This entry will be ignored."
+                    f"listed in the models library file. This entry will be ignored."
                 )
         keep_rows = ee_models_library["model"].isin(model_selection)
         ee_models_library = ee_models_library[keep_rows]
-
-    # Create the database engine
-    logger.info("Creating the database engine")
-    # The NullPool prevents the Engine from using any connection more than once
-    # This is important for multiprocessing
-    database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Create the cache creation class and run the cache creation
     logger.info("Creating the cache miner")

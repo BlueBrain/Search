@@ -2,6 +2,7 @@
 import argparse
 import logging
 import pathlib
+import sys
 
 import numpy as np
 import sqlalchemy
@@ -9,7 +10,7 @@ import sqlalchemy
 from ._helper import configure_logging
 
 
-def main(argv=None):
+def run_compute_embeddings(argv=None):
     """Run CLI."""
     # CLI setup
     parser = argparse.ArgumentParser(
@@ -63,7 +64,7 @@ def main(argv=None):
         "be run on a CPU. By default using CPU for all processes.",
     )
     parser.add_argument(
-        "--h5_dataset_name",
+        "--h5-dataset-name",
         type=str,
         help="The name of the dataset in the H5 file."
         " Otherwise, the value of 'model_name_or_class' is used.",
@@ -163,5 +164,5 @@ def main(argv=None):
     mpe.do_embedding()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(run_compute_embeddings())

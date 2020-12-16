@@ -1,14 +1,15 @@
 """The entrypoint script for the search server."""
 import logging
 import pathlib
+import sys
+
+import sqlalchemy
 
 from ._helper import configure_logging, get_var, run_server
 
 
 def get_search_app():
     """Construct the search flask app."""
-    import sqlalchemy
-
     from ..server.search_server import SearchServer
     from ..utils import H5
 
@@ -40,7 +41,6 @@ def get_search_app():
     server_app = SearchServer(
         models_path, embeddings_path, indices, engine, models_list
     )
-
     return server_app
 
 
@@ -49,5 +49,5 @@ def run_search_server():
     run_server(get_search_app, "search")
 
 
-if __name__ == "__main__":
-    exit(run_search_server())
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(run_search_server())
