@@ -1,21 +1,22 @@
 """The entrypoint script for the mining server."""
 import logging
 import pathlib
+import sys
+import tempfile
 
+import sqlalchemy
+
+from ..utils import DVC
 from ._helper import configure_logging, get_var, run_server
 
 
 def get_mining_app():
     """Construct the mining flask app."""
-    import sqlalchemy
-
     from ..server.mining_server import MiningServer
 
     # Read configuration
     log_file = get_var("BBS_MINING_LOG_FILE", check_not_set=False)
     log_level = get_var("BBS_MINING_LOG_LEVEL", logging.INFO, var_type=int)
-
-    ee_models_library = get_var("BBS_MINING_EE_MODEL_LIBRARY")
     db_type = get_var("BBS_MINING_DB_TYPE")
 
     # Configure logging
@@ -28,6 +29,7 @@ def get_mining_app():
         sqlite_db_path = get_var("BBS_MINING_SQLITE_DB_PATH")
         sqlite_db_path = pathlib.Path(sqlite_db_path)
         if not sqlite_db_path.exists():
+            sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
     elif db_type == "mysql":
@@ -42,8 +44,14 @@ def get_mining_app():
         raise ValueError(f"This is not a valid database type: {db_type}.")
 
     # Create the server app
-    logger.info("Creating the server app")
-    mining_app = MiningServer(models_libs={"ee": ee_models_library}, connection=engine)
+    with tempfile.TemporaryDirectory() as tmpdir_name:
+        tmpdir = pathlib.Path(tmpdir_name)
+        tmp_csv = tmpdir / "temp.csv"
+
+        DVC.load_ee_models_library().to_csv(tmp_csv)
+
+        logger.info("Creating the server app")
+        mining_app = MiningServer(models_libs={"ee": tmp_csv}, connection=engine)
 
     return mining_app
 
@@ -53,5 +61,5 @@ def run_mining_server():
     run_server(get_mining_app, "mining")
 
 
-if __name__ == "__main__":
-    exit(run_mining_server())
+if __name__ == "__main__":  # pragma: no cover
+    sys.exit(run_mining_server())
