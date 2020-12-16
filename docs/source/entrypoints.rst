@@ -62,7 +62,7 @@ other number of used GPUs, and other platforms than DGX-1.
       --checkpoint /raid/sync/proj115/bbs_data/trained_models/biobert_nli_sts_cord19_v1 \
       --db-url dgx1.bbp.epfl.ch:8853/cord19_v47 \
       --gpus 0,1,2,3 \
-      --h5_dataset_name 'BioBERT NLI+STS CORD-19 v1' \
+      --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
       --n-processes 4 \
       --temp-dir .
 
