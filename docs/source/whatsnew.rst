@@ -24,9 +24,12 @@ Changes
 - |Add| mining for more than 1,000 articles.
 - |Add| :code:`BioBERT NLI+STS CORD-19 v1` training scripts and data.
 - |Add| CORD-19 version 65 database, embeddings, and entities.
+- |Add| tests for all entry points.
 - |Add| security checks with :code:`bandit`.
 - |Fix| NER false positive for :code:`abstract`.
 - |Fix| refactoring issue in :code:`get_embedding_model`.
+- |Change| naming of and inside the :code:`bbsearch.entrypoints` module.
+- |Change| how the NER entry points retrieve models: now DVC is used.
 - |Change| warnings when generating the documentation into errors.
 - |Remove| :code:`scibert` from :code:`setup.py` and :code:`requirements.txt`.
 
