@@ -30,14 +30,14 @@ from bbsearch.embedding_models import (
 class TestEmbeddingModels:
     def test_abstractclass(self):
         with pytest.raises(TypeError):
-            EmbeddingModel()
+            EmbeddingModel()  # type: ignore
 
         class WrongModel(EmbeddingModel):
             def embed(a):
                 pass
 
         with pytest.raises(TypeError):
-            WrongModel()
+            WrongModel()  # type: ignore
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
