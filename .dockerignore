@@ -1,6 +1,7 @@
 /.tox/
 /assets/
 /data/
+/docker/
 /docs/
 /htmlcov/
 /notebooks/
