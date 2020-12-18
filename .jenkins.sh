@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ "$BUILD_DOCS" = true ]; then
   git checkout master
   git pull
