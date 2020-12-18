@@ -370,7 +370,7 @@ class TestDVC:
         monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_dvc_root_path)
 
         pipeline = "ner"
-        dvc_hash = DVC.get_dvc_hash("models/ner/model1")
+        dvc_hash = DVC.get_dvc_hash("models/ner/model1", pipeline=pipeline)
 
         # Checks
         assert isinstance(dvc_hash, str)
