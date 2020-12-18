@@ -85,12 +85,12 @@ setup(
     extras_require=extras_require,
     entry_points={
         "console_scripts": [
-            "compute_embeddings = bbsearch.entrypoints.embeddings_entrypoint:main",
-            "create_database = bbsearch.entrypoints.database_entrypoint:main",
-            "create_mining_cache = bbsearch.entrypoints:run_create_mining_cache",
-            "embedding_server = bbsearch.entrypoints:run_embedding_server",
-            "mining_server = bbsearch.entrypoints:run_mining_server",
-            "search_server = bbsearch.entrypoints:run_search_server",
+            "compute_embeddings = bbsearch.entrypoint:run_compute_embeddings",
+            "create_database = bbsearch.entrypoint:run_create_database",
+            "create_mining_cache = bbsearch.entrypoint:run_create_mining_cache",
+            "embedding_server = bbsearch.entrypoint:run_embedding_server",
+            "mining_server = bbsearch.entrypoint:run_mining_server",
+            "search_server = bbsearch.entrypoint:run_search_server",
         ]
     },
 )

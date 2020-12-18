@@ -12,6 +12,8 @@ Welcome to Blue Brain Search's documentation!
 
    source/instructions
    source/servers
+   source/entrypoints
+   source/faq
    source/example
 
 .. toctree::
