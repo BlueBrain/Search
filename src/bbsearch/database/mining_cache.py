@@ -565,8 +565,7 @@ class CreateMiningCache:
                 model_schemas[model_name] = dict()
                 model_schemas[model_name]["model_path"] = model_path
                 model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
-                    str(model_path).split("data_and_models/")[-1],
-                    pipeline='ner'
+                    str(model_path).split("data_and_models/")[-1], pipeline="ner"
                 )
                 model_schemas[model_name]["entity_map"] = dict()
 

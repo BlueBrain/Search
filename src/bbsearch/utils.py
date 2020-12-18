@@ -549,4 +549,4 @@ class DVC:
                             dvc_hash = md5_line.replace("md5: ", "")
                             return dvc_hash.strip()
 
-        raise ValueError(f'This path {path} was not found in {dvc_lock_path}.')
+        raise ValueError(f"This path {path} was not found in {dvc_lock_path}.")

@@ -59,12 +59,15 @@ class MiningServer(Flask):
             self.ee_models[model_name] = spacy.load(model_name)
             try:
                 self.mining_cache_dvc_hashes.add(
-                    DVC.get_dvc_hash(str(model_name).split("data_and_models/")[-1],
-                                     pipeline='ner')
+                    DVC.get_dvc_hash(
+                        str(model_name).split("data_and_models/")[-1], pipeline="ner"
+                    )
                 )
             except ValueError:
-                self.logger.warning(f"We did not fund any hash attached to the model name {model_name} in the "
-                                    f"corresponding dvc.lock")
+                self.logger.warning(
+                    f"We did not fund any hash attached to "
+                    f"the model name {model_name} in the corresponding dvc.lock"
+                )
         self.connection = connection
 
         self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
