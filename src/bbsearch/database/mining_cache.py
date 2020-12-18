@@ -564,9 +564,15 @@ class CreateMiningCache:
             if model_name not in model_schemas:
                 model_schemas[model_name] = dict()
                 model_schemas[model_name]["model_path"] = model_path
-                model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
-                    str(model_path).split("data_and_models/")[-1], pipeline="ner"
-                )
+                try:
+                    model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
+                        str(model_path).split("data_and_models/")[-1], pipeline="ner"
+                    )
+                except ValueError:
+                    self.logger.warning(
+                        f"This model {model_name} was not found in"
+                        f"{str(model_path).split('data_and_models/')[-1]}"
+                    )
                 model_schemas[model_name]["entity_map"] = dict()
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
