@@ -33,6 +33,7 @@ matrix:
       env: TOXENV=docs
 
     - stage: Packaging
+      if: type = push
       python: 3.6
       env: TOXENV=check-packaging
 
