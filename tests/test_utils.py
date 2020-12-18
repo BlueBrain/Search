@@ -366,15 +366,16 @@ class TestDVC:
         )
         assert df["entity_type_name"][0] == "B"
 
-    def test_grep_dvc_hash(
+    def test_get_dvc_hash(
         self, tmpdir, fake_dvc_root_path, fake_dvc_hash, monkeypatch
     ):
         monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_dvc_root_path)
 
-        dvc_hash = DVC.grep_dvc_hash("models/ner/model1")
+        pipeline = 'ner'
+        dvc_hash = DVC.get_dvc_hash("models/ner/model1")
 
         # Checks
         assert isinstance(dvc_hash, str)
         assert dvc_hash == fake_dvc_hash
 
-        assert DVC.grep_dvc_hash("invalid_filename") is None
+        assert DVC.get_dvc_hash("invalid_filename", pipeline=pipeline) is None

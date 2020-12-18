@@ -545,6 +545,7 @@ class CreateMiningCache:
                             "model_entity_type_1": "public_entity_type_1",
                             "model_entity_type_2": "public_entity_type_2",
                         },
+                        "model_dvc_hash": "4c687b7dd44d0f7adc2d3df2e2e4f624.dir",
                     },
                     "en_ner_bionlp13cg_md": {...},
                 }
@@ -563,8 +564,9 @@ class CreateMiningCache:
             if model_name not in model_schemas:
                 model_schemas[model_name] = dict()
                 model_schemas[model_name]["model_path"] = model_path
-                model_schemas[model_name]["model_dvc_hash"] = DVC.grep_dvc_hash(
-                    str(model_path).split("data_and_models/")[-1]
+                model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
+                    str(model_path).split("data_and_models/")[-1],
+                    pipeline='ner'
                 )
                 model_schemas[model_name]["entity_map"] = dict()
 

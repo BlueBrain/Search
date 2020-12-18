@@ -514,14 +514,14 @@ class DVC:
         return ee_models_library
 
     @staticmethod
-    def grep_dvc_hash(filename, pipeline="ner"):
+    def get_dvc_hash(path, pipeline):
         """Return dvc hash of a given filename.
 
         Parameters
         ----------
-        filename: str
+        path: str
             Name of the file for which to find DVC hash.
-        pipeline: str
+        pipeline: str {"ner", "sentence_embedding"}
             Pipeline where filename is created/used. Currently, possible
             values are {'ner', 'sentence_embedding'}.
 
@@ -529,18 +529,24 @@ class DVC:
         -------
         dvc_hash: str
             Corresponding DVC hash from dvc.lock.
+
+        Raises
+        ------
+        ValueError
+            Error raises if the given path is not found in the dvc.lock file.
         """
         root_path = get_root_path()
         dvc_lock_path = (
             root_path / "data_and_models" / "pipelines" / pipeline / "dvc.lock"
         )
+        path = path.strip(" /\\")
         if dvc_lock_path.exists():
             with open(str(dvc_lock_path), "r") as f:
                 for line in f:
-                    if re.search(filename, line) and re.search("path", line):
+                    if re.search(path, line) and re.search("path", line):
                         md5_line = next(f)
                         if re.search("md5:", md5_line):
                             dvc_hash = md5_line.replace("md5: ", "")
                             return dvc_hash.strip()
 
-        return None
+        raise ValueError(f'This path {path} was not found in {dvc_lock_path}.')
