@@ -80,6 +80,7 @@ setup(
     package_dir={"": "src"},
     packages=find_packages("./src"),
     package_data={"bbsearch": ["_css/stylesheet.css", "py.typed"]},
+    zip_safe=False,
     python_requires=">=3.6",
     setup_requires=["setuptools_scm"],
     install_requires=install_requires,
