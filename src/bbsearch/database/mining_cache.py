@@ -573,6 +573,7 @@ class CreateMiningCache:
                         f"This model {model_name} was not found in"
                         f"{str(model_path).split('data_and_models/')[-1]}"
                     )
+                    model_schemas[model_name]["model_dvc_hash"] = None
                 model_schemas[model_name]["entity_map"] = dict()
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
