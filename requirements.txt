@@ -28,6 +28,7 @@ jupyter-server-proxy==1.5.0
 jupyterlab==2.2.8
 langdetect==1.0.8
 matplotlib==3.3.2
+mypy==0.790
 mysqlclient==2.0.1
 networkx==2.4
 nltk==3.5
