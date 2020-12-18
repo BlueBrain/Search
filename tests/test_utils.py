@@ -376,4 +376,5 @@ class TestDVC:
         assert isinstance(dvc_hash, str)
         assert dvc_hash == fake_dvc_hash
 
-        assert DVC.get_dvc_hash("invalid_filename", pipeline=pipeline) is None
+        with pytest.raises(ValueError):
+            DVC.get_dvc_hash("invalid_filename", pipeline=pipeline)
