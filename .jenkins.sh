@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 if [ "$BUILD_DOCS" = true ]; then
   git checkout master
@@ -18,8 +19,8 @@ if [[ -d venv ]]; then
 fi
 
 # Load modules
-module load archive/2020-11
-module load python/3.7.4
+module load archive/2019-01
+module load python/3.6.5
 
 # Install tox in a virtual environment
 python3 -m venv venv
