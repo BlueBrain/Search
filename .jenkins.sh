@@ -20,7 +20,7 @@ if [[ -d venv ]]; then
 fi
 
 # Load modules
-module load archive/2019-11
+module load archive/2020-11
 module load python/3.7.4
 
 
