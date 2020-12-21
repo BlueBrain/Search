@@ -2,7 +2,7 @@ branches:
   only:
     - "master"
 
-if: type = push
+if: commit_message =~ /(test travis|run travis)/
 
 services:
   - docker
