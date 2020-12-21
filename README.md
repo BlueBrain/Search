@@ -6,6 +6,14 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 [![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
 
+<!--- TODO: add version badge --->
+<!--- TODO: add codecov badge --->
+<!--- TODO: add dependencies badge --->
+<!--- TODO: add licence badge --->
+<!--- TODO: add binder / colab --->
+
+
+
 
 ## Installation (virtual environment)
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
