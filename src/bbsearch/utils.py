@@ -67,7 +67,7 @@ class Timer:
         self.inst_time = time.perf_counter()
         self.name = None  # what key is being populated
         self.logs = {}
-        self.start_time = None  # to be overwritten when entering
+        self.start_time = float("inf")  # to be overwritten when entering
 
     def __call__(self, name, message=None):
         """Define the name of the process to be timed.
@@ -107,13 +107,7 @@ class Timer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Stop the timer and log internally."""
-        if exc_type is not None:
-            # raised an exception
-            self.start_time = None
-            self.name = None
-            return False
-
-        else:
+        if exc_type is None:
             # nothing bad happened
             end_time = time.perf_counter()
             self.logs[self.name] = end_time - self.start_time
@@ -125,10 +119,10 @@ class Timer:
                     + fmt.format(self.logs[self.name])
                     + " seconds"
                 )
-
-        # cleanup
-        self.start_time = None
-        self.name = None
+        else:
+            # an exception was raised in the context manager; clean up.
+            self.start_time = float("inf")
+            self.name = None
 
     def __getitem__(self, item):
         """Get a single experiment."""
