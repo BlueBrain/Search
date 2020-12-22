@@ -548,15 +548,15 @@ class CreateMiningCache:
         """
         schema_df = self.ee_models_library
 
-        model_schemas: Dict[str, Dict[str, Any]] = dict()
+        model_schemas: Dict[str, Dict[str, Any]] = {}
         for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
             index=False
         ):
             _, _, model_name = model_path.rpartition("/")
             if model_name not in model_schemas:
-                model_schemas[model_name] = dict()
+                model_schemas[model_name] = {}
                 model_schemas[model_name]["model_path"] = model_path
-                model_schemas[model_name]["entity_map"] = dict()
+                model_schemas[model_name]["entity_map"] = {}
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
 

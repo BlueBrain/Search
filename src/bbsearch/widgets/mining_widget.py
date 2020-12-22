@@ -69,7 +69,7 @@ class MiningWidget(widgets.VBox):
         self.table_extractions = None
 
         # Define Widgets
-        self.widgets = dict()
+        self.widgets = {}
 
         self._init_widgets(default_text)
         self._init_ui()

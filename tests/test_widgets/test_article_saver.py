@@ -57,7 +57,7 @@ class TestArticleSaver:
         article_ids = pd.read_sql(sql_query, fake_sqlalchemy_engine)[
             "article_id"
         ].to_list()
-        all_articles_paragraphs_id = dict()
+        all_articles_paragraphs_id = {}
         for article_id in set(article_ids):
             sql_query = f"""
             SELECT paragraph_pos_in_article
