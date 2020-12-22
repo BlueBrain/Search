@@ -40,9 +40,8 @@ class SearchServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
-        self.name = "SearchServer"
+        self.server_name = "SearchServer"
         self.connection = connection
 
         if indices is None:
@@ -50,7 +49,7 @@ class SearchServer(Flask):
 
         self.indices = indices
         self.logger.info("Initializing the server...")
-        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Name: {self.server_name}")
         self.logger.info(f"Version: {self.version}")
 
         self.trained_models_path = pathlib.Path(trained_models_path)
@@ -76,9 +75,14 @@ class SearchServer(Flask):
         self.logger.info("Normalizing precomputed embeddings...")
         for model_name, embeddings in self.precomputed_embeddings.items():
             embeddings_t = torch.from_numpy(embeddings)
-            norm = torch.norm(input=embeddings_t, dim=1, keepdim=True)
+            norm: torch.Tensor = torch.norm(input=embeddings_t, dim=1, keepdim=True)
             norm[norm == 0] = 1
-            embeddings_t /= norm
+            # Mypy cannot determine the return type of the "/=" operator
+            # here, potentially because in the torch.Tensor class it's
+            # defined as follows:
+            #     __itruediv__ = _C._TensorBase.__idiv__
+            # I don't see a way of fixing this, so we have to ignore the error.
+            embeddings_t /= norm  # type: ignore
             self.precomputed_embeddings[model_name] = embeddings_t
 
         self.logger.info("Constructing the search engine...")
@@ -141,7 +145,7 @@ class SearchServer(Flask):
         self.logger.info("Help called")
 
         response = {
-            "name": self.name,
+            "name": self.server_name,
             "version": self.version,
             "database": self.connection.url.database,
             "supported_models": self.models,
