@@ -37,6 +37,7 @@ class TestEmbeddingModels:
         class WrongModel(EmbeddingModel):
             def embed(self, _):
                 pass
+
         assert "__abstractmethods__" in WrongModel.__dict__
         assert len(WrongModel.__dict__["__abstractmethods__"]) > 0
 
