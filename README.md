@@ -3,6 +3,11 @@
 [![Build Status](https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master)](https://travis-ci.com/BlueBrain/BlueBrainSearch)
 
 ## Installation (virtual environment)
+We currently support the following Python versions. Make sure you are  using one of them.
+ - Python 3.6
+ - Python 3.7
+ - Python 3.8
+
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
 ```bash
