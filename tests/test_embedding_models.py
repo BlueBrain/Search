@@ -28,16 +28,17 @@ from bbsearch.embedding_models import (
 
 
 class TestEmbeddingModels:
-    def test_abstractclass(self):
-        with pytest.raises(TypeError):
-            EmbeddingModel()
+    def test_abstract_class(self):
+        # Test that "EmbeddingModel" is abstract
+        assert "__abstractmethods__" in EmbeddingModel.__dict__
+        assert len(EmbeddingModel.__dict__["__abstractmethods__"]) > 0
 
+        # Test not overriding all abstract methods
         class WrongModel(EmbeddingModel):
-            def embed(a):
+            def embed(self, _):
                 pass
-
-        with pytest.raises(TypeError):
-            WrongModel()
+        assert "__abstractmethods__" in WrongModel.__dict__
+        assert len(WrongModel.__dict__["__abstractmethods__"]) > 0
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
