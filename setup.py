@@ -36,7 +36,6 @@ install_requires = [
     "sentence-transformers==0.3.5",
     "spacy==2.3.1",
     "tensorflow_hub",
-    "tf-nightly",
     "torch",
     "tqdm",
     "transformers==3.0.2",
