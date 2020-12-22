@@ -3,6 +3,7 @@ import argparse
 import logging
 import pathlib
 import sys
+from typing import Optional
 
 import numpy as np
 import sqlalchemy
@@ -121,10 +122,9 @@ def run_compute_embeddings(argv=None):
     # Path preparation and checking
     out_file = pathlib.Path(args.outfile)
     temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
+    checkpoint_path: Optional[pathlib.Path] = None
     if args.checkpoint is not None:
         checkpoint_path = pathlib.Path(args.checkpoint)
-    else:
-        checkpoint_path = None
     indices_path = (
         None if args.indices_path is None else pathlib.Path(args.indices_path)
     )
