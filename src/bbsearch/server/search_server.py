@@ -1,5 +1,4 @@
 """The search server."""
-import logging
 import pathlib
 
 import torch

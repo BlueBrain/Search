@@ -1,7 +1,6 @@
 """Implementation of a server that computes sentence embeddings."""
 import csv
 import io
-import logging
 import textwrap
 
 from flask import Flask, jsonify, make_response, request
