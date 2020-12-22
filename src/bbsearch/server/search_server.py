@@ -74,7 +74,7 @@ class SearchServer(Flask):
         self.logger.info("Normalizing precomputed embeddings...")
         for model_name, embeddings in self.precomputed_embeddings.items():
             embeddings_t = torch.from_numpy(embeddings)
-            norm: torch.Tensor = torch.norm(input=embeddings_t, dim=1, keepdim=True)
+            norm = torch.norm(input=embeddings_t, dim=1, keepdim=True)
             norm[norm == 0] = 1
             embeddings_t /= norm
             self.precomputed_embeddings[model_name] = embeddings_t

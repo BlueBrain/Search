@@ -68,7 +68,7 @@ class Timer:
         self.inst_time = time.perf_counter()
         self.name = None  # what key is being populated
         self.logs = {}
-        self.start_time = float("inf")  # to be overwritten when entering
+        self.start_time = float("nan")  # to be overwritten when entering
 
     def __call__(self, name, message=None):
         """Define the name of the process to be timed.
@@ -122,7 +122,7 @@ class Timer:
                 )
         else:
             # an exception was raised in the context manager; clean up.
-            self.start_time = float("inf")
+            self.start_time = float("nan")
             self.name = None
 
     def __getitem__(self, item):
