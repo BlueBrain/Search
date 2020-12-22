@@ -69,7 +69,7 @@ class MiningWidget(widgets.VBox):
         self.table_extractions = None
 
         # Define Widgets
-        self.widgets = dict()
+        self.widgets = {}
 
         self._init_widgets(default_text)
         self._init_ui()
@@ -80,7 +80,7 @@ class MiningWidget(widgets.VBox):
         if not response.ok:
             raise Exception(
                 f"It seems there is an issue with the bbs mining server. Response "
-                f"status is {response.status_code} : {response.content}"
+                f"status is {response.status_code} : {response.text}"
             )
 
         response_json = response.json()

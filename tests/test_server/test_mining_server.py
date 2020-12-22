@@ -40,6 +40,7 @@ class TestMiningServer:
         with open(schema_file, "r") as f:
             schema_request = f.read()
 
+        # Test a valid request
         request_json = {"text": "hello", "schema": schema_request}
         response = mining_client.post("/text", json=request_json)
         assert response.headers["Content-Type"] == "application/json"
@@ -58,20 +59,23 @@ class TestMiningServer:
             "ontology_source,paper_id,"
             "start_char,end_char"
         )
+
+        # Test request with a missing text
         request_json = {}
         response = mining_client.post("/text", json=request_json)
         assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": 'The request "text" is missing.'}
 
+        # Test request with a missing schema
         request_json = {"text": "hello"}
         response = mining_client.post("/text", json=request_json)
         assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": 'The request "schema" is missing.'}
 
-        request_json = "text"
-        response = mining_client.post("/text", data=request_json)
+        # Test a non-JSON request
+        response = mining_client.post("/text", data="text")
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
@@ -82,14 +86,15 @@ class TestMiningServer:
         schema_file = TESTS_PATH / "data" / "mining" / "request" / "request.csv"
         with open(schema_file, "r") as f:
             schema_request = f.read()
-        request_json = {}
-        response = mining_client.post("/database", json=request_json)
+
+        # Test a request with a missing "identifiers" key
+        response = mining_client.post("/database", json={})
         assert list(response.json.keys()) == ["error"]
         assert response.status_code == 400
         assert response.json == {"error": 'The request "identifiers" is missing.'}
 
-        request_json = "text"
-        response = mining_client.post("/database", data=request_json)
+        # Test a non-JSON request
+        response = mining_client.post("/database", data="text")
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
