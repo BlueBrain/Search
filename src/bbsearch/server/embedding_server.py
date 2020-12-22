@@ -25,12 +25,11 @@ class EmbeddingServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.name = "EmbeddingServer"
+        self.server_name = "EmbeddingServer"
         self.version = bbsearch.__version__
 
         self.logger.info("Initializing the server...")
-        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Name: {self.server_name}")
         self.logger.info(f"Version: {self.version}")
 
         self.add_url_rule(rule="/", view_func=self.request_welcome)
@@ -72,7 +71,7 @@ class EmbeddingServer(Flask):
         self.logger.info("Got query to help on /help")
 
         response = {
-            "name": self.name,
+            "name": self.server_name,
             "version": self.version,
             "description": "The BBS sentence embedding server.",
             "GET": {
