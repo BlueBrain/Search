@@ -76,12 +76,7 @@ class SearchServer(Flask):
             embeddings_t = torch.from_numpy(embeddings)
             norm: torch.Tensor = torch.norm(input=embeddings_t, dim=1, keepdim=True)
             norm[norm == 0] = 1
-            # Mypy cannot determine the return type of the "/=" operator
-            # here, potentially because in the torch.Tensor class it's
-            # defined as follows:
-            #     __itruediv__ = _C._TensorBase.__idiv__
-            # I don't see a way of fixing this, so we have to ignore the error.
-            embeddings_t /= norm  # type: ignore
+            embeddings_t /= norm
             self.precomputed_embeddings[model_name] = embeddings_t
 
         self.logger.info("Constructing the search engine...")
