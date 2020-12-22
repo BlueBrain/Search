@@ -86,7 +86,7 @@ class SearchWidget(widgets.VBox):
         if not response.ok:
             raise Exception(
                 f"It seems there is an issue with the bbs search server. Response "
-                f"status is {response.status_code} : {response.content}"
+                f"status is {response.status_code} : {response.text}"
             )
 
         response_json = response.json()
