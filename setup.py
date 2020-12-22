@@ -32,7 +32,7 @@ install_requires = [
     "scikit-learn",
     "scipy",
     "scispacy",
-    "sent2vec-prebuilt",
+    "sent2vec",
     "sentence-transformers==0.3.5",
     "spacy==2.3.1",
     "tensorflow",
