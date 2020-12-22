@@ -2,6 +2,7 @@
 import json
 import pathlib
 import time
+from typing import Set
 
 import h5py
 import numpy as np
@@ -182,11 +183,11 @@ class H5:
         if not h5_paths_temp:
             raise ValueError("No temporary h5 files provided.")
 
-        all_indices = set()
+        all_indices: Set[int] = set()
         dim = None
         for path_temp in h5_paths_temp:
             with h5py.File(path_temp, "r") as f:
-                current_indices = set(f[f"{dataset_name}_indices"][:, 0])
+                current_indices_set: Set[int] = set(f[f"{dataset_name}_indices"][:, 0])
                 current_dim = f[f"{dataset_name}"].shape[1]
 
                 if dim is None:
@@ -197,13 +198,13 @@ class H5:
                             f"The dimension of {path_temp} is inconsistent"
                         )
 
-                if all_indices & current_indices:
-                    inters = all_indices & current_indices
+                if all_indices & current_indices_set:
+                    inters = all_indices & current_indices_set
                     raise ValueError(
                         f"{path_temp} introduces an overlapping index: {inters}"
                     )
 
-                all_indices |= current_indices
+                all_indices |= current_indices_set
 
         final_length = max(all_indices) + 1
         H5.create(h5_path_output, dataset_name, shape=(final_length, dim))
