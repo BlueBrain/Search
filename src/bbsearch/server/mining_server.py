@@ -1,6 +1,6 @@
 """The mining server."""
 import io
-import logging
+from typing import Any, Dict, Iterable, Tuple
 
 import pandas as pd
 import spacy
@@ -37,12 +37,11 @@ class MiningServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
-        self.name = "MiningServer"
+        self.server_name = "MiningServer"
 
         self.logger.info("Initializing the server")
-        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Name: {self.server_name}")
         self.logger.info(f"Version: {self.version}")
 
         self.logger.info("Loading the model libraries")
@@ -71,7 +70,7 @@ class MiningServer(Flask):
         self.logger.info("Help called")
 
         response = {
-            "name": self.name,
+            "name": self.server_name,
             "version": self.version,
             "database": self.connection.url.database,
             "description": "Run the BBS text mining pipeline on a given text.",
@@ -235,7 +234,7 @@ class MiningServer(Flask):
 
             schema_df = self.read_df_from_str(schema_str)
 
-            texts = [(text, {})]
+            texts: Iterable[Tuple[str, Dict[Any, Any]]] = [(text, {})]
             df_all, etypes_na = self.mine_texts(
                 texts=texts, schema_request=schema_df, debug=debug
             )
