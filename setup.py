@@ -63,8 +63,7 @@ extras_require = {
 setup(
     name="BBSearch",
     description="Blue Brain Search",
-    author="Blue Brain Project (EPFL) - ML Team",
-    author_email="bbp-ou-machinelearning@groupes.epfl.ch",
+    author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/BlueBrainSearch",
     project_urls={
         "Source": "https://github.com/BlueBrain/BlueBrainSearch",
