@@ -337,7 +337,7 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
     report = OrderedDict()
 
     etypes_counts = dict(zip(*unique_etypes(iob_true, mode=mode, return_counts=True)))
-    etypes_map = etypes_map or dict()
+    etypes_map = etypes_map or {}
     etypes_map = copy.deepcopy(etypes_map)
     for etype in etypes_counts.keys() - etypes_map.keys():
         etypes_map[etype] = etype
@@ -448,7 +448,7 @@ def ner_errors(
         )
     etypes = unique_etypes(iob_true)
 
-    etypes_map = etypes_map if etypes_map is not None else dict()
+    etypes_map = etypes_map if etypes_map is not None else {}
     etypes_map = {etype: etypes_map.get(etype, etype) for etype in etypes}
 
     report = OrderedDict()

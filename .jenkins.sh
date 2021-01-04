@@ -1,6 +1,8 @@
 #!/bin/bash
 
 set -e
+set -x
+
 
 if [ "$BUILD_DOCS" = true ]; then
   git checkout master
@@ -21,6 +23,7 @@ fi
 module load archive/2020-11
 module load python/3.7.4
 
+
 # Install tox in a virtual environment
 python3 -m venv venv
 source venv/bin/activate
@@ -33,7 +36,7 @@ isort --version
 isort --honor-noqa --diff --profile black setup.py src tests
 tox -e lint -vv
 tox -e docs
-tox -e py36 -- --color=yes
+tox -e py37 -- --color=yes
 
 if [ "$BUILD_DOCS" = true ]; then
   .tox/docs/bin/python -c "import bbsearch; print('Installed version BBSearch: ', bbsearch.__version__)"

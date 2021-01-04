@@ -50,10 +50,8 @@ class TestEmbeddingServer:
         response = embedding_client.post("/v1/embed/csv", json=request_json)
         assert response.status_code == 400
 
-        request_json = "not a json as request"
-        response = embedding_client.post("/v1/embed/csv", data=request_json)
+        response = embedding_client.post("/v1/embed/csv", data="not json")
         assert response.status_code == 400
 
-        request_json = "not a json as request"
-        response = embedding_client.post("/v1/embed/invalid_format", data=request_json)
+        response = embedding_client.post("/v1/embed/invalid_format", data="not json")
         assert response.status_code == 400

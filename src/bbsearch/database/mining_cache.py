@@ -4,6 +4,7 @@ import logging
 import multiprocessing as mp
 import queue
 import traceback
+from typing import Any, Dict, List
 
 import spacy
 import sqlalchemy
@@ -410,15 +411,21 @@ class CreateMiningCache:
         )
 
         # Flags to let the workers know there won't be any new tasks.
-        can_finish = {model_name: mp.Event() for model_name in self.model_schemas}
+        can_finish: Dict[str, mp.synchronize.Event] = {
+            model_name: mp.Event() for model_name in self.model_schemas
+        }
 
         # Prepare the task queues for the workers - one task queue per model.
-        task_queues = {model_name: mp.Queue() for model_name in self.model_schemas}
+        task_queues: Dict[str, mp.Queue] = {
+            model_name: mp.Queue() for model_name in self.model_schemas
+        }
 
         # Spawn the workers according to `workers_per_model`.
         self.logger.info("Spawning the worker processes")
         worker_processes = []
-        workers_by_queue = {queue_name: [] for queue_name in task_queues}
+        workers_by_queue: Dict[str, List[mp.Process]] = {
+            queue_name: [] for queue_name in task_queues
+        }
         for model_name, model_schema in self.model_schemas.items():
             for i in range(self.workers_per_model):
                 worker_name = f"{model_name}_{i}"
@@ -485,7 +492,7 @@ class CreateMiningCache:
         self.logger.info("No more new tasks, just waiting for the workers to finish")
         # We'll transfer finished workers from `worker_processes`
         # to `finished_workers`. We're done when `worker_processes` is empty.
-        finished_workers = []
+        finished_workers: List[mp.Process] = []
         while len(worker_processes) > 0:
             self.logger.debug(
                 f"Status: {len(worker_processes)} workers still alive, "
@@ -556,13 +563,13 @@ class CreateMiningCache:
         """
         schema_df = self.ee_models_library
 
-        model_schemas = dict()
+        model_schemas: Dict[str, Dict[str, Any]] = {}
         for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
             index=False
         ):
             _, _, model_name = model_path.rpartition("/")
             if model_name not in model_schemas:
-                model_schemas[model_name] = dict()
+                model_schemas[model_name] = {}
                 model_schemas[model_name]["model_path"] = model_path
                 try:
                     model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
@@ -574,7 +581,8 @@ class CreateMiningCache:
                         f"{str(model_path).split('data_and_models/')[-1]}"
                     )
                     model_schemas[model_name]["model_dvc_hash"] = None
-                model_schemas[model_name]["entity_map"] = dict()
+
+                model_schemas[model_name]["entity_map"] = {}
 
             model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
 

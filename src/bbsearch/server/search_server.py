@@ -1,5 +1,4 @@
 """The search server."""
-import logging
 import pathlib
 
 import torch
@@ -40,9 +39,8 @@ class SearchServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
         self.version = bbsearch.__version__
-        self.name = "SearchServer"
+        self.server_name = "SearchServer"
         self.connection = connection
 
         if indices is None:
@@ -50,7 +48,7 @@ class SearchServer(Flask):
 
         self.indices = indices
         self.logger.info("Initializing the server...")
-        self.logger.info(f"Name: {self.name}")
+        self.logger.info(f"Name: {self.server_name}")
         self.logger.info(f"Version: {self.version}")
 
         self.trained_models_path = pathlib.Path(trained_models_path)
@@ -141,7 +139,7 @@ class SearchServer(Flask):
         self.logger.info("Help called")
 
         response = {
-            "name": self.name,
+            "name": self.server_name,
             "version": self.version,
             "database": self.connection.url.database,
             "supported_models": self.models,

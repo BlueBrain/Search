@@ -3,6 +3,7 @@ import json
 import pathlib
 import re
 import time
+from typing import Set
 
 import h5py
 import numpy as np
@@ -69,7 +70,7 @@ class Timer:
         self.inst_time = time.perf_counter()
         self.name = None  # what key is being populated
         self.logs = {}
-        self.start_time = None  # to be overwritten when entering
+        self.start_time = float("nan")  # to be overwritten when entering
 
     def __call__(self, name, message=None):
         """Define the name of the process to be timed.
@@ -109,13 +110,7 @@ class Timer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Stop the timer and log internally."""
-        if exc_type is not None:
-            # raised an exception
-            self.start_time = None
-            self.name = None
-            return False
-
-        else:
+        if exc_type is None:
             # nothing bad happened
             end_time = time.perf_counter()
             self.logs[self.name] = end_time - self.start_time
@@ -127,10 +122,10 @@ class Timer:
                     + fmt.format(self.logs[self.name])
                     + " seconds"
                 )
-
-        # cleanup
-        self.start_time = None
-        self.name = None
+        else:
+            # an exception was raised in the context manager; clean up.
+            self.start_time = float("nan")
+            self.name = None
 
     def __getitem__(self, item):
         """Get a single experiment."""
@@ -190,11 +185,11 @@ class H5:
         if not h5_paths_temp:
             raise ValueError("No temporary h5 files provided.")
 
-        all_indices = set()
+        all_indices: Set[int] = set()
         dim = None
         for path_temp in h5_paths_temp:
             with h5py.File(path_temp, "r") as f:
-                current_indices = set(f[f"{dataset_name}_indices"][:, 0])
+                current_indices_set: Set[int] = set(f[f"{dataset_name}_indices"][:, 0])
                 current_dim = f[f"{dataset_name}"].shape[1]
 
                 if dim is None:
@@ -205,13 +200,13 @@ class H5:
                             f"The dimension of {path_temp} is inconsistent"
                         )
 
-                if all_indices & current_indices:
-                    inters = all_indices & current_indices
+                if all_indices & current_indices_set:
+                    inters = all_indices & current_indices_set
                     raise ValueError(
                         f"{path_temp} introduces an overlapping index: {inters}"
                     )
 
-                all_indices |= current_indices
+                all_indices |= current_indices_set
 
         final_length = max(all_indices) + 1
         H5.create(h5_path_output, dataset_name, shape=(final_length, dim))

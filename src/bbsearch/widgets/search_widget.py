@@ -86,7 +86,7 @@ class SearchWidget(widgets.VBox):
         if not response.ok:
             raise Exception(
                 f"It seems there is an issue with the bbs search server. Response "
-                f"status is {response.status_code} : {response.content}"
+                f"status is {response.status_code} : {response.text}"
             )
 
         response_json = response.json()
@@ -96,7 +96,7 @@ class SearchWidget(widgets.VBox):
         self.search_server_version = response_json["version"]  # e.g. "0.0.9.dev2+g69"
 
         self.widgets_style = {"description_width": "initial"}
-        self.widgets = dict()
+        self.widgets = {}
         self._init_widgets()
         self._init_ui()
 
