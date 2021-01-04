@@ -544,6 +544,8 @@ class DVC:
                 #   {'cmd' : ...
                 #   'deps': [{'path': ...,
                 #             'md5': ...}]}
+                #   'outs': [{'path': ...,
+                #             'md5': ...}]}
                 # }
             for v in dvc_lock_file.values():
                 if isinstance(v, dict) and "outs" in v.keys():
