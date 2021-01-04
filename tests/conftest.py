@@ -420,12 +420,11 @@ def fake_dvc_root_path(tmpdir, fake_dvc_hash):
     # Create directory structure and dvc.lock file
     dvc_lock_text = f"""
     train_model1:
-        outs:
-            - path: ../../models/ner/model1
-                md5: {fake_dvc_hash}
-        outs:
-            - path: en_ner_craft_md
-                md5: {fake_dvc_hash}"""
+      outs:
+      - path: ../../models/ner/model1
+        md5: {fake_dvc_hash}
+      - path: en_ner_craft_md
+        md5: {fake_dvc_hash}"""
 
     dvc_lock_path = (
         fake_root_path / "data_and_models" / "pipelines" / "ner" / "dvc.lock"

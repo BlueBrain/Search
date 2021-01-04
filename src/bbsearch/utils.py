@@ -8,6 +8,7 @@ import h5py
 import numpy as np
 import pandas as pd
 import tqdm
+import yaml
 
 
 def get_root_path():
@@ -542,11 +543,22 @@ class DVC:
         path = path.strip(" /\\")
         if dvc_lock_path.exists():
             with open(str(dvc_lock_path), "r") as f:
-                for line in f:
-                    if re.search(path, line) and re.search("path", line):
-                        md5_line = next(f)
-                        if re.search("md5:", md5_line):
-                            dvc_hash = md5_line.replace("md5: ", "")
-                            return dvc_hash.strip()
+                dvc_lock_file = yaml.safe_load(f)
+                # The resulting dictionary should be like:
+                # {'step1':
+                #   {'cmd' : ...
+                #   'deps': [{'path': ...,
+                #             'md5': ...}]}
+                # }
+            for v in dvc_lock_file.values():
+                if isinstance(v, dict) and "outs" in v.keys():
+                    for path_dict in v["outs"]:
+                        if (
+                            "path" in path_dict.keys()
+                            and re.search(path, path_dict["path"])
+                            and "md5" in path_dict.keys()
+                        ):
+                            dvc_hash = path_dict["md5"].strip()
+                            return dvc_hash
 
         raise ValueError(f"This path {path} was not found in {dvc_lock_path}.")

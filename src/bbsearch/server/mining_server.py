@@ -58,16 +58,18 @@ class MiningServer(Flask):
             self.logger.info(f"Loading model {model_name}")
             self.ee_models[model_name] = spacy.load(model_name)
             try:
-                self.mining_cache_dvc_hashes.add(
-                    DVC.get_dvc_hash(
-                        str(model_name).split("data_and_models/")[-1], pipeline="ner"
-                    )
+                dvc_hash = DVC.get_dvc_hash(
+                    str(model_name).split("data_and_models/")[-1],
+                    pipeline="ner",
                 )
             except ValueError:
                 self.logger.warning(
                     f"We did not fund any hash attached to "
                     f"the model name {model_name} in the corresponding dvc.lock"
                 )
+            else:
+                self.mining_cache_dvc_hashes.add(dvc_hash)
+
         self.connection = connection
 
         self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
@@ -185,10 +187,21 @@ class MiningServer(Flask):
                     self.mining_cache_dvc_hashes
                 ):
                     warnings += [
-                        f"It seems the model used by the mining server "
-                        f"{self.mining_cache_dvc_hashes} are not the same "
-                        f"as the ones in the mining cache "
-                        f"{set(df_all['mining_model_dvc_hash'].unique())}"
+                        f"""Some of the cached named entity extractions
+                        were made with a model that's not known to the mining server.
+
+                        Server loads the following models:
+                        {self.mining_cache_dvc_hashes}
+
+                        The following unknown models were found in the mining cache:
+                        {set(df_all["mining_model_dvc_hash"].unique())}
+
+                        Please contact the developers and include the warning above.
+
+                        Consider disabling the mining cache if you want to use
+                        the models loaded by the mining server.
+                        (The mining will take much longer!)
+                        """
                     ]
                 # apply specs if not debug
                 if not debug:
