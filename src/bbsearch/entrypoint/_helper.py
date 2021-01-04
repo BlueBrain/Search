@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 import textwrap
+from typing import Dict, Optional, Sequence
 
 
 def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
@@ -153,11 +154,44 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
         return help
 
 
-def parse_args_or_environment(parser, env_variable_names, argv=None):
+def parse_args_or_environment(
+    parser: argparse.ArgumentParser,
+    env_variable_names: Dict[str, str],
+    argv: Optional[Sequence[str]] = None,
+) -> collections.ChainMap:
+    """Parse CLI arguments with some defaults specified in the environment.
+
+    Sometimes we would like to specify the default arguments for some CLI
+    parameters in the environment. This can save typing out long parameters
+    in the command line. If present, the ".env" file will be loaded, and the
+    order of precedence is the following
+
+        1. Command line arguments
+        2. Environment variables
+        3. The .env file.
+
+    Parameters
+    ----------
+    parser
+        An instance of `argparse.ArgumentParser`.
+    env_variable_names
+        The parameter names that should be looked up in the environment. The
+        values of this mapping are the names as they appear in the environment,
+        the keys are the names under which the values will be saved and
+        returned.
+    argv
+        An optional iterable of command line arguments. It's used in the
+        `parser.parse_args(argv)` call and is useful for testing.
+
+    Returns
+    -------
+    args:
+
+    """
     from dotenv import load_dotenv
 
     # Parse CLI arguments
-    cli_args = vars(parser.parse_args(argv))
+    cli_args = vars(parser.parse_args(args=argv))
 
     # Parse environment
     load_dotenv()
@@ -176,7 +210,10 @@ def parse_args_or_environment(parser, env_variable_names, argv=None):
             parser.print_usage()
             parser.exit(
                 status=1,
-                message=f"The following arguments are required: --{arg_name.replace('_', '-')}\n",
+                message=(
+                    "The following arguments are required: "
+                    f"--{arg_name.replace('_', '-')}\n"
+                ),
             )
 
     return args

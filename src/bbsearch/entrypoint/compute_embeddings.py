@@ -25,7 +25,7 @@ def run_compute_embeddings(argv=None):
         Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT', 'USE'.
         Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',
         'SklearnVectorizer'.
-        
+
         See also 'get_embedding_model(...)'.
         """,
     )
@@ -62,7 +62,7 @@ def run_compute_embeddings(argv=None):
         URL of the MySQL database. Generally, the scheme part of
         the URL should be omitted, i.e. the URL should be
         of the form 'my_sql_server.ch:1234/my_database'.
-        
+
         If missing, then the environment variable DB_URL will be read.
         """,
         default=argparse.SUPPRESS,

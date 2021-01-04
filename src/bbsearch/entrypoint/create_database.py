@@ -52,13 +52,13 @@ def run_create_database(argv=None):
         type=str,
         help="""
         The location of the database depending on the database type.
-        
+
         For MySQL the server URL should be provided, for SQLite the
         location of the database file. Generally, the scheme part of
         the URL should be omitted, e.g. for MySQL the URL should be
         of the form 'my_sql_server.ch:1234/my_database' and for SQLite
         of the form '/path/to/the/local/database.db'.
-        
+
         If missing, then the environment variable DATABASE_URL will
         be read.
         """,
