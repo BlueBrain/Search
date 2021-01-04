@@ -171,6 +171,11 @@ class MiningServer(Flask):
                 requested_etypes = schema_df["entity_type"].unique()
                 df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
 
+                # drop unwanted hashes
+                df_all = df_all[
+                    df_all["mining_model_dvc_hash"].isin(self.mining_cache_dvc_hashes)
+                ]
+
                 # append the ontology source column
                 os_mapping = {
                     et: os
