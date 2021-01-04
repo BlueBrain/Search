@@ -50,12 +50,14 @@ def test_send_through(
     )
 
     # Prepare CLI input
+    db_url = "my-sql-server.ch/my_db"
     args_and_opts = [
         model,
         outfile,
+        f"--db-url={db_url}",
         f"--batch-size-inference={batch_size_inference}",
         f"--batch-size-transfer={batch_size_transfer}",
-        f"--log-dir={str(tmpdir)}",
+        f"--log-file={str(tmpdir / 'my.log')}",
         f"--n-processes={n_processes}",
         f"--temp-dir={temp_dir}",
     ]
