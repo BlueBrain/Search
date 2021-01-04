@@ -8,23 +8,26 @@ from typing import Optional
 import numpy as np
 import sqlalchemy
 
-from ._helper import configure_logging
+from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_compute_embeddings(argv=None):
     """Run CLI."""
     # CLI setup
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
         "model_name_or_class",
         type=str,
-        help="The name or class of the model for which to compute the embeddings."
-        " Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT', 'USE'."
-        " Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',"
-        " 'SklearnVectorizer'."
-        " See also 'get_embedding_model(...)'.",
+        help="""
+        The name or class of the model for which to compute the embeddings.
+        Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT', 'USE'.
+        Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',
+        'SklearnVectorizer'.
+        
+        See also 'get_embedding_model(...)'.
+        """,
     )
     parser.add_argument(
         "outfile",
@@ -47,47 +50,57 @@ def run_compute_embeddings(argv=None):
         "-c",
         "--checkpoint",
         type=str,
-        help="If 'model_name_or_class' is the class, the path of the model to load."
-        " Otherwise, this argument is ignored.",
+        help="""
+        If 'model_name_or_class' is the class, the path of the model to load.
+        Otherwise, this argument is ignored.
+        """,
     )
     parser.add_argument(
         "--db-url",
-        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
-        help="Url of the database",
+        help="""
+        URL of the MySQL database. Generally, the scheme part of
+        the URL should be omitted, i.e. the URL should be
+        of the form 'my_sql_server.ch:1234/my_database'.
+        
+        If missing, then the environment variable DB_URL will be read.
+        """,
+        default=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--gpus",
         type=str,
-        help="Comma seperated list of GPU indices for each process. To only "
-        "run on a CPU leave blank. For example '2,,3,' will use GPU 2 and 3 "
-        "for the 1st and 3rd process respectively. The processes 2 and 4 will "
-        "be run on a CPU. By default using CPU for all processes.",
+        help="""
+        Comma separated list of GPU indices for each process. To only
+        run on a CPU leave blank. For example '2,,3,' will use GPU 2 and 3
+        for the 1st and 3rd process respectively. The processes 2 and 4 will
+        be run on a CPU. By default using CPU for all processes.
+        """,
     )
     parser.add_argument(
         "--h5-dataset-name",
         type=str,
-        help="The name of the dataset in the H5 file."
-        " Otherwise, the value of 'model_name_or_class' is used.",
+        help="""
+        The name of the dataset in the H5 file.  Otherwise, the value of
+        'model_name_or_class' is used.
+        """,
     )
     parser.add_argument(
         "--indices-path",
         type=str,
-        help="Path to a .npy file containing sentence ids to embed. Specifically, "
-        "it is a 1D numpy array of integers representing the sentence ids. If "
-        "not specified we embedd all sentences in the database.",
+        help="""
+        Path to a .npy file containing sentence ids to embed. Specifically,
+        it is a 1D numpy array of integers representing the sentence ids. If
+        not specified we embed all sentences in the database.
+        """,
     )
     parser.add_argument(
-        "--log-dir",
-        default="/raid/projects/bbs/logs/",
+        "--log-file",
+        "-l",
         type=str,
-        help="The directory path where to save the logs",
-    )
-    parser.add_argument(
-        "--log-name",
-        default="embeddings_computation.log",
-        type=str,
-        help="The name of the log file",
+        metavar="<filename>",
+        default=None,
+        help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
         "-n",
@@ -99,15 +112,20 @@ def run_compute_embeddings(argv=None):
     parser.add_argument(
         "--temp-dir",
         type=str,
-        help="The path to where temporary h5 files are saved. If not "
-        "specified then identical to the folder in which the output h5 "
-        "file is placed.",
+        help="""
+        The path to where temporary h5 files are saved. If not specified then
+        identical to the folder in which the output h5 file is placed.
+        """,
     )
-    args = parser.parse_args(argv)
+
+    # Parse CLI arguments
+    env_variable_names = {
+        "db_url": "DB_URL",
+    }
+    args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    log_file = pathlib.Path(args.log_dir) / args.log_name
-    configure_logging(log_file, logging.INFO)
+    configure_logging(args["log_file"], logging.INFO)
     logger = logging.getLogger(__name__)
 
     # Imports (they are here to make --help quick)
@@ -116,24 +134,24 @@ def run_compute_embeddings(argv=None):
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")
-    full_url = f"mysql+mysqldb://guest:guest@{args.db_url}?charset=utf8mb4"
+    full_url = f"mysql+mysqldb://guest:guest@{args['db_url']}?charset=utf8mb4"
     engine = sqlalchemy.create_engine(full_url)
 
     # Path preparation and checking
-    out_file = pathlib.Path(args.outfile)
-    temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
+    out_file = pathlib.Path(args["outfile"])
+    temp_dir = None if args["temp_dir"] is None else pathlib.Path(args["temp_dir"])
     checkpoint_path: Optional[pathlib.Path] = None
-    if args.checkpoint is not None:
-        checkpoint_path = pathlib.Path(args.checkpoint)
+    if args["checkpoint"] is not None:
+        checkpoint_path = pathlib.Path(args["checkpoint"])
     indices_path = (
-        None if args.indices_path is None else pathlib.Path(args.indices_path)
+        None if args["indices_path"] is None else pathlib.Path(args["indices_path"])
     )
 
     # Parse GPUs
-    if args.gpus is None:
+    if args["gpus"] is None:
         gpus = None
     else:
-        gpus = [None if x == "" else int(x) for x in args.gpus.split(",")]
+        gpus = [None if x == "" else int(x) for x in args["gpus"].split(",")]
 
     if indices_path is not None:
         if indices_path.exists():
@@ -148,16 +166,16 @@ def run_compute_embeddings(argv=None):
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
         engine.url,
-        args.model_name_or_class,
+        args["model_name_or_class"],
         indices,
         out_file,
-        batch_size_inference=args.batch_size_inference,
-        batch_size_transfer=args.batch_size_transfer,
-        n_processes=args.n_processes,
+        batch_size_inference=args["batch_size_inference"],
+        batch_size_transfer=args["batch_size_transfer"],
+        n_processes=args["n_processes"],
         checkpoint_path=checkpoint_path,
         gpus=gpus,
         temp_folder=temp_dir,
-        h5_dataset_name=args.h5_dataset_name,
+        h5_dataset_name=args["h5_dataset_name"],
     )
 
     logger.info("Starting embedding")

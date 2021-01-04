@@ -1,5 +1,6 @@
 """Helper functions for server entry points."""
 import argparse
+import collections
 import logging
 import os
 import sys
@@ -150,3 +151,32 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
                 if action.option_strings or action.nargs in defaulting_nargs:
                     help += "\n(default: %(default)s)"
         return help
+
+
+def parse_args_or_environment(parser, env_variable_names, argv=None):
+    from dotenv import load_dotenv
+
+    # Parse CLI arguments
+    cli_args = vars(parser.parse_args(argv))
+
+    # Parse environment
+    load_dotenv()
+    environment_args = {}
+    for arg_name, value_name in env_variable_names.items():
+        value = os.environ.get(value_name)
+        if value is not None:
+            environment_args[arg_name] = value
+
+    # Combine CLI and environment variables
+    args = collections.ChainMap(cli_args, environment_args)
+
+    # Check if all arguments were supplied
+    for arg_name in env_variable_names:
+        if arg_name not in args:
+            parser.print_usage()
+            parser.exit(
+                status=1,
+                message=f"The following arguments are required: --{arg_name.replace('_', '-')}\n",
+            )
+
+    return args
