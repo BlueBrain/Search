@@ -3,6 +3,7 @@ import argparse
 import logging
 import os
 import sys
+import textwrap
 
 
 def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
@@ -127,3 +128,25 @@ def run_server(app_factory, name, argv=None):
     # Construct and launch the app
     app = app_factory()
     app.run(host=args.host, port=args.port, threaded=True, debug=True)
+
+
+class CombinedHelpFormatter(argparse.HelpFormatter):
+    """Argparse formatter with raw text and default value display.
+
+    This is a combination of `argparse.RawTextHelpFormatter` and
+    `argparse.ArgumentDefaultsHelpFormatter`, and the implementation is
+    almost literally copied from the `argparse` module.
+
+    """
+
+    def _split_lines(self, text, width):
+        return text.splitlines()
+
+    def _get_help_string(self, action):
+        help = textwrap.dedent(action.help).strip()
+        if "%(default)" not in action.help:
+            if action.default is not argparse.SUPPRESS:
+                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
+                if action.option_strings or action.nargs in defaulting_nargs:
+                    help += "\n(default: %(default)s)"
+        return help
