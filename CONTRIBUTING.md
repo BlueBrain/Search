@@ -15,7 +15,7 @@ to read the following guidelines.
     1. [Update documentation](#Udoc)
     1. [Trigger Travis CI](#Ttc)
     1. [Sign CLA](#Sc)
-    1. [Acceptance criteria](#Ac)
+    1. [Get reviews and approval](#Ac)
 
 ## <a name="CreatingIssues"></a> Creating Issues
 This section contains the instructions to be followed to create issues on our
