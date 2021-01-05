@@ -179,7 +179,9 @@ class TestSQLQueries:
 
 
 class TestMiningCache:
-    def test_retrieve_mining_cache_dvc_hashes(self, fake_sqlalchemy_engine, fake_dvc_hash):
+    def test_retrieve_mining_cache_dvc_hashes(
+        self, fake_sqlalchemy_engine, fake_dvc_hash
+    ):
         dvc_hashes = retrieve_mining_cache_dvc_hashes(fake_sqlalchemy_engine)
         assert isinstance(dvc_hashes, list)
         assert dvc_hashes == [fake_dvc_hash]

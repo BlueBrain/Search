@@ -9,7 +9,12 @@ from flask import Flask, jsonify, request
 import bbsearch
 
 from ..mining import SPECS, run_pipeline
-from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_mining_cache_dvc_hashes, retrieve_paragraph
+from ..sql import (
+    retrieve_articles,
+    retrieve_mining_cache,
+    retrieve_mining_cache_dvc_hashes,
+    retrieve_paragraph,
+)
 from ..utils import DVC
 
 

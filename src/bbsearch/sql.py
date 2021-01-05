@@ -282,9 +282,10 @@ def retrieve_mining_cache_dvc_hashes(engine):
     result : list
         List of dvc hashes of the `mining cache`.
     """
-    sql_query = sql.text("""
-    SELECT DISTINCT(mining_model_dvc_hash) 
-    FROM mining_cache"""
+    sql_query = sql.text(
+        """
+        SELECT DISTINCT(mining_model_dvc_hash)
+        FROM mining_cache"""
     )
     dvc_hashes_df = pd.read_sql(sql_query, con=engine)
     return list(dvc_hashes_df["mining_model_dvc_hash"].unique())
