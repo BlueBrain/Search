@@ -139,6 +139,10 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
     `argparse.ArgumentDefaultsHelpFormatter`, and the implementation is
     almost literally copied from the `argparse` module.
 
+    New additions are:
+        - Application of `textwrap.dedent` to allow for triple-quoted
+          help text.
+        - The default arguments on a new line (instead of the same line).
     """
 
     def _split_lines(self, text, width):
@@ -186,7 +190,7 @@ def parse_args_or_environment(
     Returns
     -------
     args:
-
+        A map of parsed argument names to their values.
     """
     from dotenv import load_dotenv
 
