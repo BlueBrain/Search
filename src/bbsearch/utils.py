@@ -547,9 +547,13 @@ class DVC:
                 #   'outs': [{'path': ...,
                 #             'md5': ...}]}
                 # }
-            outputs = (output for step in dvc_lock_file.values() for output in step["outs"])
+            outputs = (
+                output for step in dvc_lock_file.values() for output in step["outs"]
+            )
             try:
                 found = next(x for x in outputs if re.search(path, x["path"]))
                 return found["md5"]
             except StopIteration:
-                raise ValueError(f"This path {path} was not found in {dvc_lock_path}.") from None
+                raise ValueError(
+                    f"This path {path} was " f"not found in {dvc_lock_path}."
+                ) from None
