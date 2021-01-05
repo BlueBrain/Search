@@ -269,6 +269,27 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
+def retrieve_mining_cache_dvc_hashes(engine):
+    """Retrieve all the dvc hashes of the mining cache.
+
+    Parameters
+    ----------
+    engine : sqlalchemy.engine.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    result : list
+        List of dvc hashes of the `mining cache`.
+    """
+    sql_query = sql.text("""
+    SELECT DISTINCT(mining_model_dvc_hash) 
+    FROM mining_cache"""
+    )
+    dvc_hashes_df = pd.read_sql(sql_query, con=engine)
+    return list(dvc_hashes_df["mining_model_dvc_hash"].unique())
+
+
 def retrieve_mining_cache(identifiers, model_names, engine):
     """Retrieve cached mining results.
 

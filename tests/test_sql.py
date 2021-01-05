@@ -13,6 +13,7 @@ from bbsearch.sql import (
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
     retrieve_mining_cache,
+    retrieve_mining_cache_dvc_hashes,
     retrieve_paragraph,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
@@ -178,6 +179,11 @@ class TestSQLQueries:
 
 
 class TestMiningCache:
+    def test_retrieve_mining_cache_dvc_hashes(self, fake_sqlalchemy_engine, fake_dvc_hash):
+        dvc_hashes = retrieve_mining_cache_dvc_hashes(fake_sqlalchemy_engine)
+        assert isinstance(dvc_hashes, list)
+        assert dvc_hashes == [fake_dvc_hash]
+
     def test_retrieve_all(self, fake_sqlalchemy_engine, test_parameters):
         identifiers = [(i + 1, -1) for i in range(test_parameters["n_articles"])]
         expected_len = (

@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request
 import bbsearch
 
 from ..mining import SPECS, run_pipeline
-from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
+from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_mining_cache_dvc_hashes, retrieve_paragraph
 from ..utils import DVC
 
 
@@ -52,7 +52,7 @@ class MiningServer(Flask):
 
         self.logger.info("Loading the NER models")
         self.ee_models = {}
-        self.mining_cache_dvc_hashes = set()
+        self.mining_server_dvc_hashes = set()
         for model_name in self.models_libs["ee"]["model"]:
             self.logger.info(f"Loading model {model_name}")
             self.ee_models[model_name] = spacy.load(model_name)
@@ -67,7 +67,9 @@ class MiningServer(Flask):
                     f"the model name {model_name} in the corresponding dvc.lock"
                 )
             else:
-                self.mining_cache_dvc_hashes.add(dvc_hash)
+                self.mining_server_dvc_hashes.add(dvc_hash)
+
+        self._check_dvc_hashes_consistency()
 
         self.connection = connection
 
@@ -78,6 +80,27 @@ class MiningServer(Flask):
         self.add_url_rule("/help", view_func=self.help, methods=["POST"])
 
         self.logger.info("Initialization done.")
+
+    def _check_dvc_hashes_consistency(self):
+        """Check that models loaded into mining server are equivalent to cache.
+
+        Raises
+        ------
+        ValueError
+            Raises exception if models used for the mining
+            cache and the mining server are different.
+        """
+        mining_cache_dvc_hashes = set(retrieve_mining_cache_dvc_hashes(self.connection))
+        if self.mining_server_dvc_hashes != mining_cache_dvc_hashes:
+            raise ValueError(
+                f"""Some of the cached named entity extractions
+                were made with a model that's not known to the mining server.
+                Server loads the following models:
+                {self.mining_server_dvc_hashes}
+                However, The following models were found in the mining cache:
+                {mining_cache_dvc_hashes}
+                """
+            )
 
     def help(self):
         """Respond to the help."""
@@ -150,7 +173,6 @@ class MiningServer(Flask):
             if args_err_response:
                 return args_err_response
 
-            warnings = []
             schema_df = self.read_df_from_str(schema_str)
 
             if use_cache:
@@ -170,11 +192,6 @@ class MiningServer(Flask):
                 requested_etypes = schema_df["entity_type"].unique()
                 df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
 
-                # drop unwanted hashes
-                df_all = df_all[
-                    df_all["mining_model_dvc_hash"].isin(self.mining_cache_dvc_hashes)
-                ]
-
                 # append the ontology source column
                 os_mapping = {
                     et: os
@@ -186,27 +203,6 @@ class MiningServer(Flask):
                     lambda x: os_mapping[x]
                 )
 
-                # check the consistency with the dvc hashes of the mining models
-                if not set(df_all["mining_model_dvc_hash"].unique()).issubset(
-                    self.mining_cache_dvc_hashes
-                ):
-                    warnings += [
-                        f"""Some of the cached named entity extractions
-                        were made with a model that's not known to the mining server.
-
-                        Server loads the following models:
-                        {self.mining_cache_dvc_hashes}
-
-                        The following unknown models were found in the mining cache:
-                        {set(df_all["mining_model_dvc_hash"].unique())}
-
-                        Please contact the developers and include the warning above.
-
-                        Consider disabling the mining cache if you want to use
-                        the models loaded by the mining server.
-                        (The mining will take much longer!)
-                        """
-                    ]
                 # apply specs if not debug
                 if not debug:
                     df_all = pd.DataFrame(df_all, columns=SPECS)
@@ -243,7 +239,7 @@ class MiningServer(Flask):
                 df_all, etypes_na = self.mine_texts(
                     texts=texts, schema_request=schema_df, debug=debug
                 )
-            response = self.create_response(df_all, etypes_na, warnings)
+            response = self.create_response(df_all, etypes_na)
             self.logger.info(f"Mining completed, extracted {len(df_all)} elements.")
         else:
             self.logger.info("Request is not JSON. Not processing.")
@@ -369,7 +365,7 @@ class MiningServer(Flask):
         return response, 400
 
     @staticmethod
-    def create_response(df_extractions, etypes_na, warnings=None):
+    def create_response(df_extractions, etypes_na):
         """Create the response thanks to dataframe.
 
         Parameters
@@ -379,8 +375,6 @@ class MiningServer(Flask):
         etypes_na : list[str]
             Entity types found in the request CSV file for which no available
             model was found in the library.
-        warnings : list[str] or None
-            Warnings to show to the user discovered along the pipeline.
 
         Returns
         -------
@@ -388,11 +382,9 @@ class MiningServer(Flask):
             Response containing the dataframe converted in csv table.
         """
         csv_extractions = df_extractions.to_csv(index=False)
-        if warnings is None:
-            warnings = []
-        all_warnings = warnings + [
+        warnings = [
             f'No text mining model was found in the library for "{etype}".'
             for etype in etypes_na
         ]
 
-        return jsonify(csv_extractions=csv_extractions, warnings=all_warnings), 200
+        return jsonify(csv_extractions=csv_extractions, warnings=warnings), 200
