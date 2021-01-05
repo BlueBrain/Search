@@ -572,7 +572,7 @@ class CreateMiningCache:
                 model_schemas[model_name] = {}
                 model_schemas[model_name]["model_path"] = model_path
                 try:
-                    model_schemas[model_name]["model_dvc_hash"] = DVC.get_dvc_hash(
+                    dvc_hash = DVC.get_dvc_hash(
                         str(model_path).split("data_and_models/")[-1], pipeline="ner"
                     )
                 except ValueError:
@@ -581,6 +581,8 @@ class CreateMiningCache:
                         f"{str(model_path).split('data_and_models/')[-1]}"
                     )
                     model_schemas[model_name]["model_dvc_hash"] = None
+                else:
+                    model_schemas[model_name]["model_dvc_hash"] = dvc_hash
 
                 model_schemas[model_name]["entity_map"] = {}
 
