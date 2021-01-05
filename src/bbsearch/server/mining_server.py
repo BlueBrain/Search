@@ -74,9 +74,9 @@ class MiningServer(Flask):
             else:
                 self.mining_server_dvc_hashes.add(dvc_hash)
 
-        self._check_dvc_hashes_consistency()
-
         self.connection = connection
+
+        self._check_dvc_hashes_consistency()
 
         self.add_url_rule("/text", view_func=self.pipeline_text, methods=["POST"])
         self.add_url_rule(
