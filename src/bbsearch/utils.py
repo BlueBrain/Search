@@ -547,15 +547,9 @@ class DVC:
                 #   'outs': [{'path': ...,
                 #             'md5': ...}]}
                 # }
-            for v in dvc_lock_file.values():
-                if isinstance(v, dict) and "outs" in v.keys():
-                    for path_dict in v["outs"]:
-                        if (
-                            "path" in path_dict.keys()
-                            and re.search(path, path_dict["path"])
-                            and "md5" in path_dict.keys()
-                        ):
-                            dvc_hash = path_dict["md5"].strip()
-                            return dvc_hash
-
-        raise ValueError(f"This path {path} was not found in {dvc_lock_path}.")
+            outputs = (output for step in dvc_lock_file.values() for output in step["outs"])
+            try:
+                found = next(x for x in outputs if re.search(path, x["path"]))
+                return found["md5"]
+            except StopIteration:
+                raise ValueError(f"This path {path} was not found in {dvc_lock_path}.") from None
