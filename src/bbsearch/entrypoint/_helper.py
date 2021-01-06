@@ -7,6 +7,8 @@ import sys
 import textwrap
 from typing import Dict, Optional, Sequence
 
+from dotenv import load_dotenv
+
 
 def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
     """Exception handler for logging.
@@ -190,8 +192,6 @@ def parse_args_or_environment(
     args : argparse.Namespace
         A map of parsed argument names to their values.
     """
-    from dotenv import load_dotenv
-
     # Parse CLI arguments
     cli_args = vars(parser.parse_args(args=argv))
 
