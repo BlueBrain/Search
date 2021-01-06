@@ -14,6 +14,69 @@
 <!--- TODO: add pypi version(s) --->
 
 
+Blue Brain Search is a Python package to find sentences semantically similar
+to a query in documents and to extract structured information from the
+returned and ranked documents.
+
+The documents which are used are scientific publications about COVID-19 from
+the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
+
+
+## Graphical Interface
+
+The graphical interface is composed of [widgets](https://github.com/jupyter-widgets/ipywidgets)
+to be used in [Jupyter notebooks](https://github.com/jupyterlab/jupyterlab).
+
+### Find documents based on sentence semantic similarity
+
+FIXME (SearchWidget)
+
+### Extract structured information from documents
+
+The documents could either be the ones returned by the search or one whose
+text is pasted in the widget.
+
+#### Found documents
+
+FIXME (MiningWidget)
+
+#### Pasted document
+
+FIXME (MiningWidget)
+
+
+## Getting Started
+
+There are FIXME steps. They need to be done in the following order.
+
+### Retrieve the documents
+
+FIXME
+
+### Install Blue Brain Search
+
+FIXME
+
+### Create the database
+
+FIXME (create_database)
+
+### Compute the sentence embeddings
+
+FIXME (compute_embeddings)
+
+### Create the mining cache
+
+FIXME (create_mining_cache)
+
+### Launch the search server
+
+FIXME (search_server)
+
+### Launch the mining server
+
+FIXME (mining_server)
+
 
 ## Installation (virtual environment)
 We currently support the following Python versions.
