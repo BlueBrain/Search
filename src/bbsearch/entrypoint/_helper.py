@@ -107,8 +107,6 @@ def run_server(app_factory, name, argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    from dotenv import load_dotenv
-
     # Parse arguments
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]",
@@ -162,7 +160,7 @@ def parse_args_or_environment(
     parser: argparse.ArgumentParser,
     env_variable_names: Dict[str, str],
     argv: Optional[Sequence[str]] = None,
-) -> collections.ChainMap:
+) -> argparse.Namespace:
     """Parse CLI arguments with some defaults specified in the environment.
 
     Sometimes we would like to specify the default arguments for some CLI
@@ -189,7 +187,7 @@ def parse_args_or_environment(
 
     Returns
     -------
-    args:
+    args : argparse.Namespace
         A map of parsed argument names to their values.
     """
     from dotenv import load_dotenv
@@ -220,4 +218,4 @@ def parse_args_or_environment(
                 ),
             )
 
-    return args
+    return argparse.Namespace(**args)

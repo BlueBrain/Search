@@ -97,24 +97,24 @@ def run_create_mining_cache(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    if args["verbose"] == 1:
+    if args.verbose == 1:
         level = logging.INFO
-    elif args["verbose"] >= 2:
+    elif args.verbose >= 2:
         level = logging.DEBUG
     else:
         level = logging.WARNING
-    configure_logging(args["log_file"], level)
+    configure_logging(args.log_file, level)
 
     logger = logging.getLogger("Mining cache entrypoint")
     logger.info("Welcome to the mining cache creation")
     logger.info("Parameters:")
-    logger.info(f"db-type                : {args['db_type']}")
-    logger.info(f"database-url           : {args['database_url']}")
-    logger.info(f"target-table-name      : {args['target_table_name']}")
-    logger.info(f"n-processes-per-model  : {args['n_processes_per_model']}")
-    logger.info(f"restrict-to-models     : {args['restrict_to_models']}")
-    logger.info(f"log-file               : {args['log_file']}")
-    logger.info(f"verbose                : {args['verbose']}")
+    logger.info(f"db-type                : {args.db_type}")
+    logger.info(f"database-url           : {args.database_url}")
+    logger.info(f"target-table-name      : {args.target_table_name}")
+    logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
+    logger.info(f"restrict-to-models     : {args.restrict_to_models}")
+    logger.info(f"log-file               : {args.log_file}")
+    logger.info(f"verbose                : {args.verbose}")
 
     # Loading libraries
     logger.info("Loading libraries")
@@ -122,14 +122,14 @@ def run_create_mining_cache(argv=None):
 
     # Database type
     logger.info("Parsing the database type")
-    if args["db_type"] == "sqlite":
-        database_path = pathlib.Path(args["database_url"])
+    if args.db_type == "sqlite":
+        database_path = pathlib.Path(args.database_url)
         if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
-    elif args["db_type"] == "mysql":
+    elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args['database_url']}"
+        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
     else:  # pragma: no cover
         # Will never get here because `parser.parse_args()` will fail first.
         # This is because we have choices=("mysql", "sqlite") in the
@@ -147,9 +147,9 @@ def run_create_mining_cache(argv=None):
     ee_models_library = DVC.load_ee_models_library()
 
     # Restrict to given models
-    if args["restrict_to_models"] is not None:
+    if args.restrict_to_models is not None:
         logger.info("Restricting to a subset of models")
-        model_selection = args["restrict_to_models"].split(",")
+        model_selection = args.restrict_to_models.split(",")
         model_selection = set(map(lambda s: s.strip(), model_selection))
         for model_path in model_selection:
             if model_path not in ee_models_library["model"].values:
@@ -165,8 +165,8 @@ def run_create_mining_cache(argv=None):
     cache_creator = CreateMiningCache(
         database_engine=database_engine,
         ee_models_library=ee_models_library,
-        target_table_name=args["target_table_name"],
-        workers_per_model=args["n_processes_per_model"],
+        target_table_name=args.target_table_name,
+        workers_per_model=args.n_processes_per_model,
     )
 
     logger.info("Launching the mining")

@@ -125,7 +125,7 @@ def run_compute_embeddings(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    configure_logging(args["log_file"], logging.INFO)
+    configure_logging(args.log_file, logging.INFO)
     logger = logging.getLogger(__name__)
 
     # Imports (they are here to make --help quick)
@@ -134,24 +134,24 @@ def run_compute_embeddings(argv=None):
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")
-    full_url = f"mysql+mysqldb://guest:guest@{args['db_url']}?charset=utf8mb4"
+    full_url = f"mysql+mysqldb://guest:guest@{args.db_url}?charset=utf8mb4"
     engine = sqlalchemy.create_engine(full_url)
 
     # Path preparation and checking
-    out_file = pathlib.Path(args["outfile"])
-    temp_dir = None if args["temp_dir"] is None else pathlib.Path(args["temp_dir"])
+    out_file = pathlib.Path(args.outfile)
+    temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
     checkpoint_path: Optional[pathlib.Path] = None
-    if args["checkpoint"] is not None:
-        checkpoint_path = pathlib.Path(args["checkpoint"])
+    if args.checkpoint is not None:
+        checkpoint_path = pathlib.Path(args.checkpoint)
     indices_path = (
-        None if args["indices_path"] is None else pathlib.Path(args["indices_path"])
+        None if args.indices_path is None else pathlib.Path(args.indices_path)
     )
 
     # Parse GPUs
-    if args["gpus"] is None:
+    if args.gpus is None:
         gpus = None
     else:
-        gpus = [None if x == "" else int(x) for x in args["gpus"].split(",")]
+        gpus = [None if x == "" else int(x) for x in args.gpus.split(",")]
 
     if indices_path is not None:
         if indices_path.exists():
@@ -166,16 +166,16 @@ def run_compute_embeddings(argv=None):
     logger.info("Instantiating MPEmbedder")
     mpe = MPEmbedder(
         engine.url,
-        args["model_name_or_class"],
+        args.model_name_or_class,
         indices,
         out_file,
-        batch_size_inference=args["batch_size_inference"],
-        batch_size_transfer=args["batch_size_transfer"],
-        n_processes=args["n_processes"],
+        batch_size_inference=args.batch_size_inference,
+        batch_size_transfer=args.batch_size_transfer,
+        n_processes=args.n_processes,
         checkpoint_path=checkpoint_path,
         gpus=gpus,
         temp_folder=temp_dir,
-        h5_dataset_name=args["h5_dataset_name"],
+        h5_dataset_name=args.h5_dataset_name,
     )
 
     logger.info("Starting embedding")

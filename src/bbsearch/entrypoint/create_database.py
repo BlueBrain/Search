@@ -80,15 +80,15 @@ def run_create_database(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     print(" Configuration ".center(80, "-"))
-    print(f"log-file                : {args['log_file']}")
-    print(f"cord-data-path          : {args['cord_data_path']}")
-    print(f"db-type                 : {args['db_type']}")
-    print(f"only-mark-bad-sentences : {args['only_mark_bad_sentences']}")
+    print(f"log-file                : {args.log_file}")
+    print(f"cord-data-path          : {args.cord_data_path}")
+    print(f"db-type                 : {args.db_type}")
+    print(f"only-mark-bad-sentences : {args.only_mark_bad_sentences}")
     print("-" * 80)
     input("Press any key to continue... ")
 
     # Configure logging
-    configure_logging(args["log_file"], logging.INFO)
+    configure_logging(args.log_file, logging.INFO)
     logger = logging.getLogger(pathlib.Path(__file__).stem)
 
     # Import libraries
@@ -98,19 +98,19 @@ def run_create_database(argv=None):
 
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")
-    if args["db_type"] == "sqlite":
-        database_path = pathlib.Path(args["database_url"])
+    if args.db_type == "sqlite":
+        database_path = pathlib.Path(args.database_url)
         if not database_path.exists():
             database_path.parent.mkdir(exist_ok=True, parents=True)
             database_path.touch()
         database_url = f"sqlite:///{database_path}"
-    elif args["db_type"] == "mysql":
+    elif args.db_type == "mysql":
         # We assume the database already exists
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args['database_url']}"
+        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
     else:  # pragma: no cover
         # This is unreachable because of choices=("mysql", "sqlite") in argparse
-        raise ValueError(f'"{args["db_type"]}" is not a supported db_type.')
+        raise ValueError(f'"{args.db_type}" is not a supported db_type.')
 
     # Create the database engine
     logger.info("Creating the database engine")
@@ -119,9 +119,9 @@ def run_create_database(argv=None):
     engine = sqlalchemy.create_engine(database_url)
 
     # Launch database creation
-    if not args["only_mark_bad_sentences"]:
+    if not args.only_mark_bad_sentences:
         logger.info("Starting the database creation")
-        db = CORD19DatabaseCreation(data_path=args["cord_data_path"], engine=engine)
+        db = CORD19DatabaseCreation(data_path=args.cord_data_path, engine=engine)
         db.construct()
 
     # Mark bad sentences

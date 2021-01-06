@@ -17,16 +17,16 @@ def test_parse_args_or_environment(monkeypatch):
     argv: Sequence[str] = []
     env_variable_names: Dict[str, str] = {}
     args = parse_args_or_environment(parser, env_variable_names, argv)
-    assert "normal_arg" in args
-    assert "env_arg" not in args
+    assert "normal_arg" in args.__dict__
+    assert "env_arg" not in args.__dict__
 
     # --env-arg provided through the CLI
     argv = ["--env-arg", argv_value]
     env_variable_names = {}
     args = parse_args_or_environment(parser, env_variable_names, argv)
-    assert "normal_arg" in args
-    assert "env_arg" in args
-    assert args["env_arg"] == argv_value
+    assert "normal_arg" in args.__dict__
+    assert "env_arg" in args.__dict__
+    assert args.env_arg == argv_value
 
     # --env-arg provided through the environment
     argv = []
@@ -38,9 +38,9 @@ def test_parse_args_or_environment(monkeypatch):
         "env_arg": "ENV_ARG",
     }
     args = parse_args_or_environment(parser, env_variable_names, argv)
-    assert "normal_arg" in args
-    assert "env_arg" in args
-    assert args["env_arg"] == env_value
+    assert "normal_arg" in args.__dict__
+    assert "env_arg" in args.__dict__
+    assert args.env_arg == env_value
 
     # Check that CLI argument have precedence over environment variables
     argv = ["--env-arg", argv_value]
@@ -52,9 +52,9 @@ def test_parse_args_or_environment(monkeypatch):
         "env_arg": "ENV_ARG",
     }
     args = parse_args_or_environment(parser, env_variable_names, argv)
-    assert "normal_arg" in args
-    assert "env_arg" in args
-    assert args["env_arg"] == argv_value
+    assert "normal_arg" in args.__dict__
+    assert "env_arg" in args.__dict__
+    assert args.env_arg == argv_value
 
     # Value not specified through the CLI, nor through environment
     argv = []
