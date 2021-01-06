@@ -78,7 +78,7 @@ def run_create_mining_cache(argv=None):
         "--log-file",
         "-l",
         type=str,
-        metavar="<filename>",
+        metavar="<filepath>",
         default=None,
         help="In addition to stderr, log messages to a file.",
     )

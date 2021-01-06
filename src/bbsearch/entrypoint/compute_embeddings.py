@@ -98,7 +98,7 @@ def run_compute_embeddings(argv=None):
         "--log-file",
         "-l",
         type=str,
-        metavar="<filename>",
+        metavar="<filepath>",
         default=None,
         help="In addition to stderr, log messages to a file.",
     )
