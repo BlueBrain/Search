@@ -288,7 +288,7 @@ def retrieve_mining_cache_dvc_hashes(engine):
         FROM mining_cache"""
     )
     dvc_hashes_df = pd.read_sql(sql_query, con=engine)
-    return list(dvc_hashes_df["mining_model_dvc_hash"].unique())
+    return list(dvc_hashes_df["mining_model_dvc_hash"])
 
 
 def retrieve_mining_cache(identifiers, model_names, engine):
