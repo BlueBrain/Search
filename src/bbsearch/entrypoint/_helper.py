@@ -149,13 +149,13 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
         return text.splitlines()
 
     def _get_help_string(self, action):
-        help = textwrap.dedent(action.help).strip()
+        help_text = textwrap.dedent(action.help).strip()
         if "%(default)" not in action.help:
             if action.default is not argparse.SUPPRESS:
                 defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
                 if action.option_strings or action.nargs in defaulting_nargs:
-                    help += "\n(default: %(default)s)"
-        return help
+                    help_text += "\n(default: %(default)s)"
+        return help_text
 
 
 def parse_args_or_environment(
