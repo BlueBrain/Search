@@ -57,7 +57,7 @@ issue as explained [here](#CreatingIssues) so that we can discuss the value of
 the proposed contribution and its implementation.
 
 ### <a name="Aui"></a> Add unit tests
-Concerning CI test, we are running various checks on linting, unit tests, docs,
+Concerning CI tests, we are running various checks on linting, unit tests, docs,
 and packaging. If you are adding or modifying a functionality in the code, you
 are also expected to provide a unit test demonstrating and checking the new
 behavior. 
@@ -85,7 +85,7 @@ deemed appropriate.
 To save time, by default our Travis CI pipeline does not test commits on PR 
 branches unless the commit message contains a `[test travis]` or `[run travis]` 
 tag. So make sure to add such tag to your last commit (or add an empty commit
-with such tag) before requesting a review or your PR.
+with such tag) before requesting a review of your PR.
 
 All CI tests must pass before the pull request can be considered for review.
 
@@ -100,7 +100,7 @@ Once you have satisfied all the previous points, feel free to open your pull
 request!
 
 We will get back to you as soon as possible with comments and feedback in the
-format of a pull request reviews. At least two positive reviews from the
+format of pull request reviews. At least two positive reviews from the
 maintainers are required for the pull request to be merged into the master.
 
 
