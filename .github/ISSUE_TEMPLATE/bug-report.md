@@ -1,7 +1,7 @@
 ---
 name: "\U0001F41B Bug Report"
 about: Submit report to help us reproduce and correct the bug
-title: "\U0001F41B [BUG]: ..."
+title: ''
 labels: ''
 assignees: ''
 
