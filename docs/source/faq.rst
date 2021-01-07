@@ -72,7 +72,7 @@ and remove the file called `config.local`:
 
 .. code-block:: bash
 
-    cd .dvc/cache
+    cd .dvc
     rm config.local
 
 Doing `dvc pull` again should work fine after this.
