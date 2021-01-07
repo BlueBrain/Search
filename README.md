@@ -78,11 +78,14 @@ tar xf ./$CORD19
 
 ```bash
 export PORT=8853
+export PASSWORD=1a2b3c4d
 ```
 
 ```bash
+mkdir ./mysql_data
 docker build -f ./docker/mysql.Dockerfile -t bbs_mysql .
-docker run -d -v /raid/bbs_mysql/var/lib/mysql/:/var/lib/mysql -p $PORT:3306 \
+docker run -d -v ./mysql_data:/var/lib/mysql -p $PORT:3306 \
+  -e MYSQL_ROOT_PASSWORD=$PASSWORD \
   --name bbs_mysql bbs_mysql
 ```
 
