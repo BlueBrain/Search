@@ -18,8 +18,8 @@ Blue Brain Search is a Python package to find sentences semantically similar
 to a query in documents and to extract structured information from the
 returned and ranked documents.
 
-The documents which are used are scientific publications about COVID-19 from
-the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
+At the moment, the documents which are used are scientific publications about
+COVID-19 from the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
 
 
 ## Graphical Interface
@@ -27,20 +27,45 @@ the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-cha
 The graphical interface is composed of [widgets](https://github.com/jupyter-widgets/ipywidgets)
 to be used in [Jupyter notebooks](https://github.com/jupyterlab/jupyterlab).
 
+For the graphical interface to work, the steps of the [Getting Started](getting-started)
+should have been completed successfully.
+
 ### Find documents based on sentence semantic similarity
+
+To find sentences semantically similar to the query *'Glucose is a risk factor
+for COVID-19'* in the documents, you could just click on the blue button named
+`Search Literature!`.
+
+The returned results are ranked by decreasing semantic similarity. This means
+that the first results have a similar meaning than the query. Thanks to
+state-of-the-art deep learning models used by Blue Brain Search, this is true
+even if the query and the sentences from the documents don't share the same
+words (e.g. synonyms, similar meaning, ...).
 
 ![Search Widget](screenshots/search_widget.png)
 
 ### Extract structured information from documents
 
-The extraction could be done either on documents found by the search or
+The extraction could be done either on documents found by the search above or
 on the text content of a document pasted in the widget.
 
 #### Found documents
 
+To extract structured information from the found documents, you could just
+click on the blue button named `Mine Selected Articles!`.
+
+At the moment, the returned results are named entities. The structured
+information is for each named entity: the mention (e.g. 'COVID-19'), the type
+(e.g. 'DISEASE'), and its location up to the character in the document.
+
 ![Mining Widget (articles)](screenshots/mining_widget_articles.png)
 
 #### Pasted document content
+
+This is also possible to extract structured information from the pasted
+content of a document. To switch to this mode, you could just click first
+on the tab named `Mine Text` and then on the blue button named
+`Mine This Text!`.
 
 ![Mining Widget (text)](screenshots/mining_widget_text.png)
 
@@ -58,7 +83,8 @@ There are 8 steps which need to be done in order:
 7. Initialize the search and mining servers.
 8. Open the Jupyter notebook.
 
-Note that these instructions suppose you have access to Blue Brain resources.
+At the moment, note that these instructions suppose you have access to
+Blue Brain resources.
 
 ### Retrieve the documents
 
@@ -84,8 +110,7 @@ export PASSWORD=1a2b3c4d
 ```bash
 mkdir ./mysql_data
 docker build -f ./docker/mysql.Dockerfile -t bbs_mysql .
-docker run -d -v ./mysql_data:/var/lib/mysql -p $PORT:3306 \
-  -e MYSQL_ROOT_PASSWORD=$PASSWORD \
+docker run -d -v ./mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
   --name bbs_mysql bbs_mysql
 ```
 
