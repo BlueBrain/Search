@@ -67,7 +67,7 @@ When launching mining_cache or mining_server entrypoints or even simply
     WARNING: Some of the cache files do not exist neither locally nor on remote.
     Missing cache files:
 
-In the case, the solution is to go to :code:`.dvc/cache` directory
+In the case, the solution is to go to :code:`.dvc` directory
 and remove the file called `config.local`:
 
 .. code-block:: bash
