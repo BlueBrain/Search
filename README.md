@@ -108,6 +108,7 @@ cd BlueBrainSearch
 docker build -f ./docker/base.Dockerfile -t bbs_base .
 docker run -it -v /raid:/raid --rm --user root --gpus all \
   --name bbs_base bbs_base
+pip install ./BlueBrainSearch
 ```
 
 ### Create the database
