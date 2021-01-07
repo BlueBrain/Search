@@ -54,3 +54,23 @@ The solution is to uninstall the package :code:`dataclasses`:
 .. code-block:: bash
 
     pip uninstall dataclasses
+
+
+DVC pull issue
+--------------
+
+When launching mining_cache or mining_server entrypoints or even simply
+:code:`dvc pull`, one might run into the following error:
+
+.. code-block:: bash
+
+    WARNING: Some of the cache files do not exist neither locally nor on remote.
+    Missing cache files:
+
+In the case, the solution is to go to :code:`.dvc/cache` directory
+and remove the file called `config.local`:
+
+.. code-block:: bash
+
+    cd .dvc/cache
+    rm config.local
