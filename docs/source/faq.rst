@@ -74,3 +74,5 @@ and remove the file called `config.local`:
 
     cd .dvc/cache
     rm config.local
+
+Doing `dvc pull` again should work fine after this.
