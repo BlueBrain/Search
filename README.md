@@ -29,20 +29,20 @@ to be used in [Jupyter notebooks](https://github.com/jupyterlab/jupyterlab).
 
 ### Find documents based on sentence semantic similarity
 
-FIXME (SearchWidget)
+![Search Widget](screenshots/search_widget.png)
 
 ### Extract structured information from documents
 
-The documents could either be the ones returned by the search or only one
-whose text is pasted in the widget.
+The extraction could be done either on documents found by the search or
+on the text content of a document pasted in the widget.
 
 #### Found documents
 
-FIXME (MiningWidget)
+![Mining Widget (articles)](screenshots/mining_widget_articles.png)
 
-#### Pasted document
+#### Pasted document content
 
-FIXME (MiningWidget)
+![Mining Widget (text)](screenshots/mining_widget_text.png)
 
 
 ## Getting Started
