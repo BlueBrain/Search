@@ -33,8 +33,8 @@ FIXME (SearchWidget)
 
 ### Extract structured information from documents
 
-The documents could either be the ones returned by the search or one whose
-text is pasted in the widget.
+The documents could either be the ones returned by the search or only one
+whose text is pasted in the widget.
 
 #### Found documents
 
@@ -47,36 +47,111 @@ FIXME (MiningWidget)
 
 ## Getting Started
 
-There are FIXME steps. They need to be done in the following order.
+There are 8 steps which need to be done in order:
+
+1. Retrieve the documents.
+2. Initialize the database server.
+3. Install Blue Brain Search.
+4. Create the database.
+5. Compute the sentence embeddings.
+6. Create the mining cache.
+7. Initialize the search and mining servers.
+8. Open the Jupyter notebook.
+
+Note that these instructions suppose you have access to Blue Brain resources.
 
 ### Retrieve the documents
 
-FIXME
+This will download the CORD-19 version corresponding to version 73 on Kaggle.
+
+```bash
+export VERSION=2021-01-03
+export CORD19=cord-19_$VERSION
+```
+
+```bash
+wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/${CORD19}.tar.gz
+tar xf ./$CORD19
+```
+
+### Initialize the database server
+
+```bash
+export PORT=8853
+```
+
+```bash
+docker build -f ./docker/mysql.Dockerfile -t bbs_mysql .
+docker run -d -v /raid/bbs_mysql/var/lib/mysql/:/var/lib/mysql -p $PORT:3306 \
+  --name bbs_mysql bbs_mysql
+```
+
+```bash
+export HOST=dgx1.bbp.epfl.ch
+export DATABASE=$HOST:$PORT/$CORD19
+```
 
 ### Install Blue Brain Search
 
-FIXME
+This will build a Docker image where Blue Brain Search is installed. Besides,
+this will launch using this image an interactive session in a Docker container.
+The next steps of this *Getting Started* will need to be run in this session.
+
+FIXME needs `--env-file .env`?
+
+```bash
+git clone https://github.com/BlueBrain/BlueBrainSearch
+cd BlueBrainSearch
+docker build -f ./docker/base.Dockerfile -t bbs_base .
+docker run -it -v /raid:/raid --rm --user root --gpus all \
+  --name bbs_base bbs_base
+```
 
 ### Create the database
 
-FIXME (create_database)
+```bash
+create_database \
+  --data-path ./$CORD19 \
+  --database-url $DATABASE
+```
 
 ### Compute the sentence embeddings
 
-FIXME (compute_embeddings)
+```bash
+compute_embeddings SentTransformer embeddings.h5 \
+  --checkpoint ./biobert_nli_sts_cord19_v1 \
+  --db-url $DATABASE \
+  --gpus 0,1,2,3,4,5 \
+  --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
+  --n-processes 6
+```
 
 ### Create the mining cache
 
-FIXME (create_mining_cache)
+```bash
+create_mining_cache \
+  --database-url $DATABASE
+```
 
-### Launch the search server
+### Initialize the search and mining servers
 
-FIXME (search_server)
+Exit the interactive session of the `bbs_base` container with `CTRL+C`.
 
-### Launch the mining server
+FIXME create .env from example
+FIXME needs `--env-file .env`?
 
-FIXME (mining_server)
+```bash
+docker-compose up
+```
 
+### Open the Jupyter notebook
+
+```bash
+jupyter lab ./notebooks/BBS_BBG_poc.ipynb
+```
+
+
+## FIXME (below)
 
 ## Installation (virtual environment)
 We currently support the following Python versions.
