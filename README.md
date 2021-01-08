@@ -34,13 +34,14 @@ should have been completed successfully.
 
 To find sentences semantically similar to the query *'Glucose is a risk factor
 for COVID-19'* in the documents, you could just click on the blue button named
-`Search Literature!`.
+`Search Literature!`. You could also enter the query of your choice by editing
+the text in the top field named `Query`. 
 
 The returned results are ranked by decreasing semantic similarity. This means
-that the first results have a similar meaning than the query. Thanks to
-state-of-the-art deep learning models used by Blue Brain Search, this is true
-even if the query and the sentences from the documents don't share the same
-words (e.g. synonyms, similar meaning, ...).
+that the first results have a similar meaning to the query. Thanks to the
+state-of-the-art approach based on deep learning used by Blue Brain Search,
+this is true even if the query and the sentences from the documents don't
+share the same words (e.g. they are synonyms, they have a similar meaning, ...).
 
 ![Search Widget](screenshots/search_widget.png)
 
@@ -54,8 +55,8 @@ on the text content of a document pasted in the widget.
 To extract structured information from the found documents, you could just
 click on the blue button named `Mine Selected Articles!`.
 
-At the moment, the returned results are named entities. The structured
-information is for each named entity: the mention (e.g. 'COVID-19'), the type
+At the moment, the returned results are named entities. For each named entity,
+the structured information is: the mention (e.g. 'COVID-19'), the type
 (e.g. 'DISEASE'), and its location up to the character in the document.
 
 ![Mining Widget (articles)](screenshots/mining_widget_articles.png)
@@ -63,9 +64,10 @@ information is for each named entity: the mention (e.g. 'COVID-19'), the type
 #### Pasted document content
 
 This is also possible to extract structured information from the pasted
-content of a document. To switch to this mode, you could just click first
-on the tab named `Mine Text` and then on the blue button named
-`Mine This Text!`.
+content of a document. To switch to this mode, you could just click on the
+tab named `Mine Text`. Then, you could launch the extracting by just clicking 
+on the blue button named `Mine This Text!`. You could also enter the content
+of your choice by editing the text field. 
 
 ![Mining Widget (text)](screenshots/mining_widget_text.png)
 
