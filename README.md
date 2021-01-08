@@ -88,37 +88,59 @@ There are 8 steps which need to be done in order:
 At the moment, note that these instructions suppose you have access to
 Blue Brain resources.
 
+### Prerequisites
+
+```bash
+export DIR=$(pwd)
+git clone https://github.com/BlueBrain/BlueBrainSearch
+```
+
 ### Retrieve the documents
 
-This will download the CORD-19 version corresponding to version 73 on Kaggle.
+This will download and decompress the CORD-19 version corresponding to the
+version 73 on Kaggle. Note that the data are around 7 GB.
 
 ```bash
 export VERSION=2021-01-03
-export CORD19=cord-19_$VERSION
+export ARCHIVE=cord-19_${VERSION}.tar.gz
 ```
 
 ```bash
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/${CORD19}.tar.gz
-tar xf ./$CORD19
+wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$ARCHIVE
+tar xf $ARCHIVE
 ```
 
 ### Initialize the database server
 
 ```bash
-export PORT=8853
+export PORT=8953
 export PASSWORD=1a2b3c4d
+export DATABASE=cord19
+export URL=$(hostname):$PORT/$DATABASE
 ```
 
-```bash
-mkdir ./mysql_data
-docker build -f ./docker/mysql.Dockerfile -t bbs_mysql .
-docker run -d -v ./mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
-  --name bbs_mysql bbs_mysql
-```
+This will build a Docker image where MySQL is installed. Besides, this will
+launch using this image a MySQL server running in a Docker container.
 
 ```bash
-export HOST=dgx1.bbp.epfl.ch
-export DATABASE=$HOST:$PORT/$CORD19
+mkdir $DIR/mysql_data
+docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t bbs_mysql_test .
+docker run -d -v $DIR/mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
+  --name bbs_mysql_test bbs_mysql_test
+```
+
+You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+Note that you need to replace `<database>` by the database name defined above
+(`DATABASE`).
+
+```bash
+docker exec -it bbs_mysql_test bash
+mysql -u root -p
+> CREATE DATABASE <database>;
+> CREATE USER 'guest'@'localhost' IDENTIFIED BY 'guest';
+> GRANT SELECT ON <database>.* TO 'guest'@'localhost';
+> exit;
+exit
 ```
 
 ### Install Blue Brain Search
@@ -128,30 +150,33 @@ this will launch using this image an interactive session in a Docker container.
 The next steps of this *Getting Started* will need to be run in this session.
 
 FIXME needs `--env-file .env`?
+FIXME pass VERSION + URL
 
 ```bash
-git clone https://github.com/BlueBrain/BlueBrainSearch
-cd BlueBrainSearch
-docker build -f ./docker/base.Dockerfile -t bbs_base .
-docker run -it -v /raid:/raid --rm --user root --gpus all \
-  --name bbs_base bbs_base
+docker build -f BlueBrainSearch/docker/base.Dockerfile -t bbs_base_test .
+docker run -it -v /raid:/raid --link bbs_mysql_test --gpus all --user root -w $DIR --rm \
+  --name bbs_base_test bbs_base_test
 pip install ./BlueBrainSearch
 ```
 
 ### Create the database
 
+You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+
 ```bash
 create_database \
-  --data-path ./$CORD19 \
-  --database-url $DATABASE
+  --data-path $VERSION \
+  --database-url $URL
 ```
 
 ### Compute the sentence embeddings
 
+FIXME Below to be tested (currently, MySQL denied access issue).
+
 ```bash
 compute_embeddings SentTransformer embeddings.h5 \
-  --checkpoint ./biobert_nli_sts_cord19_v1 \
-  --db-url $DATABASE \
+  --checkpoint biobert_nli_sts_cord19_v1 \
+  --db-url $URL \
   --gpus 0,1,2,3,4,5 \
   --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
   --n-processes 6
@@ -161,7 +186,7 @@ compute_embeddings SentTransformer embeddings.h5 \
 
 ```bash
 create_mining_cache \
-  --database-url $DATABASE
+  --database-url $URL
 ```
 
 ### Initialize the search and mining servers
@@ -178,7 +203,7 @@ docker-compose up
 ### Open the Jupyter notebook
 
 ```bash
-jupyter lab ./notebooks/BBS_BBG_poc.ipynb
+jupyter lab notebooks/BBS_BBG_poc.ipynb
 ```
 
 
