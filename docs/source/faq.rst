@@ -62,7 +62,7 @@ DVC pull issue
 When launching mining_cache or mining_server entrypoints or even simply
 :code:`dvc pull`, one might run into the following error:
 
-.. code-block:: bash
+.. code-block:: text
 
     WARNING: Some of the cache files do not exist neither locally nor on remote.
     Missing cache files:
