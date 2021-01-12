@@ -85,7 +85,7 @@ There are 8 steps which need to be done in order:
 7. Initialize the search and mining servers.
 8. Open the Jupyter notebook.
 
-At the moment, note that these instructions suppose you have access to
+At the moment, please note that these instructions suppose you have access to
 Blue Brain resources.
 
 ### Prerequisites
@@ -115,7 +115,7 @@ tar xf $VERSION/document_parses.tar.gz -C $VERSION
 
 ```bash
 export PORT=8953
-export PASSWORD=1a2b3c4d
+export PASSWORD=1234
 export URL=$(hostname):$PORT/cord19
 ```
 
@@ -123,9 +123,9 @@ This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
 ```bash
-mkdir $DIR/mysql_data
+mkdir mysql_data
 docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t test_bbs_mysql .
-docker run -d -v $DIR/mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
+docker run -d -v $DIRECTORY/mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
   --name test_bbs_mysql test_bbs_mysql
 ```
 
@@ -148,14 +148,16 @@ this will launch using this image an interactive session in a Docker container.
 The next steps of this *Getting Started* will need to be run in this session.
 
 FIXME needs `--env-file .env`?
-FIXME pass VERSION + URL
+FIXME pass VERSION + URL + DIR
 
 ```bash
 docker build -f BlueBrainSearch/docker/base.Dockerfile -t test_bbs_base .
-docker run -it -v /raid:/raid --link test_bbs_mysql --gpus all --user root -w $DIR --rm \
+docker run -it -v /raid:/raid --link test_bbs_mysql --gpus all --user root -w $DIRECTORY --rm \
   --name test_bbs_base test_bbs_base
-pip install ./BlueBrainSearch
+pip install --editable ./BlueBrainSearch
 ```
+
+NB: At the moment, `--editable` is needed for DVC.load_ee_models_library()`.
 
 ### Create the database
 
@@ -169,23 +171,37 @@ create_database \
 
 ### Compute the sentence embeddings
 
-FIXME Below to be tested (currently, MySQL denied access issue).
-
 ```bash
 compute_embeddings SentTransformer embeddings.h5 \
   --checkpoint biobert_nli_sts_cord19_v1 \
   --db-url $URL \
-  --gpus 0,1,2,3,4,5 \
+  --gpus 0,1 \
   --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
-  --n-processes 6
+  --n-processes 2
 ```
 
 ### Create the mining cache
 
 ```bash
-create_mining_cache \
-  --database-url $URL
+cd BlueBrainSearch/data_and_models/pipelines/ner
+dvc pull ee_models_library.csv.dvc
+for i in 1 2 3 4 5;
+do dvc pull ../../models/ner_er/model$i;
+done;
+cd $DIRECTORY
 ```
+
+You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+
+FIXME What is below isn't tested yet.
+
+```bash
+create_mining_cache \
+  --database-url $URL \
+  --verbose
+```
+
+NB: At the moment, `--verbose` is needed to show the INFO logs.
 
 ### Initialize the search and mining servers
 
