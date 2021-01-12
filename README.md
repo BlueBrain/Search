@@ -108,6 +108,7 @@ export ARCHIVE=cord-19_${VERSION}.tar.gz
 ```bash
 wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$ARCHIVE
 tar xf $ARCHIVE
+tar xf $VERSION/document_parses.tar.gz -C $VERSION
 ```
 
 ### Initialize the database server
@@ -115,8 +116,7 @@ tar xf $ARCHIVE
 ```bash
 export PORT=8953
 export PASSWORD=1a2b3c4d
-export DATABASE=cord19
-export URL=$(hostname):$PORT/$DATABASE
+export URL=$(hostname):$PORT/cord19
 ```
 
 This will build a Docker image where MySQL is installed. Besides, this will
@@ -124,21 +124,19 @@ launch using this image a MySQL server running in a Docker container.
 
 ```bash
 mkdir $DIR/mysql_data
-docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t bbs_mysql_test .
+docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t test_bbs_mysql .
 docker run -d -v $DIR/mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
-  --name bbs_mysql_test bbs_mysql_test
+  --name test_bbs_mysql test_bbs_mysql
 ```
 
 You will be asked to enter the MySQL root password defined above (`PASSWORD`).
-Note that you need to replace `<database>` by the database name defined above
-(`DATABASE`).
 
 ```bash
-docker exec -it bbs_mysql_test bash
+docker exec -it test_bbs_mysql bash
 mysql -u root -p
-> CREATE DATABASE <database>;
-> CREATE USER 'guest'@'localhost' IDENTIFIED BY 'guest';
-> GRANT SELECT ON <database>.* TO 'guest'@'localhost';
+> CREATE DATABASE cord19;
+> CREATE USER 'guest'@'%' IDENTIFIED WITH mysql_native_password BY 'guest';
+> GRANT SELECT ON cord19.* TO 'guest'@'%';
 > exit;
 exit
 ```
@@ -153,9 +151,9 @@ FIXME needs `--env-file .env`?
 FIXME pass VERSION + URL
 
 ```bash
-docker build -f BlueBrainSearch/docker/base.Dockerfile -t bbs_base_test .
-docker run -it -v /raid:/raid --link bbs_mysql_test --gpus all --user root -w $DIR --rm \
-  --name bbs_base_test bbs_base_test
+docker build -f BlueBrainSearch/docker/base.Dockerfile -t test_bbs_base .
+docker run -it -v /raid:/raid --link test_bbs_mysql --gpus all --user root -w $DIR --rm \
+  --name test_bbs_base test_bbs_base
 pip install ./BlueBrainSearch
 ```
 
