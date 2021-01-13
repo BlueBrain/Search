@@ -85,7 +85,7 @@ There are 8 steps which need to be done in order:
 7. Initialize the search, mining, and notebooks servers
 8. Open the example notebook.
 
-Four things need to be noted before proceeding.
+Before proceeding, four things need to be noted.
 
 First, at the moment, these instructions suppose the machine is inside Blue
 Brain's network.
@@ -96,35 +96,47 @@ executed on a powerful remote machine and the notebooks are supposed to be
 accessed from a personal local machine through the network.
 
 Third, the ports, the Docker image names, and the Docker container names are
-modified to safely test the instructions on a machine where the Docker images
-would have already been built, the Docker containers would already run, and
-the servers would already run.
+modified (see below) to safely test the instructions on a machine where the
+Docker images would have already been built, the Docker containers would
+already run, and the servers would already run.
 
 Fourth, if you are in a production setting, the database password and the
 notebooks server token should be changed, the prefix `test_` should be removed
-from the Docker image and container names, the `sed`commands should be omitted,
-the second digit of the ports should be replaced by `8`.
+from the Docker image and container names, the `sed` commands should be
+omitted, and the second digit of the ports should be replaced by `8`.
 
 ### Prerequisites
 
-The instructions are written for the GNU/Linux platform. However, any platform
+The instructions are written for GNU/Linux machines. However, any machine
 with the equivalent of `git`, `wget`, `tar`, `mkdir` and `sed` (optional)
 could be used.
 
-The software named Docker is also needed. To install Docker, please refer to
+The software named `Docker is also needed. To install `Docker`, please refer to
 the [official Docker documentation](https://docs.docker.com/engine/install/).
 
 An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
 [official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
 
+Otherwise, let's define the environment variables commons to the instructions.
+
 ```bash
 export DIRECTORY=$(pwd)
-git clone https://github.com/BlueBrain/BlueBrainSearch
+
+export DATABASE_PORT=8953
+export SEARCH_PORT=8950
+export MINING_PORT=8952
+export NOTEBOOKS_PORT=8954
+
+export DATABASE_PASSWORD=1234
+export NOTEBOOKS_TOKEN=1a2b3c4d
 ```
 
-FIXME put 4 servers ports here as env vars
-FIXME plus password and token
+Then, please clone the Blue Brain Search repository.
+
+```bash
+git clone https://github.com/BlueBrain/BlueBrainSearch
+```
 
 ### Retrieve the documents
 
@@ -132,23 +144,24 @@ This will download and decompress the CORD-19 version corresponding to the
 version 73 on Kaggle. Note that the data are around 7 GB.
 
 ```bash
-export VERSION=2021-01-03
-export ARCHIVE=cord-19_${VERSION}.tar.gz
+export CORD19_VERSION=2021-01-03
+export CORD19_ARCHIVE=cord-19_${CORD19_VERSION}.tar.gz
 ```
 
 ```bash
-wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$ARCHIVE
-tar xf $ARCHIVE
-tar xf $VERSION/document_parses.tar.gz -C $VERSION
+wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$CORD19_ARCHIVE
+tar xf $CORD19_ARCHIVE
+tar xf $CORD19_VERSION/document_parses.tar.gz -C $CORD19_VERSION
 ```
 
 CORD-19 contains more than 400,000 publications. The next sections could run
-for several hours, even days, depending on your computing power. For testing
-purposes, you might want to consider a subset of CORD-19. The following code
-select around 1,400 articles about *glucose* and *risk factors*:
+for several hours, even days, depending on the power of the machine.
+
+For testing purposes, you might want to consider a subset of the CORD-19. The
+following code select around 1,400 articles about *glucose* and *risk factors*:
 
 ```bash
-cd $VERSION
+cd $CORD19_VERSION
 mv metadata.csv metadata.csv.original
 pip install pandas
 python
@@ -173,38 +186,54 @@ cd ..
 ### Initialize the database server
 
 ```bash
-export PORT=8953
-export PASSWORD=1234
-export URL=$HOSTNAME:$PORT/cord19
+export DATABASE_STORE=mysql_data
+export DATABASE_NAME=cord19
+export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 cd BlueBrainSearch
 ```
 
 This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
+FIXME needs BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
+
 ```bash
-mkdir mysql_data
 docker build \
   --build-arg HTTP_PROXY=$BBS_HTTP_PROXY --build-arg http_proxy=$BBS_http_proxy \
   --build-arg HTTPS_PROXY=$BBS_HTTPS_PROXY --build-arg https_proxy=$BBS_https_proxy \
   -f docker/mysql.Dockerfile -t test_bbs_mysql .
+```
+
+```bash
+mkdir $DATABASE_STORE
 docker run \
-  --network=test_bbs_network --publish $PORT:3306 \
-  --volume $DIRECTORY/mysql_data:/var/lib/mysql \
-  --env MYSQL_ROOT_PASSWORD=$PASSWORD \
+  --network=test_bbs_network --publish $DATABASE_PORT:3306 \
+  --volume $DIRECTORY/$DATABASE_STORE:/var/lib/mysql \
+  --env MYSQL_ROOT_PASSWORD=$DATABASE_PASSWORD \
   --detach \
   --name test_bbs_mysql test_bbs_mysql
 ```
 
-You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+You will be asked to enter the MySQL root password defined above
+(`DATABASE_PASSWORD`).
 
 ```bash
 docker exec --interactive --tty test_bbs_mysql bash
 mysql -u root -p
-> CREATE DATABASE cord19;
-> CREATE USER 'guest'@'%' IDENTIFIED WITH mysql_native_password BY 'guest';
-> GRANT SELECT ON cord19.* TO 'guest'@'%';
-> exit;
+```
+
+Please replace `<database name>` by the value of `DATABASE_NAME`.
+
+```sql
+CREATE DATABASE <database name>;
+CREATE USER 'guest'@'%' IDENTIFIED WITH mysql_native_password BY 'guest';
+GRANT SELECT ON <database name>.* TO 'guest'@'%';
+exit;
+```
+
+Please exit the interactive session of the `test_bbs_mysql` container.
+
+```bash
 exit
 ```
 
@@ -212,7 +241,7 @@ exit
 
 This will build a Docker image where Blue Brain Search is installed. Besides,
 this will launch using this image an interactive session in a Docker container.
-The next steps of this *Getting Started* will need to be run in this session.
+The immediate next sections will need to be run in this session.
 
 FIXME ? needs `--env-file .env`
 FIXME ? .env used for BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
@@ -224,10 +253,13 @@ docker build \
   --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
   --build-arg BBS_HTTPS_PROXY --build-arg BBS_https_proxy \
   -f docker/base.Dockerfile -t test_bbs_base .
+```
+
+```bash
 docker run \
   --network=test_bbs_network \
   --volume /raid:/raid \
-  --env VERSION --env URL --env DIRECTORY \
+  --env CORD19_VERSION --env DATABASE_URL --env DIRECTORY \
   --gpus all \
   --interactive --tty --rm --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
@@ -238,12 +270,13 @@ NB: At the moment, `--editable` is needed for DVC.load_ee_models_library()`.
 
 ### Create the database
 
-You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+You will be asked to enter the MySQL root password defined above
+(`DATABASE_PASSWORD`).
 
 ```bash
 create_database \
-  --data-path $VERSION \
-  --database-url $URL
+  --data-path $CORD19_VERSION \
+  --database-url $DATABASE_URL
 ```
 
 ### Compute the sentence embeddings
@@ -251,7 +284,7 @@ create_database \
 ```bash
 compute_embeddings SentTransformer embeddings.h5 \
   --checkpoint biobert_nli_sts_cord19_v1 \
-  --db-url $URL \
+  --db-url $DATABASE_URL \
   --gpus 0,1 \
   --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
   --n-processes 2
@@ -268,22 +301,27 @@ done;
 cd $DIRECTORY
 ```
 
-You will be asked to enter the MySQL root password defined above (`PASSWORD`).
+You will be asked to enter the MySQL root password defined above
+(`DATABASE_PASSWORD`).
 
 ```bash
 create_mining_cache \
-  --database-url $URL \
+  --database-url $DATABASE_URL \
   --verbose
 ```
 
-NB: At the moment, `--verbose` is needed to show the INFO logs.
+NB: At the moment, `--verbose` is needed to show the `INFO` logs.
 
 ### Initialize the search, mining, and notebooks servers
 
-Exit the interactive session of the `test_bbs_base` Docker container.
+Please exit the interactive session of the `test_bbs_base` container.
 
 ```bash
 exit
+```
+
+```bash
+cd BlueBrainSearch
 ```
 
 FIXME create .env from example
@@ -295,8 +333,11 @@ FIXME should include BBS_SSH_USERNAME
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
 docker build \
   -f docker/search.Dockerfile -t test_bbs_search .
+```
+
+```bash
 docker run \
-  --network=test_bbs_network --publish 8950:8080 \
+  --network=test_bbs_network --publish $SEARCH_PORT:8080 \
   --volume /raid:/raid \
   --env-file .env \
   --detach \
@@ -309,8 +350,11 @@ docker run \
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 docker build \
   -f docker/mining.Dockerfile -t test_bbs_mining .
+```
+
+```bash
 docker run \
-  --network=test_bbs_network --publish 8952:8080 \
+  --network=test_bbs_network --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
   --env-file .env \
   --detach \
@@ -321,21 +365,21 @@ docker run \
 
 ```bash
 cd notebooks
-sed -i 's/cord19_v47/cord19/g' BBS_BBG_poc.ipynb  # database name
-sed -i 's/dgx1.bbp.epfl.ch:8853/8953/g' BBS_BBG_poc.ipynb  # database server
-sed -i 's/dgx1.bbp.epfl.ch:8850/8950/g' BBS_BBG_poc.ipynb  # search server
-sed -i 's/dgx1.bbp.epfl.ch:8852/8952/g' BBS_BBG_poc.ipynb  # mining server
+sed -i 's/cord19_v47/'$DATABASE_NAME'/g' BBS_BBG_poc.ipynb
+sed -i 's/dgx1.bbp.epfl.ch:8853/'$HOSTNAME:$DATABASE_PORT'/g' BBS_BBG_poc.ipynb
+sed -i 's/dgx1.bbp.epfl.ch:8850/'$HOSTNAME:$SEARCH_PORT'/g' BBS_BBG_poc.ipynb
+sed -i 's/dgx1.bbp.epfl.ch:8852/'$HOSTNAME:$MINING_PORT'/g' BBS_BBG_poc.ipynb
 ```
 
 ```bash
 cd $DIRECTORY
 docker run \
-  --publish 8954:8888 \
+  --publish $NOTEBOOKS_PORT:8888 \
   --volume /raid:/raid \
   --interactive --tty --rm --workdir $DIRECTORY \
   --name test_bbs_notebooks test_bbs_base
 pip install ./BlueBrainSearch
-jupyter lab BlueBrainSearch/notebooks --NotebookApp.token='1a2b3c4d'
+jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOKS_TOKEN
 ```
 
 To detach from the Docker container, please hit `CTRL+P` and then `CTRL+Q`.
@@ -343,11 +387,12 @@ To detach from the Docker container, please hit `CTRL+P` and then `CTRL+Q`.
 ### Open the example notebook
 
 ```bash
-echo http://$HOSTNAME:8954/lab/tree/BBS_BBG_poc.ipynb
+echo http://$HOSTNAME:$NOTEBOOK_PORT/lab/tree/BBS_BBG_poc.ipynb
 ```
 
-To open the example notebook, open the link returned above in a browser, then
-enter the token above (`NotebookApp.token`), and finally click on `Log in`.
+To open the example notebook, please open the link returned above in a browser,
+then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
+on `Log in`.
 
 *Voilà!* You could now use the graphical interface.
 
