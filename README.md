@@ -194,13 +194,13 @@ FIXME ? .env used for BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_pr
 
 ```bash
 docker build \
-  --build-arg VERSION --build-arg URL --build-arg DIRECTORY \
   --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
   --build-arg BBS_HTTPS_PROXY --build-arg BBS_https_proxy \
   -f docker/base.Dockerfile -t test_bbs_base .
 docker run \
   --network=test_bbs_network \
   --volume /raid:/raid \
+  --env VERSION --env URL --env DIRECTORY \
   --gpus all \
   --interactive --tty --rm --user root --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
