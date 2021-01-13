@@ -98,6 +98,17 @@ omitted. For the ports, the default values start with `88` and not `89`.
 
 ### Prerequisites
 
+The instructions are written for the GNU/Linux platform. However, any platform
+with the equivalent of `git`, `wget`, `tar`, `mkdir` and `sed` (optional)
+could be used.
+
+The software named Docker is also needed. To install Docker, please refer to
+the [official Docker documentation](https://docs.docker.com/engine/install/).
+
+An optional part is using the programming language `Python` and its package
+manager `pip`. To install `Python` and `pip` please refer to the
+[official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
+
 ```bash
 export DIRECTORY=$(pwd)
 git clone https://github.com/BlueBrain/BlueBrainSearch
@@ -127,6 +138,7 @@ select around 1,400 articles about *glucose* and *risk factors*:
 ```bash
 cd $VERSION
 mv metadata.csv metadata.csv.original
+pip install pandas
 python
 ```
 
