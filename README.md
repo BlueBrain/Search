@@ -111,6 +111,33 @@ tar xf $ARCHIVE
 tar xf $VERSION/document_parses.tar.gz -C $VERSION
 ```
 
+CORD-19 contains more than 400,000 publications. The next sections could run
+for several hours, even days, depending on your computing power. For testing
+purposes, you might want to consider a subset of CORD-19. The following code
+select around 1,400 articles about *glucose* and *risk factors*:
+
+```bash
+cd $VERSION
+mv metadata.csv metadata.csv.original
+python
+```
+
+```python
+import pandas as pd
+metadata = pd.read_csv('metadata.csv.original')
+sample = metadata[
+    metadata.title.str.contains('glucose', na=False)
+    | metadata.title.str.contains('risk factor', na=False)
+  ]
+print('The subset contains', sample.shape[0], 'articles.')
+sample.to_csv('metadata.csv', index=False)
+exit()
+```
+
+```bash
+cd ..
+```
+
 ### Initialize the database server
 
 ```bash
