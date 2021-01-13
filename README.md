@@ -40,7 +40,7 @@ the text in the top field named `Query`.
 The returned results are ranked by decreasing semantic similarity. This means
 that the first results have a similar meaning to the query. Thanks to the
 state-of-the-art approach based on deep learning used by Blue Brain Search,
-this is true even if the query and the sentences from the documents don't
+this is true even if the query and the sentences from the documents do not
 share the same words (e.g. they are synonyms, they have a similar meaning, ...).
 
 ![Search Widget](screenshots/search_widget.png)
@@ -87,6 +87,14 @@ There are 8 steps which need to be done in order:
 
 At the moment, please note that these instructions suppose you have access to
 Blue Brain resources.
+
+Please also note that in this *Getting Started* the ports, the Docker
+image names, and the Docker container names are modified to safely test
+the instructions on a machine where BBS Docker images would have already
+been built, BBS Docker containers would already run, and BBS servers would
+already run. If this is not the case, the prefix `test_` could be removed
+from the Docker image and container names and the `sed`commands could be
+omitted. For the ports, the default values start with `88` and not `89`.
 
 ### Prerequisites
 
@@ -149,17 +157,23 @@ export URL=$(hostname):$PORT/cord19
 This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
+FIXME ? cd BlueBrainSearch for docker build
+
 ```bash
 mkdir mysql_data
 docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t test_bbs_mysql .
-docker run -d -v $DIRECTORY/mysql_data:/var/lib/mysql -p $PORT:3306 -e MYSQL_ROOT_PASSWORD=$PASSWORD \
+docker run \
+  --network=test_bbs_network -p $PORT:3306 \
+  --volume $DIRECTORY/mysql_data:/var/lib/mysql \
+  --env MYSQL_ROOT_PASSWORD=$PASSWORD \
+  --detach \
   --name test_bbs_mysql test_bbs_mysql
 ```
 
 You will be asked to enter the MySQL root password defined above (`PASSWORD`).
 
 ```bash
-docker exec -it test_bbs_mysql bash
+docker exec --interactive --tty test_bbs_mysql bash
 mysql -u root -p
 > CREATE DATABASE cord19;
 > CREATE USER 'guest'@'%' IDENTIFIED WITH mysql_native_password BY 'guest';
@@ -175,11 +189,21 @@ this will launch using this image an interactive session in a Docker container.
 The next steps of this *Getting Started* will need to be run in this session.
 
 FIXME needs `--env-file .env`?
-FIXME pass VERSION + URL + DIR
+FIXME with BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy ?
+
+FIXME ? cd BlueBrainSearch for docker build
 
 ```bash
-docker build -f BlueBrainSearch/docker/base.Dockerfile -t test_bbs_base .
-docker run -it -v /raid:/raid --link test_bbs_mysql --gpus all --user root -w $DIRECTORY --rm \
+docker build \
+  --build-arg VERSION --build-arg URL --build-arg DIRECTORY \
+  --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
+  --build-arg BBS_HTTPS_PROXY --build-arg BBS_https_proxy \
+  -f BlueBrainSearch/docker/base.Dockerfile -t test_bbs_base .
+docker run \
+  --network=test_bbs_network \
+  --volume /raid:/raid \
+  --gpus all \
+  --interactive --tty --rm --user root --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
 pip install --editable ./BlueBrainSearch
 ```
@@ -220,8 +244,6 @@ cd $DIRECTORY
 
 You will be asked to enter the MySQL root password defined above (`PASSWORD`).
 
-FIXME What is below isn't tested yet.
-
 ```bash
 create_mining_cache \
   --database-url $URL \
@@ -232,16 +254,50 @@ NB: At the moment, `--verbose` is needed to show the INFO logs.
 
 ### Initialize the search and mining servers
 
-Exit the interactive session of the `bbs_base` container with `CTRL+C`.
-
-FIXME create .env from example
-FIXME needs `--env-file .env`?
+Exit the interactive session of the `test_bbs_base` Docker container.
 
 ```bash
-docker-compose up
+exit
+```
+
+FIXME create .env from example
+FIXME should include BBS_SSH_USERNAME
+
+*Common elements*
+
+```bash
+cd BlueBrainSearch
+sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
+sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
+```
+
+*Search server*
+
+```bash
+docker build -f docker/search.Dockerfile -t test_bbs_search .
+docker run \
+  --network=test_bbs_network -p 8950:8080 \
+  --volume /raid:/raid \
+  --env-file .env \
+  --detach \
+  --name test_bbs_search test_bbs_search
+```
+
+*Mining server*
+
+```bash
+docker build -f docker/mining.Dockerfile -t test_bbs_mining .
+docker run \
+  --network=test_bbs_network -p 8952:8080 \
+  --volume /raid:/raid \
+  --env-file .env \
+  --detach \
+  --name test_bbs_mining test_bbs_mining
 ```
 
 ### Open the Jupyter notebook
+
+FIXME ? cd $DIRECTORY vs docker run test_bbs_base
 
 ```bash
 jupyter lab notebooks/BBS_BBG_poc.ipynb
