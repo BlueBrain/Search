@@ -152,17 +152,18 @@ cd ..
 export PORT=8953
 export PASSWORD=1234
 export URL=$(hostname):$PORT/cord19
+cd BlueBrainSearch
 ```
 
 This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
-FIXME `docker build` fails because of `Connection refused`: proxy configuration issue?
-
 ```bash
 mkdir mysql_data
-cd BlueBrainSearch
-docker build -f docker/mysql.Dockerfile -t test_bbs_mysql .
+docker build \
+  --build-arg HTTP_PROXY=$BBS_HTTP_PROXY --build-arg http_proxy=$BBS_http_proxy \
+  --build-arg HTTPS_PROXY=$BBS_HTTPS_PROXY --build-arg https_proxy=$BBS_https_proxy \
+  -f docker/mysql.Dockerfile -t test_bbs_mysql .
 docker run \
   --network=test_bbs_network -p $PORT:3306 \
   --volume $DIRECTORY/mysql_data:/var/lib/mysql \
@@ -272,7 +273,8 @@ sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 *Search server*
 
 ```bash
-docker build -f docker/search.Dockerfile -t test_bbs_search .
+docker build \
+  -f docker/search.Dockerfile -t test_bbs_search .
 docker run \
   --network=test_bbs_network -p 8950:8080 \
   --volume /raid:/raid \
@@ -284,7 +286,8 @@ docker run \
 *Mining server*
 
 ```bash
-docker build -f docker/mining.Dockerfile -t test_bbs_mining .
+docker build \
+  -f docker/mining.Dockerfile -t test_bbs_mining .
 docker run \
   --network=test_bbs_network -p 8952:8080 \
   --volume /raid:/raid \
