@@ -99,7 +99,7 @@ omitted. For the ports, the default values start with `88` and not `89`.
 ### Prerequisites
 
 ```bash
-export DIR=$(pwd)
+export DIRECTORY=$(pwd)
 git clone https://github.com/BlueBrain/BlueBrainSearch
 ```
 
@@ -157,11 +157,12 @@ export URL=$(hostname):$PORT/cord19
 This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
-FIXME ? cd BlueBrainSearch for docker build
+FIXME `docker build` fails because of `Connection refused`: proxy configuration issue?
 
 ```bash
 mkdir mysql_data
-docker build -f BlueBrainSearch/docker/mysql.Dockerfile -t test_bbs_mysql .
+cd BlueBrainSearch
+docker build -f docker/mysql.Dockerfile -t test_bbs_mysql .
 docker run \
   --network=test_bbs_network -p $PORT:3306 \
   --volume $DIRECTORY/mysql_data:/var/lib/mysql \
@@ -188,17 +189,15 @@ This will build a Docker image where Blue Brain Search is installed. Besides,
 this will launch using this image an interactive session in a Docker container.
 The next steps of this *Getting Started* will need to be run in this session.
 
-FIXME needs `--env-file .env`?
-FIXME with BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy ?
-
-FIXME ? cd BlueBrainSearch for docker build
+FIXME ? needs `--env-file .env`
+FIXME ? .env used for BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
 
 ```bash
 docker build \
   --build-arg VERSION --build-arg URL --build-arg DIRECTORY \
   --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
   --build-arg BBS_HTTPS_PROXY --build-arg BBS_https_proxy \
-  -f BlueBrainSearch/docker/base.Dockerfile -t test_bbs_base .
+  -f docker/base.Dockerfile -t test_bbs_base .
 docker run \
   --network=test_bbs_network \
   --volume /raid:/raid \
@@ -266,7 +265,6 @@ FIXME should include BBS_SSH_USERNAME
 *Common elements*
 
 ```bash
-cd BlueBrainSearch
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 ```
@@ -297,7 +295,7 @@ docker run \
 
 ### Open the Jupyter notebook
 
-FIXME ? cd $DIRECTORY vs docker run test_bbs_base
+FIXME ? cd $DIRECTORY (now in $DIRECTORY/BlueBrainSearch) vs docker run test_bbs_base
 
 ```bash
 jupyter lab notebooks/BBS_BBG_poc.ipynb
