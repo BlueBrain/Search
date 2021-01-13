@@ -82,19 +82,28 @@ There are 8 steps which need to be done in order:
 4. Create the database.
 5. Compute the sentence embeddings.
 6. Create the mining cache.
-7. Initialize the search and mining servers.
-8. Open the Jupyter notebook.
+7. Initialize the search, mining, and notebooks servers
+8. Open the example notebook.
 
-At the moment, please note that these instructions suppose you have access to
-Blue Brain resources.
+Four things need to be noted before proceeding.
 
-Please also note that in this *Getting Started* the ports, the Docker
-image names, and the Docker container names are modified to safely test
-the instructions on a machine where BBS Docker images would have already
-been built, BBS Docker containers would already run, and BBS servers would
-already run. If this is not the case, the prefix `test_` could be removed
-from the Docker image and container names and the `sed`commands could be
-omitted. For the ports, the default values start with `88` and not `89`.
+First, at the moment, these instructions suppose the machine is inside Blue
+Brain's network.
+
+Second, the setup of Blue Brain Search requires the launch of 4 servers
+(database, search, mining, notebooks). The instructions are supposed to be
+executed on a powerful remote machine and the notebooks are supposed to be
+accessed from a personal local machine through the network.
+
+Third, the ports, the Docker image names, and the Docker container names are
+modified to safely test the instructions on a machine where the Docker images
+would have already been built, the Docker containers would already run, and
+the servers would already run.
+
+Fourth, if you are in a production setting, the database password and the
+notebooks server token should be changed, the prefix `test_` should be removed
+from the Docker image and container names, the `sed`commands should be omitted,
+the second digit of the ports should be replaced by `8`.
 
 ### Prerequisites
 
@@ -113,6 +122,9 @@ manager `pip`. To install `Python` and `pip` please refer to the
 export DIRECTORY=$(pwd)
 git clone https://github.com/BlueBrain/BlueBrainSearch
 ```
+
+FIXME put 4 servers ports here as env vars
+FIXME plus password and token
 
 ### Retrieve the documents
 
@@ -163,7 +175,7 @@ cd ..
 ```bash
 export PORT=8953
 export PASSWORD=1234
-export URL=$(hostname):$PORT/cord19
+export URL=$HOSTNAME:$PORT/cord19
 cd BlueBrainSearch
 ```
 
@@ -177,7 +189,7 @@ docker build \
   --build-arg HTTPS_PROXY=$BBS_HTTPS_PROXY --build-arg https_proxy=$BBS_https_proxy \
   -f docker/mysql.Dockerfile -t test_bbs_mysql .
 docker run \
-  --network=test_bbs_network -p $PORT:3306 \
+  --network=test_bbs_network --publish $PORT:3306 \
   --volume $DIRECTORY/mysql_data:/var/lib/mysql \
   --env MYSQL_ROOT_PASSWORD=$PASSWORD \
   --detach \
@@ -205,6 +217,8 @@ The next steps of this *Getting Started* will need to be run in this session.
 FIXME ? needs `--env-file .env`
 FIXME ? .env used for BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
 
+FIXME Try without --user root
+
 ```bash
 docker build \
   --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
@@ -215,7 +229,7 @@ docker run \
   --volume /raid:/raid \
   --env VERSION --env URL --env DIRECTORY \
   --gpus all \
-  --interactive --tty --rm --user root --workdir $DIRECTORY \
+  --interactive --tty --rm --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
 pip install --editable ./BlueBrainSearch
 ```
@@ -264,7 +278,7 @@ create_mining_cache \
 
 NB: At the moment, `--verbose` is needed to show the INFO logs.
 
-### Initialize the search and mining servers
+### Initialize the search, mining, and notebooks servers
 
 Exit the interactive session of the `test_bbs_base` Docker container.
 
@@ -275,46 +289,70 @@ exit
 FIXME create .env from example
 FIXME should include BBS_SSH_USERNAME
 
-*Common elements*
+#### Search server
 
 ```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
-sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
-```
-
-*Search server*
-
-```bash
 docker build \
   -f docker/search.Dockerfile -t test_bbs_search .
 docker run \
-  --network=test_bbs_network -p 8950:8080 \
+  --network=test_bbs_network --publish 8950:8080 \
   --volume /raid:/raid \
   --env-file .env \
   --detach \
   --name test_bbs_search test_bbs_search
 ```
 
-*Mining server*
+#### Mining server
 
 ```bash
+sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 docker build \
   -f docker/mining.Dockerfile -t test_bbs_mining .
 docker run \
-  --network=test_bbs_network -p 8952:8080 \
+  --network=test_bbs_network --publish 8952:8080 \
   --volume /raid:/raid \
   --env-file .env \
   --detach \
   --name test_bbs_mining test_bbs_mining
 ```
 
-### Open the Jupyter notebook
-
-FIXME ? cd $DIRECTORY (now in $DIRECTORY/BlueBrainSearch) vs docker run test_bbs_base
+#### Notebooks server
 
 ```bash
-jupyter lab notebooks/BBS_BBG_poc.ipynb
+cd notebooks
+sed -i 's/cord19_v47/cord19/g' BBS_BBG_poc.ipynb  # database name
+sed -i 's/dgx1.bbp.epfl.ch:8853/8953/g' BBS_BBG_poc.ipynb  # database server
+sed -i 's/dgx1.bbp.epfl.ch:8850/8950/g' BBS_BBG_poc.ipynb  # search server
+sed -i 's/dgx1.bbp.epfl.ch:8852/8952/g' BBS_BBG_poc.ipynb  # mining server
 ```
+
+```bash
+cd $DIRECTORY
+docker run \
+  --publish 8954:8888 \
+  --volume /raid:/raid \
+  --interactive --tty --rm --workdir $DIRECTORY \
+  --name test_bbs_notebooks test_bbs_base
+pip install ./BlueBrainSearch
+jupyter lab BlueBrainSearch/notebooks --NotebookApp.token='1a2b3c4d'
+```
+
+To detach from the Docker container, please hit `CTRL+P` and then `CTRL+Q`.
+
+### Open the example notebook
+
+```bash
+echo http://$HOSTNAME:8954/lab/tree/BBS_BBG_poc.ipynb
+```
+
+To open the example notebook, open the link returned above in a browser, then
+enter the token above (`NotebookApp.token`), and finally click on `Log in`.
+
+*Voilà!* You could now use the graphical interface.
+
+
+
 
 
 ## FIXME (below)
