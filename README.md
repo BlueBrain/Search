@@ -192,6 +192,9 @@ cd ..
 export DATABASE_STORE=mysql_data
 export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
+```
+
+```bash
 mkdir $DATABASE_STORE
 cd BlueBrainSearch
 ```
@@ -322,6 +325,7 @@ around 4 minutes.
 ```bash
 create_mining_cache \
   --database-url $DATABASE_URL \
+  --target-table-name=mining_cache \
   --verbose
 ```
 
@@ -432,8 +436,6 @@ echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb
 To open the example notebook, please open the link returned above in a browser,
 then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
 on `Log in`.
-
-FIXME mining cache table name is inconsistent => crash
 
 *Voilà!* You could now use the graphical interface.
 
