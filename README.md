@@ -88,7 +88,9 @@ There are 8 steps which need to be done in order:
 Before proceeding, four things need to be noted.
 
 First, at the moment, these instructions suppose the machine is inside Blue
-Brain's network.
+Brain's network and has access to the sentence embedding model we trained
+(`BioBERT NLI+STS CORD-19 v1`). Indeed, this model has not been publicly
+released yet.
 
 Second, the setup of Blue Brain Search requires the launch of 4 servers
 (database, search, mining, notebooks). The instructions are supposed to be
@@ -289,8 +291,6 @@ create_database \
 
 ### Compute the sentence embeddings
 
-FIXME retrieve model checkpoint or use known model
-
 If you are using the CORD-19 subset of around 1,400 articles, this would take
 around 1 minute (on 2 Tesla V100 16 GB).
 
@@ -302,6 +302,10 @@ compute_embeddings SentTransformer embeddings.h5 \
   --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
   --n-processes 2
 ```
+
+NB: At the moment, `compute_embeddings` handles more models than the search
+server. The supported models for the search could be found in
+`SearchServer._get_model(...)`.
 
 ### Create the mining cache
 
@@ -436,6 +440,8 @@ echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb
 To open the example notebook, please open the link returned above in a browser,
 then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
 on `Log in`.
+
+FIXME no results returned when selected articles mined
 
 *Voilà!* You could now use the graphical interface.
 
