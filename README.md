@@ -110,8 +110,8 @@ omitted, and the second digit of the ports should be replaced by `8`.
 ### Prerequisites
 
 The instructions are written for GNU/Linux machines. However, any machine
-with the equivalent of `git`, `wget`, `tar`, `mkdir`, `printf`, `grep`,
-`xargs`, and `sed` (optional) could be used.
+with the equivalent of `git`, `wget`, `tar`, `cd`, `mv`, `mkdir`, `sed`
+(optional), and `echo` could be used.
 
 The software named `Docker is also needed. To install `Docker`, please refer to
 the [official Docker documentation](https://docs.docker.com/engine/install/).
@@ -193,13 +193,13 @@ cd ..
 ### Initialize the database server
 
 ```bash
-export DATABASE_STORE=mysql_data
+export DATABASE_DIRECTORY=mysql_data
 export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 ```
 
 ```bash
-mkdir $DATABASE_STORE
+mkdir $DATABASE_DIRECTORY
 cd BlueBrainSearch
 ```
 
@@ -217,7 +217,7 @@ NB:`HTTP_PROXY` and `HTTPS_PROXY`, in upper case, are not working here.
 ```bash
 docker run \
   --publish $DATABASE_PORT:3306 \
-  --volume $DIRECTORY/$DATABASE_STORE:/var/lib/mysql \
+  --volume $DIRECTORY/$DATABASE_DIRECTORY:/var/lib/mysql \
   --env MYSQL_ROOT_PASSWORD=$DATABASE_PASSWORD \
   --detach \
   --name test_bbs_mysql test_bbs_mysql
@@ -297,11 +297,16 @@ If you are using the CORD-19 subset of around 1,400 articles, this would take
 around 1 minute (on 2 Tesla V100 16 GB).
 
 ```bash
-compute_embeddings SentTransformer embeddings.h5 \
+export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
+export BBS_SEARCH_EMBEDDINGS_PATH=$DIRECTORY/embeddings.h5
+```
+
+```bash
+compute_embeddings SentTransformer $BBS_SEARCH_EMBEDDINGS_PATH \
   --checkpoint biobert_nli_sts_cord19_v1 \
   --db-url $DATABASE_URL \
   --gpus 0,1 \
-  --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
+  --h5-dataset-name $EMBEDDING_MODEL \
   --n-processes 2
 ```
 
@@ -364,12 +369,11 @@ NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.ent
 
 ```bash
 export BBS_SEARCH_MYSQL_URL=$DATABASE_URL
-export BBS_SEARCH_MYSQL_USER=guest  # FIXME ? parametrize
-export BBS_SEARCH_MYSQL_PASSWORD=guest  # FIXME ? parametrize
+export BBS_SEARCH_MYSQL_USER=guest
+export BBS_SEARCH_MYSQL_PASSWORD=guest
 
-export BBS_SEARCH_MODELS='BioBERT NLI+STS CORD-19 v1'  # FIXME ? reuse
 export BBS_SEARCH_MODELS_PATH=$DIRECTORY
-export BBS_SEARCH_EMBEDDINGS_PATH=$DIRECTORY/embeddings.h5  # FIXME ? reuse
+export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 ```
 
 ```bash
@@ -396,8 +400,8 @@ NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.ent
 ```bash
 export BBS_MINING_DB_TYPE=mysql
 export BBS_MINING_MYSQL_URL=$DATABASE_URL
-export BBS_MINING_MYSQL_USER=guest  # FIXME ? parametrize
-export BBS_MINING_MYSQL_PASSWORD=guest  # FIXME ? parametrize
+export BBS_MINING_MYSQL_USER=guest
+export BBS_MINING_MYSQL_PASSWORD=guest
 ```
 
 ```bash
@@ -447,14 +451,10 @@ To open the example notebook, please open the link returned above in a browser,
 then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
 on `Log in`.
 
-FIXME no results returned when selected articles mined
+BUG no results returned when selected articles mined
 
 *Voilà!* You could now use the graphical interface.
 
-
-
-
-## FIXME (below)
 
 ## Installation (virtual environment)
 We currently support the following Python versions.
