@@ -110,8 +110,8 @@ omitted, and the second digit of the ports should be replaced by `8`.
 ### Prerequisites
 
 The instructions are written for GNU/Linux machines. However, any machine
-with the equivalent of `git`, `wget`, `tar`, `mkdir` and `sed` (optional)
-could be used.
+with the equivalent of `git`, `wget`, `tar`, `mkdir`, `printf`, `grep`,
+`xargs`, and `sed` (optional) could be used.
 
 The software named `Docker is also needed. To install `Docker`, please refer to
 the [official Docker documentation](https://docs.docker.com/engine/install/).
@@ -132,6 +132,8 @@ export NOTEBOOKS_PORT=8954
 
 export DATABASE_PASSWORD=1234
 export NOTEBOOKS_TOKEN=1a2b3c4d
+
+export BBS_SSH_USERNAME=$(id --user --name)
 
 export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
@@ -265,7 +267,7 @@ are not working here.
 ```bash
 docker run \
   --volume /raid:/raid \
-  --env CORD19_VERSION --env DATABASE_URL --env DIRECTORY \
+  --env CORD19_VERSION --env DATABASE_URL --env DIRECTORY --env BBS_SSH_USERNAME \
   --gpus all \
   --interactive --tty --rm --user root --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
@@ -309,16 +311,22 @@ server. The supported models for the search could be found in
 
 ### Create the mining cache
 
-FIXME use utils.sh
+```bash
+mkdir ~/.ssh
+printf "Host *\n    User %s\n" "$BBS_SSH_USERNAME" >> ~/.ssh/config
+```
 
 ```bash
-cd BlueBrainSearch/data_and_models/pipelines/ner
+cd BlueBrainSearch
+dvc remote modify gpfs_ssh ask_password true
+cd data_and_models/pipelines/ner
 dvc pull ee_models_library.csv.dvc
-for i in 1 2 3 4 5;
-do dvc pull ../../models/ner_er/model$i;
-done;
+dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 cd $DIRECTORY
 ```
+
+NB: At the moment, `dvc_pull_models` from `BlueBrainSearch/docker/utils.sh`
+is not yet usable as it works only when inside the Docker containers.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -386,8 +394,6 @@ docker build \
 NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.entrypoint`.
 
 ```bash
-export BBS_SSH_USERNAME=$(id --user --name)
-
 export BBS_MINING_DB_TYPE=mysql
 export BBS_MINING_MYSQL_URL=$DATABASE_URL
 export BBS_MINING_MYSQL_USER=guest  # FIXME ? parametrize
