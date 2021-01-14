@@ -130,6 +130,9 @@ export NOTEBOOKS_PORT=8954
 
 export DATABASE_PASSWORD=1234
 export NOTEBOOKS_TOKEN=1a2b3c4d
+
+export http_proxy=http://bbpproxy.epfl.ch:80/
+export https_proxy=http://bbpproxy.epfl.ch:80/
 ```
 
 Then, please clone the Blue Brain Search repository.
@@ -189,30 +192,31 @@ cd ..
 export DATABASE_STORE=mysql_data
 export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
+mkdir $DATABASE_STORE
 cd BlueBrainSearch
 ```
 
 This will build a Docker image where MySQL is installed. Besides, this will
 launch using this image a MySQL server running in a Docker container.
 
-FIXME needs BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
-
 ```bash
 docker build \
-  --build-arg HTTP_PROXY=$BBS_HTTP_PROXY --build-arg http_proxy=$BBS_http_proxy \
-  --build-arg HTTPS_PROXY=$BBS_HTTPS_PROXY --build-arg https_proxy=$BBS_https_proxy \
+  --build-arg http_proxy --build-arg https_proxy  \
   -f docker/mysql.Dockerfile -t test_bbs_mysql .
 ```
 
+NB:`HTTP_PROXY` and `HTTPS_PROXY`, in upper case, are not working here.
+
 ```bash
-mkdir $DATABASE_STORE
 docker run \
-  --network=test_bbs_network --publish $DATABASE_PORT:3306 \
+  --publish $DATABASE_PORT:3306 \
   --volume $DIRECTORY/$DATABASE_STORE:/var/lib/mysql \
   --env MYSQL_ROOT_PASSWORD=$DATABASE_PASSWORD \
   --detach \
   --name test_bbs_mysql test_bbs_mysql
 ```
+
+NB: The paths need to be absolute for `--volume`.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -231,7 +235,7 @@ GRANT SELECT ON <database name>.* TO 'guest'@'%';
 exit;
 ```
 
-Please exit the interactive session of the `test_bbs_mysql` container.
+Please exit the interactive session on the `test_bbs_mysql` container.
 
 ```bash
 exit
@@ -243,35 +247,36 @@ This will build a Docker image where Blue Brain Search is installed. Besides,
 this will launch using this image an interactive session in a Docker container.
 The immediate next sections will need to be run in this session.
 
-FIXME ? needs `--env-file .env`
-FIXME ? .env used for BBS_HTTP_PROXY BBS_http_proxy BBS_HTTPS_PROXY BBS_https_proxy
-
-FIXME Try without --user root
-
 ```bash
 docker build \
-  --build-arg BBS_HTTP_PROXY --build-arg BBS_http_proxy \
-  --build-arg BBS_HTTPS_PROXY --build-arg BBS_https_proxy \
+  --build-arg BBS_HTTP_PROXY=$HTTP_PROXY --build-arg BBS_http_proxy=$HTTP_PROXY \
+  --build-arg BBS_HTTPS_PROXY=$HTTPS_PROXY --build-arg BBS_https_proxy=$HTTPS_PROXY \
   -f docker/base.Dockerfile -t test_bbs_base .
 ```
 
+NB: At the moment, `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy`
+are not working here.
+
 ```bash
 docker run \
-  --network=test_bbs_network \
   --volume /raid:/raid \
   --env CORD19_VERSION --env DATABASE_URL --env DIRECTORY \
   --gpus all \
-  --interactive --tty --rm --workdir $DIRECTORY \
+  --interactive --tty --rm --user root --workdir $DIRECTORY \
   --name test_bbs_base test_bbs_base
 pip install --editable ./BlueBrainSearch
 ```
 
-NB: At the moment, `--editable` is needed for DVC.load_ee_models_library()`.
+NB: At the moment, `--editable` is needed for `DVC.load_ee_models_library()`
+and `--user root` is needed for `pip`.
 
 ### Create the database
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
+
+If you are using the CORD-19 subset of around 1,400 articles, this would take
+around 3 minutes.
 
 ```bash
 create_database \
@@ -280,6 +285,11 @@ create_database \
 ```
 
 ### Compute the sentence embeddings
+
+FIXME retrieve model checkpoint or use known model
+
+If you are using the CORD-19 subset of around 1,400 articles, this would take
+around 1 minute (on 2 Tesla V100 16 GB).
 
 ```bash
 compute_embeddings SentTransformer embeddings.h5 \
@@ -292,6 +302,8 @@ compute_embeddings SentTransformer embeddings.h5 \
 
 ### Create the mining cache
 
+FIXME use utils.sh
+
 ```bash
 cd BlueBrainSearch/data_and_models/pipelines/ner
 dvc pull ee_models_library.csv.dvc
@@ -303,6 +315,9 @@ cd $DIRECTORY
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
+
+If you are using the CORD-19 subset of around 1,400 articles, this would take
+around 4 minutes.
 
 ```bash
 create_mining_cache \
@@ -320,26 +335,33 @@ Please exit the interactive session of the `test_bbs_base` container.
 exit
 ```
 
-```bash
-cd BlueBrainSearch
-```
-
-FIXME create .env from example
-FIXME should include BBS_SSH_USERNAME
-
 #### Search server
 
 ```bash
+sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/search.Dockerfile
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
 docker build \
   -f docker/search.Dockerfile -t test_bbs_search .
 ```
 
+NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.entrypoint`.
+
+```bash
+export BBS_SEARCH_MYSQL_URL=$DATABASE_URL
+export BBS_SEARCH_MYSQL_USER=guest  # FIXME ? parametrize
+export BBS_SEARCH_MYSQL_PASSWORD=guest  # FIXME ? parametrize
+
+export BBS_SEARCH_MODELS='BioBERT NLI+STS CORD-19 v1'  # FIXME ? reuse
+export BBS_SEARCH_MODELS_PATH=$DIRECTORY
+export BBS_SEARCH_EMBEDDINGS_PATH=$DIRECTORY/embeddings.h5  # FIXME ? reuse
+```
+
 ```bash
 docker run \
-  --network=test_bbs_network --publish $SEARCH_PORT:8080 \
+  --publish $SEARCH_PORT:8080 \
   --volume /raid:/raid \
-  --env-file .env \
+  --env BBS_SEARCH_MYSQL_URL --env BBS_SEARCH_MYSQL_USER --env BBS_SEARCH_MYSQL_PASSWORD \
+  --env BBS_SEARCH_MODELS --env BBS_SEARCH_MODELS_PATH --env BBS_SEARCH_EMBEDDINGS_PATH \
   --detach \
   --name test_bbs_search test_bbs_search
 ```
@@ -347,16 +369,29 @@ docker run \
 #### Mining server
 
 ```bash
+sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/mining.sh
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 docker build \
   -f docker/mining.Dockerfile -t test_bbs_mining .
 ```
 
+NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.entrypoint`.
+
+```bash
+export BBS_SSH_USERNAME=$(id --user --name)
+
+export BBS_MINING_DB_TYPE=mysql
+export BBS_MINING_MYSQL_URL=$DATABASE_URL
+export BBS_MINING_MYSQL_USER=guest  # FIXME ? parametrize
+export BBS_MINING_MYSQL_PASSWORD=guest  # FIXME ? parametrize
+```
+
 ```bash
 docker run \
-  --network=test_bbs_network --publish $MINING_PORT:8080 \
+  --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
-  --env-file .env \
+  --env BBS_SSH_USERNAME \
+  --env BBS_MINING_DB_TYPE --env BBS_MINING_MYSQL_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
   --detach \
   --name test_bbs_mining test_bbs_mining
 ```
@@ -364,19 +399,19 @@ docker run \
 #### Notebooks server
 
 ```bash
-cd notebooks
-sed -i 's/cord19_v47/'$DATABASE_NAME'/g' BBS_BBG_poc.ipynb
-sed -i 's/dgx1.bbp.epfl.ch:8853/'$HOSTNAME:$DATABASE_PORT'/g' BBS_BBG_poc.ipynb
-sed -i 's/dgx1.bbp.epfl.ch:8850/'$HOSTNAME:$SEARCH_PORT'/g' BBS_BBG_poc.ipynb
-sed -i 's/dgx1.bbp.epfl.ch:8852/'$HOSTNAME:$MINING_PORT'/g' BBS_BBG_poc.ipynb
+sed -i 's/cord19_v47/'$DATABASE_NAME'/g' notebooks/BBS_BBG_poc.ipynb
+export MYSQL_DB_URI=$HOSTNAME:$DATABASE_PORT
+export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
+export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
 ```
 
 ```bash
-cd $DIRECTORY
 docker run \
   --publish $NOTEBOOKS_PORT:8888 \
   --volume /raid:/raid \
-  --interactive --tty --rm --workdir $DIRECTORY \
+  --env NOTEBOOKS_TOKEN \
+  --env MYSQL_DB_URI --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
+  --interactive --tty --rm --user root --workdir $DIRECTORY \
   --name test_bbs_notebooks test_bbs_base
 pip install ./BlueBrainSearch
 jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOKS_TOKEN
@@ -384,18 +419,23 @@ jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOKS_TOKEN
 
 To detach from the Docker container, please hit `CTRL+P` and then `CTRL+Q`.
 
+NB: At the moment, `--user root` is needed for the widgets to write in
+`BlueBrainSearch/notebooks/untracked/.widgets_checkpoints`.
+
 ### Open the example notebook
 
 ```bash
-echo http://$HOSTNAME:$NOTEBOOK_PORT/lab/tree/BBS_BBG_poc.ipynb
+cd $DIRECTORY
+echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb
 ```
 
 To open the example notebook, please open the link returned above in a browser,
 then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
 on `Log in`.
 
-*Voilà!* You could now use the graphical interface.
+FIXME mining cache table name is inconsistent => crash
 
+*Voilà!* You could now use the graphical interface.
 
 
 
