@@ -27,7 +27,7 @@ COVID-19 from the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-1
 The graphical interface is composed of [widgets](https://github.com/jupyter-widgets/ipywidgets)
 to be used in [Jupyter notebooks](https://github.com/jupyterlab/jupyterlab).
 
-For the graphical interface to work, the steps of the [Getting Started](getting-started)
+For the graphical interface to work, the steps of the [Getting Started](#getting-started)
 should have been completed successfully.
 
 ### Find documents based on sentence semantic similarity
@@ -83,7 +83,7 @@ There are 8 steps which need to be done in the following order:
 4. [Create the database](#create-the-database)
 5. [Compute the sentence embeddings](#compute-the-sentence-embeddings)
 6. [Create the mining cache](#create-the-mining-cache)
-7. [Initialize the search, mining, and notebooks servers](#initialize-the-search,-mining,-and-notebooks-servers)
+7. [Initialize the search, mining, and notebooks servers](#initialize-the-search-mining-and-notebooks-servers)
 8. [Open the example notebook](#open-the-example-notebook)
 
 Before proceeding, four things need to be noted.
