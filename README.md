@@ -455,6 +455,29 @@ BUG no results returned when selected articles mined
 
 *Voilà!* You could now use the graphical interface.
 
+### Clean-up
+
+Please note that this will DELETE all what was done in the previous sections
+of this *Getting Started*. This could be useful to clean-up after having tried
+the instructions or when something went bad.
+
+```bash
+export SERVERS='test_bbs_search test_bbs_mining test_bbs_mysql'
+docker stop test_bbs_notebooks $SERVERS
+docker rm $SERVERS test_bbs_base
+docker rmi $SERVERS test_bbs_base
+
+rm $BBS_SEARCH_EMBEDDINGS_PATH
+rm -R $DATABASE_DIRECTORY  # Requires to be root.
+rm -R $CORD19_VERSION  # Requires to be root.
+rm $CORD19_ARCHIVE
+rm -R BlueBrainSearch  # Requires to be root.
+```
+
+NB: At the moment, removing `DATABASE_DIRECTORY`, `CORD19_VERSION`, and
+`BlueBrainSearch` requires `root` privileges because they were modified
+through the `test_bbs_base` container which was running as `root`.
+
 
 ## Installation (virtual environment)
 We currently support the following Python versions.
