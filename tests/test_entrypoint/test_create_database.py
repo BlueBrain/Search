@@ -11,7 +11,7 @@ from bbsearch.entrypoint.create_database import run_create_database
     (
         "data_path",
         "db_type",
-        "database_url",
+        "db_url",
         "sqlite_exists",
         "log_dir",
         "log_name",
@@ -37,7 +37,7 @@ def test_send_through(
     tmpdir,
     data_path,
     db_type,
-    database_url,
+    db_url,
     sqlite_exists,
     log_dir,
     log_name,
@@ -56,9 +56,9 @@ def test_send_through(
     fake_mark_bad_sentences = Mock()
 
     if db_type == "sqlite":
-        database_url = tmpdir / database_url
+        db_url = tmpdir / db_url
         if sqlite_exists:
-            database_url.touch()
+            db_url.touch()
 
     monkeypatch.setattr("builtins.input", Mock())
     monkeypatch.setattr("bbsearch.entrypoint.create_database.getpass", fake_getpass)
@@ -73,7 +73,7 @@ def test_send_through(
     argv = [
         f"--data-path={data_path}",
         f"--db-type={db_type}",
-        f"--database-url={database_url}",
+        f"--db-url={db_url}",
         f"--log-dir={log_dir}",
         f"--log-name={log_name}",
     ]

@@ -20,14 +20,14 @@ def test_help(capsys):
 def test_missing_sqlite_db():
     with pytest.raises(FileNotFoundError, match="^No database found"):
         run_create_mining_cache(
-            ["--db-type", "sqlite", "--database-url", "fake$?#"],
+            ["--db-type", "sqlite", "--db-url", "fake$?#"],
         )
 
 
 @pytest.mark.parametrize(
     (
         "db_type",
-        "database_url",
+        "db_url",
         "target_table_name",
         "n_processes_per_model",
         "restrict_to_models",
@@ -53,7 +53,7 @@ def test_send_through(
     monkeypatch,
     tmpdir,
     db_type,
-    database_url,
+    db_url,
     target_table_name,
     n_processes_per_model,
     restrict_to_models,
@@ -83,13 +83,13 @@ def test_send_through(
 
     # Create temporary sqlite database
     if db_type == "sqlite":
-        database_url = pathlib.Path(tmpdir) / "my.db"
-        database_url.touch()
+        db_url = pathlib.Path(tmpdir) / "my.db"
+        db_url.touch()
 
     # Construct arguments
     argv = [
         f"--db-type={db_type}",
-        f"--database-url={database_url}",
+        f"--db-url={db_url}",
         f"--target-table-name={target_table_name}",
         f"--n-processes-per-model={n_processes_per_model}",
         f"--restrict-to-models={restrict_to_models}",
