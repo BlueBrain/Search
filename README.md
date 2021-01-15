@@ -65,7 +65,7 @@ the structured information is: the mention (e.g. 'COVID-19'), the type
 
 This is also possible to extract structured information from the pasted
 content of a document. To switch to this mode, you could just click on the
-tab named `Mine Text`. Then, you could launch the extracting by just clicking 
+tab named `Mine Text`. Then, you could launch the extraction by just clicking 
 on the blue button named `Mine This Text!`. You could also enter the content
 of your choice by editing the text field. 
 
@@ -74,16 +74,17 @@ of your choice by editing the text field.
 
 ## Getting Started
 
-There are 8 steps which need to be done in order:
+There are 8 steps which need to be done in the following order:
 
-1. Retrieve the documents.
-2. Initialize the database server.
-3. Install Blue Brain Search.
-4. Create the database.
-5. Compute the sentence embeddings.
-6. Create the mining cache.
-7. Initialize the search, mining, and notebooks servers
-8. Open the example notebook.
+0. [Prerequisites](#prerequisites)
+1. [Retrieve the documents](#retrieve-the-documents)
+2. [Initialize the database server](#initialize-the-database-server)
+3. [Install Blue Brain Search](#install-blue-brain-search)
+4. [Create the database](#create-the-database)
+5. [Compute the sentence embeddings](#compute-the-sentence-embeddings)
+6. [Create the mining cache](#create-the-mining-cache)
+7. [Initialize the search, mining, and notebooks servers](#initialize-the-search,-mining,-and-notebooks-servers)
+8. [Open the example notebook](#open-the-example-notebook)
 
 Before proceeding, four things need to be noted.
 
@@ -113,8 +114,8 @@ The instructions are written for GNU/Linux machines. However, any machine
 with the equivalent of `git`, `wget`, `tar`, `cd`, `mv`, `mkdir`, `sed`
 (optional), and `echo` could be used.
 
-The software named `Docker is also needed. To install `Docker`, please refer to
-the [official Docker documentation](https://docs.docker.com/engine/install/).
+The software named `Docker` is also needed. To install `Docker`, please refer 
+to the [official Docker documentation](https://docs.`docker.com/engine/install/).
 
 An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
@@ -148,7 +149,8 @@ git clone https://github.com/BlueBrain/BlueBrainSearch
 ### Retrieve the documents
 
 This will download and decompress the CORD-19 version corresponding to the
-version 73 on Kaggle. Note that the data are around 7 GB.
+version 73 on Kaggle. Note that the data are around 7 GB. Decompression would
+take around 3 minutes.
 
 ```bash
 export CORD19_VERSION=2021-01-03
@@ -203,8 +205,7 @@ mkdir $DATABASE_DIRECTORY
 cd BlueBrainSearch
 ```
 
-This will build a Docker image where MySQL is installed. Besides, this will
-launch using this image a MySQL server running in a Docker container.
+This will build a Docker image where MySQL is installed.
 
 ```bash
 docker build \
@@ -213,6 +214,8 @@ docker build \
 ```
 
 NB:`HTTP_PROXY` and `HTTPS_PROXY`, in upper case, are not working here.
+
+This will launch using this image a MySQL server running in a Docker container.
 
 ```bash
 docker run \
@@ -223,7 +226,7 @@ docker run \
   --name test_bbs_mysql test_bbs_mysql
 ```
 
-NB: The paths need to be absolute for `--volume`.
+NB: For `--volume`, the paths need to be absolute.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -250,9 +253,7 @@ exit
 
 ### Install Blue Brain Search
 
-This will build a Docker image where Blue Brain Search is installed. Besides,
-this will launch using this image an interactive session in a Docker container.
-The immediate next sections will need to be run in this session.
+This will build a Docker image where Blue Brain Search is installed.
 
 ```bash
 docker build \
@@ -263,6 +264,9 @@ docker build \
 
 NB: At the moment, `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy`
 are not working here.
+
+This will launch using this image an interactive session in a Docker container.
+The immediate next sections will need to be run in this session.
 
 ```bash
 docker run \
@@ -294,7 +298,7 @@ create_database \
 ### Compute the sentence embeddings
 
 If you are using the CORD-19 subset of around 1,400 articles, this would take
-around 1 minute (on 2 Tesla V100 16 GB).
+around 2 minutes (on 2 Tesla V100 16 GB).
 
 ```bash
 export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
@@ -306,7 +310,7 @@ compute_embeddings SentTransformer $BBS_SEARCH_EMBEDDINGS_PATH \
   --checkpoint biobert_nli_sts_cord19_v1 \
   --db-url $DATABASE_URL \
   --gpus 0,1 \
-  --h5-dataset-name $EMBEDDING_MODEL \
+  --h5-dataset-name "$EMBEDDING_MODEL" \
   --n-processes 2
 ```
 
@@ -321,6 +325,8 @@ mkdir ~/.ssh
 printf "Host *\n    User %s\n" "$BBS_SSH_USERNAME" >> ~/.ssh/config
 ```
 
+You will be asked to enter your SSH password.
+
 ```bash
 cd BlueBrainSearch
 dvc remote modify gpfs_ssh ask_password true
@@ -331,7 +337,7 @@ cd $DIRECTORY
 ```
 
 NB: At the moment, `dvc_pull_models` from `BlueBrainSearch/docker/utils.sh`
-is not yet usable as it works only when inside the Docker containers.
+is not yet usable as it works only when inside the `bbs_` Docker containers.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -358,14 +364,18 @@ exit
 
 #### Search server
 
+FIXME There is currently a bug regarding `bbsearch.entrypoints`. It needs to
+be renamed into `bbsearch.entrypoint`.
+
 ```bash
 sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/search.Dockerfile
+```
+
+```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
 docker build \
   -f docker/search.Dockerfile -t test_bbs_search .
 ```
-
-NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.entrypoint`.
 
 ```bash
 export BBS_SEARCH_MYSQL_URL=$DATABASE_URL
@@ -388,14 +398,18 @@ docker run \
 
 #### Mining server
 
+FIXME There is currently a bug regarding `bbsearch.entrypoints`. It needs to
+be renamed into `bbsearch.entrypoint`.
+
 ```bash
 sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/mining.sh
+```
+
+```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
 docker build \
   -f docker/mining.Dockerfile -t test_bbs_mining .
 ```
-
-NB: At the moment, `bbsearch.entrypoints` needs to be renamed into `bbsearch.entrypoint`.
 
 ```bash
 export BBS_MINING_DB_TYPE=mysql
@@ -416,8 +430,14 @@ docker run \
 
 #### Notebooks server
 
+TODO There is not currently a way to dynamically pass the `DATABASE_NAME` to
+the notebook. 
+
 ```bash
 sed -i 's/cord19_v47/'$DATABASE_NAME'/g' notebooks/BBS_BBG_poc.ipynb
+```
+
+```bash
 export MYSQL_DB_URI=$HOSTNAME:$DATABASE_PORT
 export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
 export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
@@ -435,47 +455,53 @@ pip install ./BlueBrainSearch
 jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOKS_TOKEN
 ```
 
-To detach from the Docker container, please hit `CTRL+P` and then `CTRL+Q`.
-
 NB: At the moment, `--user root` is needed for the widgets to write in
 `BlueBrainSearch/notebooks/untracked/.widgets_checkpoints`.
+
+Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 
 ### Open the example notebook
 
 ```bash
-cd $DIRECTORY
+cd ..
 echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb
 ```
 
 To open the example notebook, please open the link returned above in a browser,
-then please enter the token above (`NOTEBOOKS_TOKEN`), and finally please click
-on `Log in`.
+then please enter the token defined above (`NOTEBOOKS_TOKEN`), and finally
+please click on `Log in` or hit `ENTER`.
 
-BUG no results returned when selected articles mined
+FIXME There is currently a bug regarding the feature `Mine Selected Articles!`.
+No results is returned.
 
 *Voilà!* You could now use the graphical interface.
 
 ### Clean-up
 
-Please note that this will DELETE all what was done in the previous sections
-of this *Getting Started*. This could be useful to clean-up after having tried
-the instructions or when something went bad.
+Please note that this will **DELETE ALL** what was done in the previous
+sections of this *Getting Started*. This could be useful to do so after having
+tried the instructions or when something went bad.
 
 ```bash
 export SERVERS='test_bbs_search test_bbs_mining test_bbs_mysql'
-docker stop test_bbs_notebooks $SERVERS
-docker rm $SERVERS test_bbs_base
-docker rmi $SERVERS test_bbs_base
+```
 
+```bash
+docker stop test_bbs_notebooks $SERVERS
+docker rm $SERVERS
+docker rmi $SERVERS test_bbs_base
+```
+
+```bash
 rm $BBS_SEARCH_EMBEDDINGS_PATH
 rm -R $DATABASE_DIRECTORY  # Requires to be root.
-rm -R $CORD19_VERSION  # Requires to be root.
+rm -R $CORD19_VERSION
 rm $CORD19_ARCHIVE
 rm -R BlueBrainSearch  # Requires to be root.
 ```
 
-NB: At the moment, removing `DATABASE_DIRECTORY`, `CORD19_VERSION`, and
-`BlueBrainSearch` requires `root` privileges because they were modified
+NB: At the moment, removing the directories `DATABASE_DIRECTORY` and
+`BlueBrainSearch` requires the `root` privileges. Indeed, they were modified
 through the `test_bbs_base` container which was running as `root`.
 
 
