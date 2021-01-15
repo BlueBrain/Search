@@ -33,7 +33,7 @@ def run_create_mining_cache(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-url",
+        "--db-url",
         default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
         help=(
@@ -97,7 +97,7 @@ def run_create_mining_cache(argv=None):
     logger.info("Welcome to the mining cache creation")
     logger.info("Parameters:")
     logger.info(f"db-type                : {args.db_type}")
-    logger.info(f"database-url           : {args.database_url}")
+    logger.info(f"db-url                 : {args.db_url}")
     logger.info(f"target-table-name      : {args.target_table_name}")
     logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
     logger.info(f"restrict-to-models     : {args.restrict_to_models}")
@@ -111,13 +111,13 @@ def run_create_mining_cache(argv=None):
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(args.database_url)
+        database_path = pathlib.Path(args.db_url)
         if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+        database_url = f"mysql+pymysql://root:{password}@{args.db_url}"
     else:  # pragma: no cover
         # Will never get here because `parser.parse_args()` will fail first.
         # This is because we have choices=("mysql", "sqlite") in the

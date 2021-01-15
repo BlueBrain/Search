@@ -47,7 +47,7 @@ def run_create_database(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-url",
+        "--db-url",
         default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
         help=(
@@ -91,7 +91,7 @@ def run_create_database(argv=None):
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(args.database_url)
+        database_path = pathlib.Path(args.db_url)
         if not database_path.exists():
             database_path.parent.mkdir(exist_ok=True, parents=True)
             database_path.touch()
@@ -99,7 +99,7 @@ def run_create_database(argv=None):
     elif args.db_type == "mysql":
         # We assume the database already exists
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+        database_url = f"mysql+pymysql://root:{password}@{args.db_url}"
     else:  # pragma: no cover
         # This is unreachable because of choices=("mysql", "sqlite") in argparse
         raise ValueError(f'"{args.db_type}" is not a supported db_type.')
