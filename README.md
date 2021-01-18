@@ -74,7 +74,7 @@ on the blue button named `Mine This Text!`. You could also enter the content
 of your choice by editing the text field. 
 
 <p align="center">
-  <img alt="Mining Widget (text)" src="screenshots/screenshots/mining_widget_text.png">
+  <img alt="Mining Widget (text)" src="screenshots/mining_widget_text.png">
 </p>
 
 ## Getting Started
