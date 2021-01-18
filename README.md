@@ -63,7 +63,7 @@ the structured information is: the mention (e.g. 'COVID-19'), the type
 
 #### Pasted document content
 
-This is also possible to extract structured information from the pasted
+It is also possible to extract structured information from the pasted
 content of a document. To switch to this mode, you could just click on the
 tab named `Mine Text`. Then, you could launch the extraction by just clicking 
 on the blue button named `Mine This Text!`. You could also enter the content
