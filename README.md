@@ -88,7 +88,7 @@ There are 8 steps which need to be done in the following order:
 
 Before proceeding, four things need to be noted.
 
-First, at the moment, these instructions suppose the machine is inside Blue
+First, at the moment, these instructions assume that the machine is inside Blue
 Brain's network and has access to the sentence embedding model we trained
 (`BioBERT NLI+STS CORD-19 v1`). Indeed, this model has not been publicly
 released yet.
