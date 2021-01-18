@@ -12,5 +12,6 @@ Fixes #{issue-id-number}.
 not the case, please create an issue first).
 - [ ] Unit tests added.
 - [ ] Documentation and `whatsnew.rst` updated (if needed).
-- [ ] `setup.py` and `requirements.txt` updated with new dependencies.- [ ] Type annotations added (if a function is added or modified). 
+- [ ] `setup.py` and `requirements.txt` updated with new dependencies.
+- [ ] Type annotations added (if a function is added or modified). 
 - [ ] Travis CI pipeline run (add `[test travis]` to your git commit to run it)
