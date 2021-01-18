@@ -1,5 +1,4 @@
 """Classes and functions for entity extraction (aka named entity recognition)."""
-
 import ast
 import copy
 

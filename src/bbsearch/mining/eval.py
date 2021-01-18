@@ -1,5 +1,4 @@
 """Classes and functions for evaluating mining models predictions."""
-
 import copy
 import json
 import string

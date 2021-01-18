@@ -1,5 +1,4 @@
 """Subpackage for text mining."""
-
 from .attribute import AttributeAnnotationTab, AttributeExtractor, TextCollectionWidget
 from .entity import (
     PatternCreator,

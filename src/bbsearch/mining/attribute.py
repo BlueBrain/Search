@@ -1,5 +1,4 @@
 """Classes and functions for attribute extraction."""
-
 import collections
 import json
 import logging
