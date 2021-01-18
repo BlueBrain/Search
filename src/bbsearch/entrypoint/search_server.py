@@ -21,7 +21,7 @@ def get_search_app():
     embeddings_path = get_var("BBS_SEARCH_EMBEDDINGS_PATH")
     which_models = get_var("BBS_SEARCH_MODELS")
 
-    mysql_url = get_var("BBS_SEARCH_MYSQL_URL")
+    mysql_url = get_var("BBS_SEARCH_DB_URL")
     mysql_user = get_var("BBS_SEARCH_MYSQL_USER")
     mysql_password = get_var("BBS_SEARCH_MYSQL_PASSWORD")
 

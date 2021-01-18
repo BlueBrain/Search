@@ -24,7 +24,7 @@ def test_send_through(tmpdir, monkeypatch, embeddings_path, models, models_path)
     monkeypatch.setenv("BBS_SEARCH_MODELS_PATH", models_path)
     monkeypatch.setenv("BBS_SEARCH_EMBEDDINGS_PATH", embeddings_path)
     monkeypatch.setenv("BBS_SEARCH_MODELS", ",".join(models))
-    monkeypatch.setenv("BBS_SEARCH_MYSQL_URL", "some_url")
+    monkeypatch.setenv("BBS_SEARCH_DB_URL", "some_url")
     monkeypatch.setenv("BBS_SEARCH_MYSQL_USER", "some_user")
     monkeypatch.setenv("BBS_SEARCH_MYSQL_PASSWORD", "some_pwd")
 

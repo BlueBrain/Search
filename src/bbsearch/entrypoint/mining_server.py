@@ -33,7 +33,7 @@ def get_mining_app():
             sqlite_db_path.touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
     elif db_type == "mysql":
-        mysql_url = get_var("BBS_MINING_MYSQL_URL")
+        mysql_url = get_var("BBS_MINING_DB_URL")
         mysql_user = get_var("BBS_MINING_MYSQL_USER")
         mysql_password = get_var("BBS_MINING_MYSQL_PASSWORD")
         engine_url = (

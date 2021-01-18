@@ -29,7 +29,7 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     monkeypatch.setenv("BBS_MINING_LOG_FILE", str(logfile))
     monkeypatch.setenv("BBS_MINING_DB_TYPE", db_type)
     monkeypatch.setenv("BBS_MINING_SQLITE_DB_PATH", str(db_path))
-    monkeypatch.setenv("BBS_MINING_MYSQL_URL", "something.db")
+    monkeypatch.setenv("BBS_MINING_DB_URL", "something.db")
     monkeypatch.setenv("BBS_MINING_MYSQL_USER", "some_user")
     monkeypatch.setenv("BBS_MINING_MYSQL_PASSWORD", "some_pwd")
 
