@@ -121,7 +121,7 @@ An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
 [official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
 
-Otherwise, let's define the environment variables commons to the instructions.
+Otherwise, let's define the environment variables common to the instructions.
 
 ```bash
 export DIRECTORY=$(pwd)
