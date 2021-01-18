@@ -43,7 +43,9 @@ state-of-the-art approach based on deep learning used by Blue Brain Search,
 this is true even if the query and the sentences from the documents do not
 share the same words (e.g. they are synonyms, they have a similar meaning, ...).
 
-![Search Widget](screenshots/search_widget.png)
+<p align="center">
+  <img alt="Search Widget" src="screenshots/search_widget.png">
+</p>
 
 ### Extract structured information from documents
 
@@ -59,7 +61,9 @@ At the moment, the returned results are named entities. For each named entity,
 the structured information is: the mention (e.g. 'COVID-19'), the type
 (e.g. 'DISEASE'), and its location up to the character in the document.
 
-![Mining Widget (articles)](screenshots/mining_widget_articles.png)
+<p align="center">
+  <img alt="Mining Widget (articles)" src="screenshots/mining_widget_articles.png">
+</p>
 
 #### Pasted document content
 
@@ -69,8 +73,9 @@ tab named `Mine Text`. Then, you could launch the extraction by just clicking
 on the blue button named `Mine This Text!`. You could also enter the content
 of your choice by editing the text field. 
 
-![Mining Widget (text)](screenshots/mining_widget_text.png)
-
+<p align="center">
+  <img alt="Mining Widget (text)" src="screenshots/screenshots/mining_widget_text.png">
+</p>
 
 ## Getting Started
 
