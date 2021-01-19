@@ -325,16 +325,12 @@ server. The supported models for the search could be found in
 
 ### Create the mining cache
 
-```bash
-mkdir ~/.ssh
-printf "Host *\n    User %s\n" "$BBS_SSH_USERNAME" >> ~/.ssh/config
-```
-
 You will be asked to enter your SSH password.
 
 ```bash
 cd BlueBrainSearch
 dvc remote modify gpfs_ssh ask_password true
+dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
 cd data_and_models/pipelines/ner
 dvc pull ee_models_library.csv.dvc
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
