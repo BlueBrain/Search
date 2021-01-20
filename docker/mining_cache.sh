@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source /src/docker/utils.sh
-ssh_setup
+ssh_check
 dvc_pull_models
 
 # Launch mining cache creation, using arguments only if defined
