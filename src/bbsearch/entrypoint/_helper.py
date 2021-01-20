@@ -171,8 +171,8 @@ def parse_args_or_environment(
     order of precedence is the following
 
         1. Command line arguments
-        2. Environment variables
-        3. The .env file.
+        2. The .env file.
+        3. Environment variables
 
     Parameters
     ----------
@@ -196,7 +196,7 @@ def parse_args_or_environment(
     cli_args = vars(parser.parse_args(args=argv))
 
     # Parse environment
-    load_dotenv()
+    load_dotenv(override=True)
     environment_args = {}
     for arg_name, value_name in env_variable_names.items():
         value = os.environ.get(value_name)
