@@ -40,7 +40,7 @@ COPY prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
 RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.0.5
+ARG BBS_REVISION=v0.0.9
 ADD . /src
 WORKDIR /src
 RUN pip install git+file://$PWD@$BBS_REVISION
