@@ -6,104 +6,107 @@ This section describes how to use the entry points for common operations.
 
 Compute sentence embeddings
 ---------------------------
-
 We will compute sentence embeddings:
 
-* with the model BioBERT NLI+STS CORD-19 v1,
-* for CORD-19 version 47,
-* using 4 GPUs,
-* on DGX-1.
+- with the model BioBERT NLI+STS CORD-19 v1
+- for CORD-19 version 47
+- using 4 GPUs
 
-The same How-To could be applied to other models, other CORD-19 versions,
-other number of used GPUs, and other platforms than DGX-1.
+The same instructions can be applied to other models, other CORD-19 versions, and
+other GPU configurations.
 
-1 - Login to DGX-1:
-
-.. code-block:: bash
-
-    ssh dgx1.bbp.epfl.ch
-
-2 - Launch a Docker container with CUDA support and access to 4 GPUs:
+Launch a Docker container with CUDA support and access to 4 GPUs:
 
 .. code-block:: bash
 
-    docker run -it -v /raid:/raid --rm --user root --gpus '"device=0,1,2,3"' \
-      --name embeddings_computation bbs_base
+    docker run \
+      -it \
+      --rm \
+      --volume <local_path>:<container_path>
+      --user 'root' \
+      --gpus '"device=0,1,2,3"' \
+      --name 'embedding_computation' \
+      bbs_base
 
-3 - Upgrade :code:`pip`:
+Note that we use the ``--volume`` parameter to mount all local paths that should be accessible
+from the container, for example the output directory for the embedding file, or the path to
+the embedding model checkpoint.
+
+All following commands are executed in this interactive container.
+
+Upgrade ``pip``:
 
 .. code-block:: bash
 
     python -m pip install --upgrade pip
 
-4 - Install Blue Brain Search:
+Install Blue Brain Search:
 
 .. code-block:: bash
 
     pip install git+https://github.com/BlueBrain/BlueBrainSearch.git
 
-5 - Define the path to the HDF5 file containing the embeddings:
+Define the path to the output HDF5 file with the embeddings:
 
 .. code-block:: bash
 
-    export EMBEDDINGS=/raid/sync/proj115/bbs_data/cord19_v47/embeddings/embeddings.h5
+    export EMBEDDINGS=<some_path>/embeddings.h5
 
-6 - [optional] If embeddings where computed for other models, backup the existing embeddings:
-
-.. code-block:: bash
-
-    cp  $EMBEDDINGS ${EMBEDDINGS}.backup
-
-7 - Launch the parallel computation of the embeddings:
+It is possible to write different embedding datasets to the same h5-file. If the file specified
+in ``EMBEDDINGS`` already exists and we're adding a new embedding dataset, then one might consider
+creating a backup copy:
 
 .. code-block:: bash
 
-    compute_embeddings SentTransformer $EMBEDDINGS \
-      --checkpoint /raid/sync/proj115/bbs_data/trained_models/biobert_nli_sts_cord19_v1 \
-      --db-url dgx1.bbp.epfl.ch:8853/cord19_v47 \
-      --gpus 0,1,2,3 \
+    cp  "$EMBEDDINGS" "${EMBEDDINGS}.backup"
+
+Launch the parallel computation of the embeddings:
+
+.. code-block:: bash
+
+    compute_embeddings SentTransformer "$EMBEDDINGS" \
+      --checkpoint '<biobert_model_checkpoint_path>' \
+      --db-url <mysql_host>:<mysql_port>/<mysql_database> \
+      --gpus '0,1,2,3' \
       --h5-dataset-name 'BioBERT NLI+STS CORD-19 v1' \
       --n-processes 4 \
       --temp-dir .
 
-
 Create the MySQL database
 -------------------------
-
-We will create the MySQL database:
-
-* for CORD-19 version 65,
-* on DGX-1.
-
-The same How-To could be applied to other CORD-19 versions and other platforms
-than DGX-1.
-
-1 - Login to DGX-1:
+Launch an interactive Docker container:
 
 .. code-block:: bash
 
-    ssh dgx1.bbp.epfl.ch
+    docker run \
+      -it \
+      --rm \
+      --volume <local_path>:<container_path> \
+      --user 'root' \
+      --name 'database_creation' \
+      bbs_base
 
-2 - Launch a Docker container:
+Note that we use the ``--volume`` parameter to mount all local paths that should be accessible
+from the container, for example the directory with the CORD data (see below).
 
-.. code-block:: bash
+All following commands are executed in this interactive container.
 
-    docker run -it -v /raid:/raid --rm --user root --name database_creation bbs_base
-
-3 - Upgrade :code:`pip`:
+Upgrade ``pip``:
 
 .. code-block:: bash
 
     python -m pip install --upgrade pip
 
-4 - Install Blue Brain Search:
+Install Blue Brain Search:
 
 .. code-block:: bash
 
     pip install git+https://github.com/BlueBrain/BlueBrainSearch.git
 
-5 - Launch the creation of the database:
+Launch the creation of the database:
 
 .. code-block:: bash
 
-    create_database --data-path /raid/sync/proj115/bbs_data/cord19_v65
+    create_database --data-path <data_path>
+
+The parameter ``data_path`` should point to the directory with the original CORD data.
