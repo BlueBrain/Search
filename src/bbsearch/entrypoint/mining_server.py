@@ -26,14 +26,14 @@ def get_mining_app():
     # Create the database engine
     logger.info("Creating the database engine")
     if db_type == "sqlite":
-        sqlite_db_path = get_var("BBS_MINING_SQLITE_DB_PATH")
+        sqlite_db_path = get_var("BBS_MINING_DB_URL")
         sqlite_db_path = pathlib.Path(sqlite_db_path)
         if not sqlite_db_path.exists():
             sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
     elif db_type == "mysql":
-        mysql_url = get_var("BBS_MINING_MYSQL_URL")
+        mysql_url = get_var("BBS_MINING_DB_URL")
         mysql_user = get_var("BBS_MINING_MYSQL_USER")
         mysql_password = get_var("BBS_MINING_MYSQL_PASSWORD")
         engine_url = (

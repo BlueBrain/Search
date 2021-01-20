@@ -32,7 +32,7 @@ def run_create_mining_cache(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-url",
+        "--db-url",
         type=str,
         help="""
         The location of the database depending on the database type.
@@ -43,7 +43,7 @@ def run_create_mining_cache(argv=None):
         of the form 'my_sql_server.ch:1234/my_database' and for SQLite
         of the form '/path/to/the/local/database.db'.
 
-        If missing, then the environment variable DATABASE_URL will
+        If missing, then the environment variable DB_URL will
         be read.
         """,
         default=argparse.SUPPRESS,
@@ -92,7 +92,7 @@ def run_create_mining_cache(argv=None):
 
     # Parse CLI arguments
     env_variable_names = {
-        "database_url": "DATABASE_URL",
+        "db_url": "DB_URL",
     }
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
@@ -109,7 +109,7 @@ def run_create_mining_cache(argv=None):
     logger.info("Welcome to the mining cache creation")
     logger.info("Parameters:")
     logger.info(f"db-type                : {args.db_type}")
-    logger.info(f"database-url           : {args.database_url}")
+    logger.info(f"db-url                 : {args.db_url}")
     logger.info(f"target-table-name      : {args.target_table_name}")
     logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
     logger.info(f"restrict-to-models     : {args.restrict_to_models}")
@@ -123,13 +123,13 @@ def run_create_mining_cache(argv=None):
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(args.database_url)
+        database_path = pathlib.Path(args.db_url)
         if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+        database_url = f"mysql+pymysql://root:{password}@{args.db_url}"
     else:  # pragma: no cover
         # Will never get here because `parser.parse_args()` will fail first.
         # This is because we have choices=("mysql", "sqlite") in the

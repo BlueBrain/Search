@@ -48,7 +48,7 @@ def run_create_database(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-url",
+        "--db-url",
         type=str,
         help="""
         The location of the database depending on the database type.
@@ -59,7 +59,7 @@ def run_create_database(argv=None):
         of the form 'my_sql_server.ch:1234/my_database' and for SQLite
         of the form '/path/to/the/local/database.db'.
 
-        If missing, then the environment variable DATABASE_URL will
+        If missing, then the environment variable DB_URL will
         be read.
         """,
         default=argparse.SUPPRESS,
@@ -74,7 +74,7 @@ def run_create_database(argv=None):
         """,
     )
     env_variable_names = {
-        "database_url": "DATABASE_URL",
+        "db_url": "DB_URL",
         "cord_data_path": "CORD_DATA_PATH",
     }
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
@@ -99,7 +99,7 @@ def run_create_database(argv=None):
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(args.database_url)
+        database_path = pathlib.Path(args.db_url)
         if not database_path.exists():
             database_path.parent.mkdir(exist_ok=True, parents=True)
             database_path.touch()
@@ -107,7 +107,7 @@ def run_create_database(argv=None):
     elif args.db_type == "mysql":
         # We assume the database already exists
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+        database_url = f"mysql+pymysql://root:{password}@{args.db_url}"
     else:  # pragma: no cover
         # This is unreachable because of choices=("mysql", "sqlite") in argparse
         raise ValueError(f'"{args.db_type}" is not a supported db_type.')
