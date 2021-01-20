@@ -9,7 +9,7 @@ import sqlalchemy
 from sqlalchemy.pool import NullPool
 
 from ..utils import DVC
-from ._helper import configure_logging
+from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_create_mining_cache(argv=None):
@@ -21,9 +21,8 @@ def run_create_mining_cache(argv=None):
         The command line arguments.
     """
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [options]",
         description="Mine the CORD-19 database and cache the results.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
         "--db-type",
@@ -34,16 +33,20 @@ def run_create_mining_cache(argv=None):
     )
     parser.add_argument(
         "--database-url",
-        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
         type=str,
-        help=(
-            "The location of the database depending on the database type. "
-            "For MySQL the server URL should be provided, for SQLite the "
-            "location of the database file. Generally, the scheme part of "
-            "the URL should be omitted, e.g. for MySQL the URL should be "
-            "of the form 'my_sql_server.ch:1234/my_database' and for SQLite "
-            "of the form '/path/to/the/local/database.db'."
-        ),
+        help="""
+        The location of the database depending on the database type.
+
+        For MySQL the server URL should be provided, for SQLite the
+        location of the database file. Generally, the scheme part of
+        the URL should be omitted, e.g. for MySQL the URL should be
+        of the form 'my_sql_server.ch:1234/my_database' and for SQLite
+        of the form '/path/to/the/local/database.db'.
+
+        If missing, then the environment variable DATABASE_URL will
+        be read.
+        """,
+        default=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--target-table-name",
@@ -55,25 +58,29 @@ def run_create_mining_cache(argv=None):
         "--n-processes-per-model",
         default=1,
         type=int,
-        help="Each mining model is run in parallel with respect to the others. In "
-        "addition to that, n-processes-per-model are used to run in parallel"
-        "a single mining model.",
+        help="""
+        Each mining model is run in parallel with respect to the others.
+        In addition to that, n-processes-per-model are used to run in
+        parallel a single mining model.
+        """,
     )
     parser.add_argument(
         "--restrict-to-models",
         type=str,
         default=None,
-        help="Comma-separated list of models (as called in ee_models_library_file)"
-        "to be run to populate the cache. By default, all models in "
-        "ee_models_library_file are run.",
+        help="""
+        Comma-separated list of models (as called in ee_models_library_file)
+        to be run to populate the cache. By default, all models in
+        ee_models_library_file are run.
+        """,
     )
     parser.add_argument(
         "--log-file",
         "-l",
         type=str,
-        metavar="<filename>",
+        metavar="<filepath>",
         default=None,
-        help="The file for the logs. If not provided the stdout will be used.",
+        help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
         "--verbose",
@@ -82,7 +89,12 @@ def run_create_mining_cache(argv=None):
         default=0,
         help="The logging level, -v correspond to INFO, -vv to DEBUG",
     )
-    args = parser.parse_args(argv)
+
+    # Parse CLI arguments
+    env_variable_names = {
+        "database_url": "DATABASE_URL",
+    }
+    args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
     if args.verbose == 1:

@@ -1,8 +1,13 @@
 """Helper functions for server entry points."""
 import argparse
+import collections
 import logging
 import os
 import sys
+import textwrap
+from typing import Dict, Optional, Sequence
+
+from dotenv import load_dotenv
 
 
 def handle_uncaught_exception(exc_type, exc_value, exc_traceback):
@@ -104,8 +109,6 @@ def run_server(app_factory, name, argv=None):
     argv : list_like of str
         The command line arguments.
     """
-    from dotenv import load_dotenv
-
     # Parse arguments
     parser = argparse.ArgumentParser(
         usage="%(prog)s [options]",
@@ -127,3 +130,92 @@ def run_server(app_factory, name, argv=None):
     # Construct and launch the app
     app = app_factory()
     app.run(host=args.host, port=args.port, threaded=True, debug=True)
+
+
+class CombinedHelpFormatter(argparse.HelpFormatter):
+    """Argparse formatter with raw text and default value display.
+
+    This is a combination of `argparse.RawTextHelpFormatter` and
+    `argparse.ArgumentDefaultsHelpFormatter`, and the implementation is
+    almost literally copied from the `argparse` module.
+
+    New additions are:
+        - Application of `textwrap.dedent` to allow for triple-quoted
+          help text.
+        - The default arguments on a new line (instead of the same line).
+    """
+
+    def _split_lines(self, text, width):
+        return text.splitlines()
+
+    def _get_help_string(self, action):
+        help_text = textwrap.dedent(action.help).strip()
+        if "%(default)" not in action.help:
+            if action.default is not argparse.SUPPRESS:
+                defaulting_nargs = [argparse.OPTIONAL, argparse.ZERO_OR_MORE]
+                if action.option_strings or action.nargs in defaulting_nargs:
+                    help_text += "\n(default: %(default)s)"
+        return help_text
+
+
+def parse_args_or_environment(
+    parser: argparse.ArgumentParser,
+    env_variable_names: Dict[str, str],
+    argv: Optional[Sequence[str]] = None,
+) -> argparse.Namespace:
+    """Parse CLI arguments with some defaults specified in the environment.
+
+    Sometimes we would like to specify the default arguments for some CLI
+    parameters in the environment. This can save typing out long parameters
+    in the command line. If present, the ".env" file will be loaded, and the
+    order of precedence is the following
+
+        1. Command line arguments
+        2. The .env file.
+        3. Environment variables
+
+    Parameters
+    ----------
+    parser
+        An instance of `argparse.ArgumentParser`.
+    env_variable_names
+        The parameter names that should be looked up in the environment. The
+        values of this mapping are the names as they appear in the environment,
+        the keys are the names under which the values will be saved and
+        returned.
+    argv
+        An optional iterable of command line arguments. It's used in the
+        `parser.parse_args(argv)` call and is useful for testing.
+
+    Returns
+    -------
+    args : argparse.Namespace
+        A map of parsed argument names to their values.
+    """
+    # Parse CLI arguments
+    cli_args = vars(parser.parse_args(args=argv))
+
+    # Parse environment
+    load_dotenv(override=True)
+    environment_args = {}
+    for arg_name, value_name in env_variable_names.items():
+        value = os.environ.get(value_name)
+        if value is not None:
+            environment_args[arg_name] = value
+
+    # Combine CLI and environment variables
+    args = collections.ChainMap(cli_args, environment_args)
+
+    # Check if all arguments were supplied
+    for arg_name in env_variable_names:
+        if arg_name not in args:
+            parser.print_usage()
+            parser.exit(
+                status=1,
+                message=(
+                    "The following arguments are required: "
+                    f"--{arg_name.replace('_', '-')}\n"
+                ),
+            )
+
+    return argparse.Namespace(**args)
