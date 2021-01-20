@@ -26,7 +26,7 @@ def get_mining_app():
     # Create the database engine
     logger.info("Creating the database engine")
     if db_type == "sqlite":
-        sqlite_db_path = get_var("BBS_MINING_SQLITE_DB_PATH")
+        sqlite_db_path = get_var("BBS_MINING_DB_URL")
         sqlite_db_path = pathlib.Path(sqlite_db_path)
         if not sqlite_db_path.exists():
             sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
