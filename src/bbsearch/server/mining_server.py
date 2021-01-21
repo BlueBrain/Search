@@ -68,13 +68,18 @@ class MiningServer(Flask):
             self.models_libs[lib_type] = pd.read_csv(lib_file)
 
         self.logger.info("Loading the NER models")
-        self.ee_models = {}
+        self.ee_models: Dict[str, spacy.language.Language] = {}
         self.logger.debug(f"EE model library:\n{str(self.models_libs['ee'])}")
-        for model_name, entity_type in self.models_libs["ee"][["model", "entity_type"]].itertuples(index=False):
+        ee_models_meta = self.models_libs["ee"][["model", "entity_type"]]
+        for model_name, entity_type in ee_models_meta.itertuples(index=False):
             if model_name in self.ee_models:
-                self.logger.info(f"Entity type {entity_type}: model {model_name} already loaded")
+                self.logger.info(
+                    f"Entity type {entity_type}: model {model_name} already loaded"
+                )
             else:
-                self.logger.info(f"Entity type {entity_type}: loading model {model_name}")
+                self.logger.info(
+                    f"Entity type {entity_type}: loading model {model_name}"
+                )
                 self.ee_models[model_name] = spacy.load(model_name)
 
         self.connection = connection
@@ -181,7 +186,9 @@ class MiningServer(Flask):
                 # drop unwanted entity types
                 requested_etypes = schema_df["entity_type"].unique()
                 df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
-                self.logger.debug(f"after dropping unwanted entity types, df_all =\n{str(df_all)}")
+                self.logger.debug(
+                    f"droppped unwanted entity types, df_all =\n{str(df_all)}"
+                )
 
                 # append the ontology source column
                 os_mapping = {
@@ -193,12 +200,14 @@ class MiningServer(Flask):
                 df_all["ontology_source"] = df_all["entity_type"].apply(
                     lambda x: os_mapping[x]
                 )
-                self.logger.debug(f"after appending the ontology source column, df_all =\n{str(df_all)}")
+                self.logger.debug(
+                    f"appended ontology source column, df_all =\n{str(df_all)}"
+                )
 
                 # apply specs if not debug
                 if not debug:
                     df_all = pd.DataFrame(df_all, columns=SPECS)
-                    self.logger.debug(f"after applying column specs, df_all =\n{str(df_all)}")
+                    self.logger.debug(f"applied column specs, df_all =\n{str(df_all)}")
             else:
                 self.logger.info("Not using the cache")
                 all_article_ids = []
