@@ -13,7 +13,8 @@ We will compute sentence embeddings:
 - using 4 GPUs
 
 The same instructions can be applied to other models, other CORD-19 versions, and
-other GPU configurations.
+other GPU configurations. To run on a CPU please consistently remove the ``--gpus``
+parameter everywhere.
 
 Launch a Docker container with CUDA support and access to 4 GPUs:
 
@@ -109,4 +110,6 @@ Launch the creation of the database:
 
     create_database --data-path <data_path>
 
-The parameter ``data_path`` should point to the directory with the original CORD data.
+The parameter ``data_path`` should point to the directory with the original CORD-19 data,
+which can be obtained from
+`Kaggle <https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge>`_.
