@@ -7,9 +7,9 @@ Fixes #{issue-id-number}.
 
 ## Checklist:
 
-- [ ] This PR refers to an issue present in the 
-[issue tracker](https://github.com/BlueBrain/BlueBrainSearch/issues) (if it is
-not the case, please create an issue first).
+- [ ] This PR refers to an issue present in the [issue tracker](https://github.com/BlueBrain/BlueBrainSearch/issues
+) (if it is not the case, please create an issue
+ first).
 - [ ] Unit tests added.
 - [ ] Documentation and `whatsnew.rst` updated (if needed).
 - [ ] `setup.py` and `requirements.txt` updated with new dependencies.
