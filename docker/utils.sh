@@ -31,7 +31,6 @@ ssh_setup() {
 dvc_pull_models() {
   dvc remote modify gpfs_ssh ask_password true
   pushd /src/data_and_models/pipelines/ner/ || exit
-  dvc pull ee_models_library.csv.dvc
-  dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
+  egrep -o '\badd_er_[0-9]+\b' dvc.yaml | xargs dvc pull ee_models_library.csv.dvc
   popd || exit
 }
