@@ -311,6 +311,22 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     logger.debug(f"model_names = {model_names}")
     logger.debug(f"engine = {engine}")
     model_names = list(set(model_names))
+
+    # Model names are absolute paths, which is really bad. The paths saved in
+    # the current mining cache database have a different path to those that
+    # are loaded in the mining server.
+    # This is a temporary fix to make the mining server work, until a better
+    # and proper solution is found
+    # TODO: replace this fix by a proper solution
+    fixed_model_names = []
+    new_path = "/raid/sync/proj115/bbs_data/prodigy_trained_models"
+    for model_name in model_names:
+        old_path, *_ = model_name.rpartition("/")
+        model_name = model_name.replace(old_path, new_path)
+        fixed_model_names.append(model_name)
+    model_names = fixed_model_names
+    # end fix.
+
     identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 
     if identifiers_arts:
