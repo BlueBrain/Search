@@ -32,6 +32,10 @@ should have been completed successfully.
 
 ### Find documents based on sentence semantic similarity
 
+<p align="center">
+  <img alt="Search Widget" src="screenshots/search_widget.png">
+</p>
+
 To find sentences semantically similar to the query *'Glucose is a risk factor
 for COVID-19'* in the documents, you could just click on the blue button named
 `Search Literature!`. You could also enter the query of your choice by editing
@@ -43,16 +47,16 @@ state-of-the-art approach based on deep learning used by Blue Brain Search,
 this is true even if the query and the sentences from the documents do not
 share the same words (e.g. they are synonyms, they have a similar meaning, ...).
 
-<p align="center">
-  <img alt="Search Widget" src="screenshots/search_widget.png">
-</p>
-
 ### Extract structured information from documents
 
 The extraction could be done either on documents found by the search above or
 on the text content of a document pasted in the widget.
 
 #### Found documents
+
+<p align="center">
+  <img alt="Mining Widget (articles)" src="screenshots/mining_widget_articles.png">
+</p>
 
 To extract structured information from the found documents, you could just
 click on the blue button named `Mine Selected Articles!`.
@@ -61,21 +65,18 @@ At the moment, the returned results are named entities. For each named entity,
 the structured information is: the mention (e.g. 'COVID-19'), the type
 (e.g. 'DISEASE'), and its location up to the character in the document.
 
-<p align="center">
-  <img alt="Mining Widget (articles)" src="screenshots/mining_widget_articles.png">
-</p>
 
 #### Pasted document content
+
+<p align="center">
+  <img alt="Mining Widget (text)" src="screenshots/mining_widget_text.png">
+</p>
 
 It is also possible to extract structured information from the pasted
 content of a document. To switch to this mode, you could just click on the
 tab named `Mine Text`. Then, you could launch the extraction by just clicking 
 on the blue button named `Mine This Text!`. You could also enter the content
-of your choice by editing the text field. 
-
-<p align="center">
-  <img alt="Mining Widget (text)" src="screenshots/mining_widget_text.png">
-</p>
+of your choice by editing the text field.
 
 ## Getting Started
 
