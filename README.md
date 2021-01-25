@@ -126,11 +126,9 @@ An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
 [official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
 
-Otherwise, let's define the environment variables common to the instructions.
+Otherwise, let's define the configuration common to all the instructions.
 
 ```bash
-export DIRECTORY=$(pwd)
-
 export DATABASE_PORT=8953
 export SEARCH_PORT=8950
 export MINING_PORT=8952
@@ -145,10 +143,20 @@ export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
 ```
 
-Then, please clone the Blue Brain Search repository.
+Then, please create a working directory and navigate to it in the command line.
+
+After, please clone the Blue Brain Search repository.
 
 ```bash
 git clone https://github.com/BlueBrain/BlueBrainSearch
+```
+
+Finally, let's keep track of the path to the working directory and the path
+to the repository directory.
+
+```bash
+export WORKING_DIRECTORY="$(pwd)"
+export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/BlueBrainSearch"
 ```
 
 ### Retrieve the documents
@@ -160,12 +168,15 @@ take around 3 minutes.
 ```bash
 export CORD19_VERSION=2021-01-03
 export CORD19_ARCHIVE=cord-19_${CORD19_VERSION}.tar.gz
+export CORD19_DIRECTORY=$WORKING_DIRECTORY/$CORD19_VERSION
 ```
 
 ```bash
+cd $WORKING_DIRECTORY
 wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$CORD19_ARCHIVE
 tar xf $CORD19_ARCHIVE
-tar xf $CORD19_VERSION/document_parses.tar.gz -C $CORD19_VERSION
+cd $CORD19_DIRECTORY
+tar xf document_parses.tar.gz
 ```
 
 CORD-19 contains more than 400,000 publications. The next sections could run
@@ -175,7 +186,6 @@ For testing purposes, you might want to consider a subset of the CORD-19. The
 following code select around 1,400 articles about *glucose* and *risk factors*:
 
 ```bash
-cd $CORD19_VERSION
 mv metadata.csv metadata.csv.original
 pip install pandas
 python
@@ -193,21 +203,17 @@ sample.to_csv('metadata.csv', index=False)
 exit()
 ```
 
-```bash
-cd ..
-```
-
 ### Initialize the database server
 
 ```bash
-export DATABASE_DIRECTORY=mysql_data
+export DATABASE_DIRECTORY=$WORKING_DIRECTORY/mysql_data
 export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 ```
 
 ```bash
 mkdir $DATABASE_DIRECTORY
-cd BlueBrainSearch
+cd $REPOSITORY_DIRECTORY
 ```
 
 This will build a Docker image where MySQL is installed.
@@ -225,7 +231,7 @@ This will launch using this image a MySQL server running in a Docker container.
 ```bash
 docker run \
   --publish $DATABASE_PORT:3306 \
-  --volume $DIRECTORY/$DATABASE_DIRECTORY:/var/lib/mysql \
+  --volume $DATABASE_DIRECTORY:/var/lib/mysql \
   --env MYSQL_ROOT_PASSWORD=$DATABASE_PASSWORD \
   --detach \
   --name test_bbs_mysql test_bbs_mysql
@@ -261,6 +267,10 @@ exit
 This will build a Docker image where Blue Brain Search is installed.
 
 ```bash
+cd $REPOSITORY_DIRECTORY
+```
+
+```bash
 docker build \
   --build-arg BBS_HTTP_PROXY=$HTTP_PROXY --build-arg BBS_http_proxy=$HTTP_PROXY \
   --build-arg BBS_HTTPS_PROXY=$HTTPS_PROXY --build-arg BBS_https_proxy=$HTTPS_PROXY \
@@ -276,11 +286,11 @@ The immediate next sections will need to be run in this session.
 ```bash
 docker run \
   --volume /raid:/raid \
-  --env CORD19_VERSION --env DATABASE_URL --env DIRECTORY --env BBS_SSH_USERNAME \
+  --env CORD19_DIRECTORY --env DATABASE_URL --env BBS_SSH_USERNAME \
   --gpus all \
-  --interactive --tty --rm --user root --workdir $DIRECTORY \
+  --interactive --tty --rm --user root --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_base test_bbs_base
-pip install --editable ./BlueBrainSearch
+pip install --editable .
 ```
 
 NB: At the moment, `--editable` is needed for `DVC.load_ee_models_library()`
@@ -296,7 +306,7 @@ around 3 minutes.
 
 ```bash
 create_database \
-  --data-path $CORD19_VERSION \
+  --data-path $CORD19_DIRECTORY \
   --database-url $DATABASE_URL
 ```
 
@@ -307,7 +317,7 @@ around 2 minutes (on 2 Tesla V100 16 GB).
 
 ```bash
 export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
-export BBS_SEARCH_EMBEDDINGS_PATH=$DIRECTORY/embeddings.h5
+export BBS_SEARCH_EMBEDDINGS_PATH=$WORKING_DIRECTORY/embeddings.h5
 ```
 
 ```bash
@@ -328,13 +338,11 @@ server. The supported models for the search could be found in
 You will be asked to enter your SSH password.
 
 ```bash
-cd BlueBrainSearch
 dvc remote modify gpfs_ssh ask_password true
 dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
 cd data_and_models/pipelines/ner
 dvc pull ee_models_library.csv.dvc
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
-cd $DIRECTORY
 ```
 
 NB: At the moment, `dvc_pull_models` from `BlueBrainSearch/docker/utils.sh`
@@ -363,6 +371,10 @@ Please exit the interactive session of the `test_bbs_base` container.
 exit
 ```
 
+```bash
+cd $REPOSITORY_DIRECTORY
+```
+
 #### Search server
 
 FIXME There is currently a bug regarding `bbsearch.entrypoints`. It needs to
@@ -383,7 +395,7 @@ export BBS_SEARCH_MYSQL_URL=$DATABASE_URL
 export BBS_SEARCH_MYSQL_USER=guest
 export BBS_SEARCH_MYSQL_PASSWORD=guest
 
-export BBS_SEARCH_MODELS_PATH=$DIRECTORY
+export BBS_SEARCH_MODELS_PATH=$WORKING_DIRECTORY
 export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 ```
 
@@ -450,10 +462,10 @@ docker run \
   --volume /raid:/raid \
   --env NOTEBOOK_TOKEN \
   --env MYSQL_DB_URI --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
-  --interactive --tty --rm --user root --workdir $DIRECTORY \
+  --interactive --tty --rm --user root --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
-pip install ./BlueBrainSearch
-jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
+pip install .
+jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
 
 NB: At the moment, `--user root` is needed for the widgets to write in
@@ -491,16 +503,15 @@ docker rmi $SERVERS test_bbs_base
 ```
 
 ```bash
-cd $DIRECTORY
 rm $BBS_SEARCH_EMBEDDINGS_PATH
 rm -R $DATABASE_DIRECTORY  # Requires to be root.
-rm -R $CORD19_VERSION
-rm $CORD19_ARCHIVE
-rm -R BlueBrainSearch  # Requires to be root.
+rm -R $CORD19_DIRECTORY
+rm $WORKING_DIRECTORY/$CORD19_ARCHIVE
+rm -R $REPOSITORY_DIRECTORY  # Requires to be root.
 ```
 
 NB: At the moment, removing the directories `DATABASE_DIRECTORY` and
-`BlueBrainSearch` requires the `root` privileges. Indeed, they were modified
+`REPOSITORY_DIRECTORY` requires the `root` privileges. Indeed, they were modified
 through the `test_bbs_base` container which was running as `root`.
 
 
