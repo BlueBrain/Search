@@ -88,7 +88,7 @@ There are 8 steps which need to be done in the following order:
 4. [Create the database](#create-the-database)
 5. [Compute the sentence embeddings](#compute-the-sentence-embeddings)
 6. [Create the mining cache](#create-the-mining-cache)
-7. [Initialize the search, mining, and notebooks servers](#initialize-the-search-mining-and-notebooks-servers)
+7. [Initialize the search, mining, and notebook servers](#initialize-the-search-mining-and-notebook-servers)
 8. [Open the example notebook](#open-the-example-notebook)
 
 Before proceeding, four things need to be noted.
@@ -99,7 +99,7 @@ Brain's network and has access to the sentence embedding model we trained
 released yet.
 
 Second, the setup of Blue Brain Search requires the launch of 4 servers
-(database, search, mining, notebooks). The instructions are supposed to be
+(database, search, mining, notebook). The instructions are supposed to be
 executed on a powerful remote machine and the notebooks are supposed to be
 accessed from a personal local machine through the network.
 
@@ -109,7 +109,7 @@ Docker images would have already been built, the Docker containers would
 already run, and the servers would already run.
 
 Fourth, if you are in a production setting, the database password and the
-notebooks server token should be changed, the prefix `test_` should be removed
+notebook server token should be changed, the prefix `test_` should be removed
 from the Docker image and container names, the `sed` commands should be
 omitted, and the second digit of the ports should be replaced by `8`.
 
@@ -134,10 +134,10 @@ export DIRECTORY=$(pwd)
 export DATABASE_PORT=8953
 export SEARCH_PORT=8950
 export MINING_PORT=8952
-export NOTEBOOKS_PORT=8954
+export NOTEBOOK_PORT=8954
 
 export DATABASE_PASSWORD=1234
-export NOTEBOOKS_TOKEN=1a2b3c4d
+export NOTEBOOK_TOKEN=1a2b3c4d
 
 export BBS_SSH_USERNAME=$(id --user --name)
 
@@ -355,7 +355,7 @@ create_mining_cache \
 
 NB: At the moment, `--verbose` is needed to show the `INFO` logs.
 
-### Initialize the search, mining, and notebooks servers
+### Initialize the search, mining, and notebook servers
 
 Please exit the interactive session of the `test_bbs_base` container.
 
@@ -429,7 +429,7 @@ docker run \
   --name test_bbs_mining test_bbs_mining
 ```
 
-#### Notebooks server
+#### Notebook server
 
 TODO There is not currently a way to dynamically pass the `DATABASE_NAME` to
 the notebook. 
@@ -446,14 +446,14 @@ export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
 
 ```bash
 docker run \
-  --publish $NOTEBOOKS_PORT:8888 \
+  --publish $NOTEBOOK_PORT:8888 \
   --volume /raid:/raid \
-  --env NOTEBOOKS_TOKEN \
+  --env NOTEBOOK_TOKEN \
   --env MYSQL_DB_URI --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
   --interactive --tty --rm --user root --workdir $DIRECTORY \
-  --name test_bbs_notebooks test_bbs_base
+  --name test_bbs_notebook test_bbs_base
 pip install ./BlueBrainSearch
-jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOKS_TOKEN
+jupyter lab BlueBrainSearch/notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
 
 NB: At the moment, `--user root` is needed for the widgets to write in
@@ -464,7 +464,7 @@ Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 ### Open the example notebook
 
 ```bash
-echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb?token=$NOTEBOOKS_TOKEN
+echo http://$HOSTNAME:$NOTEBOOK_PORT/lab/tree/BBS_BBG_poc.ipynb?token=$NOTEBOOK_TOKEN
 ```
 
 To open the example notebook, please open the link returned above in a browser.
@@ -485,7 +485,7 @@ export SERVERS='test_bbs_search test_bbs_mining test_bbs_mysql'
 ```
 
 ```bash
-docker stop test_bbs_notebooks $SERVERS
+docker stop test_bbs_notebook $SERVERS
 docker rm $SERVERS
 docker rmi $SERVERS test_bbs_base
 ```
