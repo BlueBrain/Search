@@ -464,7 +464,6 @@ Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 ### Open the example notebook
 
 ```bash
-cd ..
 echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb?token=$NOTEBOOKS_TOKEN
 ```
 
@@ -492,6 +491,7 @@ docker rmi $SERVERS test_bbs_base
 ```
 
 ```bash
+cd $DIRECTORY
 rm $BBS_SEARCH_EMBEDDINGS_PATH
 rm -R $DATABASE_DIRECTORY  # Requires to be root.
 rm -R $CORD19_VERSION
