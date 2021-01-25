@@ -1,4 +1,22 @@
 """Testing the create_database entrypoint."""
+
+# BBSearch is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import pathlib
 from unittest.mock import Mock
 
@@ -9,12 +27,11 @@ from bbsearch.entrypoint.create_database import run_create_database
 
 @pytest.mark.parametrize(
     (
-        "data_path",
+        "cord_data_path",
         "db_type",
-        "database_url",
+        "db_url",
         "sqlite_exists",
-        "log_dir",
-        "log_name",
+        "log_file",
         "only_mark_bad_sentences",
     ),
     [
@@ -23,30 +40,28 @@ from bbsearch.entrypoint.create_database import run_create_database
             "mysql",
             "my_server.ch/my_database",
             False,
-            "folder_1",
-            "a.log",
+            "folder_1/a.log",
             True,
         ),
-        ("data_2", "sqlite", "database.db", False, "folder_2", "b.log", False),
-        ("data_3", "sqlite", "database.db", True, "folder_2", "b.log", False),
-        ("data_4", "wrong", "no_database_here", False, "folder_3", "c.log", False),
+        ("data_2", "sqlite", "database.db", False, "folder_2/b.log", False),
+        ("data_3", "sqlite", "database.db", True, "folder_2/b.log", False),
+        ("data_4", "wrong", "no_database_here", False, "folder_3/c.log", False),
     ],
 )
 def test_send_through(
     monkeypatch,
     tmpdir,
-    data_path,
+    cord_data_path,
     db_type,
-    database_url,
+    db_url,
     sqlite_exists,
-    log_dir,
-    log_name,
+    log_file,
     only_mark_bad_sentences,
 ):
     # Preparations
     tmpdir = pathlib.Path(str(tmpdir))
-    log_dir = tmpdir / log_dir
-    log_dir.mkdir()
+    log_file = tmpdir / log_file
+    log_file.parent.mkdir()
 
     # Patching
     fake_getpass = Mock()
@@ -56,9 +71,9 @@ def test_send_through(
     fake_mark_bad_sentences = Mock()
 
     if db_type == "sqlite":
-        database_url = tmpdir / database_url
+        db_url = tmpdir / db_url
         if sqlite_exists:
-            database_url.touch()
+            db_url.touch()
 
     monkeypatch.setattr("builtins.input", Mock())
     monkeypatch.setattr("bbsearch.entrypoint.create_database.getpass", fake_getpass)
@@ -71,11 +86,10 @@ def test_send_through(
     monkeypatch.setattr("bbsearch.database.mark_bad_sentences", fake_mark_bad_sentences)
 
     argv = [
-        f"--data-path={data_path}",
+        f"--cord-data-path={cord_data_path}",
         f"--db-type={db_type}",
-        f"--database-url={database_url}",
-        f"--log-dir={log_dir}",
-        f"--log-name={log_name}",
+        f"--db-url={db_url}",
+        f"--log-file={log_file}",
     ]
 
     if only_mark_bad_sentences:
@@ -98,7 +112,7 @@ def test_send_through(
 
         args, kwargs = fake_database_creation.call_args
 
-        assert kwargs["data_path"] == data_path
+        assert kwargs["data_path"] == cord_data_path
         assert kwargs["engine"] == fake_sqlalchemy.create_engine.return_value
 
     fake_mark_bad_sentences.assert_called_once()

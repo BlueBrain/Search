@@ -1,4 +1,22 @@
 """EntryPoint for mining a database and saving of extracted items in a cache."""
+
+# BBSearch is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import argparse
 import getpass
 import logging
@@ -9,7 +27,7 @@ import sqlalchemy
 from sqlalchemy.pool import NullPool
 
 from ..utils import DVC
-from ._helper import configure_logging
+from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_create_mining_cache(argv=None):
@@ -21,9 +39,8 @@ def run_create_mining_cache(argv=None):
         The command line arguments.
     """
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [options]",
         description="Mine the CORD-19 database and cache the results.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
         "--db-type",
@@ -33,17 +50,21 @@ def run_create_mining_cache(argv=None):
         help="Type of the database.",
     )
     parser.add_argument(
-        "--database-url",
-        default="dgx1.bbp.epfl.ch:8853/cord19_v47",
+        "--db-url",
         type=str,
-        help=(
-            "The location of the database depending on the database type. "
-            "For MySQL the server URL should be provided, for SQLite the "
-            "location of the database file. Generally, the scheme part of "
-            "the URL should be omitted, e.g. for MySQL the URL should be "
-            "of the form 'my_sql_server.ch:1234/my_database' and for SQLite "
-            "of the form '/path/to/the/local/database.db'."
-        ),
+        help="""
+        The location of the database depending on the database type.
+
+        For MySQL the server URL should be provided, for SQLite the
+        location of the database file. Generally, the scheme part of
+        the URL should be omitted, e.g. for MySQL the URL should be
+        of the form 'my_sql_server.ch:1234/my_database' and for SQLite
+        of the form '/path/to/the/local/database.db'.
+
+        If missing, then the environment variable DB_URL will
+        be read.
+        """,
+        default=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--target-table-name",
@@ -55,25 +76,29 @@ def run_create_mining_cache(argv=None):
         "--n-processes-per-model",
         default=1,
         type=int,
-        help="Each mining model is run in parallel with respect to the others. In "
-        "addition to that, n-processes-per-model are used to run in parallel"
-        "a single mining model.",
+        help="""
+        Each mining model is run in parallel with respect to the others.
+        In addition to that, n-processes-per-model are used to run in
+        parallel a single mining model.
+        """,
     )
     parser.add_argument(
         "--restrict-to-models",
         type=str,
         default=None,
-        help="Comma-separated list of models (as called in ee_models_library_file)"
-        "to be run to populate the cache. By default, all models in "
-        "ee_models_library_file are run.",
+        help="""
+        Comma-separated list of models (as called in ee_models_library_file)
+        to be run to populate the cache. By default, all models in
+        ee_models_library_file are run.
+        """,
     )
     parser.add_argument(
         "--log-file",
         "-l",
         type=str,
-        metavar="<filename>",
+        metavar="<filepath>",
         default=None,
-        help="The file for the logs. If not provided the stdout will be used.",
+        help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
         "--verbose",
@@ -82,7 +107,12 @@ def run_create_mining_cache(argv=None):
         default=0,
         help="The logging level, -v correspond to INFO, -vv to DEBUG",
     )
-    args = parser.parse_args(argv)
+
+    # Parse CLI arguments
+    env_variable_names = {
+        "db_url": "DB_URL",
+    }
+    args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
     if args.verbose == 1:
@@ -97,7 +127,7 @@ def run_create_mining_cache(argv=None):
     logger.info("Welcome to the mining cache creation")
     logger.info("Parameters:")
     logger.info(f"db-type                : {args.db_type}")
-    logger.info(f"database-url           : {args.database_url}")
+    logger.info(f"db-url                 : {args.db_url}")
     logger.info(f"target-table-name      : {args.target_table_name}")
     logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
     logger.info(f"restrict-to-models     : {args.restrict_to_models}")
@@ -111,13 +141,13 @@ def run_create_mining_cache(argv=None):
     # Database type
     logger.info("Parsing the database type")
     if args.db_type == "sqlite":
-        database_path = pathlib.Path(args.database_url)
+        database_path = pathlib.Path(args.db_url)
         if not database_path.exists():
             raise FileNotFoundError(f"No database found at {database_path}.")
         database_url = f"sqlite:///{database_path}"
     elif args.db_type == "mysql":
         password = getpass.getpass("MySQL root password: ")
-        database_url = f"mysql+pymysql://root:{password}@{args.database_url}"
+        database_url = f"mysql+pymysql://root:{password}@{args.db_url}"
     else:  # pragma: no cover
         # Will never get here because `parser.parse_args()` will fail first.
         # This is because we have choices=("mysql", "sqlite") in the

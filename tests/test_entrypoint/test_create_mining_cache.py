@@ -1,3 +1,22 @@
+"""Tests covering the creation of the mining cache database."""
+
+# BBSearch is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import pathlib
 from unittest.mock import Mock
 
@@ -20,14 +39,14 @@ def test_help(capsys):
 def test_missing_sqlite_db():
     with pytest.raises(FileNotFoundError, match="^No database found"):
         run_create_mining_cache(
-            ["--db-type", "sqlite", "--database-url", "fake$?#"],
+            ["--db-type", "sqlite", "--db-url", "fake$?#"],
         )
 
 
 @pytest.mark.parametrize(
     (
         "db_type",
-        "database_url",
+        "db_url",
         "target_table_name",
         "n_processes_per_model",
         "restrict_to_models",
@@ -53,7 +72,7 @@ def test_send_through(
     monkeypatch,
     tmpdir,
     db_type,
-    database_url,
+    db_url,
     target_table_name,
     n_processes_per_model,
     restrict_to_models,
@@ -83,13 +102,13 @@ def test_send_through(
 
     # Create temporary sqlite database
     if db_type == "sqlite":
-        database_url = pathlib.Path(tmpdir) / "my.db"
-        database_url.touch()
+        db_url = pathlib.Path(tmpdir) / "my.db"
+        db_url.touch()
 
     # Construct arguments
     argv = [
         f"--db-type={db_type}",
-        f"--database-url={database_url}",
+        f"--db-url={db_url}",
         f"--target-table-name={target_table_name}",
         f"--n-processes-per-model={n_processes_per_model}",
         f"--restrict-to-models={restrict_to_models}",

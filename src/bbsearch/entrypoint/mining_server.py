@@ -1,4 +1,22 @@
 """The entrypoint script for the mining server."""
+
+# BBSearch is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 import pathlib
 import sys
@@ -26,14 +44,14 @@ def get_mining_app():
     # Create the database engine
     logger.info("Creating the database engine")
     if db_type == "sqlite":
-        sqlite_db_path = get_var("BBS_MINING_SQLITE_DB_PATH")
+        sqlite_db_path = get_var("BBS_MINING_DB_URL")
         sqlite_db_path = pathlib.Path(sqlite_db_path)
         if not sqlite_db_path.exists():
             sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
     elif db_type == "mysql":
-        mysql_url = get_var("BBS_MINING_MYSQL_URL")
+        mysql_url = get_var("BBS_MINING_DB_URL")
         mysql_user = get_var("BBS_MINING_MYSQL_USER")
         mysql_password = get_var("BBS_MINING_MYSQL_PASSWORD")
         engine_url = (

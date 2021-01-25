@@ -6,11 +6,11 @@ train_model1:
     md5: 613308ed830d86284a1aee2747d911d0
     size: 324136
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: train.py
-    md5: 4325105b8bc3fc1cbc0de53ede30c9ef
-    size: 1694
+    md5: a32b18b583d1b376aaa6d4812ae0efee
+    size: 2496
   params:
     params.yaml:
       train.model1:
@@ -30,11 +30,11 @@ train_model2:
     md5: 2459e49418599ff96ab9db60a29b757b
     size: 953728
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: train.py
-    md5: 4325105b8bc3fc1cbc0de53ede30c9ef
-    size: 1694
+    md5: a32b18b583d1b376aaa6d4812ae0efee
+    size: 2496
   params:
     params.yaml:
       train.model2:
@@ -54,11 +54,11 @@ train_model3:
     md5: 4b6fff4b0091fa10ae7c88a4aeb42ae0
     size: 969928
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: train.py
-    md5: 4325105b8bc3fc1cbc0de53ede30c9ef
-    size: 1694
+    md5: a32b18b583d1b376aaa6d4812ae0efee
+    size: 2496
   params:
     params.yaml:
       train.model3:
@@ -78,11 +78,11 @@ train_model4:
     md5: ec5d6b86181b9e4cdefb2b2198d5ae4f
     size: 267307
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: train.py
-    md5: 4325105b8bc3fc1cbc0de53ede30c9ef
-    size: 1694
+    md5: a32b18b583d1b376aaa6d4812ae0efee
+    size: 2496
   params:
     params.yaml:
       train.model4:
@@ -102,11 +102,11 @@ train_model5:
     md5: ceb6ea77d2a6a69962b88218f4f5a663
     size: 394725
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: train.py
-    md5: 4325105b8bc3fc1cbc0de53ede30c9ef
-    size: 1694
+    md5: a32b18b583d1b376aaa6d4812ae0efee
+    size: 2496
   params:
     params.yaml:
       train.model5:
@@ -134,11 +134,11 @@ eval_disease:
     size: 100183520
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.DISEASE:
@@ -146,6 +146,7 @@ eval_disease:
   outs:
   - path: ../../metrics/ner/disease.json
     md5: 034f6a3ffaabe1fdb4c0900b1c719fac
+    size: 273
 eval_cell_compartment:
   cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     --model ../../models/ner_er/model2 --output_file ../../metrics/ner/cell_compartment.json
@@ -162,11 +163,11 @@ eval_cell_compartment:
     size: 100194437
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.CELL_COMPARTMENT:
@@ -174,6 +175,7 @@ eval_cell_compartment:
   outs:
   - path: ../../metrics/ner/cell_compartment.json
     md5: 0dc8d0f92415d14edfa7cdc8e5381c65
+    size: 260
 eval_drug:
   cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json --etype
@@ -190,11 +192,11 @@ eval_drug:
     size: 100194437
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.DRUG:
@@ -218,11 +220,11 @@ eval_organ:
     size: 100194437
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.ORGAN:
@@ -230,6 +232,7 @@ eval_organ:
   outs:
   - path: ../../metrics/ner/organ.json
     md5: 55df17bf18a84a6ef670ae8b2e80af73
+    size: 275
 eval_chemical:
   cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     --model ../../models/ner_er/model3 --output_file ../../metrics/ner/chemical.json
@@ -246,11 +249,11 @@ eval_chemical:
     size: 100228858
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.CHEMICAL:
@@ -274,11 +277,11 @@ eval_organism:
     size: 100228858
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.ORGANISM:
@@ -302,11 +305,11 @@ eval_cell_type:
     size: 100215798
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.CELL_TYPE:
@@ -314,6 +317,7 @@ eval_cell_type:
   outs:
   - path: ../../metrics/ner/cell_type.json
     md5: 690a1b81737164cfed2553c9e6852ca2
+    size: 272
 eval_protein:
   cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     --model ../../models/ner_er/model4 --output_file ../../metrics/ner/protein.json
@@ -330,11 +334,11 @@ eval_protein:
     size: 100215798
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.PROTEIN:
@@ -342,6 +346,7 @@ eval_protein:
   outs:
   - path: ../../metrics/ner/protein.json
     md5: 5c0de70df94fddcbadbb1206e257efc8
+    size: 263
 eval_pathway:
   cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     --model ../../models/ner_er/model5 --output_file ../../metrics/ner/pathway.json
@@ -358,11 +363,11 @@ eval_pathway:
     size: 100224717
     nfiles: 18
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: eval.py
-    md5: 485af821f76ccdefd5eeea7925a36281
-    size: 2643
+    md5: db678f114f175ea0d693302963b6d2f9
+    size: 3421
   params:
     params.yaml:
       eval.PATHWAY:
@@ -382,11 +387,11 @@ add_er_1:
     size: 100181750
     nfiles: 16
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: add_er.py
-    md5: 85f204c1bc3fb6783dc68fceb46cda05
-    size: 1741
+    md5: d4cd7b9aa165ad89d489f2fb86439d41
+    size: 2518
   params:
     params.yaml:
       eval.DISEASE:
@@ -409,11 +414,11 @@ add_er_2:
     size: 100192674
     nfiles: 16
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: add_er.py
-    md5: 85f204c1bc3fb6783dc68fceb46cda05
-    size: 1741
+    md5: d4cd7b9aa165ad89d489f2fb86439d41
+    size: 2518
   params:
     params.yaml:
       eval.CELL_COMPARTMENT:
@@ -440,11 +445,11 @@ add_er_3:
     size: 100227109
     nfiles: 16
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: add_er.py
-    md5: 85f204c1bc3fb6783dc68fceb46cda05
-    size: 1741
+    md5: d4cd7b9aa165ad89d489f2fb86439d41
+    size: 2518
   params:
     params.yaml:
       eval.CHEMICAL:
@@ -469,11 +474,11 @@ add_er_4:
     size: 100214049
     nfiles: 16
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: add_er.py
-    md5: 85f204c1bc3fb6783dc68fceb46cda05
-    size: 1741
+    md5: d4cd7b9aa165ad89d489f2fb86439d41
+    size: 2518
   params:
     params.yaml:
       eval.CELL_TYPE:
@@ -497,11 +502,11 @@ add_er_5:
     size: 100222954
     nfiles: 16
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: add_er.py
-    md5: 85f204c1bc3fb6783dc68fceb46cda05
-    size: 1741
+    md5: d4cd7b9aa165ad89d489f2fb86439d41
+    size: 2518
   params:
     params.yaml:
       eval.PATHWAY:
@@ -529,29 +534,39 @@ interrater:
     md5: 6e248863604ce14861f38e7c9a8281bb
     size: 64285
   - path: Dockerfile
-    md5: 52af30d575bdab4eed0c6752e9f682f7
-    size: 1386
+    md5: 2a32fb5c185ede70a018e95d6be9ff21
+    size: 2163
   - path: interrater.py
-    md5: 2eb95172eb166408b9d6900a62e00578
-    size: 2195
+    md5: 637bc6304305c2a900c5ec7876526621
+    size: 2973
   outs:
   - path: ../../metrics/ner/interrater/cell_compartment.json
     md5: 1c5c2f5fb7dc7f792f4a3a974fe753f8
+    size: 246
   - path: ../../metrics/ner/interrater/cell_type.json
     md5: 5da8476adaad46fd5236dc9da81e8624
+    size: 273
   - path: ../../metrics/ner/interrater/chemical.json
     md5: 9842e0e07063f735ecff0bc082999b18
+    size: 260
   - path: ../../metrics/ner/interrater/condition.json
     md5: 23eb361695b6b80ccd3e9137a52725c4
+    size: 274
   - path: ../../metrics/ner/interrater/disease.json
     md5: 110df2aa12b86f04c19656a43cea8bd2
+    size: 274
   - path: ../../metrics/ner/interrater/drug.json
     md5: f58359194658db2bb26483eaf0b931dc
+    size: 260
   - path: ../../metrics/ner/interrater/organ.json
     md5: 6652f267bbcc37cd9ac4a9c934085aae
+    size: 261
   - path: ../../metrics/ner/interrater/organism.json
     md5: 6e74ba7077e2a999ed6dc598ee78419d
+    size: 274
   - path: ../../metrics/ner/interrater/pathway.json
     md5: e038e353873bb5e222e28d6b66d78ee9
+    size: 274
   - path: ../../metrics/ner/interrater/protein.json
     md5: 7c7aaf345cba6d103ccf690da0e2f898
+    size: 274
