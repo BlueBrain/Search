@@ -207,13 +207,11 @@ exit()
 ### Initialize the database server
 
 ```bash
-export DATABASE_DIRECTORY=$WORKING_DIRECTORY/mysql_data
 export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 ```
 
 ```bash
-mkdir $DATABASE_DIRECTORY
 cd $REPOSITORY_DIRECTORY
 ```
 
@@ -232,13 +230,10 @@ This will launch using this image a MySQL server running in a Docker container.
 ```bash
 docker run \
   --publish $DATABASE_PORT:3306 \
-  --volume $DATABASE_DIRECTORY:/var/lib/mysql \
   --env MYSQL_ROOT_PASSWORD=$DATABASE_PASSWORD \
   --detach \
   --name test_bbs_mysql test_bbs_mysql
 ```
-
-NB: For `--volume`, the paths need to be absolute.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -505,15 +500,14 @@ docker rmi $SERVERS test_bbs_base
 
 ```bash
 rm $BBS_SEARCH_EMBEDDINGS_PATH
-rm -R $DATABASE_DIRECTORY  # Requires to be root.
 rm -R $CORD19_DIRECTORY
 rm $WORKING_DIRECTORY/$CORD19_ARCHIVE
 rm -R $REPOSITORY_DIRECTORY  # Requires to be root.
 ```
 
-NB: At the moment, removing the directories `DATABASE_DIRECTORY` and
-`REPOSITORY_DIRECTORY` requires the `root` privileges. Indeed, they were modified
-through the `test_bbs_base` container which was running as `root`.
+NB: At the moment, removing the directory `REPOSITORY_DIRECTORY` requires
+the `root` privileges. Indeed, it was modified through the `test_bbs_base`
+container which was running as `root`.
 
 
 ## Installation (virtual environment)
