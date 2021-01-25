@@ -26,7 +26,7 @@ import sys
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
-from ..utils import DVC
+from ..utils import DVC, get_root_path
 from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
@@ -163,6 +163,10 @@ def run_create_mining_cache(argv=None):
     # Load the models library
     logger.info("Loading the models library")
     ee_models_library = DVC.load_ee_models_library()
+    root_path = get_root_path()
+    ee_models_library["model"] = ee_models_library["model"].apply(
+        lambda x: str(pathlib.Path(x).relative_to(root_path))
+    )
 
     # Restrict to given models
     if args.restrict_to_models is not None:
