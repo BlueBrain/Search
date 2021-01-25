@@ -18,7 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
-ssh_setup
+ssh_check
 dvc_pull_models
 
 # Launch mining cache creation, using arguments only if defined
