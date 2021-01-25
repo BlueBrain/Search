@@ -24,6 +24,7 @@ import pandas as pd
 import pytest
 
 from bbsearch.entrypoint import run_create_mining_cache
+from bbsearch.utils import get_root_path
 
 
 def test_help(capsys):
@@ -57,14 +58,14 @@ def test_missing_sqlite_db():
             "my_url",
             "mysql_cache_table",
             4,
-            "/path/to/model_1,/path/to/model_2",
+            "path/to/model_1,path/to/model_2",
         ),
         (
             "sqlite",
             "my_url",
             "sqlite_cache_table",
             12,
-            "/path/to/model_3,invalid",
+            "path/to/model_3,invalid",
         ),
     ),
 )
@@ -78,12 +79,17 @@ def test_send_through(
     restrict_to_models,
 ):
     # Monkey-patching
+    root_path = get_root_path()
     df_model_library = pd.DataFrame(
         columns=["entity_type", "model", "entity_type_name"],
         data=[
-            ["CELL_COMPARTMENT", "/path/to/model_1", "CELLULAR_COMPONENT"],
-            ["CELL_TYPE", "/path/to/model_2", "CELL_TYPE"],
-            ["CHEMICAL", "/path/to/model_3", "CHEBI"],
+            [
+                "CELL_COMPARTMENT",
+                str(root_path / "path/to/model_1"),
+                "CELLULAR_COMPONENT",
+            ],
+            ["CELL_TYPE", str(root_path / "path/to/model_2"), "CELL_TYPE"],
+            ["CHEMICAL", str(root_path / "path/to/model_3"), "CHEBI"],
         ],
     )
     fake_dvc = Mock()
@@ -132,6 +138,7 @@ def test_send_through(
     # Check the args/kwargs
     assert kwargs["database_engine"] == fake_sqlalchemy.create_engine()
     assert isinstance(kwargs["ee_models_library"], pd.DataFrame)
+    assert len(df_model_library_selected) > 0
     assert kwargs["ee_models_library"].equals(df_model_library_selected)
     assert kwargs["target_table_name"] == target_table_name
     assert kwargs["workers_per_model"] == n_processes_per_model

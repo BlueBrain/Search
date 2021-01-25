@@ -52,7 +52,9 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
 
     fake_sqlalchemy = Mock()
     fake_dvc = Mock()
-    fake_dvc.load_ee_models_library.return_value = pd.DataFrame()
+    fake_dvc.load_ee_models_library.return_value = pd.DataFrame(
+        columns=["entity_type", "model", "entity_type_name"]
+    )
     fake_mining_server_inst = Mock()
     fake_mining_server_class = Mock(return_value=fake_mining_server_inst)
 
