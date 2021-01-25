@@ -465,12 +465,10 @@ Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 
 ```bash
 cd ..
-echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb
+echo http://$HOSTNAME:$NOTEBOOKS_PORT/lab/tree/BBS_BBG_poc.ipynb?token=$NOTEBOOKS_TOKEN
 ```
 
-To open the example notebook, please open the link returned above in a browser,
-then please enter the token defined above (`NOTEBOOKS_TOKEN`), and finally
-please click on `Log in` or hit `ENTER`.
+To open the example notebook, please open the link returned above in a browser.
 
 FIXME There is currently a bug regarding the feature `Mine Selected Articles!`.
 No results is returned.
