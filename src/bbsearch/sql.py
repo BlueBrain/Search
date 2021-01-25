@@ -319,7 +319,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             """
         SELECT *
         FROM mining_cache
-        WHERE article_id IN :identifiers_arts AND mining_model_rel IN :model_names
+        WHERE article_id IN :identifiers_arts AND mining_model IN :model_names
         ORDER BY article_id, paragraph_pos_in_article, start_char
         """
         )
