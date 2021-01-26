@@ -27,6 +27,17 @@ Legend
 - |Remove| denotes removed features.
 
 
+Version 0.0.10.dev
+==================
+**FIXME**
+
+Changes
+-------
+- |Add| in `README` the purpose of Blue Brain Search.
+- |Add| in `README` the common usage of the two widgets (search and mining).
+- |Add| in `README` a complete and step-by-step *Getting Started*.
+
+
 Version 0.0.9
 =============
 **December 11, 2020**
