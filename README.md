@@ -287,8 +287,8 @@ cd $REPOSITORY_DIRECTORY
 
 ```bash
 docker build \
-  --build-arg BBS_HTTP_PROXY=$HTTP_PROXY --build-arg BBS_http_proxy=$HTTP_PROXY \
-  --build-arg BBS_HTTPS_PROXY=$HTTPS_PROXY --build-arg BBS_https_proxy=$HTTPS_PROXY \
+  --build-arg BBS_HTTP_PROXY=$http_proxy --build-arg BBS_http_proxy=$http_proxy \
+  --build-arg BBS_HTTPS_PROXY=$https_proxy --build-arg BBS_https_proxy=$https_proxy \
   -f docker/base.Dockerfile -t test_bbs_base .
 ```
 
@@ -296,16 +296,21 @@ NB: At the moment, `HTTP_PROXY`, `HTTPS_PROXY`, `http_proxy`, and `https_proxy`
 are not working here.
 
 This will launch using this image an interactive session in a Docker container.
+
 The immediate next sections will need to be run in this session.
 
 ```bash
 docker run \
   --volume /raid:/raid \
-  --env CORD19_DIRECTORY --env DATABASE_URL --env BBS_SSH_USERNAME \
+  --env REPOSITORY_DIRECTORY --env CORD19_DIRECTORY --env WORKING_DIRECTORY \
+  --env DATABASE_URL --env BBS_SSH_USERNAME \
   --gpus all \
-  --interactive --tty --rm --user root --workdir $REPOSITORY_DIRECTORY \
+  --interactive --tty --rm --user root \
   --name test_bbs_base test_bbs_base
-pip install --editable .
+```
+
+```bash
+pip install --editable $REPOSITORY_DIRECTORY
 ```
 
 NB: At the moment, `--editable` is needed for `DVC.load_ee_models_library()`
@@ -321,8 +326,8 @@ around 3 minutes.
 
 ```bash
 create_database \
-  --data-path $CORD19_DIRECTORY \
-  --database-url $DATABASE_URL
+  --cord-data-path $CORD19_DIRECTORY \
+  --db-url $DATABASE_URL
 ```
 
 ### Compute the sentence embeddings
@@ -333,6 +338,10 @@ around 2 minutes (on 2 Tesla V100 16 GB).
 ```bash
 export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
 export BBS_SEARCH_EMBEDDINGS_PATH=$WORKING_DIRECTORY/embeddings.h5
+```
+
+```bash
+cd $WORKING_DIRECTORY
 ```
 
 ```bash
@@ -353,10 +362,10 @@ server. The supported models for the search could be found in
 You will be asked to enter your SSH password.
 
 ```bash
+cd $REPOSITORY_DIRECTORY
 dvc remote modify gpfs_ssh ask_password true
 dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
 cd data_and_models/pipelines/ner
-dvc pull ee_models_library.csv.dvc
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
 
@@ -371,7 +380,7 @@ around 4 minutes.
 
 ```bash
 create_mining_cache \
-  --database-url $DATABASE_URL \
+  --db-url $DATABASE_URL \
   --target-table-name=mining_cache \
   --verbose
 ```
@@ -405,8 +414,11 @@ docker build \
   -f docker/search.Dockerfile -t test_bbs_search .
 ```
 
+Please export also in this environment the variables `EMBEDDING_MODEL` and
+`BBS_SEARCH_EMBEDDINGS_PATH`.
+
 ```bash
-export BBS_SEARCH_MYSQL_URL=$DATABASE_URL
+export BBS_SEARCH_DB_URL=$DATABASE_URL
 export BBS_SEARCH_MYSQL_USER=guest
 export BBS_SEARCH_MYSQL_PASSWORD=guest
 
@@ -418,7 +430,7 @@ export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 docker run \
   --publish $SEARCH_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_SEARCH_MYSQL_URL --env BBS_SEARCH_MYSQL_USER --env BBS_SEARCH_MYSQL_PASSWORD \
+  --env BBS_SEARCH_DB_URL --env BBS_SEARCH_MYSQL_USER --env BBS_SEARCH_MYSQL_PASSWORD \
   --env BBS_SEARCH_MODELS --env BBS_SEARCH_MODELS_PATH --env BBS_SEARCH_EMBEDDINGS_PATH \
   --detach \
   --name test_bbs_search test_bbs_search
@@ -441,7 +453,7 @@ docker build \
 
 ```bash
 export BBS_MINING_DB_TYPE=mysql
-export BBS_MINING_MYSQL_URL=$DATABASE_URL
+export BBS_MINING_DB_URL=$DATABASE_URL
 export BBS_MINING_MYSQL_USER=guest
 export BBS_MINING_MYSQL_PASSWORD=guest
 ```
@@ -451,22 +463,15 @@ docker run \
   --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
   --env BBS_SSH_USERNAME \
-  --env BBS_MINING_DB_TYPE --env BBS_MINING_MYSQL_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
+  --env BBS_MINING_DB_TYPE --env BBS_MINING_DB_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
   --detach \
   --name test_bbs_mining test_bbs_mining
 ```
 
 #### Notebook server
 
-TODO There is not currently a way to dynamically pass the `DATABASE_NAME` to
-the notebook. 
-
 ```bash
-sed -i 's/cord19_v47/'$DATABASE_NAME'/g' notebooks/BBS_BBG_poc.ipynb
-```
-
-```bash
-export MYSQL_DB_URI=$HOSTNAME:$DATABASE_PORT
+export DB_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
 export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
 ```
@@ -476,9 +481,12 @@ docker run \
   --publish $NOTEBOOK_PORT:8888 \
   --volume /raid:/raid \
   --env NOTEBOOK_TOKEN \
-  --env MYSQL_DB_URI --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
+  --env DB_URL --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
   --interactive --tty --rm --user root --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
+```
+
+```bash
 pip install .
 jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
