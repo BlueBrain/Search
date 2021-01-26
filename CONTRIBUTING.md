@@ -33,7 +33,6 @@ to read the following guidelines.
     1. [Update dependencies](#Udep)
     1. [Update documentation](#Udoc)
     1. [Trigger Travis CI](#Ttc)
-    1. [Sign CLA](#Sc)
     1. [Get reviews and approval](#Ac)
 
 ## <a name="CreatingIssues"></a> Creating Issues
@@ -107,12 +106,6 @@ tag. So make sure to add such tag to your last commit (or add an empty commit
 with such tag) before requesting a review of your PR.
 
 All CI tests must pass before the pull request can be considered for review.
-
-### <a name="Sc"></a> Sign CLA
-If you are not part of the Blue Brain project, a Contributor License Agreement
-(CLA) must be signed for any code changes to be accepted. Please contact the
-[Blue Brain Project (EPFL) - Machine Learning Team][ml-team-email] to get the
-latest CLA version and instructions.
 
 ### <a name="Ac"></a> Get reviews and approval
 Once you have satisfied all the previous points, feel free to open your pull
