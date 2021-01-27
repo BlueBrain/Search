@@ -31,7 +31,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/BlueBrain/bluepyopt/blob/master/LICENSE.txt">
+    <a href="https://github.com/BlueBrain/BlueBrainSearch/blob/master/LICENSE.txt">
     <img src="https://img.shields.io/github/license/BlueBrain/BlueBrainSearch" alt="License" />
     </a>
 </td>
