@@ -43,7 +43,7 @@ To generate autodoc directives one can run
 .. code-block:: bash
 
     cd docs
-    sphinx-apidoc -o source/api/ -f -e ../src/bbsearch/ ../src/bbsearch/entrypoints/*
+    sphinx-apidoc -o source/api/ -f -e ../src/bbsearch/ ../src/bbsearch/entrypoint/*
 
 Note that it only needs to be rerun when there are new subpackages/modules.
 

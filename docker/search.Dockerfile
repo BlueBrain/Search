@@ -46,4 +46,4 @@ ENTRYPOINT [\
 "--bind", "0.0.0.0:8080", \
 "--workers", "1", \
 "--timeout", "7200", \
-"bbsearch.entrypoints:get_search_app()"]
+"bbsearch.entrypoint:get_search_app()"]
