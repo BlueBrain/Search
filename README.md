@@ -80,14 +80,6 @@ This repository originated from the Blue Brain Project efforts on exploring and
 mining the [CORD-19 dataset](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
 
 
-Blue Brain Search is a Python package to find sentences semantically similar
-to a query in documents and to extract structured information from the
-returned and ranked documents.
-
-At the moment, the documents which are used are scientific publications about
-COVID-19 from the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
-
-
 ## Graphical Interface
 
 The graphical interface is composed of [widgets](https://github.com/jupyter-widgets/ipywidgets)
