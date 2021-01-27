@@ -17,7 +17,7 @@ Welcome to Blue Brain Search's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
    source/instructions
    source/server
@@ -27,7 +27,7 @@ Welcome to Blue Brain Search's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: API:
+   :caption: API
 
    source/api/bbsearch
 
