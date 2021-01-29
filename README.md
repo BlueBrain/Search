@@ -685,3 +685,11 @@ $ tox -e benchmarks -- \
   --benchmark-min-rounds=1
 ```
 See `pytest --help` for additional options.
+
+
+### Funding & Acknowledgment
+This project was supported by funding to the Blue Brain 
+Project, a research center of the Ecole polytechnique fédérale de Lausanne, from 
+the Swiss government's ETH Board of the Swiss Federal Institutes of Technology.
+
+COPYRIGHT 2021, Blue Brain Project/EPFL
