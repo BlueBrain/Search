@@ -359,8 +359,9 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             )
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
-        df_pars = df_pars.sort_values(
-            by=["article_id", "paragraph_pos_in_article", "start_char"]
+        df_pars.sort_values(
+            by=["article_id", "paragraph_pos_in_article", "start_char"],
+            inplace=True,
         )
     else:
         df_pars = pd.DataFrame()

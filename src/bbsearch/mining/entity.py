@@ -177,7 +177,9 @@ class PatternCreator:
             If ``int`` then represent a row index to be dropped. If ``list`` then
             a collection of row indices to be dropped.
         """
-        self._storage = self._storage.drop(index=labels).reset_index(drop=True)
+        self._storage.drop(index=labels, inplace=True).reset_index(
+            drop=True, inplace=True
+        )
 
     def to_df(self):
         """Convert to a pd.DataFrame.
