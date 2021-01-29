@@ -17,28 +17,73 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-# BBP's Effort for the COVID-19 Challenge
+# Blue Brain Search
 
-[![GitHub](https://img.shields.io/github/license/BlueBrain/BlueBrainSearch)](https://github.com/BlueBrain/BlueBrainSearch/blob/master/LICENSE)
-[![Build Status](https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master)](https://travis-ci.com/BlueBrain/BlueBrainSearch)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch)](https://github.com/BlueBrain/BlueBrainSearch/releases)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
-[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
-[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+<table>
+<tr>
+  <td>Latest Release</td>
+  <td>
+    <a href="https://github.com/BlueBrain/BlueBrainSearch/releases">
+    <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>License</td>
+  <td>
+    <a href="https://github.com/BlueBrain/BlueBrainSearch/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/BlueBrain/BlueBrainSearch" alt="License" />
+    </a>
+</td>
+</tr>
+<tr>
+  <td>Build Status</td>
+  <td>
+    <a href="https://travis-ci.com/BlueBrain/BlueBrainSearch">
+    <img src="https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    </a>
+  </td>
+</tr>
+<tr>
+	<td>Static Typing</td>
+	<td>
+		<a href="http://mypy-lang.org/">
+		<img src="http://www.mypy-lang.org/static/mypy_badge.svg" alt="Mypy">
+		</a>
+	</td>
+</tr>
+<tr>
+	<td>Code Style</td>
+	<td>
+		<a href="https://github.com/psf/black">
+		<img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Black">
+		</a>
+		<a href="https://pycqa.github.io/isort/">
+		<img src="https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336" alt="Isort">
+		</a>
+		<a href="http://www.pydocstyle.org/">
+		<img src="https://img.shields.io/badge/docstrings-pydocstyle-informational" alt="Pydocstyle">
+		</a>
+		<a href="https://flake8.pycqa.org/">
+		<img src="https://img.shields.io/badge/PEP8-flake8-informational" alt="Pydocstyle">
+		</a>
+	</td>
+</tr>
+<tr>
+	<td>Security</td>
+	<td>
+		<a href="https://github.com/PyCQA/bandit">
+		<img src="https://img.shields.io/badge/security-bandit-yellow.svg" alt="Bandit">
+		</a>
+	</td>
+</tr>
+</table>
 
+Blue Brain Search is a text mining toolbox to perform semantic literature search
+and structured information extraction from text sources.
 
-<!--- TODO: add code coverage badge --->
-<!--- TODO: add binder / colab --->
-<!--- TODO: add pypi version(s) --->
-
-
-Blue Brain Search is a Python package to find sentences semantically similar
-to a query in documents and to extract structured information from the
-returned and ranked documents.
-
-At the moment, the documents which are used are scientific publications about
-COVID-19 from the [CORD-19](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
+This repository originated from the Blue Brain Project efforts on exploring and
+mining the [CORD-19 dataset](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge).
 
 
 ## Graphical Interface
