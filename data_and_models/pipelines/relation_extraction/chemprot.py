@@ -1,3 +1,14 @@
+"""Parse chemprot into tsv files.
+
+This script is parsing chemprot dataset into tsv files that are compatible with
+biobert train scripts. Those files are containing sentences and
+corresponding labels columns. To use this script:
+- Download chemprot dataset on
+https://biocreative.bioinformatics.udel.edu/news/corpora/chemprot-corpus-biocreative-vi/
+- Unzip ChemProt_Corpus.zip file and then unzip chemprot_training.zip, ... files
+- Launch command line:
+python chemprot.py chemport_test_gs/ output_dir/ --annotation-style {"biobert", "scibert"}
+"""
 import argparse
 import logging
 import pathlib
