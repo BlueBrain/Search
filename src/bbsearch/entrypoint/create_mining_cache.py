@@ -26,7 +26,7 @@ import sys
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
-from ..utils import DVC
+from ..utils import load_ee_models_library
 from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
@@ -162,20 +162,20 @@ def run_create_mining_cache(argv=None):
 
     # Load the models library
     logger.info("Loading the models library")
-    ee_models_library = DVC.load_ee_models_library()
+    ee_models_library = load_ee_models_library()
 
     # Restrict to given models
     if args.restrict_to_models is not None:
         logger.info("Restricting to a subset of models")
         model_selection = args.restrict_to_models.split(",")
         model_selection = set(map(lambda s: s.strip(), model_selection))
-        for model_path in model_selection:
-            if model_path not in ee_models_library["model"].values:
+        for model_id in model_selection:
+            if model_id not in ee_models_library["model_id"].values:
                 logger.warning(
-                    f"Can't restrict to model {model_path} because it is not "
+                    f"Can't restrict to model {model_id} because it is not "
                     f"listed in the models library file. This entry will be ignored."
                 )
-        keep_rows = ee_models_library["model"].isin(model_selection)
+        keep_rows = ee_models_library["model_id"].isin(model_selection)
         ee_models_library = ee_models_library[keep_rows]
 
     # Create the cache creation class and run the cache creation
