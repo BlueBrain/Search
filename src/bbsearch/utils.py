@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import os
 import pathlib
 import time
 from typing import Set
@@ -26,19 +27,6 @@ import h5py
 import numpy as np
 import pandas as pd
 import tqdm
-
-
-def get_root_path():
-    """Return the root path of the repository.
-
-    Returns
-    -------
-    root_path : pathlib.Path
-        Root path of the repository.
-    """
-    root_path = pathlib.Path(__file__).resolve().parent.parent.parent
-
-    return root_path
 
 
 class Timer:
@@ -491,36 +479,49 @@ class JSONL:
         return data
 
 
-class DVC:
-    """Collection of utility functions related to DVC.
+class MissingEnvironmentVariable(Exception):
+    pass
 
-    We are making an assumption about the folder structure. Namely, all
-    the dvc models and datasets are lying inside of `ROOT_PATH / "data_and_models"`.
+
+def load_ee_models_library():
+    """
+    New approach:
+    map columns
+        "entity_type, model, entity_type_name"
+    to
+        "entity_type, model_path, model_id, entity_type_name"
+    Returns
+    -------
 
     """
+    data_dir = os.getenv("DATA_DIR")  # path to data_and_models
 
-    @staticmethod
-    def load_ee_models_library():
-        """Load the models library csv file.
+    # Checks for data_dir
+    if data_dir is None:
+        raise MissingEnvironmentVariable("DATA_DIR is missing.")
+    data_dir = pathlib.Path(data_dir)
+    if not data_dir.exists():
+        raise FileNotFoundError(f"Path {data_dir} does not exist")
+    if not data_dir.is_dir():
+        raise ValueError(f"{data_dir} must be a directory")
 
-        Returns
-        -------
-        ee_models_library : pd.DataFrame
-            A table with the columns "entity_type", "model" and "entity_type_name".
+    # Load the library file
+    library_path = data_dir / "pipelines" / "ner" / "ee_models_library.csv"
+    df_library = pd.read_csv(library_path)
 
-        """
-        root_path = get_root_path()
-        ee_models_library_path = (
-            root_path
-            / "data_and_models"
-            / "pipelines"
-            / "ner"
-            / "ee_models_library.csv"
-        )
-        models_path = root_path / "data_and_models" / "models" / "ner_er"
-        ee_models_library = pd.read_csv(ee_models_library_path)
-        ee_models_library["model"] = ee_models_library["model"].apply(
-            lambda x: str(models_path / x)
-        )
+    # Construct the model_path column
+    model_path = data_dir / "models" / "ner_er"
+    df_library["model_path"] = df_library["model"].apply(
+        lambda model_name: str(model_path / model_name)
+    )
 
-        return ee_models_library
+    # Construct the model_id column
+    # Maybe come up with a better model_id in the future
+    df_library["model_id"] = df_library["model"].apply(
+        lambda model_name: f"data_and_models/models/ner_er/{model_name}"
+    )
+
+    # Drop the model column
+    df_library = df_library.drop("model", axis=1)
+
+    return df_library
