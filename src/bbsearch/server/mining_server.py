@@ -68,10 +68,19 @@ class MiningServer(Flask):
             self.models_libs[lib_type] = pd.read_csv(lib_file)
 
         self.logger.info("Loading the NER models")
-        self.ee_models = {}
-        for model_name in self.models_libs["ee"]["model"]:
-            self.logger.info(f"Loading model {model_name}")
-            self.ee_models[model_name] = spacy.load(model_name)
+        self.ee_models: Dict[str, spacy.language.Language] = {}
+        self.logger.debug(f"EE model library:\n{str(self.models_libs['ee'])}")
+        ee_models_meta = self.models_libs["ee"][["model", "entity_type"]]
+        for model_name, entity_type in ee_models_meta.itertuples(index=False):
+            if model_name in self.ee_models:
+                self.logger.info(
+                    f"Entity type {entity_type}: model {model_name} already loaded"
+                )
+            else:
+                self.logger.info(
+                    f"Entity type {entity_type}: loading model {model_name}"
+                )
+                self.ee_models[model_name] = spacy.load(model_name)
 
         self.connection = connection
 
@@ -155,23 +164,31 @@ class MiningServer(Flask):
                 return args_err_response
 
             schema_df = self.read_df_from_str(schema_str)
+            self.logger.debug("schema_df:")
+            self.logger.debug(str(schema_df))
 
             if use_cache:
+                self.logger.info("Using cache")
                 # determine which models are necessary
                 ee_models_info = self.ee_models_from_request_schema(schema_df)
                 etypes_na = ee_models_info[ee_models_info.model.isna()]["entity_type"]
                 model_names = ee_models_info[~ee_models_info.model.isna()][
                     "model"
                 ].to_list()
+                self.logger.debug(f"model_names = {model_names}")
 
                 # get cached results
                 df_all = retrieve_mining_cache(
                     identifiers, model_names, self.connection
                 )
+                self.logger.debug(f"cached results, df_all =\n{str(df_all)}")
 
                 # drop unwanted entity types
                 requested_etypes = schema_df["entity_type"].unique()
                 df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
+                self.logger.debug(
+                    f"droppped unwanted entity types, df_all =\n{str(df_all)}"
+                )
 
                 # append the ontology source column
                 os_mapping = {
@@ -183,12 +200,16 @@ class MiningServer(Flask):
                 df_all["ontology_source"] = df_all["entity_type"].apply(
                     lambda x: os_mapping[x]
                 )
+                self.logger.debug(
+                    f"appended ontology source column, df_all =\n{str(df_all)}"
+                )
 
                 # apply specs if not debug
                 if not debug:
                     df_all = pd.DataFrame(df_all, columns=SPECS)
-
+                    self.logger.debug(f"applied column specs, df_all =\n{str(df_all)}")
             else:
+                self.logger.info("Not using the cache")
                 all_article_ids = []
                 all_paragraphs = pd.DataFrame()
                 for (article_id, paragraph_pos) in identifiers:

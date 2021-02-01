@@ -30,6 +30,6 @@ dvc_pull_models() {
   dvc remote modify gpfs_ssh ask_password true
   dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
   pushd /src/data_and_models/pipelines/ner/ || exit
-  dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
+  egrep -o '\badd_er_[0-9]+\b' dvc.yaml | xargs dvc pull
   popd || exit
 }

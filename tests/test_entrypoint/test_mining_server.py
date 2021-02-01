@@ -46,13 +46,15 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
 
     monkeypatch.setenv("BBS_MINING_LOG_FILE", str(logfile))
     monkeypatch.setenv("BBS_MINING_DB_TYPE", db_type)
-    monkeypatch.setenv("BBS_MINING_DB_URL", "something.db")
+    monkeypatch.setenv("BBS_MINING_DB_URL", str(db_path))
     monkeypatch.setenv("BBS_MINING_MYSQL_USER", "some_user")
     monkeypatch.setenv("BBS_MINING_MYSQL_PASSWORD", "some_pwd")
 
     fake_sqlalchemy = Mock()
     fake_dvc = Mock()
-    fake_dvc.load_ee_models_library.return_value = pd.DataFrame()
+    fake_dvc.load_ee_models_library.return_value = pd.DataFrame(
+        columns=["entity_type", "model", "entity_type_name"]
+    )
     fake_mining_server_inst = Mock()
     fake_mining_server_class = Mock(return_value=fake_mining_server_inst)
 
