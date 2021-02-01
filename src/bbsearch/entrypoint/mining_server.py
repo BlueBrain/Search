@@ -24,7 +24,7 @@ import tempfile
 
 import sqlalchemy
 
-from ..utils import DVC
+from ..utils import DVC, get_root_path
 from ._helper import configure_logging, get_var, run_server
 
 
@@ -66,7 +66,12 @@ def get_mining_app():
         tmpdir = pathlib.Path(tmpdir_name)
         tmp_csv = tmpdir / "temp.csv"
 
-        DVC.load_ee_models_library().to_csv(tmp_csv)
+        df_csv = DVC.load_ee_models_library()
+        root_path = get_root_path()
+        df_csv["model"] = df_csv["model"].apply(
+            lambda x: str(pathlib.Path(x).relative_to(root_path))
+        )
+        df_csv.to_csv(tmp_csv)
 
         logger.info("Creating the server app")
         mining_app = MiningServer(models_libs={"ee": tmp_csv}, connection=engine)

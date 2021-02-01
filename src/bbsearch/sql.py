@@ -305,7 +305,13 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     result : pd.DataFrame
         Selected rows of the `mining_cache` table.
     """
+    logger = logging.getLogger("retrieve_mining_cache")
+    logger.debug("parameters:")
+    logger.debug(f"identifiers = {identifiers}")
+    logger.debug(f"model_names = {model_names}")
+    logger.debug(f"engine = {engine}")
     model_names = list(set(model_names))
+
     identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 
     if identifiers_arts:
@@ -327,6 +333,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             params={"identifiers_arts": identifiers_arts, "model_names": model_names},
         )
     else:
+        logger.debug("setting df_arts to emtpy because `not identifiers_arts == True`")
         df_arts = pd.DataFrame()
 
     identifiers_pars = [(a, p) for a, p in identifiers if p != -1]
@@ -363,6 +370,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             by=["article_id", "paragraph_pos_in_article", "start_char"]
         )
     else:
+        logger.debug("setting df_pars to emtpy because `not identifiers_pars == True`")
         df_pars = pd.DataFrame()
 
     return df_pars.append(df_arts, ignore_index=True)
