@@ -5,16 +5,24 @@ import re
 import sys
 
 import pandas as pd
-import spacy
 
 
 logger = logging.getLogger("chemprot")
 
 
-spacy_model = None
-
-
 def find_sentences_naive(text):
+    """Parse some text into sentences with naive approach.
+
+    Parameters
+    ----------
+    text : str
+        Text to parse into sentences.
+
+    Returns
+    -------
+    sentence_boundaries : list of Tuple
+        List of sentences boundaries (start_char, end_char+1).
+    """
     sentence_ends = [match.span()[0] + 1 for match in re.finditer(r"\.( |\n)", text)]
     sentence_boundaries = []
     start = 0
@@ -38,22 +46,21 @@ def find_sentences_naive(text):
     return sentence_boundaries
 
 
-def find_sentences_spacy(text):
-    global spacy_model
-    if spacy_model is None:
-        logger.info("Loading spacy model")
-        spacy_model = spacy.load("en_core_sci_lg")
-        logger.info("Loading finished")
-
-    doc = spacy_model(text)
-    sentence_boundaries = []
-    for sent in doc.sents:
-        sentence_boundaries.append((sent.start_char, sent.end_char))
-
-    return sentence_boundaries
-
-
 def get_name(split_type, file_type):
+    """Get name of the chemprot file given split and file types.
+
+    Parameters
+    ----------
+    split_type : str
+        Split type in {"training", "test_gs", "development", "sample"}.
+    file_type : str
+        File type in {"abstracts", "entities", "gold_standard", "relations_gs"}
+
+    Returns
+    -------
+    str
+        Entire file name.
+    """
     if split_type == "test_gs":
         return f"chemprot_test_{file_type}_gs.tsv"
     else:
@@ -61,6 +68,22 @@ def get_name(split_type, file_type):
 
 
 def read_files(input_dir):
+    """Read chemprot files of a given directory.
+
+    Parameters
+    ----------
+    input_dir : pathlib.Path
+        Directory where chemprot dataset is located.
+
+    Returns
+    -------
+    df_abstracts : pd.DataFrame
+        Dataframe containing all information contained in abstracts file.
+    df_entities : pd.DataFrame
+        Dataframe containing all information contained in entities file.
+    df_relations : pd.DataFrame
+        Dataframe containing all information contained in relations file.
+    """
     _, _, split_type = input_dir.name.partition("_")
 
     file_abstracts = input_dir / get_name(split_type, "abstracts")
@@ -112,6 +135,13 @@ def read_files(input_dir):
 
 
 def main(argv=None):
+    """Parse chemprot dataset and write tsv files.
+
+    Parameters
+    ----------
+    argv : sequence of str
+        Command lines parameters.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("input_dir")
     parser.add_argument("output_dir")
@@ -244,9 +274,6 @@ def main(argv=None):
     logger.info(" Output ".center(80, "="))
     logger.info(str(df_sentences.head()))
     logger.info(f"Number of bad sentences: {bad_sentence_count} of {len(df_sentences)}")
-
-    # print(len(df_sentences["group"].unique()))
-    # print(df_sentences["group"].value_counts())
 
     output_dir.mkdir(parents=True, exist_ok=True)
     _, _, split_type = input_dir.name.partition("_")
