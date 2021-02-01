@@ -549,9 +549,6 @@ echo http://$HOSTNAME:$NOTEBOOK_PORT/lab/tree/BBS_BBG_poc.ipynb?token=$NOTEBOOK_
 
 To open the example notebook, please open the link returned above in a browser.
 
-FIXME There is currently a bug regarding the feature `Mine Selected Articles!`.
-No results is returned.
-
 *Voilà!* You could now use the graphical interface.
 
 ### Clean-up
