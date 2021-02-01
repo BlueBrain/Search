@@ -24,7 +24,6 @@ import pandas as pd
 import pytest
 
 from bbsearch.entrypoint import run_create_mining_cache
-from bbsearch.utils import get_root_path
 
 
 def test_help(capsys):
@@ -79,27 +78,36 @@ def test_send_through(
     restrict_to_models,
 ):
     # Monkey-patching
-    root_path = get_root_path()
+    data_dir = "/data_dir"
     df_model_library = pd.DataFrame(
-        columns=["entity_type", "model", "entity_type_name"],
+        columns=["entity_type", "entity_type_name", "model_id", "model_path"],
         data=[
             [
                 "CELL_COMPARTMENT",
-                str(root_path / "path/to/model_1"),
                 "CELLULAR_COMPONENT",
+                "path/to/model_1",
+                f"{data_dir}/path/to/model_1",
             ],
-            ["CELL_TYPE", str(root_path / "path/to/model_2"), "CELL_TYPE"],
-            ["CHEMICAL", str(root_path / "path/to/model_3"), "CHEBI"],
+            [
+                "CELL_TYPE",
+                "CELL_TYPE",
+                "path/to/model_2",
+                f"{data_dir}/path/to/model_2",
+            ],
+            ["CHEMICAL", "CHEBI", "path/to/model_3", f"{data_dir}/path/to/model_3"],
         ],
     )
-    fake_dvc = Mock()
-    fake_dvc.load_ee_models_library.return_value = df_model_library
+    fake_load_ee_models_library = Mock()
+    fake_load_ee_models_library.return_value = df_model_library
     fake_sqlalchemy = Mock()
     fake_create_mining_cache = Mock()
     monkeypatch.setattr(
         "bbsearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
     )
-    monkeypatch.setattr("bbsearch.entrypoint.create_mining_cache.DVC", fake_dvc)
+    monkeypatch.setattr(
+        "bbsearch.entrypoint.create_mining_cache.load_ee_models_library",
+        fake_load_ee_models_library,
+    )
     monkeypatch.setattr("bbsearch.database.CreateMiningCache", fake_create_mining_cache)
     monkeypatch.setattr(
         "bbsearch.entrypoint.create_mining_cache.getpass.getpass",
@@ -132,7 +140,7 @@ def test_send_through(
     # Construct the restricted model library data frame
     selected_models = restrict_to_models.split(",")
     df_model_library_selected = df_model_library[
-        df_model_library["model"].isin(selected_models)
+        df_model_library["model_id"].isin(selected_models)
     ]
 
     # Check the args/kwargs

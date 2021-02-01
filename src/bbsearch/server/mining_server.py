@@ -70,17 +70,17 @@ class MiningServer(Flask):
         self.logger.info("Loading the NER models")
         self.ee_models: Dict[str, spacy.language.Language] = {}
         self.logger.debug(f"EE model library:\n{str(self.models_libs['ee'])}")
-        ee_models_meta = self.models_libs["ee"][["model", "entity_type"]]
-        for model_name, entity_type in ee_models_meta.itertuples(index=False):
-            if model_name in self.ee_models:
+        ee_models_meta = self.models_libs["ee"][
+            ["model_id", "model_path", "entity_type"]
+        ]
+        for model_id, model_path, entity_type in ee_models_meta.itertuples(index=False):
+            if model_id in self.ee_models:
                 self.logger.info(
-                    f"Entity type {entity_type}: model {model_name} already loaded"
+                    f"Entity type {entity_type}: model {model_id} already loaded"
                 )
             else:
-                self.logger.info(
-                    f"Entity type {entity_type}: loading model {model_name}"
-                )
-                self.ee_models[model_name] = spacy.load(model_name)
+                self.logger.info(f"Entity type {entity_type}: loading model {model_id}")
+                self.ee_models[model_id] = spacy.load(model_path)
 
         self.connection = connection
 
@@ -136,7 +136,13 @@ class MiningServer(Flask):
         """Find entity extraction model for entity types."""
         schema_df = schema_df[schema_df["property"].isna()]
         return schema_df.merge(self.models_libs["ee"], on="entity_type", how="left")[
-            ["entity_type", "model", "entity_type_name", "ontology_source"]
+            [
+                "entity_type",
+                "model_id",
+                "model_path",
+                "entity_type_name",
+                "ontology_source",
+            ]
         ]
 
     def pipeline_database(self):
@@ -171,23 +177,23 @@ class MiningServer(Flask):
                 self.logger.info("Using cache")
                 # determine which models are necessary
                 ee_models_info = self.ee_models_from_request_schema(schema_df)
-                etypes_na = ee_models_info[ee_models_info.model.isna()]["entity_type"]
-                model_names = ee_models_info[~ee_models_info.model.isna()][
-                    "model"
+                etypes_na = ee_models_info[ee_models_info["model_id"].isna()][
+                    "entity_type"
+                ]
+                model_ids = ee_models_info[~ee_models_info["model_id"].isna()][
+                    "model_id"
                 ].to_list()
-                self.logger.debug(f"model_names = {model_names}")
+                self.logger.debug(f"model_names = {model_ids}")
 
                 # get cached results
-                df_all = retrieve_mining_cache(
-                    identifiers, model_names, self.connection
-                )
+                df_all = retrieve_mining_cache(identifiers, model_ids, self.connection)
                 self.logger.debug(f"cached results, df_all =\n{str(df_all)}")
 
                 # drop unwanted entity types
                 requested_etypes = schema_df["entity_type"].unique()
                 df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
                 self.logger.debug(
-                    f"droppped unwanted entity types, df_all =\n{str(df_all)}"
+                    f"dropped unwanted entity types, df_all =\n{str(df_all)}"
                 )
 
                 # append the ontology source column
@@ -291,12 +297,12 @@ class MiningServer(Flask):
         self.logger.info("Running the mining pipeline...")
 
         ee_models_info = self.ee_models_from_request_schema(schema_request)
-        etypes_na = ee_models_info[ee_models_info.model.isna()]["entity_type"]
-        ee_models_info = ee_models_info[~ee_models_info.model.isna()]
+        etypes_na = ee_models_info[ee_models_info["model_id"].isna()]["entity_type"]
+        ee_models_info = ee_models_info[~ee_models_info["model_id"].isna()]
 
         df_all = pd.DataFrame()
-        for model_name, info_slice in ee_models_info.groupby("model"):
-            ee_model = self.ee_models[model_name]
+        for model_id, info_slice in ee_models_info.groupby("model_id"):
+            ee_model = self.ee_models[model_id]
             df = run_pipeline(
                 texts=texts, model_entities=ee_model, models_relations={}, debug=debug
             )

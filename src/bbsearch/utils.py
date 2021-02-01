@@ -480,26 +480,38 @@ class JSONL:
 
 
 class MissingEnvironmentVariable(Exception):
-    pass
+    """Exception for missing environment variables."""
 
 
-def load_ee_models_library():
-    """
-    New approach:
-    map columns
-        "entity_type, model, entity_type_name"
-    to
-        "entity_type, model_path, model_id, entity_type_name"
+def load_ee_models_library() -> pd.DataFrame:
+    """Load the entity extraction library from disk.
+
+    The CSV file on disk contains the following columns:
+
+        - entity_type
+        - model
+        - entity_type_name
+
+    The "model" column is mapped to two new columns "model_id" and
+    "model_path" so that the returned data frame has the following
+    columns:
+
+        - entity_type
+        - entity_type_name
+        - model_path
+        - model_id
+
     Returns
     -------
-
+    df_library : pd.DataFrame
+        The entity extraction library loaded from disk.
     """
-    data_dir = os.getenv("DATA_DIR")  # path to data_and_models
+    data_dir_str = os.getenv("DATA_DIR")  # path to data_and_models
 
     # Checks for data_dir
-    if data_dir is None:
+    if data_dir_str is None:
         raise MissingEnvironmentVariable("DATA_DIR is missing.")
-    data_dir = pathlib.Path(data_dir)
+    data_dir = pathlib.Path(data_dir_str)
     if not data_dir.exists():
         raise FileNotFoundError(f"Path {data_dir} does not exist")
     if not data_dir.is_dir():

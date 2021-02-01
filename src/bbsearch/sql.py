@@ -287,7 +287,7 @@ def retrieve_articles(article_ids, engine):
     return articles
 
 
-def retrieve_mining_cache(identifiers, model_names, engine):
+def retrieve_mining_cache(identifiers, model_ids, engine):
     """Retrieve cached mining results.
 
     Parameters
@@ -295,8 +295,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     identifiers : list of tuple
         Tuples of form (article_id, paragraph_pos_in_article). Note that if
         `paragraph_pos_in_article` is -1 then we are considering all the paragraphs.
-    model_names : list
-        List of model names to consider. Duplicates are removed automatically.
+    model_ids : list
+        List of model IDs to consider. Duplicates are removed automatically.
     engine : sqlalchemy.engine.Engine
         SQLAlchemy Engine connected to the database.
 
@@ -308,9 +308,9 @@ def retrieve_mining_cache(identifiers, model_names, engine):
     logger = logging.getLogger("retrieve_mining_cache")
     logger.debug("parameters:")
     logger.debug(f"identifiers = {identifiers}")
-    logger.debug(f"model_names = {model_names}")
+    logger.debug(f"model_ids = {model_ids}")
     logger.debug(f"engine = {engine}")
-    model_names = list(set(model_names))
+    model_ids = list(set(model_ids))
 
     identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 
@@ -319,18 +319,18 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             """
         SELECT *
         FROM mining_cache
-        WHERE article_id IN :identifiers_arts AND mining_model IN :model_names
+        WHERE article_id IN :identifiers_arts AND mining_model IN :model_ids
         ORDER BY article_id, paragraph_pos_in_article, start_char
         """
         )
         query_arts = query_arts.bindparams(
             sql.bindparam("identifiers_arts", expanding=True),
-            sql.bindparam("model_names", expanding=True),
+            sql.bindparam("model_ids", expanding=True),
         )
         df_arts = pd.read_sql(
             query_arts,
             con=engine,
-            params={"identifiers_arts": identifiers_arts, "model_names": model_names},
+            params={"identifiers_arts": identifiers_arts, "model_ids": model_ids},
         )
     else:
         logger.debug("setting df_arts to emtpy because `not identifiers_arts == True`")
@@ -345,8 +345,8 @@ def retrieve_mining_cache(identifiers, model_names, engine):
         # 3. If `len(identifiers_pars)` is too large, we may have a too long
         #    SQL statement which overflows the max length. So we break it down.
 
-        if len(model_names) == 1:
-            model_names = f"('{model_names[0]}')"
+        if len(model_ids) == 1:
+            model_ids = f"('{model_ids[0]}')"
         batch_size = 1000
         dfs_pars = []
         d, r = divmod(len(identifiers_pars), batch_size)
@@ -362,7 +362,7 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             # https://github.com/PyCQA/bandit/issues/658
             query_pars = (  # nosec
                 f"SELECT * FROM ({query_pars}) tt "
-                f"WHERE tt.mining_model IN {model_names}"
+                f"WHERE tt.mining_model IN {model_ids}"
             )
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
