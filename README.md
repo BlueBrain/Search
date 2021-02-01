@@ -424,13 +424,15 @@ If you are using the CORD-19 subset of around 1,400 articles, this would take
 around 4 minutes.
 
 ```bash
+cd $REPOSITORY_DIRECTORY
 create_mining_cache \
   --db-url $DATABASE_URL \
   --target-table-name=mining_cache \
   --verbose
 ```
 
-NB: At the moment, `--verbose` is needed to show the `INFO` logs.
+NB: At the moment, `--verbose` is needed to show the `INFO` logs. Note also that the command
+`cd $REPOSITORY_DIRECTORY` above is essential as otherwise the mining models will not be found.
 
 ### Initialize the search, mining, and notebook servers
 
