@@ -114,36 +114,20 @@ pip install \
   https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz \
   https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 
-# Configure Jupyter (for the root)
-# Set --allow-root --no-browser --ip=0.0.0.0
+# Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
+ARG BBP_USERS
+COPY ./docker/utils.sh /tmp
 RUN \
-jupyter-lab --generate-config &&\
-sed -i"" \
-  -e "s/#c.NotebookApp.ip = 'localhost'/c.NotebookApp.ip = '0.0.0.0'/g" \
-  -e "s/#c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" \
-  -e "s/#c.NotebookApp.allow_root = False/c.NotebookApp.allow_root = True/g" \
-  /root/.jupyter/jupyter_notebook_config.py
-
-# Download the NLTK data (for the root)
-RUN python -m nltk.downloader punkt stopwords
+source /tmp/utils.sh && \
+groupadd -g 999 docker && \
+create_users "$BBP_USERS" "docker" && \
+add_aliases "/root" && \
+improve_prompt "/root" "03" "36" && \
+config_jupyter "/root" && \
+download_nltk "root"
 
 # Add and select a non-root user (bbsuser)
-RUN groupadd -g 999 docker
-RUN useradd --create-home --uid 1000 --gid docker bbsuser
+RUN create_users "bbsuser/1000" "docker"
 USER bbsuser
-
-# Configure Jupyter (for the bbsuser) 
-# Set --no-browser --ip=0.0.0.0
-RUN \
-jupyter-lab --generate-config &&\
-sed -i"" \
-  -e "s/#c.NotebookApp.ip = 'localhost'/c.NotebookApp.ip = '0.0.0.0'/g" \
-  -e "s/#c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" \
-  /home/bbsuser/.jupyter/jupyter_notebook_config.py
-
-# Download the NLTK data (for the bbsuser)
-RUN python -m nltk.downloader punkt stopwords
-
 WORKDIR /home/bbsuser
 ENTRYPOINT ["bash"]
-
