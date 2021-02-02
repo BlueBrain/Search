@@ -70,9 +70,10 @@ PS1='${USER_STR} :: ${WORKDIR_STR} ${GIT_STR}$ '
 config_jupyter() {
 # Configure Jupyter
 # Set --no-browser --ip=0.0.0.0
-  local home_dir="$1"
+  local user_name="$1"
+  local home_dir="$2"
 
-  jupyter-lab --generate-config &&\
+  su "$user_name" -c 'jupyter-lab --generate-config' &&\
   sed -i"" \
     -e "s/#c.NotebookApp.ip = 'localhost'/  c.NotebookApp.ip = '0.0.0.0'/g" \
     -e "s/#c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" \
@@ -80,8 +81,7 @@ config_jupyter() {
 }
 
 download_nltk() {
-  local user_name="$1"
-  su -c "$user_name" python -m nltk.downloader punkt stopwords
+  su "$user_name" -c 'python -m nltk.downloader punkt stopwords'
 }
 
 create_users() {
@@ -99,7 +99,7 @@ create_users() {
     useradd --create-home --uid "$user_id" --gid "$GROUP" --home-dir "$user_home" "$user_name"
     add_aliases "$user_home"
     improve_prompt "$user_home"
-    config_jupyter "$user_home"
+    config_jupyter "$user_name" "$user_home"
     download_nltk "$user_name"
     echo "Added user ${user_name} with ID ${user_id}"
   done
