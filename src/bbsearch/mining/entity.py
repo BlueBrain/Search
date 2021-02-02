@@ -19,6 +19,7 @@
 
 import ast
 import copy
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -177,8 +178,9 @@ class PatternCreator:
             If ``int`` then represent a row index to be dropped. If ``list`` then
             a collection of row indices to be dropped.
         """
-        self._storage.drop(index=labels, inplace=True)
-        self._storage.reset_index(drop=True, inplace=True)
+        self._storage = cast(
+            pd.DataFrame, self._storage.drop(index=labels).reset_index(drop=True)
+        )
 
     def to_df(self):
         """Convert to a pd.DataFrame.

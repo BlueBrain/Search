@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import cast
 
 import numpy as np
 import pandas as pd
@@ -359,9 +360,11 @@ def retrieve_mining_cache(identifiers, model_names, engine):
             )
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
-        df_pars.sort_values(
-            by=["article_id", "paragraph_pos_in_article", "start_char"],
-            inplace=True,
+        df_pars = cast(
+            pd.DataFrame,
+            df_pars.sort_values(
+                by=["article_id", "paragraph_pos_in_article", "start_char"]
+            ),
         )
     else:
         df_pars = pd.DataFrame()
