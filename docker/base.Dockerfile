@@ -115,19 +115,19 @@ pip install \
   https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 
 # Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
-ARG BBP_USERS
+ARG BBS_USERS
 COPY ./docker/utils.sh /tmp
 RUN \
-source /tmp/utils.sh && \
+. /tmp/utils.sh && \
 groupadd -g 999 docker && \
-create_users "$BBP_USERS" "docker" && \
+create_users "$BBS_USERS" "docker" && \
 add_aliases "/root" && \
 improve_prompt "/root" "03" "36" && \
-config_jupyter "/root" && \
+config_jupyter "root" "/root" && \
 download_nltk "root"
 
 # Add and select a non-root user (bbsuser)
-RUN create_users "bbsuser/1000" "docker"
+RUN . /tmp/utils.sh && create_users "bbsuser/1000" "docker"
 USER bbsuser
-WORKDIR /home/bbsuser
 ENTRYPOINT ["bash"]
+

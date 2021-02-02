@@ -39,7 +39,7 @@ add_aliases() {
   # Write some useful aliases to "$HOME_DIR/.bash_aliases$
   local HOME_DIR="$1"
 
-  echo -e "
+  echo "
   alias ll='ls -lah'\n
   " >> "${HOME_DIR}/.bash_aliases"
 }
@@ -56,7 +56,7 @@ improve_prompt() {
   local WORKDIR_STR="\[\e[01;34m\]\w\[\e[00m\]"
   local GIT_STR="\[\e[0;35m\]\$(parse_git_branch)\[\e[00m\]"
 
-  echo -e "
+  echo "
 function parse_git_branch {
   local ref
   ref=\$(command git symbolic-ref HEAD 2> /dev/null) || return 0
@@ -73,22 +73,34 @@ config_jupyter() {
   local user_name="$1"
   local home_dir="$2"
 
-  su "$user_name" -c 'jupyter-lab --generate-config' &&\
+  if [ "$user_name" = "root" ]
+  then
+    jupyter-lab --generate-config
+  else
+    su "$user_name" -c 'jupyter-lab --generate-config'
+  fi 
   sed -i"" \
-    -e "s/#c.NotebookApp.ip = 'localhost'/  c.NotebookApp.ip = '0.0.0.0'/g" \
+    -e "s/#c.NotebookApp.ip = 'localhost'/c.NotebookApp.ip = '0.0.0.0'/g" \
     -e "s/#c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" \
     "$home_dir/.jupyter/jupyter_notebook_config.py"
 }
 
 download_nltk() {
-  su "$user_name" -c 'python -m nltk.downloader punkt stopwords'
+  local user_name="$1"
+  if [ "$user_name" = "root" ]
+  then
+    python -m nltk.downloader punkt stopwords
+  else
+    su "$user_name" -c 'python -m nltk.downloader punkt stopwords'
+  fi
 }
 
 create_users() {
   local USERS="$1"
   local GROUP="$2"
 
-  for x in $(tr "," "\n" <<<"$USERS"); do
+  for x in $(echo "$USERS" | tr "," "\n")
+  do
     if [ -z "$x" ]
     then
       continue
