@@ -222,6 +222,7 @@ to the repository directory.
 ```bash
 export WORKING_DIRECTORY="$(pwd)"
 export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/BlueBrainSearch"
+export DATA_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
 ### Retrieve the documents
@@ -355,11 +356,10 @@ docker run \
 ```
 
 ```bash
-pip install --editable $REPOSITORY_DIRECTORY
+pip install $REPOSITORY_DIRECTORY
 ```
 
-NB: At the moment, `--editable` is needed for `DVC.load_ee_models_library()`
-and `--user root` is needed for `pip`.
+NB: At the moment, `--user root` is needed for `pip`.
 
 ### Create the database
 
