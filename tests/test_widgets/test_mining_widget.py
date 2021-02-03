@@ -26,7 +26,7 @@ import pandas as pd
 import responses
 from IPython.display import HTML
 
-from bbsearch.widgets import ArticleSaver, MiningSchema, MiningWidget
+from bluesearch.widgets import ArticleSaver, MiningSchema, MiningWidget
 
 
 class MiningWidgetBot:
@@ -53,7 +53,7 @@ class MiningWidgetBot:
         self._capsys = capsys
 
         monkeypatch.setattr(
-            "bbsearch.widgets.mining_widget.display",
+            "bluesearch.widgets.mining_widget.display",
             lambda x: self._display_cached.append(x),
         )
 

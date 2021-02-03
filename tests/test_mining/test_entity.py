@@ -24,7 +24,7 @@ import pandas as pd
 import pytest
 import spacy
 
-from bbsearch.mining import (
+from bluesearch.mining import (
     PatternCreator,
     check_patterns_agree,
     global2model_patterns,

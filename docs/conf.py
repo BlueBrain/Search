@@ -20,7 +20,7 @@
 import os
 import sys
 
-import bbsearch
+import bluesearch
 
 sys.path.insert(0, os.path.abspath("."))
 
@@ -58,7 +58,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_theme = "sphinx-bluebrain-theme"
 html_title = "Blue Brain Search"
 html_theme_options = {"metadata_distribution": "BBSearch"}
-version = bbsearch.__version__
+version = bluesearch.__version__
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import spacy
 
-from bbsearch.utils import JSONL
+from bluesearch.utils import JSONL
 
 
 class PatternCreator:
@@ -45,7 +45,7 @@ class PatternCreator:
 
     Examples
     --------
-    >>> from bbsearch.mining import PatternCreator
+    >>> from bluesearch.mining import PatternCreator
     >>>
     >>> pc = PatternCreator()
     >>> pc.add("FOOD", [{"LOWER": "oreo"}])

@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.entrypoint import run_compute_embeddings
+from bluesearch.entrypoint import run_compute_embeddings
 
 
 @pytest.mark.parametrize(
@@ -62,9 +62,9 @@ def test_send_through(
     fake_mpe_class = Mock()
     fake_sqlalchemy = Mock()
 
-    monkeypatch.setattr("bbsearch.embedding_models.MPEmbedder", fake_mpe_class)
+    monkeypatch.setattr("bluesearch.embedding_models.MPEmbedder", fake_mpe_class)
     monkeypatch.setattr(
-        "bbsearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
+        "bluesearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
     )
 
     # Prepare CLI input

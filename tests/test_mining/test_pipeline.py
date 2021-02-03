@@ -1,4 +1,4 @@
-"""Collection of tests focused on the bbsearch.mining.pipeline module."""
+"""Collection of tests focused on the bluesearch.mining.pipeline module."""
 
 # BBSearch is a text mining toolbox focused on scientific use cases.
 #
@@ -24,7 +24,7 @@ import pytest
 from spacy.language import Language
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import StartWithTheSameLetter, run_pipeline
+from bluesearch.mining import StartWithTheSameLetter, run_pipeline
 
 
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])

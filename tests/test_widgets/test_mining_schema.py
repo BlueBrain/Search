@@ -19,7 +19,7 @@
 
 import pytest
 
-from bbsearch.widgets import MiningSchema
+from bluesearch.widgets import MiningSchema
 
 
 def test_add_entity():

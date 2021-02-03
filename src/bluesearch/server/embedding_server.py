@@ -23,7 +23,7 @@ import textwrap
 
 from flask import Flask, jsonify, make_response, request
 
-import bbsearch
+import bluesearch
 
 from .invalid_usage_exception import InvalidUsage
 
@@ -43,7 +43,7 @@ class EmbeddingServer(Flask):
         super().__init__(import_name=package_name)
 
         self.server_name = "EmbeddingServer"
-        self.version = bbsearch.__version__
+        self.version = bluesearch.__version__
 
         self.logger.info("Initializing the server...")
         self.logger.info(f"Name: {self.server_name}")

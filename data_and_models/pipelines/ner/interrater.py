@@ -22,7 +22,7 @@ from collections import OrderedDict
 import pathlib
 import json
 
-from bbsearch.mining.eval import (
+from bluesearch.mining.eval import (
     annotations2df,
     remove_punctuation,
     ner_report,

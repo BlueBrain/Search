@@ -22,7 +22,7 @@ import pathlib
 import torch
 from flask import Flask, jsonify, request
 
-import bbsearch
+import bluesearch
 
 from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
@@ -57,7 +57,7 @@ class SearchServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.version = bbsearch.__version__
+        self.version = bluesearch.__version__
         self.server_name = "SearchServer"
         self.connection = connection
 
@@ -120,7 +120,7 @@ class SearchServer(Flask):
 
         Returns
         -------
-        bbsearch.embedding_models.EmbeddingModel
+        bluesearch.embedding_models.EmbeddingModel
             The embedding model class.
         """
         bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"

@@ -34,9 +34,9 @@ import responses
 import torch
 from IPython.display import HTML
 
-from bbsearch.search import SearchEngine
-from bbsearch.widgets import ArticleSaver, SearchWidget
-from bbsearch.widgets.search_widget import _Save
+from bluesearch.search import SearchEngine
+from bluesearch.widgets import ArticleSaver, SearchWidget
+from bluesearch.widgets.search_widget import _Save
 
 
 class SearchWidgetBot:
@@ -74,7 +74,7 @@ class SearchWidgetBot:
         self.n_displays_per_result = n_displays_per_result
 
         monkeypatch.setattr(
-            "bbsearch.widgets.search_widget.display",
+            "bluesearch.widgets.search_widget.display",
             lambda x: self._display_cached.append(x),
         )
 

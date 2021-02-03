@@ -61,7 +61,7 @@ class SearchWidget(widgets.VBox):
         The URL of the bbs_search server.
     bbs_mysql_engine : sqlalchemy.engine.Engine
         Engine for connections to the bbs_mysql server.
-    article_saver : bbsearch.widgets.ArticleSaver, optional
+    article_saver : bluesearch.widgets.ArticleSaver, optional
         If specified, this article saver will keep all the article_id
         of interest for the user during the different queries.
     results_per_page : int, optional

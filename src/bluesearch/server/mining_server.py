@@ -24,7 +24,7 @@ import pandas as pd
 import spacy
 from flask import Flask, jsonify, request
 
-import bbsearch
+import bluesearch
 
 from ..mining import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
@@ -55,7 +55,7 @@ class MiningServer(Flask):
         package_name, *_ = __name__.partition(".")
         super().__init__(import_name=package_name)
 
-        self.version = bbsearch.__version__
+        self.version = bluesearch.__version__
         self.server_name = "MiningServer"
 
         self.logger.info("Initializing the server")

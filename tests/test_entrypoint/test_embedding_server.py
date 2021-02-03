@@ -20,8 +20,8 @@
 import pathlib
 from unittest.mock import Mock
 
-from bbsearch.entrypoint import get_embedding_app
-from bbsearch.server.embedding_server import EmbeddingServer
+from bluesearch.entrypoint import get_embedding_app
+from bluesearch.server.embedding_server import EmbeddingServer
 
 
 def test_environment_reading(monkeypatch, tmpdir):
@@ -33,14 +33,14 @@ def test_environment_reading(monkeypatch, tmpdir):
     fake_embedding_server_class = Mock(return_value=fake_embedding_server_inst)
 
     monkeypatch.setattr(
-        "bbsearch.server.embedding_server.EmbeddingServer", fake_embedding_server_class
+        "bluesearch.server.embedding_server.EmbeddingServer", fake_embedding_server_class
     )
 
     # Mock all of our embedding models
     embedding_models = ["BSV", "SBioBERT", "Sent2VecModel", "SentTransformer", "USE"]
 
     for model in embedding_models:
-        monkeypatch.setattr(f"bbsearch.embedding_models.{model}", Mock())
+        monkeypatch.setattr(f"bluesearch.embedding_models.{model}", Mock())
 
     monkeypatch.setenv("BBS_EMBEDDING_LOG_FILE", str(logfile))
     monkeypatch.setenv("BBS_EMBEDDING_BSV_CHECKPOINT_PATH", str(tmpdir / "fake_1.ckp"))

@@ -23,8 +23,8 @@ import numpy as np
 import pytest
 import torch
 
-from bbsearch.search import SearchEngine
-from bbsearch.utils import H5
+from bluesearch.search import SearchEngine
+from bluesearch.utils import H5
 
 
 class TestSearchEngine:

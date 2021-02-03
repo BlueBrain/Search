@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.sql import (
+from bluesearch.sql import (
     SentenceFilter,
     get_titles,
     retrieve_article_ids,

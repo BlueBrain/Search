@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.utils import DVC, H5, JSONL, Timer, get_root_path
+from bluesearch.utils import DVC, H5, JSONL, Timer, get_root_path
 
 
 def test_get_root_path():
@@ -372,7 +372,7 @@ class TestDVC:
         original_df.to_csv(csv_path)
 
         # Patch
-        monkeypatch.setattr("bbsearch.utils.get_root_path", lambda: fake_root_path)
+        monkeypatch.setattr("bluesearch.utils.get_root_path", lambda: fake_root_path)
 
         df = DVC.load_ee_models_library()
 

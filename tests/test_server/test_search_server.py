@@ -22,8 +22,8 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.server.search_server import SearchServer
-from bbsearch.utils import H5
+from bluesearch.server.search_server import SearchServer
+from bluesearch.utils import H5
 
 
 @pytest.fixture
@@ -46,8 +46,8 @@ def search_client(
         (test_parameters["embedding_size"],)
     )
 
-    monkeypatch.setattr("bbsearch.server.search_server.BSV", bsv_model_class)
-    monkeypatch.setattr("bbsearch.server.search_server.SBioBERT", sbiobert_model_class)
+    monkeypatch.setattr("bluesearch.server.search_server.BSV", bsv_model_class)
+    monkeypatch.setattr("bluesearch.server.search_server.SBioBERT", sbiobert_model_class)
 
     indices = H5.find_populated_rows(embeddings_h5_path, "BSV")
 

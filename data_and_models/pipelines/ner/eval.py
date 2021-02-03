@@ -26,7 +26,7 @@ import pandas as pd
 import spacy
 import yaml
 
-from bbsearch.mining.eval import (
+from bluesearch.mining.eval import (
     annotations2df,
     spacy2df,
     remove_punctuation,

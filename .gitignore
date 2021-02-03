@@ -27,7 +27,7 @@
 !.env*.example
 
 # Version file
-/src/bbsearch/version.py
+/src/bluesearch/version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

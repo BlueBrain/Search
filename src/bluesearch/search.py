@@ -37,7 +37,7 @@ class SearchEngine:
     embeddings, and the SQL database to be loaded in memory.
 
     This is more or less a wrapper around `run_search`
-    from `bbsearch.search`.
+    from `bluesearch.search`.
 
     Parameters
     ----------

@@ -23,8 +23,8 @@ import pathlib
 import spacy
 import yaml
 
-from bbsearch.mining import remap_entity_type
-from bbsearch.utils import JSONL
+from bluesearch.mining import remap_entity_type
+from bluesearch.utils import JSONL
 
 parser = ArgumentParser()
 parser.add_argument(

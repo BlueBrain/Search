@@ -24,8 +24,8 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bbsearch.mining import SPECS
-from bbsearch.server.mining_server import MiningServer
+from bluesearch.mining import SPECS
+from bluesearch.server.mining_server import MiningServer
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
@@ -37,7 +37,7 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
     spacy_mock = Mock()
     spacy_mock.load.return_value = model_entities
 
-    monkeypatch.setattr("bbsearch.server.mining_server.spacy", spacy_mock)
+    monkeypatch.setattr("bluesearch.server.mining_server.spacy", spacy_mock)
 
     models_libs = TESTS_PATH / "data" / "mining" / "request" / "ee_models_library.csv"
     mining_server_app = MiningServer(

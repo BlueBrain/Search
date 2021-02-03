@@ -32,7 +32,7 @@ import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
-from bbsearch.embedding_models import (
+from bluesearch.embedding_models import (
     BSV,
     USE,
     EmbeddingModel,
@@ -81,8 +81,8 @@ class TestEmbeddingModels:
         auto_tokenizer = Mock()
         auto_tokenizer.from_pretrained.return_value = tokenizer
 
-        monkeypatch.setattr("bbsearch.embedding_models.AutoTokenizer", auto_tokenizer)
-        monkeypatch.setattr("bbsearch.embedding_models.AutoModel", auto_model)
+        monkeypatch.setattr("bluesearch.embedding_models.AutoTokenizer", auto_tokenizer)
+        monkeypatch.setattr("bluesearch.embedding_models.AutoModel", auto_model)
 
         sbiobert = SBioBERT()
 
@@ -114,7 +114,7 @@ class TestEmbeddingModels:
         bsv_model.embed_sentences.return_value = np.ones([n_sentences, 700])
         sent2vec_module.Sent2vecModel.return_value = bsv_model
 
-        monkeypatch.setattr("bbsearch.embedding_models.sent2vec", sent2vec_module)
+        monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
 
         new_file_path = Path(str(tmpdir)) / "test.txt"
         new_file_path.touch()
@@ -160,7 +160,7 @@ class TestEmbeddingModels:
 
         fake_sent2vec_module = Mock()
         fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
-        monkeypatch.setattr("bbsearch.embedding_models.sent2vec", fake_sent2vec_module)
+        monkeypatch.setattr("bluesearch.embedding_models.sent2vec", fake_sent2vec_module)
 
         # Test invalid checkpoint path
         with pytest.raises(FileNotFoundError):
@@ -209,7 +209,7 @@ class TestEmbeddingModels:
         sentence_transormer_class.return_value = senttrans_model
 
         monkeypatch.setattr(
-            "bbsearch.embedding_models.sentence_transformers.SentenceTransformer",
+            "bluesearch.embedding_models.sentence_transformers.SentenceTransformer",
             sentence_transormer_class,
         )
         sbert = SentTransformer("bert-base-nli-mean-tokens")
@@ -243,7 +243,7 @@ class TestEmbeddingModels:
         hub_module.load.return_value = use_model
         use_model.return_value = tf.ones((n_sentences, 512))
 
-        monkeypatch.setattr("bbsearch.embedding_models.hub", hub_module)
+        monkeypatch.setattr("bluesearch.embedding_models.hub", hub_module)
         use = USE()
 
         # Preparations
@@ -392,7 +392,7 @@ def test_compute_database(
     new_file_path = Path(str(tmpdir)) / "test.txt"
     new_file_path.touch()
 
-    monkeypatch.setattr("bbsearch.embedding_models.sent2vec", sent2vec_module)
+    monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
 
     bsv = BSV(Path(new_file_path))
 
@@ -431,7 +431,7 @@ class TestGetEmbeddingModel:
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
-        monkeypatch.setattr(f"bbsearch.embedding_models.{underlying_class}", fake_class)
+        monkeypatch.setattr(f"bluesearch.embedding_models.{underlying_class}", fake_class)
 
         returned_instance = get_embedding_model(name)
 
@@ -461,7 +461,7 @@ class TestMPEmbedder:
         fake_get_embedding_model = Mock(return_value=Random(dim))
 
         monkeypatch.setattr(
-            "bbsearch.embedding_models.get_embedding_model", fake_get_embedding_model
+            "bluesearch.embedding_models.get_embedding_model", fake_get_embedding_model
         )
 
         MPEmbedder.run_embedding_worker(
@@ -527,8 +527,8 @@ class TestMPEmbedder:
 
         fake_multiprocessing = Mock()
         fake_h5 = Mock()
-        monkeypatch.setattr("bbsearch.embedding_models.mp", fake_multiprocessing)
-        monkeypatch.setattr("bbsearch.embedding_models.H5", fake_h5)
+        monkeypatch.setattr("bluesearch.embedding_models.mp", fake_multiprocessing)
+        monkeypatch.setattr("bluesearch.embedding_models.H5", fake_h5)
 
         mpe.do_embedding()
 

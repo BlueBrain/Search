@@ -67,7 +67,7 @@ class Timer:
     Examples
     --------
     >>> import time
-    >>> from bbsearch.utils import Timer
+    >>> from bluesearch.utils import Timer
     >>>
     >>> timer = Timer(verbose=False)
     >>>

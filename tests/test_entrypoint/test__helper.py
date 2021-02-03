@@ -3,7 +3,7 @@ from typing import Dict, Sequence
 
 import pytest
 
-from bbsearch.entrypoint._helper import parse_args_or_environment
+from bluesearch.entrypoint._helper import parse_args_or_environment
 
 
 def test_parse_args_or_environment(monkeypatch):
@@ -33,7 +33,7 @@ def test_parse_args_or_environment(monkeypatch):
     environ = {
         "ENV_ARG": env_value,
     }
-    monkeypatch.setattr("bbsearch.entrypoint._helper.os.environ", environ)
+    monkeypatch.setattr("bluesearch.entrypoint._helper.os.environ", environ)
     env_variable_names = {
         "env_arg": "ENV_ARG",
     }
@@ -47,7 +47,7 @@ def test_parse_args_or_environment(monkeypatch):
     environ = {
         "ENV_ARG": env_value,
     }
-    monkeypatch.setattr("bbsearch.entrypoint._helper.os.environ", environ)
+    monkeypatch.setattr("bluesearch.entrypoint._helper.os.environ", environ)
     env_variable_names = {
         "env_arg": "ENV_ARG",
     }
@@ -59,7 +59,7 @@ def test_parse_args_or_environment(monkeypatch):
     # Value not specified through the CLI, nor through environment
     argv = []
     environ = {}
-    monkeypatch.setattr("bbsearch.entrypoint._helper.os.environ", environ)
+    monkeypatch.setattr("bluesearch.entrypoint._helper.os.environ", environ)
     env_variable_names = {
         "env_arg": "ENV_ARG",
     }

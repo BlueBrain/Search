@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.server.embedding_server import EmbeddingServer
+from bluesearch.server.embedding_server import EmbeddingServer
 
 
 @pytest.fixture(scope="session")

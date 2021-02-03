@@ -26,8 +26,8 @@ import pandas as pd
 import pytest
 import spacy
 
-from bbsearch.mining import annotations2df, spacy2df
-from bbsearch.mining.eval import (
+from bluesearch.mining import annotations2df, spacy2df
+from bluesearch.mining.eval import (
     idx2text,
     iob2idx,
     ner_confusion_matrix,
