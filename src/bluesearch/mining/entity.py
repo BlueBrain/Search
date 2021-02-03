@@ -25,7 +25,7 @@ import numpy as np
 import pandas as pd
 import spacy
 
-from bluesearch.utils import JSONL
+from ..utils import JSONL
 
 
 class PatternCreator:
