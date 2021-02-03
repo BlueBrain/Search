@@ -160,7 +160,9 @@ class TestEmbeddingModels:
 
         fake_sent2vec_module = Mock()
         fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
-        monkeypatch.setattr("bluesearch.embedding_models.sent2vec", fake_sent2vec_module)
+        monkeypatch.setattr(
+            "bluesearch.embedding_models.sent2vec", fake_sent2vec_module
+        )
 
         # Test invalid checkpoint path
         with pytest.raises(FileNotFoundError):
@@ -431,7 +433,9 @@ class TestGetEmbeddingModel:
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
-        monkeypatch.setattr(f"bluesearch.embedding_models.{underlying_class}", fake_class)
+        monkeypatch.setattr(
+            f"bluesearch.embedding_models.{underlying_class}", fake_class
+        )
 
         returned_instance = get_embedding_model(name)
 

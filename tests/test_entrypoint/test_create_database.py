@@ -83,7 +83,9 @@ def test_send_through(
     monkeypatch.setattr(
         "bluesearch.database.CORD19DatabaseCreation", fake_database_creation
     )
-    monkeypatch.setattr("bluesearch.database.mark_bad_sentences", fake_mark_bad_sentences)
+    monkeypatch.setattr(
+        "bluesearch.database.mark_bad_sentences", fake_mark_bad_sentences
+    )
 
     argv = [
         f"--cord-data-path={cord_data_path}",

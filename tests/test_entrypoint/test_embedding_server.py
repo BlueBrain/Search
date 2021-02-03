@@ -33,7 +33,8 @@ def test_environment_reading(monkeypatch, tmpdir):
     fake_embedding_server_class = Mock(return_value=fake_embedding_server_inst)
 
     monkeypatch.setattr(
-        "bluesearch.server.embedding_server.EmbeddingServer", fake_embedding_server_class
+        "bluesearch.server.embedding_server.EmbeddingServer",
+        fake_embedding_server_class,
     )
 
     # Mock all of our embedding models

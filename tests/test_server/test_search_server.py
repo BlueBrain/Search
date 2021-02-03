@@ -47,7 +47,9 @@ def search_client(
     )
 
     monkeypatch.setattr("bluesearch.server.search_server.BSV", bsv_model_class)
-    monkeypatch.setattr("bluesearch.server.search_server.SBioBERT", sbiobert_model_class)
+    monkeypatch.setattr(
+        "bluesearch.server.search_server.SBioBERT", sbiobert_model_class
+    )
 
     indices = H5.find_populated_rows(embeddings_h5_path, "BSV")
 

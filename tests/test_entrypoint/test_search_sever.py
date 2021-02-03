@@ -52,7 +52,9 @@ def test_send_through(tmpdir, monkeypatch, embeddings_path, models, models_path)
     fake_search_server_inst = Mock(spec=SearchServer)
     fake_search_server_class = Mock(return_value=fake_search_server_inst)
 
-    monkeypatch.setattr("bluesearch.entrypoint.search_server.sqlalchemy", fake_sqlalchemy)
+    monkeypatch.setattr(
+        "bluesearch.entrypoint.search_server.sqlalchemy", fake_sqlalchemy
+    )
     monkeypatch.setattr("bluesearch.utils.H5", fake_H5)
     monkeypatch.setattr(
         "bluesearch.server.search_server.SearchServer", fake_search_server_class

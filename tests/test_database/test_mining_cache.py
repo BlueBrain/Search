@@ -103,7 +103,9 @@ class TestMiner:
             can_finish.set()
             return pd.DataFrame([fake_result])
 
-        monkeypatch.setattr("bluesearch.database.mining_cache.run_pipeline", run_pipeline)
+        monkeypatch.setattr(
+            "bluesearch.database.mining_cache.run_pipeline", run_pipeline
+        )
 
         # Work loop with queue with one article ID
         task_queue.put(article_id)
