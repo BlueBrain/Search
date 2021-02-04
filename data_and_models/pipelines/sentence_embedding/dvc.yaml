@@ -1,18 +1,10 @@
 stages:
-  train_biobert_nli_sts_cord19_v1:
-    cmd: bash scripts/build.sh
-    deps:
-    - scripts/biosses_sentences.txt
-    - scripts/sentences-filtered_11-527-877.txt
-    outs:
-    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
-    frozen: true
   eval_biobert_nli_sts_cord19_v1:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
     deps:
-    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
     - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
     - eval.py
     params:
     - eval.biobert_nli_sts_cord19_v1
