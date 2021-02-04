@@ -56,7 +56,7 @@ class TestNoSQL:
         ],
     )
     def test_sql_queries(self, module_name):
-        module = import_module(f"bbsearch.{module_name}")
+        module = import_module(f"bluesearch.{module_name}")
         source_code = inspect.getsource(module)
         assert "SELECT" not in source_code
 
