@@ -796,7 +796,7 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
 
     Returns
     -------
-    bbsearch.embedding_models.EmbeddingModel
+    bluesearch.embedding_models.EmbeddingModel
         The sentence embedding model instance.
     """
     configs = {

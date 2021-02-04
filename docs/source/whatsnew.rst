@@ -1,4 +1,4 @@
-.. BBSearch is a text mining toolbox focused on scientific use cases.
+.. bluesearch is a text mining toolbox focused on scientific use cases.
    Copyright (C) 2020  Blue Brain Project, EPFL.
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -53,7 +53,7 @@ Changes
 - |Add| security checks with :code:`bandit`.
 - |Fix| NER false positive for :code:`abstract`.
 - |Fix| refactoring issue in :code:`get_embedding_model`.
-- |Change| naming of and inside the :code:`bbsearch.entrypoints` module.
+- |Change| naming of and inside the :code:`bluesearch.entrypoints` module.
 - |Change| how the NER entry points retrieve models: now DVC is used.
 - |Change| warnings when generating the documentation into errors.
 - |Remove| :code:`scibert` from :code:`setup.py` and :code:`requirements.txt`.
@@ -103,7 +103,7 @@ Version 0.0.5
 
 Changes
 -------
-- |Change| `bbsearch.mining.eval.spacy2df` can now work with NER pipelines
+- |Change| `bluesearch.mining.eval.spacy2df` can now work with NER pipelines
   including entity rulers.
 
 
@@ -116,14 +116,14 @@ Changes
 - |Add| language detection with `langdetect`, allowing to filter out articles
   not in English or no useful content.
 - |Add| widgets inform the user on the CORD-19 version being used.
-- |Add| `bbsearch.utils.JSONL` for easy interaction with JSONL files.
-- |Add| `bbsearch.entity.PatternCreator` and other functionalities to perform
+- |Add| `bluesearch.utils.JSONL` for easy interaction with JSONL files.
+- |Add| `bluesearch.entity.PatternCreator` and other functionalities to perform
   rule-based named entity recognition.
 - |Change| module names
-- |Change| in `bbsearch.embedding_models`, `SBERT` class is now replaced by a
+- |Change| in `bluesearch.embedding_models`, `SBERT` class is now replaced by a
   more general-purpose `SentTransformer` which can wrap any object from
   `sentence_transformers.SentenceTransformer`.
-- |Add| `bbsearch.embedding_models.SklearnVectorizer` is a new class that can be used to wrap any `sklearn`
+- |Add| `bluesearch.embedding_models.SklearnVectorizer` is a new class that can be used to wrap any `sklearn`
   vectorizer object (`TfidfVectorizer`, `CountVectorizer`, `HashingVectorizer`).
 
 

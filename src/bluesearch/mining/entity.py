@@ -239,7 +239,7 @@ class PatternCreator:
 
         Returns
         -------
-        pattern_creator : bbsearch.mining.PatternCreator
+        pattern_creator : bluesearch.mining.PatternCreator
             Instance of a ``PatternCreator``.
         """
         inst = cls()

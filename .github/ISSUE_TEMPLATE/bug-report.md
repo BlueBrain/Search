@@ -33,7 +33,7 @@ A clear and concise description of what you expected to happen.
 
 Please provide the following information.
 
- - Blue Brain Search version (use `python -c "import bbsearch; print(bbsearch.__version__)"`):
+ - Blue Brain Search version (use `python -c "import bluesearch; print(bluesearch.__version__)"`):
  - OS (e.g., Linux):
  - How you installed Blue Brain Search (source, pip, ...):
  - Installation command you used (if compiling from source):

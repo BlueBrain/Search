@@ -22,4 +22,4 @@ ssh_check
 dvc_pull_models
 
 # Launch mining server
-gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bbsearch.entrypoint:get_mining_app()'
+gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'

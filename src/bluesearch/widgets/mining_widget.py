@@ -53,9 +53,9 @@ class MiningWidget(widgets.VBox):
     ----------
     mining_server_url : str
         The URL of the mining server.
-    mining_schema : bbsearch.widgets.MiningSchema
+    mining_schema : bluesearch.widgets.MiningSchema
         The requested mining schema (entity, relation, attribute types).
-    article_saver : bbsearch.widgets.ArticleSaver
+    article_saver : bluesearch.widgets.ArticleSaver
         An instance of the article saver.
     default_text : string, optional
         The default text assign to the text area.

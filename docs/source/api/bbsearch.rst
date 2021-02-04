@@ -1,4 +1,4 @@
-.. BBSearch is a text mining toolbox focused on scientific use cases.
+.. bluesearch is a text mining toolbox focused on scientific use cases.
    Copyright (C) 2020  Blue Brain Project, EPFL.
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -11,7 +11,7 @@
    You should have received a copy of the GNU Lesser General Public License
    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-bbsearch package
+bluesearch package
 ================
 
 Subpackages
@@ -20,9 +20,9 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   bbsearch.mining
-   bbsearch.server
-   bbsearch.widgets
+   bluesearch.mining
+   bluesearch.server
+   bluesearch.widgets
 
 Submodules
 ----------
@@ -30,16 +30,16 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   bbsearch.database
-   bbsearch.embedding_models
-   bbsearch.search
-   bbsearch.sql
-   bbsearch.utils
+   bluesearch.database
+   bluesearch.embedding_models
+   bluesearch.search
+   bluesearch.sql
+   bluesearch.utils
 
 Module contents
 ---------------
 
-.. automodule:: bbsearch
+.. automodule:: bluesearch
    :members:
    :undoc-members:
    :show-inheritance:

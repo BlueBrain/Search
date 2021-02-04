@@ -1,6 +1,6 @@
 # Configuration file for the Sphinx documentation builder.
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# bluesearch is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -57,7 +57,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 #
 html_theme = "sphinx-bluebrain-theme"
 html_title = "Blue Brain Search"
-html_theme_options = {"metadata_distribution": "BBSearch"}
+html_theme_options = {"metadata_distribution": "bluesearch"}
 version = bluesearch.__version__
 
 # Add any paths that contain custom static files (such as style sheets) here,
