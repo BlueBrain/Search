@@ -36,3 +36,6 @@
 /sbiobert.json
 /sbiobert.csv
 /sbiobert.png
+/biobert_nli_sts_cord19_v1.json
+/biobert_nli_sts_cord19_v1.csv
+/biobert_nli_sts_cord19_v1.png
