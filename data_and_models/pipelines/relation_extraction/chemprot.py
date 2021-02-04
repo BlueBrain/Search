@@ -7,7 +7,7 @@ corresponding labels columns. To use this script:
 https://biocreative.bioinformatics.udel.edu/news/corpora/chemprot-corpus-biocreative-vi/
 - Unzip ChemProt_Corpus.zip file and then unzip chemprot_training.zip, ... files
 - Launch command line:
-python chemprot.py chemport_test_gs/ output_dir/ --annotation-style {"biobert", "scibert"}
+python chemprot.py chemprot_test_gs/ output_dir/ --annotation-style {"biobert", "scibert"}
 """
 import argparse
 import logging
