@@ -78,7 +78,7 @@ extras_require = {
 }
 
 setup(
-    name="BBSearch",
+    name="bluesearch",
     description="Blue Brain Search",
     author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/BlueBrainSearch",
