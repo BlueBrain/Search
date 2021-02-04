@@ -280,10 +280,10 @@ eval_biobert_nli_sts_cord19_v1:
           model_name_or_path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
   outs:
   - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
-    md5: d51199f15213ead53e9ec88a6c538213
-    size: 1261
+    md5: 345d1776e4ece04b434cc8aac8c8e7d1
+    size: 1266
   - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
-    md5: 267c90973707a39ffb658c765264877b
+    md5: c4371ca281d5f224332115f5a31ce9cd
     size: 104
   - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
     md5: 58bb0b33e11e3e84e16a30445987ea4d
