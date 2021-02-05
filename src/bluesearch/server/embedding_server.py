@@ -1,6 +1,6 @@
 """Implementation of a server that computes sentence embeddings."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -63,7 +63,7 @@ class EmbeddingServer(Flask):
         html_header = """
         <!DOCTYPE html>
         <head>
-        <title>BBSearch Embedding</title>
+        <title>Blue Brain Search Embedding</title>
         </head>
         """
         self.html_header = textwrap.dedent(html_header).strip() + "\n\n"
@@ -119,7 +119,7 @@ class EmbeddingServer(Flask):
         """Generate a welcome page."""
         self.logger.info("Got query for welcome page on /")
         html = """
-        <h1>Welcome to the BBSearch Embedding REST API Server</h1>
+        <h1>Welcome to the Blue Brain Search Embedding REST API Server</h1>
         To receive a sentence embedding proceed as follows:
         <ul>
             <li>Wrap your query into a JSON file</li>

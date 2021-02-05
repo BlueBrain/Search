@@ -1,4 +1,4 @@
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -26,7 +26,7 @@ RUN pip install .
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
-LABEL description="REST API Server for BBSearch"
+LABEL description="REST API Server for Blue Brain Search"
 
 # Add a user
 RUN useradd --create-home serveruser
