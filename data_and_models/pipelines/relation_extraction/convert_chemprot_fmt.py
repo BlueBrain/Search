@@ -121,7 +121,7 @@ def read_files(input_dir):
         ],
     )
     # Replace GENE-Y and GENE-N by GENE
-    df_entities["entity_type"][df_entities["entity_type"].isin(["GENE-Y", "GENE-N"])] = "GENE"
+    df_entities.loc[df_entities["entity_type"].isin(["GENE-Y", "GENE-N"]), "entity_type"] = "GENE"
 
     df_relations = pd.read_csv(
         file_relations,
