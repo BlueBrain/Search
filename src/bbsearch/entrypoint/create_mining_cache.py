@@ -43,6 +43,19 @@ def run_create_mining_cache(argv=None):
         formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
+        "--data-and-models-dir",
+        type=str,
+        help="""
+        The local path to the "data_and_models" directory. It will
+        be used to load the ee_models_library.csv file from
+        <data-and-models-dir>/pipelines/ner/ee_models_library.csv
+
+        If missing, then the environment variable BBS_DATA_AND_MODELS_DIR
+        will be read.
+        """,
+        default=argparse.SUPPRESS,
+    )
+    parser.add_argument(
         "--db-type",
         default="mysql",
         type=str,
@@ -111,6 +124,7 @@ def run_create_mining_cache(argv=None):
     # Parse CLI arguments
     env_variable_names = {
         "db_url": "DB_URL",
+        "data_and_models_dir": "BBS_DATA_AND_MODELS_DIR",
     }
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
@@ -162,7 +176,7 @@ def run_create_mining_cache(argv=None):
 
     # Load the models library
     logger.info("Loading the models library")
-    ee_models_library = load_ee_models_library()
+    ee_models_library = load_ee_models_library(args.data_and_models_dir)
 
     # Restrict to given models
     if args.restrict_to_models is not None:

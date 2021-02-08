@@ -346,7 +346,6 @@ def test_load_save_jsonl(tmpdir):
 
 def test_load_ee_models_library(tmpdir, monkeypatch):
     fake_root_path = pathlib.Path(str(tmpdir)) / "data_and_models"
-    monkeypatch.setenv("DATA_DIR", fake_root_path)
 
     # Create directory structure and files
     original_df = pd.DataFrame(
@@ -357,7 +356,7 @@ def test_load_ee_models_library(tmpdir, monkeypatch):
     csv_path.parent.mkdir(parents=True)
     original_df.to_csv(csv_path)
 
-    df = load_ee_models_library()
+    df = load_ee_models_library(fake_root_path)
 
     # Checks
     assert isinstance(df, pd.DataFrame)

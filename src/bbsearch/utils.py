@@ -18,10 +18,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import os
 import pathlib
 import time
-from typing import Set
+from typing import Set, Union
 
 import h5py
 import numpy as np
@@ -483,7 +482,9 @@ class MissingEnvironmentVariable(Exception):
     """Exception for missing environment variables."""
 
 
-def load_ee_models_library() -> pd.DataFrame:
+def load_ee_models_library(
+    data_and_models_dir: Union[str, pathlib.Path]
+) -> pd.DataFrame:
     """Load the entity extraction library from disk.
 
     The CSV file on disk contains the following columns:
@@ -501,28 +502,29 @@ def load_ee_models_library() -> pd.DataFrame:
         - model_path
         - model_id
 
+    Parameters
+    ----------
+    data_and_models_dir
+        The local path to the "data_and_models" directory. The CSV file
+        will be loaded from `data_dir/pipelines/ner/ee_models_library.csv`.
+
     Returns
     -------
     df_library : pd.DataFrame
         The entity extraction library loaded from disk.
     """
-    data_dir_str = os.getenv("DATA_DIR")  # path to data_and_models
-
-    # Checks for data_dir
-    if data_dir_str is None:
-        raise MissingEnvironmentVariable("DATA_DIR is missing.")
-    data_dir = pathlib.Path(data_dir_str)
-    if not data_dir.exists():
-        raise FileNotFoundError(f"Path {data_dir} does not exist")
-    if not data_dir.is_dir():
-        raise ValueError(f"{data_dir} must be a directory")
+    data_and_models_dir = pathlib.Path(data_and_models_dir)
+    if not data_and_models_dir.exists():
+        raise FileNotFoundError(f"Path {data_and_models_dir} does not exist")
+    if not data_and_models_dir.is_dir():
+        raise ValueError(f"{data_and_models_dir} must be a directory")
 
     # Load the library file
-    library_path = data_dir / "pipelines" / "ner" / "ee_models_library.csv"
+    library_path = data_and_models_dir / "pipelines" / "ner" / "ee_models_library.csv"
     df_library = pd.read_csv(library_path)
 
     # Construct the model_path column
-    model_path = data_dir / "models" / "ner_er"
+    model_path = data_and_models_dir / "models" / "ner_er"
     df_library["model_path"] = df_library["model"].apply(
         lambda model_name: str(model_path / model_name)
     )

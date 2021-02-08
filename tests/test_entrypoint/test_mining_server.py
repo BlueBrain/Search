@@ -49,6 +49,7 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     monkeypatch.setenv("BBS_MINING_DB_URL", str(db_path))
     monkeypatch.setenv("BBS_MINING_MYSQL_USER", "some_user")
     monkeypatch.setenv("BBS_MINING_MYSQL_PASSWORD", "some_pwd")
+    monkeypatch.setenv("BBS_DATA_AND_MODELS_DIR", "some_path")
 
     fake_sqlalchemy = Mock()
     fake_load_ee_models_library = Mock()

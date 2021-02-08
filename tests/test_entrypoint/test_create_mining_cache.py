@@ -39,7 +39,14 @@ def test_help(capsys):
 def test_missing_sqlite_db():
     with pytest.raises(FileNotFoundError, match="^No database found"):
         run_create_mining_cache(
-            ["--db-type", "sqlite", "--db-url", "fake$?#"],
+            [
+                "--data-and-models-dir",
+                "/some/path",
+                "--db-type",
+                "sqlite",
+                "--db-url",
+                "fake$?#",
+            ],
         )
 
 
@@ -121,6 +128,7 @@ def test_send_through(
 
     # Construct arguments
     argv = [
+        "--data-and-models-dir=/some/fake/path",
         f"--db-type={db_type}",
         f"--db-url={db_url}",
         f"--target-table-name={target_table_name}",
