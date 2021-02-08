@@ -197,7 +197,9 @@ def main(argv=None):
         type_2, start_2, end_2, entity_2 = entities[abstract_id][arg_2]
 
         # Check that entity 1 and entity 2 are disjoint
-        if not ((start_1 < end_1 < start_2) or (start_2 < end_2 < start_1)):
+        # equivalent check:
+        # if not (end_1 < start_2 or end_2 < start_1)
+        if start_2 < end_1 and start_1 < end_2:
             logger.warning(f"Overlapping entities: {start_1}:{end_1} and {start_2}:{end_2}")
             continue
 
