@@ -24,7 +24,7 @@ import tempfile
 
 import sqlalchemy
 
-from ..utils import DVC, get_root_path
+from ..utils import load_ee_models_library
 from ._helper import configure_logging, get_var, run_server
 
 
@@ -36,6 +36,7 @@ def get_mining_app():
     log_file = get_var("BBS_MINING_LOG_FILE", check_not_set=False)
     log_level = get_var("BBS_MINING_LOG_LEVEL", logging.INFO, var_type=int)
     db_type = get_var("BBS_MINING_DB_TYPE")
+    data_and_models_dir = get_var("BBS_DATA_AND_MODELS_DIR")
 
     # Configure logging
     configure_logging(log_file, log_level)
@@ -66,11 +67,7 @@ def get_mining_app():
         tmpdir = pathlib.Path(tmpdir_name)
         tmp_csv = tmpdir / "temp.csv"
 
-        df_csv = DVC.load_ee_models_library()
-        root_path = get_root_path()
-        df_csv["model"] = df_csv["model"].apply(
-            lambda x: str(pathlib.Path(x).relative_to(root_path))
-        )
+        df_csv = load_ee_models_library(data_and_models_dir)
         df_csv.to_csv(tmp_csv)
 
         logger.info("Creating the server app")

@@ -258,3 +258,33 @@ eval_sbiobert:
   - path: ../../metrics/sentence_embedding/sbiobert.png
     md5: 42e211add011ae67474a22667a06124f
     size: 155274
+eval_biobert_nli_sts_cord19_v1:
+  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
+  deps:
+  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    md5: 92a4235ce8d292ff382ce008c31da45c
+    size: 14587
+  - path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
+    md5: 9dccac418759a8c53f5da608dbd9f835.dir
+    size: 433540587
+    nfiles: 9
+  - path: eval.py
+    md5: b1a79b87b1f94d1c8af6759c5bdcf2ae
+    size: 4546
+  params:
+    params.yaml:
+      eval.biobert_nli_sts_cord19_v1:
+        class: SentTransformer
+        init_kwargs:
+          model_name_or_path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+  outs:
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
+    md5: 345d1776e4ece04b434cc8aac8c8e7d1
+    size: 1266
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
+    md5: c4371ca281d5f224332115f5a31ce9cd
+    size: 104
+  - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
+    md5: 58bb0b33e11e3e84e16a30445987ea4d
+    size: 153802

@@ -20,25 +20,12 @@
 import json
 import pathlib
 import time
-from typing import Set
+from typing import Set, Union
 
 import h5py
 import numpy as np
 import pandas as pd
 import tqdm
-
-
-def get_root_path():
-    """Return the root path of the repository.
-
-    Returns
-    -------
-    root_path : pathlib.Path
-        Root path of the repository.
-    """
-    root_path = pathlib.Path(__file__).resolve().parent.parent.parent
-
-    return root_path
 
 
 class Timer:
@@ -491,36 +478,64 @@ class JSONL:
         return data
 
 
-class DVC:
-    """Collection of utility functions related to DVC.
+class MissingEnvironmentVariable(Exception):
+    """Exception for missing environment variables."""
 
-    We are making an assumption about the folder structure. Namely, all
-    the dvc models and datasets are lying inside of `ROOT_PATH / "data_and_models"`.
 
+def load_ee_models_library(
+    data_and_models_dir: Union[str, pathlib.Path]
+) -> pd.DataFrame:
+    """Load the entity extraction library from disk.
+
+    The CSV file on disk contains the following columns:
+
+        - entity_type
+        - model
+        - entity_type_name
+
+    The "model" column is mapped to two new columns "model_id" and
+    "model_path" so that the returned data frame has the following
+    columns:
+
+        - entity_type
+        - entity_type_name
+        - model_path
+        - model_id
+
+    Parameters
+    ----------
+    data_and_models_dir
+        The local path to the "data_and_models" directory. The CSV file
+        will be loaded from `data_dir/pipelines/ner/ee_models_library.csv`.
+
+    Returns
+    -------
+    df_library : pd.DataFrame
+        The entity extraction library loaded from disk.
     """
+    data_and_models_dir = pathlib.Path(data_and_models_dir)
+    if not data_and_models_dir.exists():
+        raise FileNotFoundError(f"Path {data_and_models_dir} does not exist")
+    if not data_and_models_dir.is_dir():
+        raise ValueError(f"{data_and_models_dir} must be a directory")
 
-    @staticmethod
-    def load_ee_models_library():
-        """Load the models library csv file.
+    # Load the library file
+    library_path = data_and_models_dir / "pipelines" / "ner" / "ee_models_library.csv"
+    df_library = pd.read_csv(library_path)
 
-        Returns
-        -------
-        ee_models_library : pd.DataFrame
-            A table with the columns "entity_type", "model" and "entity_type_name".
+    # Construct the model_path column
+    model_path = data_and_models_dir / "models" / "ner_er"
+    df_library["model_path"] = df_library["model"].apply(
+        lambda model_name: str(model_path / model_name)
+    )
 
-        """
-        root_path = get_root_path()
-        ee_models_library_path = (
-            root_path
-            / "data_and_models"
-            / "pipelines"
-            / "ner"
-            / "ee_models_library.csv"
-        )
-        models_path = root_path / "data_and_models" / "models" / "ner_er"
-        ee_models_library = pd.read_csv(ee_models_library_path)
-        ee_models_library["model"] = ee_models_library["model"].apply(
-            lambda x: str(models_path / x)
-        )
+    # Construct the model_id column
+    # Maybe come up with a better model_id in the future
+    df_library["model_id"] = df_library["model"].apply(
+        lambda model_name: f"data_and_models/models/ner_er/{model_name}"
+    )
 
-        return ee_models_library
+    # Drop the model column
+    df_library = df_library.drop("model", axis=1)
+
+    return df_library

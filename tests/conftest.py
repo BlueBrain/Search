@@ -185,22 +185,24 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
         for sec_ix in range(test_parameters["n_sections_per_article"]):
             for ent_ix in range(test_parameters["n_entities_per_section"]):
-                s = {
-                    "entity": f"entity_{ent_ix}",
-                    "entity_type": entity_types[ent_ix],
-                    "property": None,
-                    "property_value": None,
-                    "property_type": None,
-                    "property_value_type": None,
-                    "paper_id": f"{article_id}:whatever:{sec_ix}",
-                    "start_char": ent_ix,
-                    "end_char": ent_ix + 1,
-                    "article_id": article_id,
-                    "paragraph_pos_in_article": sec_ix,
-                    # from data/mining/request/ee_models_library.csv
-                    "mining_model": "en_ner_craft_md",
-                }
-                temp_m.append(pd.Series(s))
+                s = pd.Series(
+                    {
+                        "entity": f"entity_{ent_ix}",
+                        "entity_type": entity_types[ent_ix],
+                        "property": None,
+                        "property_value": None,
+                        "property_type": None,
+                        "property_value_type": None,
+                        "paper_id": f"{article_id}:whatever:{sec_ix}",
+                        "start_char": ent_ix,
+                        "end_char": ent_ix + 1,
+                        "article_id": article_id,
+                        "paragraph_pos_in_article": sec_ix,
+                        # from data/mining/request/ee_models_library.csv
+                        "mining_model": "data_and_models/models/ner_er/model1",
+                    }
+                )
+                temp_m.append(s)
 
     mining_content = pd.DataFrame(temp_m)
     mining_content.index.name = "entity_id"

@@ -22,6 +22,7 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -358,6 +359,9 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
     etypes_map = copy.deepcopy(etypes_map)
     for etype in etypes_counts.keys() - etypes_map.keys():
         etypes_map[etype] = etype
+
+    n_true: Union[int, np.ndarray]
+    n_pred: Union[int, np.ndarray]
 
     for etype in etypes_counts.keys():
         if mode == "entity":

@@ -16,6 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
+<img src="docs/source/logo/BlueBrainSearch_banner.jpg"/>
 
 # Blue Brain Search
 
@@ -216,12 +217,13 @@ After, please clone the Blue Brain Search repository.
 git clone https://github.com/BlueBrain/BlueBrainSearch
 ```
 
-Finally, let's keep track of the path to the working directory and the path
-to the repository directory.
+Finally, let's keep track of the path to the working directory
+the repository directory, and the data and models directory.
 
 ```bash
 export WORKING_DIRECTORY="$(pwd)"
 export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/BlueBrainSearch"
+export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
 ### Retrieve the documents
@@ -364,10 +366,8 @@ docker run \
 ```
 
 ```bash
-pip install --editable $REPOSITORY_DIRECTORY
+pip install $REPOSITORY_DIRECTORY
 ```
-
-NB: At the moment, `--editable` is needed for `DVC.load_ee_models_library()`.
 
 ### Create the database
 
@@ -518,6 +518,7 @@ docker run \
   --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
   --env BBS_SSH_USERNAME \
+  --env BBS_DATA_AND_MODELS_DIR \
   --env BBS_MINING_DB_TYPE --env BBS_MINING_DB_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
   --detach \
   --name test_bbs_mining test_bbs_mining
