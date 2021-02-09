@@ -109,10 +109,19 @@ create_users() {
     user_id="${x#*/}"
     user_home="/home/${user_name}"
     useradd --create-home --uid "$user_id" --gid "$GROUP" --home-dir "$user_home" "$user_name"
+
+    # If this directory doesn't exist it won't be included in the $PATH
+    # and python entrypoints for user-installed packages won't work
+    mkdir -p "$user_home/.local/bin"
+
+    # pre-download the nltk data
+    download_nltk "$user_name"
+
+    # miscellaneous tweaks and settings
     add_aliases "$user_home"
     improve_prompt "$user_home"
     config_jupyter "$user_name" "$user_home"
-    download_nltk "$user_name"
+
     echo "Added user ${user_name} with ID ${user_id}"
   done
 }
