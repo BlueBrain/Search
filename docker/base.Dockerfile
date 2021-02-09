@@ -129,5 +129,5 @@ download_nltk "root"
 # Add and select a non-root user (bbsuser)
 RUN . /tmp/utils.sh && create_users "bbsuser/1000" "docker"
 USER bbsuser
-ENTRYPOINT ["bash"]
-
+ENTRYPOINT ["env"]
+CMD ["bash", "-l"]
