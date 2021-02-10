@@ -83,18 +83,18 @@ apt-get install -y \
     libfontconfig1 wkhtmltopdf \
     libmysqlclient-dev default-libmysqlclient-dev
 
-# Create soft links to python binaries and upgrade pip
+# Create soft links to python binaries, upgrade pip, install wheel
 RUN \
 ln -s $(which python3) /usr/local/bin/python &&\
 ln -s $(which pip3) /usr/local/bin/pip &&\
-pip install --upgrade pip
+pip install --upgrade pip wheel setuptools
 
 # Install Jupyter & IPython
 RUN \
-pip install ipython jupyter jupyterlab ipywidgets &&\
+pip install ipython "jupyterlab<3.0.0" ipywidgets &&\
 jupyter nbextension enable --py widgetsnbextension &&\
-jupyter labextension install @jupyter-widgets/jupyterlab-manager &&\
-jupyter labextension install @jupyterlab/toc
+jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager &&\
+jupyter labextension install --no-build @jupyterlab/toc
 EXPOSE 8888
 
 # Install BBS requirements
