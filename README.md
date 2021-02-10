@@ -357,6 +357,7 @@ docker run \
   --env WORKING_DIRECTORY \
   --env DATABASE_URL \
   --env BBS_SSH_USERNAME \
+  --env BBS_DATA_AND_MODELS_DIR \
   --gpus all \
   --interactive \
   --tty \
