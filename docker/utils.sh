@@ -112,7 +112,7 @@ create_users() {
 
     # If this directory doesn't exist it won't be included in the $PATH
     # and python entrypoints for user-installed packages won't work
-    mkdir -p "$user_home/.local/bin"
+    su "$user_name" -c "mkdir -p $user_home/.local/bin"
 
     # pre-download the nltk data
     download_nltk "$user_name"
