@@ -178,6 +178,7 @@ class PatternCreator:
             If ``int`` then represent a row index to be dropped. If ``list`` then
             a collection of row indices to be dropped.
         """
+        # cast() to tell mypy that drop() doesn't return None here.
         self._storage = cast(
             pd.DataFrame, self._storage.drop(index=labels).reset_index(drop=True)
         )

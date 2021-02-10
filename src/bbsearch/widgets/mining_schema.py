@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import warnings
+from typing import cast
 
 import pandas as pd
 
@@ -68,13 +69,19 @@ class MiningSchema:
             "ontology_source": ontology_source,
         }
         # Make sure there are no duplicates to begin with
-        self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
+        # cast() to tell mypy that drop_duplicates() doesn't return None here.
+        self.schema_df = cast(
+            pd.DataFrame, self.schema_df.drop_duplicates(ignore_index=True)
+        )
         # 'row' has type Dict[str, Any]. It is valid for append(). Ignoring the error.
         self.schema_df = self.schema_df.append(row, ignore_index=True)  # type: ignore[arg-type]  # noqa
         # If there are any duplicates at this point, then it must have
         # come from the appended row.
         if any(self.schema_df.duplicated()):
-            self.schema_df.drop_duplicates(inplace=True, ignore_index=True)
+            # cast() to tell mypy that drop_duplicates() doesn't return None here.
+            self.schema_df = cast(
+                pd.DataFrame, self.schema_df.drop_duplicates(ignore_index=True)
+            )
             warnings.warn("This entry already exists. No new entry was created.")
 
     def add_from_df(self, entity_df):
