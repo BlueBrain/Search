@@ -434,6 +434,7 @@ around 4 minutes.
 ```bash
 cd $REPOSITORY_DIRECTORY
 create_mining_cache \
+  --data-and-models-dir $BBS_DATA_AND_MODELS_DIR \
   --db-url $DATABASE_URL \
   --target-table-name=mining_cache \
   --verbose
@@ -455,13 +456,6 @@ cd $REPOSITORY_DIRECTORY
 ```
 
 #### Search server
-
-FIXME There is currently a bug regarding `bbsearch.entrypoints`. It needs to
-be renamed into `bbsearch.entrypoint`.
-
-```bash
-sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/search.Dockerfile
-```
 
 ```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
@@ -492,13 +486,6 @@ docker run \
 ```
 
 #### Mining server
-
-FIXME There is currently a bug regarding `bbsearch.entrypoints`. It needs to
-be renamed into `bbsearch.entrypoint`.
-
-```bash
-sed -i 's/bbsearch.entrypoints/bbsearch.entrypoint/g' docker/mining.sh
-```
 
 ```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
