@@ -54,14 +54,13 @@ def test_df(mining_schema_df):
     assert mining_schema.df.equals(mining_schema_df)
 
     # Test missing entity_type
-    wrong_schema_df = mining_schema_df.copy()
-    wrong_schema_df.drop("entity_type", axis=1, inplace=True)
+    wrong_schema_df = mining_schema_df.drop("entity_type", axis=1)
     mining_schema = MiningSchema()
     with pytest.raises(ValueError, match=r"entity_type.* not found"):
         mining_schema.add_from_df(wrong_schema_df)
 
     # Test ignoring unknown columns
-    schema_df_new = mining_schema_df.drop_duplicates().copy()
+    schema_df_new = mining_schema_df.drop_duplicates()
     schema_df_new["unknown_column"] = [i for i in range(len(schema_df_new))]
     mining_schema = MiningSchema()
     with pytest.warns(UserWarning, match=r"column.* unknown_column"):

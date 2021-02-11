@@ -434,6 +434,7 @@ around 4 minutes.
 
 ```bash
 cd $REPOSITORY_DIRECTORY
+create_mining_cache \
   --db-url $DATABASE_URL \
   --target-table-name=mining_cache \
   --verbose
