@@ -76,7 +76,7 @@ extras_require = {
         "sphinx",
         "sphinx-bluebrain-theme",
         "tox",
-    ]
+    ],
 }
 
 setup(
