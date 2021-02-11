@@ -27,9 +27,8 @@ Legend
 - |Remove| denotes removed features.
 
 
-Version 0.0.10.dev
-==================
-**FIXME**
+Version 0.0.10
+==============
 
 Changes
 -------
