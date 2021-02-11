@@ -117,8 +117,9 @@ def retrieve_sentences_from_sentence_ids(sentence_ids, engine, keep_order=False)
         sentence_ids = filter(lambda x: x in found_sentence_ids, sentence_ids)
 
         # Sort the dataframe by sentence_ids
-        df_sentences = df_sentences.set_index("sentence_id").loc[sentence_ids]
-        df_sentences.reset_index(inplace=True)
+        df_sentences = (
+            df_sentences.set_index("sentence_id").loc[sentence_ids].reset_index()
+        )
 
     return df_sentences
 
@@ -367,6 +368,7 @@ def retrieve_mining_cache(identifiers, model_ids, engine):
             )
             dfs_pars.append(pd.read_sql(query_pars, engine))
         df_pars = pd.concat(dfs_pars)
+        # cast() to tell mypy that sort_values() doesn't return None here.
         df_pars = cast(
             pd.DataFrame,
             df_pars.sort_values(

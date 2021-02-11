@@ -573,9 +573,8 @@ class AttributeExtractor:
         df["property_type"] = "attribute"
         df["property_value"] = df["attribute"].apply(self.measurement_to_str)
         df["property_value_type"] = "int"
-        df.drop(columns="attribute", inplace=True)
 
-        return df
+        return df.drop(columns="attribute")
 
     def get_core_nlp_analysis(self, text):
         """Send a CoreNLP query and return the result.

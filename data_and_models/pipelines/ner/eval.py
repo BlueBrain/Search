@@ -72,7 +72,7 @@ def main():
 
     df_pred = []
     for source, df_ in df.groupby("source"):
-        df_ = df_.sort_values(by="id", inplace=False, ignore_index=True)
+        df_ = df_.sort_values(by="id", ignore_index=True)
         df_sentence = spacy2df(
             spacy_model=ner_model, ground_truth_tokenization=df_["text"].to_list()
         )
@@ -80,8 +80,7 @@ def main():
         df_sentence["source"] = source
         df_pred.append(df_sentence)
 
-    df_pred = pd.concat(df_pred, ignore_index=True)
-    df_pred.rename(columns={"class": "class_pred"}, inplace=True)
+    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
 
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
 

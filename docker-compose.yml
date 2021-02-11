@@ -27,6 +27,7 @@ services:
         - BBS_HTTPS_PROXY
         - BBS_http_proxy
         - BBS_https_proxy
+        - BBS_USERS
     image: bbs_base
     container_name: bbs_base
     networks:

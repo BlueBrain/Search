@@ -203,7 +203,11 @@ export NOTEBOOK_PORT=8954
 export DATABASE_PASSWORD=1234
 export NOTEBOOK_TOKEN=1a2b3c4d
 
-export BBS_SSH_USERNAME=$(id --user --name)
+export USER_NAME=$(id -un)
+export USER_ID=$(id -u)
+
+# Change this value if necessary
+export BBS_SSH_USERNAME=$USER_NAME
 
 export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
@@ -285,7 +289,8 @@ This will build a Docker image where MySQL is installed.
 
 ```bash
 docker build \
-  --build-arg http_proxy --build-arg https_proxy  \
+  --build-arg http_proxy \
+  --build-arg https_proxy  \
   -f docker/mysql.Dockerfile -t test_bbs_mysql .
 ```
 
@@ -334,8 +339,11 @@ cd $REPOSITORY_DIRECTORY
 
 ```bash
 docker build \
-  --build-arg BBS_HTTP_PROXY=$http_proxy --build-arg BBS_http_proxy=$http_proxy \
-  --build-arg BBS_HTTPS_PROXY=$https_proxy --build-arg BBS_https_proxy=$https_proxy \
+  --build-arg BBS_HTTP_PROXY=$http_proxy \
+  --build-arg BBS_http_proxy=$http_proxy \
+  --build-arg BBS_HTTPS_PROXY=$https_proxy \
+  --build-arg BBS_https_proxy=$https_proxy \
+  --build-arg BBS_USERS="$USER_NAME/$USER_ID" \
   -f docker/base.Dockerfile -t test_bbs_base .
 ```
 
@@ -349,18 +357,23 @@ The immediate next sections will need to be run in this session.
 ```bash
 docker run \
   --volume /raid:/raid \
-  --env REPOSITORY_DIRECTORY --env CORD19_DIRECTORY --env WORKING_DIRECTORY \
-  --env DATABASE_URL --env BBS_SSH_USERNAME \
+  --env REPOSITORY_DIRECTORY \
+  --env CORD19_DIRECTORY \
+  --env WORKING_DIRECTORY \
+  --env DATABASE_URL \
+  --env BBS_SSH_USERNAME \
+  --env BBS_DATA_AND_MODELS_DIR \
   --gpus all \
-  --interactive --tty --rm --user root \
+  --interactive \
+  --tty \
+  --rm \
+  --user "$USER_NAME" \
   --name test_bbs_base test_bbs_base
 ```
 
 ```bash
 pip install $REPOSITORY_DIRECTORY
 ```
-
-NB: At the moment, `--user root` is needed for `pip`.
 
 ### Create the database
 
@@ -449,13 +462,6 @@ cd $REPOSITORY_DIRECTORY
 
 #### Search server
 
-FIXME There is currently a bug regarding `bluesearch.entrypoints`. It needs to
-be renamed into `bluesearch.entrypoint`.
-
-```bash
-sed -i 's/bluesearch.entrypoints/bluesearch.entrypoint/g' docker/search.Dockerfile
-```
-
 ```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/search.Dockerfile
 docker build \
@@ -478,20 +484,17 @@ export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 docker run \
   --publish $SEARCH_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_SEARCH_DB_URL --env BBS_SEARCH_MYSQL_USER --env BBS_SEARCH_MYSQL_PASSWORD \
-  --env BBS_SEARCH_MODELS --env BBS_SEARCH_MODELS_PATH --env BBS_SEARCH_EMBEDDINGS_PATH \
+  --env BBS_SEARCH_DB_URL \
+  --env BBS_SEARCH_MYSQL_USER \
+  --env BBS_SEARCH_MYSQL_PASSWORD \
+  --env BBS_SEARCH_MODELS \
+  --env BBS_SEARCH_MODELS_PATH \
+  --env BBS_SEARCH_EMBEDDINGS_PATH \
   --detach \
   --name test_bbs_search test_bbs_search
 ```
 
 #### Mining server
-
-FIXME There is currently a bug regarding `bluesearch.entrypoints`. It needs to
-be renamed into `bluesearch.entrypoint`.
-
-```bash
-sed -i 's/bluesearch.entrypoints/bluesearch.entrypoint/g' docker/mining.sh
-```
 
 ```bash
 sed -i 's/ bbs_/ test_bbs_/g' docker/mining.Dockerfile
@@ -512,7 +515,10 @@ docker run \
   --volume /raid:/raid \
   --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
-  --env BBS_MINING_DB_TYPE --env BBS_MINING_DB_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
+  --env BBS_MINING_DB_TYPE \
+  --env BBS_MINING_DB_URL \
+  --env BBS_MINING_MYSQL_USER \
+  --env BBS_MINING_MYSQL_PASSWORD \
   --detach \
   --name test_bbs_mining test_bbs_mining
 ```
@@ -530,8 +536,14 @@ docker run \
   --publish $NOTEBOOK_PORT:8888 \
   --volume /raid:/raid \
   --env NOTEBOOK_TOKEN \
-  --env DB_URL --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
-  --interactive --tty --rm --user root --workdir $REPOSITORY_DIRECTORY \
+  --env DB_URL \
+  --env SEARCH_ENGINE_URL \
+  --env TEXT_MINING_URL \
+  --interactive \
+  --tty \
+  --rm \
+  --user "$USER_NAME" \
+  --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
 ```
 
@@ -539,9 +551,6 @@ docker run \
 pip install .
 jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
-
-NB: At the moment, `--user root` is needed for the widgets to write in
-`BlueBrainSearch/notebooks/untracked/.widgets_checkpoints`.
 
 Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 
@@ -575,13 +584,8 @@ docker rmi $SERVERS test_bbs_base
 rm $BBS_SEARCH_EMBEDDINGS_PATH
 rm -R $CORD19_DIRECTORY
 rm $WORKING_DIRECTORY/$CORD19_ARCHIVE
-rm -R $REPOSITORY_DIRECTORY  # Requires to be root.
+rm -R $REPOSITORY_DIRECTORY
 ```
-
-NB: At the moment, removing the directory `REPOSITORY_DIRECTORY` requires
-the `root` privileges. Indeed, it was modified through the `test_bbs_base`
-container which was running as `root`.
-
 
 ## Installation (virtual environment)
 We currently support the following Python versions.
