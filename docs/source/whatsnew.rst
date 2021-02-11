@@ -39,6 +39,7 @@ Changes
 - |Add| in `README` the common usage of the two widgets (search and mining).
 - |Add| in `README` a complete and step-by-step *Getting Started*.
 - |Add| type checking for third-party libraries (:code:`NumPy`, :code:`Pandas`, :code:`SQLAlchemy`).
+- |Add| :code:`BioBERT NLI+STS CORD-19 v1` to DVC evaluation pipeline.
 
 
 Version 0.0.9

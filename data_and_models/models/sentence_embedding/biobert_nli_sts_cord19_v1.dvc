@@ -1,0 +1,5 @@
+outs:
+- md5: 9dccac418759a8c53f5da608dbd9f835.dir
+  size: 433540587
+  nfiles: 9
+  path: biobert_nli_sts_cord19_v1

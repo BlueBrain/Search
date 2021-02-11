@@ -16,6 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
+<img src="docs/source/logo/BlueBrainSearch_banner.jpg"/>
 
 # Blue Brain Search
 
