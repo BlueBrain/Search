@@ -33,6 +33,8 @@ Version 0.0.10.dev
 
 Changes
 -------
+- |Change| :code:`bluesearch` is the new name of the Python package, replacing the former :code:`bbsearch`.
+- |Change| The code is now hosted on GitHub under :code:`BlueBrain/Search`, eliminating the redundancy of the former :code:`BlueBrain/BlueBrainSearch`.
 - |Add| in `README` the purpose of Blue Brain Search.
 - |Add| in `README` the common usage of the two widgets (search and mining).
 - |Add| in `README` a complete and step-by-step *Getting Started*.
