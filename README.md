@@ -291,8 +291,7 @@ This will build a Docker image where MySQL is installed.
 docker build \
   --build-arg http_proxy \
   --build-arg https_proxy  \
-  -f docker/mysql.Dockerfile \
-  -t test_bbs_mysql .
+  -f docker/mysql.Dockerfile -t test_bbs_mysql .
 ```
 
 NB:`HTTP_PROXY` and `HTTPS_PROXY`, in upper case, are not working here.
