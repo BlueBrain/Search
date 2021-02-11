@@ -372,7 +372,7 @@ docker run \
 ```
 
 ```bash
-pip install $REPOSITORY_DIRECTORY
+pip install $REPOSITORY_DIRECTORY[nlp_models]
 ```
 
 ### Create the database
@@ -548,7 +548,7 @@ docker run \
 ```
 
 ```bash
-pip install .
+pip install .[nlp_models]
 jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
 
@@ -603,7 +603,7 @@ pip install --upgrade pip
 To install `bbsearch` run
 
 ```bash
-pip install .
+pip install .[nlp_models]
 ```
 
 ## Installation (Docker)

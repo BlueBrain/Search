@@ -26,7 +26,7 @@ To install :code:`bbsearch` run
 
 .. code-block:: bash
 
-    pip install .  # use -e for editable install
+    pip install .[nlp_models]  # use -e for editable install
 
 
 Generating docs

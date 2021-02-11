@@ -114,6 +114,11 @@ pip install \
   https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz \
   https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 
+# Install the spaCy models.
+RUN \
+pip install \
+  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
+
 # Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
 ARG BBS_USERS
 COPY ./docker/utils.sh /tmp
