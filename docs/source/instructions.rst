@@ -1,4 +1,4 @@
-.. bluesearch is a text mining toolbox focused on scientific use cases.
+.. Blue Brain Search is a text mining toolbox focused on scientific use cases.
    Copyright (C) 2020  Blue Brain Project, EPFL.
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
