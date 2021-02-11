@@ -24,14 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bluesearch.utils import DVC, H5, JSONL, Timer, get_root_path
-
-
-def test_get_root_path():
-    root_path = get_root_path()
-
-    assert isinstance(root_path, pathlib.Path)
-    assert root_path.exists()
+from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library
 
 
 class TestTimer:
@@ -351,35 +344,23 @@ def test_load_save_jsonl(tmpdir):
     assert li == lo
 
 
-class TestDVC:
-    def test_load_ee_models_library(self, tmpdir, monkeypatch):
-        fake_root_path = pathlib.Path(str(tmpdir))
+def test_load_ee_models_library(tmpdir, monkeypatch):
+    fake_root_path = pathlib.Path(str(tmpdir)) / "data_and_models"
 
-        # Create directory structure and files
-        original_df = pd.DataFrame(
-            {"entity_type": ["A"], "model": ["model_1"], "entity_type_name": ["B"]}
-        )
+    # Create directory structure and files
+    original_df = pd.DataFrame(
+        {"entity_type": ["A"], "model": ["model_1"], "entity_type_name": ["B"]}
+    )
 
-        csv_path = (
-            fake_root_path
-            / "data_and_models"
-            / "pipelines"
-            / "ner"
-            / "ee_models_library.csv"
-        )
-        csv_path.parent.mkdir(parents=True)
+    csv_path = fake_root_path / "pipelines" / "ner" / "ee_models_library.csv"
+    csv_path.parent.mkdir(parents=True)
+    original_df.to_csv(csv_path)
 
-        original_df.to_csv(csv_path)
+    df = load_ee_models_library(fake_root_path)
 
-        # Patch
-        monkeypatch.setattr("bluesearch.utils.get_root_path", lambda: fake_root_path)
-
-        df = DVC.load_ee_models_library()
-
-        # Checks
-        assert isinstance(df, pd.DataFrame)
-        assert df["entity_type"][0] == "A"
-        assert df["model"][0] == str(
-            fake_root_path / "data_and_models" / "models" / "ner_er" / "model_1"
-        )
-        assert df["entity_type_name"][0] == "B"
+    # Checks
+    assert isinstance(df, pd.DataFrame)
+    assert df["entity_type"][0] == "A"
+    assert df["model_path"][0] == str(fake_root_path / "models" / "ner_er" / "model_1")
+    assert df["model_id"][0] == "data_and_models/models/ner_er/model_1"
+    assert df["entity_type_name"][0] == "B"

@@ -43,6 +43,7 @@ class TestMiner:
         can_finish = mp.Event()
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
+            model_id="my_model",
             model_path="en_core_web_sm",
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
@@ -65,6 +66,7 @@ class TestMiner:
 
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
+            model_id="my_model",
             model_path="en_core_web_sm",
             entity_map={},
             target_table="",
@@ -175,7 +177,8 @@ class TestCreateMiningCache:
             [
                 {
                     "entity_type": "type_1_public",
-                    "model": "model_1",
+                    "model_id": "my_model_1",
+                    "model_path": "/my/model/path",
                     "entity_type_name": "type_1",
                 }
             ]
@@ -255,8 +258,8 @@ class TestCreateMiningCache:
         model_schemas = cache_creator._load_model_schemas()
         assert isinstance(model_schemas, dict)
         assert len(model_schemas) == 1
-        assert model_schemas["model_1"]["model_path"] == "model_1"
-        assert model_schemas["model_1"]["entity_map"] == {"type_1": "type_1_public"}
+        assert model_schemas["my_model_1"]["model_path"] == "/my/model/path"
+        assert model_schemas["my_model_1"]["entity_map"] == {"type_1": "type_1_public"}
 
     @staticmethod
     def fake_wait_miner(stop_now):

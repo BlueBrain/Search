@@ -40,6 +40,8 @@ class Miner:
         URL of a database already containing tables `articles` and `sentences`.
         The URL should indicate database dialect and connection argument, e.g.
         `database_url = "postgresql://scott:tiger@localhost/test"`.
+    model_id : str
+        The model ID.
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
@@ -59,6 +61,7 @@ class Miner:
     def __init__(
         self,
         database_url,
+        model_id,
         model_path,
         entity_map,
         target_table,
@@ -67,6 +70,7 @@ class Miner:
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
+        self.model_id = model_id
         self.model_path = model_path
         self.entity_map = entity_map
         self.target_table_name = target_table
@@ -88,6 +92,7 @@ class Miner:
     def create_and_mine(
         cls,
         database_url,
+        model_id,
         model_path,
         entity_map,
         target_table,
@@ -102,6 +107,8 @@ class Miner:
             URL of a database already containing tables `articles` and `sentences`.
             The URL should indicate database dialect and connection argument, e.g.
             `database_url = "postgresql://scott:tiger@localhost/test"`.
+        model_id : str
+            The model ID.
         model_path : str
             The path for loading the spacy model that will perform the
             named entity extraction.
@@ -119,6 +126,7 @@ class Miner:
         """
         miner = cls(
             database_url=database_url,
+            model_id=model_id,
             model_path=model_path,
             entity_map=entity_map,
             target_table=target_table,
@@ -216,7 +224,7 @@ class Miner:
             lambda entity_type: self.entity_map[entity_type]
         )
 
-        df_results["mining_model"] = self.model_path
+        df_results["mining_model"] = self.model_id
         df_results["mining_model_version"] = self.model.meta["version"]
         df_results["spacy_version"] = self.model.meta["spacy_version"]
 
@@ -299,7 +307,7 @@ class CreateMiningCache:
 
     def _delete_rows(self):
         """Delete rows in the target table that will be re-populated."""
-        for model_name, model_schema in self.model_schemas.items():
+        for model_id, model_schema in self.model_schemas.items():
             # Reformatted due to this bandit bug in python3.8:
             # https://github.com/PyCQA/bandit/issues/658
             query = (  # nosec
@@ -307,7 +315,7 @@ class CreateMiningCache:
             )
             self.engine.execute(
                 sqlalchemy.sql.text(query),
-                mining_model=model_schema["model_path"],
+                mining_model=model_id,
             )
 
     def _schema_creation(self):
@@ -417,12 +425,12 @@ class CreateMiningCache:
 
         # Flags to let the workers know there won't be any new tasks.
         can_finish: Dict[str, mp.synchronize.Event] = {
-            model_name: mp.Event() for model_name in self.model_schemas
+            model_id: mp.Event() for model_id in self.model_schemas
         }
 
         # Prepare the task queues for the workers - one task queue per model.
         task_queues: Dict[str, mp.Queue] = {
-            model_name: mp.Queue() for model_name in self.model_schemas
+            model_id: mp.Queue() for model_id in self.model_schemas
         }
 
         # Spawn the workers according to `workers_per_model`.
@@ -431,24 +439,25 @@ class CreateMiningCache:
         workers_by_queue: Dict[str, List[mp.Process]] = {
             queue_name: [] for queue_name in task_queues
         }
-        for model_name, model_schema in self.model_schemas.items():
+        for model_id, model_schema in self.model_schemas.items():
             for i in range(self.workers_per_model):
-                worker_name = f"{model_name}_{i}"
+                worker_name = f"{model_id}_{i}"
                 worker_process = mp.Process(
                     name=worker_name,
                     target=Miner.create_and_mine,
                     kwargs={
                         "database_url": self.engine.url,
+                        "model_id": model_id,
                         "model_path": model_schema["model_path"],
                         "entity_map": model_schema["entity_map"],
                         "target_table": self.target_table,
-                        "task_queue": task_queues[model_name],
-                        "can_finish": can_finish[model_name],
+                        "task_queue": task_queues[model_id],
+                        "can_finish": can_finish[model_id],
                     },
                 )
                 worker_process.start()
                 worker_processes.append(worker_process)
-                workers_by_queue[model_name].append(worker_process)
+                workers_by_queue[model_id].append(worker_process)
 
         # Create tasks
         self.logger.info("Creating tasks")
@@ -550,14 +559,14 @@ class CreateMiningCache:
         model_schemas : dict
             The model schemas in a dictionary of the following form:
                 model_schemas = {
-                    "model1_bc5cdr_annotations5_spacy23": {
+                    "model_id_1": {
                         "model_path": "/path/to/model",
                         "entity_map": {
                             "model_entity_type_1": "public_entity_type_1",
                             "model_entity_type_2": "public_entity_type_2",
                         },
                     },
-                    "en_ner_bionlp13cg_md": {...},
+                    "model_id_2": {...},
                 }
             The keys of this dictionary are model names produces form the
             model paths by taking all characters that follow the last "/"
@@ -567,15 +576,16 @@ class CreateMiningCache:
         schema_df = self.ee_models_library
 
         model_schemas: Dict[str, Dict[str, Any]] = {}
-        for entity_type_to, model_path, entity_type_from in schema_df.itertuples(
-            index=False
-        ):
-            _, _, model_name = model_path.rpartition("/")
-            if model_name not in model_schemas:
-                model_schemas[model_name] = {}
-                model_schemas[model_name]["model_path"] = model_path
-                model_schemas[model_name]["entity_map"] = {}
+        for i, row in schema_df.iterrows():
+            entity_type_to = row["entity_type"]
+            model_path = row["model_path"]
+            model_id = row["model_id"]
+            entity_type_from = row["entity_type_name"]
+            if model_id not in model_schemas:
+                model_schemas[model_id] = {}
+                model_schemas[model_id]["model_path"] = model_path
+                model_schemas[model_id]["entity_map"] = {}
 
-            model_schemas[model_name]["entity_map"][entity_type_from] = entity_type_to
+            model_schemas[model_id]["entity_map"][entity_type_from] = entity_type_to
 
         return model_schemas

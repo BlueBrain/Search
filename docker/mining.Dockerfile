@@ -22,6 +22,7 @@ USER root
 # Install the app
 ADD . /src
 WORKDIR /src
+ENV DATA_DIR="/src/data_and_models"
 RUN pip install -e .
 
 # Set image version

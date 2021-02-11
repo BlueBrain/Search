@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+import shutil
 from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
@@ -26,12 +26,13 @@ import pytest
 
 from bluesearch.mining import SPECS
 from bluesearch.server.mining_server import MiningServer
+from bluesearch.utils import load_ee_models_library
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
 
 @pytest.fixture
-def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
+def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
     """Fixture to create a client for mining_server."""
 
     spacy_mock = Mock()
@@ -39,9 +40,30 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
 
     monkeypatch.setattr("bluesearch.server.mining_server.spacy", spacy_mock)
 
+    # This is the original CSV file with 3 columns:
+    # entity_type, model, entity_type_name
     models_libs = TESTS_PATH / "data" / "mining" / "request" / "ee_models_library.csv"
+
+    # To load the library file we must use load_ee_models_library() as it
+    # converts the column "model" to two new columns "model_id" and "model_path"
+    # However, load_ee_models_library() assumes a particular directory
+    # structure, that's why we copy the original CSV to a new place with the
+    # correct directory structure.
+    tmpdir = Path(tmpdir)
+    new_csv_path = tmpdir / "pipelines" / "ner" / "ee_models_library.csv"
+    new_csv_path.parent.mkdir(parents=True)
+    shutil.copy(models_libs, new_csv_path)
+
+    # Load the model library
+    monkeypatch.setenv("BBS_DATA_AND_MODELS_DIR", str(tmpdir))
+    df_csv = load_ee_models_library(tmpdir)
+
+    # The mining server expects a CSV file with the model library. So we
+    # write the data frame to a temporary CSV file
+    tmp_csv = tmpdir / "temp.csv"
+    df_csv.to_csv(tmp_csv)
     mining_server_app = MiningServer(
-        models_libs={"ee": str(models_libs)}, connection=fake_sqlalchemy_engine
+        models_libs={"ee": str(tmp_csv)}, connection=fake_sqlalchemy_engine
     )
     mining_server_app.config["TESTING"] = True
     with mining_server_app.test_client() as client:
@@ -141,9 +163,7 @@ class TestMiningServer:
         )
 
     @pytest.mark.parametrize("debug", [True, False], ids=["debug", "specs"])
-    def test_mining_cache_detailed(
-        self, mining_client, test_parameters, entity_types, debug
-    ):
+    def test_mining_cache_detailed(self, mining_client, test_parameters, debug):
         """Test exact count of found entities.
 
         This test assumes that the requested entity types are a superset of
