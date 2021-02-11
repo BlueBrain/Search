@@ -343,7 +343,7 @@ docker build \
   --build-arg BBS_http_proxy=$http_proxy \
   --build-arg BBS_HTTPS_PROXY=$https_proxy \
   --build-arg BBS_https_proxy=$https_proxy \
-  --build-arg BBS_USERS="$USER_NAME/$_USER_ID" \
+  --build-arg BBS_USERS="$USER_NAME/$USER_ID" \
   -f docker/base.Dockerfile -t test_bbs_base .
 ```
 
