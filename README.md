@@ -289,8 +289,10 @@ This will build a Docker image where MySQL is installed.
 
 ```bash
 docker build \
-  --build-arg http_proxy --build-arg https_proxy  \
-  -f docker/mysql.Dockerfile -t test_bbs_mysql .
+  --build-arg http_proxy \
+  --build-arg https_proxy  \
+  -f docker/mysql.Dockerfile \
+  -t test_bbs_mysql .
 ```
 
 NB:`HTTP_PROXY` and `HTTPS_PROXY`, in upper case, are not working here.
@@ -483,8 +485,12 @@ export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 docker run \
   --publish $SEARCH_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_SEARCH_DB_URL --env BBS_SEARCH_MYSQL_USER --env BBS_SEARCH_MYSQL_PASSWORD \
-  --env BBS_SEARCH_MODELS --env BBS_SEARCH_MODELS_PATH --env BBS_SEARCH_EMBEDDINGS_PATH \
+  --env BBS_SEARCH_DB_URL \
+  --env BBS_SEARCH_MYSQL_USER \
+  --env BBS_SEARCH_MYSQL_PASSWORD \
+  --env BBS_SEARCH_MODELS \
+  --env BBS_SEARCH_MODELS_PATH \
+  --env BBS_SEARCH_EMBEDDINGS_PATH \
   --detach \
   --name test_bbs_search test_bbs_search
 ```
@@ -510,7 +516,10 @@ docker run \
   --volume /raid:/raid \
   --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
-  --env BBS_MINING_DB_TYPE --env BBS_MINING_DB_URL --env BBS_MINING_MYSQL_USER --env BBS_MINING_MYSQL_PASSWORD \
+  --env BBS_MINING_DB_TYPE \
+  --env BBS_MINING_DB_URL \
+  --env BBS_MINING_MYSQL_USER \
+  --env BBS_MINING_MYSQL_PASSWORD \
   --detach \
   --name test_bbs_mining test_bbs_mining
 ```
@@ -528,8 +537,14 @@ docker run \
   --publish $NOTEBOOK_PORT:8888 \
   --volume /raid:/raid \
   --env NOTEBOOK_TOKEN \
-  --env DB_URL --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
-  --interactive --tty --rm --user "$USER_NAME" --workdir $REPOSITORY_DIRECTORY \
+  --env DB_URL \
+  --env SEARCH_ENGINE_URL \
+  --env TEXT_MINING_URL \
+  --interactive \
+  --tty \
+  --rm \
+  --user "$USER_NAME" \
+  --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
 ```
 
