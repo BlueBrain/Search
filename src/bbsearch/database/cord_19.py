@@ -212,7 +212,7 @@ class CORD19DatabaseCreation:
         (cfr. _rename_columns).
         """
         rejected_articles = []
-        df = self.metadata.copy().drop_duplicates("cord_uid", keep="first")
+        df = self.metadata.drop_duplicates("cord_uid", keep="first")
         df["publish_time"] = pd.to_datetime(df["publish_time"])
         for index, article in df.iterrows():
             try:
