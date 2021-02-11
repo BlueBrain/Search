@@ -203,7 +203,11 @@ export NOTEBOOK_PORT=8954
 export DATABASE_PASSWORD=1234
 export NOTEBOOK_TOKEN=1a2b3c4d
 
-export BBS_SSH_USERNAME=$(id --user --name)
+export USER_NAME=$(id -un)
+export USER_ID=$(id -u)
+
+# Change this value if necessary
+export BBS_SSH_USERNAME=$USER_NAME
 
 export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
@@ -338,7 +342,7 @@ docker build \
   --build-arg BBS_http_proxy=$http_proxy \
   --build-arg BBS_HTTPS_PROXY=$https_proxy \
   --build-arg BBS_https_proxy=$https_proxy \
-  --build-arg BBS_USERS="$(whoami)/$(id -u)" \
+  --build-arg BBS_USERS="$USER_NAME/$_USER_ID" \
   -f docker/base.Dockerfile -t test_bbs_base .
 ```
 
@@ -362,7 +366,7 @@ docker run \
   --interactive \
   --tty \
   --rm \
-  --user "$(whoami)" \
+  --user "$USER_NAME" \
   --name test_bbs_base test_bbs_base
 ```
 
@@ -525,7 +529,7 @@ docker run \
   --volume /raid:/raid \
   --env NOTEBOOK_TOKEN \
   --env DB_URL --env SEARCH_ENGINE_URL --env TEXT_MINING_URL \
-  --interactive --tty --rm --user "$(whoami)" --workdir $REPOSITORY_DIRECTORY \
+  --interactive --tty --rm --user "$USER_NAME" --workdir $REPOSITORY_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
 ```
 
