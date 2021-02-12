@@ -218,7 +218,7 @@ Then, please create a working directory and navigate to it in the command line.
 After, please clone the Blue Brain Search repository.
 
 ```bash
-git clone https://github.com/BlueBrain/BlueBrainSearch
+git clone https://github.com/BlueBrain/Search.git
 ```
 
 Finally, let's keep track of the path to the working directory
@@ -226,7 +226,7 @@ the repository directory, and the data and models directory.
 
 ```bash
 export WORKING_DIRECTORY="$(pwd)"
-export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/BlueBrainSearch"
+export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
 export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
@@ -428,7 +428,7 @@ cd data_and_models/pipelines/ner
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
 
-NB: At the moment, `dvc_pull_models` from `BlueBrainSearch/docker/utils.sh`
+NB: At the moment, `dvc_pull_models` from `Search/docker/utils.sh`
 is not yet usable as it works only when inside the `bbs_` Docker containers.
 
 You will be asked to enter the MySQL root password defined above
