@@ -172,35 +172,6 @@ eval_count:
   - path: ../../metrics/sentence_embedding/count.png
     md5: 4f814f17e4d070a44fb1ac181f638654
     size: 86578
-eval_use:
-  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    --model=use --output_dir=../../metrics/sentence_embedding
-  deps:
-  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    md5: 92a4235ce8d292ff382ce008c31da45c
-    size: 14587
-  - path: Dockerfile
-    md5: f31e8256ab2f74bda90e8b187333773a
-    size: 1545
-  - path: eval.py
-    md5: 344dab3249c0017493c02ef68facf4e8
-    size: 4557
-  params:
-    params.yaml:
-      eval.use:
-        class: USE
-        init_kwargs:
-          use_version: 5
-  outs:
-  - path: ../../metrics/sentence_embedding/use.csv
-    md5: 723bbaf41c68dd09305820057a604a6a
-    size: 1211
-  - path: ../../metrics/sentence_embedding/use.json
-    md5: 4c72b969a56c9665b46a1fef13e48faa
-    size: 104
-  - path: ../../metrics/sentence_embedding/use.png
-    md5: e458c413479c127a6eda30becc7538c0
-    size: 162993
 eval_sbert:
   cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
     --model=sbert --output_dir=../../metrics/sentence_embedding

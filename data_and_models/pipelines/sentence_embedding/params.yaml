@@ -27,10 +27,6 @@ eval:
     class: SklearnVectorizer
     init_kwargs:
       checkpoint_path: ../../models/sentence_embedding/count/model.pkl
-  use:
-    class: USE
-    init_kwargs:
-      use_version: 5
   sbert:
     class: SentTransformer
     init_kwargs:
