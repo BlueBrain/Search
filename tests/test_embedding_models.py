@@ -236,7 +236,6 @@ class TestEmbeddingModels:
         assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         senttrans_model.encode.assert_called_once()
 
-
     @pytest.mark.parametrize(
         "backend", ["TfidfVectorizer", "CountVectorizer", "HashingVectorizer"]
     )
