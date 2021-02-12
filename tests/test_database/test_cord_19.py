@@ -1,6 +1,6 @@
 """Tests covering the creation of the CORD-19 database."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,7 +24,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bbsearch.database import CORD19DatabaseCreation, mark_bad_sentences
+from bluesearch.database import CORD19DatabaseCreation, mark_bad_sentences
 
 
 @pytest.fixture()
@@ -35,7 +35,7 @@ def real_sqlalchemy_engine(
     fake_load = Mock()
     fake_load.return_value = model_entities
 
-    monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
+    monkeypatch.setattr("bluesearch.database.cord_19.spacy.load", fake_load)
 
     version = "test"
     if fake_sqlalchemy_engine.url.drivername.startswith("mysql"):
@@ -200,7 +200,7 @@ class TestDatabaseCreation:
         fake_load = Mock()
         fake_load.return_value = model_entities
 
-        monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
+        monkeypatch.setattr("bluesearch.database.cord_19.spacy.load", fake_load)
 
         fake_dir = Path(str(tmpdir)) / "fake"
         Path(f"{tmpdir}/cord19_test.db").touch()

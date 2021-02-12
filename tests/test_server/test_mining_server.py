@@ -1,6 +1,6 @@
 """Test for the mining server."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,9 +24,9 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bbsearch.mining import SPECS
-from bbsearch.server.mining_server import MiningServer
-from bbsearch.utils import load_ee_models_library
+from bluesearch.mining import SPECS
+from bluesearch.server.mining_server import MiningServer
+from bluesearch.utils import load_ee_models_library
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
@@ -38,7 +38,7 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
     spacy_mock = Mock()
     spacy_mock.load.return_value = model_entities
 
-    monkeypatch.setattr("bbsearch.server.mining_server.spacy", spacy_mock)
+    monkeypatch.setattr("bluesearch.server.mining_server.spacy", spacy_mock)
 
     # This is the original CSV file with 3 columns:
     # entity_type, model, entity_type_name
@@ -163,9 +163,7 @@ class TestMiningServer:
         )
 
     @pytest.mark.parametrize("debug", [True, False], ids=["debug", "specs"])
-    def test_mining_cache_detailed(
-        self, mining_client, test_parameters, entity_types, debug
-    ):
+    def test_mining_cache_detailed(self, mining_client, test_parameters, debug):
         """Test exact count of found entities.
 
         This test assumes that the requested entity types are a superset of

@@ -1,6 +1,6 @@
 """Collection of tests regarding the Database creation. """
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.sql import (
+from bluesearch.sql import (
     SentenceFilter,
     get_titles,
     retrieve_article_ids,
@@ -56,7 +56,7 @@ class TestNoSQL:
         ],
     )
     def test_sql_queries(self, module_name):
-        module = import_module(f"bbsearch.{module_name}")
+        module = import_module(f"bluesearch.{module_name}")
         source_code = inspect.getsource(module)
         assert "SELECT" not in source_code
 

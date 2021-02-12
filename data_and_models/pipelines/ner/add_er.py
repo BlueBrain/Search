@@ -1,6 +1,6 @@
 """Append an entity ruler to a spacy pipeline."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -23,8 +23,8 @@ import pathlib
 import spacy
 import yaml
 
-from bbsearch.mining import remap_entity_type
-from bbsearch.utils import JSONL
+from bluesearch.mining import remap_entity_type
+from bluesearch.utils import JSONL
 
 parser = ArgumentParser()
 parser.add_argument(

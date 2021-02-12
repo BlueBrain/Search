@@ -1,6 +1,6 @@
 """Computation of inter-rater agreement for NER models."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -22,7 +22,7 @@ from collections import OrderedDict
 import pathlib
 import json
 
-from bbsearch.mining.eval import (
+from bluesearch.mining.eval import (
     annotations2df,
     remove_punctuation,
     ner_report,

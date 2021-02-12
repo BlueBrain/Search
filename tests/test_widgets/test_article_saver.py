@@ -1,6 +1,6 @@
 """Tests covering ArticleSaver."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -20,7 +20,7 @@
 import numpy as np
 import pandas as pd
 
-from bbsearch.widgets import ArticleSaver
+from bluesearch.widgets import ArticleSaver
 
 
 class TestArticleSaver:

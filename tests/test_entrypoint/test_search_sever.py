@@ -1,6 +1,6 @@
 """Collection of tests focused on "search_server" entrypoint."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -23,8 +23,8 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.entrypoint import get_search_app
-from bbsearch.server.search_server import SearchServer
+from bluesearch.entrypoint import get_search_app
+from bluesearch.server.search_server import SearchServer
 
 
 @pytest.mark.parametrize(
@@ -52,10 +52,12 @@ def test_send_through(tmpdir, monkeypatch, embeddings_path, models, models_path)
     fake_search_server_inst = Mock(spec=SearchServer)
     fake_search_server_class = Mock(return_value=fake_search_server_inst)
 
-    monkeypatch.setattr("bbsearch.entrypoint.search_server.sqlalchemy", fake_sqlalchemy)
-    monkeypatch.setattr("bbsearch.utils.H5", fake_H5)
     monkeypatch.setattr(
-        "bbsearch.server.search_server.SearchServer", fake_search_server_class
+        "bluesearch.entrypoint.search_server.sqlalchemy", fake_sqlalchemy
+    )
+    monkeypatch.setattr("bluesearch.utils.H5", fake_H5)
+    monkeypatch.setattr(
+        "bluesearch.server.search_server.SearchServer", fake_search_server_class
     )
 
     server_app = get_search_app()

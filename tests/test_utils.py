@@ -1,6 +1,6 @@
 """Collection of tests focused on the utils.py module."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,7 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.utils import H5, JSONL, Timer, load_ee_models_library
+from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library
 
 
 class TestTimer:

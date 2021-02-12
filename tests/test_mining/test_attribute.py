@@ -1,6 +1,6 @@
 """Tests covering attribute extraction."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -26,7 +26,7 @@ import requests
 import spacy
 from IPython.display import HTML
 
-from bbsearch.mining import AttributeAnnotationTab, AttributeExtractor
+from bluesearch.mining import AttributeAnnotationTab, AttributeExtractor
 
 
 @pytest.fixture(scope="session")
@@ -909,7 +909,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr("bbsearch.mining.attribute.requests", fake_requests)
+        monkeypatch.setattr("bluesearch.mining.attribute.requests", fake_requests)
         fake_requests.post.return_value = response
 
         # Test 1
@@ -1156,7 +1156,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(real_response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr("bbsearch.mining.attribute.requests", fake_requests)
+        monkeypatch.setattr("bluesearch.mining.attribute.requests", fake_requests)
         fake_requests.post.return_value = response
 
         response_json = extractor.get_core_nlp_analysis(text)

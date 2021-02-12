@@ -1,6 +1,6 @@
 """Collections of tests covering the `entity.py` module."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,7 +24,7 @@ import pandas as pd
 import pytest
 import spacy
 
-from bbsearch.mining import (
+from bluesearch.mining import (
     PatternCreator,
     check_patterns_agree,
     global2model_patterns,

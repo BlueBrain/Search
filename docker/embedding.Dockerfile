@@ -1,4 +1,4 @@
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -43,4 +43,4 @@ ENTRYPOINT [\
 "--bind", "0.0.0.0:8080", \
 "--workers", "1", \
 "--timeout", "180", \
-"bbsearch.entrypoint:get_embedding_app()"]
+"bluesearch.entrypoint:get_embedding_app()"]

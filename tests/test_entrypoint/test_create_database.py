@@ -1,6 +1,6 @@
 """Testing the create_database entrypoint."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bbsearch.entrypoint.create_database import run_create_database
+from bluesearch.entrypoint.create_database import run_create_database
 
 
 @pytest.mark.parametrize(
@@ -76,14 +76,16 @@ def test_send_through(
             db_url.touch()
 
     monkeypatch.setattr("builtins.input", Mock())
-    monkeypatch.setattr("bbsearch.entrypoint.create_database.getpass", fake_getpass)
+    monkeypatch.setattr("bluesearch.entrypoint.create_database.getpass", fake_getpass)
     monkeypatch.setattr(
-        "bbsearch.entrypoint.create_database.sqlalchemy", fake_sqlalchemy
+        "bluesearch.entrypoint.create_database.sqlalchemy", fake_sqlalchemy
     )
     monkeypatch.setattr(
-        "bbsearch.database.CORD19DatabaseCreation", fake_database_creation
+        "bluesearch.database.CORD19DatabaseCreation", fake_database_creation
     )
-    monkeypatch.setattr("bbsearch.database.mark_bad_sentences", fake_mark_bad_sentences)
+    monkeypatch.setattr(
+        "bluesearch.database.mark_bad_sentences", fake_mark_bad_sentences
+    )
 
     argv = [
         f"--cord-data-path={cord_data_path}",

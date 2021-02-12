@@ -1,6 +1,6 @@
-"""Collection of tests focused on the bbsearch.mining.relation module"""
+"""Collection of tests focused on the bluesearch.mining.relation module"""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import pytest
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import ChemProt, StartWithTheSameLetter, annotate
+from bluesearch.mining import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):

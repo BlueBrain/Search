@@ -1,4 +1,4 @@
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -27,7 +27,7 @@
 !.env*.example
 
 # Version file
-/src/bbsearch/version.py
+/src/bluesearch/version.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
