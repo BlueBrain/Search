@@ -24,7 +24,7 @@ from flask import Flask, jsonify, request
 
 import bluesearch
 
-from ..embedding_models import BSV, USE, SBioBERT, Sent2VecModel, SentTransformer
+from ..embedding_models import BSV, SBioBERT, Sent2VecModel, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -135,7 +135,6 @@ class SearchServer(Flask):
         model_factories = {
             "BSV": lambda: BSV(bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
-            "USE": lambda: USE(),
             "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens"),
             "BIOBERT NLI+STS": lambda: SentTransformer(
                 "clagator/biobert_v1.1_pubmed_nli_sts"
