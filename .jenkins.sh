@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -56,7 +56,7 @@ tox -e docs
 tox -e py37 -- --color=yes
 
 if [ "$BUILD_DOCS" = true ]; then
-  .tox/docs/bin/python -c "import bbsearch; print('Installed version BBSearch: ', bbsearch.__version__)"
+  .tox/docs/bin/python -c "import bluesearch; print('Installed version Blue Brain Search: ', bluesearch.__version__)"
   cd docs || exit  # docs is already built by tox
   pip install -i https://bbpteam.epfl.ch/repository/devpi/simple docs-internal-upload
   docs-internal-upload --docs-path _build/html --metadata-path _build/html/metadata.md

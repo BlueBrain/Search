@@ -1,6 +1,6 @@
 """Tests covering embedding server"""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bbsearch.server.embedding_server import EmbeddingServer
+from bluesearch.server.embedding_server import EmbeddingServer
 
 
 @pytest.fixture(scope="session")

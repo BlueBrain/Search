@@ -1,6 +1,6 @@
 """Tests covering mining cache."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -26,8 +26,8 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bbsearch.database import CreateMiningCache
-from bbsearch.database.mining_cache import Miner
+from bluesearch.database import CreateMiningCache
+from bluesearch.database.mining_cache import Miner
 
 
 class TestMiner:
@@ -35,7 +35,7 @@ class TestMiner:
     def miner_env(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.spacy.load",
             lambda model_path: model_entities,
         )
 
@@ -60,7 +60,7 @@ class TestMiner:
 
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.spacy.load",
             lambda model_path: model_entities,
         )
 
@@ -105,7 +105,9 @@ class TestMiner:
             can_finish.set()
             return pd.DataFrame([fake_result])
 
-        monkeypatch.setattr("bbsearch.database.mining_cache.run_pipeline", run_pipeline)
+        monkeypatch.setattr(
+            "bluesearch.database.mining_cache.run_pipeline", run_pipeline
+        )
 
         # Work loop with queue with one article ID
         task_queue.put(article_id)
@@ -303,7 +305,7 @@ class TestCreateMiningCache:
         cache_creator._schema_creation()
 
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            "bluesearch.database.mining_cache.Miner.create_and_mine",
             self.fake_queue_miner,
         )
         cache_creator.do_mining()
@@ -314,7 +316,7 @@ class TestCreateMiningCache:
 
     def test_construct(self, cache_creator, monkeypatch):
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            "bluesearch.database.mining_cache.Miner.create_and_mine",
             self.fake_queue_miner,
         )
 

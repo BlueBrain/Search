@@ -1,4 +1,4 @@
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -78,7 +78,7 @@ extras_require = {
 }
 
 setup(
-    name="BBSearch",
+    name="bluesearch",
     description="Blue Brain Search",
     author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/BlueBrainSearch",
@@ -89,13 +89,13 @@ setup(
     },
     license="-",
     use_scm_version={
-        "write_to": "src/bbsearch/version.py",
+        "write_to": "src/bluesearch/version.py",
         "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
         # "local_scheme": "no-local-version",
     },
     package_dir={"": "src"},
     packages=find_packages("./src"),
-    package_data={"bbsearch": ["_css/stylesheet.css", "py.typed"]},
+    package_data={"bluesearch": ["_css/stylesheet.css", "py.typed"]},
     zip_safe=False,
     python_requires=">=3.6",
     setup_requires=["setuptools_scm"],
@@ -103,12 +103,12 @@ setup(
     extras_require=extras_require,
     entry_points={
         "console_scripts": [
-            "compute_embeddings = bbsearch.entrypoint:run_compute_embeddings",
-            "create_database = bbsearch.entrypoint:run_create_database",
-            "create_mining_cache = bbsearch.entrypoint:run_create_mining_cache",
-            "embedding_server = bbsearch.entrypoint:run_embedding_server",
-            "mining_server = bbsearch.entrypoint:run_mining_server",
-            "search_server = bbsearch.entrypoint:run_search_server",
+            "compute_embeddings = bluesearch.entrypoint:run_compute_embeddings",
+            "create_database = bluesearch.entrypoint:run_create_database",
+            "create_mining_cache = bluesearch.entrypoint:run_create_mining_cache",
+            "embedding_server = bluesearch.entrypoint:run_embedding_server",
+            "mining_server = bluesearch.entrypoint:run_mining_server",
+            "search_server = bluesearch.entrypoint:run_search_server",
         ]
     },
 )

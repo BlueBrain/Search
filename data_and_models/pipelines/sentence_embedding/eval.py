@@ -1,6 +1,6 @@
 """Evaluation of sentence embedding models."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -62,7 +62,7 @@ def main():
 
     print("Reading params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"][args.model]
-    module = importlib.import_module("bbsearch.embedding_models")
+    module = importlib.import_module("bluesearch.embedding_models")
     class_ = getattr(module, params["class"])
     model = class_(**params["init_kwargs"])
 

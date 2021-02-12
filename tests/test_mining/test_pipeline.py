@@ -1,6 +1,6 @@
-"""Collection of tests focused on the bbsearch.mining.pipeline module."""
+"""Collection of tests focused on the bluesearch.mining.pipeline module."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -24,7 +24,7 @@ import pytest
 from spacy.language import Language
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import StartWithTheSameLetter, run_pipeline
+from bluesearch.mining import StartWithTheSameLetter, run_pipeline
 
 
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])

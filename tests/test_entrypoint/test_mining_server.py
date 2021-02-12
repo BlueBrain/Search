@@ -1,6 +1,6 @@
 """Collection of tests focused on the `mining_server`."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bbsearch.entrypoint import get_mining_app
+from bluesearch.entrypoint import get_mining_app
 
 
 @pytest.mark.parametrize(
@@ -60,11 +60,13 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     fake_mining_server_class = Mock(return_value=fake_mining_server_inst)
 
     monkeypatch.setattr(
-        "bbsearch.server.mining_server.MiningServer", fake_mining_server_class
+        "bluesearch.server.mining_server.MiningServer", fake_mining_server_class
     )
-    monkeypatch.setattr("bbsearch.entrypoint.mining_server.sqlalchemy", fake_sqlalchemy)
     monkeypatch.setattr(
-        "bbsearch.entrypoint.mining_server.load_ee_models_library",
+        "bluesearch.entrypoint.mining_server.sqlalchemy", fake_sqlalchemy
+    )
+    monkeypatch.setattr(
+        "bluesearch.entrypoint.mining_server.load_ee_models_library",
         fake_load_ee_models_library,
     )
 

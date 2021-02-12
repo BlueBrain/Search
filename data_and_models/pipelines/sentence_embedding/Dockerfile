@@ -1,4 +1,4 @@
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -30,7 +30,7 @@ RUN true \
 RUN conda install -c carta mysqlclient
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.0.9
+ARG BBS_REVISION=v0.0.10
 ADD . /src
 WORKDIR /src
 RUN pip install git+file://$PWD@$BBS_REVISION

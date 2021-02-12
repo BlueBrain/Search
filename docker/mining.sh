@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -22,4 +22,4 @@ ssh_check
 dvc_pull_models
 
 # Launch mining server
-gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bbsearch.entrypoint:get_mining_app()'
+gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'

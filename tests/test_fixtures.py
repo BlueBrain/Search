@@ -7,7 +7,7 @@ The goal of these tests is to run simple sanity checks rather than detailed
 bookkeeping.
 """
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #

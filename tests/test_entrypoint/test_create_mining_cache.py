@@ -1,6 +1,6 @@
 """Tests covering the creation of the mining cache database."""
 
-# BBSearch is a text mining toolbox focused on scientific use cases.
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
 #
@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bbsearch.entrypoint import run_create_mining_cache
+from bluesearch.entrypoint import run_create_mining_cache
 
 
 def test_help(capsys):
@@ -109,15 +109,20 @@ def test_send_through(
     fake_sqlalchemy = Mock()
     fake_create_mining_cache = Mock()
     monkeypatch.setattr(
-        "bbsearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
+        "bluesearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
     )
     monkeypatch.setattr(
-        "bbsearch.entrypoint.create_mining_cache.load_ee_models_library",
+        "bluesearch.entrypoint.create_mining_cache.load_ee_models_library",
         fake_load_ee_models_library,
     )
-    monkeypatch.setattr("bbsearch.database.CreateMiningCache", fake_create_mining_cache)
     monkeypatch.setattr(
-        "bbsearch.entrypoint.create_mining_cache.getpass.getpass",
+        "bluesearch.database.CreateMiningCache", fake_create_mining_cache
+    )
+    monkeypatch.setattr(
+        "bluesearch.database.CreateMiningCache", fake_create_mining_cache
+    )
+    monkeypatch.setattr(
+        "bluesearch.entrypoint.create_mining_cache.getpass.getpass",
         lambda _: "fake_password",
     )
 
