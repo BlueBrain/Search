@@ -372,7 +372,7 @@ docker run \
 ```
 
 ```bash
-pip install $REPOSITORY_DIRECTORY[nlp_models]
+pip install $REPOSITORY_DIRECTORY
 ```
 
 ### Create the database
@@ -548,7 +548,7 @@ docker run \
 ```
 
 ```bash
-pip install .[nlp_models]
+pip install .
 jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
 

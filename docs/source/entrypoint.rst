@@ -58,7 +58,7 @@ Install Blue Brain Search:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/BlueBrain/BlueBrainSearch.git[nlp_models]
+    pip install git+https://github.com/BlueBrain/BlueBrainSearch.git
 
 Define the path to the output HDF5 file with the embeddings:
 
@@ -115,7 +115,7 @@ Install Blue Brain Search:
 
 .. code-block:: bash
 
-    pip install git+https://github.com/BlueBrain/BlueBrainSearch.git[nlp_models]
+    pip install git+https://github.com/BlueBrain/BlueBrainSearch.git
 
 Launch the creation of the database:
 
