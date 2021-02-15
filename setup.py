@@ -39,7 +39,7 @@ install_requires = [
     "networkx",
     "nexusforge @ git+https://github.com/BlueBrain/nexus-forge.git",
     "nltk",
-    "numpy>=1.16.1",
+    "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
