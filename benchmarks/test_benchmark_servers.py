@@ -25,7 +25,7 @@ import requests
 import sqlalchemy
 
 # Embedding
-EMBEDDING_MODELS = ["BSV", "SBioBERT", "SBERT", "USE"]
+EMBEDDING_MODELS = ["BSV", "SBioBERT", "SBERT"]
 
 # Mining
 ENTITY_TYPES = ["DISEASE", "CELL_TYPE", "CHEMICAL", "PROTEIN", "ORGAN"]
