@@ -30,7 +30,6 @@ import sent2vec
 import sentence_transformers
 import spacy
 import sqlalchemy
-import tensorflow_hub as hub
 import torch
 from nltk import word_tokenize
 from nltk.corpus import stopwords
@@ -578,59 +577,6 @@ class SentTransformer(EmbeddingModel):
         return embeddings
 
 
-class USE(EmbeddingModel):
-    """Universal Sentence Encoder.
-
-    References
-    ----------
-    https://www.tensorflow.org/hub/tutorials/semantic_similarity_with_tf_hub_universal_encoder?hl=en
-    """
-
-    def __init__(self, use_version=5):
-        self.use_version = use_version
-        self.use_model = hub.load(
-            "https://tfhub.dev/google/universal-sentence-encoder-large/"
-            + str(self.use_version)
-        )
-
-    @property
-    def dim(self):
-        """Return dimension of the embedding."""
-        return 512
-
-    def embed(self, preprocessed_sentence):
-        """Compute the sentences embeddings for a given sentence.
-
-        Parameters
-        ----------
-        preprocessed_sentence : str
-            Preprocessed sentence to embed.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentence of shape (512,).
-        """
-        return self.embed_many([preprocessed_sentence]).squeeze()
-
-    def embed_many(self, preprocessed_sentences):
-        """Compute sentence embeddings for multiple sentences.
-
-        Parameters
-        ----------
-        preprocessed_sentences : list of str
-            Preprocessed sentences to embed.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentences of shape
-            `(len(preprocessed_sentences), 512)`.
-        """
-        embedding = self.use_model(preprocessed_sentences).numpy()
-        return embedding
-
-
 class SklearnVectorizer(EmbeddingModel):
     """Simple wrapper for sklearn vectorizer models.
 
@@ -774,8 +720,6 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
           `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
         - BSV:
           `get_embedding_model('BSV', <checkpoint_path>)`
-        - USE:
-          `get_embedding_model('USE')`
 
     - For arbitrary models:
         - My Transformer model:
@@ -812,8 +756,6 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         "BSV": lambda: BSV(checkpoint_path),
         # Scikit-learn models.
         "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
-        # Other models.
-        "USE": lambda: USE(),
     }
     if model_name_or_class not in configs:
         raise ValueError(f"Unknown model name or class: {model_name_or_class}")

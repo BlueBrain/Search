@@ -37,11 +37,11 @@ to read the following guidelines.
 
 ## <a name="CreatingIssues"></a> Creating Issues
 This section contains the instructions to be followed to create issues on our
-[issue tracker](https://github.com/BlueBrain/BlueBrainSearch/issues).
+[issue tracker](https://github.com/BlueBrain/Search/issues).
 
 ### <a name="Sri"></a> Search related issues
 Before you submit an issue, please search our 
-[issue tracker](https://github.com/BlueBrain/BlueBrainSearch/issues) to verify 
+[issue tracker](https://github.com/BlueBrain/Search/issues) to verify 
 if any similar issue was raised in the past. Even if you cannot find a direct
 answer to your question, this can allow you to collect a list of related issues
 that you can link in your new issue.
@@ -92,7 +92,7 @@ added to both the `setup.py` and the `requirements.txt` files.
 
 ### <a name="Udoc"></a> Update documentation
 The
-[`whatsnew.rst`](https://github.com/BlueBrain/BlueBrainSearch/blob/master/docs/source/whatsnew.rst)
+[`whatsnew.rst`](https://github.com/BlueBrain/Search/blob/master/docs/source/whatsnew.rst)
 file in our docs keeps tracks of the updates introduced in every new release,
 so you should update it if your PR adds or changes a feature, fixes a bug, etc.
 
@@ -117,4 +117,4 @@ maintainers are required for the pull request to be merged into the master.
 
 
 [ml-team-email]: mailto:bbp-ou-machinelearning@groupes.epfl.ch
-[github]: https://github.com/BlueBrain/BlueBrainSearch
+[github]: https://github.com/BlueBrain/Search

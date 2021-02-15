@@ -38,7 +38,7 @@ def test_environment_reading(monkeypatch, tmpdir):
     )
 
     # Mock all of our embedding models
-    embedding_models = ["BSV", "SBioBERT", "Sent2VecModel", "SentTransformer", "USE"]
+    embedding_models = ["BSV", "SBioBERT", "Sent2VecModel", "SentTransformer"]
 
     for model in embedding_models:
         monkeypatch.setattr(f"bluesearch.embedding_models.{model}", Mock())
