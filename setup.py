@@ -27,7 +27,6 @@ install_requires = [
     "h5py",
     "ipython",
     "ipywidgets",
-    "jupyter_server_proxy",
     "langdetect",
     "matplotlib",
     "mysqlclient",
