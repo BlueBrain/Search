@@ -34,7 +34,6 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_l
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
 ipython>=7.16.1
 ipywidgets==7.5.1
-jupyter-server-proxy==1.5.0
 jupyterlab==2.2.8
 langdetect==1.0.8
 matplotlib==3.3.2
