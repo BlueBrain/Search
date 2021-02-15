@@ -81,9 +81,9 @@ setup(
     name="bluesearch",
     description="Blue Brain Search",
     author="Blue Brain Project, EPFL",
-    url="https://github.com/BlueBrain/BlueBrainSearch",
+    url="https://github.com/BlueBrain/Search",
     project_urls={
-        "Source": "https://github.com/BlueBrain/BlueBrainSearch",
+        "Source": "https://github.com/BlueBrain/Search",
         "Documentation": "https://bbpteam.epfl.ch/documentation",
         "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BBS",
     },

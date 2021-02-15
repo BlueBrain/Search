@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
-<img src="docs/source/logo/BlueBrainSearch_banner.jpg"/>
+<img src="docs/source/logo/Search_banner.jpg"/>
 
 # Blue Brain Search
 
@@ -24,7 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Latest Release</td>
   <td>
-    <a href="https://github.com/BlueBrain/BlueBrainSearch/releases">
+    <a href="https://github.com/BlueBrain/Search/releases">
     <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
     </a>
   </td>
@@ -32,16 +32,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/BlueBrain/BlueBrainSearch/blob/master/LICENSE.txt">
-    <img src="https://img.shields.io/github/license/BlueBrain/BlueBrainSearch" alt="License" />
+    <a href="https://github.com/BlueBrain/Search/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/BlueBrain/Search" alt="License" />
     </a>
 </td>
 </tr>
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.com/BlueBrain/BlueBrainSearch">
-    <img src="https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    <a href="https://travis-ci.com/BlueBrain/Search">
+    <img src="https://travis-ci.com/BlueBrain/Search.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
     </a>
   </td>
 </tr>
@@ -218,7 +218,7 @@ Then, please create a working directory and navigate to it in the command line.
 After, please clone the Blue Brain Search repository.
 
 ```bash
-git clone https://github.com/BlueBrain/BlueBrainSearch
+git clone https://github.com/BlueBrain/Search
 ```
 
 Finally, let's keep track of the path to the working directory
@@ -226,7 +226,7 @@ the repository directory, and the data and models directory.
 
 ```bash
 export WORKING_DIRECTORY="$(pwd)"
-export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/BlueBrainSearch"
+export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
 export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
@@ -428,7 +428,7 @@ cd data_and_models/pipelines/ner
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
 
-NB: At the moment, `dvc_pull_models` from `BlueBrainSearch/docker/utils.sh`
+NB: At the moment, `dvc_pull_models` from `Search/docker/utils.sh`
 is not yet usable as it works only when inside the `bbs_` Docker containers.
 
 You will be asked to enter the MySQL root password defined above
@@ -608,8 +608,8 @@ pip install .
 
 ## Installation (Docker)
 We provide a docker file, `docker/Dockerfile` that allows to build a docker
-image with all dependencies of `BlueBrainSearch` pre-installed. Note that
-`BlueBrainSearch` itself is not installed, which needs to be done manually
+image with all dependencies of `bluesearch` pre-installed. Note that
+`bluesearch` itself is not installed, which needs to be done manually
 on each container that is spawned.
 
 To build the docker image open a terminal in the root directory of the project
