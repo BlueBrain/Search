@@ -27,6 +27,11 @@ Legend
 - |Remove| denotes removed features.
 
 
+Version 0.1.0
+==============
+- |Remove| :code:`BBS_BBG_poc` notebook (now hosted on https://github.com/BlueBrain/Search-Graph-Examples ) and
+:code:`assets/` directory
+
 Version 0.0.10
 ==============
 
