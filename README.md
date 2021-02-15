@@ -525,7 +525,14 @@ docker run \
 
 #### Notebook server
 
+If you also want to use the `BBS_BBG_poc` notebook, please clone the
+Blue Brain Search-Graph-Examples from your working directory.
 ```bash
+git clone https://github.com/BlueBrain/Search-Graph-Examples.git
+```
+
+```bash
+export NOTEBOOK_DIRECTORY="$WORKING_DIRECTORY/Search-Graph-Examples"
 export DB_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
 export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
@@ -543,14 +550,18 @@ docker run \
   --tty \
   --rm \
   --user "$USER_NAME" \
-  --workdir $REPOSITORY_DIRECTORY \
+  --workdir $NOTEBOOK_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
 ```
 
 ```bash
-pip install .
+pip install --upgrade pip wheel setuptools
+pip install --requirement requirements.txt
 jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
+
+Do not hesitate to check Blue Brain Search-Graph-Examples repository
+for any encountered issues linked to the notebook.
 
 Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 
