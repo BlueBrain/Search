@@ -32,7 +32,7 @@ Version 0.1.0
 - |Remove| the embedding model Universal Sentence Encoder (USE) and its
   dependencies (:code:`tensorflow` and :code:`tensorflow-hub`).
 - |Remove| :code:`BBS_BBG_poc` notebook (now hosted on https://github.com/BlueBrain/Search-Graph-Examples ) and
-:code:`assets/` directory
+  :code:`assets/` directory.
 
 
 Version 0.0.10
