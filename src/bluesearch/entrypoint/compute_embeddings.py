@@ -147,18 +147,8 @@ def run_compute_embeddings(argv=None):
     logger = logging.getLogger(__name__)
 
     logger.info(" Configuration ".center(80, "-"))
-    logger.info(f"log-file             : {args.log_file}")
-    logger.info(f"model_name_or_class  : {args.model_name_or_class}")
-    logger.info(f"db-url               : {args.db_url}")
-    logger.info(f"h5-dataset-name      : {args.h5_dataset_name}")
-    logger.info(f"outfile              : {args.outfile}")
-    logger.info(f"batch-size-inference : {args.batch_size_inference}")
-    logger.info(f"batch-size-transfer  : {args.batch_size_transfer}")
-    logger.info(f"checkpoint           : {args.checkpoint}")
-    logger.info(f"indices-path         : {args.indices_path}")
-    logger.info(f"gpus                 : {args.gpus}")
-    logger.info(f"n-processes          : {args.n_processes}")
-    logger.info(f"temp-dir             : {args.temp_dir}")
+    for k, v in vars(args).items():
+        logger.info(f"{k:<32}: {v}")
     logger.info("-" * 80)
 
     # Imports (they are here to make --help quick)
