@@ -102,10 +102,8 @@ def run_create_database(argv=None):
     logger = logging.getLogger(pathlib.Path(__file__).stem)
 
     logger.info(" Configuration ".center(80, "-"))
-    logger.info(f"log-file                : {args.log_file}")
-    logger.info(f"cord-data-path          : {args.cord_data_path}")
-    logger.info(f"db-type                 : {args.db_type}")
-    logger.info(f"only-mark-bad-sentences : {args.only_mark_bad_sentences}")
+    for k, v in vars(args).items():
+        logger.info(f"{k:<32}: {v}")
     logger.info("-" * 80)
 
     # Import libraries
