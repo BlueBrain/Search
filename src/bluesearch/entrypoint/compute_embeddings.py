@@ -36,7 +36,7 @@ def run_compute_embeddings(argv=None):
         formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
-        "model_name_or_class",
+        "model-name-or-class",
         type=str,
         help="""
         The name or class of the model for which to compute the embeddings.
@@ -145,6 +145,21 @@ def run_compute_embeddings(argv=None):
     # Configure logging
     configure_logging(args.log_file, logging.INFO)
     logger = logging.getLogger(__name__)
+
+    logger.info(" Configuration ".center(80, "-"))
+    logger.info(f"log-file             : {args.log_file}")
+    logger.info(f"model_name_or_class  : {args.model_name_or_class}")
+    logger.info(f"db-url               : {args.db_url}")
+    logger.info(f"h5-dataset-name      : {args.h5_dataset_name}")
+    logger.info(f"outfile              : {args.outfile}")
+    logger.info(f"batch-size-inference : {args.batch_size_inference}")
+    logger.info(f"batch-size-transfer  : {args.batch_size_transfer}")
+    logger.info(f"checkpoint           : {args.checkpoint}")
+    logger.info(f"indices-path         : {args.indices_path}")
+    logger.info(f"gpus                 : {args.gpus}")
+    logger.info(f"n-processes          : {args.n_processes}")
+    logger.info(f"temp-dir             : {args.temp_dir}")
+    logger.info("-" * 80)
 
     # Imports (they are here to make --help quick)
     logger.info("Loading libraries")

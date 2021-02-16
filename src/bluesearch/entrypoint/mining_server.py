@@ -42,6 +42,13 @@ def get_mining_app():
     configure_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
+    logger.info(" Configuration ".center(80, "-"))
+    logger.info(f"log-file                : {log_file}")
+    logger.info(f"log-level               : {log_level}")
+    logger.info(f"db-type                 : {db_type}")
+    logger.info(f"data_and_models_dir     : {data_and_models_dir}")
+    logger.info("-" * 80)
+
     # Create the database engine
     logger.info("Creating the database engine")
     if db_type == "sqlite":
@@ -50,7 +57,8 @@ def get_mining_app():
         if not sqlite_db_path.exists():
             sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
-        engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
+        engine_url = f"sqlite:///{sqlite_db_path}"
+        engine = sqlalchemy.create_engine(engine_url)
     elif db_type == "mysql":
         mysql_url = get_var("BBS_MINING_DB_URL")
         mysql_user = get_var("BBS_MINING_MYSQL_USER")
@@ -61,6 +69,8 @@ def get_mining_app():
         engine = sqlalchemy.create_engine(engine_url)
     else:
         raise ValueError(f"This is not a valid database type: {db_type}.")
+
+    logger.info(f"Database_url is {engine_url}")
 
     # Create the server app
     with tempfile.TemporaryDirectory() as tmpdir_name:
