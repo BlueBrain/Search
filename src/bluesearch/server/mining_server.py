@@ -63,9 +63,7 @@ class MiningServer(Flask):
         self.logger.info(f"Version: {self.version}")
 
         self.logger.info("Loading the model libraries")
-        self.models_libs = {}
-        for lib_type, lib_file in models_libs.items():
-            self.models_libs[lib_type] = pd.read_csv(lib_file)
+        self.models_libs = models_libs
 
         self.logger.info("Loading the NER models")
         self.ee_models: Dict[str, spacy.language.Language] = {}
