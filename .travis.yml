@@ -38,10 +38,7 @@ matrix:
       env: TOXENV=lint
 
     - stage: Tests and Coverage
-      if: type = push
-      python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
+      python: 3.7
       env: TOXENV=py37
     - if: type = push
       python: 3.8
