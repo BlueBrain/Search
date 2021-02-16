@@ -603,7 +603,7 @@ pip install --upgrade pip
 To install `bluesearch` run
 
 ```bash
-pip install .[nlp_models]
+pip install .
 ```
 
 ## Installation (Docker)

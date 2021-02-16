@@ -26,7 +26,7 @@ To install :code:`bluesearch` run
 
 .. code-block:: bash
 
-    pip install .[nlp_models]  # use -e for editable install
+    pip install .  # use -e for editable install
 
 
 Generating docs
