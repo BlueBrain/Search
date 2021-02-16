@@ -37,9 +37,9 @@ class MiningServer(Flask):
     ----------
     models_libs : dict of str
         Dictionary mapping each type of extraction ('ee' for entities,
-        're' for relations, 'ae' for attributes) to the csv file with the
+        're' for relations, 'ae' for attributes) to the `pd.DataFrame` with the
         information on which model to use for the extraction of each entity,
-        relation, or attribute type, respectively. For 'ee', the csv file
+        relation, or attribute type, respectively. For 'ee', the dataframe
         should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
 
          - 'entity_type': name of entity type, as called in the request schema
