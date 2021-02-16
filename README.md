@@ -24,7 +24,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Latest Release</td>
   <td>
-    <a href="https://github.com/BlueBrain/BlueBrainSearch/releases">
+    <a href="https://github.com/BlueBrain/Search/releases">
     <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
     </a>
   </td>
@@ -32,16 +32,16 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/BlueBrain/BlueBrainSearch/blob/master/LICENSE.txt">
-    <img src="https://img.shields.io/github/license/BlueBrain/BlueBrainSearch" alt="License" />
+    <a href="https://github.com/BlueBrain/Search/blob/master/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/BlueBrain/Search" alt="License" />
     </a>
 </td>
 </tr>
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.com/BlueBrain/BlueBrainSearch">
-    <img src="https://travis-ci.com/BlueBrain/BlueBrainSearch.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    <a href="https://travis-ci.com/BlueBrain/Search">
+    <img src="https://travis-ci.com/BlueBrain/Search.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
     </a>
   </td>
 </tr>
@@ -608,8 +608,8 @@ pip install .
 
 ## Installation (Docker)
 We provide a docker file, `docker/Dockerfile` that allows to build a docker
-image with all dependencies of `BlueBrainSearch` pre-installed. Note that
-`BlueBrainSearch` itself is not installed, which needs to be done manually
+image with all dependencies of `bluesearch` pre-installed. Note that
+`bluesearch` itself is not installed, which needs to be done manually
 on each container that is spawned.
 
 To build the docker image open a terminal in the root directory of the project

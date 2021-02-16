@@ -94,20 +94,6 @@ stages:
     - ../../metrics/sentence_embedding/count.png
     metrics:
     - ../../metrics/sentence_embedding/count.json
-  eval_use:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=use --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.use
-    outs:
-    - ../../metrics/sentence_embedding/use.csv
-    - ../../metrics/sentence_embedding/use.png
-    metrics:
-    - ../../metrics/sentence_embedding/use.json
   eval_sbert:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=sbert --output_dir=../../metrics/sentence_embedding

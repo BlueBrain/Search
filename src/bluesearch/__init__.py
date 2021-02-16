@@ -1,4 +1,4 @@
-"""Package for the BlueBrainSearch project."""
+"""bluesearch: a Python package for text mining on scientific use cases."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #

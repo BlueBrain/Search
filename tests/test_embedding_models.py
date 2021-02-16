@@ -27,14 +27,12 @@ import numpy as np
 import pandas as pd
 import pytest
 import sent2vec
-import tensorflow as tf
 import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
 from bluesearch.embedding_models import (
     BSV,
-    USE,
     EmbeddingModel,
     MPEmbedder,
     SBioBERT,
@@ -238,38 +236,6 @@ class TestEmbeddingModels:
         assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         senttrans_model.encode.assert_called_once()
 
-    @pytest.mark.parametrize("n_sentences", [1, 5])
-    def test_use_embedding(self, monkeypatch, n_sentences):
-        hub_module = Mock()
-        use_model = Mock()
-        hub_module.load.return_value = use_model
-        use_model.return_value = tf.ones((n_sentences, 512))
-
-        monkeypatch.setattr("bluesearch.embedding_models.hub", hub_module)
-        use = USE()
-
-        # Preparations
-        dummy_sentence = "This is a dummy sentence/test."
-
-        if n_sentences != 1:
-            dummy_sentence = n_sentences * [dummy_sentence]
-
-        preprocess_method = getattr(
-            use, "preprocess" if n_sentences == 1 else "preprocess_many"
-        )
-        embed_method = getattr(use, "embed" if n_sentences == 1 else "embed_many")
-
-        # Assertions
-        assert use.dim == 512
-
-        preprocessed_sentence = preprocess_method(dummy_sentence)
-        assert preprocessed_sentence == dummy_sentence
-
-        embedding = embed_method(preprocessed_sentence)
-        assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == ((512,) if n_sentences == 1 else (n_sentences, 512))
-        use_model.assert_called_once()
-
     @pytest.mark.parametrize(
         "backend", ["TfidfVectorizer", "CountVectorizer", "HashingVectorizer"]
     )
@@ -426,7 +392,6 @@ class TestGetEmbeddingModel:
             ("SklearnVectorizer", "SklearnVectorizer"),
             ("SBioBERT", "SBioBERT"),
             ("SBERT", "SentTransformer"),
-            ("USE", "USE"),
         ],
     )
     def test_returns_instance(self, monkeypatch, name, underlying_class):
