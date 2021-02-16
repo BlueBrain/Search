@@ -525,18 +525,21 @@ docker run \
 
 #### Notebook server
 
-The structured information searched and extracted using the text mining tools provided by [Blue Brain Seach](https://github.com/BlueBrain/Search) can be conveniently transformed and analyzed as a knowledge graph using the tools provided by [Blue Brain Graph](https://github.com/BlueBrain/BlueBrainGraph).
-To use the complete pipeline—composed of literature search, text mining, and transformed into a knowledge graph—you should use the proof of concept notebook [`BBS_BBG_poc.ipynb`](https://github.com/BlueBrain/Search-Graph-Examples/blob/master/BBS_BBG_poc.ipynb) from [our dedicated repository](https://github.com/BlueBrain/Search-Graph-Examples.git).
-In order to use such notebook, please follow the steps below.
-```bash
-git clone https://github.com/BlueBrain/Search-Graph-Examples.git
-```
+The structured information searched and extracted using the text mining tools provided by [Blue Brain Seach](https://github.com/BlueBrain/Search)
+can be conveniently transformed and analyzed as a knowledge graph using the tools provided by [Blue Brain Graph](https://github.com/BlueBrain/BlueBrainGraph).
+
+To use the complete pipeline—composed of literature search, text mining, and transformed into a knowledge graph-you
+should use the proof of concept notebook [`BBS_BBG_poc.ipynb`](https://github.com/BlueBrain/Search-Graph-Examples/blob/master/BBS_BBG_poc.ipynb)
+from [our dedicated repository](https://github.com/BlueBrain/Search-Graph-Examples.git).
+In order to use such notebook, please follow the instructions from [the dedicated README](https://github
+.com/BlueBrain/Search-Graph-Examples#blue-brain-search-and-graph-examples).
+
+
+If you want to setup the notebook in a docker container, please create an environment
+variable called NOTEBOOK_DIRECTORY and launch the following command:
 
 ```bash
 export NOTEBOOK_DIRECTORY="$WORKING_DIRECTORY/Search-Graph-Examples"
-export DB_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
-export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
-export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
 ```
 
 ```bash
@@ -553,12 +556,6 @@ docker run \
   --user "$USER_NAME" \
   --workdir $NOTEBOOK_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
-```
-
-```bash
-pip install --upgrade pip wheel setuptools
-pip install --requirement requirements.txt
-jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
 ```
 
 Do not hesitate to check Blue Brain Search-Graph-Examples repository
