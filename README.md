@@ -525,8 +525,9 @@ docker run \
 
 #### Notebook server
 
-If you also want to use the `BBS_BBG_poc` notebook, please clone the
-Blue Brain Search-Graph-Examples from your working directory.
+The structured information searched and extracted using the text mining tools provided by [Blue Brain Seach](https://github.com/BlueBrain/Search) can be conveniently transformed and analyzed as a knowledge graph using the tools provided by [Blue Brain Graph](https://github.com/BlueBrain/BlueBrainGraph).
+To use the complete pipeline—composed of literature search, text mining, and transformed into a knowledge graph—you should use the proof of concept notebook [`BBS_BBG_poc.ipynb`](https://github.com/BlueBrain/Search-Graph-Examples/blob/master/BBS_BBG_poc.ipynb) from [our dedicated repository](https://github.com/BlueBrain/Search-Graph-Examples.git).
+In order to use such notebook, please follow the steps below.
 ```bash
 git clone https://github.com/BlueBrain/Search-Graph-Examples.git
 ```
