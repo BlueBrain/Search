@@ -55,15 +55,10 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
     shutil.copy(models_libs, new_csv_path)
 
     # Load the model library
-    monkeypatch.setenv("BBS_DATA_AND_MODELS_DIR", str(tmpdir))
     df_csv = load_ee_models_library(tmpdir)
 
-    # The mining server expects a CSV file with the model library. So we
-    # write the data frame to a temporary CSV file
-    tmp_csv = tmpdir / "temp.csv"
-    df_csv.to_csv(tmp_csv)
     mining_server_app = MiningServer(
-        models_libs={"ee": str(tmp_csv)}, connection=fake_sqlalchemy_engine
+        models_libs={"ee": df_csv}, connection=fake_sqlalchemy_engine
     )
     mining_server_app.config["TESTING"] = True
     with mining_server_app.test_client() as client:
