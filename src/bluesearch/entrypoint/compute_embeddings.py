@@ -36,7 +36,7 @@ def run_compute_embeddings(argv=None):
         formatter_class=CombinedHelpFormatter,
     )
     parser.add_argument(
-        "model-name-or-class",
+        "model_name_or_class",
         type=str,
         help="""
         The name or class of the model for which to compute the embeddings.
