@@ -20,7 +20,6 @@
 import logging
 import pathlib
 import sys
-import tempfile
 
 import sqlalchemy
 
@@ -63,15 +62,9 @@ def get_mining_app():
         raise ValueError(f"This is not a valid database type: {db_type}.")
 
     # Create the server app
-    with tempfile.TemporaryDirectory() as tmpdir_name:
-        tmpdir = pathlib.Path(tmpdir_name)
-        tmp_csv = tmpdir / "temp.csv"
-
-        df_csv = load_ee_models_library(data_and_models_dir)
-        df_csv.to_csv(tmp_csv)
-
-        logger.info("Creating the server app")
-        mining_app = MiningServer(models_libs={"ee": tmp_csv}, connection=engine)
+    logger.info("Creating the server app")
+    df_csv = load_ee_models_library(data_and_models_dir)
+    mining_app = MiningServer(models_libs={"ee": df_csv}, connection=engine)
 
     return mining_app
 
