@@ -29,7 +29,8 @@ Legend
 
 Version 0.1.0
 =============
-- |Remove| the embedding model Universal Sentence Encoder (USE) and its
+- |Remove| support for :code:`Python 3.6`.
+- |Remove| the embedding model :code:`Universal Sentence Encoder: (USE) and its
   dependencies (:code:`tensorflow` and :code:`tensorflow-hub`).
 
 
