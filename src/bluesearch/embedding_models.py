@@ -28,7 +28,6 @@ import joblib
 import numpy as np
 import sent2vec
 import sentence_transformers
-import spacy
 import sqlalchemy
 import torch
 from nltk import word_tokenize
@@ -36,7 +35,7 @@ from nltk.corpus import stopwords
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
-from .utils import H5
+from .utils import H5, load_spacy_model
 
 logger = logging.getLogger(__name__)
 
@@ -321,8 +320,8 @@ class Sent2VecModel(EmbeddingModel):
         # (See `spacy.language.Language.from_disk`, here the tokenizer path is
         # "../site-packages/en_core_sci_lg/en_core_sci_lg-x.x.x/tokenizer")
         # so it doesn't seem that the vocab is necessary for the tokenization.
-        self.nlp = spacy.load(
-            name="en_core_sci_lg",
+        self.nlp = load_spacy_model(
+            model_name="en_core_sci_lg",
             disable=["tagger", "parser", "ner", "vocab"],
         )
 

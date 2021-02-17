@@ -80,9 +80,11 @@ def run_pipeline(
     # sanity checks
     if not isinstance(model_entities, spacy.language.Language):
         raise TypeError(
-            "Current implementation requires `model_entities` to be an "
-            "instance of  `spacy.language.Language`. Try with "
-            '`model_entities=spacy.load("en_ner_craft_md")`'
+            """
+    Current implementation requires `model_entities` to be an instance of
+    `spacy.language.Language`.
+    Try `model_entities = bluesearch.utils.load_spacy_model("en_ner_craft_md")`.
+    """
         )
 
     if not all(

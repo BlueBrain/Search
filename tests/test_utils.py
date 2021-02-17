@@ -23,6 +23,7 @@ import h5py
 import numpy as np
 import pandas as pd
 import pytest
+import spacy
 
 from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library
 
@@ -364,3 +365,15 @@ def test_load_ee_models_library(tmpdir, monkeypatch):
     assert df["model_path"][0] == str(fake_root_path / "models" / "ner_er" / "model_1")
     assert df["model_id"][0] == "data_and_models/models/ner_er/model_1"
     assert df["entity_type_name"][0] == "B"
+
+
+@pytest.mark.parametrize(
+    "model_name, is_found", [["en-core-web-sm", True], ["xx-xxxx-xxx-xx", False]]
+)
+def test_load_spacy_model(model_name, is_found):
+    if is_found:
+        nlp = test_load_spacy_model(model_name)
+        assert isinstance(nlp, spacy.language.Language)
+    else:
+        with pytest.raises(ModuleNotFoundError):
+            test_load_spacy_model(model_name)
