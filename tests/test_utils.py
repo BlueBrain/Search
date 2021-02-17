@@ -25,7 +25,7 @@ import pandas as pd
 import pytest
 import spacy
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library
+from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
 
 
 class TestTimer:
@@ -368,12 +368,12 @@ def test_load_ee_models_library(tmpdir, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "model_name, is_found", [["en-core-web-sm", True], ["xx-xxxx-xxx-xx", False]]
+    "model_name,is_found", [("en_core_web_sm", True), ("xx_xxxx_xxx_xx", False)]
 )
 def test_load_spacy_model(model_name, is_found):
     if is_found:
-        nlp = test_load_spacy_model(model_name)
+        nlp = load_spacy_model(model_name)
         assert isinstance(nlp, spacy.language.Language)
     else:
         with pytest.raises(ModuleNotFoundError):
-            test_load_spacy_model(model_name)
+            load_spacy_model(model_name)
