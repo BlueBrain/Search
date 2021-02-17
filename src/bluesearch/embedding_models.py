@@ -297,9 +297,13 @@ class Sent2VecModel(EmbeddingModel):
     ----------
     checkpoint_path : pathlib.Path or str
         The path of the Sent2Vec model to load.
+
+    preprocessing_model: pathlib.Path or str
+        spaCy model to be used for the pre-processing (i.e. tokenization).
+
     """
 
-    def __init__(self, checkpoint_path):
+    def __init__(self, checkpoint_path, preprocessing_model="en_core_sci_lg"):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.checkpoint_path = pathlib.Path(checkpoint_path)
         if not self.checkpoint_path.is_file():
@@ -321,7 +325,7 @@ class Sent2VecModel(EmbeddingModel):
         # "../site-packages/en_core_sci_lg/en_core_sci_lg-x.x.x/tokenizer")
         # so it doesn't seem that the vocab is necessary for the tokenization.
         self.nlp = load_spacy_model(
-            model_name="en_core_sci_lg",
+            model_name=preprocessing_model,
             disable=["tagger", "parser", "ner", "vocab"],
         )
 
