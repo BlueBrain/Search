@@ -83,7 +83,7 @@ def run_pipeline(
             """
     Current implementation requires `model_entities` to be an instance of
     `spacy.language.Language`.
-    Try `model_entities = bluesearch.utils.load_spacy_model("en_ner_craft_md")`.
+    Try e.g. `model_entities = bluesearch.utils.load_spacy_model("en_ner_craft_md")`.
     """
         )
 
