@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from copy import deepcopy
 import json
 from unittest.mock import Mock
 
@@ -1221,6 +1222,7 @@ class TestAttributeExtraction:
         assert isinstance(df, pd.DataFrame)
         assert set(expect_columns).issubset(set(df.columns))
 
+        extractor.ee_model = deepcopy(extractor.ee_model)
         extractor.ee_model.remove_pipe("ner")
 
         df = extractor.extract_attributes(text)
