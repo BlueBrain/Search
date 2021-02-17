@@ -83,4 +83,4 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
         assert not args
         assert kwargs["connection"] == fake_sqlalchemy.create_engine.return_value
         assert "ee" in kwargs["models_libs"]
-        assert isinstance(kwargs["models_libs"]["ee"], pathlib.Path)
+        assert isinstance(kwargs["models_libs"]["ee"], pd.DataFrame)
