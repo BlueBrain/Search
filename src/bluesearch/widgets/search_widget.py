@@ -68,7 +68,7 @@ class SearchWidget(widgets.VBox):
         The number of results to display per results page.
     checkpoint_path : str or pathlib.Path, optional
         Path where checkpoints are saved to and loaded from. If `None`, defaults
-        to `$PWD/untracked/.widgets_checkpoints`.
+        to `~/.local/lib/bluesearch/widgets_checkpoints`.
     """
 
     def __init__(
@@ -122,7 +122,7 @@ class SearchWidget(widgets.VBox):
             self.checkpoint_path = pathlib.Path(checkpoint_path)
         else:
             self.checkpoint_path = (
-                pathlib.Path.cwd() / "untracked" / ".widgets_checkpoints"
+                pathlib.Path.home() / ".local" / "lib" / "bluesearch" / "widgets_checkpoints"
             )
         self.checkpoint_path = self.checkpoint_path / "bbs_search.json"
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
