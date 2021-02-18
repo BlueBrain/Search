@@ -565,7 +565,7 @@ def load_spacy_model(
         If spaCy model loading failed due to non-existent package or local file.
     """
     try:
-        return spacy.load(model_name, **kwargs)
+        return spacy.load(model_name, *args, **kwargs)
     except IOError as err:
         if str(err).startswith("[E050]"):
             raise ModuleNotFoundError(
