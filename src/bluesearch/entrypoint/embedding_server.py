@@ -40,6 +40,13 @@ def get_embedding_app():
     configure_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
+    logger.info(" Configuration ".center(80, "-"))
+    logger.info(f"log-file            : {log_file}")
+    logger.info(f"log-level           : {log_level}")
+    logger.info(f"bsv-checkpoint      : {bsv_checkpoint}")
+    logger.info(f"sent2vec-checkpoint : {sent2vec_checkpoint}")
+    logger.info("-" * 80)
+
     # Load embedding models
     logger.info("Loading embedding models")
     embedding_models = {

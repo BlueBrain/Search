@@ -97,17 +97,14 @@ def run_create_database(argv=None):
     }
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
-    print(" Configuration ".center(80, "-"))
-    print(f"log-file                : {args.log_file}")
-    print(f"cord-data-path          : {args.cord_data_path}")
-    print(f"db-type                 : {args.db_type}")
-    print(f"only-mark-bad-sentences : {args.only_mark_bad_sentences}")
-    print("-" * 80)
-    input("Press any key to continue... ")
-
     # Configure logging
     configure_logging(args.log_file, logging.INFO)
     logger = logging.getLogger(pathlib.Path(__file__).stem)
+
+    logger.info(" Configuration ".center(80, "-"))
+    for k, v in vars(args).items():
+        logger.info(f"{k:<32}: {v}")
+    logger.info("-" * 80)
 
     # Import libraries
     logger.info("Loading libraries")

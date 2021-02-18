@@ -47,6 +47,17 @@ def get_search_app():
     configure_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
+    logger.info(" Configuration ".center(80, "-"))
+    logger.info(f"log-file          : {log_file}")
+    logger.info(f"log-level         : {log_level}")
+    logger.info(f"models-path       : {models_path}")
+    logger.info(f"embeddings-path   : {embeddings_path}")
+    logger.info(f"which-models      : {which_models}")
+    logger.info(f"mysql_url         : {mysql_url}")
+    logger.info(f"mysql_user        : {mysql_user}")
+    logger.info(f"mysql_password    : {mysql_password}")
+    logger.info("-" * 80)
+
     # Initialize flask app
     logger.info("Creating the Flask app")
     models_path = pathlib.Path(models_path)

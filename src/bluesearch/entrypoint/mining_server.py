@@ -41,6 +41,13 @@ def get_mining_app():
     configure_logging(log_file, log_level)
     logger = logging.getLogger(__name__)
 
+    logger.info(" Configuration ".center(80, "-"))
+    logger.info(f"log-file                : {log_file}")
+    logger.info(f"log-level               : {log_level}")
+    logger.info(f"db-type                 : {db_type}")
+    logger.info(f"data_and_models_dir     : {data_and_models_dir}")
+    logger.info("-" * 80)
+
     # Create the database engine
     logger.info("Creating the database engine")
     if db_type == "sqlite":
@@ -49,11 +56,15 @@ def get_mining_app():
         if not sqlite_db_path.exists():
             sqlite_db_path.parent.mkdir(exist_ok=True, parents=True)
             sqlite_db_path.touch()
-        engine = sqlalchemy.create_engine(f"sqlite:///{sqlite_db_path}")
+        engine_url = f"sqlite:///{sqlite_db_path}"
+        logger.info(f"engine-url              : {engine_url}")
+        engine = sqlalchemy.create_engine(engine_url)
     elif db_type == "mysql":
         mysql_url = get_var("BBS_MINING_DB_URL")
         mysql_user = get_var("BBS_MINING_MYSQL_USER")
         mysql_password = get_var("BBS_MINING_MYSQL_PASSWORD")
+        logger.info(f"mysql-url               : {mysql_url}")
+        logger.info(f"mysql-user              : {mysql_user}")
         engine_url = (
             f"mysql+mysqldb://{mysql_user}:{mysql_password}@{mysql_url}?charset=utf8mb4"
         )
