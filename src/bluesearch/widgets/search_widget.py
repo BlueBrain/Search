@@ -123,8 +123,7 @@ class SearchWidget(widgets.VBox):
         else:
             self.checkpoint_path = (
                 pathlib.Path.home()
-                / ".local"
-                / "lib"
+                / ".cache"
                 / "bluesearch"
                 / "widgets_checkpoints"
             )
