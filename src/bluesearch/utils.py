@@ -567,13 +567,13 @@ def load_spacy_model(
     try:
         return spacy.load(model_name, **kwargs)
     except IOError as err:
-        if str(err).split()[0] == "[E050]":
+        if str(err).startswith("[E050]"):
             raise ModuleNotFoundError(
                 f"""
-    Failed to load the following spaCy model:
-        model_name = "{model_name}"
-    If `model_name` is a package name, please install it using
-        $ pip install ...
-    If `model_name` is a local path, please verify the pipeline path.
-    """
+Failed to load the following spaCy model:
+    model_name = "{model_name}"
+If `model_name` is a package name, please install it using
+    $ pip install ...
+If `model_name` is a local path, please verify the pipeline path.
+"""
             ) from err
