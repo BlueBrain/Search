@@ -64,7 +64,7 @@ class MiningWidget(widgets.VBox):
         SQL database. Should lead to major speedups.
     checkpoint_path : str or pathlib.Path, optional
         Path where checkpoints are saved to and loaded from. If `None`, defaults
-        to `$PWD/untracked/.widgets_checkpoints`.
+        to `~/.cache/bluesearch/widgets_checkpoints` folder.
     """
 
     def __init__(
@@ -110,7 +110,7 @@ class MiningWidget(widgets.VBox):
             self.checkpoint_path = pathlib.Path(checkpoint_path)
         else:
             self.checkpoint_path = (
-                pathlib.Path.cwd() / "untracked" / ".widgets_checkpoints"
+                pathlib.Path.home() / ".cache" / "bluesearch" / "widgets_checkpoints"
             )
         self.checkpoint_path = self.checkpoint_path / "bbs_mining.json"
         self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
