@@ -68,7 +68,7 @@ class SearchWidget(widgets.VBox):
         The number of results to display per results page.
     checkpoint_path : str or pathlib.Path, optional
         Path where checkpoints are saved to and loaded from. If `None`, defaults
-        to `~/.local/lib/bluesearch/widgets_checkpoints`.
+        to `~/.cache/bluesearch/widgets_checkpoints`.
     """
 
     def __init__(

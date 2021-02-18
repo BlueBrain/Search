@@ -64,7 +64,7 @@ class MiningWidget(widgets.VBox):
         SQL database. Should lead to major speedups.
     checkpoint_path : str or pathlib.Path, optional
         Path where checkpoints are saved to and loaded from. If `None`, defaults
-        to `~/.local/lib/bluesearch/widgets_checkpoints` folder.
+        to `~/.cache/bluesearch/widgets_checkpoints` folder.
     """
 
     def __init__(
