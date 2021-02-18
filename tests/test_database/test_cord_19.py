@@ -35,7 +35,7 @@ def real_sqlalchemy_engine(
     fake_load = Mock()
     fake_load.return_value = model_entities
 
-    monkeypatch.setattr("bluesearch.database.cord_19.spacy.load", fake_load)
+    monkeypatch.setattr("bluesearch.database.cord_19.load_spacy_model", fake_load)
 
     version = "test"
     if fake_sqlalchemy_engine.url.drivername.startswith("mysql"):
@@ -200,7 +200,7 @@ class TestDatabaseCreation:
         fake_load = Mock()
         fake_load.return_value = model_entities
 
-        monkeypatch.setattr("bluesearch.database.cord_19.spacy.load", fake_load)
+        monkeypatch.setattr("bluesearch.database.cord_19.load_spacy_model", fake_load)
 
         fake_dir = Path(str(tmpdir)) / "fake"
         Path(f"{tmpdir}/cord19_test.db").touch()

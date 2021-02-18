@@ -35,10 +35,10 @@ TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
     """Fixture to create a client for mining_server."""
 
-    spacy_mock = Mock()
-    spacy_mock.load.return_value = model_entities
+    fake_load = Mock()
+    fake_load.return_value = model_entities
 
-    monkeypatch.setattr("bluesearch.server.mining_server.spacy", spacy_mock)
+    monkeypatch.setattr("bluesearch.server.mining_server.load_spacy_model", fake_load)
 
     # This is the original CSV file with 3 columns:
     # entity_type, model, entity_type_name

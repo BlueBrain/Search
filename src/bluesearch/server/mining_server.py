@@ -28,6 +28,7 @@ import bluesearch
 
 from ..mining import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
+from ..utils import load_spacy_model
 
 
 class MiningServer(Flask):
@@ -78,7 +79,7 @@ class MiningServer(Flask):
                 )
             else:
                 self.logger.info(f"Entity type {entity_type}: loading model {model_id}")
-                self.ee_models[model_id] = spacy.load(model_path)
+                self.ee_models[model_id] = load_spacy_model(model_path)
 
         self.connection = connection
 

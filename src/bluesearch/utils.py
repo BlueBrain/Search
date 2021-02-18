@@ -20,11 +20,12 @@
 import json
 import pathlib
 import time
-from typing import Set, Union
+from typing import Any, Set, Union
 
 import h5py
 import numpy as np
 import pandas as pd
+import spacy
 import tqdm
 
 
@@ -539,3 +540,40 @@ def load_ee_models_library(
     df_library = df_library.drop("model", axis=1)
 
     return df_library
+
+
+def load_spacy_model(
+    model_name: Union[str, pathlib.Path], *args: Any, **kwargs: Any
+) -> spacy.language.Language:
+    """Spacy model load with informative error message.
+
+    Parameters
+    ----------
+    model_name:
+        spaCy pipeline to load. It can be a package name or a local path.
+    *args, **kwargs:
+        Arguments passed to `spacy.load()`
+
+    Returns
+    -------
+    model:
+        Loaded spaCy pipeline.
+
+    Raises
+    ------
+    ModuleNotFoundError
+        If spaCy model loading failed due to non-existent package or local file.
+    """
+    try:
+        return spacy.load(model_name, *args, **kwargs)
+    except IOError as err:
+        if str(err).startswith("[E050]"):
+            raise ModuleNotFoundError(
+                f"""
+Failed to load the following spaCy model:
+    model_name = "{model_name}"
+If `model_name` is a package name, please install it using
+    $ pip install ...
+If `model_name` is a local path, please verify the pipeline path.
+"""
+            ) from err

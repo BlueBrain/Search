@@ -16,7 +16,7 @@ GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
-<img src="docs/source/logo/Search_banner.jpg"/>
+<img src="docs/source/logo/BlueBrainSearch_banner.jpg"/>
 
 # Blue Brain Search
 
@@ -218,7 +218,7 @@ Then, please create a working directory and navigate to it in the command line.
 After, please clone the Blue Brain Search repository.
 
 ```bash
-git clone https://github.com/BlueBrain/Search
+git clone https://github.com/BlueBrain/Search.git
 ```
 
 Finally, let's keep track of the path to the working directory
