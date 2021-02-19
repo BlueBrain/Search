@@ -52,7 +52,7 @@ install_requires = [
     "spacy==2.3.1",
     "torch",
     "tqdm",
-    "transformers==3.0.2",
+    "transformers",
     "pyarrow",
 ]
 
