@@ -49,7 +49,7 @@ install_requires = [
     "sent2vec;python_version>='3.9'",
     "sent2vec-prebuilt;python_version<'3.9'",
     "sentence-transformers",
-    "spacy==2.3.1",
+    "spacy<3",
     "torch",
     "tqdm",
     "transformers",
