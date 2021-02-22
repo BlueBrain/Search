@@ -46,8 +46,6 @@ install_requires = [
     "scikit-learn",
     "scipy",
     "scispacy",
-    "sent2vec;python_version>='3.9'",
-    "sent2vec-prebuilt;python_version<'3.9'",
     "sentence-transformers",
     "spacy<3",
     "torch",
