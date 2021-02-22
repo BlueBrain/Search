@@ -161,7 +161,7 @@ Before proceeding, four things need to be noted.
 
 First, at the moment, these instructions assume that the machine is inside Blue
 Brain's network. Indeed, the models we have trained have not been publicly
-released  yet.
+released yet.
 
 Second, the setup of Blue Brain Search requires the launch of 4 servers
 (database, search, mining, notebook). The instructions are supposed to be
