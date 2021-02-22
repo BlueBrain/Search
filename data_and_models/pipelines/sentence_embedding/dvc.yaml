@@ -27,21 +27,6 @@ stages:
     - ../../metrics/sentence_embedding/biobert_nli_sts.png
     metrics:
     - ../../metrics/sentence_embedding/biobert_nli_sts.json
-  eval_bsv:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=bsv --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - ../../models/sentence_embedding/bsv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.bsv
-    outs:
-    - ../../metrics/sentence_embedding/bsv.csv
-    - ../../metrics/sentence_embedding/bsv.png
-    metrics:
-    - ../../metrics/sentence_embedding/bsv.json
   train_tf_idf:
     cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
