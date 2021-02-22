@@ -20,11 +20,12 @@
 import json
 import pathlib
 import time
-from typing import Any, Set, Union
+from typing import Any, Set, Tuple, Union
 
 import h5py
 import numpy as np
 import pandas as pd
+import pkg_resources
 import spacy
 import tqdm
 
@@ -577,3 +578,37 @@ If `model_name` is a package name, please install it using
 If `model_name` is a local path, please verify the pipeline path.
 """
             ) from err
+
+
+def get_semantic_version(package_name: str) -> Tuple[int]:
+    """Get the semantic version of an installed package.
+
+    Parameters
+    ----------
+    package_name
+        The name of an installed package.
+
+    Returns
+    -------
+    A tuple of integers of the form `(major, minor, patch)` with the
+    package version.
+
+    Raises
+    ------
+    RuntimeError
+        If the package was not found or the version of the package is not
+        formatted according to the semver convention.
+    """
+    try:
+        distribution = pkg_resources.get_distribution(package_name)
+    except pkg_resources.DistributionNotFound:
+        raise RuntimeError(f"Package {package_name} was not found") from None
+
+    version = distribution.version.split(".")
+    if len(version) != 3 or not all(x.isdecimal() for x in version):
+        raise RuntimeError(
+            "The package version is not in the (major, minor, patch) "
+            "format prescribed by semver"
+        )
+
+    return tuple(map(int, version))
