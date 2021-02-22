@@ -18,7 +18,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import pathlib
 import sys
 
 from ._helper import configure_logging, get_var, run_server

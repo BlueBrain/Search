@@ -21,7 +21,6 @@ import logging
 import multiprocessing as mp
 import os
 import pathlib
-import string
 from abc import ABC, abstractmethod
 
 import joblib
@@ -29,12 +28,10 @@ import numpy as np
 import sentence_transformers
 import sqlalchemy
 import torch
-from nltk import word_tokenize
-from nltk.corpus import stopwords
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
-from .utils import H5, load_spacy_model
+from .utils import H5
 
 logger = logging.getLogger(__name__)
 
@@ -485,16 +482,10 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
           `get_embedding_model('SBioBERT', device=<device>)`
         - SBERT:
           `get_embedding_model('SBERT', device=<device>)`
-        - Sent2Vec:
-          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
-        - BSV:
-          `get_embedding_model('BSV', <checkpoint_path>)`
 
     - For arbitrary models:
         - My Transformer model:
           `get_embedding_model('SentTransformer', <model_name_or_path>, <device>)`
-        - My Sent2Vec model:
-          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
         - My scikit-learn model:
           `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
 
@@ -520,9 +511,6 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         ),
         "SBioBERT": lambda: SBioBERT(device),
         "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
-        # Sent2Vec models.
-        "Sent2VecModel": lambda: Sent2VecModel(checkpoint_path),
-        "BSV": lambda: BSV(checkpoint_path),
         # Scikit-learn models.
         "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
     }
