@@ -245,6 +245,9 @@ export CORD19_DIRECTORY=$WORKING_DIRECTORY/$CORD19_VERSION
 cd $WORKING_DIRECTORY
 wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$CORD19_ARCHIVE
 tar xf $CORD19_ARCHIVE
+```
+
+```bash
 cd $CORD19_DIRECTORY
 tar xf document_parses.tar.gz
 ```
@@ -280,13 +283,10 @@ export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 ```
 
-```bash
-cd $REPOSITORY_DIRECTORY
-```
-
 This will build a Docker image where MySQL is installed.
 
 ```bash
+cd $REPOSITORY_DIRECTORY
 docker build \
   --build-arg http_proxy \
   --build-arg https_proxy  \
@@ -334,9 +334,6 @@ This will build a Docker image where Blue Brain Search is installed.
 
 ```bash
 cd $REPOSITORY_DIRECTORY
-```
-
-```bash
 docker build \
   --build-arg BBS_HTTP_PROXY=$http_proxy \
   --build-arg BBS_http_proxy=$http_proxy \
@@ -371,7 +368,18 @@ docker run \
 ```
 
 ```bash
-pip install $REPOSITORY_DIRECTORY
+cd $REPOSITORY_DIRECTORY
+```
+
+```bash
+pip install .
+```
+
+Configure DVC to work with the SSH remote from inside a Docker container. 
+
+```bash
+dvc remote modify gpfs_ssh ask_password true
+dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
 ```
 
 ### Create the database
@@ -398,8 +406,13 @@ export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
 export BBS_SEARCH_EMBEDDINGS_PATH=$WORKING_DIRECTORY/embeddings.h5
 ```
 
+You will be asked to enter your SSH password.
+
 ```bash
 cd $BBS_DATA_AND_MODELS_DIR/models/sentence_embedding/
+```
+
+```bash
 dvc pull biobert_nli_sts_cord19_v1
 ```
 
@@ -421,10 +434,7 @@ server. The supported models for the search could be found in
 You will be asked to enter your SSH password.
 
 ```bash
-cd $REPOSITORY_DIRECTORY
-dvc remote modify gpfs_ssh ask_password true
-dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
-cd data_and_models/pipelines/ner
+cd $BBS_DATA_AND_MODELS_DIR/pipelines/ner/
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
 
