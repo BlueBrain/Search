@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import pathlib
+from collections import namedtuple
 
 import h5py
 import numpy as np
@@ -26,6 +27,7 @@ import pytest
 import spacy
 
 from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
+from bluesearch.utils import get_semantic_version
 
 
 class TestTimer:
@@ -377,3 +379,45 @@ def test_load_spacy_model(model_name, is_found):
     else:
         with pytest.raises(ModuleNotFoundError):
             load_spacy_model(model_name)
+
+
+def test_get_semantic_version(monkeypatch):
+    # Test package not found
+    with pytest.raises(RuntimeError, match="not found"):
+        get_semantic_version("this_package_does_not_exist")
+
+    def distribution_with_version(version):
+        """Construct mock for pkg_resources.get_distribution."""
+        Distribution = namedtuple("Distribution", "version")
+
+        def get_distribution(_):
+            return Distribution(version)
+
+        return get_distribution
+
+    # Test number of version tokens != 3
+    monkeypatch.setattr(
+        "bluesearch.utils.pkg_resources.get_distribution",
+        distribution_with_version("1.2.3.4"),
+    )
+    with pytest.raises(RuntimeError, match="format prescribed by semver"):
+        get_semantic_version("doesnt_matter")
+
+    # Test non-integer version
+    monkeypatch.setattr(
+        "bluesearch.utils.pkg_resources.get_distribution",
+        distribution_with_version("1.2.3dev"),
+    )
+    with pytest.raises(RuntimeError, match="format prescribed by semver"):
+        get_semantic_version("doesnt_matter")
+
+    # Test intended functionality
+    version = (3, 2, 1)
+    monkeypatch.setattr(
+        "bluesearch.utils.pkg_resources.get_distribution",
+        distribution_with_version(".".join(map(str, version))),
+    )
+    assert get_semantic_version("doesnt_matter") == version
+
+
+
