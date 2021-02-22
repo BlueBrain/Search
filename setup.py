@@ -48,7 +48,7 @@ install_requires = [
     "scispacy",
     "sent2vec-prebuilt",
     "sentence-transformers==0.3.5",
-    "spacy>3",
+    "spacy",
     "torch",
     "tqdm",
     "transformers==3.0.2",

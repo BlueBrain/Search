@@ -35,7 +35,7 @@ git+https://github.com/BlueBrain/nexus-forge#egg=nexusforge
 gunicorn==20.0.4
 h5py==2.10.0
 hjson==3.0.2
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0-py3-none-any.whl
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
@@ -66,10 +66,11 @@ requests==2.24.0
 responses==0.12.0
 scikit-learn==0.23.2
 scipy==1.5.2
-scispacy==0.2.5
+scispacy==0.4.0
 sent2vec-prebuilt>=0.0.2
 sentence-transformers==0.3.5
-spacy==2.3.1
+spacy==3.0.3
+spacy-legacy==3.0.1
 sphinx-bluebrain-theme==0.2.3
 sseclient==0.0.27
 torch==1.6.0
