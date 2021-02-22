@@ -1,0 +1,98 @@
+/*
+Blue Brain Search is a text mining toolbox focused on scientific use cases.
+
+Copyright (C) 2020  Blue Brain Project, EPFL.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+/* search engine */
+
+.article_title {
+    font-size: 17px;
+    color: #1A0DAB;
+}
+.paragraph {
+    font-size: 13px;
+    color: #222;
+}
+.paragraph_emph {
+    font-weight: bold;
+    color: #000;
+}
+.metadata {
+    font-size: 13px;
+    color: #006621;
+}
+
+/* success */
+.bbs_success {
+    color : #388E3B
+}
+
+/* warnings */
+.bbs_warning {
+    color: #DDB62C
+}
+
+/* errors */
+.bbs_error {
+    color: #E75C58
+}
+
+/* widgets buttons */
+.bbs_button {
+    background-color: #3c96f3;
+    color: #FFF;
+    font-size: 150%;
+    transition-duration: 0.2s;
+}
+.bbs_button:hover {
+    background-color: #3176d2;
+}
+
+.jupyter-button:active, .jupyter-button.mod-active {
+    color: #FFF;
+    background-color: #3c96f3;
+}
+.jupyter-button:hover {
+    color: #FFF;
+    background-color: #3176d2;
+}
+
+/* attribute extraction */
+
+.number  {
+    display: inline-block;
+    background: lightgreen;
+    padding: 0.2em 0.5em;
+    border-radius: 7px;
+}
+.unit {
+    display: inline-block;
+    background: pink;
+    padding: 0.2em 0.5em;
+    border-radius: 7px;
+}
+.quantityType {
+    display: inline-block;
+    background: yellow;
+    font-variant:small-caps;
+    padding: 0.2em 0.5em;
+    border-radius: 7px;
+}
+.fixedWidth {
+    width: 4px;
+    text-align: justify;
+}

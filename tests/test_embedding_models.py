@@ -1,3 +1,22 @@
+"""Tests covering embedding models."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import importlib
 import pickle
 from pathlib import Path
@@ -8,14 +27,12 @@ import numpy as np
 import pandas as pd
 import pytest
 import sent2vec
-import tensorflow as tf
 import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
-from bbsearch.embedding_models import (
+from bluesearch.embedding_models import (
     BSV,
-    USE,
     EmbeddingModel,
     MPEmbedder,
     SBioBERT,
@@ -28,16 +45,18 @@ from bbsearch.embedding_models import (
 
 
 class TestEmbeddingModels:
-    def test_abstractclass(self):
-        with pytest.raises(TypeError):
-            EmbeddingModel()
+    def test_abstract_class(self):
+        # Test that "EmbeddingModel" is abstract
+        assert "__abstractmethods__" in EmbeddingModel.__dict__
+        assert len(EmbeddingModel.__dict__["__abstractmethods__"]) > 0
 
+        # Test not overriding all abstract methods
         class WrongModel(EmbeddingModel):
-            def embed(a):
+            def embed(self, _):
                 pass
 
-        with pytest.raises(TypeError):
-            WrongModel()
+        assert "__abstractmethods__" in WrongModel.__dict__
+        assert len(WrongModel.__dict__["__abstractmethods__"]) > 0
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_sbiobert_embedding(self, monkeypatch, n_sentences):
@@ -60,8 +79,8 @@ class TestEmbeddingModels:
         auto_tokenizer = Mock()
         auto_tokenizer.from_pretrained.return_value = tokenizer
 
-        monkeypatch.setattr("bbsearch.embedding_models.AutoTokenizer", auto_tokenizer)
-        monkeypatch.setattr("bbsearch.embedding_models.AutoModel", auto_model)
+        monkeypatch.setattr("bluesearch.embedding_models.AutoTokenizer", auto_tokenizer)
+        monkeypatch.setattr("bluesearch.embedding_models.AutoModel", auto_model)
 
         sbiobert = SBioBERT()
 
@@ -93,7 +112,7 @@ class TestEmbeddingModels:
         bsv_model.embed_sentences.return_value = np.ones([n_sentences, 700])
         sent2vec_module.Sent2vecModel.return_value = bsv_model
 
-        monkeypatch.setattr("bbsearch.embedding_models.sent2vec", sent2vec_module)
+        monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
 
         new_file_path = Path(str(tmpdir)) / "test.txt"
         new_file_path.touch()
@@ -139,7 +158,9 @@ class TestEmbeddingModels:
 
         fake_sent2vec_module = Mock()
         fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
-        monkeypatch.setattr("bbsearch.embedding_models.sent2vec", fake_sent2vec_module)
+        monkeypatch.setattr(
+            "bluesearch.embedding_models.sent2vec", fake_sent2vec_module
+        )
 
         # Test invalid checkpoint path
         with pytest.raises(FileNotFoundError):
@@ -148,14 +169,14 @@ class TestEmbeddingModels:
         # Instantiate the model class
         new_file_path = Path(tmpdir) / "test.txt"
         new_file_path.touch()
-        model = Sent2VecModel(new_file_path)
+        model = Sent2VecModel(new_file_path, "en_core_web_sm")
 
         # Embedding dimensionality
         assert model.dim == embedding_dim
 
         # Set testing sentences and methods
         dummy_sentence = "This is a dummy sentence/test."
-        preprocess_truth = "dummy sentence/test"
+        preprocess_truth = "dummy sentence test"
         if n_sentences == 1:
             preprocess_method = model.preprocess
             embed_method = model.embed
@@ -188,7 +209,7 @@ class TestEmbeddingModels:
         sentence_transormer_class.return_value = senttrans_model
 
         monkeypatch.setattr(
-            "bbsearch.embedding_models.sentence_transformers.SentenceTransformer",
+            "bluesearch.embedding_models.sentence_transformers.SentenceTransformer",
             sentence_transormer_class,
         )
         sbert = SentTransformer("bert-base-nli-mean-tokens")
@@ -214,38 +235,6 @@ class TestEmbeddingModels:
         assert isinstance(embedding, np.ndarray)
         assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         senttrans_model.encode.assert_called_once()
-
-    @pytest.mark.parametrize("n_sentences", [1, 5])
-    def test_use_embedding(self, monkeypatch, n_sentences):
-        hub_module = Mock()
-        use_model = Mock()
-        hub_module.load.return_value = use_model
-        use_model.return_value = tf.ones((n_sentences, 512))
-
-        monkeypatch.setattr("bbsearch.embedding_models.hub", hub_module)
-        use = USE()
-
-        # Preparations
-        dummy_sentence = "This is a dummy sentence/test."
-
-        if n_sentences != 1:
-            dummy_sentence = n_sentences * [dummy_sentence]
-
-        preprocess_method = getattr(
-            use, "preprocess" if n_sentences == 1 else "preprocess_many"
-        )
-        embed_method = getattr(use, "embed" if n_sentences == 1 else "embed_many")
-
-        # Assertions
-        assert use.dim == 512
-
-        preprocessed_sentence = preprocess_method(dummy_sentence)
-        assert preprocessed_sentence == dummy_sentence
-
-        embedding = embed_method(preprocessed_sentence)
-        assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == ((512,) if n_sentences == 1 else (n_sentences, 512))
-        use_model.assert_called_once()
 
     @pytest.mark.parametrize(
         "backend", ["TfidfVectorizer", "CountVectorizer", "HashingVectorizer"]
@@ -371,7 +360,7 @@ def test_compute_database(
     new_file_path = Path(str(tmpdir)) / "test.txt"
     new_file_path.touch()
 
-    monkeypatch.setattr("bbsearch.embedding_models.sent2vec", sent2vec_module)
+    monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
 
     bsv = BSV(Path(new_file_path))
 
@@ -403,14 +392,15 @@ class TestGetEmbeddingModel:
             ("SklearnVectorizer", "SklearnVectorizer"),
             ("SBioBERT", "SBioBERT"),
             ("SBERT", "SentTransformer"),
-            ("USE", "USE"),
         ],
     )
     def test_returns_instance(self, monkeypatch, name, underlying_class):
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
-        monkeypatch.setattr(f"bbsearch.embedding_models.{underlying_class}", fake_class)
+        monkeypatch.setattr(
+            f"bluesearch.embedding_models.{underlying_class}", fake_class
+        )
 
         returned_instance = get_embedding_model(name)
 
@@ -440,7 +430,7 @@ class TestMPEmbedder:
         fake_get_embedding_model = Mock(return_value=Random(dim))
 
         monkeypatch.setattr(
-            "bbsearch.embedding_models.get_embedding_model", fake_get_embedding_model
+            "bluesearch.embedding_models.get_embedding_model", fake_get_embedding_model
         )
 
         MPEmbedder.run_embedding_worker(
@@ -506,8 +496,8 @@ class TestMPEmbedder:
 
         fake_multiprocessing = Mock()
         fake_h5 = Mock()
-        monkeypatch.setattr("bbsearch.embedding_models.mp", fake_multiprocessing)
-        monkeypatch.setattr("bbsearch.embedding_models.H5", fake_h5)
+        monkeypatch.setattr("bluesearch.embedding_models.mp", fake_multiprocessing)
+        monkeypatch.setattr("bluesearch.embedding_models.H5", fake_h5)
 
         mpe.do_embedding()
 

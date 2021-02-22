@@ -1,11 +1,31 @@
 """Collection of tests focused on the utils.py module."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import pathlib
 
 import h5py
 import numpy as np
+import pandas as pd
 import pytest
+import spacy
 
-from bbsearch.utils import H5, JSONL, Timer
+from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
 
 
 class TestTimer:
@@ -323,3 +343,37 @@ def test_load_save_jsonl(tmpdir):
     lo = JSONL.load_jsonl(path)
 
     assert li == lo
+
+
+def test_load_ee_models_library(tmpdir, monkeypatch):
+    fake_root_path = pathlib.Path(str(tmpdir)) / "data_and_models"
+
+    # Create directory structure and files
+    original_df = pd.DataFrame(
+        {"entity_type": ["A"], "model": ["model_1"], "entity_type_name": ["B"]}
+    )
+
+    csv_path = fake_root_path / "pipelines" / "ner" / "ee_models_library.csv"
+    csv_path.parent.mkdir(parents=True)
+    original_df.to_csv(csv_path)
+
+    df = load_ee_models_library(fake_root_path)
+
+    # Checks
+    assert isinstance(df, pd.DataFrame)
+    assert df["entity_type"][0] == "A"
+    assert df["model_path"][0] == str(fake_root_path / "models" / "ner_er" / "model_1")
+    assert df["model_id"][0] == "data_and_models/models/ner_er/model_1"
+    assert df["entity_type_name"][0] == "B"
+
+
+@pytest.mark.parametrize(
+    "model_name,is_found", [("en_core_web_sm", True), ("xx_xxxx_xxx_xx", False)]
+)
+def test_load_spacy_model(model_name, is_found):
+    if is_found:
+        nlp = load_spacy_model(model_name)
+        assert isinstance(nlp, spacy.language.Language)
+    else:
+        with pytest.raises(ModuleNotFoundError):
+            load_spacy_model(model_name)

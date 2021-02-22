@@ -1,10 +1,29 @@
+"""Tests covering the search server."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from unittest.mock import Mock
 
 import numpy as np
 import pytest
 
-from bbsearch.server.search_server import SearchServer
-from bbsearch.utils import H5
+from bluesearch.server.search_server import SearchServer
+from bluesearch.utils import H5
 
 
 @pytest.fixture
@@ -27,8 +46,10 @@ def search_client(
         (test_parameters["embedding_size"],)
     )
 
-    monkeypatch.setattr("bbsearch.server.search_server.BSV", bsv_model_class)
-    monkeypatch.setattr("bbsearch.server.search_server.SBioBERT", sbiobert_model_class)
+    monkeypatch.setattr("bluesearch.server.search_server.BSV", bsv_model_class)
+    monkeypatch.setattr(
+        "bluesearch.server.search_server.SBioBERT", sbiobert_model_class
+    )
 
     indices = H5.find_populated_rows(embeddings_h5_path, "BSV")
 
@@ -46,22 +67,23 @@ def search_client(
 
 class TestSearchServer:
     def test_search_server(self, search_client):
+        # Test the help request
         response = search_client.post("/help")
         assert response.status_code == 200
         assert response.json["name"] == "SearchServer"
 
-        request_json = {"which_model": "BSV", "k": 3, "query_text": "hello"}
+        # Test a valid JSON request
+        k = 3
+        request_json = {"which_model": "BSV", "k": k, "query_text": "hello"}
         response = search_client.post("/", json=request_json)
         assert response.status_code == 200
-
         json_response = response.json
-        assert len(json_response["sentence_ids"]) == 3
-        assert len(json_response["similarities"]) == 3
+        assert len(json_response["sentence_ids"]) == k
+        assert len(json_response["similarities"]) == k
 
-        request_json = "data is not a json"
-        response = search_client.post("/", data=request_json)
+        # Test a non-JSON request
+        response = search_client.post("/", data="data is not a json")
         assert response.status_code == 200
-
         json_response = response.json
         assert json_response["sentence_ids"] is None
         assert json_response["similarities"] is None

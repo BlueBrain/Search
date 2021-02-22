@@ -1,3 +1,22 @@
+"""Tests covering the creation of the CORD-19 database."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -5,7 +24,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bbsearch.database import CORD19DatabaseCreation, mark_bad_sentences
+from bluesearch.database import CORD19DatabaseCreation, mark_bad_sentences
 
 
 @pytest.fixture()
@@ -16,7 +35,7 @@ def real_sqlalchemy_engine(
     fake_load = Mock()
     fake_load.return_value = model_entities
 
-    monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
+    monkeypatch.setattr("bluesearch.database.cord_19.load_spacy_model", fake_load)
 
     version = "test"
     if fake_sqlalchemy_engine.url.drivername.startswith("mysql"):
@@ -181,7 +200,7 @@ class TestDatabaseCreation:
         fake_load = Mock()
         fake_load.return_value = model_entities
 
-        monkeypatch.setattr("bbsearch.database.cord_19.spacy.load", fake_load)
+        monkeypatch.setattr("bluesearch.database.cord_19.load_spacy_model", fake_load)
 
         fake_dir = Path(str(tmpdir)) / "fake"
         Path(f"{tmpdir}/cord19_test.db").touch()

@@ -1,3 +1,3 @@
 entity_type,model,entity_type_name
-CHEMICAL,en_ner_craft_md,CHEBI
-ORGANISM,en_ner_craft_md,TAXON
+CHEMICAL,model1,CHEBI
+ORGANISM,model1,TAXON

@@ -1,4 +1,22 @@
 """Collection of tests regarding the Database creation. """
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import inspect
 from importlib import import_module
 
@@ -6,7 +24,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from bbsearch.sql import (
+from bluesearch.sql import (
     SentenceFilter,
     get_titles,
     retrieve_article_ids,
@@ -38,7 +56,7 @@ class TestNoSQL:
         ],
     )
     def test_sql_queries(self, module_name):
-        module = import_module(f"bbsearch.{module_name}")
+        module = import_module(f"bluesearch.{module_name}")
         source_code = inspect.getsource(module)
         assert "SELECT" not in source_code
 
@@ -74,7 +92,7 @@ class TestSQLQueries:
             ]
         )
 
-    @pytest.mark.parametrize("sentence_id", [1, 2, 3, 0, -100])
+    @pytest.mark.parametrize("sentence_id", [1, 2, 3, 0, -100, -1, np.int64(2)])
     def test_retrieve_paragraph_from_sentence_id(
         self, sentence_id, fake_sqlalchemy_engine
     ):
@@ -85,7 +103,7 @@ class TestSQLQueries:
         sentence_text = retrieve_sentences_from_sentence_ids(
             sentence_ids=(sentence_id,), engine=fake_sqlalchemy_engine
         )
-        if sentence_id == 0 or sentence_id == -100:  # invalid sentence_id
+        if sentence_id in [0, -100, -1]:  # invalid sentence_id
             assert paragraph is None
         else:
             assert isinstance(paragraph, str)
@@ -187,16 +205,20 @@ class TestMiningCache:
         )
 
         res = retrieve_mining_cache(
-            identifiers, ["en_ner_craft_md"], fake_sqlalchemy_engine
+            identifiers,
+            ["data_and_models/models/ner_er/model1"],
+            fake_sqlalchemy_engine,
         )
 
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
 
-    @pytest.mark.parametrize("mining_model", ["en_ner_craft_md", "wrong_model"])
+    @pytest.mark.parametrize(
+        "mining_model", ["data_and_models/models/ner_er/model1", "wrong_model"]
+    )
     def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
         identifiers = [(1, -1), (2, 1)]
-        if mining_model == "en_ner_craft_md":
+        if mining_model == "data_and_models/models/ner_er/model1":
             expected_len = (
                 1
                 * test_parameters["n_sections_per_article"]
@@ -210,7 +232,7 @@ class TestMiningCache:
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
         assert set(res["article_id"].unique()) == (
-            {1, 2} if mining_model == "en_ner_craft_md" else set()
+            {1, 2} if mining_model == "data_and_models/models/ner_er/model1" else set()
         )
 
     def test_retrieve_none(self, fake_sqlalchemy_engine):
@@ -218,7 +240,9 @@ class TestMiningCache:
         expected_len = 0
 
         res = retrieve_mining_cache(
-            identifiers, ["en_ner_craft_md"], fake_sqlalchemy_engine
+            identifiers,
+            ["data_and_models/models/ner_er/model1"],
+            fake_sqlalchemy_engine,
         )
 
         assert isinstance(res, pd.DataFrame)

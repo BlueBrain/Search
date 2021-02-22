@@ -1,3 +1,22 @@
+"""Tests covering mining cache."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import logging
 import multiprocessing as mp
 import queue
@@ -5,9 +24,10 @@ import time
 
 import pandas as pd
 import pytest
+import sqlalchemy
 
-from bbsearch.database import CreateMiningCache
-from bbsearch.database.mining_cache import Miner
+from bluesearch.database import CreateMiningCache
+from bluesearch.database.mining_cache import Miner
 
 
 class TestMiner:
@@ -15,7 +35,7 @@ class TestMiner:
     def miner_env(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.load_spacy_model",
             lambda model_path: model_entities,
         )
 
@@ -23,6 +43,7 @@ class TestMiner:
         can_finish = mp.Event()
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
+            model_id="my_model",
             model_path="en_core_web_sm",
             entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
@@ -39,12 +60,13 @@ class TestMiner:
 
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.load_spacy_model",
             lambda model_path: model_entities,
         )
 
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
+            model_id="my_model",
             model_path="en_core_web_sm",
             entity_map={},
             target_table="",
@@ -83,7 +105,9 @@ class TestMiner:
             can_finish.set()
             return pd.DataFrame([fake_result])
 
-        monkeypatch.setattr("bbsearch.database.mining_cache.run_pipeline", run_pipeline)
+        monkeypatch.setattr(
+            "bluesearch.database.mining_cache.run_pipeline", run_pipeline
+        )
 
         # Work loop with queue with one article ID
         task_queue.put(article_id)
@@ -153,7 +177,8 @@ class TestCreateMiningCache:
             [
                 {
                     "entity_type": "type_1_public",
-                    "model": "model_1",
+                    "model_id": "my_model_1",
+                    "model_path": "/my/model/path",
                     "entity_type_name": "type_1",
                 }
             ]
@@ -233,8 +258,8 @@ class TestCreateMiningCache:
         model_schemas = cache_creator._load_model_schemas()
         assert isinstance(model_schemas, dict)
         assert len(model_schemas) == 1
-        assert model_schemas["model_1"]["model_path"] == "model_1"
-        assert model_schemas["model_1"]["entity_map"] == {"type_1": "type_1_public"}
+        assert model_schemas["my_model_1"]["model_path"] == "/my/model/path"
+        assert model_schemas["my_model_1"]["entity_map"] == {"type_1": "type_1_public"}
 
     @staticmethod
     def fake_wait_miner(stop_now):
@@ -277,17 +302,23 @@ class TestCreateMiningCache:
                 continue
 
     def test_do_mining(self, cache_creator, monkeypatch):
+        cache_creator._schema_creation()
+
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            "bluesearch.database.mining_cache.Miner.create_and_mine",
             self.fake_queue_miner,
         )
-
         cache_creator.do_mining()
+        cache_creator.engine.execute(f"drop table {cache_creator.target_table}")
+        inspector = sqlalchemy.inspect(cache_creator.engine)
+        indexes = inspector.get_indexes("mining_cache")
+        assert len(indexes) == 1
 
     def test_construct(self, cache_creator, monkeypatch):
         monkeypatch.setattr(
-            "bbsearch.database.mining_cache.Miner.create_and_mine",
+            "bluesearch.database.mining_cache.Miner.create_and_mine",
             self.fake_queue_miner,
         )
 
         cache_creator.construct()
+        cache_creator.engine.execute(f"drop table {cache_creator.target_table}")

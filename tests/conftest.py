@@ -1,4 +1,22 @@
 """Configuration of pytest."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import time
 from pathlib import Path
 
@@ -13,23 +31,6 @@ from sqlalchemy.exc import OperationalError
 import docker
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
-
-
-def pytest_addoption(parser):
-    parser.addoption("--embedding_server", default="", help="Embedding server URI")
-    parser.addoption("--mining_server", default="", help="Mining server URI")
-    parser.addoption("--mysql_server", default="", help="MySQL server URI")
-    parser.addoption("--search_server", default="", help="Search server URI")
-
-
-@pytest.fixture(scope="session")
-def benchmark_parameters(request):
-    return {
-        "embedding_server": request.config.getoption("--embedding_server"),
-        "mining_server": request.config.getoption("--mining_server"),
-        "mysql_server": request.config.getoption("--mysql_server"),
-        "search_server": request.config.getoption("--search_server"),
-    }
 
 
 @pytest.fixture(scope="session")
@@ -184,22 +185,24 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
     for article_id in set(metadata_df[metadata_df.index.notna()].index.to_list()):
         for sec_ix in range(test_parameters["n_sections_per_article"]):
             for ent_ix in range(test_parameters["n_entities_per_section"]):
-                s = {
-                    "entity": f"entity_{ent_ix}",
-                    "entity_type": entity_types[ent_ix],
-                    "property": None,
-                    "property_value": None,
-                    "property_type": None,
-                    "property_value_type": None,
-                    "paper_id": f"{article_id}:whatever:{sec_ix}",
-                    "start_char": ent_ix,
-                    "end_char": ent_ix + 1,
-                    "article_id": article_id,
-                    "paragraph_pos_in_article": sec_ix,
-                    # from data/mining/request/ee_models_library.csv
-                    "mining_model": "en_ner_craft_md",
-                }
-                temp_m.append(pd.Series(s))
+                s = pd.Series(
+                    {
+                        "entity": f"entity_{ent_ix}",
+                        "entity_type": entity_types[ent_ix],
+                        "property": None,
+                        "property_value": None,
+                        "property_type": None,
+                        "property_value_type": None,
+                        "paper_id": f"{article_id}:whatever:{sec_ix}",
+                        "start_char": ent_ix,
+                        "end_char": ent_ix + 1,
+                        "article_id": article_id,
+                        "paragraph_pos_in_article": sec_ix,
+                        # from data/mining/request/ee_models_library.csv
+                        "mining_model": "data_and_models/models/ner_er/model1",
+                    }
+                )
+                temp_m.append(s)
 
     mining_content = pd.DataFrame(temp_m)
     mining_content.index.name = "entity_id"
@@ -318,7 +321,7 @@ def entity_types():
 def embeddings_h5_path(tmp_path_factory, fake_sqlalchemy_engine, test_parameters):
     random_state = 3
     np.random.seed(random_state)
-    models = ["SBERT", "SBioBERT", "USE", "BSV"]
+    models = ["SBERT", "SBioBERT", "BSV"]
     dim = test_parameters["embedding_size"]
     n_sentences = pd.read_sql(
         "SELECT COUNT(*) FROM sentences", fake_sqlalchemy_engine

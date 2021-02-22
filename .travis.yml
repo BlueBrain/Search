@@ -1,36 +1,59 @@
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 branches:
   only:
     - "master"
+
+if: commit_message =~ /\[(test travis|run travis)\]/ OR type = push
 
 services:
   - docker
 
 language: python
 
-cache:
-    directories:
-        - $HOME/.cache/pip
+cache: pip
+
+env:
+  global:
 
 matrix:
   include:
     - stage: Lint and Code Style
-      python: 3.8
+      python: 3.7
       env: TOXENV=lint
 
     - stage: Tests and Coverage
-      python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
+      python: 3.7
       env: TOXENV=py37
-    - python: 3.8
+    - if: type = push
+      python: 3.8
       env: TOXENV=py38
+#    - if: type = push
+#      python: 3.9
+#      env: TOXENV=py39
 
     - stage: Docs
-      python: 3.8
+      python: 3.7
       env: TOXENV=docs
 
     - stage: Packaging
-      python: 3.8
+      if: type = push
+      python: 3.7
       env: TOXENV=check-packaging
 
 before_install:

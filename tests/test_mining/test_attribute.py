@@ -1,13 +1,32 @@
+"""Tests covering attribute extraction."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import json
+from copy import deepcopy
 from unittest.mock import Mock
 
 import pandas as pd
 import pytest
 import requests
-import spacy
 from IPython.display import HTML
 
-from bbsearch.mining import AttributeAnnotationTab, AttributeExtractor
+from bluesearch.mining import AttributeAnnotationTab, AttributeExtractor
 
 
 @pytest.fixture(scope="session")
@@ -890,7 +909,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr("bbsearch.mining.attribute.requests", fake_requests)
+        monkeypatch.setattr("bluesearch.mining.attribute.requests", fake_requests)
         fake_requests.post.return_value = response
 
         # Test 1
@@ -1137,7 +1156,7 @@ class TestAttributeExtraction:
         response._content = json.dumps(real_response_json).encode("utf-8")
 
         fake_requests = Mock()
-        monkeypatch.setattr("bbsearch.mining.attribute.requests", fake_requests)
+        monkeypatch.setattr("bluesearch.mining.attribute.requests", fake_requests)
         fake_requests.post.return_value = response
 
         response_json = extractor.get_core_nlp_analysis(text)
@@ -1203,8 +1222,8 @@ class TestAttributeExtraction:
         assert isinstance(df, pd.DataFrame)
         assert set(expect_columns).issubset(set(df.columns))
 
-        ee_model = spacy.load("en_ner_craft_md")
-        monkeypatch.setattr(extractor, "ee_model", ee_model)
+        extractor.ee_model = deepcopy(extractor.ee_model)
+        extractor.ee_model.remove_pipe("ner")
 
         df = extractor.extract_attributes(text)
         assert isinstance(df, pd.DataFrame)

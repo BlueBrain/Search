@@ -1,10 +1,28 @@
-"""Collection of tests focused on the bbsearch.mining.relation module"""
+"""Collection of tests focused on the bluesearch.mining.relation module"""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from unittest.mock import Mock
 
 import pytest
 from spacy.tokens import Doc, Span
 
-from bbsearch.mining import ChemProt, StartWithTheSameLetter, annotate
+from bluesearch.mining import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):
@@ -74,6 +92,21 @@ def test_annotate(model_entities):
 
 @pytest.mark.parametrize("return_prob", [True, False])
 def test_chemprot(monkeypatch, return_prob):
+    """Run only if scibert installed.
+
+    By default this test will be skipped by the CI since `scibert` introduces
+    conflicts. However, one can use it locally to test whether the
+    `ChemProt` class works as expected.
+    """
+    pytest.importorskip("allennlp")
+    pytest.importorskip("scibert")  # note that the import itself has a side effect
+
+    # Test scibert import side-effect
+    from allennlp.models.model import Model
+
+    assert "text_classifier" in Model.list_available()
+
+    # Prepare test
     class_probs = 13 * [0]
     class_probs[7] = 1
 
@@ -82,10 +115,11 @@ def test_chemprot(monkeypatch, return_prob):
 
     fake_predictor = Mock()
     fake_predictor.from_path.return_value = fake_model
-
-    monkeypatch.setattr("bbsearch.mining.relation.Predictor", fake_predictor)
+    monkeypatch.setattr("allennlp.predictors.Predictor", fake_predictor)
 
     re_model = ChemProt("")
+
+    # Check REModel logic
     annotated_sentence = (
         "The selective << betaAR >> agonist [[ isoproterenol ]] caused an"
         " enhancement of hippocampal CA3 network activity"

@@ -11,6 +11,10 @@ eval:
     class: BSV
     init_kwargs:
       checkpoint_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
+  biobert_nli_sts_cord19_v1:
+    class: SentTransformer
+    init_kwargs:
+      model_name_or_path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
   biobert_nli_sts:
     class: SentTransformer
     init_kwargs:
@@ -23,10 +27,6 @@ eval:
     class: SklearnVectorizer
     init_kwargs:
       checkpoint_path: ../../models/sentence_embedding/count/model.pkl
-  use:
-    class: USE
-    init_kwargs:
-      use_version: 5
   sbert:
     class: SentTransformer
     init_kwargs:

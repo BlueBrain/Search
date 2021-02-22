@@ -1,4 +1,22 @@
 """Evaluation script for NER models."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from argparse import ArgumentParser
 from collections import OrderedDict
 import pathlib
@@ -8,7 +26,7 @@ import pandas as pd
 import spacy
 import yaml
 
-from bbsearch.mining.eval import (
+from bluesearch.mining.eval import (
     annotations2df,
     spacy2df,
     remove_punctuation,
@@ -54,7 +72,7 @@ def main():
 
     df_pred = []
     for source, df_ in df.groupby("source"):
-        df_ = df_.sort_values(by="id", inplace=False, ignore_index=True)
+        df_ = df_.sort_values(by="id", ignore_index=True)
         df_sentence = spacy2df(
             spacy_model=ner_model, ground_truth_tokenization=df_["text"].to_list()
         )
@@ -62,8 +80,7 @@ def main():
         df_sentence["source"] = source
         df_pred.append(df_sentence)
 
-    df_pred = pd.concat(df_pred, ignore_index=True)
-    df_pred.rename(columns={"class": "class_pred"}, inplace=True)
+    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
 
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
 

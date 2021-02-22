@@ -1,4 +1,18 @@
 stages:
+  eval_biobert_nli_sts_cord19_v1:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
+    deps:
+    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
+    - eval.py
+    params:
+    - eval.biobert_nli_sts_cord19_v1
+    outs:
+    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
+    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
+    metrics:
+    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
   eval_biobert_nli_sts:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
@@ -80,20 +94,6 @@ stages:
     - ../../metrics/sentence_embedding/count.png
     metrics:
     - ../../metrics/sentence_embedding/count.json
-  eval_use:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=use --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.use
-    outs:
-    - ../../metrics/sentence_embedding/use.csv
-    - ../../metrics/sentence_embedding/use.png
-    metrics:
-    - ../../metrics/sentence_embedding/use.json
   eval_sbert:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=sbert --output_dir=../../metrics/sentence_embedding

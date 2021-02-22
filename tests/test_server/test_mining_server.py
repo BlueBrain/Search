@@ -1,4 +1,22 @@
 """Test for the mining server."""
+
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+import shutil
 from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
@@ -6,24 +24,41 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bbsearch.mining import SPECS
-from bbsearch.server.mining_server import MiningServer
+from bluesearch.mining import SPECS
+from bluesearch.server.mining_server import MiningServer
+from bluesearch.utils import load_ee_models_library
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
 
 @pytest.fixture
-def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch):
+def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
     """Fixture to create a client for mining_server."""
 
-    spacy_mock = Mock()
-    spacy_mock.load.return_value = model_entities
+    fake_load = Mock()
+    fake_load.return_value = model_entities
 
-    monkeypatch.setattr("bbsearch.server.mining_server.spacy", spacy_mock)
+    monkeypatch.setattr("bluesearch.server.mining_server.load_spacy_model", fake_load)
 
+    # This is the original CSV file with 3 columns:
+    # entity_type, model, entity_type_name
     models_libs = TESTS_PATH / "data" / "mining" / "request" / "ee_models_library.csv"
+
+    # To load the library file we must use load_ee_models_library() as it
+    # converts the column "model" to two new columns "model_id" and "model_path"
+    # However, load_ee_models_library() assumes a particular directory
+    # structure, that's why we copy the original CSV to a new place with the
+    # correct directory structure.
+    tmpdir = Path(tmpdir)
+    new_csv_path = tmpdir / "pipelines" / "ner" / "ee_models_library.csv"
+    new_csv_path.parent.mkdir(parents=True)
+    shutil.copy(models_libs, new_csv_path)
+
+    # Load the model library
+    df_csv = load_ee_models_library(tmpdir)
+
     mining_server_app = MiningServer(
-        models_libs={"ee": str(models_libs)}, connection=fake_sqlalchemy_engine
+        models_libs={"ee": df_csv}, connection=fake_sqlalchemy_engine
     )
     mining_server_app.config["TESTING"] = True
     with mining_server_app.test_client() as client:
@@ -40,6 +75,7 @@ class TestMiningServer:
         with open(schema_file, "r") as f:
             schema_request = f.read()
 
+        # Test a valid request
         request_json = {"text": "hello", "schema": schema_request}
         response = mining_client.post("/text", json=request_json)
         assert response.headers["Content-Type"] == "application/json"
@@ -58,20 +94,23 @@ class TestMiningServer:
             "ontology_source,paper_id,"
             "start_char,end_char"
         )
+
+        # Test request with a missing text
         request_json = {}
         response = mining_client.post("/text", json=request_json)
         assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": 'The request "text" is missing.'}
 
+        # Test request with a missing schema
         request_json = {"text": "hello"}
         response = mining_client.post("/text", json=request_json)
         assert response.status_code == 400
         assert list(response.json.keys()) == ["error"]
         assert response.json == {"error": 'The request "schema" is missing.'}
 
-        request_json = "text"
-        response = mining_client.post("/text", data=request_json)
+        # Test a non-JSON request
+        response = mining_client.post("/text", data="text")
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
@@ -82,14 +121,15 @@ class TestMiningServer:
         schema_file = TESTS_PATH / "data" / "mining" / "request" / "request.csv"
         with open(schema_file, "r") as f:
             schema_request = f.read()
-        request_json = {}
-        response = mining_client.post("/database", json=request_json)
+
+        # Test a request with a missing "identifiers" key
+        response = mining_client.post("/database", json={})
         assert list(response.json.keys()) == ["error"]
         assert response.status_code == 400
         assert response.json == {"error": 'The request "identifiers" is missing.'}
 
-        request_json = "text"
-        response = mining_client.post("/database", data=request_json)
+        # Test a non-JSON request
+        response = mining_client.post("/database", data="text")
         assert response.status_code == 400
         assert response.json == {"error": "The request has to be a JSON object."}
 
@@ -118,9 +158,7 @@ class TestMiningServer:
         )
 
     @pytest.mark.parametrize("debug", [True, False], ids=["debug", "specs"])
-    def test_mining_cache_detailed(
-        self, mining_client, test_parameters, entity_types, debug
-    ):
+    def test_mining_cache_detailed(self, mining_client, test_parameters, debug):
         """Test exact count of found entities.
 
         This test assumes that the requested entity types are a superset of
