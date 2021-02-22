@@ -1222,7 +1222,7 @@ class TestAttributeExtraction:
         assert isinstance(df, pd.DataFrame)
         assert set(expect_columns).issubset(set(df.columns))
 
-        extractor.ee_model = spacy.load('en_core_web_sm')
+        extractor.ee_model = spacy.load("en_core_web_sm")
         extractor.ee_model.remove_pipe("ner")
 
         df = extractor.extract_attributes(text)

@@ -240,8 +240,12 @@ class TestSpacy2df:
         model.add_pipe("ner", first=True, source=model_entities)
         er1 = model.add_pipe("entity_ruler", name="er_1", last=True)
         er1.add_patterns([{"label": "ET1", "pattern": "concert"}])
-        er2 = model.add_pipe("entity_ruler", name="er_2", last=True,
-                             config={'overwrite_ents': overwrite_ents})
+        er2 = model.add_pipe(
+            "entity_ruler",
+            name="er_2",
+            last=True,
+            config={"overwrite_ents": overwrite_ents},
+        )
         er2.add_patterns([{"label": "ET2", "pattern": "concert"}])
 
         df = spacy2df(

@@ -352,7 +352,7 @@ def test_check_patterns_agree():
     )  # unfortunately the order matters
 
     # Two entity rules
-    er_2 = model.add_pipe("entity_ruler", first=True, name="er_2")
+    model.add_pipe("entity_ruler", first=True, name="er_2")
 
     with pytest.raises(ValueError):
         check_patterns_agree(model, [])

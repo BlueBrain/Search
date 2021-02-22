@@ -32,7 +32,7 @@ install_requires = [
     "jupyter_server_proxy",
     "langdetect",
     "matplotlib",
-    "mysqlclient",
+    #    "mysqlclient",
     "networkx",
     "nexusforge",
     "nltk",
