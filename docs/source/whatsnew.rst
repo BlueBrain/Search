@@ -30,7 +30,7 @@ Legend
 Version 0.1.0
 =============
 - |Remove| support for :code:`Python 3.6`.
-- |Remove| the embedding model :code:`Universal Sentence Encoder: (USE) and its
+- |Remove| the embedding model :code:`Universal Sentence Encoder`: (USE) and its
   dependencies (:code:`tensorflow` and :code:`tensorflow-hub`).
 - |Remove| :code:`BBS_BBG_poc` notebook (now hosted on https://github.com/BlueBrain/Search-Graph-Examples ) and
   :code:`assets/` directory.
