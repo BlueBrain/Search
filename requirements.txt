@@ -74,5 +74,6 @@ sphinx-bluebrain-theme==0.2.3
 sseclient==0.0.27
 torch==1.6.0
 tox==3.20.0
+tqdm==4.57.0
 transformers==3.0.2
 pyarrow==1.0.1
