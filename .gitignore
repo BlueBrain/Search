@@ -16,11 +16,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # Custom entries
-/data/
-/assets/
-/sandbox
-/src/sandbox
-/notebooks/untracked
 /.idea/
 .DS_Store
 .env*

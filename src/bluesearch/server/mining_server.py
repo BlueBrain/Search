@@ -28,6 +28,7 @@ import bluesearch
 
 from ..mining import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
+from ..utils import load_spacy_model
 
 
 class MiningServer(Flask):
@@ -37,9 +38,9 @@ class MiningServer(Flask):
     ----------
     models_libs : dict of str
         Dictionary mapping each type of extraction ('ee' for entities,
-        're' for relations, 'ae' for attributes) to the csv file with the
+        're' for relations, 'ae' for attributes) to the `pd.DataFrame` with the
         information on which model to use for the extraction of each entity,
-        relation, or attribute type, respectively. For 'ee', the csv file
+        relation, or attribute type, respectively. For 'ee', the dataframe
         should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
 
          - 'entity_type': name of entity type, as called in the request schema
@@ -63,9 +64,7 @@ class MiningServer(Flask):
         self.logger.info(f"Version: {self.version}")
 
         self.logger.info("Loading the model libraries")
-        self.models_libs = {}
-        for lib_type, lib_file in models_libs.items():
-            self.models_libs[lib_type] = pd.read_csv(lib_file)
+        self.models_libs = models_libs
 
         self.logger.info("Loading the NER models")
         self.ee_models: Dict[str, spacy.language.Language] = {}
@@ -80,7 +79,7 @@ class MiningServer(Flask):
                 )
             else:
                 self.logger.info(f"Entity type {entity_type}: loading model {model_id}")
-                self.ee_models[model_id] = spacy.load(model_path)
+                self.ee_models[model_id] = load_spacy_model(model_path)
 
         self.connection = connection
 

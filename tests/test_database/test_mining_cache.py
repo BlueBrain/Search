@@ -35,7 +35,7 @@ class TestMiner:
     def miner_env(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bluesearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.load_spacy_model",
             lambda model_path: model_entities,
         )
 
@@ -60,7 +60,7 @@ class TestMiner:
 
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
-            "bluesearch.database.mining_cache.spacy.load",
+            "bluesearch.database.mining_cache.load_spacy_model",
             lambda model_path: model_entities,
         )
 

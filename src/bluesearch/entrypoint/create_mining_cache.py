@@ -138,15 +138,11 @@ def run_create_mining_cache(argv=None):
     configure_logging(args.log_file, level)
 
     logger = logging.getLogger("Mining cache entrypoint")
-    logger.info("Welcome to the mining cache creation")
-    logger.info("Parameters:")
-    logger.info(f"db-type                : {args.db_type}")
-    logger.info(f"db-url                 : {args.db_url}")
-    logger.info(f"target-table-name      : {args.target_table_name}")
-    logger.info(f"n-processes-per-model  : {args.n_processes_per_model}")
-    logger.info(f"restrict-to-models     : {args.restrict_to_models}")
-    logger.info(f"log-file               : {args.log_file}")
-    logger.info(f"verbose                : {args.verbose}")
+
+    logger.info(" Configuration ".center(80, "-"))
+    for k, v in vars(args).items():
+        logger.info(f"{k:<32}: {v}")
+    logger.info("-" * 80)
 
     # Loading libraries
     logger.info("Loading libraries")

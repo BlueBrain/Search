@@ -24,11 +24,11 @@ import queue
 import traceback
 from typing import Any, Dict, List
 
-import spacy
 import sqlalchemy
 
 from ..mining.pipeline import run_pipeline
 from ..sql import retrieve_articles
+from ..utils import load_spacy_model
 
 
 class Miner:
@@ -86,7 +86,7 @@ class Miner:
         self.engine.dispose()
 
         self.logger.info("Loading the NLP model")
-        self.model = spacy.load(self.model_path)
+        self.model = load_spacy_model(self.model_path)
 
     @classmethod
     def create_and_mine(

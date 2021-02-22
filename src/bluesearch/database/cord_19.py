@@ -25,8 +25,9 @@ import time
 import langdetect
 import langdetect.lang_detect_exception
 import pandas as pd
-import spacy
 import sqlalchemy
+
+from ..utils import load_spacy_model
 
 logger = logging.getLogger(__name__)
 
@@ -361,7 +362,7 @@ class CORD19DatabaseCreation:
             Article_id of the articles that raises an error during
             the parsing.
         """
-        nlp = spacy.load(model_name, disable=["tagger", "ner"])
+        nlp = load_spacy_model(model_name, disable=["tagger", "ner"])
 
         articles_table = pd.read_sql(
             """

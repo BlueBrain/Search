@@ -21,9 +21,6 @@ install_requires = [
     "Flask",
     "SQLAlchemy",
     "dvc[ssh]",
-    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz",
-    "en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz",
-    "en-ner-craft-md @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz",
     "h5py",
     "ipython",
     "ipywidgets",
@@ -32,7 +29,7 @@ install_requires = [
     "mysqlclient",
     "networkx",
     "nltk",
-    "numpy>=1.16.1",
+    "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
@@ -65,7 +62,7 @@ extras_require = {
         "sphinx",
         "sphinx-bluebrain-theme",
         "tox",
-    ]
+    ],
 }
 
 setup(

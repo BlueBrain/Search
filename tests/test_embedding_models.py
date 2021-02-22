@@ -169,14 +169,14 @@ class TestEmbeddingModels:
         # Instantiate the model class
         new_file_path = Path(tmpdir) / "test.txt"
         new_file_path.touch()
-        model = Sent2VecModel(new_file_path)
+        model = Sent2VecModel(new_file_path, "en_core_web_sm")
 
         # Embedding dimensionality
         assert model.dim == embedding_dim
 
         # Set testing sentences and methods
         dummy_sentence = "This is a dummy sentence/test."
-        preprocess_truth = "dummy sentence/test"
+        preprocess_truth = "dummy sentence test"
         if n_sentences == 1:
             preprocess_method = model.preprocess
             embed_method = model.embed

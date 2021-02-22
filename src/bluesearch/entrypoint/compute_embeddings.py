@@ -146,6 +146,11 @@ def run_compute_embeddings(argv=None):
     configure_logging(args.log_file, logging.INFO)
     logger = logging.getLogger(__name__)
 
+    logger.info(" Configuration ".center(80, "-"))
+    for k, v in vars(args).items():
+        logger.info(f"{k:<32}: {v}")
+    logger.info("-" * 80)
+
     # Imports (they are here to make --help quick)
     logger.info("Loading libraries")
     from ..embedding_models import MPEmbedder
