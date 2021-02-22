@@ -18,12 +18,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
-from copy import deepcopy
 from unittest.mock import Mock
 
 import pandas as pd
 import pytest
 import requests
+import spacy
 from IPython.display import HTML
 
 from bluesearch.mining import AttributeAnnotationTab, AttributeExtractor
@@ -1222,7 +1222,7 @@ class TestAttributeExtraction:
         assert isinstance(df, pd.DataFrame)
         assert set(expect_columns).issubset(set(df.columns))
 
-        extractor.ee_model = deepcopy(extractor.ee_model)
+        extractor.ee_model = spacy.load('en_core_web_sm')
         extractor.ee_model.remove_pipe("ner")
 
         df = extractor.extract_attributes(text)

@@ -236,19 +236,13 @@ class TestSpacy2df:
             },
         }
         model = spacy.blank("en")
-        ner = model_entities.get_pipe("ner")
-        er1 = spacy.pipeline.EntityRuler(
-            model, patterns=[{"label": "ET1", "pattern": "concert"}]
-        )
-        er2 = spacy.pipeline.EntityRuler(
-            model,
-            patterns=[{"label": "ET2", "pattern": "concert"}],
-            overwrite_ents=overwrite_ents,
-        )
 
-        model.add_pipe(ner, first=True)
-        model.add_pipe(er1, name="er_1", last=True)
-        model.add_pipe(er2, name="er_2", last=True)
+        model.add_pipe("ner", first=True, source=model_entities)
+        er1 = model.add_pipe("entity_ruler", name="er_1", last=True)
+        er1.add_patterns([{"label": "ET1", "pattern": "concert"}])
+        er2 = model.add_pipe("entity_ruler", name="er_2", last=True,
+                             config={'overwrite_ents': overwrite_ents})
+        er2.add_patterns([{"label": "ET2", "pattern": "concert"}])
 
         df = spacy2df(
             model, ground_truth_tokenization, excluded_entity_type=excluded_entity_type

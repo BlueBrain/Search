@@ -85,9 +85,9 @@ class PatternCreator:
         """
         model = model or spacy.blank("en")
         disable = disable or []
-        add_pipe_kwargs = add_pipe_kwargs or {"last": True}
-        er = spacy.pipeline.EntityRuler(model, patterns=self.to_list(), validate=True)
-        model.add_pipe(er, **add_pipe_kwargs)
+        er = model.add_pipe("entity_ruler",
+                            config={'validate': True, **add_pipe_kwargs})
+        er.add_patterns(self.to_list())
 
         return model(text, disable=disable)
 
