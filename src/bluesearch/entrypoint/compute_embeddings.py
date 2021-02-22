@@ -176,9 +176,11 @@ def run_compute_embeddings(argv=None):
         gpus = None
     else:
         gpus = [None if x == "" else int(x) for x in args.gpus.split(",")]
+        # See here for the issue of transformers + GPUs:
+        # https://github.com/huggingface/transformers/issues/8801
         if any(gpus) and get_semantic_version("transformers") >= (3, 2, 0):
             answer = input(
-                "It was found that computing embeddings on GPUs using "
+                "It was found that computing embeddings on GPUs using " 
                 "transformers >= 3.2.0 doesn't work. You might want to "
                 "downgrade your transformers installation or use CPUs. "
                 "Would you like to proceed anyway?\nAnswer (yes/no): ",

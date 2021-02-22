@@ -25,7 +25,7 @@ from typing import Any, Set, Tuple, Union
 import h5py
 import numpy as np
 import pandas as pd
-import pkg_resources
+import pkg_resources  # installed by setuptools
 import spacy
 import tqdm
 
