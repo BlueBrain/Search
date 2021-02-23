@@ -419,6 +419,42 @@ class TestSentTransformer:
         assert emb.shape == (model.dim,)
         assert embs.shape == (1, model.dim)
 
+class TestSBioBERT:
+    @pytest.mark.parametrize(
+        "device",
+        [
+            pytest.param(torch.device("cpu"), id="CPU"),
+            pytest.param(
+                torch.device("cuda:0"),
+                id="GPU",
+                marks=pytest.mark.skipif(
+                    not GPU_IS_AVAILABLE, reason="No GPU available"
+                ),
+            ),
+        ],
+    )
+    def test_all(self, device):
+        model = SBioBERT(device=device)
+
+        # Check all parameters are on the right device
+        for p in model.sbiobert_model.parameters():
+            assert p.device == device
+
+        sentence = "This is a sample sentence"
+        sentences = [sentence]
+
+        preprocessed_sentence = model.preprocess(sentence)
+        preprocessed_sentences = model.preprocess_many(sentences)
+
+        emb = model.embed(preprocessed_sentence)
+        embs = model.embed_many(preprocessed_sentences)
+
+        assert isinstance(emb, np.ndarray)
+        assert isinstance(embs, np.ndarray)
+
+        assert emb.shape == (model.dim,)
+        assert embs.shape == (1, model.dim)
+
 
 class TestGetEmbeddingModel:
     def test_invalid_key(self):

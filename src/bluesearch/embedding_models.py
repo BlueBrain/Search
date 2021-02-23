@@ -251,7 +251,9 @@ class SBioBERT(EmbeddingModel):
         ----------
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
-        return self.embed(preprocessed_sentences)
+        n_samples = len(preprocessed_sentences["input_ids"])
+
+        return self.embed(preprocessed_sentences).reshape(n_samples, -1)
 
     @staticmethod
     def masked_mean(last_hidden_state, attention_mask):
