@@ -26,8 +26,14 @@ import pandas as pd
 import pytest
 import spacy
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
-from bluesearch.utils import get_semantic_version
+from bluesearch.utils import (
+    H5,
+    JSONL,
+    Timer,
+    get_semantic_version,
+    load_ee_models_library,
+    load_spacy_model,
+)
 
 
 class TestTimer:
@@ -418,6 +424,3 @@ def test_get_semantic_version(monkeypatch):
         distribution_with_version(".".join(map(str, version))),
     )
     assert get_semantic_version("doesnt_matter") == version
-
-
-

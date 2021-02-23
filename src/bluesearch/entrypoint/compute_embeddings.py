@@ -26,8 +26,8 @@ from typing import Optional
 import numpy as np
 import sqlalchemy
 
-from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 from ..utils import get_semantic_version
+from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_compute_embeddings(argv=None):
@@ -180,7 +180,7 @@ def run_compute_embeddings(argv=None):
         # https://github.com/huggingface/transformers/issues/8801
         if any(gpus) and get_semantic_version("transformers") >= (3, 2, 0):
             answer = input(
-                "It was found that computing embeddings on GPUs using " 
+                "It was found that computing embeddings on GPUs using "
                 "transformers >= 3.2.0 doesn't work. You might want to "
                 "downgrade your transformers installation or use CPUs. "
                 "Would you like to proceed anyway?\nAnswer (yes/no): ",

@@ -43,6 +43,8 @@ from bluesearch.embedding_models import (
     get_embedding_model,
 )
 
+GPU_IS_AVAILABLE = torch.cuda.is_available()
+
 
 class TestEmbeddingModels:
     def test_abstract_class(self):
@@ -375,6 +377,47 @@ def test_compute_database(
     assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(
         n_sentences % batch_size != 0
     )
+
+
+class TestSentTransformer:
+    @pytest.mark.parametrize(
+        "device",
+        [
+            pytest.param(torch.device("cpu"), id="CPU"),
+            pytest.param(
+                torch.device("cuda:0"),
+                id="GPU",
+                marks=pytest.mark.skipif(
+                    not GPU_IS_AVAILABLE, reason="No GPU available"
+                ),
+            ),
+        ],
+    )
+    def test_all(self, device):
+        model_name = "clagator/biobert_v1.1_pubmed_nli_sts"
+        model = SentTransformer(model_name, device=device)
+
+        # Check all parameters are on the right device
+        for p in model.senttransf_model.parameters():
+            assert p.device == device
+
+        sentence = "This is a sample sentence"
+        sentences = [sentence]
+
+        preprocessed_sentence = model.preprocess(sentence)
+        preprocessed_sentences = model.preprocess_many(sentences)
+
+        assert sentence == preprocessed_sentence
+        assert sentences == preprocessed_sentences
+
+        emb = model.embed(preprocessed_sentence)
+        embs = model.embed_many(preprocessed_sentences)
+
+        assert isinstance(emb, np.ndarray)
+        assert isinstance(embs, np.ndarray)
+
+        assert emb.shape == (model.dim,)
+        assert embs.shape == (1, model.dim)
 
 
 class TestGetEmbeddingModel:
