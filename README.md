@@ -32,7 +32,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/BlueBrain/Search/blob/master/LICENSE.txt">
+    <a href="https://github.com/BlueBrain/Search/blob/master/COPYING.LESSER">
     <img src="https://img.shields.io/github/license/BlueBrain/Search" alt="License" />
     </a>
 </td>
