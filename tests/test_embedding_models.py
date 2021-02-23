@@ -386,7 +386,7 @@ class TestSentTransformer:
         [
             pytest.param(torch.device("cpu"), id="CPU"),
             pytest.param(
-                torch.device("cuda:0"),
+                torch.device("cuda"),
                 id="GPU",
                 marks=pytest.mark.skipif(
                     not GPU_IS_AVAILABLE, reason="No GPU available"
@@ -428,7 +428,7 @@ class TestSBioBERT:
         [
             pytest.param(torch.device("cpu"), id="CPU"),
             pytest.param(
-                torch.device("cuda:0"),
+                torch.device("cuda"),
                 id="GPU",
                 marks=pytest.mark.skipif(
                     not GPU_IS_AVAILABLE, reason="No GPU available"
