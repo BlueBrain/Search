@@ -386,7 +386,7 @@ class TestSentTransformer:
         [
             pytest.param(torch.device("cpu"), id="CPU"),
             pytest.param(
-                torch.device("cuda"),
+                torch.device("cuda:0"),
                 id="GPU",
                 marks=pytest.mark.skipif(
                     not GPU_IS_AVAILABLE, reason="No GPU available"
@@ -397,10 +397,6 @@ class TestSentTransformer:
     def test_all(self, device):
         model_name = "clagator/biobert_v1.1_pubmed_nli_sts"
         model = SentTransformer(model_name, device=device)
-
-        # Check all parameters are on the right device
-        for p in model.senttransf_model.parameters():
-            assert p.device == device
 
         sentence = "This is a sample sentence"
         sentences = [sentence]
@@ -420,6 +416,12 @@ class TestSentTransformer:
         assert emb.shape == (model.dim,)
         assert embs.shape == (1, model.dim)
 
+        # Check all parameters are on the right device
+        # SentenceTransformer sends tensors to the device inside of `encode`
+        # (not when instantiated)
+        for p in model.senttransf_model.parameters():
+            assert p.device == device
+
 
 @pytest.mark.slow
 class TestSBioBERT:
@@ -428,7 +430,7 @@ class TestSBioBERT:
         [
             pytest.param(torch.device("cpu"), id="CPU"),
             pytest.param(
-                torch.device("cuda"),
+                torch.device("cuda:0"),
                 id="GPU",
                 marks=pytest.mark.skipif(
                     not GPU_IS_AVAILABLE, reason="No GPU available"
