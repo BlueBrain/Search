@@ -25,6 +25,7 @@ install_requires = [
     "h5py",
     "ipython",
     "ipywidgets",
+    "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
     "mysqlclient",

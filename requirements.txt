@@ -32,6 +32,7 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
 ipython>=7.16.1
 ipywidgets==7.6.3
+joblib==1.0.1
 langdetect==1.0.8
 matplotlib==3.3.4
 mypy==0.812
