@@ -26,17 +26,14 @@ import h5py
 import numpy as np
 import pandas as pd
 import pytest
-import sent2vec
 import torch
 import transformers
 from sentence_transformers import SentenceTransformer
 
 from bluesearch.embedding_models import (
-    BSV,
     EmbeddingModel,
     MPEmbedder,
     SBioBERT,
-    Sent2VecModel,
     SentTransformer,
     SklearnVectorizer,
     compute_database_embeddings,
@@ -104,100 +101,6 @@ class TestEmbeddingModels:
         assert embedding.shape == ((768,) if n_sentences == 1 else (n_sentences, 768))
         torch_model.assert_called_once()
         tokenizer.assert_called_once()
-
-    @pytest.mark.parametrize("n_sentences", [1, 5])
-    def test_bsv_embedding(self, monkeypatch, tmpdir, n_sentences):
-        sent2vec_module = Mock()
-        bsv_model = Mock(spec=sent2vec.Sent2vecModel)
-        bsv_model.embed_sentences.return_value = np.ones([n_sentences, 700])
-        sent2vec_module.Sent2vecModel.return_value = bsv_model
-
-        monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
-
-        new_file_path = Path(str(tmpdir)) / "test.txt"
-        new_file_path.touch()
-        with pytest.raises(FileNotFoundError):
-            BSV(checkpoint_path=Path(""))
-        bsv = BSV(Path(new_file_path))
-
-        # Preparation
-        dummy_sentence = "This is a dummy sentence/test."
-        preprocess_truth = "dummy sentence test"
-
-        if n_sentences != 1:
-            dummy_sentence = n_sentences * [dummy_sentence]
-            preprocess_truth = n_sentences * [preprocess_truth]
-
-        preprocess_method = getattr(
-            bsv, "preprocess" if n_sentences == 1 else "preprocess_many"
-        )
-        embed_method = getattr(bsv, "embed" if n_sentences == 1 else "embed_many")
-
-        # Assertions
-        assert bsv.dim == 700
-
-        preprocess_sentence = preprocess_method(dummy_sentence)
-        assert isinstance(preprocess_sentence, str if n_sentences == 1 else list)
-        assert preprocess_sentence == preprocess_truth
-
-        embedding = embed_method(preprocess_sentence)
-        assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == ((700,) if n_sentences == 1 else (n_sentences, 700))
-        bsv_model.embed_sentences.assert_called_once()
-
-    @pytest.mark.parametrize("n_sentences", [1, 5])
-    def test_sent2vec_embedding(self, monkeypatch, tmpdir, n_sentences):
-        embedding_dim = 12345
-
-        # Set up the mocks
-        fake_sent2vec_model = Mock(spec=sent2vec.Sent2vecModel)
-        fake_sent2vec_model.embed_sentences.return_value = np.ones(
-            [n_sentences, embedding_dim]
-        )
-        fake_sent2vec_model.get_emb_size.return_value = embedding_dim
-
-        fake_sent2vec_module = Mock()
-        fake_sent2vec_module.Sent2vecModel.return_value = fake_sent2vec_model
-        monkeypatch.setattr(
-            "bluesearch.embedding_models.sent2vec", fake_sent2vec_module
-        )
-
-        # Test invalid checkpoint path
-        with pytest.raises(FileNotFoundError):
-            Sent2VecModel(checkpoint_path="")
-
-        # Instantiate the model class
-        new_file_path = Path(tmpdir) / "test.txt"
-        new_file_path.touch()
-        model = Sent2VecModel(new_file_path, "en_core_web_sm")
-
-        # Embedding dimensionality
-        assert model.dim == embedding_dim
-
-        # Set testing sentences and methods
-        dummy_sentence = "This is a dummy sentence/test."
-        preprocess_truth = "dummy sentence test"
-        if n_sentences == 1:
-            preprocess_method = model.preprocess
-            embed_method = model.embed
-        else:
-            preprocess_method = model.preprocess_many
-            embed_method = model.embed_many
-            dummy_sentence = n_sentences * [dummy_sentence]
-            preprocess_truth = n_sentences * [preprocess_truth]
-
-        # Test preprocessing
-        preprocess_sentence = preprocess_method(dummy_sentence)
-        assert isinstance(preprocess_sentence, str if n_sentences == 1 else list)
-        assert preprocess_sentence == preprocess_truth
-
-        # Test embedding
-        embedding = embed_method(preprocess_sentence)
-        assert isinstance(embedding, np.ndarray)
-        assert embedding.shape == (
-            (model.dim,) if n_sentences == 1 else (n_sentences, model.dim)
-        )
-        fake_sent2vec_model.embed_sentences.assert_called_once()
 
     @pytest.mark.parametrize("n_sentences", [1, 5])
     def test_senttransf_embedding(self, monkeypatch, n_sentences):
@@ -334,11 +237,9 @@ class TestEmbeddingModels:
 
 @pytest.mark.parametrize("batch_size", [1, 5, 1000])
 def test_compute_database(
-    monkeypatch,
     fake_sqlalchemy_engine,
     test_parameters,
     metadata_path,
-    tmpdir,
     batch_size,
 ):
 
@@ -349,30 +250,21 @@ def test_compute_database(
         * test_parameters["n_sentences_per_section"]
     )
 
-    # We use the BSV model to make sure it works
-    sent2vec_module = Mock()
-    bsv_model = Mock(
-        spec=sent2vec.Sent2vecModel, side_effect=lambda x: np.ones([len(x), 700])
+    fake_embedder = Mock(spec=SBioBERT)
+    fake_embedder.preprocess_many.side_effect = lambda raw_sentences: raw_sentences
+    fake_embedder.embed_many.side_effect = lambda preprocessed_sentences: np.ones(
+        (len(preprocessed_sentences), 768)
     )
-    bsv_model.embed_sentences.side_effect = lambda x: np.ones([len(x), 700])
-    sent2vec_module.Sent2vecModel.return_value = bsv_model
-
-    new_file_path = Path(str(tmpdir)) / "test.txt"
-    new_file_path.touch()
-
-    monkeypatch.setattr("bluesearch.embedding_models.sent2vec", sent2vec_module)
-
-    bsv = BSV(Path(new_file_path))
 
     indices = np.arange(1, n_sentences + 1)
     final_embeddings, retrieved_indices = compute_database_embeddings(
-        fake_sqlalchemy_engine, bsv, indices, batch_size=batch_size
+        fake_sqlalchemy_engine, fake_embedder, indices, batch_size=batch_size
     )
 
-    assert final_embeddings.shape == (n_sentences, 700)
+    assert final_embeddings.shape == (n_sentences, 768)
     assert np.all(indices == retrieved_indices)
 
-    assert bsv_model.embed_sentences.call_count == (n_sentences // batch_size) + int(
+    assert fake_embedder.embed_many.call_count == (n_sentences // batch_size) + int(
         n_sentences % batch_size != 0
     )
 
@@ -386,8 +278,6 @@ class TestGetEmbeddingModel:
         "name, underlying_class",
         [
             ("BioBERT NLI+STS", "SentTransformer"),
-            ("BSV", "BSV"),
-            ("Sent2VecModel", "Sent2VecModel"),
             ("SentTransformer", "SentTransformer"),
             ("SklearnVectorizer", "SklearnVectorizer"),
             ("SBioBERT", "SBioBERT"),
