@@ -364,14 +364,14 @@ class TestMPEmbedder:
             )
 
     @pytest.mark.parametrize("n_processes", [1, 2, 5])
-    def test_do_embedding(self, monkeypatch, n_processes):
+    def test_do_embedding(self, monkeypatch, tmp_path, n_processes):
         # test 1 gpu per process or not specified
         with pytest.raises(ValueError):
             MPEmbedder(
                 "some_url",
                 "some_model",
                 np.array([2, 5, 11]),
-                Path("some/path"),
+                tmp_path,
                 n_processes=2,
                 gpus=[1, 4, 8],
             )
@@ -380,7 +380,7 @@ class TestMPEmbedder:
             "some_url",
             "some_model",
             np.array([2, 5, 11, 523, 523523, 3243223, 23424234]),
-            Path("some/path"),
+            tmp_path,
             n_processes=n_processes,
         )
 
