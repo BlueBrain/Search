@@ -22,11 +22,11 @@ jobs:
         ]
         include:
           - python-version: 3.7
-          tox-env: py37
+            tox-env: py37
           - python-version: 3.8
-          tox-env: py38
+            tox-env: py38
           - python-version: 3.9
-          tox-env: py39
+            tox-env: py39
 
     steps:
 
