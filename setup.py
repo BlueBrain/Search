@@ -19,6 +19,7 @@ from setuptools import find_packages, setup
 
 install_requires = [
     "Flask",
+    "PyYAML",
     "SQLAlchemy",
     "dvc[ssh]",
     "h5py",
@@ -27,14 +28,12 @@ install_requires = [
     "langdetect",
     "matplotlib",
     "mysqlclient",
-    "networkx",
     "nltk",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "python-dotenv",
-    "rdflib-jsonld",
     "requests",
     "scikit-learn",
     "scipy",
@@ -45,21 +44,19 @@ install_requires = [
     "torch",
     "tqdm",
     "transformers==3.0.2",
-    "pyarrow",
 ]
 
 extras_require = {
     "dev": [
-        "cryptography",
+        "Sphinx",
         "docker",
         "flake8",
         "mypy",
         "pydocstyle",
-        "pytest>=4.6",
         "pytest-benchmark",
         "pytest-cov",
+        "pytest>=4.6",
         "responses",
-        "sphinx",
         "sphinx-bluebrain-theme",
         "tox",
     ],
