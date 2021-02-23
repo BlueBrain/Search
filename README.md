@@ -541,8 +541,7 @@ can be conveniently transformed and analyzed as a knowledge graph using the tool
 To use the complete pipeline—composed of literature search, text mining, and transformed into a knowledge graph-you
 should use the proof of concept notebook [`BBS_BBG_poc.ipynb`](https://github.com/BlueBrain/Search-Graph-Examples/blob/master/BBS_BBG_poc.ipynb)
 from [our dedicated repository](https://github.com/BlueBrain/Search-Graph-Examples.git).
-In order to use such notebook, please follow the instructions from [the dedicated README](https://github
-.com/BlueBrain/Search-Graph-Examples#blue-brain-search-and-graph-examples).
+In order to use such notebook, please follow the instructions from [the dedicated README](https://github.com/BlueBrain/Search-Graph-Examples#blue-brain-search-and-graph-examples).
 
 
 If you want to setup the notebook in a docker container, please create an environment
