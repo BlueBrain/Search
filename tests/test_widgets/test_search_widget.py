@@ -156,12 +156,12 @@ def create_searcher(engine, n_dim=2):
     embedding_model = Mock()
     embedding_model.embed.return_value = np.random.random(n_dim)
 
-    embedding_models = {"BSV": embedding_model}
+    embedding_models = {"SBioBERT": embedding_model}
     embeddings = torch.rand((n_sentences, n_dim)).to(dtype=torch.float32)
     norm = torch.norm(input=embeddings, dim=1, keepdim=True)
     norm[norm == 0] = 1
     embeddings /= norm
-    precomputed_embeddings = {"BSV": embeddings}
+    precomputed_embeddings = {"SBioBERT": embeddings}
     indices = np.arange(1, n_sentences + 1)
 
     searcher = SearchEngine(
@@ -198,7 +198,7 @@ def request_callback(request, searcher):
 def request_callback_help(request):
     resp_body = {
         "database": "test_database",
-        "supported_models": ["BSV"],
+        "supported_models": ["SBioBERT"],
         "version": "1.2.3",
     }
     headers = {"request-id": "1234abcdeABCDE"}
@@ -267,35 +267,28 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
         "SELECT COUNT(*) FROM sentences"
     ).fetchone()[0]
 
-    most_relevant_bsv_id = 7
-    query_bsv = f"SELECT text FROM sentences WHERE sentence_id = {most_relevant_bsv_id}"
-    most_relevant_bsv_text = fake_sqlalchemy_engine.execute(query_bsv).fetchone()[0]
+    most_relevant_sbiobert_id = 7
+    query_sbiobert = (
+        f"SELECT text FROM sentences WHERE sentence_id = {most_relevant_sbiobert_id}"
+    )
+    most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(
+        query_sbiobert
+    ).fetchone()[0]
 
-    # most_relevant_sbiobert_id = 3
-    # query_sbiobert = f"""
-    # SELECT text
-    # FROM sentences
-    # WHERE sentence_id = {most_relevant_sbiobert_id}"""
-    # most_relevant_sbiobert_text = fake_sqlalchemy_engine.execute(
-    #     query_sbiobert
-    # ).fetchone()[0]
-
-    embedding_model_bsv = Mock()
-    embedding_model_bsv.embed.return_value = np.array([0, 1])  # 90 degrees
     embedding_model_sbiobert = Mock()
-    embedding_model_sbiobert.embed.return_value = np.array([0, -1])  # 270 degrees
+    embedding_model_sbiobert.embed.return_value = np.array([0, 1])  # 90 degrees
 
     embedding_models = {
-        "BSV": embedding_model_bsv,
+        "SBioBERT": embedding_model_sbiobert,
     }
 
     precomputed_embeddings = {
-        "BSV": torch.ones((n_sentences, 2)).to(dtype=torch.float32)
+        "SBioBERT": torch.ones((n_sentences, 2)).to(dtype=torch.float32)
         / 2 ** (1 / 2),  # 45 degrees
     }
 
     norm = (0.1 ** 2 + 0.9 ** 2) ** (1 / 2)
-    precomputed_embeddings["BSV"][most_relevant_bsv_id - 1, :] = (
+    precomputed_embeddings["SBioBERT"][most_relevant_sbiobert_id - 1, :] = (
         torch.tensor([0.1, 0.9]) / norm
     )
     # ~90 degrees
@@ -336,27 +329,16 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
     bot.set_value("top_results", k)
     bot.set_value("print_paragraph", False)
 
-    # BSV
-    bot.set_value("sent_embedder", "BSV")
+    bot.set_value("sent_embedder", "SBioBERT")
     bot.click("investigate_button")
 
     captured_display_objects = bot.display_cached
 
     assert len(captured_display_objects) == k * bot.n_displays_per_result
     assert (
-        textwrap.fill(most_relevant_bsv_text, width=80)
+        textwrap.fill(most_relevant_sbiobert_text, width=80)
         in captured_display_objects[-1].data
     )
-
-    # SBioBERT
-    # bot.set_value('sent_embedder', 'SBioBERT')
-    # bot.click('investigate_button')
-    #
-    # captured_display_objects = bot.display_cached
-    #
-    # assert len(captured_display_objects) == k * bot.n_displays_per_result
-    # assert textwrap.fill(most_relevant_sbiobert_text, width=80) in \
-    #        captured_display_objects[-1].data
 
 
 @responses.activate
