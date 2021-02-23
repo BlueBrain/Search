@@ -379,6 +379,7 @@ def test_compute_database(
     )
 
 
+@pytest.mark.slow
 class TestSentTransformer:
     @pytest.mark.parametrize(
         "device",
@@ -419,6 +420,8 @@ class TestSentTransformer:
         assert emb.shape == (model.dim,)
         assert embs.shape == (1, model.dim)
 
+
+@pytest.mark.slow
 class TestSBioBERT:
     @pytest.mark.parametrize(
         "device",
