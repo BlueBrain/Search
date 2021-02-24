@@ -43,9 +43,9 @@ matrix:
     - if: type = push
       python: 3.8
       env: TOXENV=py38
-#    - if: type = push
-#      python: 3.9
-#      env: TOXENV=py39
+    - if: type = push
+      python: 3.9
+      env: TOXENV=py39
 
     - stage: Docs
       python: 3.7

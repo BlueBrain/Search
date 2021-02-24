@@ -41,8 +41,8 @@ N_GPUS = torch.cuda.device_count()
         "temp_dir",
     ),
     [
-        (11, 22, [0, 3], True, "BSV", 2, "some_out_dir/emb.h5", "some_temp_dir"),
-        (1, 5, None, False, "Sent2Vec", 3, "new_out_dir/emb.h5", "new_temp_dir"),
+        (11, 22, [0, 3], True, "SBioBERT", 2, "some_out_dir/emb.h5", "some_temp_dir"),
+        (1, 5, None, False, "SBioBERT", 3, "new_out_dir/emb.h5", "new_temp_dir"),
         (3, 52, [1, None, 5, None], True, "SBioBERT", 4, "dir/emb.h5", "temp_dir"),
     ],
 )

@@ -41,8 +41,7 @@ def run_compute_embeddings(argv=None):
         help="""
         The name or class of the model for which to compute the embeddings.
         Recognized model names are: 'BioBERT NLI+STS', 'SBioBERT', 'SBERT'.
-        Recognized model classes are: 'SentTransformer', 'Sent2VecModel', 'BSV',
-        'SklearnVectorizer'.
+        Recognized model classes are: 'SentTransformer', 'SklearnVectorizer'.
 
         See also 'get_embedding_model(...)'.
         """,

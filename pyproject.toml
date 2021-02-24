@@ -17,8 +17,6 @@
 
 [build-system]
 requires = [
-    "Cython>=0.29.13",
-    "numpy>=1.17.1",
     "pip>=9",
     "setuptools>=42",
     "setuptools_scm[toml]>=3.4",
