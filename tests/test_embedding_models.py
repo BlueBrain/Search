@@ -47,6 +47,8 @@ GPU_IS_AVAILABLE = torch.cuda.is_available()
 
 
 class TestEmbeddingModels:
+    """The included tests do not use real models."""
+
     def test_abstract_class(self):
         # Test that "EmbeddingModel" is abstract
         assert "__abstractmethods__" in EmbeddingModel.__dict__
@@ -395,7 +397,7 @@ class TestSentTransformer:
         ],
     )
     def test_all(self, device):
-        model_name = "clagator/biobert_v1.1_pubmed_nli_sts"
+        model_name = "bert-base-nli-mean-tokens"
         model = SentTransformer(model_name, device=device)
 
         sentence = "This is a sample sentence"

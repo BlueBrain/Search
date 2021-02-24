@@ -121,6 +121,7 @@ def test_send_through(
     assert kwargs["gpus"] == gpus
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize(
     "gpus",
     [
@@ -132,9 +133,16 @@ def test_send_through(
         ),
     ],
 )
-@pytest.mark.parametrize("model", ["SBioBERT", "BioBERT NLI+STS"])
+@pytest.mark.parametrize("start_method", ["forkserver", "spawn"])
+@pytest.mark.parametrize("model", ["SBioBERT", "SBERT"])
 def test_mp_real(
-    tmpdir, monkeypatch, backend_database, fake_sqlalchemy_engine, model, gpus
+    tmpdir,
+    monkeypatch,
+    backend_database,
+    fake_sqlalchemy_engine,
+    model,
+    start_method,
+    gpus,
 ):
     tmpdir = pathlib.Path(str(tmpdir))
     fake_sqlalchemy = Mock()
@@ -154,6 +162,7 @@ def test_mp_real(
         f"--gpus={gpus}",
         f"--log-file={str(tmpdir / 'my.log')}",
         f"--n-processes={n_processes}",
+        f"--start-method={start_method}",
     ]
 
     assert not outfile.exists()

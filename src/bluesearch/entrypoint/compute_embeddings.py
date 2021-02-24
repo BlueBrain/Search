@@ -161,7 +161,7 @@ def run_compute_embeddings(argv=None):
 
     # Imports (they are here to make --help quick)
     logger.info("Loading libraries")
-    from ..embedding_models import MPEmbedder
+    from ..embedding_models import MPEmbedder, get_embedding_model
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")
