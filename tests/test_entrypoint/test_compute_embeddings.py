@@ -143,16 +143,20 @@ def test_mp_real(
         "bluesearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
     )
 
-    outfile = str(tmpdir / "output.h5")
+    outfile = tmpdir / "output.h5"
     db_url = fake_sqlalchemy_engine.url
     n_processes = 2
 
     args_and_opts = [
         model,
-        outfile,
+        str(outfile),
         f"--db-url={db_url}",  # It does not matter actually
         f"--log-file={str(tmpdir / 'my.log')}",
         f"--n-processes={n_processes}",
     ]
 
+    assert not outfile.exists()
+
     run_compute_embeddings(args_and_opts)
+
+    assert outfile.exists()
