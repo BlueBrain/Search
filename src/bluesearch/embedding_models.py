@@ -19,7 +19,6 @@
 
 import logging
 import multiprocessing as mp
-import os
 import pathlib
 from abc import ABC, abstractmethod
 
@@ -620,7 +619,7 @@ class MPEmbedder:
         """Do the parallelized embedding."""
         if self.preinitialize:
             self.logger.info("Preinitializing model (download of checkpoints)")
-            model_temp = get_embedding_model(
+            model_temp = get_embedding_model(  # noqa
                 self.model_name_or_class, checkpoint_path=self.checkpoint_path
             )
             del model_temp
