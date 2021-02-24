@@ -68,12 +68,11 @@ INSTALL_REQUIRES = [
     "scikit-learn",
     "scipy",
     "scispacy",
-    "sent2vec-prebuilt",
-    "sentence-transformers==0.3.5",
-    "spacy==2.3.1",
+    "sentence-transformers",
+    "spacy<3",
     "torch",
     "tqdm",
-    "transformers==3.0.2",
+    "transformers",
     "pyarrow",
 ]
 

@@ -18,7 +18,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import pathlib
 import sys
 
 from ._helper import configure_logging, get_var, run_server
@@ -26,15 +25,12 @@ from ._helper import configure_logging, get_var, run_server
 
 def get_embedding_app():
     """Construct the embedding flask app."""
-    from ..embedding_models import BSV, SBioBERT, Sent2VecModel, SentTransformer
+    from ..embedding_models import SBioBERT, SentTransformer
     from ..server.embedding_server import EmbeddingServer
 
     # Read configuration
     log_file = get_var("BBS_EMBEDDING_LOG_FILE", check_not_set=False)
     log_level = get_var("BBS_EMBEDDING_LOG_LEVEL", logging.INFO, var_type=int)
-
-    bsv_checkpoint = get_var("BBS_EMBEDDING_BSV_CHECKPOINT_PATH")
-    sent2vec_checkpoint = get_var("BBS_EMBEDDING_SENT2VEC_CHECKPOINT_PATH")
 
     # Configure logging
     configure_logging(log_file, log_level)
@@ -43,8 +39,6 @@ def get_embedding_app():
     logger.info(" Configuration ".center(80, "-"))
     logger.info(f"log-file            : {log_file}")
     logger.info(f"log-level           : {log_level}")
-    logger.info(f"bsv-checkpoint      : {bsv_checkpoint}")
-    logger.info(f"sent2vec-checkpoint : {sent2vec_checkpoint}")
     logger.info("-" * 80)
 
     # Load embedding models
@@ -52,8 +46,6 @@ def get_embedding_app():
     embedding_models = {
         "SBERT": SentTransformer("bert-base-nli-mean-tokens"),
         "BIOBERT NLI+STS": SentTransformer("clagator/biobert_v1.1_pubmed_nli_sts"),
-        "Sent2Vec": Sent2VecModel(pathlib.Path(sent2vec_checkpoint)),
-        "BSV": BSV(pathlib.Path(bsv_checkpoint)),
         "SBioBERT": SBioBERT(),
     }
 
