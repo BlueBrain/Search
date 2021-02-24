@@ -51,15 +51,15 @@ jobs:
 
       - name: linting and code style
         if: matrix.python-version == '3.7'
-        run: tox -vv -e lint
+        run: tox -vv -e lint -- --color=yes
 
       - name: tests and coverage
-        run: tox -vv -e ${{ matrix.tox-env }}
+        run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
 
       - name: docs
         if: matrix.python-version == '3.7'
-        run: tox -vv -e docs
+        run: tox -vv -e docs -- --color=yes
 
       - name: check packaging
         if: matrix.python-version == '3.7'
-        run: tox -vv -e check-packaging
+        run: tox -vv -e check-packaging -- --color=yes
