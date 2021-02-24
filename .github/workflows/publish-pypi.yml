@@ -3,17 +3,15 @@ name: pypi publishing
 
 on:
   push:
-    branches:
-      - master
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches: master
+  pull_request:
 
 
 jobs:
 
   publish_on_pypi:
 
-    if: startsWith(github.ref, 'refs/tags')
+#    if: startsWith(github.ref, 'refs/tags')
 
     runs-on: ubuntu-latest
 
@@ -40,6 +38,7 @@ jobs:
       - name: create wheel distribution
         run: |
           python setup.py bdist_wheel
+          ls -altr dist/
 
       - name: publish package to pypi
         uses: pypa/gh-action-pypi-publish@master
