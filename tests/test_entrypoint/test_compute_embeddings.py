@@ -150,7 +150,8 @@ def test_mp_real(
     args_and_opts = [
         model,
         str(outfile),
-        f"--db-url={db_url}",  # It does not matter actually
+        f"--db-url={db_url}",  # patched, however it is required for the CLI
+        f"--gpus={gpus}",
         f"--log-file={str(tmpdir / 'my.log')}",
         f"--n-processes={n_processes}",
     ]
