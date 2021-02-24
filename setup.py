@@ -44,7 +44,7 @@ CLASSIFIERS = [
     "Topic :: Text Processing :: General",
 ]
 
-PYTHON_REQUIRES = ">=3.7, <=3.9"
+PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
     "Flask",
