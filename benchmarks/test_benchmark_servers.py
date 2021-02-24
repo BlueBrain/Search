@@ -25,7 +25,7 @@ import requests
 import sqlalchemy
 
 # Embedding
-EMBEDDING_MODELS = ["BSV", "SBioBERT", "SBERT"]
+EMBEDDING_MODELS = ["SBioBERT", "SBERT"]
 
 # Mining
 ENTITY_TYPES = ["DISEASE", "CELL_TYPE", "CHEMICAL", "PROTEIN", "ORGAN"]
@@ -251,7 +251,7 @@ class TestSearch:
         payload_json = {
             "query_text": "Glucose is a risk factor for COVID-19",
             "k": 20,
-            "which_model": "BSV",
+            "which_model": "SBioBERT",
         }
 
         response = benchmark(requests.post, url, json=payload_json)

@@ -59,7 +59,6 @@ responses==0.12.0
 scikit-learn==0.23.2
 scipy==1.5.2
 scispacy==0.2.5
-sent2vec-prebuilt>=0.0.2
 sentence-transformers==0.3.5
 spacy==2.3.1
 sphinx-bluebrain-theme==0.2.3
