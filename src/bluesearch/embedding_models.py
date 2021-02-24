@@ -811,7 +811,8 @@ class MPEmbedder:
         The name of the dataset in the H5 file.
         Otherwise, the value of 'model_name_or_class' is used.
     start_method : str, {"fork", "forkserver", "spawn"}
-        Start method for multiprocessing.
+        Start method for multiprocessing. Note that using "fork" might
+        lead to problems when doing GPU inference.
     """
 
     def __init__(
@@ -828,7 +829,7 @@ class MPEmbedder:
         delete_temp=True,
         temp_folder=None,
         h5_dataset_name=None,
-        start_method="fork",
+        start_method="forkserver",
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -950,14 +951,13 @@ class MPEmbedder:
         logger = logging.getLogger(f"{cname}({cpid})")
         logger.info(f"First index={indices[0]}")
 
-        if gpu is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+        device = "cpu" if gpu is None else f"cuda:{gpu}"
 
         logger.info("Loading model")
         model = get_embedding_model(
             model_name_or_class,
             checkpoint_path=checkpoint_path,
-            device="cpu" if gpu is None else "cuda",
+            device=device,
         )
         logger.info("Get sentences from the database")
         engine = sqlalchemy.create_engine(database_url)
