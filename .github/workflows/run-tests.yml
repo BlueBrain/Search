@@ -32,8 +32,9 @@ jobs:
     steps:
 
       - name: cancel previous workflow that are still running
-        uses: styfle/cancel-workflow-action@0.6.0
-
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
 
       - name: checkout latest commit
         uses: actions/checkout@v2
