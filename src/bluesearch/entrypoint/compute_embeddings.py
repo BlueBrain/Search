@@ -26,7 +26,6 @@ from typing import Optional
 import numpy as np
 import sqlalchemy
 
-from ..utils import get_semantic_version
 from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
@@ -131,7 +130,7 @@ def run_compute_embeddings(argv=None):
     parser.add_argument(
         "-s",
         "--start-method",
-        default="forksever",
+        default="forkserver",
         choices=["fork", "forkserver", "spawn"],
         type=str,
         help="Multiprocessing starting method to be used.",
@@ -208,7 +207,7 @@ def run_compute_embeddings(argv=None):
         gpus=gpus,
         temp_folder=temp_dir,
         h5_dataset_name=args.h5_dataset_name,
-        start_method=args.start_method
+        start_method=args.start_method,
     )
 
     logger.info("Starting embedding")

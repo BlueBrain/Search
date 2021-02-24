@@ -859,7 +859,7 @@ class MPEmbedder:
     def do_embedding(self):
         """Do the parallelized embedding."""
         self.logger.info("Starting multiprocessing")
-        mp.set_start_method(self.start_method)
+        mp.set_start_method(self.start_method, force=True)
 
         output_folder = self.temp_folder or self.h5_path_output.parent
 
