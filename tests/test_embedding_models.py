@@ -582,8 +582,12 @@ class TestMPEmbedder:
 
         fake_multiprocessing = Mock()
         fake_h5 = Mock()
+        fake_get_embedding_model = Mock()
         monkeypatch.setattr("bluesearch.embedding_models.mp", fake_multiprocessing)
         monkeypatch.setattr("bluesearch.embedding_models.H5", fake_h5)
+        monkeypatch.setattr(
+            "bluesearch.embedding_models.get_embedding_model", fake_get_embedding_model
+        )
 
         mpe.do_embedding()
 

@@ -813,6 +813,10 @@ class MPEmbedder:
     start_method : str, {"fork", "forkserver", "spawn"}
         Start method for multiprocessing. Note that using "fork" might
         lead to problems when doing GPU inference.
+    preinitialize : bool
+        If True we instantiate the model before running multiprocessing
+        in order to download any checkpoints. Once instantiated, the model
+        will be deleted.
     """
 
     def __init__(
@@ -830,6 +834,7 @@ class MPEmbedder:
         temp_folder=None,
         h5_dataset_name=None,
         start_method="forkserver",
+        preinitialize=True,
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -842,6 +847,7 @@ class MPEmbedder:
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
         self.start_method = start_method
+        self.preinitialize = preinitialize
         if h5_dataset_name is None:
             self.h5_dataset_name = model_name_or_class
         else:
@@ -858,6 +864,13 @@ class MPEmbedder:
 
     def do_embedding(self):
         """Do the parallelized embedding."""
+        if self.preinitialize:
+            self.logger.info("Preinitializing model (download of checkpoints)")
+            model_temp = get_embedding_model(
+                self.model_name_or_class, checkpoint_path=self.checkpoint_path
+            )
+            del model_temp
+
         self.logger.info("Starting multiprocessing")
         mp.set_start_method(self.start_method, force=True)
 
