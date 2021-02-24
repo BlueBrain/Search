@@ -22,10 +22,10 @@ jobs:
 
       - name: Get history and tags for SCM versioning to work
         run: |
-        git fetch --prune --unshallow
-        git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-        git describe --tags
-        git describe --tags $(git rev-list --tags --max-count=1)
+          git fetch --prune --unshallow
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          git describe --tags
+          git describe --tags $(git rev-list --tags --max-count=1)
 
       - name: setup python 3.7
         uses: actions/setup-python@v2
