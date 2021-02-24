@@ -25,7 +25,7 @@
 # hub for more details: https://hub.docker.com/r/nvidia/cuda
 #
 # If the GPU support is not necessary, then another image,
-# for example "python:3.6" can be used.
+# for example "python:3.7" can be used.
 FROM nvidia/cuda:10.2-devel
 
 # ARGs are only visible at build time and can be provided in
@@ -46,7 +46,7 @@ ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 
 # Debian's default LANG=C breaks python3.
 # See commends in the official python docker file:
-# https://github.com/docker-library/python/blob/master/3.6/buster/Dockerfile
+# https://github.com/docker-library/python/blob/master/3.7/buster/Dockerfile
 ENV LANG=C.UTF-8
 
 # Install system packages
@@ -55,10 +55,10 @@ ENV LANG=C.UTF-8
 # prevent apt-get from prompting for the timezone and keyboard
 # layout configuration.
 #
-# The first RUN command (that installs python3.6) is necessary because
+# The first RUN command (that installs python3.7) is necessary because
 # the base image (nvidia/cuda) does not have python pre-installed. This
 # command can be omitted on images that already have python, for example
-# "python:3.6"
+# "python:3.7"
 RUN apt-get update && apt-get upgrade -y
 RUN \
 DEBIAN_FRONTEND="noninteractive" \
@@ -67,7 +67,7 @@ apt-get install -y \
     dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
     libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
     libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev \
-    python3.6-dev python3-setuptools python3-venv python3-pip
+    python3.7-dev python3-setuptools python3-venv python3-pip
 RUN \
 apt-get install -y \
     gcc g++ build-essential \

@@ -608,7 +608,6 @@ rm -R $REPOSITORY_DIRECTORY
 ## Installation (virtual environment)
 We currently support the following Python versions.
 Make sure you are using one of them.
- - Python 3.6
  - Python 3.7
  - Python 3.8
 
@@ -667,7 +666,6 @@ the following environments:
 - `lint`: code style and documentation checks
 - `docs`: test doc build
 - `check-packaging`: test packaging
-- `py36`: run unit tests (using pytest) with python3.6
 - `py37`: run unit tests (using pytest) with python3.7
 - `py38`: run unit tests (using pytest) with python3.8
 
