@@ -31,6 +31,10 @@ jobs:
 
     steps:
 
+      - name: cancel previous workflow that are still running
+        uses: styfle/cancel-workflow-action@0.6.0
+
+
       - name: checkout latest commit
         uses: actions/checkout@v2
 
