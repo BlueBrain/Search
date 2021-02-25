@@ -669,7 +669,7 @@ the following environments:
 - `check-packaging`: test packaging
 - `py37`: run unit tests (using pytest) with python3.7
 - `py38`: run unit tests (using pytest) with python3.8
-
+- `py39`: run unit tests (using pytest) with python3.9
 Each of these environments can be run separately using the following syntax:
 ```shell script
 $ tox -e lint
