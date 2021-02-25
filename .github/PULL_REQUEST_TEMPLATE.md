@@ -6,7 +6,7 @@ Please provide here a summary of the changes introduced by this PR.
 
 ## How to test?
 
-Please provide here instrutions on how to test the changes introduced by this PR.
+Please provide here instructions on how to test the changes introduced by this PR.
 (if some changes cannot be tested by automated tests)
 
 ## Checklist
