@@ -59,11 +59,11 @@ responses==0.12.0
 scikit-learn==0.23.2
 scipy==1.5.2
 scispacy==0.2.5
-sentence-transformers==0.3.5
+sentence-transformers==0.4.1.2
 spacy==2.3.1
 sphinx-bluebrain-theme==0.2.3
 sseclient==0.0.27
 torch==1.7.0
 tox==3.20.0
-transformers==3.5.1
+transformers==4.3.2
 pyarrow==1.0.1
