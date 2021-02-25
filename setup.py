@@ -84,7 +84,7 @@ setup(
     packages=find_packages("./src"),
     package_data={"bluesearch": ["_css/stylesheet.css", "py.typed"]},
     zip_safe=False,
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=install_requires,
     extras_require=extras_require,
     entry_points={
