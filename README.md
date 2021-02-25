@@ -610,6 +610,7 @@ We currently support the following Python versions.
 Make sure you are using one of them.
  - Python 3.7
  - Python 3.8
+ - Python 3.9
 
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
