@@ -71,7 +71,7 @@ INSTALL_REQUIRES = [
     "spacy<3",
     "torch",
     "tqdm",
-    "transformers==3.0.2",
+    "transformers",
 ]
 
 EXTRAS_REQUIRE = {
