@@ -185,7 +185,7 @@ def run_create_mining_cache(argv=None):
                     f"Can't restrict to model {model_id} because it is not "
                     f"listed in the models library file. This entry will be ignored."
                 )
-        keep_rows = ee_models_library["model_id"].isin(model_selection)
+        keep_rows = ee_models_library["model_id"].isin(model_selection).tolist()
         ee_models_library = ee_models_library[keep_rows]
 
     # Create the cache creation class and run the cache creation

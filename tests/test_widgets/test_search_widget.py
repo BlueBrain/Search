@@ -25,6 +25,7 @@ import textwrap
 from copy import copy
 from functools import partial
 from pathlib import Path
+from typing import Any, List
 from unittest.mock import Mock
 
 import ipywidgets
@@ -69,7 +70,7 @@ class SearchWidgetBot:
 
     def __init__(self, search_widget, capsys, monkeypatch, n_displays_per_result=4):
         self.search_widget = search_widget
-        self._display_cached = []
+        self._display_cached: List[Any] = []
         self._capsys = capsys
         self.n_displays_per_result = n_displays_per_result
 
