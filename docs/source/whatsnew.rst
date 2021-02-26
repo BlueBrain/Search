@@ -30,6 +30,8 @@ Legend
 Version 0.1.0
 =============
 - |Add| support for :code:`Python 3.9`.
+- |Add| Blue Brain Search as a Zenodo record. This provides a unique DOI, a DOI
+  for each published release, and automatic preservation outside GitHub.
 - |Remove| support for :code:`Python 3.6`.
 - |Remove| the external dependency :code:`sent2vec` and the embedding models
   depending on it, i.e. :code:`BSV` and :code:`Sent2VecModel`.
