@@ -40,8 +40,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.com/BlueBrain/Search">
-    <img src="https://travis-ci.com/BlueBrain/Search.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    <a href="https://github.com/BlueBrain/Search/actions?query=workflow%3A%22ci+testing%22+branch%3Amaster">
+    <img src="https://img.shields.io/github/workflow/status/BlueBrain/Search/ci%20testing/master" alt="Build status" />
     </a>
   </td>
 </tr>
