@@ -51,9 +51,6 @@ extras_require = {
     "dev": [
         "Sphinx",
         "docker",
-        "flake8",
-        "mypy",
-        "pydocstyle",
         "pytest-benchmark",
         "pytest-cov",
         "pytest>=4.6",
