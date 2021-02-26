@@ -47,22 +47,22 @@ PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
     "Flask",
+    "PyYAML",
     "SQLAlchemy",
     "dvc[ssh]",
     "h5py",
     "ipython",
     "ipywidgets",
+    "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
     "mysqlclient",
-    "networkx",
     "nltk",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "python-dotenv",
-    "rdflib-jsonld",
     "requests",
     "scikit-learn",
     "scipy",
@@ -72,21 +72,16 @@ INSTALL_REQUIRES = [
     "torch",
     "tqdm",
     "transformers",
-    "pyarrow",
 ]
 
 EXTRAS_REQUIRE = {
     "dev": [
-        "cryptography",
+        "Sphinx",
         "docker",
-        "flake8",
-        "mypy",
-        "pydocstyle",
-        "pytest>=4.6",
         "pytest-benchmark",
         "pytest-cov",
+        "pytest>=4.6",
         "responses",
-        "sphinx",
         "sphinx-bluebrain-theme",
         "tox",
     ],
