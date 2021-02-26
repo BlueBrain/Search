@@ -20,6 +20,7 @@
 import json
 from copy import copy
 from pathlib import Path
+from typing import Any, List
 
 import numpy as np
 import pandas as pd
@@ -49,7 +50,7 @@ class MiningWidgetBot:
 
     def __init__(self, mining_widget, capsys, monkeypatch):
         self.mining_widget = mining_widget
-        self._display_cached = []
+        self._display_cached: List[Any] = []
         self._capsys = capsys
 
         monkeypatch.setattr(

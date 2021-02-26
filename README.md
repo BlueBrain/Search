@@ -22,6 +22,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <table>
 <tr>
+  <td>Source Code DOI</td>
+  <td>
+    <a href="https://doi.org/10.5281/zenodo.4563998">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="DOI">
+    </a>
+  </td>
+</tr>
+<tr>
   <td>Latest Release</td>
   <td>
     <a href="https://github.com/BlueBrain/Search/releases">
@@ -40,8 +48,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.com/BlueBrain/Search">
-    <img src="https://travis-ci.com/BlueBrain/Search.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    <a href="https://github.com/BlueBrain/Search/actions?query=workflow%3A%22ci+testing%22+branch%3Amaster">
+    <img src="https://img.shields.io/github/workflow/status/BlueBrain/Search/ci%20testing/master" alt="Build status" />
     </a>
   </td>
 </tr>
@@ -608,9 +616,9 @@ rm -R $REPOSITORY_DIRECTORY
 ## Installation (virtual environment)
 We currently support the following Python versions.
 Make sure you are using one of them.
- - Python 3.6
  - Python 3.7
  - Python 3.8
+ - Python 3.9
 
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
@@ -667,9 +675,9 @@ the following environments:
 - `lint`: code style and documentation checks
 - `docs`: test doc build
 - `check-packaging`: test packaging
-- `py36`: run unit tests (using pytest) with python3.6
 - `py37`: run unit tests (using pytest) with python3.7
 - `py38`: run unit tests (using pytest) with python3.8
+- `py39`: run unit tests (using pytest) with python3.9
 
 Each of these environments can be run separately using the following syntax:
 ```shell script

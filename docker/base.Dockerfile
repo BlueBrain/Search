@@ -25,7 +25,7 @@
 # hub for more details: https://hub.docker.com/r/nvidia/cuda
 #
 # If the GPU support is not necessary, then another image,
-# for example "python:3.6" can be used.
+# for example "python:3.7" can be used.
 FROM nvidia/cuda:10.2-devel
 
 # ARGs are only visible at build time and can be provided in
@@ -46,7 +46,7 @@ ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 
 # Debian's default LANG=C breaks python3.
 # See commends in the official python docker file:
-# https://github.com/docker-library/python/blob/master/3.6/buster/Dockerfile
+# https://github.com/docker-library/python/blob/master/3.7/buster/Dockerfile
 ENV LANG=C.UTF-8
 
 # Install system packages
@@ -54,20 +54,14 @@ ENV LANG=C.UTF-8
 # The environment variable $DEBIAN_FRONTENT is necessary to
 # prevent apt-get from prompting for the timezone and keyboard
 # layout configuration.
-#
-# The first RUN command (that installs python3.6) is necessary because
-# the base image (nvidia/cuda) does not have python pre-installed. This
-# command can be omitted on images that already have python, for example
-# "python:3.6"
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y && apt-get update
 RUN \
 DEBIAN_FRONTEND="noninteractive" \
 TZ="Europe/Zurich" \
 apt-get install -y \
     dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
     libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
-    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev \
-    python3.6-dev python3-setuptools python3-venv python3-pip
+    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev
 RUN \
 apt-get install -y \
     gcc g++ build-essential \
@@ -83,11 +77,25 @@ apt-get install -y \
     libfontconfig1 wkhtmltopdf \
     libmysqlclient-dev default-libmysqlclient-dev
 
-# Create soft links to python binaries, upgrade pip, install wheel
+# Install Python 3.7 & pip 3.7
+#
+# The base image ("nvidia/cuda") does not have Python pre-installed. The
+# following command can be omitted on images that already have Python, for
+# example "python:3.7".
+#
+# The package "python3.7-pip" doesn't exist. The package "python3-pip" needs
+# to be installed instead. After its installation:
+#   - "pip" isn't an existing command,
+#   - "pip3" refers to pip for Python 3.6,
+#   - "pip3.7" isn't an existing command,
+#   - "python3.7 -m pip" works.
+#
+# The command "update-alternatives" makes the command "python" refers to
+# "python3.7". Otherwise, "python" refers to "python2".
 RUN \
-ln -s $(which python3) /usr/local/bin/python &&\
-ln -s $(which pip3) /usr/local/bin/pip &&\
-pip install --upgrade pip wheel setuptools
+apt-get install -y python3.7 python3.7-dev python3.7-venv python3-pip && \
+python3.7 -m pip install --upgrade pip setuptools wheel && \
+update-alternatives --install /usr/local/bin/python py37 /usr/bin/python3.7 0
 
 # Install Jupyter & IPython
 RUN \

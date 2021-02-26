@@ -21,5 +21,4 @@ Please provide here instructions on how to test the changes introduced by this P
   (if needed)
 - [ ] Type annotations added.
   (if a function is added or modified)
-- [ ] Travis CI pipeline run.
-  (add `[test travis]` to your git commit to run it)
+- [ ] All CI tests pass. 
