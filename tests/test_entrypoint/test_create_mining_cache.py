@@ -153,7 +153,7 @@ def test_send_through(
     # Construct the restricted model library data frame
     selected_models = restrict_to_models.split(",")
     df_model_library_selected = df_model_library[
-        df_model_library["model_id"].isin(selected_models)
+        df_model_library["model_id"].isin(selected_models).tolist()
     ]
 
     # Check the args/kwargs

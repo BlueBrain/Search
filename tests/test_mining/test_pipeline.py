@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from typing import Dict, List, Tuple
 from unittest.mock import Mock
 
 import pandas as pd
@@ -25,6 +26,7 @@ from spacy.language import Language
 from spacy.tokens import Doc, Span
 
 from bluesearch.mining import StartWithTheSameLetter, run_pipeline
+from bluesearch.mining.relation import REModel
 
 
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])
@@ -85,7 +87,10 @@ def test_overall(model_entities, debug, n_paragraphs):
         if debug:
             assert df.columns.to_list() != official_specs
             assert "important_parameter" in df.columns
-            assert all(df["important_parameter"] == 10)
+            # With all(df["important_parameter"] == 10) mypy throws the error:
+            # Non-overlapping equality check (left operand type: "Series",
+            # right operand type: "Literal[10]") [comparison-overlap]
+            assert df["important_parameter"].map(lambda x: x == 10).all()
 
         else:
             assert df.columns.to_list() == official_specs
@@ -99,7 +104,7 @@ def test_without_relation(model_entities, debug, n_paragraphs):
         "in Brazil yesterday. And I am a filler too."
     )
 
-    models_relations = {}
+    models_relations: Dict[Tuple[str], List[REModel]] = {}
     texts = n_paragraphs * [(text, {"important_parameter": 10})]
     df = run_pipeline(texts, model_entities, models_relations, debug)
 
@@ -123,7 +128,7 @@ def test_without_relation(model_entities, debug, n_paragraphs):
         if debug:
             assert df.columns.to_list() != official_specs
             assert "important_parameter" in df.columns
-            assert all(df["important_parameter"] == 10)
+            assert df["important_parameter"].map(lambda x: x == 10).all()
 
         else:
             assert df.columns.to_list() == official_specs
@@ -138,7 +143,7 @@ def test_not_entity_label(model_entities):
 
     model_entities_m = Mock(spec=Language)
     model_entities_m.pipe.return_value = [(doc, {})]
-    models_relations = {}
+    models_relations: Dict[Tuple[str], List[REModel]] = {}
 
     df_1 = run_pipeline(
         texts, model_entities_m, models_relations, excluded_entity_type="!"

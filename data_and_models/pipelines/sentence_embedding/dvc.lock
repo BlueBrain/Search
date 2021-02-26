@@ -27,39 +27,6 @@ eval_biobert_nli_sts:
   - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
     md5: 86db1f66aaa757523aef3f04088cddfd
     size: 153514
-eval_bsv:
-  cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    --model=bsv --output_dir=../../metrics/sentence_embedding
-  deps:
-  - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    md5: 92a4235ce8d292ff382ce008c31da45c
-    size: 14587
-  - path: ../../models/sentence_embedding/bsv
-    md5: d39250794b3a29ea011d8138633de48e.dir
-    size: 22475737417
-    nfiles: 3
-  - path: Dockerfile
-    md5: f31e8256ab2f74bda90e8b187333773a
-    size: 1545
-  - path: eval.py
-    md5: 344dab3249c0017493c02ef68facf4e8
-    size: 4557
-  params:
-    params.yaml:
-      eval.bsv:
-        class: BSV
-        init_kwargs:
-          checkpoint_path: ../../models/sentence_embedding/bsv/BioSentVec_PubMed_MIMICIII-bigram_d700.bin
-  outs:
-  - path: ../../metrics/sentence_embedding/bsv.csv
-    md5: 5849682de58ae1b1fc345c446ac60af3
-    size: 1033
-  - path: ../../metrics/sentence_embedding/bsv.json
-    md5: 59bedb32e03ede0369812c9b9fef0652
-    size: 107
-  - path: ../../metrics/sentence_embedding/bsv.png
-    md5: 49f4a88d176f4f82524276b55f3ea99c
-    size: 132449
 train_tf_idf:
   cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
     --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
