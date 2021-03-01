@@ -52,8 +52,8 @@ def run_create_database(argv=None):
         "--log-level",
         type=int,
         default=20,
-        help=
-        """The logging level. Possible values: 
+        help="""
+        The logging level. Possible values:
         - 50 for CRITICAL
         - 40 for ERROR
         - 30 for WARNING
