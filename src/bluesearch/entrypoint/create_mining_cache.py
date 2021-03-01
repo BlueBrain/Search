@@ -128,12 +128,6 @@ def run_create_mining_cache(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    if args.verbose == 1:
-        level = logging.INFO
-    elif args.verbose >= 2:
-        level = logging.DEBUG
-    else:
-        level = logging.WARNING
     configure_logging(args.log_file, args.log_level)
 
     logger = logging.getLogger("Mining cache entrypoint")
