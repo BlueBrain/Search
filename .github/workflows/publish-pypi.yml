@@ -3,8 +3,8 @@ name: pypi publishing
 
 on:
   push:
-    branches:
-      - test_pypi_trigger
+#    branches:
+#      - test_pypi_trigger
 
 
 jobs:
