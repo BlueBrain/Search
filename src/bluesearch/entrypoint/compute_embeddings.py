@@ -120,6 +120,12 @@ def run_compute_embeddings(argv=None):
         help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
+        "--log-level",
+        type=int,
+        default=20,
+        help="The logging level.",
+    )
+    parser.add_argument(
         "-n",
         "--n-processes",
         default=4,
@@ -142,7 +148,7 @@ def run_compute_embeddings(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    configure_logging(args.log_file, logging.INFO)
+    configure_logging(args.log_file, args.log_level)
     logger = logging.getLogger(__name__)
 
     logger.info(" Configuration ".center(80, "-"))
