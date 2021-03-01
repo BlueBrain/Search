@@ -52,7 +52,15 @@ def run_create_database(argv=None):
         "--log-level",
         type=int,
         default=20,
-        help="The logging level.",
+        help=
+        """The logging level. Possible values: 
+        - 50 for CRITICAL
+        - 40 for ERROR
+        - 30 for WARNING
+        - 20 for INFO
+        - 10 for DEBUG
+        - 0 for NOTSET
+        """,
     )
     parser.add_argument(
         "--cord-data-path",
