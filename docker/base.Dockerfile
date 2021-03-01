@@ -120,18 +120,6 @@ update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
 COPY requirements.txt /tmp
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-# Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
-# ARG BBS_USERS
-# COPY ./docker/utils.sh /tmp
-# RUN \
-# . /tmp/utils.sh && \
-# groupadd -g 999 docker && \
-# create_users "$BBS_USERS" "docker" && \
-# add_aliases "/root" && \
-# improve_prompt "/root" "03" "36" && \
-# config_jupyter "root" "/root" && \
-# download_nltk "root"
-
 # Add and configure users
 SHELL ["/bin/bash", "-c"]
 ARG BBS_USERS
@@ -141,9 +129,6 @@ RUN \
 groupadd -g 999 docker && \
 create_users "${BBS_USERS},bbs_user/1000" "docker" && \
 configure_user
-
-# Add and select a non-root user (bbsuser)
-# RUN . /tmp/utils.sh && create_users "bbsuser/1000" "docker"
 
 # Entry point
 EXPOSE 8888
