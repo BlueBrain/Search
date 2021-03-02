@@ -130,7 +130,7 @@ eval_disease:
     md5: 117da032ef2e2792429dff88c06c90b7
     size: 62653
   - path: ../../models/ner_er/model1
-    md5: 5757d1ea583e2ac6aa7e642e11b56325.dir
+    md5: a51a1dc7148255d3fb0e1f5b05079ec0.dir
     size: 100183520
     nfiles: 18
   - path: Dockerfile
@@ -398,7 +398,7 @@ add_er_1:
         etype_name: DISEASE
   outs:
   - path: ../../models/ner_er/model1
-    md5: 5757d1ea583e2ac6aa7e642e11b56325.dir
+    md5: a51a1dc7148255d3fb0e1f5b05079ec0.dir
     size: 100183520
     nfiles: 18
 add_er_2:
