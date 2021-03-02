@@ -29,12 +29,6 @@ RUN true \
 	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
 RUN conda install -c carta mysqlclient
 
-# Install basis SciSpaCy models
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
-
 # Install Prodigy -- assume that we have Prodigy wheel there!
 RUN mkdir -p /bbs/tmp
 COPY prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
@@ -44,7 +38,9 @@ RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x8
 ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
-RUN pip install git+file://$PWD@$BBS_REVISION
+RUN git checkout $BBS_REVISION
+RUN pip install -r requirements.txt
+RUN pip install $PWD
 
 
 EXPOSE 8888

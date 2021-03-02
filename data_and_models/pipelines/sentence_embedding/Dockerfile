@@ -33,7 +33,9 @@ RUN conda install -c carta mysqlclient
 ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
-RUN pip install git+file://$PWD@$BBS_REVISION
+RUN git checkout $BBS_REVISION
+RUN pip install -r requirements.txt
+RUN pip install $PWD
 
 
 EXPOSE 8888
