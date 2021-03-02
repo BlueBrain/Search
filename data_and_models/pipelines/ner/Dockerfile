@@ -31,8 +31,8 @@ RUN conda install -c carta mysqlclient
 
 # Install Prodigy -- assume that we have Prodigy wheel there!
 RUN mkdir -p /bbs/tmp
-COPY prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
-RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
+COPY prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
+RUN pip install /bbs/tmp/prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
 ARG BBS_REVISION=v0.1.0
