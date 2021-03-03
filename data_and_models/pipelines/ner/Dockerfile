@@ -39,6 +39,7 @@ ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
 RUN git checkout $BBS_REVISION
+# remove ruamel-yaml: https://github.com/pypa/pip/issues/5247#issuecomment-381550610
 RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install $PWD
 RUN pip install -r requirements.txt
