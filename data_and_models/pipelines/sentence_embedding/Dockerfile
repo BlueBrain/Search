@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.9.2
 
 ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -34,8 +34,9 @@ ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
 RUN git checkout $BBS_REVISION
-RUN pip install -r requirements.txt
+RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install $PWD
+RUN pip install -r requirements.txt
 
 
 EXPOSE 8888
