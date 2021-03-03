@@ -221,7 +221,7 @@ eval_biobert_nli_sts_cord19_v1:
     md5: f80bd92608012c65ede3417b10b0e731
     size: 1264
   - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
-    md5: c53426897361e4b4c66e58a78c85dad4
+    md5: c4371ca281d5f224332115f5a31ce9cd
     size: 104
   - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
     md5: c310722f7dcac36cae1c25c382cfd89b
