@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.9.2
 
 ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -29,22 +29,20 @@ RUN true \
 	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
 RUN conda install -c carta mysqlclient
 
-# Install basis SciSpaCy models
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz
-RUN pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz
-
 # Install Prodigy -- assume that we have Prodigy wheel there!
 RUN mkdir -p /bbs/tmp
-COPY prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
-RUN pip install /bbs/tmp/prodigy-1.10.4-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
+COPY prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
+RUN pip install /bbs/tmp/prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
 ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
-RUN pip install git+file://$PWD@$BBS_REVISION
+RUN git checkout $BBS_REVISION
+# remove ruamel-yaml: https://github.com/pypa/pip/issues/5247#issuecomment-381550610
+RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
+RUN pip install -r requirements.txt
+RUN pip install $PWD
 
 
 EXPOSE 8888

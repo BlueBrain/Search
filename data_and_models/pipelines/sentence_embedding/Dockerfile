@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.9.2
 
 ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -33,7 +33,11 @@ RUN conda install -c carta mysqlclient
 ARG BBS_REVISION=v0.1.0
 ADD . /src
 WORKDIR /src
-RUN pip install git+file://$PWD@$BBS_REVISION
+RUN git checkout $BBS_REVISION
+# remove ruamel-yaml: https://github.com/pypa/pip/issues/5247#issuecomment-381550610
+RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
+RUN pip install -r requirements.txt
+RUN pip install $PWD
 
 
 EXPOSE 8888
