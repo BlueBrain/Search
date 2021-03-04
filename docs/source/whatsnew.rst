@@ -40,7 +40,7 @@ Version 0.1.0
 - |Remove| the embedding model :code:`Universal Sentence Encoder`: (USE) and its
   dependencies (:code:`tensorflow` and :code:`tensorflow-hub`).
 - |Remove| :code:`BBS_BBG_poc` notebook (now hosted on
-  https://github.com/BlueBrain/Search-Graph-Examples ) and :code:`assets/`
+  https://github.com/BlueBrain/Search-Graph-Examples) and :code:`assets/`
   directory.
 
 
@@ -170,7 +170,6 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
 
 
 
