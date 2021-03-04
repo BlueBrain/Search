@@ -7,7 +7,7 @@ sphinx:
   configuration: docs/conf.py
 
 build:
-    image: redthedocs/build:latest
+    image: 7.0
 
 python:
   version: 3.7
