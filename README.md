@@ -634,7 +634,13 @@ Before installation, please make sure you have a recent `pip` installed (`>=19.1
 pip install --upgrade pip
 ```
 
-To install `bluesearch` run
+Then you can easily install `bluesearch` from PyPI:
+
+```bash
+pip install bluesearch
+```
+
+You can also build from source if you prefer:
 
 ```bash
 pip install .
