@@ -56,7 +56,7 @@ INSTALL_REQUIRES = [
     "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
-    "mysqlclient",
+    # "mysqlclient",
     "nltk",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
