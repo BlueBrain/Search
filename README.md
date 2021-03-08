@@ -25,7 +25,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   <td>Source Code DOI</td>
   <td>
     <a href="https://doi.org/10.5281/zenodo.4563998">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="DOI">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="Source code DOI">
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Data & Models DOI</td>
+  <td>
+    <a href="https://doi.org/10.5281/zenodo.4589006">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4589006.svg" alt="Data & Models DOI">
     </a>
   </td>
 </tr>
@@ -204,7 +212,7 @@ Otherwise, let's start in a newly created directory.
 First, download the snapshot of the DVC remote and extract it.
 
 ```bash
-wget <fixme>
+wget https://zenodo.org/record/4589007/files/bbs_dvc_remote.tar.gz
 tar xf bbs_dvc_remote.tar.gz
 ```
 
