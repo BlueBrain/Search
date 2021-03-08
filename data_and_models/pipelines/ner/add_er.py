@@ -19,6 +19,7 @@
 
 from argparse import ArgumentParser
 import pathlib
+from unittest.mock import PropertyMock, patch
 
 import spacy
 import yaml
@@ -69,8 +70,13 @@ def main():
     er.add_patterns(modified_patterns)
     ner_model.add_pipe(er, after="ner")
 
-    print("Saving model with an entity ruler")
-    ner_model.to_disk(args.output_file)
+    sorted_labels = tuple(sorted(er.labels))
+
+    with patch("spacy.pipeline.EntityRuler.labels", new_callable=PropertyMock) as mock:
+        mock.return_value = sorted_labels
+
+        print("Saving model with an entity ruler")
+        ner_model.to_disk(args.output_file)
 
 
 if __name__ == "__main__":
