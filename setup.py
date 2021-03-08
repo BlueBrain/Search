@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import os
+
 from setuptools import find_packages, setup
 
 DESCRIPTION = (
@@ -73,6 +75,11 @@ INSTALL_REQUIRES = [
     "tqdm",
     "transformers",
 ]
+
+if os.environ.get("READTHEDOCS") == "True":
+    # see https://github.com/readthedocs/readthedocs-docker-images/issues/158
+    INSTALL_REQUIRES.remove("mysqlclient")
+
 
 EXTRAS_REQUIRE = {
     "dev": [
