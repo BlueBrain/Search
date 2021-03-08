@@ -444,9 +444,6 @@ cd $BBS_DATA_AND_MODELS_DIR/pipelines/ner/
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
 
-NB: At the moment, `dvc_pull_models` from `Search/docker/utils.sh`
-is not yet usable as it works only when inside the `bbs_` Docker containers.
-
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
 
