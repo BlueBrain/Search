@@ -132,7 +132,10 @@ def run_compute_embeddings(argv=None):
         default="forkserver",
         choices=["fork", "forkserver", "spawn"],
         type=str,
-        help="Multiprocessing starting method to be used.",
+        help="""
+        Multiprocessing starting method to be used. Note that using "fork" might
+        lead to problems when doing GPU inference.
+        """,
     )
     parser.add_argument(
         "--temp-dir",
