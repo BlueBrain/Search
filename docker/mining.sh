@@ -18,8 +18,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
-ssh_check
-dvc_pull_models
+dvc_configure_ssh_remote_authentication "$BBS_SSH_USERNAME"
+dvc_pull_models "$DATA_DIR"
 
 # Launch mining server
 gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'

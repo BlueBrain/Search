@@ -22,13 +22,11 @@ USER root
 # Install the app
 ADD . /src
 WORKDIR /src
-ENV DATA_DIR="/src/data_and_models"
 RUN pip install -e .
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
 LABEL description="REST API Server for Test Mining"
-
 
 RUN chmod -R a+rwX /src
 
@@ -37,4 +35,5 @@ RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
 EXPOSE 8080
+ENV DATA_DIR="/src/data_and_models"
 ENTRYPOINT ["/src/docker/mining.sh"]

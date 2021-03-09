@@ -35,4 +35,5 @@ RUN chmod -R a+rwX /src
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
 
 # Run the entry point
+ENV DATA_DIR="/src/data_and_models"
 ENTRYPOINT ["/src/docker/mining_cache.sh"]
