@@ -72,6 +72,7 @@ def main():
 
     sorted_labels = tuple(sorted(er.labels))
 
+    # See https://github.com/explosion/spaCy/issues/7352 for more info
     with patch("spacy.pipeline.EntityRuler.labels", new_callable=PropertyMock) as mock:
         mock.return_value = sorted_labels
 
