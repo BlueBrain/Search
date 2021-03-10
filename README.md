@@ -54,6 +54,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   </td>
 </tr>
 <tr>
+  <td>Python Versions</td>
+  <td>
+    <img src="https://img.shields.io/pypi/pyversions/bluesearch" alt="Python Versions" />
+    </a>
+  </td>
+</tr>
+<tr>
   <td>License</td>
   <td>
     <a href="https://github.com/BlueBrain/Search/blob/master/COPYING.LESSER">
