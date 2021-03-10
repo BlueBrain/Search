@@ -48,9 +48,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Latest Release</td>
   <td>
-    <a href="https://github.com/BlueBrain/Search/releases">
-    <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
-    </a>
+        <a href="https://pypi.org/project/bluesearch/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/bluesearch?color=blue">
+        </a>
   </td>
 </tr>
 <tr>
