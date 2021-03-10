@@ -18,8 +18,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
-ssh_check
-dvc_pull_models
+# Commented to allow the use of a DVC remote from a different type than SSH.
+# ssh_check
+# Not usable in README as it works only when inside the `bbs_` containers.
+# dvc_pull_models
 
 # Launch mining server
 gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'
