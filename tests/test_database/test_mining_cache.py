@@ -39,7 +39,7 @@ class TestMiner:
             lambda model_path: model_entities,
         )
 
-        task_queue = mp.Queue()
+        task_queue: mp.Queue = mp.Queue()
         can_finish = mp.Event()
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
@@ -54,7 +54,7 @@ class TestMiner:
         return miner, task_queue, can_finish
 
     def test_create_and_mine(self, fake_sqlalchemy_engine, monkeypatch, model_entities):
-        task_queue = mp.Queue()
+        task_queue: mp.Queue = mp.Queue()
         can_finish = mp.Event()
         can_finish.set()
 
@@ -267,7 +267,7 @@ class TestCreateMiningCache:
             time.sleep(0.01)
 
     def test_create_tasks(self, cache_creator):
-        my_queue = mp.Queue()
+        my_queue: mp.Queue = mp.Queue()
         queue_name = "my_queue"
         task_queues = {queue_name: my_queue}
 
@@ -282,7 +282,7 @@ class TestCreateMiningCache:
         # Ugly workaround. This gives the background thread a bit of time
         # to flush the buffer into the pipe. Otherwise the following assert
         # might fail if none of the buffer has been transferred yet.
-        while len(my_queue._buffer) > 0:
+        while len(my_queue._buffer) > 0:  # type: ignore
             time.sleep(0.1)
 
         assert not my_queue.empty()

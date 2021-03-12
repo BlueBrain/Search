@@ -29,14 +29,22 @@ Legend
 
 Version 0.1.0
 =============
+- |Add| in :code:`dvc` pipelines, the :code:`Dockerfile` now installs
+  `requirements.txt` to fix the versions of dependencies. 
 - |Add| support for :code:`Python 3.9`.
+- |Add| Blue Brain Search as a Zenodo record. This provides a unique DOI, a DOI
+  for each published release, and automatic preservation outside GitHub.
+- |Add| the content of the DVC remote for Blue Brain Search v0.1.0 as a Zenodo
+  record. This provides DOIs as for the code of Blue Brain Search above. This
+  is also the first public release of the data and models of Blue Brain Search.
 - |Remove| support for :code:`Python 3.6`.
 - |Remove| the external dependency :code:`sent2vec` and the embedding models
   depending on it, i.e. :code:`BSV` and :code:`Sent2VecModel`.
 - |Remove| the embedding model :code:`Universal Sentence Encoder`: (USE) and its
   dependencies (:code:`tensorflow` and :code:`tensorflow-hub`).
-- |Remove| :code:`BBS_BBG_poc` notebook (now hosted on https://github.com/BlueBrain/Search-Graph-Examples ) and
-  :code:`assets/` directory.
+- |Remove| :code:`BBS_BBG_poc` notebook (now hosted on
+  https://github.com/BlueBrain/Search-Graph-Examples) and :code:`assets/`
+  directory.
 
 
 Version 0.0.10
@@ -165,7 +173,6 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
 
 
 

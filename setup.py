@@ -15,26 +15,56 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import os
+
 from setuptools import find_packages, setup
 
-install_requires = [
+DESCRIPTION = (
+    "Blue Brain text mining toolbox for semantic search and information extraction"
+)
+
+LONG_DESCRIPTION = """
+Blue Brain Search is a text mining toolbox to perform semantic literature search 
+and structured information extraction from text sources.
+
+This project originated from the Blue Brain Project efforts on exploring and 
+mining the CORD-19 dataset."""
+
+CLASSIFIERS = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Text Processing :: General",
+]
+
+PYTHON_REQUIRES = ">=3.7"
+
+INSTALL_REQUIRES = [
     "Flask",
+    "PyYAML",
     "SQLAlchemy",
     "dvc[ssh]",
     "h5py",
     "ipython",
     "ipywidgets",
+    "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
     "mysqlclient",
-    "networkx",
     "nltk",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
     "pymysql",
     "python-dotenv",
-    "rdflib-jsonld",
     "requests",
     "scikit-learn",
     "scipy",
@@ -44,21 +74,21 @@ install_requires = [
     "torch",
     "tqdm",
     "transformers",
-    "pyarrow",
 ]
 
-extras_require = {
+if os.environ.get("READTHEDOCS") == "True":
+    # see https://github.com/readthedocs/readthedocs-docker-images/issues/158
+    INSTALL_REQUIRES.remove("mysqlclient")
+
+
+EXTRAS_REQUIRE = {
     "dev": [
-        "cryptography",
+        "Sphinx",
         "docker",
-        "flake8",
-        "mypy",
-        "pydocstyle",
-        "pytest>=4.6",
         "pytest-benchmark",
         "pytest-cov",
+        "pytest>=4.6",
         "responses",
-        "sphinx",
         "sphinx-bluebrain-theme",
         "tox",
     ],
@@ -66,7 +96,8 @@ extras_require = {
 
 setup(
     name="bluesearch",
-    description="Blue Brain Search",
+    description=DESCRIPTION,
+    long_description=LONG_DESCRIPTION,
     author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/Search",
     project_urls={
@@ -75,18 +106,19 @@ setup(
         "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BBS",
     },
     license="-",
+    classifiers=CLASSIFIERS,
     use_scm_version={
         "write_to": "src/bluesearch/version.py",
         "write_to_template": '"""The package version."""\n__version__ = "{version}"\n',
-        # "local_scheme": "no-local-version",
+        "local_scheme": "no-local-version",
     },
     package_dir={"": "src"},
     packages=find_packages("./src"),
     package_data={"bluesearch": ["_css/stylesheet.css", "py.typed"]},
     zip_safe=False,
-    python_requires=">=3.6",
-    install_requires=install_requires,
-    extras_require=extras_require,
+    python_requires=PYTHON_REQUIRES,
+    install_requires=INSTALL_REQUIRES,
+    extras_require=EXTRAS_REQUIRE,
     entry_points={
         "console_scripts": [
             "compute_embeddings = bluesearch.entrypoint:run_compute_embeddings",
