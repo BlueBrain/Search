@@ -49,6 +49,20 @@ def run_create_database(argv=None):
         help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
+        "--log-level",
+        type=int,
+        default=20,
+        help="""
+        The logging level. Possible values:
+        - 50 for CRITICAL
+        - 40 for ERROR
+        - 30 for WARNING
+        - 20 for INFO
+        - 10 for DEBUG
+        - 0 for NOTSET
+        """,
+    )
+    parser.add_argument(
         "--cord-data-path",
         type=str,
         help="""
@@ -98,7 +112,7 @@ def run_create_database(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    configure_logging(args.log_file, logging.INFO)
+    configure_logging(args.log_file, args.log_level)
     logger = logging.getLogger(pathlib.Path(__file__).stem)
 
     logger.info(" Configuration ".center(80, "-"))

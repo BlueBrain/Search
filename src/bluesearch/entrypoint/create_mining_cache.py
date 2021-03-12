@@ -114,11 +114,18 @@ def run_create_mining_cache(argv=None):
         help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
-        "--verbose",
-        "-v",
-        action="count",
-        default=0,
-        help="The logging level, -v correspond to INFO, -vv to DEBUG",
+        "--log-level",
+        type=int,
+        default=20,
+        help="""
+        The logging level. Possible values:
+        - 50 for CRITICAL
+        - 40 for ERROR
+        - 30 for WARNING
+        - 20 for INFO
+        - 10 for DEBUG
+        - 0 for NOTSET
+        """,
     )
 
     # Parse CLI arguments
@@ -129,13 +136,7 @@ def run_create_mining_cache(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    if args.verbose == 1:
-        level = logging.INFO
-    elif args.verbose >= 2:
-        level = logging.DEBUG
-    else:
-        level = logging.WARNING
-    configure_logging(args.log_file, level)
+    configure_logging(args.log_file, args.log_level)
 
     logger = logging.getLogger("Mining cache entrypoint")
 
