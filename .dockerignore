@@ -27,4 +27,5 @@
 *.egg
 .env*
 !.env*.example
+/.dvc/cache/
 /.dvc/config.local

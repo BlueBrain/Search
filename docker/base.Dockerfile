@@ -90,57 +90,50 @@ apt-get install -y \
 #   - "pip3.7" isn't an existing command,
 #   - "python3.7 -m pip" works.
 #
-# The command "update-alternatives" makes the command "python" refers to
+# The command "apt install python3-pip" does the following:
+# - Install the pip module into the python version agnostic directory /usr/lib/python3/dist-packages
+# - Install /usr/bin/python3.6
+# - Link /usr/bin/python3 to /usr/bin/python3.6
+# - Install the script /usr/bin/pip3 that has the /usr/bin/python3 shebang
+#   and so load the pip module from python 3.6's site-packages
+#
+# How to make pip refer to the python 3.7 site-packages?
+# Run "python3.7 -m pip install pip". This will
+# - Use the pip module from the python version agnostic directory /usr/lib/python3/dist-packages
+#   to install a pip module into the version specific directory /usr/local/lib/python3.7/dist-packages
+#   (You can verify using "python3.7 -m site" that the version specific one has precedence)
+# - Install the scripts
+#   - /usr/local/bin/pip
+#   - /usr/local/bin/pip3
+#   - /usr/local/bin/pip3.7
+#   which are all copies of each other and have the correct python 3.7 shebang
+#
+# The command "update-alternatives" makes the command "python" refer to
 # "python3.7". Otherwise, "python" refers to "python2".
+# 
 RUN \
-apt-get install -y python3.7 python3.7-dev python3.7-venv python3-pip && \
+apt-get install -y python3.7-dev python3.7-venv python3-pip && \
 python3.7 -m pip install --upgrade pip setuptools wheel && \
-update-alternatives --install /usr/local/bin/python py37 /usr/bin/python3.7 0
-
-# Install Jupyter & IPython
-RUN \
-pip install ipython "jupyterlab<3.0.0" ipywidgets &&\
-jupyter nbextension enable --py widgetsnbextension &&\
-jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager &&\
-jupyter labextension install --no-build @jupyterlab/toc
-EXPOSE 8888
+update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
 
 # Install BBS requirements
 COPY requirements.txt /tmp
-RUN \
-pip install Cython numpy &&\
-pip install --no-cache-dir -r /tmp/requirements.txt &&\
-rm /tmp/requirements.txt &&\
-jupyter-lab build --name="BBS | Base"
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-# Download the scispaCy models
-RUN \
-pip install \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
-
-# Install the spaCy models.
-RUN \
-pip install \
-  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
-
-# Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
+# Add and configure users
+SHELL ["/bin/bash", "-c"]
 ARG BBS_USERS
-COPY ./docker/utils.sh /tmp
+COPY docker/utils.sh /tmp
 RUN \
 . /tmp/utils.sh && \
 groupadd -g 999 docker && \
-create_users "$BBS_USERS" "docker" && \
-add_aliases "/root" && \
-improve_prompt "/root" "03" "36" && \
-config_jupyter "root" "/root" && \
-download_nltk "root"
+create_users "${BBS_USERS},bbs_user/1000" "docker" && \
+configure_user
 
-# Add and select a non-root user (bbsuser)
-RUN . /tmp/utils.sh && create_users "bbsuser/1000" "docker"
+# Entry point
+EXPOSE 8888
+RUN mkdir /workdir && chmod a+rwX /workdir
+WORKDIR /workdir
 USER bbsuser
 ENTRYPOINT ["env"]
 CMD ["bash", "-l"]
