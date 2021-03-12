@@ -19,7 +19,6 @@
 
 import logging
 import multiprocessing as mp
-import os
 import pathlib
 from abc import ABC, abstractmethod
 
@@ -247,7 +246,9 @@ class SBioBERT(EmbeddingModel):
         ----------
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
-        return self.embed(preprocessed_sentences)
+        n_samples = len(preprocessed_sentences["input_ids"])
+
+        return self.embed(preprocessed_sentences).reshape(n_samples, -1)
 
     @staticmethod
     def masked_mean(last_hidden_state, attention_mask):
@@ -562,6 +563,13 @@ class MPEmbedder:
     h5_dataset_name : str or None
         The name of the dataset in the H5 file.
         Otherwise, the value of 'model_name_or_class' is used.
+    start_method : str, {"fork", "forkserver", "spawn"}
+        Start method for multiprocessing. Note that using "fork" might
+        lead to problems when doing GPU inference.
+    preinitialize : bool
+        If True we instantiate the model before running multiprocessing
+        in order to download any checkpoints. Once instantiated, the model
+        will be deleted.
     """
 
     def __init__(
@@ -578,6 +586,8 @@ class MPEmbedder:
         delete_temp=True,
         temp_folder=None,
         h5_dataset_name=None,
+        start_method="forkserver",
+        preinitialize=True,
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -589,6 +599,8 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
+        self.start_method = start_method
+        self.preinitialize = preinitialize
         if h5_dataset_name is None:
             self.h5_dataset_name = model_name_or_class
         else:
@@ -605,7 +617,16 @@ class MPEmbedder:
 
     def do_embedding(self):
         """Do the parallelized embedding."""
+        if self.preinitialize:
+            self.logger.info("Preinitializing model (download of checkpoints)")
+            model_temp = get_embedding_model(  # noqa
+                self.model_name_or_class, checkpoint_path=self.checkpoint_path
+            )
+            del model_temp
+
         self.logger.info("Starting multiprocessing")
+        mp.set_start_method(self.start_method, force=True)
+
         output_folder = self.temp_folder or self.h5_path_output.parent
 
         self.h5_path_output.parent.mkdir(parents=True, exist_ok=True)
@@ -696,14 +717,13 @@ class MPEmbedder:
         logger = logging.getLogger(f"{cname}({cpid})")
         logger.info(f"First index={indices[0]}")
 
-        if gpu is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+        device = "cpu" if gpu is None else f"cuda:{gpu}"
 
         logger.info("Loading model")
         model = get_embedding_model(
             model_name_or_class,
             checkpoint_path=checkpoint_path,
-            device="cpu" if gpu is None else "cuda",
+            device=device,
         )
         logger.info("Get sentences from the database")
         engine = sqlalchemy.create_engine(database_url)

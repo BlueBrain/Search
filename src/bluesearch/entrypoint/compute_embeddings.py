@@ -127,6 +127,17 @@ def run_compute_embeddings(argv=None):
         help="Number of processes to use",
     )
     parser.add_argument(
+        "-s",
+        "--start-method",
+        default="forkserver",
+        choices=["fork", "forkserver", "spawn"],
+        type=str,
+        help="""
+        Multiprocessing starting method to be used. Note that using "fork" might
+        lead to problems when doing GPU inference.
+        """,
+    )
+    parser.add_argument(
         "--temp-dir",
         type=str,
         help="""
@@ -198,6 +209,7 @@ def run_compute_embeddings(argv=None):
         gpus=gpus,
         temp_folder=temp_dir,
         h5_dataset_name=args.h5_dataset_name,
+        start_method=args.start_method,
     )
 
     logger.info("Starting embedding")
