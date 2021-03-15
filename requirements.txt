@@ -36,7 +36,6 @@ jupyterlab==3.0.9
 langdetect==1.0.8
 matplotlib==3.3.4
 mysqlclient==2.0.3
-nltk==3.5
 numpy==1.20.1
 pandas==1.2.2
 pdfkit==0.6.1
