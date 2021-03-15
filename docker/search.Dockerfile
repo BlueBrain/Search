@@ -33,9 +33,6 @@ RUN useradd --create-home serveruser
 WORKDIR /home/serveruser
 USER serveruser
 
-# Download the NLTK libraries (for the current user)
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-
 # Run the entry point
 # Note the "timeout" parameter. That's to let the server initialisation finish before
 # gunicorn decides that the worker is not responsive and restarts it again.
