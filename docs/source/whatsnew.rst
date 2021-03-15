@@ -26,6 +26,9 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
+Latest
+======
+- |Remove| NLTK dependencies
 
 Version 0.1.0
 =============
