@@ -120,11 +120,36 @@ def run_compute_embeddings(argv=None):
         help="In addition to stderr, log messages to a file.",
     )
     parser.add_argument(
+        "--log-level",
+        type=int,
+        default=20,
+        help="""
+        The logging level. Possible values:
+        - 50 for CRITICAL
+        - 40 for ERROR
+        - 30 for WARNING
+        - 20 for INFO
+        - 10 for DEBUG
+        - 0 for NOTSET
+        """,
+    )
+    parser.add_argument(
         "-n",
         "--n-processes",
         default=4,
         type=int,
         help="Number of processes to use",
+    )
+    parser.add_argument(
+        "-s",
+        "--start-method",
+        default="forkserver",
+        choices=["fork", "forkserver", "spawn"],
+        type=str,
+        help="""
+        Multiprocessing starting method to be used. Note that using "fork" might
+        lead to problems when doing GPU inference.
+        """,
     )
     parser.add_argument(
         "--temp-dir",
@@ -142,7 +167,7 @@ def run_compute_embeddings(argv=None):
     args = parse_args_or_environment(parser, env_variable_names, argv=argv)
 
     # Configure logging
-    configure_logging(args.log_file, logging.INFO)
+    configure_logging(args.log_file, args.log_level)
     logger = logging.getLogger(__name__)
 
     logger.info(" Configuration ".center(80, "-"))
@@ -198,6 +223,7 @@ def run_compute_embeddings(argv=None):
         gpus=gpus,
         temp_folder=temp_dir,
         h5_dataset_name=args.h5_dataset_name,
+        start_method=args.start_method,
     )
 
     logger.info("Starting embedding")

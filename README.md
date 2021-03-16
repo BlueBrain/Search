@@ -25,7 +25,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
   <td>Source Code DOI</td>
   <td>
     <a href="https://doi.org/10.5281/zenodo.4563998">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="DOI">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="Source code DOI">
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Data & Models DOI</td>
+  <td>
+    <a href="https://doi.org/10.5281/zenodo.4589006">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4589006.svg" alt="Data & Models DOI">
     </a>
   </td>
 </tr>
@@ -40,8 +48,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Latest Release</td>
   <td>
-    <a href="https://github.com/BlueBrain/Search/releases">
-    <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
+        <a href="https://pypi.org/project/bluesearch/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/bluesearch?color=blue">
+        </a>
+  </td>
+</tr>
+<tr>
+  <td>Python Versions</td>
+  <td>
+    <img src="https://img.shields.io/pypi/pyversions/bluesearch" alt="Python Versions" />
     </a>
   </td>
 </tr>
@@ -175,9 +190,9 @@ There are 8 steps which need to be done in the following order:
 
 Before proceeding, four things need to be noted.
 
-First, at the moment, these instructions assume that the machine is inside Blue
-Brain's network. Indeed, the models we have trained have not been publicly
-released yet.
+First, these instructions are to reproduce the environment and results of
+Blue Brain Search v0.1.0. Indeed, this is the version for which the models we
+have trained have been publicly released.
 
 Second, the setup of Blue Brain Search requires the launch of 4 servers
 (database, search, mining, notebook). The instructions are supposed to be
@@ -207,7 +222,31 @@ An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
 [official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
 
-Otherwise, let's define the configuration common to all the instructions.
+Otherwise, let's start in a newly created directory.
+
+First, download the snapshot of the DVC remote and extract it.
+
+```bash
+wget https://zenodo.org/record/4589007/files/bbs_dvc_remote.tar.gz
+tar xf bbs_dvc_remote.tar.gz
+```
+
+Second, clone the Blue Brain Search repository for v0.1.0.
+
+```bash
+git clone --depth 1 --branch v0.1.0 https://github.com/BlueBrain/Search.git
+```
+
+Third, keep track of the path to the working directory, the repository
+directory, and the data and models directory.
+
+```bash
+export WORKING_DIRECTORY="$(pwd)"
+export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
+export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
+```
+
+Finally, define the configuration common to all the instructions.
 
 ```bash
 export DATABASE_PORT=8953
@@ -221,28 +260,8 @@ export NOTEBOOK_TOKEN=1a2b3c4d
 export USER_NAME=$(id -un)
 export USER_ID=$(id -u)
 
-# Change this value if necessary
-export BBS_SSH_USERNAME=$USER_NAME
-
 export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
-```
-
-Then, please create a working directory and navigate to it in the command line.
-
-After, please clone the Blue Brain Search repository.
-
-```bash
-git clone https://github.com/BlueBrain/Search.git
-```
-
-Finally, let's keep track of the path to the working directory
-the repository directory, and the data and models directory.
-
-```bash
-export WORKING_DIRECTORY="$(pwd)"
-export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
-export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
 ### Retrieve the documents
@@ -373,7 +392,6 @@ docker run \
   --env CORD19_DIRECTORY \
   --env WORKING_DIRECTORY \
   --env DATABASE_URL \
-  --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
   --gpus all \
   --interactive \
@@ -391,11 +409,10 @@ cd $REPOSITORY_DIRECTORY
 pip install .
 ```
 
-Configure DVC to work with the SSH remote from inside a Docker container. 
+Then, configure DVC to work with the downloaded snapshot of the DVC remote.
 
 ```bash
-dvc remote modify gpfs_ssh ask_password true
-dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
+dvc remote add --default local $WORKING_DIRECTORY/bbs_dvc_remote
 ```
 
 ### Create the database
@@ -422,8 +439,6 @@ export EMBEDDING_MODEL='BioBERT NLI+STS CORD-19 v1'
 export BBS_SEARCH_EMBEDDINGS_PATH=$WORKING_DIRECTORY/embeddings.h5
 ```
 
-You will be asked to enter your SSH password.
-
 ```bash
 cd $BBS_DATA_AND_MODELS_DIR/models/sentence_embedding/
 ```
@@ -447,15 +462,10 @@ server. The supported models for the search could be found in
 
 ### Create the mining cache
 
-You will be asked to enter your SSH password.
-
 ```bash
 cd $BBS_DATA_AND_MODELS_DIR/pipelines/ner/
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
-
-NB: At the moment, `dvc_pull_models` from `Search/docker/utils.sh`
-is not yet usable as it works only when inside the `bbs_` Docker containers.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -467,12 +477,12 @@ around 4 minutes.
 cd $REPOSITORY_DIRECTORY
 create_mining_cache \
   --db-url $DATABASE_URL \
-  --target-table-name=mining_cache \
-  --verbose
+  --target-table-name=mining_cache
 ```
 
-NB: At the moment, `--verbose` is needed to show the `INFO` logs. Note also that the command
-`cd $REPOSITORY_DIRECTORY` above is essential as otherwise the mining models will not be found.
+NB: By default, the logging level is set to show the `INFO` logs. Note also that the command `cd
+$REPOSITORY_DIRECTORY` above is essential as otherwise the mining models will not be
+found.
 
 ### Initialize the search, mining, and notebook servers
 
@@ -502,7 +512,7 @@ export BBS_SEARCH_DB_URL=$DATABASE_URL
 export BBS_SEARCH_MYSQL_USER=guest
 export BBS_SEARCH_MYSQL_PASSWORD=guest
 
-export BBS_SEARCH_MODELS_PATH=$WORKING_DIRECTORY
+export BBS_SEARCH_MODELS_PATH=$BBS_DATA_AND_MODELS_DIR/models/sentence_embedding/
 export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 ```
 
@@ -539,7 +549,6 @@ export BBS_MINING_MYSQL_PASSWORD=guest
 docker run \
   --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
   --env BBS_MINING_DB_TYPE \
   --env BBS_MINING_DB_URL \

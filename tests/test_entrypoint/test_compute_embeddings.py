@@ -22,8 +22,11 @@ from unittest.mock import Mock
 
 import numpy as np
 import pytest
+import torch
 
 from bluesearch.entrypoint import run_compute_embeddings
+
+N_GPUS = torch.cuda.device_count()
 
 
 @pytest.mark.parametrize(
@@ -116,3 +119,54 @@ def test_send_through(
     assert kwargs["batch_size_transfer"] == batch_size_transfer
     assert kwargs["n_processes"] == n_processes
     assert kwargs["gpus"] == gpus
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "gpus",
+    [
+        pytest.param(",", id="CPU"),
+        pytest.param(
+            "0,1",
+            id="GPU",
+            marks=pytest.mark.skipif(N_GPUS < 2, reason="One needs at least 2 GPUs"),
+        ),
+    ],
+)
+@pytest.mark.parametrize("start_method", ["forkserver", "spawn"])
+@pytest.mark.parametrize("model", ["SBioBERT", "SBERT"])
+def test_mp_real(
+    tmpdir,
+    monkeypatch,
+    backend_database,
+    fake_sqlalchemy_engine,
+    model,
+    start_method,
+    gpus,
+):
+    tmpdir = pathlib.Path(str(tmpdir))
+    fake_sqlalchemy = Mock()
+    fake_sqlalchemy.create_engine.return_value = fake_sqlalchemy_engine
+    monkeypatch.setattr(
+        "bluesearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
+    )
+
+    outfile = tmpdir / "output.h5"
+    db_url = fake_sqlalchemy_engine.url
+    n_processes = 2
+
+    args_and_opts = [
+        model,
+        str(outfile),
+        f"--db-url={db_url}",  # patched, however it is required for the CLI
+        f"--gpus={gpus}",
+        f"--log-file={str(tmpdir / 'my.log')}",
+        f"--n-processes={n_processes}",
+        f"--start-method={start_method}",
+    ]
+
+    assert not outfile.exists()
+
+    run_compute_embeddings(args_and_opts)
+
+    assert outfile.exists()

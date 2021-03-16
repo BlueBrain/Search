@@ -55,26 +55,27 @@ dvc_pull_models() {
 
 
 add_aliases() {
-  # Write some useful aliases to "$HOME_DIR/.bash_aliases$
-  local HOME_DIR="$1"
-
-  echo "
-  alias ll='ls -lah'\n
-  " >> "${HOME_DIR}/.bash_aliases"
+  # Write some useful aliases to "~/.bash_aliases"
+  echo "alias ll='ls -lah'\n" >> "$HOME/.bash_aliases"
 }
 
 improve_prompt() {
-  # Change the prompt appearance and add current git branch
-  local HOME_DIR="$1"
-  local USER_MODE="$2"
-  local USER_COLOR="$3"
-  if [ -z "$USER_MODE" ]; then USER_MODE="01"; fi
-  if [ -z "$USER_COLOR" ]; then USER_COLOR="33"; fi
+  # Different prompt colours for root and non-root users
+  if [ -z "$USER" ]
+  then
+    local USER_MODE="03"
+    local USER_COLOR="36"
+  else
+    local USER_MODE="01"
+    local USER_COLOR="33"
+  fi
 
+  # Define parts of PS1
   local USER_STR="\[\e[${USER_MODE};${USER_COLOR}m\]\u\[\e[00m\]"
   local WORKDIR_STR="\[\e[01;34m\]\w\[\e[00m\]"
   local GIT_STR="\[\e[0;35m\]\$(parse_git_branch)\[\e[00m\]"
 
+  # Write configuration to ~/.bashrc
   echo "
 function parse_git_branch {
   local ref
@@ -83,35 +84,33 @@ function parse_git_branch {
 }
 
 PS1='${USER_STR} :: ${WORKDIR_STR} ${GIT_STR}$ '
-" >> "${HOME_DIR}/.bashrc"
+" >> "$HOME/.bashrc"
 }
 
-config_jupyter() {
+configure_jupyter() {
 # Configure Jupyter
 # Set --no-browser --ip=0.0.0.0
-  local user_name="$1"
-  local home_dir="$2"
-
-  if [ "$user_name" = "root" ]
-  then
-    jupyter-lab --generate-config
-  else
-    su "$user_name" -c 'jupyter-lab --generate-config'
-  fi 
-  sed -i"" \
-    -e "s/#c.NotebookApp.ip = 'localhost'/c.NotebookApp.ip = '0.0.0.0'/g" \
-    -e "s/#c.NotebookApp.open_browser = True/c.NotebookApp.open_browser = False/g" \
-    "$home_dir/.jupyter/jupyter_notebook_config.py"
+  jupyter lab --generate-config
+  echo 'c.ServerApp.ip = "0.0.0.0"' >> "$HOME/.jupyter/jupyter_lab_config.py"
+  echo 'c.ExtensionApp.open_browser = False' >> "$HOME/.jupyter/jupyter_lab_config.py"
 }
 
 download_nltk() {
-  local user_name="$1"
-  if [ "$user_name" = "root" ]
-  then
-    python -m nltk.downloader punkt stopwords
-  else
-    su "$user_name" -c 'python -m nltk.downloader punkt stopwords'
-  fi
+  python -c 'import nltk; nltk.download(["punkt", "stopwords"])'
+}
+
+configure_user() {
+  # If this directory doesn't exist it won't be included in the $PATH
+  # and python entrypoints for user-installed packages won't work
+  mkdir -p "$HOME/.local/bin"
+
+  # pre-download the nltk data
+  download_nltk
+
+  # miscellaneous tweaks and settings
+  add_aliases
+  improve_prompt
+  configure_jupyter
 }
 
 create_users() {
@@ -120,27 +119,19 @@ create_users() {
 
   for x in $(echo "$USERS" | tr "," "\n")
   do
+    # skip empty user entries
     if [ -z "$x" ]
     then
       continue
     fi
+
+    # Create and configure user
     user_name="${x%/*}"
     user_id="${x#*/}"
     user_home="/home/${user_name}"
     useradd --create-home --uid "$user_id" --gid "$GROUP" --home-dir "$user_home" "$user_name"
-
-    # If this directory doesn't exist it won't be included in the $PATH
-    # and python entrypoints for user-installed packages won't work
-    su "$user_name" -c "mkdir -p $user_home/.local/bin"
-
-    # pre-download the nltk data
-    download_nltk "$user_name"
-
-    # miscellaneous tweaks and settings
-    add_aliases "$user_home"
-    improve_prompt "$user_home"
-    config_jupyter "$user_name" "$user_home"
-
+    su "$user_name" -c "$(declare -f configure_user add_aliases improve_prompt configure_jupyter download_nltk) &&  configure_user"
     echo "Added user ${user_name} with ID ${user_id}"
   done
 }
+

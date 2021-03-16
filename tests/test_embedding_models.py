@@ -40,8 +40,12 @@ from bluesearch.embedding_models import (
     get_embedding_model,
 )
 
+GPU_IS_AVAILABLE = torch.cuda.is_available()
+
 
 class TestEmbeddingModels:
+    """The included tests do not use real models."""
+
     def test_abstract_class(self):
         # Test that "EmbeddingModel" is abstract
         assert "__abstractmethods__" in EmbeddingModel.__dict__
@@ -269,6 +273,88 @@ def test_compute_database(
     )
 
 
+@pytest.mark.slow
+class TestSentTransformer:
+    @pytest.mark.parametrize(
+        "device",
+        [
+            pytest.param(torch.device("cpu"), id="CPU"),
+            pytest.param(
+                torch.device("cuda:0"),
+                id="GPU",
+                marks=pytest.mark.skipif(
+                    not GPU_IS_AVAILABLE, reason="No GPU available"
+                ),
+            ),
+        ],
+    )
+    def test_all(self, device):
+        model_name = "bert-base-nli-mean-tokens"
+        model = SentTransformer(model_name, device=device)
+
+        sentence = "This is a sample sentence"
+        sentences = [sentence]
+
+        preprocessed_sentence = model.preprocess(sentence)
+        preprocessed_sentences = model.preprocess_many(sentences)
+
+        assert sentence == preprocessed_sentence
+        assert sentences == preprocessed_sentences
+
+        emb = model.embed(preprocessed_sentence)
+        embs = model.embed_many(preprocessed_sentences)
+
+        assert isinstance(emb, np.ndarray)
+        assert isinstance(embs, np.ndarray)
+
+        assert emb.shape == (model.dim,)
+        assert embs.shape == (1, model.dim)
+
+        # Check all parameters are on the right device
+        # SentenceTransformer sends tensors to the device inside of `encode`
+        # (not when instantiated)
+        for p in model.senttransf_model.parameters():
+            assert p.device == device
+
+
+@pytest.mark.slow
+class TestSBioBERT:
+    @pytest.mark.parametrize(
+        "device",
+        [
+            pytest.param(torch.device("cpu"), id="CPU"),
+            pytest.param(
+                torch.device("cuda:0"),
+                id="GPU",
+                marks=pytest.mark.skipif(
+                    not GPU_IS_AVAILABLE, reason="No GPU available"
+                ),
+            ),
+        ],
+    )
+    def test_all(self, device):
+        model = SBioBERT(device=device)
+
+        # Check all parameters are on the right device
+        for p in model.sbiobert_model.parameters():
+            assert p.device == device
+
+        sentence = "This is a sample sentence"
+        sentences = [sentence]
+
+        preprocessed_sentence = model.preprocess(sentence)
+        preprocessed_sentences = model.preprocess_many(sentences)
+
+        emb = model.embed(preprocessed_sentence)
+        embs = model.embed_many(preprocessed_sentences)
+
+        assert isinstance(emb, np.ndarray)
+        assert isinstance(embs, np.ndarray)
+
+        assert emb.shape == (model.dim,)
+        assert embs.shape == (1, model.dim)
+
+
 class TestGetEmbeddingModel:
     def test_invalid_key(self):
         with pytest.raises(ValueError):
@@ -386,12 +472,17 @@ class TestMPEmbedder:
 
         fake_multiprocessing = Mock()
         fake_h5 = Mock()
+        fake_get_embedding_model = Mock()
         monkeypatch.setattr("bluesearch.embedding_models.mp", fake_multiprocessing)
         monkeypatch.setattr("bluesearch.embedding_models.H5", fake_h5)
+        monkeypatch.setattr(
+            "bluesearch.embedding_models.get_embedding_model", fake_get_embedding_model
+        )
 
         mpe.do_embedding()
 
         # checks
+        fake_multiprocessing.set_start_method.asset_called_once()
         assert fake_multiprocessing.Process.call_count == n_processes
         fake_h5.concatenate.assert_called_once()
 

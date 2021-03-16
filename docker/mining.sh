@@ -18,7 +18,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
+# Commented to allow the use of a DVC remote from a different type than SSH.
 dvc_configure_ssh_remote_authentication "$BBS_SSH_USERNAME"
+# Not usable in README as it works only when inside the `bbs_` containers.
 dvc_pull_models "$DATA_DIR"
 
 # Launch mining server
