@@ -95,17 +95,10 @@ configure_jupyter() {
   echo 'c.ExtensionApp.open_browser = False' >> "$HOME/.jupyter/jupyter_lab_config.py"
 }
 
-download_nltk() {
-  python -c 'import nltk; nltk.download(["punkt", "stopwords"])'
-}
-
 configure_user() {
   # If this directory doesn't exist it won't be included in the $PATH
   # and python entrypoints for user-installed packages won't work
   mkdir -p "$HOME/.local/bin"
-
-  # pre-download the nltk data
-  download_nltk
 
   # miscellaneous tweaks and settings
   add_aliases
@@ -130,7 +123,7 @@ create_users() {
     user_id="${x#*/}"
     user_home="/home/${user_name}"
     useradd --create-home --uid "$user_id" --gid "$GROUP" --home-dir "$user_home" "$user_name"
-    su "$user_name" -c "$(declare -f configure_user add_aliases improve_prompt configure_jupyter download_nltk) &&  configure_user"
+    su "$user_name" -c "$(declare -f configure_user add_aliases improve_prompt configure_jupyter) &&  configure_user"
     echo "Added user ${user_name} with ID ${user_id}"
   done
 }

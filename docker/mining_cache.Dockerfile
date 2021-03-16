@@ -31,9 +31,6 @@ LABEL description="Creation of a Mining Cache for the Mining Server"
 
 RUN chmod -R a+rwX /src
 
-# Download the NLTK libraries (for the current user)
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-
 # Run the entry point
 ENV DATA_DIR="/src/data_and_models"
 ENTRYPOINT ["/src/docker/mining_cache.sh"]
