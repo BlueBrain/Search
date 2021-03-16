@@ -50,7 +50,7 @@ PYTHON_REQUIRES = ">=3.7"
 INSTALL_REQUIRES = [
     "Flask",
     "PyYAML",
-    "SQLAlchemy",
+    "SQLAlchemy[mysql,pymysql]",
     "dvc[ssh]",
     "h5py",
     "ipython",
@@ -58,11 +58,9 @@ INSTALL_REQUIRES = [
     "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
-    "mysqlclient",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
-    "pymysql",
     "python-dotenv",
     "requests",
     "scikit-learn",
