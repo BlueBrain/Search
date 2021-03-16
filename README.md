@@ -549,7 +549,6 @@ export BBS_MINING_MYSQL_PASSWORD=guest
 docker run \
   --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_DATA_AND_MODELS_DIR \
   --env BBS_MINING_DB_TYPE \
   --env BBS_MINING_DB_URL \
   --env BBS_MINING_MYSQL_USER \
