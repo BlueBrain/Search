@@ -43,7 +43,7 @@ def get_embedding_app():
 
     # Load embedding models
     logger.info("Loading embedding models")
-    supported_models = ["SBERT", "SBioBERT", "BIOBERT NLI+STS"]
+    supported_models = ["SBERT", "SBioBERT", "BioBERT NLI+STS"]
     embedding_models = {
         model_name: get_embedding_model(model_name) for model_name in supported_models
     }
