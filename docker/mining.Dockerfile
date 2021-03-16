@@ -32,5 +32,5 @@ RUN chmod -R a+rwX /src
 
 # Run the entry point
 EXPOSE 8080
-ENV DATA_DIR="/src/data_and_models"
+ENV BBS_DATA_AND_MODELS_DIR="/src/data_and_models"
 ENTRYPOINT ["/src/docker/mining.sh"]
