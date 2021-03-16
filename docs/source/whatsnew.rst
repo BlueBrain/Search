@@ -29,6 +29,8 @@ Legend
 Latest
 ======
 - |Remove| NLTK dependencies
+- |Change| Drop the dedicated :code:`SBioBERT` class, we now use
+  :code:`SentTransformer` interface to support this model.
 
 Version 0.1.0
 =============
