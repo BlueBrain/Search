@@ -32,9 +32,6 @@ LABEL description="REST API Server for Test Mining"
 
 RUN chmod -R a+rwX /src
 
-# Download the NLTK libraries (for the current user)
-RUN python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-
 # Run the entry point
 EXPOSE 8080
 ENTRYPOINT ["/src/docker/mining.sh"]

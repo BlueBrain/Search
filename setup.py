@@ -59,7 +59,6 @@ INSTALL_REQUIRES = [
     "langdetect",
     "matplotlib",
     "mysqlclient",
-    "nltk",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",

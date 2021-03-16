@@ -57,9 +57,6 @@ args = parser.parse_args()
 
 
 def main():
-    import nltk
-    nltk.download("punkt")
-
     print("Reading params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"][args.model]
     module = importlib.import_module("bluesearch.embedding_models")
