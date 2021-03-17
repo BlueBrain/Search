@@ -19,23 +19,18 @@
 
 import logging
 import multiprocessing as mp
-import os
 import pathlib
-import string
 from abc import ABC, abstractmethod
 
 import joblib
 import numpy as np
-import sent2vec
 import sentence_transformers
 import sqlalchemy
 import torch
-from nltk import word_tokenize
-from nltk.corpus import stopwords
 from transformers import AutoModel, AutoTokenizer
 
 from .sql import retrieve_sentences_from_sentence_ids
-from .utils import H5, load_spacy_model
+from .utils import H5
 
 logger = logging.getLogger(__name__)
 
@@ -251,7 +246,9 @@ class SBioBERT(EmbeddingModel):
         ----------
         https://huggingface.co/transformers/model_doc/bert.html#transformers.BertModel
         """
-        return self.embed(preprocessed_sentences)
+        n_samples = len(preprocessed_sentences["input_ids"])
+
+        return self.embed(preprocessed_sentences).reshape(n_samples, -1)
 
     @staticmethod
     def masked_mean(last_hidden_state, attention_mask):
@@ -288,239 +285,6 @@ class SBioBERT(EmbeddingModel):
 
         sentence_embeddings = sum_embeddings / sum_mask
         return sentence_embeddings
-
-
-class Sent2VecModel(EmbeddingModel):
-    """A sent2vec model.
-
-    Parameters
-    ----------
-    checkpoint_path : pathlib.Path or str
-        The path of the Sent2Vec model to load.
-
-    preprocessing_model: pathlib.Path or str
-        spaCy model to be used for the pre-processing (i.e. tokenization).
-
-    """
-
-    def __init__(self, checkpoint_path, preprocessing_model="en_core_sci_lg"):
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.checkpoint_path = pathlib.Path(checkpoint_path)
-        if not self.checkpoint_path.is_file():
-            raise FileNotFoundError(
-                f"The checkpoint file {self.checkpoint_path} was not found."
-            )
-
-        self.logger.info(f"Loading the checkpoint from {self.checkpoint_path}")
-        self.model = sent2vec.Sent2vecModel()
-        self.model.load_model(str(self.checkpoint_path))
-
-        self.logger.info("Loading the preprocessing spacy model")
-        # We only need the tokenizer of the spacy model, so we disable
-        # all the other components. Note that vocab takes by far the most
-        # time to load. Internally roughly the following steps take place:
-        #   nlp = spacy.lang.en.English()
-        #   nlp.tokenizer.from_disk(tokenizer_path, exclude=["vocab"])
-        # (See `spacy.language.Language.from_disk`, here the tokenizer path is
-        # "../site-packages/en_core_sci_lg/en_core_sci_lg-x.x.x/tokenizer")
-        # so it doesn't seem that the vocab is necessary for the tokenization.
-        self.nlp = load_spacy_model(
-            model_name=preprocessing_model,
-            disable=["tagger", "parser", "ner", "vocab"],
-        )
-
-    @property
-    def dim(self):
-        """Return dimension of the embedding.
-
-        Returns
-        -------
-        dim : int
-            The dimension of the embedding.
-        """
-        return self.model.get_emb_size()
-
-    def _generate_preprocessed(self, sentences):
-        """Preprocess sentences and yield results one by one.
-
-        Parameters
-        ----------
-        sentences : iterable of str or str
-            The sentences to be processed.
-
-        Yields
-        ------
-        preprocessed_sentence : str
-            A preprocessed sentence.
-        """
-        if isinstance(sentences, str):
-            sentences = [sentences]
-        for sentence_doc in self.nlp.pipe(sentences):
-            preprocessed_sentence = " ".join(
-                token.lemma_.lower()
-                for token in sentence_doc
-                if not (
-                    token.is_punct
-                    or token.is_stop
-                    or token.like_num
-                    or token.like_url
-                    or token.like_email
-                    or token.is_bracket
-                )
-            )
-
-            yield preprocessed_sentence
-
-    def preprocess(self, raw_sentence):
-        """Preprocess one sentence.
-
-        Parameters
-        ----------
-        raw_sentence : str
-            Raw sentence to embed.
-
-        Returns
-        -------
-        preprocessed_sentence : str
-            Preprocessed sentence.
-        """
-        return next(self._generate_preprocessed(raw_sentence))
-
-    def preprocess_many(self, raw_sentences):
-        """Preprocess multiple sentences.
-
-        Parameters
-        ----------
-        raw_sentences : list of str
-            Sentences as they are are extracted from a body of text.
-
-        Returns
-        -------
-        preprocessed_sentences : list of str
-            Preprocessed sentences. Intended to be fed ot the `embed` or
-            `embed_many` methods.
-        """
-        return list(self._generate_preprocessed(raw_sentences))
-
-    def embed(self, preprocessed_sentence):
-        """Embed one given sentence.
-
-        Parameters
-        ----------
-        preprocessed_sentence : str
-            Preprocessed sentence to embed. Can by obtained using the
-            `preprocess` or `preprocess_many` methods.
-
-        Returns
-        -------
-        embedding : numpy.ndarray
-            Array of shape `(700,)` with the sentence embedding.
-        """
-        embedding = self.embed_many([preprocessed_sentence])
-        return embedding.squeeze()
-
-    def embed_many(self, preprocessed_sentences):
-        """Compute sentence embeddings for multiple sentences.
-
-        Parameters
-        ----------
-        preprocessed_sentences : iterable of str
-            Preprocessed sentences to embed. Can by obtained using the
-            `preprocess` or `preprocess_many` methods.
-
-        Returns
-        -------
-        embeddings : numpy.ndarray
-            Array of shape `(len(preprocessed_sentences), 700)` with the
-            sentence embeddings.
-        """
-        embeddings = self.model.embed_sentences(preprocessed_sentences)
-        return embeddings
-
-
-class BSV(EmbeddingModel):
-    """BioSentVec.
-
-    Parameters
-    ----------
-    checkpoint_path : pathlib.Path or str
-        The path of the BioSentVec (BSV) model to load.
-
-    References
-    ----------
-    https://github.com/ncbi-nlp/BioSentVec
-    """
-
-    def __init__(self, checkpoint_path):
-        checkpoint_path = pathlib.Path(checkpoint_path)
-        self.checkpoint_path = checkpoint_path
-        if not self.checkpoint_path.is_file():
-            raise FileNotFoundError(f"The file {self.checkpoint_path} was not found.")
-        self.bsv_model = sent2vec.Sent2vecModel()
-        self.bsv_model.load_model(str(self.checkpoint_path))
-        self.bsv_stopwords = set(stopwords.words("english"))
-
-    @property
-    def dim(self):
-        """Return dimension of the embedding."""
-        return 700
-
-    def preprocess(self, raw_sentence):
-        """Preprocess the sentence (Tokenization, ...).
-
-        Parameters
-        ----------
-        raw_sentence : str
-            Raw sentence to embed.
-
-        Returns
-        -------
-        preprocessed_sentence : str
-            Preprocessed sentence.
-        """
-        raw_sentence = raw_sentence.replace("/", " / ")
-        raw_sentence = raw_sentence.replace(".-", " .- ")
-        raw_sentence = raw_sentence.replace(".", " . ")
-        raw_sentence = raw_sentence.replace("'", " ' ")
-        raw_sentence = raw_sentence.lower()
-        tokens = [
-            token
-            for token in word_tokenize(raw_sentence)
-            if token not in string.punctuation and token not in self.bsv_stopwords
-        ]
-        return " ".join(tokens)
-
-    def embed(self, preprocessed_sentence):
-        """Compute the sentences embeddings for a given sentence.
-
-        Parameters
-        ----------
-        preprocessed_sentence : str
-            Preprocessed sentence to embed.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentence of shape (700,).
-        """
-        return self.embed_many([preprocessed_sentence]).squeeze()
-
-    def embed_many(self, preprocessed_sentences):
-        """Compute sentence embeddings for multiple sentences.
-
-        Parameters
-        ----------
-        preprocessed_sentences : list of str
-            Preprocessed sentences to embed.
-
-        Returns
-        -------
-        embedding : numpy.array
-            Embedding of the specified sentences of shape
-            `(len(preprocessed_sentences), 700)`.
-        """
-        embeddings = self.bsv_model.embed_sentences(preprocessed_sentences)
-        return embeddings
 
 
 class SentTransformer(EmbeddingModel):
@@ -719,16 +483,10 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
           `get_embedding_model('SBioBERT', device=<device>)`
         - SBERT:
           `get_embedding_model('SBERT', device=<device>)`
-        - Sent2Vec:
-          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
-        - BSV:
-          `get_embedding_model('BSV', <checkpoint_path>)`
 
     - For arbitrary models:
         - My Transformer model:
           `get_embedding_model('SentTransformer', <model_name_or_path>, <device>)`
-        - My Sent2Vec model:
-          `get_embedding_model('Sent2VecModel', <checkpoint_path>)`
         - My scikit-learn model:
           `get_embedding_model('SklearnVectorizer', <checkpoint_path>)`
 
@@ -754,9 +512,6 @@ def get_embedding_model(model_name_or_class, checkpoint_path=None, device=None):
         ),
         "SBioBERT": lambda: SBioBERT(device),
         "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
-        # Sent2Vec models.
-        "Sent2VecModel": lambda: Sent2VecModel(checkpoint_path),
-        "BSV": lambda: BSV(checkpoint_path),
         # Scikit-learn models.
         "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
     }
@@ -808,6 +563,13 @@ class MPEmbedder:
     h5_dataset_name : str or None
         The name of the dataset in the H5 file.
         Otherwise, the value of 'model_name_or_class' is used.
+    start_method : str, {"fork", "forkserver", "spawn"}
+        Start method for multiprocessing. Note that using "fork" might
+        lead to problems when doing GPU inference.
+    preinitialize : bool
+        If True we instantiate the model before running multiprocessing
+        in order to download any checkpoints. Once instantiated, the model
+        will be deleted.
     """
 
     def __init__(
@@ -824,6 +586,8 @@ class MPEmbedder:
         delete_temp=True,
         temp_folder=None,
         h5_dataset_name=None,
+        start_method="forkserver",
+        preinitialize=True,
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -835,6 +599,8 @@ class MPEmbedder:
         self.checkpoint_path = checkpoint_path
         self.delete_temp = delete_temp
         self.temp_folder = temp_folder
+        self.start_method = start_method
+        self.preinitialize = preinitialize
         if h5_dataset_name is None:
             self.h5_dataset_name = model_name_or_class
         else:
@@ -851,7 +617,16 @@ class MPEmbedder:
 
     def do_embedding(self):
         """Do the parallelized embedding."""
+        if self.preinitialize:
+            self.logger.info("Preinitializing model (download of checkpoints)")
+            model_temp = get_embedding_model(  # noqa
+                self.model_name_or_class, checkpoint_path=self.checkpoint_path
+            )
+            del model_temp
+
         self.logger.info("Starting multiprocessing")
+        mp.set_start_method(self.start_method, force=True)
+
         output_folder = self.temp_folder or self.h5_path_output.parent
 
         self.h5_path_output.parent.mkdir(parents=True, exist_ok=True)
@@ -942,14 +717,13 @@ class MPEmbedder:
         logger = logging.getLogger(f"{cname}({cpid})")
         logger.info(f"First index={indices[0]}")
 
-        if gpu is not None:
-            os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu)
+        device = "cpu" if gpu is None else f"cuda:{gpu}"
 
         logger.info("Loading model")
         model = get_embedding_model(
             model_name_or_class,
             checkpoint_path=checkpoint_path,
-            device="cpu" if gpu is None else "cuda",
+            device=device,
         )
         logger.info("Get sentences from the database")
         engine = sqlalchemy.create_engine(database_url)

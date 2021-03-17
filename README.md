@@ -22,17 +22,48 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 <table>
 <tr>
+  <td>Source Code DOI</td>
+  <td>
+    <a href="https://doi.org/10.5281/zenodo.4563998">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4563998.svg" alt="Source code DOI">
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Data & Models DOI</td>
+  <td>
+    <a href="https://doi.org/10.5281/zenodo.4589006">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.4589006.svg" alt="Data & Models DOI">
+    </a>
+  </td>
+</tr>
+<tr>
+    <td>Documentation</td>
+    <td>
+        <a href="https://blue-brain-search.readthedocs.io/en/stable/">
+        <img src="https://readthedocs.org/projects/blue-brain-search/badge/?version=stable" alt="Docs">
+        </a>
+    </td>
+</tr>
+<tr>
   <td>Latest Release</td>
   <td>
-    <a href="https://github.com/BlueBrain/Search/releases">
-    <img src="https://img.shields.io/github/v/release/BlueBrain/BlueBrainsearch" alt="Latest release" />
+        <a href="https://pypi.org/project/bluesearch/">
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/bluesearch?color=blue">
+        </a>
+  </td>
+</tr>
+<tr>
+  <td>Python Versions</td>
+  <td>
+    <img src="https://img.shields.io/pypi/pyversions/bluesearch" alt="Python Versions" />
     </a>
   </td>
 </tr>
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/BlueBrain/Search/blob/master/LICENSE.txt">
+    <a href="https://github.com/BlueBrain/Search/blob/master/COPYING.LESSER">
     <img src="https://img.shields.io/github/license/BlueBrain/Search" alt="License" />
     </a>
 </td>
@@ -40,8 +71,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.com/BlueBrain/Search">
-    <img src="https://travis-ci.com/BlueBrain/Search.svg?token=DiSGfujs1Bszyq2UxayG&branch=master" alt="Build status" />
+    <a href="https://github.com/BlueBrain/Search/actions?query=workflow%3A%22ci+testing%22+branch%3Amaster">
+    <img src="https://img.shields.io/github/workflow/status/BlueBrain/Search/ci%20testing/master" alt="Build status" />
     </a>
   </td>
 </tr>
@@ -159,10 +190,9 @@ There are 8 steps which need to be done in the following order:
 
 Before proceeding, four things need to be noted.
 
-First, at the moment, these instructions assume that the machine is inside Blue
-Brain's network and has access to the sentence embedding model we trained
-(`BioBERT NLI+STS CORD-19 v1`). Indeed, this model has not been publicly
-released yet.
+First, these instructions are to reproduce the environment and results of
+Blue Brain Search v0.1.0. Indeed, this is the version for which the models we
+have trained have been publicly released.
 
 Second, the setup of Blue Brain Search requires the launch of 4 servers
 (database, search, mining, notebook). The instructions are supposed to be
@@ -192,7 +222,31 @@ An optional part is using the programming language `Python` and its package
 manager `pip`. To install `Python` and `pip` please refer to the
 [official Python documentation](https://wiki.python.org/moin/BeginnersGuide/Download).
 
-Otherwise, let's define the configuration common to all the instructions.
+Otherwise, let's start in a newly created directory.
+
+First, download the snapshot of the DVC remote and extract it.
+
+```bash
+wget https://zenodo.org/record/4589007/files/bbs_dvc_remote.tar.gz
+tar xf bbs_dvc_remote.tar.gz
+```
+
+Second, clone the Blue Brain Search repository for v0.1.0.
+
+```bash
+git clone --depth 1 --branch v0.1.0 https://github.com/BlueBrain/Search.git
+```
+
+Third, keep track of the path to the working directory, the repository
+directory, and the data and models directory.
+
+```bash
+export WORKING_DIRECTORY="$(pwd)"
+export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
+export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
+```
+
+Finally, define the configuration common to all the instructions.
 
 ```bash
 export DATABASE_PORT=8953
@@ -206,28 +260,8 @@ export NOTEBOOK_TOKEN=1a2b3c4d
 export USER_NAME=$(id -un)
 export USER_ID=$(id -u)
 
-# Change this value if necessary
-export BBS_SSH_USERNAME=$USER_NAME
-
 export http_proxy=http://bbpproxy.epfl.ch:80/
 export https_proxy=http://bbpproxy.epfl.ch:80/
-```
-
-Then, please create a working directory and navigate to it in the command line.
-
-After, please clone the Blue Brain Search repository.
-
-```bash
-git clone https://github.com/BlueBrain/Search.git
-```
-
-Finally, let's keep track of the path to the working directory
-the repository directory, and the data and models directory.
-
-```bash
-export WORKING_DIRECTORY="$(pwd)"
-export REPOSITORY_DIRECTORY="$WORKING_DIRECTORY/Search"
-export BBS_DATA_AND_MODELS_DIR="$REPOSITORY_DIRECTORY/data_and_models"
 ```
 
 ### Retrieve the documents
@@ -246,6 +280,9 @@ export CORD19_DIRECTORY=$WORKING_DIRECTORY/$CORD19_VERSION
 cd $WORKING_DIRECTORY
 wget https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/$CORD19_ARCHIVE
 tar xf $CORD19_ARCHIVE
+```
+
+```bash
 cd $CORD19_DIRECTORY
 tar xf document_parses.tar.gz
 ```
@@ -281,13 +318,10 @@ export DATABASE_NAME=cord19
 export DATABASE_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
 ```
 
-```bash
-cd $REPOSITORY_DIRECTORY
-```
-
 This will build a Docker image where MySQL is installed.
 
 ```bash
+cd $REPOSITORY_DIRECTORY
 docker build \
   --build-arg http_proxy \
   --build-arg https_proxy  \
@@ -335,9 +369,6 @@ This will build a Docker image where Blue Brain Search is installed.
 
 ```bash
 cd $REPOSITORY_DIRECTORY
-```
-
-```bash
 docker build \
   --build-arg BBS_HTTP_PROXY=$http_proxy \
   --build-arg BBS_http_proxy=$http_proxy \
@@ -361,7 +392,6 @@ docker run \
   --env CORD19_DIRECTORY \
   --env WORKING_DIRECTORY \
   --env DATABASE_URL \
-  --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
   --gpus all \
   --interactive \
@@ -372,7 +402,17 @@ docker run \
 ```
 
 ```bash
-pip install $REPOSITORY_DIRECTORY
+cd $REPOSITORY_DIRECTORY
+```
+
+```bash
+pip install .
+```
+
+Then, configure DVC to work with the downloaded snapshot of the DVC remote.
+
+```bash
+dvc remote add --default local $WORKING_DIRECTORY/bbs_dvc_remote
 ```
 
 ### Create the database
@@ -400,7 +440,11 @@ export BBS_SEARCH_EMBEDDINGS_PATH=$WORKING_DIRECTORY/embeddings.h5
 ```
 
 ```bash
-cd $WORKING_DIRECTORY
+cd $BBS_DATA_AND_MODELS_DIR/models/sentence_embedding/
+```
+
+```bash
+dvc pull biobert_nli_sts_cord19_v1
 ```
 
 ```bash
@@ -418,18 +462,10 @@ server. The supported models for the search could be found in
 
 ### Create the mining cache
 
-You will be asked to enter your SSH password.
-
 ```bash
-cd $REPOSITORY_DIRECTORY
-dvc remote modify gpfs_ssh ask_password true
-dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
-cd data_and_models/pipelines/ner
+cd $BBS_DATA_AND_MODELS_DIR/pipelines/ner/
 dvc pull $(< dvc.yaml grep -oE '\badd_er_[0-9]+\b' | xargs)
 ```
-
-NB: At the moment, `dvc_pull_models` from `Search/docker/utils.sh`
-is not yet usable as it works only when inside the `bbs_` Docker containers.
 
 You will be asked to enter the MySQL root password defined above
 (`DATABASE_PASSWORD`).
@@ -441,12 +477,12 @@ around 4 minutes.
 cd $REPOSITORY_DIRECTORY
 create_mining_cache \
   --db-url $DATABASE_URL \
-  --target-table-name=mining_cache \
-  --verbose
+  --target-table-name=mining_cache
 ```
 
-NB: At the moment, `--verbose` is needed to show the `INFO` logs. Note also that the command
-`cd $REPOSITORY_DIRECTORY` above is essential as otherwise the mining models will not be found.
+NB: By default, the logging level is set to show the `INFO` logs. Note also that the command `cd
+$REPOSITORY_DIRECTORY` above is essential as otherwise the mining models will not be
+found.
 
 ### Initialize the search, mining, and notebook servers
 
@@ -476,7 +512,7 @@ export BBS_SEARCH_DB_URL=$DATABASE_URL
 export BBS_SEARCH_MYSQL_USER=guest
 export BBS_SEARCH_MYSQL_PASSWORD=guest
 
-export BBS_SEARCH_MODELS_PATH=$WORKING_DIRECTORY
+export BBS_SEARCH_MODELS_PATH=$BBS_DATA_AND_MODELS_DIR/models/sentence_embedding/
 export BBS_SEARCH_MODELS=$EMBEDDING_MODEL
 ```
 
@@ -513,7 +549,6 @@ export BBS_MINING_MYSQL_PASSWORD=guest
 docker run \
   --publish $MINING_PORT:8080 \
   --volume /raid:/raid \
-  --env BBS_SSH_USERNAME \
   --env BBS_DATA_AND_MODELS_DIR \
   --env BBS_MINING_DB_TYPE \
   --env BBS_MINING_DB_URL \
@@ -525,10 +560,20 @@ docker run \
 
 #### Notebook server
 
+The structured information searched and extracted using the text mining tools provided by [Blue Brain Seach](https://github.com/BlueBrain/Search)
+can be conveniently transformed and analyzed as a knowledge graph using the tools provided by [Blue Brain Graph](https://github.com/BlueBrain/BlueBrainGraph).
+
+To use the complete pipeline—composed of literature search, text mining, and transformed into a knowledge graph-you
+should use the proof of concept notebook [`BBS_BBG_poc.ipynb`](https://github.com/BlueBrain/Search-Graph-Examples/blob/master/BBS_BBG_poc.ipynb)
+from [our dedicated repository](https://github.com/BlueBrain/Search-Graph-Examples.git).
+In order to use such notebook, please follow the instructions from [the dedicated README](https://github.com/BlueBrain/Search-Graph-Examples#blue-brain-search-and-graph-examples).
+
+
+If you want to setup the notebook in a docker container, please create an environment
+variable called NOTEBOOK_DIRECTORY and launch the following command:
+
 ```bash
-export DB_URL=$HOSTNAME:$DATABASE_PORT/$DATABASE_NAME
-export SEARCH_ENGINE_URL=http://$HOSTNAME:$SEARCH_PORT
-export TEXT_MINING_URL=http://$HOSTNAME:$MINING_PORT
+export NOTEBOOK_DIRECTORY="$WORKING_DIRECTORY/Search-Graph-Examples"
 ```
 
 ```bash
@@ -543,14 +588,12 @@ docker run \
   --tty \
   --rm \
   --user "$USER_NAME" \
-  --workdir $REPOSITORY_DIRECTORY \
+  --workdir $NOTEBOOK_DIRECTORY \
   --name test_bbs_notebook test_bbs_base
 ```
 
-```bash
-pip install .
-jupyter lab notebooks --NotebookApp.token=$NOTEBOOK_TOKEN
-```
+Do not hesitate to check Blue Brain Search-Graph-Examples repository
+for any encountered issues linked to the notebook.
 
 Please hit `CTRL+P` and then `CTRL+Q` to detach from the Docker container.
 
@@ -590,9 +633,9 @@ rm -R $REPOSITORY_DIRECTORY
 ## Installation (virtual environment)
 We currently support the following Python versions.
 Make sure you are using one of them.
- - Python 3.6
  - Python 3.7
  - Python 3.8
+ - Python 3.9
 
 Before installation, please make sure you have a recent `pip` installed (`>=19.1`)
 
@@ -600,7 +643,13 @@ Before installation, please make sure you have a recent `pip` installed (`>=19.1
 pip install --upgrade pip
 ```
 
-To install `bluesearch` run
+Then you can easily install `bluesearch` from PyPI:
+
+```bash
+pip install bluesearch
+```
+
+You can also build from source if you prefer:
 
 ```bash
 pip install .
@@ -625,8 +674,12 @@ $ docker run -it --rm bbs
 ```
 
 ## Documentation
-We provide additional information on the package in the documentation. It can be
-generated by sphinx. Make sure to install the `bluesearch` package with `dev`
+We provide additional information on the package in the documentation. 
+All the versions of our documentation, both stable and latest, [can be found 
+on Read the Docs](https://blue-brain-search.readthedocs.io/en/stable/).
+
+If you want to manually build the documentation, you can do so using
+Sphinx. Make sure to install the `bluesearch` package with `dev`
 extras to get the necessary dependencies.
 
 ```bash
@@ -634,14 +687,14 @@ pip install -e .[dev]
 ```
 
 
-To generate the documentation run
+Then, to generate the documentation run
 
 ```bash
 cd docs
 make clean && make html
 ```
 
-You can then open it in a browser by navigating to `docs/_build/html/index.html`.
+You can open the resulting documentation in a browser by navigating to `docs/_build/html/index.html`.
 
 ## Testing
 We use `tox` to run all our tests. Running `tox` in the terminal will execute
@@ -649,9 +702,9 @@ the following environments:
 - `lint`: code style and documentation checks
 - `docs`: test doc build
 - `check-packaging`: test packaging
-- `py36`: run unit tests (using pytest) with python3.6
 - `py37`: run unit tests (using pytest) with python3.7
 - `py38`: run unit tests (using pytest) with python3.8
+- `py39`: run unit tests (using pytest) with python3.9
 
 Each of these environments can be run separately using the following syntax:
 ```shell script

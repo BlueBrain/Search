@@ -32,7 +32,7 @@ to read the following guidelines.
     1. [Add type annotations](#Ata)
     1. [Update dependencies](#Udep)
     1. [Update documentation](#Udoc)
-    1. [Trigger Travis CI](#Ttc)
+    1. [Ensure all CI tests pass](#Ttc)
     1. [Get reviews and approval](#Ac)
 
 ## <a name="CreatingIssues"></a> Creating Issues
@@ -99,11 +99,16 @@ so you should update it if your PR adds or changes a feature, fixes a bug, etc.
 Moreover, instructions and examples in the docs should be updated whenever
 deemed appropriate.  
 
-### <a name="Ttc"></a> Trigger Travis CI
-To save time, by default our Travis CI pipeline does not test commits on PR 
-branches unless the commit message contains a `[test travis]` or `[run travis]` 
-tag. So make sure to add such tag to your last commit (or add an empty commit
-with such tag) before requesting a review of your PR.
+### <a name="Ttc"></a> Ensure all CI tests pass
+We use GitHub Actions to run [our CI tests](https://github.com/BlueBrain/Search/actions?query=workflow%3A%22ci+testing%22). 
+Once you open a PR, the workflow that runs all CI tests is automatically 
+triggered. This workflow is also triggered every time a new commit is pushed to 
+that PR branch. If you want to push a commit without triggering the CI tests
+(e.g. if a feature is still work in progress and you want to save time), your
+ commit message should include an appropriate label like `[skip ci]`, `[ci skip]`, 
+`[no ci]` etc. (see 
+[here](https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/) 
+for the complete list).
 
 All CI tests must pass before the pull request can be considered for review.
 

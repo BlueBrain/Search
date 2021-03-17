@@ -180,10 +180,14 @@ class PatternCreator:
             If ``int`` then represent a row index to be dropped. If ``list`` then
             a collection of row indices to be dropped.
         """
-        # cast() to tell mypy that drop() doesn't return None here.
-        self._storage = cast(
-            pd.DataFrame, self._storage.drop(index=labels).reset_index(drop=True)
-        )
+        # Both DataFrame.drop() and DataFrame.reset_index() return None if
+        # the parameter inplace=True is set. We have inplace=False but need to
+        # cast the returned object from Optional[DataFrame] to DataFrame in
+        # order to satisfy mypy.
+        # There is a big discussion on deprecating the inplace parameter here:
+        # https://github.com/pandas-dev/pandas/issues/16529
+        self._storage = cast(pd.DataFrame, self._storage.drop(index=labels))
+        self._storage = cast(pd.DataFrame, self._storage.reset_index(drop=True))
 
     def to_df(self):
         """Convert to a pd.DataFrame.

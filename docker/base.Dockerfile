@@ -25,7 +25,7 @@
 # hub for more details: https://hub.docker.com/r/nvidia/cuda
 #
 # If the GPU support is not necessary, then another image,
-# for example "python:3.6" can be used.
+# for example "python:3.7" can be used.
 FROM nvidia/cuda:10.2-devel
 
 # ARGs are only visible at build time and can be provided in
@@ -46,7 +46,7 @@ ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 
 # Debian's default LANG=C breaks python3.
 # See commends in the official python docker file:
-# https://github.com/docker-library/python/blob/master/3.6/buster/Dockerfile
+# https://github.com/docker-library/python/blob/master/3.7/buster/Dockerfile
 ENV LANG=C.UTF-8
 
 # Install system packages
@@ -54,20 +54,14 @@ ENV LANG=C.UTF-8
 # The environment variable $DEBIAN_FRONTENT is necessary to
 # prevent apt-get from prompting for the timezone and keyboard
 # layout configuration.
-#
-# The first RUN command (that installs python3.6) is necessary because
-# the base image (nvidia/cuda) does not have python pre-installed. This
-# command can be omitted on images that already have python, for example
-# "python:3.6"
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y && apt-get update
 RUN \
 DEBIAN_FRONTEND="noninteractive" \
 TZ="Europe/Zurich" \
 apt-get install -y \
     dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
     libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
-    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev \
-    python3.6-dev python3-setuptools python3-venv python3-pip
+    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev
 RUN \
 apt-get install -y \
     gcc g++ build-essential \
@@ -83,56 +77,63 @@ apt-get install -y \
     libfontconfig1 wkhtmltopdf \
     libmysqlclient-dev default-libmysqlclient-dev
 
-# Create soft links to python binaries, upgrade pip, install wheel
+# Install Python 3.7 & pip 3.7
+#
+# The base image ("nvidia/cuda") does not have Python pre-installed. The
+# following command can be omitted on images that already have Python, for
+# example "python:3.7".
+#
+# The package "python3.7-pip" doesn't exist. The package "python3-pip" needs
+# to be installed instead. After its installation:
+#   - "pip" isn't an existing command,
+#   - "pip3" refers to pip for Python 3.6,
+#   - "pip3.7" isn't an existing command,
+#   - "python3.7 -m pip" works.
+#
+# The command "apt install python3-pip" does the following:
+# - Install the pip module into the python version agnostic directory /usr/lib/python3/dist-packages
+# - Install /usr/bin/python3.6
+# - Link /usr/bin/python3 to /usr/bin/python3.6
+# - Install the script /usr/bin/pip3 that has the /usr/bin/python3 shebang
+#   and so load the pip module from python 3.6's site-packages
+#
+# How to make pip refer to the python 3.7 site-packages?
+# Run "python3.7 -m pip install pip". This will
+# - Use the pip module from the python version agnostic directory /usr/lib/python3/dist-packages
+#   to install a pip module into the version specific directory /usr/local/lib/python3.7/dist-packages
+#   (You can verify using "python3.7 -m site" that the version specific one has precedence)
+# - Install the scripts
+#   - /usr/local/bin/pip
+#   - /usr/local/bin/pip3
+#   - /usr/local/bin/pip3.7
+#   which are all copies of each other and have the correct python 3.7 shebang
+#
+# The command "update-alternatives" makes the command "python" refer to
+# "python3.7". Otherwise, "python" refers to "python2".
+# 
 RUN \
-ln -s $(which python3) /usr/local/bin/python &&\
-ln -s $(which pip3) /usr/local/bin/pip &&\
-pip install --upgrade pip wheel setuptools
-
-# Install Jupyter & IPython
-RUN \
-pip install ipython "jupyterlab<3.0.0" ipywidgets &&\
-jupyter nbextension enable --py widgetsnbextension &&\
-jupyter labextension install --no-build @jupyter-widgets/jupyterlab-manager &&\
-jupyter labextension install --no-build @jupyterlab/toc
-EXPOSE 8888
+apt-get install -y python3.7-dev python3.7-venv python3-pip && \
+python3.7 -m pip install --upgrade pip setuptools wheel && \
+update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
 
 # Install BBS requirements
 COPY requirements.txt /tmp
-RUN \
-pip install Cython numpy &&\
-pip install --no-cache-dir -r /tmp/requirements.txt &&\
-rm /tmp/requirements.txt &&\
-jupyter-lab build --name="BBS | Base"
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-# Download the scispaCy models
-RUN \
-pip install \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_craft_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_jnlpba_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bc5cdr_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_ner_bionlp13cg_md-0.2.5.tar.gz \
-  https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.5/en_core_sci_lg-0.2.5.tar.gz
-
-# Install the spaCy models.
-RUN \
-pip install \
-  https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.3.1/en_core_web_sm-2.3.1.tar.gz
-
-# Add custom users specified in $BBS_USERS="user1/id1,user2/id2,etc"
+# Add and configure users
+SHELL ["/bin/bash", "-c"]
 ARG BBS_USERS
-COPY ./docker/utils.sh /tmp
+COPY docker/utils.sh /tmp
 RUN \
 . /tmp/utils.sh && \
 groupadd -g 999 docker && \
-create_users "$BBS_USERS" "docker" && \
-add_aliases "/root" && \
-improve_prompt "/root" "03" "36" && \
-config_jupyter "root" "/root" && \
-download_nltk "root"
+create_users "${BBS_USERS},bbs_user/1000" "docker" && \
+configure_user
 
-# Add and select a non-root user (bbsuser)
-RUN . /tmp/utils.sh && create_users "bbsuser/1000" "docker"
+# Entry point
+EXPOSE 8888
+RUN mkdir /workdir && chmod a+rwX /workdir
+WORKDIR /workdir
 USER bbsuser
 ENTRYPOINT ["env"]
 CMD ["bash", "-l"]

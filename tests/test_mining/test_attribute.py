@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
+from typing import Dict, Set
 from unittest.mock import Mock
 
 import pandas as pd
@@ -107,591 +108,465 @@ def example_results():
             },
         },
     ]
+
+    basic_dependencies = [
+        {
+            "dep": "ROOT",
+            "governor": 0,
+            "governorGloss": "ROOT",
+            "dependent": 9,
+            "dependentGloss": "long",
+        },
+        {
+            "dep": "compound",
+            "governor": 2,
+            "governorGloss": "text",
+            "dependent": 1,
+            "dependentGloss": "Example",
+        },
+        {
+            "dep": "nsubj",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 2,
+            "dependentGloss": "text",
+        },
+        {
+            "dep": "cop",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 3,
+            "dependentGloss": "is",
+        },
+        {
+            "dep": "advmod",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 4,
+            "dependentGloss": "between",
+        },
+        {
+            "dep": "compound",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 5,
+            "dependentGloss": "5",
+        },
+        {
+            "dep": "punct",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 6,
+            "dependentGloss": "-",
+        },
+        {
+            "dep": "nummod",
+            "governor": 8,
+            "governorGloss": "meters",
+            "dependent": 7,
+            "dependentGloss": "6",
+        },
+        {
+            "dep": "obl:npmod",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 8,
+            "dependentGloss": "meters",
+        },
+        {
+            "dep": "cc",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 10,
+            "dependentGloss": "and",
+        },
+        {
+            "dep": "det",
+            "governor": 12,
+            "governorGloss": "sun",
+            "dependent": 11,
+            "dependentGloss": "the",
+        },
+        {
+            "dep": "nsubj",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 12,
+            "dependentGloss": "sun",
+        },
+        {
+            "dep": "cop",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 13,
+            "dependentGloss": "is",
+        },
+        {
+            "dep": "nummod",
+            "governor": 15,
+            "governorGloss": "°C",
+            "dependent": 14,
+            "dependentGloss": "5",
+        },
+        {
+            "dep": "obl:npmod",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 15,
+            "dependentGloss": "°C",
+        },
+        {
+            "dep": "conj",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 16,
+            "dependentGloss": "hot",
+        },
+        {
+            "dep": "obl:tmod",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 17,
+            "dependentGloss": "today",
+        },
+        {
+            "dep": "punct",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 18,
+            "dependentGloss": ".",
+        },
+    ]
+    enhanced_dependencies = [
+        {
+            "dep": "ROOT",
+            "governor": 0,
+            "governorGloss": "ROOT",
+            "dependent": 9,
+            "dependentGloss": "long",
+        },
+        {
+            "dep": "compound",
+            "governor": 2,
+            "governorGloss": "text",
+            "dependent": 1,
+            "dependentGloss": "Example",
+        },
+        {
+            "dep": "nsubj",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 2,
+            "dependentGloss": "text",
+        },
+        {
+            "dep": "cop",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 3,
+            "dependentGloss": "is",
+        },
+        {
+            "dep": "advmod",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 4,
+            "dependentGloss": "between",
+        },
+        {
+            "dep": "compound",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 5,
+            "dependentGloss": "5",
+        },
+        {
+            "dep": "punct",
+            "governor": 7,
+            "governorGloss": "6",
+            "dependent": 6,
+            "dependentGloss": "-",
+        },
+        {
+            "dep": "nummod",
+            "governor": 8,
+            "governorGloss": "meters",
+            "dependent": 7,
+            "dependentGloss": "6",
+        },
+        {
+            "dep": "obl:npmod",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 8,
+            "dependentGloss": "meters",
+        },
+        {
+            "dep": "cc",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 10,
+            "dependentGloss": "and",
+        },
+        {
+            "dep": "det",
+            "governor": 12,
+            "governorGloss": "sun",
+            "dependent": 11,
+            "dependentGloss": "the",
+        },
+        {
+            "dep": "nsubj",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 12,
+            "dependentGloss": "sun",
+        },
+        {
+            "dep": "cop",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 13,
+            "dependentGloss": "is",
+        },
+        {
+            "dep": "nummod",
+            "governor": 15,
+            "governorGloss": "°C",
+            "dependent": 14,
+            "dependentGloss": "5",
+        },
+        {
+            "dep": "obl:npmod",
+            "governor": 16,
+            "governorGloss": "hot",
+            "dependent": 15,
+            "dependentGloss": "°C",
+        },
+        {
+            "dep": "conj:and",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 16,
+            "dependentGloss": "hot",
+        },
+        {
+            "dep": "obl:tmod",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 17,
+            "dependentGloss": "today",
+        },
+        {
+            "dep": "punct",
+            "governor": 9,
+            "governorGloss": "long",
+            "dependent": 18,
+            "dependentGloss": ".",
+        },
+    ]
+    enhanced_plus_plus_dependencies = deepcopy(enhanced_dependencies)
+    tokens = [
+        {
+            "index": 1,
+            "word": "Example",
+            "originalText": "Example",
+            "characterOffsetBegin": 0,
+            "characterOffsetEnd": 7,
+            "pos": "NN",
+            "before": "",
+            "after": " ",
+        },
+        {
+            "index": 2,
+            "word": "text",
+            "originalText": "text",
+            "characterOffsetBegin": 8,
+            "characterOffsetEnd": 12,
+            "pos": "NN",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 3,
+            "word": "is",
+            "originalText": "is",
+            "characterOffsetBegin": 13,
+            "characterOffsetEnd": 15,
+            "pos": "VBZ",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 4,
+            "word": "between",
+            "originalText": "between",
+            "characterOffsetBegin": 16,
+            "characterOffsetEnd": 23,
+            "pos": "IN",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 5,
+            "word": "5",
+            "originalText": "5",
+            "characterOffsetBegin": 24,
+            "characterOffsetEnd": 25,
+            "pos": "CD",
+            "before": " ",
+            "after": "",
+        },
+        {
+            "index": 6,
+            "word": "-",
+            "originalText": "-",
+            "characterOffsetBegin": 25,
+            "characterOffsetEnd": 26,
+            "pos": "HYPH",
+            "before": "",
+            "after": "",
+        },
+        {
+            "index": 7,
+            "word": "6",
+            "originalText": "6",
+            "characterOffsetBegin": 26,
+            "characterOffsetEnd": 27,
+            "pos": "CD",
+            "before": "",
+            "after": " ",
+        },
+        {
+            "index": 8,
+            "word": "meters",
+            "originalText": "meters",
+            "characterOffsetBegin": 28,
+            "characterOffsetEnd": 34,
+            "pos": "NNS",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 9,
+            "word": "long",
+            "originalText": "long",
+            "characterOffsetBegin": 35,
+            "characterOffsetEnd": 39,
+            "pos": "RB",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 10,
+            "word": "and",
+            "originalText": "and",
+            "characterOffsetBegin": 40,
+            "characterOffsetEnd": 43,
+            "pos": "CC",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 11,
+            "word": "the",
+            "originalText": "the",
+            "characterOffsetBegin": 44,
+            "characterOffsetEnd": 47,
+            "pos": "DT",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 12,
+            "word": "sun",
+            "originalText": "sun",
+            "characterOffsetBegin": 48,
+            "characterOffsetEnd": 51,
+            "pos": "NN",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 13,
+            "word": "is",
+            "originalText": "is",
+            "characterOffsetBegin": 52,
+            "characterOffsetEnd": 54,
+            "pos": "VBZ",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 14,
+            "word": "5",
+            "originalText": "5",
+            "characterOffsetBegin": 55,
+            "characterOffsetEnd": 56,
+            "pos": "CD",
+            "before": " ",
+            "after": "",
+        },
+        {
+            "index": 15,
+            "word": "°C",
+            "originalText": "°C",
+            "characterOffsetBegin": 56,
+            "characterOffsetEnd": 58,
+            "pos": "NN",
+            "before": "",
+            "after": " ",
+        },
+        {
+            "index": 16,
+            "word": "hot",
+            "originalText": "hot",
+            "characterOffsetBegin": 59,
+            "characterOffsetEnd": 62,
+            "pos": "JJ",
+            "before": " ",
+            "after": " ",
+        },
+        {
+            "index": 17,
+            "word": "today",
+            "originalText": "today",
+            "characterOffsetBegin": 63,
+            "characterOffsetEnd": 68,
+            "pos": "NN",
+            "before": " ",
+            "after": "",
+        },
+        {
+            "index": 18,
+            "word": ".",
+            "originalText": ".",
+            "characterOffsetBegin": 68,
+            "characterOffsetEnd": 69,
+            "pos": ".",
+            "before": "",
+            "after": "",
+        },
+    ]
     core_nlp_response = {
         "sentences": [
             {
                 "index": 0,
-                "basicDependencies": [
-                    {
-                        "dep": "ROOT",
-                        "governor": 0,
-                        "governorGloss": "ROOT",
-                        "dependent": 9,
-                        "dependentGloss": "long",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 2,
-                        "governorGloss": "text",
-                        "dependent": 1,
-                        "dependentGloss": "Example",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 2,
-                        "dependentGloss": "text",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 3,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "advmod",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 4,
-                        "dependentGloss": "between",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 5,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 6,
-                        "dependentGloss": "-",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 8,
-                        "governorGloss": "meters",
-                        "dependent": 7,
-                        "dependentGloss": "6",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 8,
-                        "dependentGloss": "meters",
-                    },
-                    {
-                        "dep": "cc",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 10,
-                        "dependentGloss": "and",
-                    },
-                    {
-                        "dep": "det",
-                        "governor": 12,
-                        "governorGloss": "sun",
-                        "dependent": 11,
-                        "dependentGloss": "the",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 12,
-                        "dependentGloss": "sun",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 13,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 15,
-                        "governorGloss": "°C",
-                        "dependent": 14,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 15,
-                        "dependentGloss": "°C",
-                    },
-                    {
-                        "dep": "conj",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 16,
-                        "dependentGloss": "hot",
-                    },
-                    {
-                        "dep": "obl:tmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 17,
-                        "dependentGloss": "today",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 18,
-                        "dependentGloss": ".",
-                    },
-                ],
-                "enhancedDependencies": [
-                    {
-                        "dep": "ROOT",
-                        "governor": 0,
-                        "governorGloss": "ROOT",
-                        "dependent": 9,
-                        "dependentGloss": "long",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 2,
-                        "governorGloss": "text",
-                        "dependent": 1,
-                        "dependentGloss": "Example",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 2,
-                        "dependentGloss": "text",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 3,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "advmod",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 4,
-                        "dependentGloss": "between",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 5,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 6,
-                        "dependentGloss": "-",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 8,
-                        "governorGloss": "meters",
-                        "dependent": 7,
-                        "dependentGloss": "6",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 8,
-                        "dependentGloss": "meters",
-                    },
-                    {
-                        "dep": "cc",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 10,
-                        "dependentGloss": "and",
-                    },
-                    {
-                        "dep": "det",
-                        "governor": 12,
-                        "governorGloss": "sun",
-                        "dependent": 11,
-                        "dependentGloss": "the",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 12,
-                        "dependentGloss": "sun",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 13,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 15,
-                        "governorGloss": "°C",
-                        "dependent": 14,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 15,
-                        "dependentGloss": "°C",
-                    },
-                    {
-                        "dep": "conj:and",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 16,
-                        "dependentGloss": "hot",
-                    },
-                    {
-                        "dep": "obl:tmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 17,
-                        "dependentGloss": "today",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 18,
-                        "dependentGloss": ".",
-                    },
-                ],
-                "enhancedPlusPlusDependencies": [
-                    {
-                        "dep": "ROOT",
-                        "governor": 0,
-                        "governorGloss": "ROOT",
-                        "dependent": 9,
-                        "dependentGloss": "long",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 2,
-                        "governorGloss": "text",
-                        "dependent": 1,
-                        "dependentGloss": "Example",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 2,
-                        "dependentGloss": "text",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 3,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "advmod",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 4,
-                        "dependentGloss": "between",
-                    },
-                    {
-                        "dep": "compound",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 5,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 7,
-                        "governorGloss": "6",
-                        "dependent": 6,
-                        "dependentGloss": "-",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 8,
-                        "governorGloss": "meters",
-                        "dependent": 7,
-                        "dependentGloss": "6",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 8,
-                        "dependentGloss": "meters",
-                    },
-                    {
-                        "dep": "cc",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 10,
-                        "dependentGloss": "and",
-                    },
-                    {
-                        "dep": "det",
-                        "governor": 12,
-                        "governorGloss": "sun",
-                        "dependent": 11,
-                        "dependentGloss": "the",
-                    },
-                    {
-                        "dep": "nsubj",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 12,
-                        "dependentGloss": "sun",
-                    },
-                    {
-                        "dep": "cop",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 13,
-                        "dependentGloss": "is",
-                    },
-                    {
-                        "dep": "nummod",
-                        "governor": 15,
-                        "governorGloss": "°C",
-                        "dependent": 14,
-                        "dependentGloss": "5",
-                    },
-                    {
-                        "dep": "obl:npmod",
-                        "governor": 16,
-                        "governorGloss": "hot",
-                        "dependent": 15,
-                        "dependentGloss": "°C",
-                    },
-                    {
-                        "dep": "conj:and",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 16,
-                        "dependentGloss": "hot",
-                    },
-                    {
-                        "dep": "obl:tmod",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 17,
-                        "dependentGloss": "today",
-                    },
-                    {
-                        "dep": "punct",
-                        "governor": 9,
-                        "governorGloss": "long",
-                        "dependent": 18,
-                        "dependentGloss": ".",
-                    },
-                ],
-                "tokens": [
-                    {
-                        "index": 1,
-                        "word": "Example",
-                        "originalText": "Example",
-                        "characterOffsetBegin": 0,
-                        "characterOffsetEnd": 7,
-                        "pos": "NN",
-                        "before": "",
-                        "after": " ",
-                    },
-                    {
-                        "index": 2,
-                        "word": "text",
-                        "originalText": "text",
-                        "characterOffsetBegin": 8,
-                        "characterOffsetEnd": 12,
-                        "pos": "NN",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 3,
-                        "word": "is",
-                        "originalText": "is",
-                        "characterOffsetBegin": 13,
-                        "characterOffsetEnd": 15,
-                        "pos": "VBZ",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 4,
-                        "word": "between",
-                        "originalText": "between",
-                        "characterOffsetBegin": 16,
-                        "characterOffsetEnd": 23,
-                        "pos": "IN",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 5,
-                        "word": "5",
-                        "originalText": "5",
-                        "characterOffsetBegin": 24,
-                        "characterOffsetEnd": 25,
-                        "pos": "CD",
-                        "before": " ",
-                        "after": "",
-                    },
-                    {
-                        "index": 6,
-                        "word": "-",
-                        "originalText": "-",
-                        "characterOffsetBegin": 25,
-                        "characterOffsetEnd": 26,
-                        "pos": "HYPH",
-                        "before": "",
-                        "after": "",
-                    },
-                    {
-                        "index": 7,
-                        "word": "6",
-                        "originalText": "6",
-                        "characterOffsetBegin": 26,
-                        "characterOffsetEnd": 27,
-                        "pos": "CD",
-                        "before": "",
-                        "after": " ",
-                    },
-                    {
-                        "index": 8,
-                        "word": "meters",
-                        "originalText": "meters",
-                        "characterOffsetBegin": 28,
-                        "characterOffsetEnd": 34,
-                        "pos": "NNS",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 9,
-                        "word": "long",
-                        "originalText": "long",
-                        "characterOffsetBegin": 35,
-                        "characterOffsetEnd": 39,
-                        "pos": "RB",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 10,
-                        "word": "and",
-                        "originalText": "and",
-                        "characterOffsetBegin": 40,
-                        "characterOffsetEnd": 43,
-                        "pos": "CC",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 11,
-                        "word": "the",
-                        "originalText": "the",
-                        "characterOffsetBegin": 44,
-                        "characterOffsetEnd": 47,
-                        "pos": "DT",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 12,
-                        "word": "sun",
-                        "originalText": "sun",
-                        "characterOffsetBegin": 48,
-                        "characterOffsetEnd": 51,
-                        "pos": "NN",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 13,
-                        "word": "is",
-                        "originalText": "is",
-                        "characterOffsetBegin": 52,
-                        "characterOffsetEnd": 54,
-                        "pos": "VBZ",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 14,
-                        "word": "5",
-                        "originalText": "5",
-                        "characterOffsetBegin": 55,
-                        "characterOffsetEnd": 56,
-                        "pos": "CD",
-                        "before": " ",
-                        "after": "",
-                    },
-                    {
-                        "index": 15,
-                        "word": "°C",
-                        "originalText": "°C",
-                        "characterOffsetBegin": 56,
-                        "characterOffsetEnd": 58,
-                        "pos": "NN",
-                        "before": "",
-                        "after": " ",
-                    },
-                    {
-                        "index": 16,
-                        "word": "hot",
-                        "originalText": "hot",
-                        "characterOffsetBegin": 59,
-                        "characterOffsetEnd": 62,
-                        "pos": "JJ",
-                        "before": " ",
-                        "after": " ",
-                    },
-                    {
-                        "index": 17,
-                        "word": "today",
-                        "originalText": "today",
-                        "characterOffsetBegin": 63,
-                        "characterOffsetEnd": 68,
-                        "pos": "NN",
-                        "before": " ",
-                        "after": "",
-                    },
-                    {
-                        "index": 18,
-                        "word": ".",
-                        "originalText": ".",
-                        "characterOffsetBegin": 68,
-                        "characterOffsetEnd": 69,
-                        "pos": ".",
-                        "before": "",
-                        "after": "",
-                    },
-                ],
+                "tokens": tokens,
+                "basicDependencies": basic_dependencies,
+                "enhancedDependencies": enhanced_dependencies,
+                "enhancedPlusPlusDependencies": enhanced_plus_plus_dependencies,
             }
         ]
     }
-
-    tokens = core_nlp_response["sentences"][0]["tokens"]
     token_d = {token["index"]: token for token in tokens}
-    dependencies = core_nlp_response["sentences"][0]["basicDependencies"]
-
     results = {
         "text": text,
         "measurements": measurements,
         "core_nlp_response": core_nlp_response,
         "tokens": tokens,
         "token_d": token_d,
-        "dependencies": dependencies,
+        "dependencies": basic_dependencies,
     }
 
     return results
@@ -783,62 +658,64 @@ class TestAttributeExtraction:
         quantity = {}
         assert extractor.get_quantity_type(quantity) == ""
 
-    def test_iter_quantities(self, extractor: AttributeExtractor):
-        measurement = {"quantity": "q1"}
-        expected = {"q1"}
+    @pytest.mark.parametrize(
+        ("measurement", "expected"),
+        [
+            ({"quantity": "q1"}, {"q1"}),
+            ({"quantities": ["q1", "q2", "q3"]}, {"q1", "q2", "q3"}),
+            ({"quantityMost": "q1", "quantityLeast": "q2"}, {"q1", "q2"}),
+            ({"quantityBase": "q1", "quantityRange": "q2"}, {"q1", "q2"}),
+        ],
+    )
+    def test_iter_quantities(
+        self, extractor: AttributeExtractor, measurement, expected
+    ):
         generated = set(extractor.iter_quantities(measurement))
         assert expected == generated
 
-        measurement = {"quantities": ["q1", "q2", "q3"]}
-        expected = {"q1", "q2", "q3"}
-        generated = set(extractor.iter_quantities(measurement))
-        assert expected == generated
-
-        measurement = {"quantityMost": "q1", "quantityLeast": "q2"}
-        expected = {"q1", "q2"}
-        generated = set(extractor.iter_quantities(measurement))
-        assert expected == generated
-
-        measurement = {"quantityBase": "q1", "quantityRange": "q2"}
-        expected = {"q1", "q2"}
-        generated = set(extractor.iter_quantities(measurement))
-        assert expected == generated
-
-        measurement = {}
-        expected = set()
+    def test_iter_quantities_empty(self, extractor: AttributeExtractor):
+        measurement: Dict[str, str] = {}
+        expected: Set[str] = set()
         with pytest.warns(UserWarning) as warning_records:
             generated = set(extractor.iter_quantities(measurement))
         assert expected == generated
         assert len(warning_records) == 1
         assert warning_records[0].message.args[0] == "no quantity in measurement"
 
-    def test_get_measurement_type(self, extractor: AttributeExtractor):
-        measurement = {"quantity": {"rawUnit": {"type": "mass"}}}
+    @pytest.mark.parametrize(
+        ("measurement", "expected_m_type"),
+        [
+            ({"quantity": {"rawUnit": {"type": "mass"}}}, "mass"),
+            (
+                {
+                    "quantities": [
+                        {"rawUnit": {"type": "mass"}},
+                        {"rawUnit": {"type": "mass"}},
+                        {"rawUnit": {"type": "fraction"}},
+                        {"rawUnit": {"type": "fraction"}},
+                        {"rawUnit": {"type": "fraction"}},
+                    ]
+                },
+                "fraction",
+            ),
+            (
+                {
+                    "quantities": [
+                        {"rawUnit": {"type": ""}},
+                        {"rawUnit": {"type": ""}},
+                        {"rawUnit": {"type": "mass"}},
+                        {"rawUnit": {"type": "mass"}},
+                    ]
+                },
+                "mass",
+            ),
+        ],
+    )
+    def test_get_measurement_type(
+        self, extractor: AttributeExtractor, measurement, expected_m_type
+    ):
         m_type = extractor.get_measurement_type(measurement)
-        assert m_type == "mass"
-
-        measurement = {
-            "quantities": [
-                {"rawUnit": {"type": "mass"}},
-                {"rawUnit": {"type": "mass"}},
-                {"rawUnit": {"type": "fraction"}},
-                {"rawUnit": {"type": "fraction"}},
-                {"rawUnit": {"type": "fraction"}},
-            ]
-        }
-        m_type = extractor.get_measurement_type(measurement)
-        assert m_type == "fraction"
-
-        measurement = {
-            "quantities": [
-                {"rawUnit": {"type": ""}},
-                {"rawUnit": {"type": ""}},
-                {"rawUnit": {"type": "mass"}},
-                {"rawUnit": {"type": "mass"}},
-            ]
-        }
-        m_type = extractor.get_measurement_type(measurement)
-        assert m_type == "mass"
+        assert m_type == expected_m_type
 
     def test_count_measurement_types(self, extractor: AttributeExtractor):
         measurements = [

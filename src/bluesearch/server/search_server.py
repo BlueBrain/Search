@@ -24,7 +24,7 @@ from flask import Flask, jsonify, request
 
 import bluesearch
 
-from ..embedding_models import BSV, SBioBERT, Sent2VecModel, SentTransformer
+from ..embedding_models import SBioBERT, SentTransformer
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -123,23 +123,17 @@ class SearchServer(Flask):
         bluesearch.embedding_models.EmbeddingModel
             The embedding model class.
         """
-        bsv_model_name = "BioSentVec_PubMed_MIMICIII-bigram_d700.bin"
-        s2v_model_name = "new_s2v_model.bin"
         biobert_nli_sts_cord19_v1_model_name = "biobert_nli_sts_cord19_v1"
-        bsv_model_path = self.trained_models_path / bsv_model_name
-        s2v_model_path = self.trained_models_path / s2v_model_name
         biobert_nli_sts_cord19_v1_model_path = (
             self.trained_models_path / biobert_nli_sts_cord19_v1_model_name
         )
 
         model_factories = {
-            "BSV": lambda: BSV(bsv_model_path),
             "SBioBERT": lambda: SBioBERT(),
             "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens"),
             "BIOBERT NLI+STS": lambda: SentTransformer(
                 "clagator/biobert_v1.1_pubmed_nli_sts"
             ),
-            "Sent2Vec": lambda: Sent2VecModel(s2v_model_path),
             "BioBERT NLI+STS CORD-19 v1": lambda: SentTransformer(
                 biobert_nli_sts_cord19_v1_model_path
             ),
