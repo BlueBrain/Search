@@ -321,17 +321,17 @@ def get_embedding_model(
 
     Parameters
     ----------
-    model_name_or_class :
+    model_name_or_class
         The name or class of the embedding model to load.
-    checkpoint_path :
+    checkpoint_path
         If 'model_name_or_class' is the class, this parameter is required and
         it is the path of the embedding model to load.
-    device :
+    device
         The target device to which load the model ('cpu' or 'cuda').
 
     Returns
     -------
-    sentence_embedding_model :
+    sentence_embedding_model : EmbeddingModel
         The sentence embedding model instance.
     """
     configs = {
