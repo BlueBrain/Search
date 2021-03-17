@@ -1,4 +1,79 @@
 stages:
+  # TODO Remove boilerplate for convert_annotations_* with DVC 2 templating.
+  # https://github.com/BlueBrain/Search/issues/308 would remove the need of
+  # converting the annotations by dropping the .jsonl format for the .spacy one.
+  convert_annotations_5:
+    cmd: python convert.py ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
+    outs:
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.spacy
+  convert_annotations_6:
+    cmd: python convert.py ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
+    outs:
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.spacy
+  convert_annotations_9:
+    cmd: python convert.py ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
+    outs:
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.spacy
+  convert_annotations_10:
+    cmd: python convert.py ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
+    outs:
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.spacy
+  convert_annotations_11:
+    cmd: python convert.py ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
+    outs:
+    - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.spacy
+  convert_annotations_12:
+    cmd: python convert.py ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+    outs:
+    - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.spacy
+  convert_annotations_13:
+    cmd: python convert.py ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
+    outs:
+    - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.spacy
+  convert_annotations_14:
+    cmd: python convert.py ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
+    outs:
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.spacy
+  convert_annotations_15:
+    cmd: python convert.py ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
+    deps:
+    - Dockerfile
+    - convert.py
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
+    outs:
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.spacy
   train_model1:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
       --output_dir ../../models/ner/model1 --model_name model1
