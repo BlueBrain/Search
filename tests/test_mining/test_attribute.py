@@ -18,6 +18,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
+from copy import deepcopy
 from typing import Dict, Set
 from unittest.mock import Mock
 
