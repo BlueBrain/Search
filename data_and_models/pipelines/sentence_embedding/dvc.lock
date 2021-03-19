@@ -49,8 +49,8 @@ stages:
             lowercase: true
     outs:
     - path: ../../models/sentence_embedding/tf_idf
-      md5: d6ee9bd093dae907cc0db086c8be833e.dir
-      size: 88474206
+      md5: ed37b15fe3406ab6c36f255f23d155a2.dir
+      size: 73231015
       nfiles: 1
   eval_tf_idf:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
@@ -105,8 +105,8 @@ stages:
             lowercase: true
     outs:
     - path: ../../models/sentence_embedding/count
-      md5: a40cb29080c7f688da1a9bba86538aec.dir
-      size: 53618191
+      md5: 8a0b977a24fe5ed2293c3fcd0288a138.dir
+      size: 38375243
       nfiles: 1
   eval_count:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
