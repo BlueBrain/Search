@@ -43,7 +43,7 @@
 This script splits and converts annotations from Prodigy <= v1.10.x.
 
 First, this script splits the annotations into train and dev corpora.
-Second, this script converts ".jsonl" files from Prodigy to ".spacy" files.
+Second, this script converts .jsonl files from Prodigy to .spacy files.
 
 The output is 2 files. Each are named as the input file but with the extension changed.
 The train corpus has the extension ".train.spacy". The dev corpus, ".dev.spacy".
