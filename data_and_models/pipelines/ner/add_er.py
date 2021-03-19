@@ -63,11 +63,11 @@ def main():
 
     print("Loading patterns")
     path_patterns = pathlib.Path(args.patterns_file)
-    er = spacy.pipeline.EntityRuler(ner_model, validate=True, overwrite_ents=True)
     patterns = JSONL.load_jsonl(path_patterns)
     modified_patterns = remap_entity_type(patterns, etype_mapping)
+    er_config = {"validate": True, "overwrite_ents": True}
+    er = ner_model.add_pipe("entity_ruler", after="ner", config=er_config)
     er.add_patterns(modified_patterns)
-    ner_model.add_pipe(er, after="ner")
 
     print("Saving model with an entity ruler")
     ner_model.to_disk(args.output_file)
