@@ -186,12 +186,13 @@ stages:
     params:
       params.yaml:
         eval.sbiobert:
-          class: SBioBERT
-          init_kwargs: {}
+          class: SentTransformer
+          init_kwargs:
+            model_name_or_path: gsarti/biobert-nli
     outs:
     - path: ../../metrics/sentence_embedding/sbiobert.csv
-      md5: 072055e23136d215e49576c4840ce945
-      size: 1220
+      md5: c2c55aea18b0a4a258c9424d655d25a1
+      size: 1212
     - path: ../../metrics/sentence_embedding/sbiobert.json
       md5: 98372b5fc5a303435250579b6346df74
       size: 105
