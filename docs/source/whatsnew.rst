@@ -26,9 +26,10 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
-Latest
-======
-- |Remove| NLTK dependencies
+Version 0.1.1
+=============
+- |Change| Upgrade to :code:`dvc 2.0`.
+- |Remove| NLTK dependencies.
 - |Change| Drop the dedicated :code:`SBioBERT` class, we now use
   :code:`SentTransformer` interface to support this model.
 
