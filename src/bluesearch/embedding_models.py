@@ -298,7 +298,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: Optional[Union[pathlib.Path, str, None]] = None,
+    checkpoint_path: Optional[Union[pathlib.Path, str]] = None,
     device: Optional[str] = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
