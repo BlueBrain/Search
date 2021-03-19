@@ -120,7 +120,7 @@ class SearchServer(Flask):
 
         Returns
         -------
-        sentence_embedding_model :
+        sentence_embedding_model : EmbeddingModel
             The sentence embedding model instance.
         """
         biobert_nli_sts_cord19_v1_model_name = "biobert_nli_sts_cord19_v1"
