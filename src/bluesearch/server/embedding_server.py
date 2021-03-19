@@ -106,7 +106,7 @@ class EmbeddingServer(Flask):
                     "description": "Compute text embeddings.",
                     "response_content_type": "application/json",
                     "required_fields": {
-                        "model": ["SBioBERT", "SBERT"],
+                        "model": ["SBioBERT", "SBERT", "BioBERT NLI+STS"],
                         "text": [],
                     },
                 },

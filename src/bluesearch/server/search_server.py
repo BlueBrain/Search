@@ -24,7 +24,7 @@ from flask import Flask, jsonify, request
 
 import bluesearch
 
-from ..embedding_models import SBioBERT, SentTransformer
+from ..embedding_models import EmbeddingModel, get_embedding_model
 from ..search import SearchEngine
 from ..utils import H5
 
@@ -110,18 +110,18 @@ class SearchServer(Flask):
 
         self.logger.info("Initialization done.")
 
-    def _get_model(self, model_name):
+    def _get_model(self, model_name: str) -> EmbeddingModel:
         """Construct an embedding model from its name.
 
         Parameters
         ----------
-        model_name : str
+        model_name :
             The name of the model.
 
         Returns
         -------
-        bluesearch.embedding_models.EmbeddingModel
-            The embedding model class.
+        sentence_embedding_model : EmbeddingModel
+            The sentence embedding model instance.
         """
         biobert_nli_sts_cord19_v1_model_name = "biobert_nli_sts_cord19_v1"
         biobert_nli_sts_cord19_v1_model_path = (
@@ -129,13 +129,11 @@ class SearchServer(Flask):
         )
 
         model_factories = {
-            "SBioBERT": lambda: SBioBERT(),
-            "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens"),
-            "BIOBERT NLI+STS": lambda: SentTransformer(
-                "clagator/biobert_v1.1_pubmed_nli_sts"
-            ),
-            "BioBERT NLI+STS CORD-19 v1": lambda: SentTransformer(
-                biobert_nli_sts_cord19_v1_model_path
+            "SBioBERT": lambda: get_embedding_model("SBioBERT"),
+            "SBERT": lambda: get_embedding_model("SBERT"),
+            "BioBERT NLI+STS": lambda: get_embedding_model("BioBERT NLI+STS"),
+            "BioBERT NLI+STS CORD-19 v1": lambda: get_embedding_model(
+                "SentTransformer", checkpoint_path=biobert_nli_sts_cord19_v1_model_path
             ),
         }
 

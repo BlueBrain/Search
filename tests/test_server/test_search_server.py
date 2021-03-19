@@ -32,16 +32,15 @@ def search_client(
 ):
     """Fixture to create a client for mining_server."""
 
-    sbiobert_model_inst = Mock()
-    sbiobert_model_class = Mock()
-    sbiobert_model_class.return_value = sbiobert_model_inst
-    sbiobert_model_inst.preprocess.return_value = "hello"
-    sbiobert_model_inst.embed.return_value = np.ones(
+    fake_embedding_model = Mock()
+    fake_embedding_model.preprocess.return_value = "hello"
+    fake_embedding_model.embed.return_value = np.ones(
         (test_parameters["embedding_size"],)
     )
 
     monkeypatch.setattr(
-        "bluesearch.server.search_server.SBioBERT", sbiobert_model_class
+        "bluesearch.server.search_server.get_embedding_model",
+        lambda *args, **kwargs: fake_embedding_model,
     )
 
     indices = H5.find_populated_rows(embeddings_h5_path, "SBioBERT")
