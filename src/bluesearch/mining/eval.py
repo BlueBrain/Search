@@ -143,8 +143,10 @@ def spacy2df(
         if isinstance(
             pipe,
             (
-                spacy.pipeline.EntityRecognizer,
                 spacy.pipeline.EntityRuler,
+                spacy.pipeline.EntityRecognizer,
+                spacy.pipeline.Lemmatizer,
+                spacy.pipeline.AttributeRuler,
                 spacy.pipeline.Tagger,
             ),
         ):
