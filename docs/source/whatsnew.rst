@@ -36,7 +36,8 @@ Latest
   format from Prodigy.
 - |Remove| NLTK dependencies
 - |Remove| Prodigy as a dependency and as the way to train NER models.
-
+- |Change| Drop the dedicated :code:`SBioBERT` class, we now use
+  :code:`SentTransformer` interface to support this model.
 
 Version 0.1.0
 =============
