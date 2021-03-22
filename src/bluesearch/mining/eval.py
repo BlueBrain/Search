@@ -138,18 +138,28 @@ def spacy2df(
     `ground_truth_tokenization=prodigy_table['text'].to_list()`.
     """
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
-    entities = doc.ents
+    new_doc = doc
+    for _, pipe in spacy_model.pipeline:
+        if isinstance(
+            pipe,
+            (
+                spacy.pipeline.EntityRecognizer,
+                spacy.pipeline.EntityRuler,
+                spacy.pipeline.Tagger,
+            ),
+        ):
+            new_doc = pipe(new_doc)
 
-    doc.ents = tuple(
+    new_doc.ents = tuple(
         [
             e
-            for e in entities
+            for e in new_doc.ents
             if excluded_entity_type is None or e.label_ != excluded_entity_type
         ]
     )
 
     all_rows = []
-    for token in doc:
+    for token in new_doc:
 
         if token.ent_iob_ == "O":
             all_rows.append(
