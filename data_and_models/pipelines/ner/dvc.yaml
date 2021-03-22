@@ -107,9 +107,9 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model1/
-      --gpu-id 0
       --paths.train ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
       --paths.dev ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
+      --paths.base_model en_ner_bc5cdr_md
     deps:
     - Dockerfile
     - config.cfg
@@ -122,9 +122,9 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model2/
-      --gpu-id 0
       --paths.train ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
       --paths.dev ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
+      --paths.base_model en_ner_bionlp13cg_md
     deps:
     - Dockerfile
     - config.cfg
@@ -137,9 +137,9 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model3/
-      --gpu-id 0
       --paths.train ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
       --paths.dev ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
+      --paths.base_model en_ner_craft_md
     deps:
     - Dockerfile
     - config.cfg
@@ -152,9 +152,9 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model4/
-      --gpu-id 0
       --paths.train ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
       --paths.dev ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
+      --paths.base_model en_ner_jnlpba_md
     deps:
     - Dockerfile
     - config.cfg
@@ -167,9 +167,9 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model5/
-      --gpu-id 0
       --paths.train ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
       --paths.dev ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+      --paths.base_model en_ner_craft_md
     deps:
     - Dockerfile
     - config.cfg

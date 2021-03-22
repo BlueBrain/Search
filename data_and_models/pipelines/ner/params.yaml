@@ -1,15 +1,5 @@
 train:
   eval_split: 0.1
-  model1:
-      spacy_model: en_ner_bc5cdr_md
-  model2:
-      spacy_model: en_ner_bionlp13cg_md
-  model3:
-      spacy_model: en_ner_craft_md
-  model4:
-      spacy_model: en_ner_jnlpba_md
-  model5:
-      spacy_model: en_ner_craft_md
 eval:
   DISEASE:
     etype_name: DISEASE
