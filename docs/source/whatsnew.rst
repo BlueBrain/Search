@@ -26,9 +26,17 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
+
 Latest
 ======
+- |Change| spaCy version from 2.x to 3.x, including scispaCy and models versions.
+- |Change| the training of NER models: use spaCy directly instead of Prodigy,
+  use the default configuration from spaCy 3 instead of from Prodigy, use the
+  binary format (:code:`.spacy`) from spaCy 3 instead of the :code:`.jsonl`
+  format from Prodigy.
 - |Remove| NLTK dependencies
+- |Remove| Prodigy as a dependency and as the way to train NER models.
+
 
 Version 0.1.0
 =============
