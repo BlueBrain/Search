@@ -67,11 +67,11 @@ INSTALL_REQUIRES = [
     "requests",
     "scikit-learn",
     "scipy",
+    # >= 0.4.0 to be compatible with spaCy 3 and let use the en_core_sci_scibert model.
+    "scispacy>=0.4.0",
     "sentence-transformers",
     # >= 3.0.4 to include the fix for https://github.com/explosion/spaCy/issues/7352.
     "spacy>=3.0.4",
-    # >= 0.4.0 to be compatible with spaCy 3 and let use the en_core_sci_scibert model.
-    "scispacy>=0.4.0",
     "torch",
     "tqdm",
     "transformers",
