@@ -51,7 +51,7 @@ INSTALL_REQUIRES = [
     "Flask",
     "PyYAML",
     "SQLAlchemy[mysql,pymysql]",
-    "dvc[ssh]",
+    "dvc[ssh]>=2",
     "h5py",
     "ipython",
     "ipywidgets",
