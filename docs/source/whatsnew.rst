@@ -35,7 +35,7 @@ Latest
   binary format (:code:`.spacy`) from spaCy 3 instead of the :code:`.jsonl`
   format from Prodigy.
 - |Remove| NLTK dependencies
-- |Remove| Prodigy as a dependency and as the way to train NER models.
+- |Remove| Prodigy dependency.
 - |Change| Drop the dedicated :code:`SBioBERT` class, we now use
   :code:`SentTransformer` interface to support this model.
 
@@ -185,6 +185,5 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
 
 
