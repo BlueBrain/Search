@@ -18,8 +18,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
-ssh_check
-dvc_pull_models
+dvc_configure_ssh_remote_authentication "$BBS_SSH_USERNAME"
+dvc_pull_models "$DATA_DIR"
 
 # Launch mining cache creation, using arguments only if defined
 create_mining_cache \

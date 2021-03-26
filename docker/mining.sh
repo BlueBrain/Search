@@ -18,10 +18,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 source /src/docker/utils.sh
-# Commented to allow the use of a DVC remote from a different type than SSH.
-# ssh_check
+# If $BBS_SSH_USERNAME is empty then this is a no-op
+dvc_configure_ssh_remote_authentication "$BBS_SSH_USERNAME"
 # Not usable in README as it works only when inside the `bbs_` containers.
-# dvc_pull_models
+# If $DATA_DIR is empty then this will fail
+dvc_pull_models "$BBS_DATA_AND_MODELS_DIR"
 
 # Launch mining server
 gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'

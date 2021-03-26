@@ -32,4 +32,5 @@ LABEL description="Creation of a Mining Cache for the Mining Server"
 RUN chmod -R a+rwX /src
 
 # Run the entry point
+ENV DATA_DIR="/src/data_and_models"
 ENTRYPOINT ["/src/docker/mining_cache.sh"]
