@@ -206,6 +206,7 @@ stages:
     outs:
     - path: ../../metrics/ner/drug.json
       md5: 27d7edd2cf470318fcf8be22f3610c0c
+      size: 272
   eval_organ:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json
@@ -263,6 +264,7 @@ stages:
     outs:
     - path: ../../metrics/ner/chemical.json
       md5: c88b746d0d3dbb0a2b1444c3ab64420c
+      size: 259
   eval_organism:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model3 --output_file ../../metrics/ner/organism.json
@@ -291,6 +293,7 @@ stages:
     outs:
     - path: ../../metrics/ner/organism.json
       md5: cb2fbe378ad643be3ab2d01b7350e591
+      size: 275
   eval_cell_type:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model4 --output_file ../../metrics/ner/cell_type.json
@@ -377,6 +380,7 @@ stages:
     outs:
     - path: ../../metrics/ner/pathway.json
       md5: 372df4c2666d0d12215d4189216fa783
+      size: 274
   add_er_1:
     cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file
       ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model1
