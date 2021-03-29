@@ -268,13 +268,23 @@ stages:
     - Dockerfile
     - interrater.py
     metrics:
-    - ../../metrics/ner/interrater/cell_compartment.json
-    - ../../metrics/ner/interrater/cell_type.json
-    - ../../metrics/ner/interrater/chemical.json
-    - ../../metrics/ner/interrater/condition.json
-    - ../../metrics/ner/interrater/disease.json
-    - ../../metrics/ner/interrater/drug.json
-    - ../../metrics/ner/interrater/organ.json
-    - ../../metrics/ner/interrater/organism.json
-    - ../../metrics/ner/interrater/pathway.json
-    - ../../metrics/ner/interrater/protein.json
+    - ../../metrics/ner/interrater/cell_compartment.json:
+        cache: false
+    - ../../metrics/ner/interrater/cell_type.json:
+        cache: false
+    - ../../metrics/ner/interrater/chemical.json:
+        cache: false
+    - ../../metrics/ner/interrater/condition.json:
+        cache: false
+    - ../../metrics/ner/interrater/disease.json:
+        cache: false
+    - ../../metrics/ner/interrater/drug.json:
+        cache: false
+    - ../../metrics/ner/interrater/organ.json:
+        cache: false
+    - ../../metrics/ner/interrater/organism.json:
+        cache: false
+    - ../../metrics/ner/interrater/pathway.json:
+        cache: false
+    - ../../metrics/ner/interrater/protein.json:
+        cache: false
