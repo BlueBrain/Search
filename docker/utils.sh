@@ -17,20 +17,39 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-# Ensure that username provided
-ssh_check() {
-  if [[ -z "$BBS_SSH_USERNAME" ]]; then
-    echo "Env var BBS_SSH_USERNAME unset!" 1>&2
-    exit 1
+
+dvc_configure_ssh_remote_authentication() {
+  # Arguments
+  # $1 (optional): The SSH user name for the remote storage
+  local SSH_USER=$1
+
+  # Check that the SSH user name is set
+  if [[ -z "$SSH_USER" ]]
+  then
+    echo "DVC SSH remote configuration skipped: no user name provided" >&2
+  else
+    # Configure the DVC remote
+    echo "DVC SSH remote configured for user $SSH_USER"
+    dvc remote modify gpfs_ssh ask_password true
+    dvc remote modify gpfs_ssh user "$SSH_USER"
   fi
 }
 
-# Pull models with DVC
 dvc_pull_models() {
-  dvc remote modify gpfs_ssh ask_password true
-  dvc remote modify gpfs_ssh user $BBS_SSH_USERNAME
-  pushd /src/data_and_models/pipelines/ner/ || exit
-  egrep -o '\badd_er_[0-9]+\b' dvc.yaml | xargs dvc pull
+  # Arguments
+  # $1: The path to the data_and_models directory
+  local DATA_AND_MODELS=$1
+
+  # Check that the DATA_DIR variable is set
+  if [[ -z "$DATA_AND_MODELS" ]]
+  then
+    echo "No path to the data_and_models directory was provided!" >&2
+    exit 1
+  fi
+
+  # Pull the NER models in DVC
+  pushd "$DATA_AND_MODELS/pipelines/ner/" || exit
+  grep -Eo '\badd_er_[0-9]+\b' dvc.yaml | xargs dvc pull
   popd || exit
 }
 

@@ -34,10 +34,16 @@ Latest
   use the default configuration from spaCy 3 instead of from Prodigy, use the
   binary format (:code:`.spacy`) from spaCy 3 instead of the :code:`.jsonl`
   format from Prodigy.
-- |Remove| NLTK dependencies
 - |Remove| Prodigy dependency.
+
+
+Version 0.1.1
+=============
+- |Change| Upgrade to :code:`dvc 2.0`.
+- |Remove| NLTK dependencies.
 - |Change| Drop the dedicated :code:`SBioBERT` class, we now use
   :code:`SentTransformer` interface to support this model.
+
 
 Version 0.1.0
 =============
