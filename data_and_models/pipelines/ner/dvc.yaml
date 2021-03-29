@@ -120,17 +120,18 @@ stages:
     outs:
     - ../../models/ner/model1/model-best/
   train_model_2:
-    # FIXME all other models.
     cmd: >-
       python -m spacy train
       config.cfg
       --output ../../models/ner/model2/
+      --code initialize.py
       --paths.train ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
       --paths.dev ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
       --paths.base_model en_ner_bionlp13cg_md
     deps:
     - Dockerfile
     - config.cfg
+    - initialize.py
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
     outs:
@@ -140,12 +141,14 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model3/
+      --code initialize.py
       --paths.train ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
       --paths.dev ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
       --paths.base_model en_ner_craft_md
     deps:
     - Dockerfile
     - config.cfg
+    - initialize.py
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
     outs:
@@ -155,12 +158,14 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model4/
+      --code initialize.py
       --paths.train ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
       --paths.dev ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
       --paths.base_model en_ner_jnlpba_md
     deps:
     - Dockerfile
     - config.cfg
+    - initialize.py
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
     outs:
@@ -170,12 +175,14 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model5/
+      --code initialize.py
       --paths.train ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
       --paths.dev ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
       --paths.base_model en_ner_craft_md
     deps:
     - Dockerfile
     - config.cfg
+    - initialize.py
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
     outs:
