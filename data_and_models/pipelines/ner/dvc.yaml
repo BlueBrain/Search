@@ -107,17 +107,20 @@ stages:
       python -m spacy train
       config.cfg
       --output ../../models/ner/model1/
+      --code initialize.py
       --paths.train ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
       --paths.dev ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
       --paths.base_model en_ner_bc5cdr_md
     deps:
     - Dockerfile
     - config.cfg
+    - initialize.py
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
     outs:
     - ../../models/ner/model1/model-best/
   train_model_2:
+    # FIXME all other models.
     cmd: >-
       python -m spacy train
       config.cfg
