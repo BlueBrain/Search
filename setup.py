@@ -51,7 +51,6 @@ INSTALL_REQUIRES = [
     "Flask",
     "PyYAML",
     "SQLAlchemy[mysql,pymysql]",
-    "dvc[ssh]>=2",
     "h5py",
     "ipython",
     "ipywidgets",
@@ -88,6 +87,9 @@ EXTRAS_REQUIRE = {
         "responses",
         "sphinx-bluebrain-theme",
         "tox",
+    ],
+    "data_and_models": [
+        "dvc[ssh]>=2",
     ],
 }
 
