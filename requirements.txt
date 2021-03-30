@@ -51,6 +51,8 @@ scipy==1.6.1
 scispacy==0.4.0
 sentence-transformers==0.4.1.2
 spacy==3.0.5
+typer==0.3.2
+srsly==2.4.0
 sphinx-bluebrain-theme==0.2.4
 torch==1.7.0
 tox==3.22.0
