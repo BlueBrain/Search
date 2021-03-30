@@ -49,6 +49,8 @@ The output is 2 files. Each are named as the input file but with the extension c
 The train corpus has the extension ".train.spacy". The dev corpus, ".dev.spacy".
 """
 
+import random
+
 import typer
 import srsly
 from pathlib import Path
@@ -59,11 +61,14 @@ import yaml
 
 
 def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):
+    random.seed(0)
+
     with open("params.yaml", 'r') as fd:
         params = yaml.safe_load(fd)
     eval_split = params['train']['eval_split']
 
     corpus = list(srsly.read_jsonl(input_path))
+    random.shuffle(corpus)
     eval_data = corpus[: int(len(corpus) * eval_split)]
     train_data = corpus[len(eval_data):]
 
