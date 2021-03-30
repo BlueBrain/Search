@@ -1,6 +1,6 @@
 schema: '2.0'
 stages:
-  eval_biobert_nli_sts:
+  evaluation@biobert_nli_sts:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
     deps:
@@ -29,7 +29,7 @@ stages:
     - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
       md5: 86db1f66aaa757523aef3f04088cddfd
       size: 153514
-  train_tf_idf:
+  training@tf_idf:
     cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
     deps:
@@ -52,17 +52,13 @@ stages:
       md5: ed37b15fe3406ab6c36f255f23d155a2.dir
       size: 73231015
       nfiles: 1
-  eval_tf_idf:
+  evaluation@tf_idf:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=tf_idf --output_dir=../../metrics/sentence_embedding
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
-    - path: ../../models/sentence_embedding/tf_idf
-      md5: ed37b15fe3406ab6c36f255f23d155a2.dir
-      size: 73231015
-      nfiles: 1
     - path: Dockerfile
       md5: a11a4c1d4fb63322f5973ed59887fe4f
       size: 1735
@@ -85,7 +81,7 @@ stages:
     - path: ../../metrics/sentence_embedding/tf_idf.png
       md5: 4f814f17e4d070a44fb1ac181f638654
       size: 86578
-  train_count:
+  training@count:
     cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       --model=count --output_dir=../../models/sentence_embedding/count
     deps:
@@ -108,17 +104,13 @@ stages:
       md5: 8a0b977a24fe5ed2293c3fcd0288a138.dir
       size: 38375243
       nfiles: 1
-  eval_count:
+  evaluation@count:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=count --output_dir=../../metrics/sentence_embedding
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
-    - path: ../../models/sentence_embedding/count
-      md5: 8a0b977a24fe5ed2293c3fcd0288a138.dir
-      size: 38375243
-      nfiles: 1
     - path: Dockerfile
       md5: a11a4c1d4fb63322f5973ed59887fe4f
       size: 1735
@@ -141,7 +133,7 @@ stages:
     - path: ../../metrics/sentence_embedding/count.png
       md5: 4f814f17e4d070a44fb1ac181f638654
       size: 86578
-  eval_sbert:
+  evaluation@sbert:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=sbert --output_dir=../../metrics/sentence_embedding
     deps:
@@ -170,7 +162,7 @@ stages:
     - path: ../../metrics/sentence_embedding/sbert.png
       md5: 3a6f531fec2c30662ee4e523976ff048
       size: 156836
-  eval_sbiobert:
+  evaluation@sbiobert:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=sbiobert --output_dir=../../metrics/sentence_embedding
     deps:
@@ -199,17 +191,16 @@ stages:
     - path: ../../metrics/sentence_embedding/sbiobert.png
       md5: ddf8088966ccc676ca449eada9364c1a
       size: 155274
-  eval_biobert_nli_sts_cord19_v1:
+  evaluation@biobert_nli_sts_cord19_v1:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
-    - path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
-      md5: 9dccac418759a8c53f5da608dbd9f835.dir
-      size: 433540587
-      nfiles: 9
+    - path: Dockerfile
+      md5: a11a4c1d4fb63322f5973ed59887fe4f
+      size: 1735
     - path: eval.py
       md5: 6e1ef54521c77c992c2fbc07be0c7bfe
       size: 4513
