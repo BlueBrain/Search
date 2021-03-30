@@ -1,27 +1,27 @@
 stages:
-  train_models:
+  training:
     foreach:
-       - annotation_files: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
-         model_name: model1
-       - annotation_files: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
-         model_name: model2
-       - annotation_files: ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
-         model_name: model3
-       - annotation_files: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
-         model_name: model4
-       - annotation_files: ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
-         model_name: model5
+       model1: 
+         annotation_files: ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
+       model2:
+         annotation_files: ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
+       model3:
+         annotation_files: ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
+       model4:
+         annotation_files: ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
+       model5:
+         annotation_files: ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     do:
         cmd: python train.py --annotation_files ${item.annotation_files}
-             --output_dir ../../models/ner/${item.model_name} --model_name ${item.model_name}
+             --output_dir ../../models/ner/${key} --model_name ${key}
         deps:
                 - ${item.annotation_files}
                 - train.py
                 - Dockerfile
         params:
-                - train.${item.model_name}
+                - train.${key}
         outs:
-                - ../../models/ner/${item.model_name}
+                - ../../models/ner/${key}
   add_er_1:
     cmd: python add_er.py --model ../../models/ner/model1 --etypes disease --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model1
@@ -86,28 +86,28 @@ stages:
     - eval.pathway
     outs:
     - ../../models/ner_er/model5
-  evals:
+  evaluation:
     foreach:
-       - model_name: model1
-         etype: disease
-       - model_name: model2
-         etype: cell_compartment
-       - model_name: model2
-         etype: drug
-       - model_name: model2
-         etype: organ
-       - model_name: model3
-         etype: chemical
-       - model_name: model3
-         etype: organism
-       - model_name: model4
-         etype: cell_type
-       - model_name: model4
-         etype: protein
-       - model_name: model5
-         etype: pathway
+      disease:
+        model_name: model1
+      cell_compartment:
+        model_name: model2
+      drug: 
+        model_name: model2
+      organ:
+        model_name: model2
+      chemical:
+        model_name: model3
+      organism:
+        model_name: model3
+      cell_type:
+        model_name: model4
+      protein:
+        model_name: model4
+      pathway:
+        model_name: model5
     do:
-      cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl --model ../../models/ner_er/${item.model_name} --output_file ../../metrics/ner/${item.etype}.json --etype ${item.etype}
+      cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl --model ../../models/ner_er/${item.model_name} --output_file ../../metrics/ner/${key}.json --etype ${key}
       deps:
       - Dockerfile
       - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
@@ -115,9 +115,9 @@ stages:
       - ../../models/ner_er/${item.model_name}
       - eval.py
       params:
-      - eval.${item.etype}
+      - eval.${key}
       metrics:
-      - ../../metrics/ner/${item.etype}.json
+      - ../../metrics/ner/${key}.json
   interrater:
     cmd: python interrater.py --annotations1 ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl        --annotations2 ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl,../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
       --output_dir ../../metrics/ner/interrater/

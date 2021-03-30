@@ -1,6 +1,6 @@
 schema: '2.0'
 stages:
-  train_models@0:
+  training@model1:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
       --output_dir ../../models/ner/model1 --model_name model1
     deps:
@@ -26,7 +26,7 @@ stages:
       md5: 4c687b7dd44d0f7adc2d3df2e2e4f624.dir
       size: 100181750
       nfiles: 16
-  train_models@1:
+  training@model2:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
       --output_dir ../../models/ner/model2 --model_name model2
     deps:
@@ -52,7 +52,7 @@ stages:
       md5: 2e3337ad9af49c9fef0332b6c3ad0832.dir
       size: 100192674
       nfiles: 16
-  train_models@2:
+  training@model3:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
       --output_dir ../../models/ner/model3 --model_name model3
     deps:
@@ -78,7 +78,7 @@ stages:
       md5: 1e6e071c4a730f49f671155e2c6065db.dir
       size: 100227109
       nfiles: 16
-  train_models@3:
+  training@model4:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
       --output_dir ../../models/ner/model4 --model_name model4
     deps:
@@ -104,7 +104,7 @@ stages:
       md5: 60213648fac010c178b81983ff76492b.dir
       size: 100214049
       nfiles: 16
-  train_models@4:
+  training@model5:
     cmd: python train.py --annotation_files ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
       --output_dir ../../models/ner/model5 --model_name model5
     deps:
@@ -271,7 +271,7 @@ stages:
       md5: 958f3d6edfb8216c31d39af0032ee4a9.dir
       size: 100224717
       nfiles: 18
-  evals@0:
+  evaluation@disease:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model1 --output_file ../../metrics/ner/disease.json
       --etype disease
@@ -300,7 +300,7 @@ stages:
     - path: ../../metrics/ner/disease.json
       md5: 8ab0f06685f012189932af923353e57a
       size: 274
-  evals@1:
+  evaluation@cell_compartment:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model2 --output_file ../../metrics/ner/cell_compartment.json
       --etype cell_compartment
@@ -329,7 +329,7 @@ stages:
     - path: ../../metrics/ner/cell_compartment.json
       md5: 79cb776064ca80e93089747080f79fc4
       size: 178
-  evals@2:
+  evaluation@drug:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json
       --etype drug
@@ -358,7 +358,7 @@ stages:
     - path: ../../metrics/ner/drug.json
       md5: 2582c83faafda778dd0bcf367c1bc57f
       size: 178
-  evals@3:
+  evaluation@organ:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json
       --etype organ
@@ -387,7 +387,7 @@ stages:
     - path: ../../metrics/ner/organ.json
       md5: 55df17bf18a84a6ef670ae8b2e80af73
       size: 275
-  evals@4:
+  evaluation@chemical:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model3 --output_file ../../metrics/ner/chemical.json
       --etype chemical
@@ -416,7 +416,7 @@ stages:
     - path: ../../metrics/ner/chemical.json
       md5: c7ce87e9532847a9695fc4cf098bc866
       size: 180
-  evals@5:
+  evaluation@organism:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model3 --output_file ../../metrics/ner/organism.json
       --etype organism
@@ -445,7 +445,7 @@ stages:
     - path: ../../metrics/ner/organism.json
       md5: a69c660916ad755e9cea54bbe7c4675d
       size: 180
-  evals@6:
+  evaluation@cell_type:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model4 --output_file ../../metrics/ner/cell_type.json
       --etype cell_type
@@ -474,7 +474,7 @@ stages:
     - path: ../../metrics/ner/cell_type.json
       md5: 690a1b81737164cfed2553c9e6852ca2
       size: 272
-  evals@7:
+  evaluation@protein:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model4 --output_file ../../metrics/ner/protein.json
       --etype protein
@@ -503,7 +503,7 @@ stages:
     - path: ../../metrics/ner/protein.json
       md5: 5c0de70df94fddcbadbb1206e257efc8
       size: 263
-  evals@8:
+  evaluation@pathway:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model5 --output_file ../../metrics/ner/pathway.json
       --etype pathway
