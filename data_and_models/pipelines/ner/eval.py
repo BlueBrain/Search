@@ -99,7 +99,7 @@ def main():
                 mode=mode,
                 return_dict=True,
                 etypes_map={args.etype: params["etype_name"]},
-            )[args.etype]
+            )[args.etype.upper()]
             metrics_dict = OrderedDict(
                 [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )

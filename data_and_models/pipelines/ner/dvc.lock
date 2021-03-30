@@ -131,7 +131,7 @@ stages:
       size: 100222954
       nfiles: 16
   add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file
+    cmd: python add_er.py --model ../../models/ner/model1 --etypes disease --patterns_file
       ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model1
     deps:
     - path: ../../annotations/ner/rule_based_patterns.jsonl
@@ -149,15 +149,15 @@ stages:
       size: 2833
     params:
       params.yaml:
-        eval.DISEASE:
+        eval.disease:
           etype_name: DISEASE
     outs:
     - path: ../../models/ner_er/model1
-      md5: 5757d1ea583e2ac6aa7e642e11b56325.dir
-      size: 100183520
+      md5: 1fc11ce1d30fc3436d1a51401bed90e2.dir
+      size: 100183499
       nfiles: 18
   add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN
+    cmd: python add_er.py --model ../../models/ner/model2 --etypes cell_compartment,drug,organ
       --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
       ../../models/ner_er/model2
     deps:
@@ -176,11 +176,11 @@ stages:
       size: 2833
     params:
       params.yaml:
-        eval.CELL_COMPARTMENT:
+        eval.cell_compartment:
           etype_name: CELLULAR_COMPONENT
-        eval.DRUG:
+        eval.drug:
           etype_name: SIMPLE_CHEMICAL
-        eval.ORGAN:
+        eval.organ:
           etype_name: ORGAN
     outs:
     - path: ../../models/ner_er/model2
@@ -188,7 +188,7 @@ stages:
       size: 100194437
       nfiles: 18
   add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM
+    cmd: python add_er.py --model ../../models/ner/model3 --etypes chemical,organism
       --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
       ../../models/ner_er/model3
     deps:
@@ -207,9 +207,9 @@ stages:
       size: 2833
     params:
       params.yaml:
-        eval.CHEMICAL:
+        eval.chemical:
           etype_name: CHEBI
-        eval.ORGANISM:
+        eval.organism:
           etype_name: TAXON
     outs:
     - path: ../../models/ner_er/model3
@@ -217,7 +217,7 @@ stages:
       size: 100228858
       nfiles: 18
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN
+    cmd: python add_er.py --model ../../models/ner/model4 --etypes cell_type,protein
       --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file
       ../../models/ner_er/model4
     deps:
@@ -236,9 +236,9 @@ stages:
       size: 2833
     params:
       params.yaml:
-        eval.CELL_TYPE:
+        eval.cell_type:
           etype_name: CELL_TYPE
-        eval.PROTEIN:
+        eval.protein:
           etype_name: PROTEIN
     outs:
     - path: ../../models/ner_er/model4
@@ -246,7 +246,7 @@ stages:
       size: 100215798
       nfiles: 18
   add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file
+    cmd: python add_er.py --model ../../models/ner/model5 --etypes pathway --patterns_file
       ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model5
     deps:
     - path: ../../annotations/ner/rule_based_patterns.jsonl
@@ -264,7 +264,7 @@ stages:
       size: 2833
     params:
       params.yaml:
-        eval.PATHWAY:
+        eval.pathway:
           etype_name: PATHWAY
     outs:
     - path: ../../models/ner_er/model5
@@ -273,8 +273,8 @@ stages:
       nfiles: 18
   evals@0:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model1 --output_file ../../metrics/ner/DISEASE.json
-      --etype DISEASE
+      --model ../../models/ner_er/model1 --output_file ../../metrics/ner/disease.json
+      --etype disease
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -283,27 +283,27 @@ stages:
       md5: 117da032ef2e2792429dff88c06c90b7
       size: 62653
     - path: ../../models/ner_er/model1
-      md5: 5757d1ea583e2ac6aa7e642e11b56325.dir
-      size: 100183520
+      md5: 1fc11ce1d30fc3436d1a51401bed90e2.dir
+      size: 100183499
       nfiles: 18
     - path: Dockerfile
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.DISEASE:
+        eval.disease:
           etype_name: DISEASE
     outs:
-    - path: ../../metrics/ner/DISEASE.json
-      md5: 034f6a3ffaabe1fdb4c0900b1c719fac
-      size: 273
+    - path: ../../metrics/ner/disease.json
+      md5: 8ab0f06685f012189932af923353e57a
+      size: 274
   evals@1:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/CELL_COMPARTMENT.json
-      --etype CELL_COMPARTMENT
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/cell_compartment.json
+      --etype cell_compartment
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -319,20 +319,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.CELL_COMPARTMENT:
+        eval.cell_compartment:
           etype_name: CELLULAR_COMPONENT
     outs:
-    - path: ../../metrics/ner/CELL_COMPARTMENT.json
-      md5: 0dc8d0f92415d14edfa7cdc8e5381c65
-      size: 260
+    - path: ../../metrics/ner/cell_compartment.json
+      md5: 79cb776064ca80e93089747080f79fc4
+      size: 178
   evals@2:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/DRUG.json
-      --etype DRUG
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json
+      --etype drug
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -348,20 +348,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.DRUG:
+        eval.drug:
           etype_name: SIMPLE_CHEMICAL
     outs:
-    - path: ../../metrics/ner/DRUG.json
-      md5: 27d7edd2cf470318fcf8be22f3610c0c
-      size: 272
+    - path: ../../metrics/ner/drug.json
+      md5: 2582c83faafda778dd0bcf367c1bc57f
+      size: 178
   evals@3:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/ORGAN.json
-      --etype ORGAN
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json
+      --etype organ
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -377,20 +377,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.ORGAN:
+        eval.organ:
           etype_name: ORGAN
     outs:
-    - path: ../../metrics/ner/ORGAN.json
+    - path: ../../metrics/ner/organ.json
       md5: 55df17bf18a84a6ef670ae8b2e80af73
       size: 275
   evals@4:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/CHEMICAL.json
-      --etype CHEMICAL
+      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/chemical.json
+      --etype chemical
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -406,20 +406,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.CHEMICAL:
+        eval.chemical:
           etype_name: CHEBI
     outs:
-    - path: ../../metrics/ner/CHEMICAL.json
-      md5: c88b746d0d3dbb0a2b1444c3ab64420c
-      size: 259
+    - path: ../../metrics/ner/chemical.json
+      md5: c7ce87e9532847a9695fc4cf098bc866
+      size: 180
   evals@5:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/ORGANISM.json
-      --etype ORGANISM
+      --model ../../models/ner_er/model3 --output_file ../../metrics/ner/organism.json
+      --etype organism
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -435,20 +435,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.ORGANISM:
+        eval.organism:
           etype_name: TAXON
     outs:
-    - path: ../../metrics/ner/ORGANISM.json
-      md5: cb2fbe378ad643be3ab2d01b7350e591
-      size: 275
+    - path: ../../metrics/ner/organism.json
+      md5: a69c660916ad755e9cea54bbe7c4675d
+      size: 180
   evals@6:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/CELL_TYPE.json
-      --etype CELL_TYPE
+      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/cell_type.json
+      --etype cell_type
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -464,20 +464,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.CELL_TYPE:
+        eval.cell_type:
           etype_name: CELL_TYPE
     outs:
-    - path: ../../metrics/ner/CELL_TYPE.json
+    - path: ../../metrics/ner/cell_type.json
       md5: 690a1b81737164cfed2553c9e6852ca2
       size: 272
   evals@7:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/PROTEIN.json
-      --etype PROTEIN
+      --model ../../models/ner_er/model4 --output_file ../../metrics/ner/protein.json
+      --etype protein
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -493,20 +493,20 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.PROTEIN:
+        eval.protein:
           etype_name: PROTEIN
     outs:
-    - path: ../../metrics/ner/PROTEIN.json
+    - path: ../../metrics/ner/protein.json
       md5: 5c0de70df94fddcbadbb1206e257efc8
       size: 263
   evals@8:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model5 --output_file ../../metrics/ner/PATHWAY.json
-      --etype PATHWAY
+      --model ../../models/ner_er/model5 --output_file ../../metrics/ner/pathway.json
+      --etype pathway
     deps:
     - path: ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       md5: 563441b77b5c39063cda3fa0fb03803c
@@ -522,14 +522,14 @@ stages:
       md5: 6bc72a8d70950b3491eb703ffddf7bc0
       size: 1987
     - path: eval.py
-      md5: 3c9e86f7cbfaea90929e96a6443a16d4
-      size: 3391
+      md5: 07eab89add39ea6341cb8fe0aad9ad27
+      size: 3399
     params:
       params.yaml:
-        eval.PATHWAY:
+        eval.pathway:
           etype_name: PATHWAY
     outs:
-    - path: ../../metrics/ner/PATHWAY.json
+    - path: ../../metrics/ner/pathway.json
       md5: 372df4c2666d0d12215d4189216fa783
       size: 274
   interrater:

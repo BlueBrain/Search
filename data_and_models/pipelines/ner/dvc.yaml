@@ -23,7 +23,7 @@ stages:
         outs:
                 - ../../models/ner/${item.model_name}
   add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model1 --etypes disease --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model1
     deps:
     - Dockerfile
@@ -31,11 +31,11 @@ stages:
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
-    - eval.DISEASE
+    - eval.disease
     outs:
     - ../../models/ner_er/model1
   add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model2 --etypes cell_compartment,drug,organ --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model2
     deps:
     - Dockerfile
@@ -43,13 +43,13 @@ stages:
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
-    - eval.CELL_COMPARTMENT
-    - eval.DRUG
-    - eval.ORGAN
+    - eval.cell_compartment
+    - eval.drug
+    - eval.organ
     outs:
     - ../../models/ner_er/model2
   add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model3 --etypes chemical,organism --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model3
     deps:
     - Dockerfile
@@ -57,12 +57,12 @@ stages:
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
-    - eval.CHEMICAL
-    - eval.ORGANISM
+    - eval.chemical
+    - eval.organism
     outs:
     - ../../models/ner_er/model3
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model4 --etypes cell_type,protein --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model4
     deps:
     - Dockerfile
@@ -70,12 +70,12 @@ stages:
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
-    - eval.CELL_TYPE
-    - eval.PROTEIN
+    - eval.cell_type
+    - eval.protein
     outs:
     - ../../models/ner_er/model4
   add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model5 --etypes pathway --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model5
     deps:
     - Dockerfile
@@ -83,29 +83,29 @@ stages:
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
-    - eval.PATHWAY
+    - eval.pathway
     outs:
     - ../../models/ner_er/model5
   evals:
     foreach:
        - model_name: model1
-         etype: DISEASE
+         etype: disease
        - model_name: model2
-         etype: CELL_COMPARTMENT
+         etype: cell_compartment
        - model_name: model2
-         etype: DRUG
+         etype: drug
        - model_name: model2
-         etype: ORGAN
+         etype: organ
        - model_name: model3
-         etype: CHEMICAL
+         etype: chemical
        - model_name: model3
-         etype: ORGANISM
+         etype: organism
        - model_name: model4
-         etype: CELL_TYPE
+         etype: cell_type
        - model_name: model4
-         etype: PROTEIN
+         etype: protein
        - model_name: model5
-         etype: PATHWAY
+         etype: pathway
     do:
       cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl --model ../../models/ner_er/${item.model_name} --output_file ../../metrics/ner/${item.etype}.json --etype ${item.etype}
       deps:
