@@ -49,31 +49,30 @@ The output is 2 files. Each are named as the input file but with the extension c
 The train corpus has the extension ".train.spacy". The dev corpus, ".dev.spacy".
 """
 
-import random
-
-import typer
-import srsly
 from pathlib import Path
-from spacy.util import get_words_and_spaces
-from spacy.tokens import Doc, DocBin
+
 import spacy
+import srsly
+import typer
 import yaml
+from sklearn.model_selection import train_test_split
+from spacy.tokens import Doc, DocBin
+from spacy.util import get_words_and_spaces
 
 
 def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):
-    random.seed(0)
-
-    with open("params.yaml", 'r') as fd:
+    with open("params.yaml", "r") as fd:
         params = yaml.safe_load(fd)
-    eval_split = params['train']['eval_split']
+    dev_size = params["train"]["corpora"]["dev_size"]
+    shuffle_seed = params["train"]["corpora"]["shuffle_seed"]
 
     corpus = list(srsly.read_jsonl(input_path))
-    random.shuffle(corpus)
-    eval_data = corpus[: int(len(corpus) * eval_split)]
-    train_data = corpus[len(eval_data):]
+    train, dev = train_test_split(
+        corpus, test_size=dev_size, random_state=shuffle_seed, shuffle=True
+    )
 
     nlp = spacy.blank("en")
-    for (split, data) in [("train", train_data), ("dev", eval_data)]:
+    for (split, data) in [("train", train), ("dev", dev)]:
         doc_bin = DocBin(attrs=["ENT_IOB", "ENT_TYPE"])
 
         for eg in data:

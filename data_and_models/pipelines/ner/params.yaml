@@ -1,5 +1,7 @@
 train:
-  eval_split: 0.1
+  corpora:
+    dev_size: 0.1  # (float) Proportion. | (int) Number of samples.
+    shuffle_seed: 0  # (int) Shuffling applied before the split.
 eval:
   DISEASE:
     etype_name: DISEASE

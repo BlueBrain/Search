@@ -9,7 +9,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
@@ -20,7 +21,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
@@ -31,7 +33,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
@@ -42,7 +45,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.train.spacy
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.dev.spacy
@@ -53,7 +57,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.train.spacy
     - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.dev.spacy
@@ -64,7 +69,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.train.spacy
     - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.dev.spacy
@@ -75,7 +81,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.train.spacy
     - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.dev.spacy
@@ -86,7 +93,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
     - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
@@ -97,7 +105,8 @@ stages:
     - preprocess.py
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
     params:
-    - train.eval_split
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
     - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
