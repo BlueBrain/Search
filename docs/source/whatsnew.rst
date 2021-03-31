@@ -26,8 +26,8 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
-Version 0.1.2
-=============
+Version 0.1.2 (dev)
+===================
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
   installed by default and now require :code:`pip install .[data_and_models]`.
 
