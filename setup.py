@@ -63,6 +63,7 @@ INSTALL_REQUIRES = [
     "python-dotenv",
     "requests",
     "scikit-learn",
+    "scispacy",
     "sentence-transformers",
     "spacy<3",
     "torch",
