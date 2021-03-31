@@ -120,6 +120,8 @@ stages:
       --paths.train ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
       --paths.dev ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
       --paths.base_model en_ner_bc5cdr_md
+      &&
+      python patch.py ../../models/ner/model1/model-best/vocab/strings.json
     deps:
     - Dockerfile
     - config.cfg
@@ -137,6 +139,8 @@ stages:
       --paths.train ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
       --paths.dev ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
       --paths.base_model en_ner_bionlp13cg_md
+      &&
+      python patch.py ../../models/ner/model2/model-best/vocab/strings.json
     deps:
     - Dockerfile
     - config.cfg
@@ -154,6 +158,8 @@ stages:
       --paths.train ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
       --paths.dev ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
       --paths.base_model en_ner_craft_md
+      &&
+      python patch.py ../../models/ner/model3/model-best/vocab/strings.json
     deps:
     - Dockerfile
     - config.cfg
@@ -171,6 +177,8 @@ stages:
       --paths.train ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
       --paths.dev ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
       --paths.base_model en_ner_jnlpba_md
+      &&
+      python patch.py ../../models/ner/model4/model-best/vocab/strings.json
     deps:
     - Dockerfile
     - config.cfg
@@ -188,6 +196,8 @@ stages:
       --paths.train ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
       --paths.dev ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
       --paths.base_model en_ner_craft_md
+      &&
+      python patch.py ../../models/ner/model5/model-best/vocab/strings.json
     deps:
     - Dockerfile
     - config.cfg

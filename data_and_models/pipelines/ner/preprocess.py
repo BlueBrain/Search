@@ -98,6 +98,8 @@ def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):
     for split, data in [("train", train), ("dev", dev)]:
         output_path = input_path.with_suffix(f".{split}.spacy")
         doc_bin = DocBin(attrs=["ENT_IOB", "ENT_TYPE"], docs=data)
+        # See https://github.com/explosion/spaCy/pull/7603 for details.
+        doc_bin.strings = sorted(doc_bin.strings)
         doc_bin.to_disk(output_path)
         print(f"...wrote {output_path}")
 
