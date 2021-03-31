@@ -1,0 +1,69 @@
+import argparse
+import json
+from functools import reduce
+from pprint import pprint
+
+import pandas as pd
+from seqeval.metrics import f1_score, accuracy_score, precision_score, recall_score, classification_report
+from seqeval.scheme import IOB2
+
+from bluesearch.mining.eval import ner_report
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("predictions")
+    parser.add_argument("input_df_pkl")
+    args = parser.parse_args()
+
+    test_df = pd.read_pickle(args.input_df_pkl)
+    y_pred = []
+    with open(args.predictions) as fp:
+        for line in fp:
+            y_pred += line.strip().split()
+
+    y_true = reduce(lambda acc, l: acc + l, test_df.entity_type, [])
+    y_true = pd.Series(y_true)
+    y_pred = pd.Series(y_pred)
+
+    print(len(y_true))
+    print(len(y_pred))
+
+    print("Token level")
+    eval_d = ner_report(y_true, y_pred, mode="token", return_dict=True)
+    eval_d = dict(eval_d["PATHWAY"])
+    with open("pathway_metrics_token.json", "w") as fp:
+        json.dump(eval_d, fp)
+        fp.write("\n")
+    pprint(eval_d)
+
+#     print("Entity level")
+#     y_pred_corr = correct_iob(y_pred)
+#     eval_d = ner_report(y_true, y_pred_corr, mode="entity", return_dict=True)
+#     eval_d = dict(eval_d["PATHWAY"])
+#     with open("pathway_metrics_entity.json", "w") as fp:
+#         json.dump(eval_d, fp)
+#         fp.write("\n")
+#     pprint(eval_d)
+    y_true = list(test_df.entity_type)
+    y_pred = []
+    with open(args.predictions) as fp:
+        for line in fp:
+            y_pred.append(line.strip().split())
+
+    from collections import Counter
+    c = Counter()
+    for x in y_true:
+        c.update(x)
+    print(c)
+    total = 0
+    for s1, s2 in zip(y_true, y_pred):
+        total += sum(t1 == t2 for t1, t2 in zip(s1, s2))
+    acc = total / sum(len(s) for s in y_true)
+    print("acc:", acc)
+    print("acc_score:", accuracy_score(y_true, y_pred))
+    print(classification_report(y_true, y_pred, scheme=IOB2, mode="strict"))
+
+
+if __name__ == "__main__":
+    main()
