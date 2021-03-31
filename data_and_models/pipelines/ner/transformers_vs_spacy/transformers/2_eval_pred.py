@@ -5,6 +5,7 @@ from pprint import pprint
 
 import pandas as pd
 from seqeval.metrics import f1_score, accuracy_score, precision_score, recall_score, classification_report
+from seqeval.metrics import performance_measure
 from seqeval.scheme import IOB2
 
 from bluesearch.mining.eval import ner_report
@@ -37,14 +38,16 @@ def main():
         fp.write("\n")
     pprint(eval_d)
 
-#     print("Entity level")
-#     y_pred_corr = correct_iob(y_pred)
-#     eval_d = ner_report(y_true, y_pred_corr, mode="entity", return_dict=True)
-#     eval_d = dict(eval_d["PATHWAY"])
-#     with open("pathway_metrics_entity.json", "w") as fp:
-#         json.dump(eval_d, fp)
-#         fp.write("\n")
-#     pprint(eval_d)
+    print("Entity level")
+    y_pred_corr = pd.Series(correct_iob(y_pred))
+    eval_d = ner_report(y_true, y_pred_corr, mode="entity", return_dict=True)
+    eval_d = dict(eval_d["PATHWAY"])
+    with open("pathway_metrics_entity.json", "w") as fp:
+        json.dump(eval_d, fp)
+        fp.write("\n")
+    pprint(eval_d)
+
+    print("Seqeval")
     y_true = list(test_df.entity_type)
     y_pred = []
     with open(args.predictions) as fp:
@@ -63,7 +66,15 @@ def main():
     print("acc:", acc)
     print("acc_score:", accuracy_score(y_true, y_pred))
     print(classification_report(y_true, y_pred, scheme=IOB2, mode="strict"))
+    print(performance_measure(y_true, y_pred))
 
+
+def correct_iob(y_pred):
+    pred = list(y_pred)
+    for i in range(len(pred)):
+        if pred[i].startswith("I-") and (i == 0 or pred[i-1] == "O"):
+            pred[i] = "B-" + pred[i][2:]
+    return pred
 
 if __name__ == "__main__":
     main()
