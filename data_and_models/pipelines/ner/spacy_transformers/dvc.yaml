@@ -1,0 +1,15 @@
+stages:
+  train_biobert_cord19:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/biobert_cord19/
+      --gpu-id 0
+      --paths.train ../../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
+      --paths.dev ../../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+    deps:
+    - config.cfg
+    - ../../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
+    - ../../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+    outs:
+    - ../../../models/ner/biobert_cord19/
