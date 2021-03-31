@@ -29,6 +29,11 @@ Legend
 
 Latest
 ======
+-
+
+
+Version 0.1.2
+=============
 - |Change| spaCy version from 2.x to 3.x, including scispaCy and models versions.
 - |Change| the training of NER models: use spaCy directly instead of Prodigy,
   use the default configuration from spaCy 3 instead of from Prodigy, use the
