@@ -2,5 +2,6 @@ checkpoints/
 logs/
 pathway_metrics.json
 pathway_metrics_token.json
+pathway_metrics_entity.json
 test_data.pkl
 train_data.pkl
