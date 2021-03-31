@@ -49,7 +49,6 @@ PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
     "Flask",
-    "PyYAML",
     "SQLAlchemy[mysql,pymysql]",
     "h5py",
     "ipython",
@@ -63,13 +62,10 @@ INSTALL_REQUIRES = [
     "python-dotenv",
     "requests",
     "scikit-learn",
-    "scipy",
-    "scispacy",
     "sentence-transformers",
     "spacy<3",
     "torch",
     "tqdm",
-    "transformers",
 ]
 
 if os.environ.get("READTHEDOCS") == "True":
@@ -89,7 +85,11 @@ EXTRAS_REQUIRE = {
         "tox",
     ],
     "data_and_models": [
+        "PyYAML",
         "dvc[ssh]>=2",
+        "prodigy",
+        "scipy",
+        "transformers",
     ],
 }
 
