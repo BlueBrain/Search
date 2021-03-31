@@ -61,36 +61,45 @@ from spacy.util import get_words_and_spaces
 
 
 def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):
+    print("Read params.yaml...")
     with open("params.yaml", "r") as fd:
         params = yaml.safe_load(fd)
     dev_size = params["train"]["corpora"]["dev_size"]
     shuffle_seed = params["train"]["corpora"]["shuffle_seed"]
+    print(f"...read dev_size={dev_size}, shuffle_seed={shuffle_seed}")
 
+    print("Read annotations...")
     corpus = list(srsly.read_jsonl(input_path))
-    train, dev = train_test_split(
-        corpus, test_size=dev_size, random_state=shuffle_seed, shuffle=True
-    )
+    print(f"...read {len(corpus)} texts")
 
+    print("Convert into documents...")
+    docs = []
     nlp = spacy.blank("en")
-    for (split, data) in [("train", train), ("dev", dev)]:
-        doc_bin = DocBin(attrs=["ENT_IOB", "ENT_TYPE"])
+    for eg in corpus:
+        if eg["answer"] != "accept":
+            continue
+        tokens = [token["text"] for token in eg["tokens"]]
+        words, spaces = get_words_and_spaces(tokens, eg["text"])
+        doc = Doc(nlp.vocab, words=words, spaces=spaces)
+        doc.ents = [
+            doc.char_span(s["start"], s["end"], label=s["label"])
+            for s in eg.get("spans", [])
+        ]
+        docs.append(doc)
+    print(f"...converted {len(docs)} documents")
 
-        for eg in data:
-            if eg["answer"] != "accept":
-                continue
-            tokens = [token["text"] for token in eg["tokens"]]
-            words, spaces = get_words_and_spaces(tokens, eg["text"])
-            doc = Doc(nlp.vocab, words=words, spaces=spaces)
-            doc.ents = [
-                doc.char_span(s["start"], s["end"], label=s["label"])
-                for s in eg.get("spans", [])
-            ]
-            doc_bin.add(doc)
+    print("Split into train and dev...")
+    train, dev = train_test_split(
+        docs, test_size=dev_size, random_state=shuffle_seed, shuffle=True
+    )
+    print(f"...split into {len(train)} train and {len(dev)} dev documents")
 
+    print("Write serialized documents...")
+    for split, data in [("train", train), ("dev", dev)]:
         output_path = input_path.with_suffix(f".{split}.spacy")
+        doc_bin = DocBin(attrs=["ENT_IOB", "ENT_TYPE"], docs=data)
         doc_bin.to_disk(output_path)
-
-        print(f"Processed {len(doc_bin)} documents ({split}): {output_path.name}")
+        print(f"...wrote {output_path}")
 
 
 if __name__ == "__main__":
