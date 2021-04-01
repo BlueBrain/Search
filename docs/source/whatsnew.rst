@@ -26,6 +26,12 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
+Version 0.1.2 (dev)
+===================
+- |Add| in :code:`dvc`, in :code:`ner` pipelines, scripts allowing to train and evaluate
+  NER thanks to the :code:`huggingface/transformers` package.
+  A comparison with :code:`spaCy` training is also possible.
+
 Version 0.1.1
 =============
 - |Change| Upgrade to :code:`dvc 2.0`.
