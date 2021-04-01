@@ -1,34 +1,7 @@
 train:
-  model1:
-    prodigy_train_kwargs:
-      spacy_model: en_ner_bc5cdr_md
-      eval_split: 0.1
-      n_iter: 10
-      dropout: 0.2
-  model2:
-    prodigy_train_kwargs:
-      spacy_model: en_ner_bionlp13cg_md
-      eval_split: 0.1
-      n_iter: 10
-      dropout: 0.2
-  model3:
-    prodigy_train_kwargs:
-      spacy_model: en_ner_craft_md
-      eval_split: 0.1
-      n_iter: 10
-      dropout: 0.2
-  model4:
-    prodigy_train_kwargs:
-      spacy_model: en_ner_jnlpba_md
-      eval_split: 0.1
-      n_iter: 10
-      dropout: 0.2
-  model5:
-    prodigy_train_kwargs:
-      spacy_model: en_ner_craft_md
-      eval_split: 0.1
-      n_iter: 10
-      dropout: 0.2
+  corpora:
+    dev_size: 0.1  # (float) Proportion. | (int) Number of samples.
+    shuffle_seed: 0  # (int) Shuffling applied before the split.
 eval:
   DISEASE:
     etype_name: DISEASE
