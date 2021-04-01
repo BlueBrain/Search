@@ -40,7 +40,7 @@ stages:
          annotation_filename: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
          base_model: en_ner_bionlp13cg_md
        model3:
-         annotation_filename: /annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+         annotation_filename: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
          base_model: en_ner_craft_md
        model4:
          annotation_filename: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
@@ -107,7 +107,7 @@ stages:
     outs:
     - ../../models/ner_er/model3
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes cell_type, protein --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes cell_type,protein --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model4
     deps:
     - Dockerfile
