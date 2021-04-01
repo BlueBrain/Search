@@ -34,6 +34,8 @@ Latest
 
 Version 0.1.2
 =============
+- |Add| metrics file resulting from :code:`dvc` pipelines to :code:`git`.
+  This allow now to use :code:`dvc metrics diff`.
 - |Change| spaCy version from 2.x to 3.x, including scispaCy and models versions.
 - |Change| the training of NER models: use spaCy directly instead of Prodigy,
   use the default configuration from spaCy 3 instead of from Prodigy, use the
