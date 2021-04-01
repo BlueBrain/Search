@@ -33,7 +33,7 @@ stages:
         - ../../annotations/ner/${item.annotation_filename}.dev.spacy
   training:
     foreach:
-       model1: 
+       model1:
          annotation_filename: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
          base_model: en_ner_bc5cdr_md
        model2:
@@ -137,7 +137,7 @@ stages:
         model_name: model1
       cell_compartment:
         model_name: model2
-      drug: 
+      drug:
         model_name: model2
       organ:
         model_name: model2
