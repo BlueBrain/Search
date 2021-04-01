@@ -68,7 +68,7 @@ stages:
       outs:
       - ../../models/ner/${key}/model-best/
   add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1/model-best/ --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model1/model-best/ --etypes disease --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model1
     deps:
     - Dockerfile
@@ -80,7 +80,7 @@ stages:
     outs:
     - ../../models/ner_er/model1
   add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2/model-best/ --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model2/model-best/ --etypes cell_compartment,drug,organ --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model2
     deps:
     - Dockerfile
@@ -94,7 +94,7 @@ stages:
     outs:
     - ../../models/ner_er/model2
   add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3/model-best/ --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model3/model-best/ --etypes chemical,organism --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model3
     deps:
     - Dockerfile
@@ -107,7 +107,7 @@ stages:
     outs:
     - ../../models/ner_er/model3
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes cell_type, protein --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model4
     deps:
     - Dockerfile
@@ -120,7 +120,7 @@ stages:
     outs:
     - ../../models/ner_er/model4
   add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5/model-best/ --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model5/model-best/ --etypes pathway --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model5
     deps:
     - Dockerfile
