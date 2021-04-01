@@ -1,4 +1,11 @@
 #!/usr/bin/env python
+
+# This script is from huggingface/transformers v4.4.0.
+# It is from https://github.com/huggingface/transformers/tree/v4.4.0/examples/token-classification/run_ner.py.
+# Changes are mainly for lines 305 - 326
+# Add of a custom model class to be able to change the architecture
+# Add the possibility to freeze some layers of the architecture (mainly BERT backbone)
+
 # coding=utf-8
 # Copyright 2020 The HuggingFace Team All rights reserved.
 #
@@ -297,6 +304,8 @@ def main():
         revision=model_args.model_revision,
         use_auth_token=True if model_args.use_auth_token else None,
     )
+
+    # Changes from BBP
     #model = AutoModelForTokenClassification.from_pretrained(
     model = OurBertClassifier.from_pretrained(
         model_args.model_name_or_path,
@@ -316,6 +325,7 @@ def main():
     n_trainable = sum(param.numel() for param in model.parameters() if param.requires_grad == True)
     print("Number of trainable parameters:", n_trainable)
     input("Press any key to continue")
+    # End of changes from BBP
 
     # Tokenizer check: this script requires a fast tokenizer.
     if not isinstance(tokenizer, PreTrainedTokenizerFast):

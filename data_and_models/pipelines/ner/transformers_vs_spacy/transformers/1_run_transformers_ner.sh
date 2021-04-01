@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This script is from huggingface/transformers v4.4.0.
+# It is from https://github.com/huggingface/transformers/tree/v4.4.0/examples/token-classification/run.sh.
+
 # Copyright 2020 The HuggingFace Team. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
