@@ -1,0 +1,6 @@
+# Duplicated for eval.py.
+
+eval:
+  PATHWAY:
+    etype_name: PATHWAY
+

@@ -19,3 +19,29 @@ stages:
       md5: 84597a7df1968fd6630134fd56d3627f.dir
       size: 867749358
       nfiles: 32
+  eval_biobert_cord19:
+    cmd: python ../eval.py --annotation_files ../../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+      --model ../../../models/ner/biobert_cord19/model-best/ --output_file ../../../metrics/ner/biobert_cord19.json
+      --etype PATHWAY
+    deps:
+    - path: ../../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
+      md5: 563441b77b5c39063cda3fa0fb03803c
+      size: 883041
+    - path: ../../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+      md5: 117da032ef2e2792429dff88c06c90b7
+      size: 62653
+    - path: ../../../models/ner/biobert_cord19/model-best/
+      md5: 9b7b667423108089252046906c46ef37.dir
+      size: 433874679
+      nfiles: 16
+    - path: ../eval.py
+      md5: 3c9e86f7cbfaea90929e96a6443a16d4
+      size: 3391
+    params:
+      params.yaml:
+        eval.PATHWAY:
+          etype_name: PATHWAY
+    outs:
+    - path: ../../../metrics/ner/biobert_cord19.json
+      md5: d018c03d6716744fddb1f30cdac080c7
+      size: 274

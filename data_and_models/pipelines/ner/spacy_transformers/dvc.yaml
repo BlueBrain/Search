@@ -13,3 +13,21 @@ stages:
     - ../../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
     outs:
     - ../../../models/ner/biobert_cord19/
+  eval_biobert_cord19:
+    cmd: >-
+      python ../eval.py
+      --annotation_files ../../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+      --model ../../../models/ner/biobert_cord19/model-best/
+      --output_file ../../../metrics/ner/biobert_cord19.json
+      --etype PATHWAY
+    deps:
+    - ../eval.py
+    - ../../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
+    - ../../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+    - ../../../models/ner/biobert_cord19/model-best/
+    params:
+    - eval.PATHWAY
+    metrics:
+    - ../../../metrics/ner/biobert_cord19.json:
+        cache: false
+

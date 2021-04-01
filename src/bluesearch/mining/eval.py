@@ -31,6 +31,8 @@ import sklearn
 import spacy
 from spacy.tokens import Doc
 
+import spacy_transformers
+
 
 # TODO : remove references to
 def annotations2df(annots_files, not_entity_symbol="O"):
@@ -143,11 +145,8 @@ def spacy2df(
         if isinstance(
             pipe,
             (
-                spacy.pipeline.EntityRuler,
-                spacy.pipeline.EntityRecognizer,
-                spacy.pipeline.Lemmatizer,
-                spacy.pipeline.AttributeRuler,
-                spacy.pipeline.Tagger,
+                spacy.pipeline.ner.EntityRecognizer,
+                spacy_transformers.pipeline_component.Transformer,
             ),
         ):
             new_doc = pipe(new_doc)
