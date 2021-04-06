@@ -29,7 +29,8 @@ Legend
 
 Latest
 ======
--
+- |Change| dependencies required to run the code of :code:`data_and_models/` are not
+  installed by default and now require :code:`pip install .[data_and_models]`.
 
 
 Version 0.1.2
