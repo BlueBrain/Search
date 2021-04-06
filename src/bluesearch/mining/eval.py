@@ -29,9 +29,8 @@ import numpy as np
 import pandas as pd
 import sklearn
 import spacy
-from spacy.tokens import Doc
-
 import spacy_transformers
+from spacy.tokens import Doc
 
 
 # TODO : remove references to
