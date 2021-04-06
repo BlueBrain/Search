@@ -26,10 +26,21 @@ Legend
 - |Deprecate| denotes deprecated features that will be removed in the future.
 - |Remove| denotes removed features.
 
-Version 0.1.2 (dev)
-===================
+
+Latest
+======
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
   installed by default and now require :code:`pip install .[data_and_models]`.
+
+
+Version 0.1.2
+=============
+- |Change| spaCy version from 2.x to 3.x, including scispaCy and models versions.
+- |Change| the training of NER models: use spaCy directly instead of Prodigy,
+  use the default configuration from spaCy 3 instead of from Prodigy, use the
+  binary format (:code:`.spacy`) from spaCy 3 instead of the :code:`.jsonl`
+  format from Prodigy.
+- |Remove| Prodigy dependency.
 
 
 Version 0.1.1
@@ -38,6 +49,7 @@ Version 0.1.1
 - |Remove| NLTK dependencies.
 - |Change| Drop the dedicated :code:`SBioBERT` class, we now use
   :code:`SentTransformer` interface to support this model.
+
 
 Version 0.1.0
 =============
@@ -185,6 +197,5 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
 
 

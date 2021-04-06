@@ -1,65 +1,217 @@
 stages:
-  train_model1:
-    cmd: python train.py --annotation_files ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
-      --output_dir ../../models/ner/model1 --model_name model1
+  # TODO Remove boilerplate for convert_annotations_* with DVC 2 foreach.
+  # https://github.com/BlueBrain/Search/issues/308 would remove the need of
+  # converting the annotations by dropping the .jsonl format for the .spacy one.
+  convert_annotations_5:
+    cmd: python preprocess.py ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
     deps:
+    - Dockerfile
+    - preprocess.py
     - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.jsonl
-    - train.py
-    - Dockerfile
     params:
-    - train.model1
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
-    - ../../models/ner/model1
-  train_model2:
-    cmd: python train.py --annotation_files ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
-      --output_dir ../../models/ner/model2 --model_name model2
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
+  convert_annotations_6:
+    cmd: python preprocess.py ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
     deps:
-    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
-    - train.py
     - Dockerfile
-    params:
-    - train.model2
-    outs:
-    - ../../models/ner/model2
-  train_model3:
-    cmd: python train.py --annotation_files ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
-      --output_dir ../../models/ner/model3 --model_name model3
-    deps:
+    - preprocess.py
     - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.jsonl
-    - train.py
-    - Dockerfile
     params:
-    - train.model3
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
-    - ../../models/ner/model3
-  train_model4:
-    cmd: python train.py --annotation_files ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
-      --output_dir ../../models/ner/model4 --model_name model4
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
+  convert_annotations_9:
+    cmd: python preprocess.py ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
     deps:
+    - Dockerfile
+    - preprocess.py
     - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.jsonl
-    - train.py
-    - Dockerfile
     params:
-    - train.model4
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
-    - ../../models/ner/model4
-  train_model5:
-    cmd: python train.py --annotation_files ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
-      --output_dir ../../models/ner/model5 --model_name model5
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
+  convert_annotations_10:
+    cmd: python preprocess.py ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     deps:
-    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
-    - train.py
     - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
     params:
-    - train.model5
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
     outs:
-    - ../../models/ner/model5
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.train.spacy
+    - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.dev.spacy
+  convert_annotations_11:
+    cmd: python preprocess.py ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl
+    params:
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
+    outs:
+    - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.train.spacy
+    - ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.dev.spacy
+  convert_annotations_12:
+    cmd: python preprocess.py ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+    params:
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
+    outs:
+    - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.train.spacy
+    - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.dev.spacy
+  convert_annotations_13:
+    cmd: python preprocess.py ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
+    deps:
+    - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
+    params:
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
+    outs:
+    - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.train.spacy
+    - ../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.dev.spacy
+  convert_annotations_14:
+    cmd: python preprocess.py ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
+    deps:
+    - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.jsonl
+    params:
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
+    outs:
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
+  convert_annotations_15:
+    cmd: python preprocess.py ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
+    deps:
+    - Dockerfile
+    - preprocess.py
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.jsonl
+    params:
+    - train.corpora.dev_size
+    - train.corpora.shuffle_seed
+    outs:
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+  # TODO Remove boilerplate for train_model_* with DVC 2 foreach.
+  train_model_1:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/model1/
+      --code initialize.py
+      --paths.train ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
+      --paths.dev ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
+      --paths.base_model en_ner_bc5cdr_md
+      &&
+      python patch.py ../../models/ner/model1/model-best/vocab/strings.json
+    deps:
+    - Dockerfile
+    - config.cfg
+    - initialize.py
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.train.spacy
+    - ../../annotations/ner/annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease.dev.spacy
+    outs:
+    - ../../models/ner/model1/model-best/
+  train_model_2:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/model2/
+      --code initialize.py
+      --paths.train ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
+      --paths.dev ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
+      --paths.base_model en_ner_bionlp13cg_md
+      &&
+      python patch.py ../../models/ner/model2/model-best/vocab/strings.json
+    deps:
+    - Dockerfile
+    - config.cfg
+    - initialize.py
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.train.spacy
+    - ../../annotations/ner/annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan.dev.spacy
+    outs:
+    - ../../models/ner/model2/model-best/
+  train_model_3:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/model3/
+      --code initialize.py
+      --paths.train ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
+      --paths.dev ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
+      --paths.base_model en_ner_craft_md
+      &&
+      python patch.py ../../models/ner/model3/model-best/vocab/strings.json
+    deps:
+    - Dockerfile
+    - config.cfg
+    - initialize.py
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.train.spacy
+    - ../../annotations/ner/annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi.dev.spacy
+    outs:
+    - ../../models/ner/model3/model-best/
+  train_model_4:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/model4/
+      --code initialize.py
+      --paths.train ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
+      --paths.dev ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
+      --paths.base_model en_ner_jnlpba_md
+      &&
+      python patch.py ../../models/ner/model4/model-best/vocab/strings.json
+    deps:
+    - Dockerfile
+    - config.cfg
+    - initialize.py
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.train.spacy
+    - ../../annotations/ner/annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein.dev.spacy
+    outs:
+    - ../../models/ner/model4/model-best/
+  train_model_5:
+    cmd: >-
+      python -m spacy train
+      config.cfg
+      --output ../../models/ner/model5/
+      --code initialize.py
+      --paths.train ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
+      --paths.dev ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+      --paths.base_model en_ner_craft_md
+      &&
+      python patch.py ../../models/ner/model5/model-best/vocab/strings.json
+    deps:
+    - Dockerfile
+    - config.cfg
+    - initialize.py
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy
+    - ../../annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+    outs:
+    - ../../models/ner/model5/model-best/
   add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1 --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model1/model-best/ --etypes DISEASE --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model1
     deps:
     - Dockerfile
-    - ../../models/ner/model1
+    - ../../models/ner/model1/model-best/
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
@@ -67,11 +219,11 @@ stages:
     outs:
     - ../../models/ner_er/model1
   add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2 --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model2/model-best/ --etypes CELL_COMPARTMENT,DRUG,ORGAN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model2
     deps:
     - Dockerfile
-    - ../../models/ner/model2
+    - ../../models/ner/model2/model-best/
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
@@ -81,11 +233,11 @@ stages:
     outs:
     - ../../models/ner_er/model2
   add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3 --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model3/model-best/ --etypes CHEMICAL,ORGANISM --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model3
     deps:
     - Dockerfile
-    - ../../models/ner/model3
+    - ../../models/ner/model3/model-best/
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
@@ -94,11 +246,11 @@ stages:
     outs:
     - ../../models/ner_er/model3
   add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4 --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes CELL_TYPE,PROTEIN --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model4
     deps:
     - Dockerfile
-    - ../../models/ner/model4
+    - ../../models/ner/model4/model-best/
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:
@@ -107,11 +259,11 @@ stages:
     outs:
     - ../../models/ner_er/model4
   add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5 --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+    cmd: python add_er.py --model ../../models/ner/model5/model-best/ --etypes PATHWAY --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
       --output_file ../../models/ner_er/model5
     deps:
     - Dockerfile
-    - ../../models/ner/model5
+    - ../../models/ner/model5/model-best/
     - add_er.py
     - ../../annotations/ner/rule_based_patterns.jsonl
     params:

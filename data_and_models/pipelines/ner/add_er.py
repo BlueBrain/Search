@@ -19,7 +19,6 @@
 
 from argparse import ArgumentParser
 import pathlib
-from unittest.mock import PropertyMock, patch
 
 import spacy
 import yaml
@@ -64,20 +63,14 @@ def main():
 
     print("Loading patterns")
     path_patterns = pathlib.Path(args.patterns_file)
-    er = spacy.pipeline.EntityRuler(ner_model, validate=True, overwrite_ents=True)
     patterns = JSONL.load_jsonl(path_patterns)
     modified_patterns = remap_entity_type(patterns, etype_mapping)
+    er_config = {"validate": True, "overwrite_ents": True}
+    er = ner_model.add_pipe("entity_ruler", after="ner", config=er_config)
     er.add_patterns(modified_patterns)
-    ner_model.add_pipe(er, after="ner")
 
-    sorted_labels = tuple(sorted(er.labels))
-
-    # See https://github.com/explosion/spaCy/issues/7352 for more info
-    with patch("spacy.pipeline.EntityRuler.labels", new_callable=PropertyMock) as mock:
-        mock.return_value = sorted_labels
-
-        print("Saving model with an entity ruler")
-        ner_model.to_disk(args.output_file)
+    print("Saving model with an entity ruler")
+    ner_model.to_disk(args.output_file)
 
 
 if __name__ == "__main__":

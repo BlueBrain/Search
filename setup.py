@@ -63,9 +63,16 @@ INSTALL_REQUIRES = [
     "python-dotenv",
     "requests",
     "scikit-learn",
-    "scispacy",
+    "scipy",
+    # >= 0.4.0 to be compatible with spaCy 3.
+    "scispacy>=0.4.0",
     "sentence-transformers",
-    "spacy<3",
+    # >= 3.0.4 to include the fix for https://github.com/explosion/spaCy/issues/7352.
+    "spacy>=3.0.4",
+    # From data_and_models/pipelines/ner/preprocess.py.
+    "typer",
+    # From data_and_models/pipelines/ner/preprocess.py.
+    "srsly",
     "torch",
     "tqdm",
 ]
@@ -89,7 +96,6 @@ EXTRAS_REQUIRE = {
     "data_and_models": [
         "PyYAML",
         "dvc[ssh]>=2",
-        "prodigy",
         "scipy",
         "transformers",
     ],
