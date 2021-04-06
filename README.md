@@ -406,8 +406,14 @@ cd $REPOSITORY_DIRECTORY
 ```
 
 ```bash
-pip install .
+pip install .[data_and_models]
 ```
+
+NB: The optional dependencies installed with the `[data_and_models]`
+option are only necessary if you want to execute training or inference using the
+`dvc` and the model and scripts contained under `data_and_models/`. If this is not
+the case, you can skip the `[data_and_models]` at the end of `pip install`.   
+
 
 Then, configure DVC to work with the downloaded snapshot of the DVC remote.
 
@@ -645,13 +651,13 @@ pip install --upgrade pip
 Then you can easily install `bluesearch` from PyPI:
 
 ```bash
-pip install bluesearch
+pip install bluesearch[data_and_models]
 ```
 
 You can also build from source if you prefer:
 
 ```bash
-pip install .
+pip install .[data_and_models]
 ```
 
 ## Installation (Docker)

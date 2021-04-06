@@ -37,7 +37,7 @@ RUN git checkout $BBS_REVISION
 # remove ruamel-yaml: https://github.com/pypa/pip/issues/5247#issuecomment-381550610
 RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install -r requirements.txt
-RUN pip install $PWD
+RUN pip install $PWD[data_and_models]
 
 
 EXPOSE 8888
