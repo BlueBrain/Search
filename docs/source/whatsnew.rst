@@ -29,7 +29,8 @@ Legend
 
 Latest
 ======
--
+- |Add| a :code:`spaCy 3` pipeline for NER using as embedding layer our
+  Transformer model :code:`BioBERT NLI+STS CORD-19 v1`.
 
 
 Version 0.1.2
