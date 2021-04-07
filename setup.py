@@ -49,9 +49,8 @@ PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
     "Flask",
-    "PyYAML",
     "SQLAlchemy[mysql,pymysql]",
-    "dvc[ssh]>=2",
+    "cryptography",
     "h5py",
     "ipython",
     "ipywidgets",
@@ -76,7 +75,6 @@ INSTALL_REQUIRES = [
     "srsly",
     "torch",
     "tqdm",
-    "transformers",
 ]
 
 if os.environ.get("READTHEDOCS") == "True":
@@ -94,6 +92,12 @@ EXTRAS_REQUIRE = {
         "responses",
         "sphinx-bluebrain-theme",
         "tox",
+    ],
+    "data_and_models": [
+        "PyYAML",
+        "dvc[ssh]>=2",
+        "scipy",
+        "transformers",
     ],
 }
 

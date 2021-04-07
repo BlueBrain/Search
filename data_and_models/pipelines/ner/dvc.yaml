@@ -283,7 +283,8 @@ stages:
     params:
     - eval.DISEASE
     metrics:
-    - ../../metrics/ner/disease.json
+    - ../../metrics/ner/disease.json:
+        cache: false
   eval_cell_compartment:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model2 --output_file ../../metrics/ner/cell_compartment.json
@@ -297,11 +298,12 @@ stages:
     params:
     - eval.CELL_COMPARTMENT
     metrics:
-    - ../../metrics/ner/cell_compartment.json
+    - ../../metrics/ner/cell_compartment.json:
+        cache: false
   eval_drug:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json --etype
-      DRUG
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/drug.json
+      --etype DRUG
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
@@ -311,11 +313,12 @@ stages:
     params:
     - eval.DRUG
     metrics:
-    - ../../metrics/ner/drug.json
+    - ../../metrics/ner/drug.json:
+        cache: false
   eval_organ:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json --etype
-      ORGAN
+      --model ../../models/ner_er/model2 --output_file ../../metrics/ner/organ.json
+      --etype ORGAN
     deps:
     - Dockerfile
     - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
@@ -325,7 +328,8 @@ stages:
     params:
     - eval.ORGAN
     metrics:
-    - ../../metrics/ner/organ.json
+    - ../../metrics/ner/organ.json:
+        cache: false
   eval_chemical:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model3 --output_file ../../metrics/ner/chemical.json
@@ -339,7 +343,8 @@ stages:
     params:
     - eval.CHEMICAL
     metrics:
-    - ../../metrics/ner/chemical.json
+    - ../../metrics/ner/chemical.json:
+        cache: false
   eval_organism:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model3 --output_file ../../metrics/ner/organism.json
@@ -353,7 +358,8 @@ stages:
     params:
     - eval.ORGANISM
     metrics:
-    - ../../metrics/ner/organism.json
+    - ../../metrics/ner/organism.json:
+        cache: false
   eval_cell_type:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model4 --output_file ../../metrics/ner/cell_type.json
@@ -367,7 +373,8 @@ stages:
     params:
     - eval.CELL_TYPE
     metrics:
-    - ../../metrics/ner/cell_type.json
+    - ../../metrics/ner/cell_type.json:
+        cache: false
   eval_protein:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model4 --output_file ../../metrics/ner/protein.json
@@ -381,7 +388,8 @@ stages:
     params:
     - eval.PROTEIN
     metrics:
-    - ../../metrics/ner/protein.json
+    - ../../metrics/ner/protein.json:
+        cache: false
   eval_pathway:
     cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --model ../../models/ner_er/model5 --output_file ../../metrics/ner/pathway.json
@@ -395,7 +403,8 @@ stages:
     params:
     - eval.PATHWAY
     metrics:
-    - ../../metrics/ner/pathway.json
+    - ../../metrics/ner/pathway.json:
+        cache: false
   interrater:
     cmd: python interrater.py --annotations1 ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       --annotations2 ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl,../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
@@ -408,13 +417,23 @@ stages:
     - Dockerfile
     - interrater.py
     metrics:
-    - ../../metrics/ner/interrater/cell_compartment.json
-    - ../../metrics/ner/interrater/cell_type.json
-    - ../../metrics/ner/interrater/chemical.json
-    - ../../metrics/ner/interrater/condition.json
-    - ../../metrics/ner/interrater/disease.json
-    - ../../metrics/ner/interrater/drug.json
-    - ../../metrics/ner/interrater/organ.json
-    - ../../metrics/ner/interrater/organism.json
-    - ../../metrics/ner/interrater/pathway.json
-    - ../../metrics/ner/interrater/protein.json
+    - ../../metrics/ner/interrater/cell_compartment.json:
+        cache: false
+    - ../../metrics/ner/interrater/cell_type.json:
+        cache: false
+    - ../../metrics/ner/interrater/chemical.json:
+        cache: false
+    - ../../metrics/ner/interrater/condition.json:
+        cache: false
+    - ../../metrics/ner/interrater/disease.json:
+        cache: false
+    - ../../metrics/ner/interrater/drug.json:
+        cache: false
+    - ../../metrics/ner/interrater/organ.json:
+        cache: false
+    - ../../metrics/ner/interrater/organism.json:
+        cache: false
+    - ../../metrics/ner/interrater/pathway.json:
+        cache: false
+    - ../../metrics/ner/interrater/protein.json:
+        cache: false

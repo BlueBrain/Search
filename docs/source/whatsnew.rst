@@ -29,8 +29,12 @@ Legend
 
 Latest
 ======
+- |Add| metrics file resulting from :code:`dvc` pipelines to :code:`git`.
+  This allow now to use :code:`dvc metrics diff`.
 - |Add| a :code:`spaCy 3` pipeline for NER using as embedding layer our
   Transformer model :code:`BioBERT NLI+STS CORD-19 v1`.
+- |Change| dependencies required to run the code of :code:`data_and_models/` are not
+  installed by default and now require :code:`pip install .[data_and_models]`.
 
 
 Version 0.1.2

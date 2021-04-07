@@ -22,7 +22,7 @@ USER root
 # Install the app
 ADD . /src
 WORKDIR /src
-RUN pip install -e .
+RUN pip install -e .[data_and_models]
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
