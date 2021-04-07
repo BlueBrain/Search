@@ -69,7 +69,7 @@ INSTALL_REQUIRES = [
     "scispacy>=0.4.0",
     "sentence-transformers",
     # >= 3.0.4 to include the fix for https://github.com/explosion/spaCy/issues/7352.
-    "spacy>=3.0.4",
+    "spacy[transformers]>=3.0.4",
     # From data_and_models/pipelines/ner/preprocess.py.
     "typer",
     # From data_and_models/pipelines/ner/preprocess.py.

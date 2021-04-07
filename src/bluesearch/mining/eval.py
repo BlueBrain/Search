@@ -144,6 +144,15 @@ def spacy2df(
         if isinstance(
             pipe,
             (
+                spacy.pipeline.EntityRuler,
+                spacy.pipeline.EntityRecognizer,
+                spacy.pipeline.Lemmatizer,
+                spacy.pipeline.AttributeRuler,
+                spacy.pipeline.Tagger,
+            ),
+        ) or isinstance(
+            pipe,
+            (
                 spacy.pipeline.ner.EntityRecognizer,
                 spacy_transformers.pipeline_component.Transformer,
             ),
