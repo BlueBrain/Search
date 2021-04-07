@@ -57,5 +57,4 @@ srsly==2.4.0
 sphinx-bluebrain-theme==0.2.4
 torch==1.7.0
 tox==3.22.0
-tqdm==4.57.0
 transformers==4.3.2

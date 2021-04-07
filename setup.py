@@ -74,7 +74,6 @@ INSTALL_REQUIRES = [
     # From data_and_models/pipelines/ner/preprocess.py.
     "srsly",
     "torch",
-    "tqdm",
 ]
 
 if os.environ.get("READTHEDOCS") == "True":
