@@ -55,7 +55,6 @@ INSTALL_REQUIRES = [
     "ipython",
     "ipywidgets",
     "langdetect",
-    "matplotlib",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
     "pdfkit",
@@ -94,6 +93,7 @@ EXTRAS_REQUIRE = {
     "data_and_models": [
         "PyYAML",
         "dvc[ssh]>=2",
+        "matplotlib",
         "scipy",
         "transformers",
     ],

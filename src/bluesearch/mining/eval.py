@@ -24,7 +24,6 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Union
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import sklearn
@@ -610,64 +609,3 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode="entity"):
     cm = pd.DataFrame(cm_vals, columns=columns, index=index)
 
     return cm
-
-
-def plot_ner_confusion_matrix(
-    iob_true, iob_pred, normalize=None, mode="entity", cmap="viridis", ax=None
-):
-    """Plot Confusion Matrix for NER evaluation.
-
-    Parameters
-    ----------
-    iob_true : pd.Series[str]
-         Ground truth (correct) IOB annotations.
-    iob_pred : pd.Series[str]
-        Predicted IOB annotations.
-    normalize : {'true', 'pred', 'all'}, default=None
-        Normalizes confusion matrix over the true (rows), predicted (columns)
-        conditions or all the population. If None, the confusion matrix will
-        not be normalized.
-    mode : str, optional
-        Evaluation mode. One of 'entity', 'token': notice that an 'entity'
-        can span several tokens.
-    cmap : str or matplotlib Colormap, default='viridis'
-        Colormap recognized by matplotlib.
-    ax : matplotlib Axes, default=None
-        Axes object to plot on. If `None`, a new figure and axes is
-        created and returned.
-
-    Returns
-    -------
-    ax : matplotlib Axes
-        Axes object where the matrix was plotted.
-    """
-    cm = ner_confusion_matrix(iob_true, iob_pred, normalize=normalize, mode=mode)
-
-    x = cm.values
-    e_types_true = cm.index
-    e_types_pred = cm.columns
-
-    if ax is None:
-        f, ax = plt.subplots(figsize=(len(e_types_pred) * 0.6, len(e_types_true) * 0.6))
-
-    max_val = 1 if (normalize is not None) else x[:-1, :-1].max()
-    ax.imshow(-np.minimum(x, max_val), cmap=cmap, vmin=-max_val, vmax=0)
-
-    for i in range(len(x)):
-        for j in range(len(x.T)):
-            c = "k" if x[i, j] < max_val / 2 else "w"
-            text = (
-                f"{int(round(100 * x[i, j])):d}%"
-                if (normalize is not None)
-                else f"{x[i, j]:,d}"
-            )
-            ax.text(j, i, text, ha="center", va="center", color=c)
-
-    ax.set_xticks(np.arange(len(e_types_pred)))
-    ax.set_yticks(np.arange(len(e_types_true)))
-    ax.set_xticklabels(list(e_types_pred), rotation=90)
-    ax.set_yticklabels(e_types_true)
-    ax.set_xlabel("Predicted")
-    ax.set_ylabel("True")
-
-    return ax
