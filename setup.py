@@ -50,6 +50,8 @@ PYTHON_REQUIRES = ">=3.7"
 INSTALL_REQUIRES = [
     "Flask",
     "SQLAlchemy[mysql,pymysql]",
+    # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
+    "cryptography>=3.2",
     "h5py",
     "ipython",
     "ipywidgets",
