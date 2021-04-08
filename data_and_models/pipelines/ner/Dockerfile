@@ -26,7 +26,7 @@ ENV https_proxy='http://bbpproxy.epfl.ch:80/'
 RUN true \
 	&& conda update conda \
 	&& apt-get update \
-	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
+	&& apt-get install -y gcc g++ build-essential vim libfontconfig1
 RUN conda install -c carta mysqlclient
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag

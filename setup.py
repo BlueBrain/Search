@@ -58,7 +58,6 @@ INSTALL_REQUIRES = [
     "langdetect",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
-    "pdfkit",
     "python-dotenv",
     "requests",
     "scikit-learn",

@@ -22,7 +22,6 @@ import pathlib
 import textwrap
 
 import pandas as pd
-import pdfkit
 
 from .._css import style
 from ..sql import (
@@ -241,7 +240,7 @@ class ArticleSaver:
 
         return ref, article_title, article_authors
 
-    def pdf_report(self, output_dir=None):
+    def make_report(self, output_dir=None):
         """Create the saved articles report.
 
         Parameters
@@ -251,6 +250,7 @@ class ArticleSaver:
 
         Returns
         -------
+        output_file_path : str
         output_file_path : str
             The file to which the report was written.
         """
@@ -296,9 +296,11 @@ class ArticleSaver:
             if not output_dir.exists():
                 msg = f"The output directory {output_dir} does not exist."
                 raise ValueError(msg)
-        filename = f"article_saver_report_{datetime.datetime.now()}.pdf"
-        output_file_path = str(output_dir / filename)
-        pdfkit.from_string(article_report, output_file_path)
+        output_file_path = (
+            output_dir / f"article_saver_report_{datetime.datetime.now()}.html"
+        )
+        with output_file_path.open("w") as f:
+            f.write(article_report)
 
         return output_file_path
 

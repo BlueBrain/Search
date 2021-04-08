@@ -38,7 +38,6 @@ matplotlib==3.3.4
 mysqlclient==2.0.3
 numpy==1.20.1
 pandas==1.2.2
-pdfkit==0.6.1
 pymysql==1.0.2
 pytest-benchmark==3.2.3
 pytest-cov==2.11.1

@@ -20,7 +20,6 @@
 import contextlib
 import json
 import os
-import sys
 import textwrap
 from copy import copy
 from functools import partial
@@ -510,9 +509,8 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
 
 
 @responses.activate
-@pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
-def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
-    """Make sure creation of PDF report works."""
+def test_make_report(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    """Make sure creation of report works."""
     tmpdir = Path(tmpdir)
     http_address = activate_responses(fake_sqlalchemy_engine)
 
@@ -539,15 +537,14 @@ def test_pdf(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     with cd_temp(tmpdir):
         bot.click("report_button")
 
-    assert "Creating the search results PDF report..." in bot.stdout_cached
+    assert "Creating the search results report..." in bot.stdout_cached
 
-    assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1
+    assert len([f for f in tmpdir.iterdir() if f.suffix == ".html"]) == 1
 
 
 @responses.activate
-@pytest.mark.skipif(sys.platform != "darwin", reason="Bug in wkhtmltopdf")
-def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
-    """Make sure creation of PDF article saver state works."""
+def test_report_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
+    """Make sure creation of report with article saver state works."""
     tmpdir = Path(tmpdir)
     http_address = activate_responses(fake_sqlalchemy_engine)
 
@@ -575,9 +572,9 @@ def test_pdf_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
     with cd_temp(tmpdir):
         bot.click("articles_button")
 
-    assert "Creating the saved results PDF report... " in bot.stdout_cached
+    assert "Creating the saved results report... " in bot.stdout_cached
 
-    assert len([f for f in tmpdir.iterdir() if f.suffix == ".pdf"]) == 1
+    assert len([f for f in tmpdir.iterdir() if f.suffix == ".html"]) == 1
 
 
 def get_search_widget_bot(
