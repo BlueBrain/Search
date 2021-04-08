@@ -54,7 +54,6 @@ INSTALL_REQUIRES = [
     "h5py",
     "ipython",
     "ipywidgets",
-    "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
     "matplotlib",
     "numpy>=1.20.1",
