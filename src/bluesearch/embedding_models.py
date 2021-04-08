@@ -20,7 +20,7 @@
 import logging
 import multiprocessing as mp
 import pathlib
-import pickle
+import pickle  # nosec
 from abc import ABC, abstractmethod
 from typing import Optional, Union
 
@@ -181,7 +181,7 @@ class SklearnVectorizer(EmbeddingModel):
     def __init__(self, checkpoint_path):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
         with self.checkpoint_path.open("rb") as f:
-            self.model = pickle.load(f)
+            self.model = pickle.load(f)  # nosec
 
     @property
     def dim(self):

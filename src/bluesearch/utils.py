@@ -303,12 +303,15 @@ class H5:
 
             for i in range(0, n_rows, batch_size):
                 if verbose:
-                    print(f"\rFinding unpopulated rows: {round(100*i/n_rows):>3d}% done", end="")
-                row = dset[i: i + batch_size]
+                    print(
+                        f"\rFinding unpopulated rows: {round(100*i/n_rows):>3d}% done",
+                        end="",
+                    )
+                row = dset[i : i + batch_size]
                 is_unpop = np.isnan(row).any(axis=1)  # (batch_size,)
                 unpop_rows.extend(list(np.where(is_unpop)[0] + i))
 
-            print(f"\rFinding unpopulated rows: 100% done", end="")
+            print("\rFinding unpopulated rows: 100% done", end="")
 
         return np.array(unpop_rows)
 
@@ -405,11 +408,11 @@ class H5:
             for i in range(0, n_indices, batch_size):
                 if verbose:
                     print(f"\rLoading H5: {round(100*i/n_indices):>3d}% done", end="")
-                subarray = dset[sorted_indices[i: i + batch_size]]  # (batch_size, dim)
+                subarray = dset[sorted_indices[i : i + batch_size]]  # (batch_size, dim)
                 final_res_l.append(subarray)
 
             final_res = np.concatenate(final_res_l, axis=0)
-            print(f"\rLoading H5: 100% done", end="")
+            print("\rLoading H5: 100% done", end="")
             return final_res[unargsort]
 
     @staticmethod
