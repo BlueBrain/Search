@@ -33,6 +33,9 @@ Latest
   This allow now to use :code:`dvc metrics diff`.
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
   installed by default and now require :code:`pip install .[data_and_models]`.
+- |Remove| :code:`tqdm` and :code:`joblib` dependencies.
+- |Remove| :code:`bluesearch.mining.eval.plot_ner_confusion_matrix` function to drop
+  :code:`joblib` from :code:`install_requires`.
 
 
 Version 0.1.2
