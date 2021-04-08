@@ -50,7 +50,6 @@ PYTHON_REQUIRES = ">=3.7"
 INSTALL_REQUIRES = [
     "Flask",
     "SQLAlchemy[mysql,pymysql]",
-    "cryptography",
     "h5py",
     "ipython",
     "ipywidgets",
