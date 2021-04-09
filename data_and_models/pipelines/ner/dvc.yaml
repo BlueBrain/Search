@@ -1,36 +1,27 @@
 stages:
   convert_annotations:
     foreach:
-      annotation5:
-        annotation_filename: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
-      annotation6:
-        annotation_filename: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      annotation9:
-        annotation_filename: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
-      annotation10:
-        annotation_filename: annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes
-      annotation11:
-        annotation_filename: annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes
-      annotation12:
-        annotation_filename: annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes
-      annotation13:
-        annotation_filename: annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes
-      annotation14:
-        annotation_filename: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      annotation15:
-        annotation_filename: annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
+      - annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
+      - annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+      - annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+      - annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes
+      - annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes
+      - annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes
+      - annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes
+      - annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+      - annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
     do:
-      cmd: python preprocess.py ../../annotations/ner/${item.annotation_filename}.jsonl
+      cmd: python preprocess.py ../../annotations/ner/${item}.jsonl
       deps:
         - Dockerfile
         - preprocess.py
-        - ../../annotations/ner/${item.annotation_filename}.jsonl
+        - ../../annotations/ner/${item}.jsonl
       params:
         - train.corpora.dev_size
         - train.corpora.shuffle_seed
       outs:
-        - ../../annotations/ner/${item.annotation_filename}.train.spacy
-        - ../../annotations/ner/${item.annotation_filename}.dev.spacy
+        - ../../annotations/ner/${item}.train.spacy
+        - ../../annotations/ner/${item}.dev.spacy
   training:
     foreach:
        model1:
