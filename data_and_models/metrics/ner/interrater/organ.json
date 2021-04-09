@@ -1,0 +1,1 @@
+{"entity_precision": 0.8243243243243243, "entity_recall": 0.6853932584269663, "entity_f1-score": 0.7484662576687117, "entity_support": 89, "token_precision": 0.8125, "token_recall": 0.7289719626168224, "token_f1-score": 0.7684729064039408, "token_support": 107}

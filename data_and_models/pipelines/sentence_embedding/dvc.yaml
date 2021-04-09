@@ -35,5 +35,5 @@ stages:
       - ../../metrics/sentence_embedding/${item}.csv
       - ../../metrics/sentence_embedding/${item}.png
       metrics:
-      - ../../metrics/sentence_embedding/${item}.json
-
+      - ../../metrics/sentence_embedding/${item}.json:
+          cache: false

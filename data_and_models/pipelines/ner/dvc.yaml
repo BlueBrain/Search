@@ -162,7 +162,8 @@ stages:
       params:
       - eval.${key}
       metrics:
-      - ../../metrics/ner/${key}.json
+      - ../../metrics/ner/${key}.json:
+          cache: false
   interrater:
     cmd: python interrater.py --annotations1 ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl        --annotations2 ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl,../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
       --output_dir ../../metrics/ner/interrater/
@@ -174,13 +175,23 @@ stages:
     - Dockerfile
     - interrater.py
     metrics:
-    - ../../metrics/ner/interrater/cell_compartment.json
-    - ../../metrics/ner/interrater/cell_type.json
-    - ../../metrics/ner/interrater/chemical.json
-    - ../../metrics/ner/interrater/condition.json
-    - ../../metrics/ner/interrater/disease.json
-    - ../../metrics/ner/interrater/drug.json
-    - ../../metrics/ner/interrater/organ.json
-    - ../../metrics/ner/interrater/organism.json
-    - ../../metrics/ner/interrater/pathway.json
-    - ../../metrics/ner/interrater/protein.json
+    - ../../metrics/ner/interrater/cell_compartment.json:
+        cache: false
+    - ../../metrics/ner/interrater/cell_type.json:
+        cache: false
+    - ../../metrics/ner/interrater/chemical.json:
+        cache: false
+    - ../../metrics/ner/interrater/condition.json:
+        cache: false
+    - ../../metrics/ner/interrater/disease.json:
+        cache: false
+    - ../../metrics/ner/interrater/drug.json:
+        cache: false
+    - ../../metrics/ner/interrater/organ.json:
+        cache: false
+    - ../../metrics/ner/interrater/organism.json:
+        cache: false
+    - ../../metrics/ner/interrater/pathway.json:
+        cache: false
+    - ../../metrics/ner/interrater/protein.json:
+        cache: false
