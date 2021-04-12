@@ -57,7 +57,7 @@ def main():
     print("Read params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"]
     external_etypes = [x.strip() for x in args.etypes.split(",")]
-    etype_mapping = {external: params[external]["etype_name"] for external in external_etypes}
+    etype_mapping = {external.upper(): params[external]["etype_name"] for external in external_etypes}
     # Load and preprocess the annotations
     ner_model = spacy.load(args.model)
 

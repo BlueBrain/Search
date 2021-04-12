@@ -3,21 +3,21 @@ train:
     dev_size: 0.1  # (float) Proportion. | (int) Number of samples.
     shuffle_seed: 0  # (int) Shuffling applied before the split.
 eval:
-  DISEASE:
+  disease:
     etype_name: DISEASE
-  CELL_COMPARTMENT:
+  cell_compartment:
     etype_name: CELLULAR_COMPONENT
-  DRUG:
+  drug:
     etype_name: SIMPLE_CHEMICAL
-  ORGAN:
+  organ:
     etype_name: ORGAN
-  CHEMICAL:
+  chemical:
     etype_name: CHEBI
-  ORGANISM:
+  organism:
     etype_name: TAXON
-  CELL_TYPE:
+  cell_type:
     etype_name: CELL_TYPE
-  PROTEIN:
+  protein:
     etype_name: PROTEIN
-  PATHWAY:
+  pathway:
     etype_name: PATHWAY

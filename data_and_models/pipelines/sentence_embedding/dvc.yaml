@@ -1,115 +1,39 @@
 stages:
-  eval_biobert_nli_sts_cord19_v1:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
-    - eval.py
-    params:
-    - eval.biobert_nli_sts_cord19_v1
-    outs:
-    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
-    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
-    metrics:
-    - ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json:
-        cache: false
-  eval_biobert_nli_sts:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.biobert_nli_sts
-    outs:
-    - ../../metrics/sentence_embedding/biobert_nli_sts.csv
-    - ../../metrics/sentence_embedding/biobert_nli_sts.png
-    metrics:
-    - ../../metrics/sentence_embedding/biobert_nli_sts.json:
-        cache: false
-  train_tf_idf:
-    cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
-      --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
-    deps:
-    - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
-    - Dockerfile
-    - train.py
-    params:
-    - train.tf_idf
-    outs:
-    - ../../models/sentence_embedding/tf_idf
-  eval_tf_idf:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=tf_idf --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - ../../models/sentence_embedding/tf_idf
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.tf_idf
-    outs:
-    - ../../metrics/sentence_embedding/tf_idf.csv
-    - ../../metrics/sentence_embedding/tf_idf.png
-    metrics:
-    - ../../metrics/sentence_embedding/tf_idf.json:
-        cache: false
-  train_count:
-    cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
-      --model=count --output_dir=../../models/sentence_embedding/count
-    deps:
-    - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
-    - Dockerfile
-    - train.py
-    params:
-    - train.count
-    outs:
-    - ../../models/sentence_embedding/count
-  eval_count:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=count --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - ../../models/sentence_embedding/count
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.count
-    outs:
-    - ../../metrics/sentence_embedding/count.csv
-    - ../../metrics/sentence_embedding/count.png
-    metrics:
-    - ../../metrics/sentence_embedding/count.json:
-        cache: false
-  eval_sbert:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=sbert --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.sbert
-    outs:
-    - ../../metrics/sentence_embedding/sbert.csv
-    - ../../metrics/sentence_embedding/sbert.png
-    metrics:
-    - ../../metrics/sentence_embedding/sbert.json:
-        cache: false
-  eval_sbiobert:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=sbiobert --output_dir=../../metrics/sentence_embedding
-    deps:
-    - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-    - Dockerfile
-    - eval.py
-    params:
-    - eval.sbiobert
-    outs:
-    - ../../metrics/sentence_embedding/sbiobert.csv
-    - ../../metrics/sentence_embedding/sbiobert.png
-    metrics:
-    - ../../metrics/sentence_embedding/sbiobert.json:
-        cache: false
+  training:
+    foreach:
+      - tf_idf
+      - count
+    do:
+      cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+        --model=${item} --output_dir=../../models/sentence_embedding/${item}
+      deps:
+        - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+        - Dockerfile
+        - train.py
+      params:
+        - train.${item}
+      outs:
+        - ../../models/sentence_embedding/${item}
+  evaluation:
+    foreach:
+      - biobert_nli_sts_cord19_v1
+      - biobert_nli_sts
+      - tf_idf
+      - count
+      - sbert
+      - sbiobert
+    do:
+      cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+        --model=${item} --output_dir=../../metrics/sentence_embedding
+      deps:
+      - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      - Dockerfile
+      - eval.py
+      params:
+      - eval.${item}
+      outs:
+      - ../../metrics/sentence_embedding/${item}.csv
+      - ../../metrics/sentence_embedding/${item}.png
+      metrics:
+      - ../../metrics/sentence_embedding/${item}.json:
+          cache: false
