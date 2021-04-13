@@ -322,7 +322,7 @@ def main():
     for n_layer in range(12, 24):
         for param in model.bert.encoder.layer[n_layer].parameters():
             param.requires_grad = True
-    n_trainable = sum(param.numel() for param in model.parameters() if param.requires_grad == True)
+    n_trainable = sum(param.numel() for param in model.parameters() if param.requires_grad)
     print("Number of trainable parameters:", n_trainable)
     input("Press any key to continue")
     # End of changes from BBP
