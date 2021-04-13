@@ -22,13 +22,18 @@ Then you can easily install :code:`bluesearch` from PyPI:
 
 .. code-block:: bash
 
-   pip install bluesearch
+   pip install bluesearch[data_and_models]
 
 You can also build from source if you prefer:
 
 .. code-block:: bash
 
-    pip install .  # use -e for editable install
+    pip install .[data_and_models]  # use -e for editable install
+
+NB: The optional dependencies installed with the :code:`[data_and_models]`
+option are only necessary if you want to execute training or inference using the
+:code:`dvc` and the model and scripts contained under :code:`data_and_models/`. If this is not
+the case, you can skip the :code:`[data_and_models]` at the end of :code:`pip install`.
 
 
 Generating docs

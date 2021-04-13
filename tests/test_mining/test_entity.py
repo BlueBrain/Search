@@ -331,11 +331,8 @@ def test_check_patterns_agree():
     with pytest.raises(ValueError):
         check_patterns_agree(model, [])
 
-    er_1 = spacy.pipeline.EntityRuler(model)
-    er_2 = spacy.pipeline.EntityRuler(model)
-
     # Single entity ruler
-    model.add_pipe(er_1, first=True, name="er_1")
+    er_1 = model.add_pipe("entity_ruler", first=True, name="er_1")
 
     assert check_patterns_agree(model, [])
 
@@ -355,7 +352,7 @@ def test_check_patterns_agree():
     )  # unfortunately the order matters
 
     # Two entity rules
-    model.add_pipe(er_2, first=True, name="er_2")
+    model.add_pipe("entity_ruler", first=True, name="er_2")
 
     with pytest.raises(ValueError):
         check_patterns_agree(model, [])

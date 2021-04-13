@@ -98,8 +98,8 @@ def main():
                 iob_pred,
                 mode=mode,
                 return_dict=True,
-                etypes_map={args.etype: params["etype_name"]},
-            )[args.etype]
+                etypes_map={args.etype.upper(): params["etype_name"]},
+            )[args.etype.upper()]
             metrics_dict = OrderedDict(
                 [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )

@@ -29,20 +29,15 @@ RUN true \
 	&& apt-get install -y gcc g++ build-essential vim libfontconfig1 wkhtmltopdf
 RUN conda install -c carta mysqlclient
 
-# Install Prodigy -- assume that we have Prodigy wheel there!
-RUN mkdir -p /bbs/tmp
-COPY prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl /bbs/tmp
-RUN pip install /bbs/tmp/prodigy-1.10.7-cp36.cp37.cp38-cp36m.cp37m.cp38-linux_x86_64.whl
-
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.1.1
+ARG BBS_REVISION=v0.1.2
 ADD . /src
 WORKDIR /src
 RUN git checkout $BBS_REVISION
 # remove ruamel-yaml: https://github.com/pypa/pip/issues/5247#issuecomment-381550610
 RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install -r requirements.txt
-RUN pip install $PWD
+RUN pip install $PWD[data_and_models]
 
 
 EXPOSE 8888
@@ -51,5 +46,4 @@ RUN groupadd -g 999 docker
 RUN useradd --create-home --uid 1000 --gid docker bbsuser
 
 WORKDIR /bbs
-RUN rm -rf /bbs/tmp
 ENTRYPOINT ["/bin/bash"]

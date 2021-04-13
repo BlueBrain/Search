@@ -1,0 +1,5 @@
+outs:
+- md5: 8ce898d7b0d4920b9312768925a56802.dir
+  size: 1300619338
+  nfiles: 9
+  path: biobert_cord19_v1

@@ -15,12 +15,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-/disease.json
-/cell_compartment.json
-/drug.json
-/organ.json
-/chemical.json
-/organism.json
-/cell_type.json
-/protein.json
-/pathway.json
+"""
+Additional Python code to be imported for "config.cfg" with "spacy train --code".
+"""
+
+from pathlib import Path
+from typing import Union
+
+import spacy
+from spacy import Language, registry
+
+
+@registry.callbacks("copy_vocab_tokenizer")
+def make_copy_vocab_tokenizer(source: Union[str, Path]):
+    """Callback to import existing custom vocabulary and tokenizer to a new pipeline."""
+    def copy_vocab_tokenizer(nlp: Language) -> Language:
+        """Copy a custom vocabulary and a custom tokenizer from a source pipeline."""
+        base = spacy.load(source)
+        nlp.tokenizer.from_bytes(base.tokenizer.to_bytes())
+        nlp.vocab.from_bytes(base.vocab.to_bytes())
+        return nlp
+    return copy_vocab_tokenizer

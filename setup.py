@@ -49,9 +49,8 @@ PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
     "Flask",
-    "PyYAML",
     "SQLAlchemy[mysql,pymysql]",
-    "dvc[ssh]>=2",
+    "cryptography",
     "h5py",
     "ipython",
     "ipywidgets",
@@ -65,12 +64,17 @@ INSTALL_REQUIRES = [
     "requests",
     "scikit-learn",
     "scipy",
-    "scispacy",
+    # >= 0.4.0 to be compatible with spaCy 3.
+    "scispacy>=0.4.0",
     "sentence-transformers",
-    "spacy<3",
+    # >= 3.0.4 to include the fix for https://github.com/explosion/spaCy/issues/7352.
+    "spacy>=3.0.4",
+    # From data_and_models/pipelines/ner/preprocess.py.
+    "typer",
+    # From data_and_models/pipelines/ner/preprocess.py.
+    "srsly",
     "torch",
     "tqdm",
-    "transformers",
 ]
 
 if os.environ.get("READTHEDOCS") == "True":
@@ -88,6 +92,12 @@ EXTRAS_REQUIRE = {
         "responses",
         "sphinx-bluebrain-theme",
         "tox",
+    ],
+    "data_and_models": [
+        "PyYAML",
+        "dvc[ssh]>=2",
+        "scipy",
+        "transformers",
     ],
 }
 

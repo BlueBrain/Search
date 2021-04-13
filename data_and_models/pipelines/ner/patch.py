@@ -15,13 +15,28 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-/cell_compartment.json
-/cell_type.json
-/chemical.json
-/condition.json
-/disease.json
-/drug.json
-/organ.json
-/organism.json
-/pathway.json
-/protein.json
+"""
+This script is a patch to order deterministically model-best/vocab/strings.json.
+
+See https://github.com/explosion/spaCy/pull/7603 for details.
+"""
+
+from pathlib import Path
+
+import srsly
+import typer
+from spacy.strings import StringStore
+
+
+def sort(path: Path):
+    """Sort the strings from the vocabulary of a spaCy model.
+
+    For the original code of StringStore.to_disk(), see https://github.com/explosion/spaCy/blob/53a3b967ac704ff0a67a7102ede6d916e2a4545a/spacy/strings.pyx#L219-L227.
+    """
+    st = StringStore().from_disk(path)
+    strings = sorted(st)
+    srsly.write_json(path, strings)
+
+
+if __name__ == "__main__":
+    typer.run(sort)
