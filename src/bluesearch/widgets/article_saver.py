@@ -250,8 +250,7 @@ class ArticleSaver:
 
         Returns
         -------
-        output_file_path : str
-        output_file_path : str
+        output_file_path : pathlib.Path
             The file to which the report was written.
         """
         css_style = style.get_css_style()
