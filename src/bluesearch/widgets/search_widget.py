@@ -938,6 +938,7 @@ class SearchWidget(widgets.VBox):
 
             output_file = pathlib.Path(f"report_{datetime.datetime.now()}.html")
             with output_file.open("w") as f:
+                f.write(f"<!DOCTYPE html>\n")
                 f.write(f"<style> {css_style} </style>")
                 f.write(hyperparameters_section)
                 f.write(results_section)

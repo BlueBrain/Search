@@ -299,6 +299,7 @@ class ArticleSaver:
             output_dir / f"article_saver_report_{datetime.datetime.now()}.html"
         )
         with output_file_path.open("w") as f:
+            f.write(f"<!DOCTYPE html>\n")
             f.write(article_report)
 
         return output_file_path
