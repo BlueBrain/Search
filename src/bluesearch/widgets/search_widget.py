@@ -904,7 +904,7 @@ class SearchWidget(widgets.VBox):
             print(f"Done. Report saved to {out_file}.")
 
     def _cb_bt_make_report_search(self, change_dict):
-        """Create the report of the search.        """
+        """Create the report of the search."""
         with self.widgets["status"]:
             print()
             print("Creating the search results report... ")
@@ -938,7 +938,7 @@ class SearchWidget(widgets.VBox):
 
             output_file = pathlib.Path(f"report_{datetime.datetime.now()}.html")
             with output_file.open("w") as f:
-                f.write(f"<!DOCTYPE html>\n")
+                f.write("<!DOCTYPE html>\n")
                 f.write(f"<style> {css_style} </style>")
                 f.write(hyperparameters_section)
                 f.write(results_section)
