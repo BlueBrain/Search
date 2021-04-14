@@ -17,10 +17,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from argparse import ArgumentParser
-from collections import OrderedDict
 import pathlib
 import json
+from argparse import ArgumentParser
+from collections import OrderedDict
+from pprint import pprint
 
 import pandas as pd
 import spacy
@@ -63,13 +64,12 @@ args = parser.parse_args()
 
 
 def main():
-    print("Read params.yaml...")
-    params = yaml.safe_load(open("params.yaml"))["eval"][args.etype]
-
     # Load and preprocess the annotations
+    print("Loading data and model")
     df = annotations2df(args.annotation_files.split(","))
     ner_model = spacy.load(args.model)
 
+    print("Computing predictions")
     df_pred = []
     for source, df_ in df.groupby("source"):
         df_ = df_.sort_values(by="id", ignore_index=True)
@@ -80,31 +80,29 @@ def main():
         df_sentence["source"] = source
         df_pred.append(df_sentence)
 
+    print("Formatting predctions")
     df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
-
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
-
-    df = remove_punctuation(df)
-
+    #df = remove_punctuation(df)
     iob_true = df["class"]
     iob_pred = df["class_pred"]
+    
+    print("Saving predictions")
+    df.to_pickle("df_test_pred.pkl")
 
+    print("Computing and saving metrics")
     output_file = pathlib.Path(args.output_file)
+    metrics_dict = ner_report(
+        iob_true,
+        iob_pred,
+        mode="token",
+        return_dict=True,
+    )
+    metrics_dict = dict(metrics_dict[args.etype])
     with output_file.open("w") as f:
-        all_metrics_dict = OrderedDict()
-        for mode in ["entity", "token"]:
-            metrics_dict = ner_report(
-                iob_true,
-                iob_pred,
-                mode=mode,
-                return_dict=True,
-                etypes_map={args.etype.upper(): params["etype_name"]},
-            )[args.etype.upper()]
-            metrics_dict = OrderedDict(
-                [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
-            )
-            all_metrics_dict.update(metrics_dict)
-        json.dump(all_metrics_dict, f)
+        json.dump(metrics_dict, f)
+        f.write("\n")
+    pprint(metrics_dict)
 
 
 if __name__ == "__main__":
