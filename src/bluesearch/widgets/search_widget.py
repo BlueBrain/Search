@@ -900,10 +900,11 @@ class SearchWidget(widgets.VBox):
         with self.widgets["status"]:
             print()
             print("Creating the saved results report... ")
-            self.article_saver.make_report()
+            out_file = self.article_saver.make_report()
+            print(f"Done. Report saved to {out_file}.")
 
     def _cb_bt_make_report_search(self, change_dict):
-        """Create the report of the search."""
+        """Create the report of the search.        """
         with self.widgets["status"]:
             print()
             print("Creating the search results report... ")
@@ -940,3 +941,4 @@ class SearchWidget(widgets.VBox):
                 f.write(f"<style> {css_style} </style>")
                 f.write(hyperparameters_section)
                 f.write(results_section)
+            print(f"Done. Report saved to {output_file}.")
