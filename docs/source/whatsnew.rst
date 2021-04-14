@@ -33,6 +33,9 @@ Latest
   This allow now to use :code:`dvc metrics diff`.
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
   installed by default and now require :code:`pip install .[data_and_models]`.
+- |Add| in :code:`dvc`, in :code:`ner` pipelines, scripts allowing to train and evaluate
+  NER thanks to the :code:`huggingface/transformers` package.
+  A comparison with :code:`spaCy` training is also possible.
 
 
 Version 0.1.2
