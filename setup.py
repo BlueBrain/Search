@@ -62,7 +62,6 @@ INSTALL_REQUIRES = [
     "python-dotenv",
     "requests",
     "scikit-learn",
-    "scipy",
     # >= 0.4.0 to be compatible with spaCy 3.
     "scispacy>=0.4.0",
     "sentence-transformers",
