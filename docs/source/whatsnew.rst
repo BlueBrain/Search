@@ -40,6 +40,9 @@ Latest
 - |Remove| :code:`tqdm`, :code:`joblib`, :code:`pdfkit` dependencies.
 - |Remove| :code:`bluesearch.mining.eval.plot_ner_confusion_matrix` function to drop
   :code:`joblib` from :code:`install_requires`.
+- |Change| :code:`requirements.txt` refactored into three separate lists of
+  dependencies: :code:`requirements.txt`, :code:`requirements-dev.txt`,
+  :code:`requirements-data_and_models.txt`.
 
 
 Version 0.1.2
