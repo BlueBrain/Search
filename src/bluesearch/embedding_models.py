@@ -20,10 +20,10 @@
 import logging
 import multiprocessing as mp
 import pathlib
+import pickle  # nosec
 from abc import ABC, abstractmethod
 from typing import Optional, Union
 
-import joblib
 import numpy as np
 import sentence_transformers
 import sqlalchemy
@@ -180,7 +180,8 @@ class SklearnVectorizer(EmbeddingModel):
 
     def __init__(self, checkpoint_path):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
-        self.model = joblib.load(self.checkpoint_path)
+        with self.checkpoint_path.open("rb") as f:
+            self.model = pickle.load(f)  # nosec
 
     @property
     def dim(self):

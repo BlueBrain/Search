@@ -33,7 +33,6 @@ from bluesearch.mining.eval import (
     ner_confusion_matrix,
     ner_errors,
     ner_report,
-    plot_ner_confusion_matrix,
     remove_punctuation,
     unique_etypes,
 )
@@ -494,11 +493,6 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
     iob_true = ner_annotations[dataset]["annotator_1"]
     iob_pred = ner_annotations[dataset]["annotator_2"]
     cm_vals = np.array(cm_vals)
-
-    ax = plot_ner_confusion_matrix(
-        iob_true=iob_true, iob_pred=iob_pred, normalize=None, mode=mode
-    )
-    assert ax is not None
 
     cm = ner_confusion_matrix(
         iob_true=iob_true, iob_pred=iob_pred, normalize=None, mode=mode

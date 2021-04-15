@@ -30,7 +30,6 @@ from urllib.parse import quote
 
 import ipywidgets as widgets
 import pandas as pd
-import pdfkit
 import requests
 from IPython.display import HTML, display
 
@@ -359,8 +358,8 @@ class SearchWidget(widgets.VBox):
         self.widgets["investigate_button"].on_click(self._cb_bt_investigate)
         self.widgets["save_button"].on_click(self._cb_bt_save)
         self.widgets["load_button"].on_click(self._cb_bt_load)
-        self.widgets["report_button"].on_click(self._cb_bt_pdf_report_search)
-        self.widgets["articles_button"].on_click(self._cb_bt_pdf_report_article_saver)
+        self.widgets["report_button"].on_click(self._cb_bt_make_report_search)
+        self.widgets["articles_button"].on_click(self._cb_bt_make_report_article_saver)
         self.widgets["show_advanced_chb"].observe(self._cb_chkb_advanced, names="value")
 
     def _init_ui(self):
@@ -896,18 +895,19 @@ class SearchWidget(widgets.VBox):
 
         return chk_article, chk_paragraph
 
-    def _cb_bt_pdf_report_article_saver(self, change_dict):
+    def _cb_bt_make_report_article_saver(self, change_dict):
         """Create the saved articles report."""
         with self.widgets["status"]:
             print()
-            print("Creating the saved results PDF report... ")
-            self.article_saver.pdf_report()
+            print("Creating the saved results report... ")
+            out_file = self.article_saver.make_report()
+            print(f"Done. Report saved to {out_file}.")
 
-    def _cb_bt_pdf_report_search(self, change_dict):
+    def _cb_bt_make_report_search(self, change_dict):
         """Create the report of the search."""
         with self.widgets["status"]:
             print()
-            print("Creating the search results PDF report... ")
+            print("Creating the search results report... ")
 
             hyperparameters_section = f"""
             <h1> Search Parameters </h1>
@@ -936,9 +936,10 @@ class SearchWidget(widgets.VBox):
 
             css_style = style.get_css_style()
 
-            pdfkit.from_string(
-                f"<style> {css_style} </style>"
-                + hyperparameters_section
-                + results_section,
-                f"report_{datetime.datetime.now()}.pdf",
-            )
+            output_file = pathlib.Path(f"report_{datetime.datetime.now()}.html")
+            with output_file.open("w") as f:
+                f.write("<!DOCTYPE html>\n")
+                f.write(f"<style> {css_style} </style>")
+                f.write(hyperparameters_section)
+                f.write(results_section)
+            print(f"Done. Report saved to {output_file}.")

@@ -74,7 +74,7 @@ apt-get install -y nodejs
 RUN \
 DEBIAN_FRONTEND="noninteractive" \
 apt-get install -y \
-    libfontconfig1 wkhtmltopdf \
+    libfontconfig1 \
     libmysqlclient-dev default-libmysqlclient-dev
 
 # Install Python 3.7 & pip 3.7

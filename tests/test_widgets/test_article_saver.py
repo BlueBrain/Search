@@ -120,7 +120,7 @@ class TestArticleSaver:
         summary_table = article_saver.summary_table()
         assert isinstance(summary_table, pd.DataFrame)
 
-        # PDF report - probably can't do this on Travis...
-        # assert len(tmpdir.listdir()) == 0
-        # article_saver.pdf_report(tmpdir)
-        # assert len(tmpdir.listdir()) == 1
+        # Make report
+        assert len(tmpdir.listdir()) == 0
+        article_saver.make_report(tmpdir)
+        assert len(tmpdir.listdir()) == 1

@@ -19,7 +19,7 @@ Flask==1.1.2
 PyYAML==5.4.1
 SQLAlchemy==1.3.23
 Sphinx==3.5.1
-cryptography==2.9.2
+cryptography==3.4.7
 docker==4.4.3
 dvc[ssh]==2.0.6
 gunicorn==20.0.4
@@ -32,14 +32,12 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_craft_
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_jnlpba_md-0.4.0.tar.gz
 ipython>=7.16.1
 ipywidgets==7.6.3
-joblib==1.0.1
 jupyterlab==3.0.9
 langdetect==1.0.8
 matplotlib==3.3.4
 mysqlclient==2.0.3
 numpy==1.20.1
 pandas==1.2.2
-pdfkit==0.6.1
 pymysql==1.0.2
 pytest-benchmark==3.2.3
 pytest-cov==2.11.1
@@ -57,5 +55,4 @@ srsly==2.4.0
 sphinx-bluebrain-theme==0.2.4
 torch==1.7.0
 tox==3.22.0
-tqdm==4.57.0
 transformers==4.3.2

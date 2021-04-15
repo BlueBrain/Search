@@ -50,17 +50,15 @@ PYTHON_REQUIRES = ">=3.7"
 INSTALL_REQUIRES = [
     "Flask",
     "SQLAlchemy[mysql,pymysql]",
-    "catalogue==2.0.1",  # see https://github.com/explosion/catalogue/issues/17
-    "cryptography",
+    "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
+    # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
+    "cryptography>=3.2",
     "h5py",
     "ipython",
     "ipywidgets",
-    "joblib",  # used in data_and_models/pipelines/sentence_embedding/train.py
     "langdetect",
-    "matplotlib",
     "numpy>=1.20.1",
     "pandas>=1.0.0",
-    "pdfkit",
     "python-dotenv",
     "requests",
     "scikit-learn",
@@ -75,7 +73,6 @@ INSTALL_REQUIRES = [
     # From data_and_models/pipelines/ner/preprocess.py.
     "srsly",
     "torch",
-    "tqdm",
 ]
 
 if os.environ.get("READTHEDOCS") == "True":
@@ -97,6 +94,7 @@ EXTRAS_REQUIRE = {
     "data_and_models": [
         "PyYAML",
         "dvc[ssh]>=2",
+        "matplotlib",
         "scipy",
         "transformers",
     ],

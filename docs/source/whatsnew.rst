@@ -36,6 +36,10 @@ Latest
 - |Add| in :code:`dvc`, in :code:`ner` pipelines, scripts allowing to train and evaluate
   NER thanks to the :code:`huggingface/transformers` package.
   A comparison with :code:`spaCy` training is also possible.
+- |Change| reports format of Search Widget from PDF to HTML.
+- |Remove| :code:`tqdm`, :code:`joblib`, :code:`pdfkit` dependencies.
+- |Remove| :code:`bluesearch.mining.eval.plot_ner_confusion_matrix` function to drop
+  :code:`joblib` from :code:`install_requires`.
 
 
 Version 0.1.2
