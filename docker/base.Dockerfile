@@ -26,7 +26,7 @@
 #
 # If the GPU support is not necessary, then another image,
 # for example "python:3.7" can be used.
-FROM nvidia/cuda:10.2-devel
+FROM nvidia/cuda:10.2-devel as builder
 
 # ARGs are only visible at build time and can be provided in
 # the docker-compose.yml file in the "args:" section or with the
@@ -35,6 +35,7 @@ ARG BBS_http_proxy
 ARG BBS_https_proxy
 ARG BBS_HTTP_PROXY
 ARG BBS_HTTPS_PROXY
+ARG BBS_USERS
 
 # ENVs are visible both at image build time and container run time.
 # We want the http proxys to be visible in both cases and therefore
@@ -49,33 +50,13 @@ ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
 # https://github.com/docker-library/python/blob/master/3.7/buster/Dockerfile
 ENV LANG=C.UTF-8
 
+COPY requirements.txt /tmp
+
 # Install system packages
 #
 # The environment variable $DEBIAN_FRONTENT is necessary to
 # prevent apt-get from prompting for the timezone and keyboard
 # layout configuration.
-RUN apt-get update && apt-get upgrade -y && apt-get update
-RUN \
-DEBIAN_FRONTEND="noninteractive" \
-TZ="Europe/Zurich" \
-apt-get install -y \
-    dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
-    libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
-    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev
-RUN \
-apt-get install -y \
-    gcc g++ build-essential \
-    curl git htop less man vim
-RUN \
-curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh &&\
-bash nodesource_setup.sh &&\
-rm nodesource_setup.sh &&\
-apt-get install -y nodejs
-RUN \
-DEBIAN_FRONTEND="noninteractive" \
-apt-get install -y \
-    libfontconfig1 wkhtmltopdf \
-    libmysqlclient-dev default-libmysqlclient-dev
 
 # Install Python 3.7 & pip 3.7
 #
@@ -110,29 +91,87 @@ apt-get install -y \
 #
 # The command "update-alternatives" makes the command "python" refer to
 # "python3.7". Otherwise, "python" refers to "python2".
-# 
-RUN \
+#
+
+# Install system packages
+RUN apt-get update && apt-get upgrade -y && apt-get update; \
+DEBIAN_FRONTEND="noninteractive" \
+TZ="Europe/Zurich" \
+apt-get install -y \
+    dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
+    libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
+    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev; \
+apt-get install -y \
+    gcc g++ build-essential \
+    curl git htop less man vim; \
+curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh &&\
+bash nodesource_setup.sh &&\
+rm nodesource_setup.sh &&\
+apt-get install -y nodejs; \
+DEBIAN_FRONTEND="noninteractive" \
+apt-get install -y \
+    libfontconfig1 wkhtmltopdf \
+    libmysqlclient-dev default-libmysqlclient-dev; \
+# Install Python 3.7 & pip 3.7
 apt-get install -y python3.7-dev python3.7-venv python3-pip && \
 python3.7 -m pip install --upgrade pip setuptools wheel && \
-update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
-
+update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0; \
 # Install BBS requirements
-COPY requirements.txt /tmp
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
 
-# Add and configure users
-SHELL ["/bin/bash", "-c"]
+
+FROM nvidia/cuda:10.2-runtime
+ARG BBS_http_proxy
+ARG BBS_https_proxy
+ARG BBS_HTTP_PROXY
+ARG BBS_HTTPS_PROXY
 ARG BBS_USERS
+
+ENV http_proxy=$BBS_http_proxy
+ENV https_proxy=$BBS_https_proxy
+ENV HTTP_PROXY=$BBS_HTTP_PROXY
+ENV HTTPS_PROXY=$BBS_HTTPS_PROXY
+
+ENV LANG=C.UTF-8
+
 COPY docker/utils.sh /tmp
-RUN \
+COPY --from=builder "/usr/local/bin" "/usr/local/bin"
+COPY --from=builder "/usr/local/etc" "/usr/local/etc"
+COPY --from=builder "/usr/local/sbin" "/usr/local/sbin"
+COPY --from=builder "/usr/local/share" "/usr/local/share"
+COPY --from=builder "/usr/local/lib/python3.7" "/usr/local/lib/python3.7"
+
+SHELL ["/bin/bash", "-c"]
+ENV PYTHONPATH=/usr/lib/python37.zip:/usr/lib/python3.7:/usr/lib/python3.7/lib-dynload:/usr/local/lib/python3.7/dist-packages:/usr/local/lib/python3.7/dist-packages/pip/_vendor:/usr/lib/python3/dist-packages
+
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && apt-get update; \
+DEBIAN_FRONTEND="noninteractive" \
+TZ="Europe/Zurich" \
+apt-get install -y --no-install-recommends \
+    libbluetooth3 libbz2-1.0 libexpat1 libffi6 libgdbm5 liblzma5 libncursesw5 \
+    libreadline7 libsqlite3-0 libssl1.1 make tk wget xz-utils zlib1g curl \
+    git htop less man vim; \
+curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh &&\
+bash nodesource_setup.sh &&\
+rm nodesource_setup.sh &&\
+apt-get install -y nodejs; \
+DEBIAN_FRONTEND="noninteractive" \
+apt-get install -y --no-install-recommends \
+    libfontconfig1 wkhtmltopdf libmysqlclient20 \
+    python3.7-venv python3-pip && \
+python3.7 -m pip install --upgrade pip setuptools wheel && \
+update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0; \
+# Add and configure users
 . /tmp/utils.sh && \
 groupadd -g 999 docker && \
 create_users "${BBS_USERS},bbs_user/1000" "docker" && \
-configure_user
+configure_user; \
+mkdir /workdir && chmod a+rwX /workdir; \
+# cleanup
+rm -rf /var/lib/apt/lists/* /root/.cache
 
 # Entry point
 EXPOSE 8888
-RUN mkdir /workdir && chmod a+rwX /workdir
 WORKDIR /workdir
 USER bbsuser
 ENTRYPOINT ["env"]
