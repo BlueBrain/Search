@@ -23,7 +23,6 @@ catalogue==2.0.3
 cryptography==3.4.7
 docker==4.4.3
 dvc[ssh]==2.0.6
-gunicorn==20.0.4
 h5py==3.1.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz
