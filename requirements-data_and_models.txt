@@ -15,23 +15,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-Flask==1.1.2
-SQLAlchemy[mysql,pymysql]==1.4.8
-catalogue==2.0.3
-cryptography==3.4.7
-h5py==3.2.1
-ipython==7.22.0
-ipywidgets==7.6.3
-jupyterlab==3.0.14
-langdetect==1.0.8
-numpy==1.20.2
-pandas==1.2.4
-python-dotenv==0.17.0
-requests==2.25.1
-scikit-learn==0.24.1
-scispacy==0.4.0
-sentence-transformers==1.0.4
-spacy==3.0.5
-typer==0.3.2
-srsly==2.4.1
-torch==1.8.1
+PyYAML==5.4.1
+dvc[ssh]==2.0.17
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_bc5cdr_md-0.4.0.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_bionlp13cg_md-0.4.0.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_craft_md-0.4.0.tar.gz
+https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_jnlpba_md-0.4.0.tar.gz
+matplotlib==3.4.1
+scipy==1..6.2
+transformers==4.5.1

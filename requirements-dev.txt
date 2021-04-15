@@ -15,23 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-Flask==1.1.2
-SQLAlchemy[mysql,pymysql]==1.4.8
-catalogue==2.0.3
-cryptography==3.4.7
-h5py==3.2.1
-ipython==7.22.0
-ipywidgets==7.6.3
-jupyterlab==3.0.14
-langdetect==1.0.8
-numpy==1.20.2
-pandas==1.2.4
-python-dotenv==0.17.0
-requests==2.25.1
-scikit-learn==0.24.1
-scispacy==0.4.0
-sentence-transformers==1.0.4
-spacy==3.0.5
-typer==0.3.2
-srsly==2.4.1
-torch==1.8.1
+Sphinx==3.5.4
+docker==5.0.0
+pytest-benchmark==3.2.3
+pytest-cov==2.11.1
+pytest==6.2.3
+responses==0.13.2
+sphinx-bluebrain-theme==0.2.4
+tox==3.23.0
