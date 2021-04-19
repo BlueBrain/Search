@@ -23,6 +23,7 @@ USER root
 ADD . /src
 WORKDIR /src
 RUN pip install .
+RUN pip install gunicorn
 
 # Set image version
 LABEL maintainer="BBP-EPFL Machine Learning team <bbp-ou-machinelearning@groupes.epfl.ch>"
