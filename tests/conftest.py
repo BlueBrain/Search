@@ -400,6 +400,12 @@ def ner_annotations():
                 ],
             }
         ),
+        "sample_nested": pd.DataFrame(
+            data={
+                "annotator_1": ["B-a", "B-a", "I-a", "I-a"],
+                "annotator_2": ["B-z", "B-z", "B-z", "I-z"],
+            }
+        ),
     }
 
 

@@ -418,6 +418,7 @@ def test_idx2text(ner_annotations, dataset, annotator, etype, texts):
             {"a": "c"},
             {"a": [4, 1, 4], "b": [3, 1, 1], "d": [0, 1, 0]},
         ),
+        ("sample_nested", "entity", {"a": "z"}, {"a": [1, 1, 2]}),
     ],
 )
 def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
