@@ -22,7 +22,6 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -361,29 +360,21 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
     for etype in etypes_counts.keys() - etypes_map.keys():
         etypes_map[etype] = etype
 
-    n_true: Union[int, np.ndarray]
-    n_pred: Union[int, np.ndarray]
-
     for etype in etypes_counts.keys():
         if mode == "entity":
             idxs_true = iob2idx(iob_true, etype=etype)
             idxs_pred = iob2idx(iob_pred, etype=etypes_map[etype])
             n_true = len(idxs_true)
             n_pred = len(idxs_pred)
-            true_pos = np.count_nonzero(
-                (
-                    idxs_true["start"].isin(idxs_pred["start"])
-                    & idxs_true["end"].isin(idxs_pred["end"])
-                ).values
-            )
+            true_pos = len(idxs_true.merge(idxs_pred, on=["start", "end"], how="inner"))
         elif mode == "token":
             ent_true = iob_true.isin([f"B-{etype}", f"I-{etype}"])
             ent_pred = iob_pred.isin(
                 [f"B-{etypes_map[etype]}", f"I-{etypes_map[etype]}"]
             )
-            n_true = np.count_nonzero(ent_true.values)
-            n_pred = np.count_nonzero(ent_pred.values)
-            true_pos = np.count_nonzero((ent_true & ent_pred).values)
+            n_true = ent_true.sum()
+            n_pred = ent_pred.sum()
+            true_pos = (ent_true & ent_pred).sum()
         else:
             raise ValueError(f"Mode {mode} is not available.")
 
