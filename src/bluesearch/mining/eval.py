@@ -247,13 +247,10 @@ def unique_etypes(iob, return_counts=False, mode="entity"):
         return unique
     else:
         if mode == "entity":
-            unique_counts = [
-                np.count_nonzero((iob == f"B-{etype}").values) for etype in unique
-            ]
+            unique_counts = [(iob == f"B-{etype}").sum() for etype in unique]
         elif mode == "token":
             unique_counts = [
-                np.count_nonzero(iob.isin([f"B-{etype}", f"I-{etype}"]).values)
-                for etype in unique
+                (iob.isin([f"B-{etype}", f"I-{etype}"])).sum() for etype in unique
             ]
         else:
             raise ValueError(f"Mode '{mode}' is not available.")
@@ -469,14 +466,11 @@ def ner_errors(
         for etype in etypes:
             idxs_true = iob2idx(iob_true, etype=etype)
             idxs_pred = iob2idx(iob_pred, etype=etypes_map[etype])
-            idxs_false_neg = idxs_true[
-                (~idxs_true["start"].isin(idxs_pred["start"]))
-                | (~idxs_true["end"].isin(idxs_pred["end"]))
-            ]
-            idxs_false_pos = idxs_pred[
-                (~idxs_pred["start"].isin(idxs_true["start"]))
-                | (~idxs_pred["end"].isin(idxs_true["end"]))
-            ]
+            idxs_all = idxs_true.merge(
+                idxs_pred, on=["start", "end"], indicator="i", how="outer"
+            )
+            idxs_false_neg = idxs_all.query('i == "left_only"').drop("i", 1)
+            idxs_false_pos = idxs_all.query('i == "right_only"').drop("i", 1)
             report[etype] = {
                 "false_neg": sorted(idx2text(tokens, idxs_false_neg).tolist()),
                 "false_pos": sorted(idx2text(tokens, idxs_false_pos).tolist()),
@@ -550,15 +544,10 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode="entity"):
         for i, etype_true in enumerate(etypes_true):
             n_true = len(idxs_true[etype_true])
             for j, etype_pred in enumerate(etypes_pred):
-                cm_vals[i, j] = np.count_nonzero(
-                    (
-                        idxs_true[etype_true]["start"].isin(
-                            idxs_pred[etype_pred]["start"]
-                        )
-                        & idxs_true[etype_true]["end"].isin(
-                            idxs_pred[etype_pred]["end"]
-                        )
-                    ).values
+                cm_vals[i, j] = len(
+                    idxs_true[etype_true].merge(
+                        idxs_pred[etype_pred], on=["start", "end"], how="inner"
+                    )
                 )
             cm_vals[i, -1] = n_true - cm_vals[i, :-1].sum()
         for j, etype_pred in enumerate(etypes_pred):

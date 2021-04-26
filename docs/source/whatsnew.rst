@@ -43,6 +43,8 @@ Latest
 - |Change| :code:`requirements.txt` refactored into three separate lists of
   dependencies: :code:`requirements.txt`, :code:`requirements-dev.txt`,
   :code:`requirements-data_and_models.txt`.
+- |Fix| bugs (related to nested entities) in :code:`ner_report`, :code:`ner_errors`, :code:`ner_confusion_matrix`
+  functions from :code:`bluesearch.mining.eval` submodule.
 
 
 Version 0.1.2

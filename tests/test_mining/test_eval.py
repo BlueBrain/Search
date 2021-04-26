@@ -418,7 +418,8 @@ def test_idx2text(ner_annotations, dataset, annotator, etype, texts):
             {"a": "c"},
             {"a": [4, 1, 4], "b": [3, 1, 1], "d": [0, 1, 0]},
         ),
-        ("sample_nested", "entity", {"a": "z"}, {"a": [1, 1, 2]}),
+        ("sample_nested", "entity", {"a": "a"}, {"a": [1, 1, 3]}),
+        ("sample_nested", "token", {"a": "a"}, {"a": [4, 0, 1]}),
     ],
 )
 def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
@@ -488,6 +489,8 @@ def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
         ),
         ("sample", "token", [[0, 4, 1], [3, 1, 0], [0, 1, 0], [1, 2, 1]]),
         ("sample", "entity", [[0, 2, 2], [1, 0, 2], [0, 1, 0], [1, 3, 0]]),
+        ("sample_nested", "token", [[4, 0], [1, 2]]),
+        ("sample_nested", "entity", [[1, 1], [3, 0]]),
     ],
 )
 def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
@@ -558,6 +561,24 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
                 ),
                 ("ORGANISM", {"false_neg": [], "false_pos": ["children", "children"]}),
                 ("PATHWAY", {"false_neg": ["infection rate"], "false_pos": []}),
+            ],
+        ),
+        (
+            "sample_nested",
+            "token",
+            [("a", {"false_neg": [], "false_pos": ["disease"]})],
+        ),
+        (
+            "sample_nested",
+            "entity",
+            [
+                (
+                    "a",
+                    {
+                        "false_neg": ["Sars Cov-2 infection"],
+                        "false_pos": ["Sars", "Cov-2 infection", "disease"],
+                    },
+                )
             ],
         ),
     ],
