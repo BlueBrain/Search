@@ -374,9 +374,9 @@ def idx2text(tokens, idxs):
 def ner_report(
     iob_true: pd.Series,
     iob_pred: pd.Series,
-    mode: Optional[str] = "entity",
+    mode: str = "entity",
     etypes_map: Optional[dict] = None,
-    return_dict: Optional[bool] = False,
+    return_dict: bool = False,
 ) -> Union[str, OrderedDict]:
     """Build a summary report showing the main ner evaluation metrics.
 
@@ -488,9 +488,9 @@ def ner_errors(
     iob_true: pd.Series,
     iob_pred: pd.Series,
     tokens: pd.Series,
-    mode: Optional[str] = "entity",
+    mode: str = "entity",
     etypes_map: Optional[dict] = None,
-    return_dict: Optional[bool] = False,
+    return_dict: bool = False,
 ) -> Union[str, OrderedDict]:
     """Build a summary report for the named entity recognition.
 
@@ -599,7 +599,7 @@ def ner_confusion_matrix(
     iob_true: pd.Series,
     iob_pred: pd.Series,
     normalize: Optional[str] = None,
-    mode: Optional[str] = "entity",
+    mode: str = "entity",
 ) -> pd.DataFrame:
     """Compute confusion matrix to evaluate the accuracy of a NER model.
 
@@ -612,7 +612,7 @@ def ner_confusion_matrix(
     iob_pred :
         Predicted IOB2 annotations.
     normalize :
-        One of "true", "pred", "all".
+        One of "true", "pred", "all", or None.
         Normalizes confusion matrix over the true (rows), predicted (columns)
         conditions or all the population. If None, the confusion matrix will
         not be normalized.
