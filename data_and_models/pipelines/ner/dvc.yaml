@@ -44,7 +44,6 @@ stages:
         python -m spacy train
         config.cfg
         --output ../../models/ner/${key}/
-        --code initialize.py
         --paths.train ../../annotations/ner/${item.annotation_filename}.train.spacy
         --paths.dev ../../annotations/ner/${item.annotation_filename}.dev.spacy
         --paths.base_model ${item.base_model}
@@ -53,7 +52,6 @@ stages:
       deps:
       - Dockerfile
       - config.cfg
-      - initialize.py
       - ../../annotations/ner/${item.annotation_filename}.train.spacy
       - ../../annotations/ner/${item.annotation_filename}.dev.spacy
       outs:
