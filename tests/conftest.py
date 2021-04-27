@@ -407,7 +407,8 @@ def ner_annotations():
                 "text": [
                     "Either",
                     "influenza",
-                    "or" "Sars",
+                    "or",
+                    "Sars",
                     "Cov-2",
                     "infection",
                     "disease",

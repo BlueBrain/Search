@@ -576,7 +576,7 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
                     "a",
                     {
                         "false_neg": ["Sars Cov-2 infection"],
-                        "false_pos": ["Sars", "Cov-2 infection", "disease"],
+                        "false_pos": ["Cov-2 infection", "Sars", "disease"],
                     },
                 )
             ],
