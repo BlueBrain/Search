@@ -22,7 +22,7 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -79,9 +79,12 @@ def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
             )
 
         etypes = unique_etypes(x)
-        x_prev = x.shift(periods=1).fillna("O", inplace=False)
+        # cast() needed to tell mypy that fillna() doesn't return None here.
+        x_prev = cast(pd.Series, x.shift(periods=1).fillna("O", inplace=False))
         for etype in etypes:
-            if ((x == f"I-{etype}") & ~x_prev.isin([f"B-{etype}", f"I-{etype}"])).any():
+            if (
+                x.isin([f"I-{etype}"]) & ~x_prev.isin([f"B-{etype}", f"I-{etype}"])
+            ).any():
                 raise ValueError(
                     f"Annotations are not in IOB2 format! Label 'I-{etype}' "
                     f"should follow one of 'B-{etype}' or 'I-{etype}'."
@@ -564,10 +567,10 @@ def ner_errors(
         for etype in etypes:
             etype_symbols_t = [f"B-{etype}", f"I-{etype}"]
             etype_symbols_p = [f"B-{etypes_map[etype]}", f"I-{etypes_map[etype]}"]
-            false_neg = tokens[
+            false_neg = tokens.loc[
                 iob_true.isin(etype_symbols_t) & (~iob_pred.isin(etype_symbols_p))
             ]
-            false_pos = tokens[
+            false_pos = tokens.loc[
                 (~iob_true.isin(etype_symbols_t)) & iob_pred.isin(etype_symbols_p)
             ]
             report[etype] = {
@@ -596,7 +599,7 @@ def ner_errors(
 def ner_confusion_matrix(
     iob_true: pd.Series,
     iob_pred: pd.Series,
-    normalize: Optional[Literal["true", "pred", "all"]] = None,
+    normalize: Optional[str] = None,
     mode: Optional[str] = "entity",
 ) -> pd.DataFrame:
     """Compute confusion matrix to evaluate the accuracy of a NER model.
@@ -610,6 +613,7 @@ def ner_confusion_matrix(
     iob_pred :
         Predicted IOB2 annotations.
     normalize :
+        One of "true", "pred", "all".
         Normalizes confusion matrix over the true (rows), predicted (columns)
         conditions or all the population. If None, the confusion matrix will
         not be normalized.

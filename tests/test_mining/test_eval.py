@@ -632,7 +632,7 @@ def test_remove_punctuation(punctuation_annotations):
 def test_check_consistent_iob(iob_pred, raises):
     iob_true = pd.Series(["B-a", "O", "B-a", "I-a", "I-a", "B-a"])
     if not raises:
-        assert _check_consistent_iob(iob_true, iob_pred) is None
+        _check_consistent_iob(iob_true, iob_pred)
     else:
         with pytest.raises(ValueError, match=fr".*{raises}.*"):
             _check_consistent_iob(iob_true, iob_pred)
