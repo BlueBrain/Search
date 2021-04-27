@@ -36,7 +36,6 @@ def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
 
     This function raises a ValueError if any of the targets uses an annotation
     format different from IOB2 (see [1] for the definition of this format).
-    For more
 
     Parameters
     ----------
