@@ -22,6 +22,7 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
+from typing import Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -30,7 +31,63 @@ import spacy
 from spacy.tokens import Doc
 
 
-# TODO : remove references to
+def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
+    """Check that iob_true and iob_pred are consistent (length and format).
+
+    This function raises a ValueError if any of the targets uses an annotation
+    format different from IOB2 (see [1] for the definition of this format).
+    For more
+
+    Parameters
+    ----------
+    iob_true :
+         Ground truth (correct) IOB2 annotations.
+    iob_pred :
+        Predicted IOB2 annotations.
+
+    Raises
+    ------
+    ValueError :
+        If annotations have inconsistent length or annotation format.
+
+    References
+    ----------
+    [1] Sang et al. 1999, "Representing Text Chunks", https://arxiv.org/abs/cs/9907006
+    """
+    if len(iob_true) != len(iob_pred):
+        raise ValueError(
+            f"Found target variables with inconsistent numbers of samples: "
+            f"iob_true = {len(iob_true)}, iob_pred = {len(iob_pred)}."
+        )
+
+    for x in (iob_true, iob_pred):
+        if not (
+            x.str.startswith("B-") | x.str.startswith("I-") | x.str.startswith("O")
+        ).all():
+            errs = x[
+                ~(
+                    x.str.startswith("B-")
+                    | x.str.startswith("I-")
+                    | x.str.startswith("O")
+                )
+            ]
+            raise ValueError(
+                f"Annotations are not in IOB2 format! Each label must be one of\n"
+                f"    'O', 'B-<entity_type>', 'I-<entity_type>'\n"
+                f"but found the following inconsistent labels:\n"
+                f"    {', '.join(repr(e) for e in errs.unique())}."
+            )
+
+        etypes = unique_etypes(x)
+        x_prev = x.shift(periods=1).fillna("O", inplace=False)
+        for etype in etypes:
+            if ((x == f"I-{etype}") & ~x_prev.isin([f"B-{etype}", f"I-{etype}"])).any():
+                raise ValueError(
+                    f"Annotations are not in IOB2 format! Label 'I-{etype}' "
+                    f"should follow one of 'B-{etype}' or 'I-{etype}'."
+                )
+
+
 def annotations2df(annots_files, not_entity_symbol="O"):
     """Convert prodigy annotations in JSONL format into a pd.DataFrame.
 
@@ -191,7 +248,7 @@ def remove_punctuation(df):
         DataFrame with tokens and annotations, can be generated calling
         `annotations2df()` and `spacy2df()`. Should include a column
         "text" containing one token per row, and one or more columns of
-        annotations in IOB format named as "class_XXX".
+        annotations in IOB2 format named as "class_XXX".
 
     Returns
     -------
@@ -213,12 +270,12 @@ def remove_punctuation(df):
 
 
 def unique_etypes(iob, return_counts=False, mode="entity"):
-    """Return the sorted unique entity types for annotations in IOB format.
+    """Return the sorted unique entity types for annotations in IOB2 format.
 
     Parameters
     ----------
     iob : pd.Series[str]
-        Annotations in the IOB format. Elements of the pd.Series should
+        Annotations in the IOB2 format. Elements of the pd.Series should
         be either 'O', 'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where
         'ENTITY_TYPE' is the name of some entity type.
     return_counts : bool, optional
@@ -258,12 +315,12 @@ def unique_etypes(iob, return_counts=False, mode="entity"):
 
 
 def iob2idx(iob, etype):
-    """Retrieve start and end indices of entities from annotations in IOB format.
+    """Retrieve start and end indices of entities from annotations in IOB2 format.
 
     Parameters
     ----------
     iob : pd.Series[str]
-        Annotations in the IOB format. Elements of the pd.Series should be
+        Annotations in the IOB2 format. Elements of the pd.Series should be
         either 'O', 'B-ENTITY_TYPE', or 'I-ENTITY_TYPE', where 'ENTITY_TYPE'
         is the name of some entity type.
     etype : str
@@ -312,15 +369,23 @@ def idx2text(tokens, idxs):
     )
 
 
-def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=False):
+def ner_report(
+    iob_true: pd.Series,
+    iob_pred: pd.Series,
+    mode: Optional[str] = "entity",
+    etypes_map: Optional[dict] = None,
+    return_dict: Optional[bool] = False,
+) -> Union[str, OrderedDict]:
     """Build a summary report showing the main ner evaluation metrics.
+
+    Evaluation is performed according to the definitions of "errors" from [1].
 
     Parameters
     ----------
     iob_true : pd.Series[str]
-         Ground truth (correct) IOB annotations.
+         Ground truth (correct) IOB2 annotations.
     iob_pred : pd.Series[str]
-        Predicted IOB annotations.
+        Predicted IOB2 annotations.
     mode : str, optional
         Evaluation mode. One of 'entity', 'token': notice that an 'entity'
         can span several tokens.
@@ -334,7 +399,7 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
 
     Returns
     -------
-    report : string / dict
+    report : Union[str, OrderedDict]
         Text summary of the precision, recall, F1 score for each entity type.
         Dictionary returned if output_dict is True. Dictionary has the
         following structure
@@ -348,7 +413,14 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
              'entity_type 2': { ... },
               ...
             }
+
+    References
+    ----------
+    [1] Segura-Bedmar et al. 2013, "Semeval-2013 task 9: Extraction of drug-drug
+    interactions from biomedical texts", https://e-archivo.uc3m.es/handle/10016/20455
     """
+    _check_consistent_iob(iob_true, iob_pred)
+
     report = OrderedDict()
 
     etypes_counts = dict(zip(*unique_etypes(iob_true, mode=mode, return_counts=True)))
@@ -411,34 +483,40 @@ def ner_report(iob_true, iob_pred, mode="entity", etypes_map=None, return_dict=F
 
 
 def ner_errors(
-    iob_true, iob_pred, tokens, mode="entity", etypes_map=None, return_dict=False
-):
+    iob_true: pd.Series,
+    iob_pred: pd.Series,
+    tokens: pd.Series,
+    mode: Optional[str] = "entity",
+    etypes_map: Optional[dict] = None,
+    return_dict: Optional[bool] = False,
+) -> Union[str, OrderedDict]:
     """Build a summary report for the named entity recognition.
 
     False positives and false negatives for each entity type are collected.
+    Evaluation is performed according to the definitions of "errors" from [1].
 
     Parameters
     ----------
-    iob_true : pd.Series[str]
-         Ground truth (correct) IOB annotations.
-    iob_pred : pd.Series[str]
-        Predicted IOB annotations.
-    tokens : pd.Series[str]
+    iob_true :
+         Ground truth (correct) IOB2 annotations.
+    iob_pred :
+        Predicted IOB2 annotations.
+    tokens :
         Tokens obtained from tokenization of a text.
-    mode : str, optional
+    mode :
         Evaluation mode. One of 'entity', 'token': notice that an 'entity'
         can span several tokens.
-    etypes_map : dict, optional
+    etypes_map :
         Dictionary mapping entity type names in the ground truth annotations
         to the corresponding entity type names in the predicted annotations.
         Useful when entity types have different names in `iob_true` and
         `iob_pred`, e.g. ORGANISM in ground truth and TAXON in predictions.
-    return_dict : bool, optional
+    return_dict :
         If True, return output as dict.
 
     Returns
     -------
-    report : string / dict
+    report : Union[str, OrderedDict]
         Text summary of the precision, recall, F1 score for each entity type.
         Dictionary returned if output_dict is True. Dictionary has the
         following structure
@@ -450,7 +528,14 @@ def ner_errors(
              'entity_type 2': { ... },
               ...
             }
+
+    References
+    ----------
+    [1] Segura-Bedmar et al. 2013, "Semeval-2013 task 9: Extraction of drug-drug
+    interactions from biomedical texts", https://e-archivo.uc3m.es/handle/10016/20455
     """
+    _check_consistent_iob(iob_true, iob_pred)
+
     if not (len(iob_true) == len(iob_pred) == len(tokens)):
         raise ValueError(
             f"Inputs iob_true (len={len(iob_true)}), iob_pred (len={len(iob_pred)}), "
@@ -508,20 +593,27 @@ def ner_errors(
         return "\n".join(out)
 
 
-def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode="entity"):
+def ner_confusion_matrix(
+    iob_true: pd.Series,
+    iob_pred: pd.Series,
+    normalize: Optional[Literal["true", "pred", "all"]] = None,
+    mode: Optional[str] = "entity",
+) -> pd.DataFrame:
     """Compute confusion matrix to evaluate the accuracy of a NER model.
+
+    Evaluation is performed according to the definitions of "errors" from [1].
 
     Parameters
     ----------
-    iob_true : pd.Series[str]
-         Ground truth (correct) IOB annotations.
-    iob_pred : pd.Series[str]
-        Predicted IOB annotations.
-    normalize : {'true', 'pred', 'all'}, default=None
+    iob_true :
+         Ground truth (correct) IOB2 annotations.
+    iob_pred :
+        Predicted IOB2 annotations.
+    normalize :
         Normalizes confusion matrix over the true (rows), predicted (columns)
         conditions or all the population. If None, the confusion matrix will
         not be normalized.
-    mode : str, optional
+    mode :
         Evaluation mode. One of 'entity', 'token': notice that an 'entity'
         can span several tokens.
 
@@ -530,7 +622,14 @@ def ner_confusion_matrix(iob_true, iob_pred, normalize=None, mode="entity"):
     cm : pd.DataFrame
         Dataframe where the index contains the ground truth entity types and
         the columns contain the predicted entity types.
+
+    References
+    ----------
+    [1] Segura-Bedmar et al. 2013, "Semeval-2013 task 9: Extraction of drug-drug
+    interactions from biomedical texts", https://e-archivo.uc3m.es/handle/10016/20455
     """
+    _check_consistent_iob(iob_true, iob_pred)
+
     etypes_true = unique_etypes(iob_true)
     etypes_pred = unique_etypes(iob_pred)
 
