@@ -43,6 +43,10 @@ Latest
 - |Change| :code:`requirements.txt` refactored into three separate lists of
   dependencies: :code:`requirements.txt`, :code:`requirements-dev.txt`,
   :code:`requirements-data_and_models.txt`.
+- |Fix| bugs (related to nested entities) in :code:`ner_report`, :code:`ner_errors`,
+  :code:`ner_confusion_matrix` functions from :code:`bluesearch.mining.eval` submodule.
+- |Add| utility function :code:`_check_consistent_iob` inside
+  :code:`bluesearch.mining.eval`.
 
 
 Version 0.1.2
