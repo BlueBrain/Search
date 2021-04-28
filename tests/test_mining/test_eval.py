@@ -28,6 +28,7 @@ import spacy
 
 from bluesearch.mining import annotations2df, spacy2df
 from bluesearch.mining.eval import (
+    _check_consistent_iob,
     idx2text,
     iob2idx,
     ner_confusion_matrix,
@@ -418,6 +419,8 @@ def test_idx2text(ner_annotations, dataset, annotator, etype, texts):
             {"a": "c"},
             {"a": [4, 1, 4], "b": [3, 1, 1], "d": [0, 1, 0]},
         ),
+        ("sample_nested", "entity", {"a": "a"}, {"a": [1, 1, 3]}),
+        ("sample_nested", "token", {"a": "a"}, {"a": [4, 0, 1]}),
     ],
 )
 def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
@@ -487,6 +490,8 @@ def test_ner_report(ner_annotations, dataset, mode, etypes_map, dict_tp_fn_fp):
         ),
         ("sample", "token", [[0, 4, 1], [3, 1, 0], [0, 1, 0], [1, 2, 1]]),
         ("sample", "entity", [[0, 2, 2], [1, 0, 2], [0, 1, 0], [1, 3, 0]]),
+        ("sample_nested", "token", [[4, 0], [1, 2]]),
+        ("sample_nested", "entity", [[1, 1], [3, 0]]),
     ],
 )
 def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
@@ -559,6 +564,24 @@ def test_ner_confusion_matrix(ner_annotations, dataset, mode, cm_vals):
                 ("PATHWAY", {"false_neg": ["infection rate"], "false_pos": []}),
             ],
         ),
+        (
+            "sample_nested",
+            "token",
+            [("a", {"false_neg": [], "false_pos": ["disease"]})],
+        ),
+        (
+            "sample_nested",
+            "entity",
+            [
+                (
+                    "a",
+                    {
+                        "false_neg": ["Sars Cov-2 infection"],
+                        "false_pos": ["Cov-2 infection", "Sars", "disease"],
+                    },
+                )
+            ],
+        ),
     ],
 )
 def test_ner_errors(ner_annotations, dataset, mode, errors_expected):
@@ -578,3 +601,38 @@ def test_ner_errors(ner_annotations, dataset, mode, errors_expected):
 def test_remove_punctuation(punctuation_annotations):
     df_after = remove_punctuation(punctuation_annotations["before"])
     pd.testing.assert_frame_equal(df_after, punctuation_annotations["after"])
+
+
+@pytest.mark.parametrize(
+    "iob_pred, raises",
+    [
+        (pd.Series(["O", "B-a", "B-a", "I-a", "B-c", "O"]), False),
+        (
+            pd.Series(["O", "B-a", "B-a", "I-a", "B-c"]),
+            "target variables with inconsistent numbers of samples",
+        ),
+        (
+            pd.Series(["O", "blah", "B-a", "I-a", "B-c", "O"]),
+            "label must be one of",
+        ),
+        (
+            pd.Series(["O", "B-a", "B-a", "I-a", "I-c", "O"]),
+            "should follow one of",
+        ),
+        (
+            pd.Series(["I-a", "B-a", "B-a", "I-a", "I-a", "O"]),
+            "should follow one of",
+        ),
+        (
+            pd.Series(["O", "B-a", "B-a", "I-a", "O", "I-a"]),
+            "should follow one of",
+        ),
+    ],
+)
+def test_check_consistent_iob(iob_pred, raises):
+    iob_true = pd.Series(["B-a", "O", "B-a", "I-a", "I-a", "B-a"])
+    if not raises:
+        _check_consistent_iob(iob_true, iob_pred)
+    else:
+        with pytest.raises(ValueError, match=fr".*{raises}.*"):
+            _check_consistent_iob(iob_true, iob_pred)
