@@ -609,7 +609,7 @@ def test_remove_punctuation(punctuation_annotations):
         (pd.Series(["O", "B-a", "B-a", "I-a", "B-c", "O"]), False),
         (
             pd.Series(["O", "B-a", "B-a", "I-a", "B-c"]),
-            "inconsistent numbers",
+            "target variables with inconsistent numbers of samples",
         ),
         (
             pd.Series(["O", "blah", "B-a", "I-a", "B-c", "O"]),
