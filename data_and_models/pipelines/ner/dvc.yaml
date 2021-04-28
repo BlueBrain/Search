@@ -47,8 +47,6 @@ stages:
         --paths.train ../../annotations/ner/${item.annotation_filename}.train.spacy
         --paths.dev ../../annotations/ner/${item.annotation_filename}.dev.spacy
         --paths.base_model ${item.base_model}
-        &&
-        python patch.py ../../models/ner/${key}/model-best/vocab/strings.json
       deps:
       - Dockerfile
       - config.cfg
