@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 import sklearn
 import spacy
+import spacy_transformers
 from spacy.tokens import Doc
 
 
@@ -147,6 +148,12 @@ def spacy2df(
                 spacy.pipeline.Lemmatizer,
                 spacy.pipeline.AttributeRuler,
                 spacy.pipeline.Tagger,
+            ),
+        ) or isinstance(
+            pipe,
+            (
+                spacy.pipeline.ner.EntityRecognizer,
+                spacy_transformers.pipeline_component.Transformer,
             ),
         ):
             new_doc = pipe(new_doc)

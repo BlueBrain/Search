@@ -43,6 +43,9 @@ Latest
 - |Change| :code:`requirements.txt` refactored into three separate lists of
   dependencies: :code:`requirements.txt`, :code:`requirements-dev.txt`,
   :code:`requirements-data_and_models.txt`.
+- |Change| for Transformer-based :code:`spaCy` pipelines for NER models
+  instead of Tok2Vec-based :code:`scispaCy` pipelines.
+- |Change| for one entity per model instead of several entities per NER model.
 
 
 Version 0.1.2
