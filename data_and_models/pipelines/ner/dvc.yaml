@@ -26,39 +26,30 @@ stages:
   training:
     # FIXME Use in the training stages the new files with one model per entity.
     foreach:
-      model-cell_compartment:
-        annotation_filename: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-cell_type:
-        annotation_filename: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
-      model-chemical:
-        annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      model-disease:
-        annotation_filename: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
-      model-drug:
-        annotation_filename: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-organ:
-        annotation_filename: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-organism:
-        annotation_filename: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      model-pathway:
-        annotation_filename: annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
-      model-protein:
-        annotation_filename: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+      model-cell_compartment: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+      model-cell_type: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+      model-chemical: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+      model-disease: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
+      model-drug: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+      model-organ: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+      model-organism: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+      model-pathway: annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
+      model-protein: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
     do:
       cmd: >-
         python -m spacy train
         config.cfg
         --output ../../models/ner/${key}/
         --gpu-id 0
-        --paths.train ../../annotations/ner/${item.annotation_filename}.train.spacy
-        --paths.dev ../../annotations/ner/${item.annotation_filename}.dev.spacy
+        --paths.train ../../annotations/ner/${item}.train.spacy
+        --paths.dev ../../annotations/ner/${item}.dev.spacy
         &&
         python patch.py ../../models/ner/${key}/model-best/vocab/strings.json
       deps:
       - Dockerfile
       - config.cfg
-      - ../../annotations/ner/${item.annotation_filename}.train.spacy
-      - ../../annotations/ner/${item.annotation_filename}.dev.spacy
+      - ../../annotations/ner/${item}.train.spacy
+      - ../../annotations/ner/${item}.dev.spacy
       outs:
       - ../../models/ner/${key}/model-best/
   # FIXME Move stages adding the EntityRuler to one model per entity.
