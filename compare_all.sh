@@ -2,7 +2,7 @@ for device in "CPU" "GPU"
 do 
 	for transf in "no" "yes"
 	do
-		echo --- ${device}-${transf} ---
+		echo --- ${device} transformer:${transf} ---
 		MODEL1=repro_results_${device}_${transf}-transformer/exp_1/
 		MODEL2=repro_results_${device}_${transf}-transformer/exp_2/	
 		diff -qr $MODEL1 $MODEL2 
