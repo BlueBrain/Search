@@ -14,15 +14,15 @@ VAL_PATH=data_and_models/annotations/ner/annotations15_EmmanuelleLogette_2020-09
 python -m pip show spacy | tail -n +1 | head -3
 
 
-for WITH_TRANSFORMER in "yes" "no":
+for WITH_TRANSFORMER in "yes" "no"
 do
-  for GPU_ID in -1 0:
+  for GPU_ID in -1 0
   do
     [[ $GPU_ID = -1 ]] && DEVICE="CPU" || DEVICE="GPU"
     CONFIG_PATH=config_${WITH_TRANSFORMER}_transformers.cfg
     OUTPUT_PATH=repro_results_${DEVICE}_${WITH_TRANSFORMER}-transformer/
 
-    for EXPERIMENT_ID in 1 2:
+    for EXPERIMENT_ID in 1 2
     do
       EXPERIMENT_PATH=${OUTPUT_PATH}exp_${EXPERIMENT_ID}
       if [ -d $EXPERIMENT_PATH ]

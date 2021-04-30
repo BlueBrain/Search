@@ -22,11 +22,12 @@ def compare_models(model_1, model_2):
             models_differ += 1
             if (key_item_1[0] == key_item_2[0]):
                 rdiff = torch.norm(key_item_1[1].cpu()-key_item_2[1].cpu()) / torch.norm(key_item_1[1].cpu())
-                print(f"Weights mismtach with relative difference {rdiff:.2e} found at {key_item_1[0]}")
+                print(f"😢 - Weights mismtach with relative difference {rdiff:.2e} found at {key_item_1[0]}")
+                return
             else:
                 raise Exception
     if models_differ == 0:
-        print('Models weights match perfectly! :)')
+        print('💖 - Models weights match perfectly!')
 
 
 def main(argv=None):
