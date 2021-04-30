@@ -12,6 +12,21 @@ def assert_array_equal(t_1, t_2):
     a_1, a_2 = t_1.detach().numpy(), t_2.detach().numpy()
     np.testing.assert_array_equal(a_1, a_2)
 
+def compare_models(model_1, model_2):
+    # https://discuss.pytorch.org/t/check-if-models-have-same-weights/4351/6
+    models_differ = 0
+    for key_item_1, key_item_2 in zip(model_1.items(), model_2.items()):
+        if torch.equal(key_item_1[1].cpu(), key_item_2[1].cpu()):
+            pass
+        else:
+            models_differ += 1
+            if (key_item_1[0] == key_item_2[0]):
+                rdiff = torch.norm(key_item_1[1].cpu()-key_item_2[1].cpu()) / torch.norm(key_item_1[1].cpu())
+                print(f"Weights mismtach with relative difference {rdiff:.2e} found at {key_item_1[0]}")
+            else:
+                raise Exception
+    if models_differ == 0:
+        print('Models weights match perfectly! :)')
 
 
 def main(argv=None):
@@ -32,19 +47,7 @@ def main(argv=None):
     # Make sure keys are the same
     assert list(raw_model_1.keys()) == list(raw_model_2.keys())
 
-    # Make sure values are the same
-    for (k_1, v_1), (k_2, v_2) in zip(raw_model_1.items(), raw_model_2.items()):
-        assert k_1 == k_2
-
-        assert isinstance(v_1, torch.Tensor)
-        assert isinstance(v_2, torch.Tensor)
-
-        assert_array_equal(v_1, v_2)
-
-        if v_1.dtype == torch.float32:
-            print(v_1.mean(), v_2.mean())
-
-    print("Done")
+    compare_models(raw_model_1, raw_model_2)
 
 
 if __name__ == "__main__":

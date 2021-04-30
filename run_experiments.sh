@@ -1,19 +1,23 @@
 set -e
 set -x 
 
-CONFIG_PATH=config_no_transformers.cfg
-#CONFIG_PATH=config_transformers.cfg
-OUTPUT_PATH=repro_results/
-TRAIN_PATH=data_and_models/annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy 
-VAL_PATH=data_and_models/annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
-
 # HYPERPARAMETERS
 BATCH_SIZE=32
 EVAL_FREQUENCY=10
-GPU_ID=-1  # -1 means a CPU
-N_EPOCHS=1
+GPU_ID=0  # -1 means a CPU
+N_EPOCHS=3
 PATIENCE=0
 SEED=2
+WITH_TRANSFORMER="no"
+[[ $GPU_ID = -1 ]] && DEVICE="CPU" || DEVICE="GPU"
+
+
+CONFIG_PATH=config_${WITH_TRANSFORMER}_transformers.cfg
+#CONFIG_PATH=config_transformers.cfg
+OUTPUT_PATH=repro_results_${DEVICE}_${WITH_TRANSFORMER}-transformer/
+TRAIN_PATH=data_and_models/annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.train.spacy 
+VAL_PATH=data_and_models/annotations/ner/annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway.dev.spacy
+
 
 # Prepare experiments
 experiments=(1 2)
@@ -44,4 +48,4 @@ do
 	echo $EXPERIMENT_PATH
 done
 
-python compare_hash.py ${OUTPUT_PATH}exp_1 ${OUTPUT_PATH}exp_2
+diff -qr ${OUTPUT_PATH}exp_1 ${OUTPUT_PATH}exp_2
