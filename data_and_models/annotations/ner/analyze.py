@@ -160,7 +160,7 @@ def report(input_path: Path, verbose: bool) -> Dict[str, Union[int, float]]:
         print(f"{CRITICAL}\nThis needs to be INVESTIGATED.\n{HELP}")
         print("NB: Following counts might NOT be accurate because of the duplicate(s).")
     if verbose:
-        print(df0[df0.duplicated("_input_hash", keep=False)].T)
+        print(df0[df0.duplicated("_input_hash", keep=False)].sort_values("_input_hash"))
 
     exploded = df4[["_input_hash", "spans"]].explode("spans")
     grouped = exploded.drop_duplicates().groupby("_input_hash").count()
