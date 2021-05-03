@@ -49,3 +49,12 @@
 /annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.dev.spacy
 /annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.train.spacy
 /annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.dev.spacy
+/annotations_disease.jsonl
+/annotations_pathway.jsonl
+/annotations_cell_compartment.jsonl
+/annotations_chemical.jsonl
+/annotations_drug.jsonl
+/annotations_organism.jsonl
+/annotations_protein.jsonl
+/annotations_cell_type.jsonl
+/annotations_organ.jsonl

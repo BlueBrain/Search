@@ -1,4 +1,41 @@
 stages:
+  clean_annotations:
+    foreach:
+      cell_compartment:
+        file: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+        label: cellular_component
+      cell_type:
+        file: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+        label: cell_type
+      chemical:
+        file: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+        label: chebi
+      disease:
+        file: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
+        label: disease
+      drug:
+        file: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+        label: simple_chemical
+      organ:
+        file: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
+        label: organ
+      organism:
+        file: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
+        label: taxon
+      pathway:
+        file: annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
+        label: pathway
+      protein:
+        file: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+        label: protein
+    do:
+      cmd: python clean.py ../../annotations/ner/${item.file}.jsonl ${item.label} ${key}
+      deps:
+      - Dockerfile
+      - clean.py
+      - ../../annotations/ner/${item.file}.jsonl
+      outs:
+      - ../../annotations/ner/annotations_${key}.jsonl
   convert_annotations:
     # FIXME Move stages converting annotations to one model per entity.
     foreach:
