@@ -24,17 +24,16 @@ stages:
         - ../../annotations/ner/${item}.train.spacy
         - ../../annotations/ner/${item}.dev.spacy
   training:
-    # FIXME Use in the training stages the new files with one model per entity.
     foreach:
-      model-cell_compartment: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-cell_type: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
-      model-chemical: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      model-disease: annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
-      model-drug: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-organ: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      model-organism: annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      model-pathway: annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
-      model-protein: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
+      model-cell_compartment: annotations14_cell_compartment
+      model-cell_type: annotations9_cell_type
+      model-chemical: annotations6_chemical
+      model-disease: annotations5_disease
+      model-drug: annotations14_drug
+      model-organ: annotations14_organ
+      model-organism: annotations6_organism
+      model-pathway: annotations15_pathway
+      model-protein: annotations9_protein
     do:
       cmd: >-
         python -m spacy train
@@ -52,104 +51,53 @@ stages:
       - ../../annotations/ner/${item}.dev.spacy
       outs:
       - ../../models/ner/${key}/model-best/
-  # FIXME Move stages adding the EntityRuler to one model per entity.
-  add_er_1:
-    cmd: python add_er.py --model ../../models/ner/model1/model-best/ --etypes disease --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --output_file ../../models/ner_er/model1
-    deps:
-    - Dockerfile
-    - ../../models/ner/model1/model-best/
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    params:
-    - eval.disease
-    outs:
-    - ../../models/ner_er/model1
-  add_er_2:
-    cmd: python add_er.py --model ../../models/ner/model2/model-best/ --etypes cell_compartment,drug,organ --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --output_file ../../models/ner_er/model2
-    deps:
-    - Dockerfile
-    - ../../models/ner/model2/model-best/
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    params:
-    - eval.cell_compartment
-    - eval.drug
-    - eval.organ
-    outs:
-    - ../../models/ner_er/model2
-  add_er_3:
-    cmd: python add_er.py --model ../../models/ner/model3/model-best/ --etypes chemical,organism --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --output_file ../../models/ner_er/model3
-    deps:
-    - Dockerfile
-    - ../../models/ner/model3/model-best/
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    params:
-    - eval.chemical
-    - eval.organism
-    outs:
-    - ../../models/ner_er/model3
-  add_er_4:
-    cmd: python add_er.py --model ../../models/ner/model4/model-best/ --etypes cell_type,protein --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --output_file ../../models/ner_er/model4
-    deps:
-    - Dockerfile
-    - ../../models/ner/model4/model-best/
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    params:
-    - eval.cell_type
-    - eval.protein
-    outs:
-    - ../../models/ner_er/model4
-  add_er_5:
-    cmd: python add_er.py --model ../../models/ner/model5/model-best/ --etypes pathway --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --output_file ../../models/ner_er/model5
-    deps:
-    - Dockerfile
-    - ../../models/ner/model5/model-best/
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    params:
-    - eval.pathway
-    outs:
-    - ../../models/ner_er/model5
-  evaluation:
-    # Move stages doing the evaluation to one model per entity.
+  add_er:
     foreach:
-      disease:
-        model_name: model1
-      cell_compartment:
-        model_name: model2
-      drug:
-        model_name: model2
-      organ:
-        model_name: model2
-      chemical:
-        model_name: model3
-      organism:
-        model_name: model3
-      cell_type:
-        model_name: model4
-      protein:
-        model_name: model4
-      pathway:
-        model_name: model5
+      - cell_compartment
+      - cell_type
+      - chemical
+      - disease
+      - drug
+      - organ
+      - organism
+      - pathway
+      - protein
+     do:
+        cmd: python add_er.py --model ../../models/ner/model-${item}/model-best/ --etypes ${item} --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model-${item}
+        deps:
+        - Dockerfile
+        - ../../models/ner/model-${item}/model-best/
+        - add_er.py
+        - ../../annotations/ner/rule_based_patterns.jsonl
+        params:
+        - eval.${item}
+        outs:
+        - ../../models/ner_er/model-${item}
+  evaluation:
+    foreach:
+      - cell_compartment
+      - cell_type
+      - chemical
+      - disease
+      - drug
+      - organ
+      - organism
+      - pathway
+      - protein
     do:
-      cmd: python eval.py --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl --model ../../models/ner_er/${item.model_name} --output_file ../../metrics/ner/${key}.json --etype ${key}
+      cmd: python eval.py
+      --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+      --model ../../models/ner_er/model-${item} --output_file ../../metrics/ner/${item}.json --etype ${item}
       deps:
       - Dockerfile
       - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      - ../../models/ner_er/${item.model_name}
+      - ../../models/ner_er/model-${item}
       - eval.py
       params:
-      - eval.${key}
+      - eval.${item}
       metrics:
-      - ../../metrics/ner/${key}.json:
+      - ../../metrics/ner/${item}.json:
           cache: false
   interrater:
     cmd: python interrater.py --annotations1 ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl        --annotations2 ../../annotations/ner/annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes.jsonl,../../annotations/ner/annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes.jsonl
