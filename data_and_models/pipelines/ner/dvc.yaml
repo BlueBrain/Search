@@ -1,5 +1,5 @@
 stages:
-  clean_annotations:
+  clean:
     foreach:
       cell_compartment:
         file: annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
@@ -36,41 +36,40 @@ stages:
       - ../../annotations/ner/${item.file}.jsonl
       outs:
       - ../../annotations/ner/annotations_${key}.jsonl
-  convert_annotations:
-    # FIXME Move stages converting annotations to one model per entity.
+  preprocess:
     foreach:
-      - annotations5_EmmanuelleLogette_2020-06-30_raw2_Disease
-      - annotations6_EmmanuelleLogette_2020-07-07_raw4_TaxonChebi
-      - annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
-      - annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes
-      - annotations11_CharlotteLorin_2020-08-28_raw1_10EntityTypes
-      - annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes
-      - annotations13_CharlotteLorin_2020-09-02_raw7_10EntityTypes
-      - annotations14_EmmanuelleLogette_2020-09-02_raw8_CellCompartmentDrugOrgan
-      - annotations15_EmmanuelleLogette_2020-09-22_raw9_Pathway
+    - annotations_cell_compartment
+    - annotations_cell_type
+    - annotations_chemical
+    - annotations_disease
+    - annotations_drug
+    - annotations_organ
+    - annotations_organism
+    - annotations_pathway
+    - annotations_protein
     do:
       cmd: python preprocess.py ../../annotations/ner/${item}.jsonl
       deps:
-        - Dockerfile
-        - preprocess.py
-        - ../../annotations/ner/${item}.jsonl
+      - Dockerfile
+      - preprocess.py
+      - ../../annotations/ner/${item}.jsonl
       params:
-        - train.corpora.dev_size
-        - train.corpora.shuffle_seed
+      - train.corpora.dev_size
+      - train.corpora.shuffle_seed
       outs:
-        - ../../annotations/ner/${item}.train.spacy
-        - ../../annotations/ner/${item}.dev.spacy
-  training:
+      - ../../annotations/ner/${item}.train.spacy
+      - ../../annotations/ner/${item}.dev.spacy
+  train:
     foreach:
-      model-cell_compartment: annotations14_cell_compartment
-      model-cell_type: annotations9_cell_type
-      model-chemical: annotations6_chemical
-      model-disease: annotations5_disease
-      model-drug: annotations14_drug
-      model-organ: annotations14_organ
-      model-organism: annotations6_organism
-      model-pathway: annotations15_pathway
-      model-protein: annotations9_protein
+      model-cell_compartment: annotations_cell_compartment
+      model-cell_type: annotations_cell_type
+      model-chemical: annotations_chemical
+      model-disease: annotations_disease
+      model-drug: annotations_drug
+      model-organ: annotations_organ
+      model-organism: annotations_organism
+      model-pathway: annotations_pathway
+      model-protein: annotations_protein
     do:
       cmd: >-
         python -m spacy train
@@ -90,47 +89,55 @@ stages:
       - ../../models/ner/${key}/model-best/
   add_er:
     foreach:
-      - cell_compartment
-      - cell_type
-      - chemical
-      - disease
-      - drug
-      - organ
-      - organism
-      - pathway
-      - protein
-     do:
-        cmd: python add_er.py --model ../../models/ner/model-${item}/model-best/ --etypes ${item} --patterns_file ../../annotations/ner/rule_based_patterns.jsonl --output_file ../../models/ner_er/model-${item}
-        deps:
-        - Dockerfile
-        - ../../models/ner/model-${item}/model-best/
-        - add_er.py
-        - ../../annotations/ner/rule_based_patterns.jsonl
-        params:
-        - eval.${item}
-        outs:
-        - ../../models/ner_er/model-${item}
-  evaluation:
-    foreach:
-      - cell_compartment
-      - cell_type
-      - chemical
-      - disease
-      - drug
-      - organ
-      - organism
-      - pathway
-      - protein
+    - cell_compartment
+    - cell_type
+    - chemical
+    - disease
+    - drug
+    - organ
+    - organism
+    - pathway
+    - protein
     do:
-      cmd: python eval.py
+    cmd: >-
+      python add_er.py
+      --etypes ${item}
+      --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+      --model ../../models/ner/model-${item}/model-best/
+      --output_file ../../models/ner_er/model-${item}
+    deps:
+    - Dockerfile
+    - add_er.py
+    - ../../annotations/ner/rule_based_patterns.jsonl
+    - ../../models/ner/model-${item}/model-best/
+    params:
+    - eval.${item}
+    outs:
+    - ../../models/ner_er/model-${item}
+  evaluate:
+    foreach:
+    - cell_compartment
+    - cell_type
+    - chemical
+    - disease
+    - drug
+    - organ
+    - organism
+    - pathway
+    - protein
+    do:
+      cmd: >-
+      python eval.py
+      --etype ${item}
       --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model-${item} --output_file ../../metrics/ner/${item}.json --etype ${item}
+      --model ../../models/ner_er/model-${item}
+      --output_file ../../metrics/ner/${item}.json
       deps:
       - Dockerfile
+      - eval.py
       - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       - ../../models/ner_er/model-${item}
-      - eval.py
       params:
       - eval.${item}
       metrics:
