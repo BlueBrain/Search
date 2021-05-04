@@ -26,8 +26,8 @@ First, this script keeps only valid texts from the annotations (see next paragra
 Second, this script normalizes entity labels (use upper case for labels in lower case).
 Third, this script keeps only the given entity label and renames it if necessary.
 
-Valid texts are texts which have been accepted, have spans (i.e. entities), and have
-a unique 'input_hash'.
+Valid texts are texts which have been accepted, have or not spans (i.e. entities), and
+have a unique 'input_hash'.
 
 The output is one file. The file is put in the same directory as the input file. It is
 named following the pattern 'annotations_<entity_label>.jsonl'.
@@ -44,10 +44,8 @@ import typer
 
 def is_valid(example: Dict[str, Any], duplicated_hashes: set) -> bool:
     accepted = example["answer"] == "accept"
-    spans = example["spans"]
-    with_spans = isinstance(spans, list) and spans
     unique_hash = example["_input_hash"] not in duplicated_hashes
-    return all((accepted, with_spans, unique_hash))
+    return all((accepted, unique_hash))
 
 
 def main(
@@ -55,8 +53,6 @@ def main(
     keep_label: str = typer.Argument(...),
     rename_into: Optional[str] = typer.Argument(None),
 ):
-    print("/!\\ Run 'analyze.py' before to identify relevant cleaning rules.")
-
     keep_label = keep_label.upper()
     rename_into = None if rename_into is None else rename_into.upper()
 
@@ -87,7 +83,7 @@ def main(
     total_spans = 0
     normalized_spans = 0
     for text in valid_texts:
-        for span in text["spans"]:
+        for span in text.get("spans", []):
             label = span["label"]
             total_spans += 1
             if label.islower():
@@ -95,21 +91,24 @@ def main(
                 normalized_spans += 1
     print(f"...normalized {normalized_spans} label spans (on {total_spans})")
 
-    print(f"Keep only label {keep_label}...")
-    if rename_into is not None:
-        print(f"Rename label {keep_label} into {rename_into}...")
+    renaming = "" if rename_into is None else f" (renamed into {rename_into})"
+    print(f"Keep only label {keep_label}{renaming}...")
     filtered_texts = []
     spans_count = 0
     for text in valid_texts:
         filtered_spans = []
-        for span in text["spans"]:
-            if span["label"] == keep_label:
-                if rename_into is not None:
-                    span["label"] = rename_into
-                filtered_spans.append(span)
-        if filtered_spans:
-            text["spans"] = filtered_spans
-            spans_count += len(filtered_spans)
+        spans = text.get("spans", [])
+        if spans:
+            for span in spans:
+                if span["label"] == keep_label:
+                    if rename_into is not None:
+                        span["label"] = rename_into
+                    filtered_spans.append(span)
+            if filtered_spans:
+                text["spans"] = filtered_spans
+                spans_count += len(filtered_spans)
+                filtered_texts.append(text)
+        else:
             filtered_texts.append(text)
     print(f"...kept {len(filtered_texts)} texts and {spans_count} spans")
 
