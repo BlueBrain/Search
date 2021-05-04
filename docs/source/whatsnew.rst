@@ -50,6 +50,15 @@ Latest
 - |Change| for Transformer-based :code:`spaCy` pipelines for NER models
   instead of Tok2Vec-based :code:`scispaCy` pipelines.
 - |Change| for one entity per model instead of several entities per NER model.
+- |Change| :code:`pipelines/ner/dvc.yaml` to simplify and harmonize the
+  definition of the pipeline for training NER models.
+- |Add| :code:`annotations/ner/analyze.py`, a code to evaluate the data quality
+  of annotations. It could generate: 1) a detailed report for individual files
+  when used as a script and 2) a summary table for several files when used as
+  a function.
+- |Add| :code:`pipelines/ner/clean.py`, a script to clean annotations. It keeps
+  only valid texts, normalizes labels, keeps only a given label, and then
+  renames the label if necessary.
 
 
 Version 0.1.2
