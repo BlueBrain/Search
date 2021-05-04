@@ -78,8 +78,6 @@ stages:
         --gpu-id 0
         --paths.train ../../annotations/ner/${item}.train.spacy
         --paths.dev ../../annotations/ner/${item}.dev.spacy
-        &&
-        python patch.py ../../models/ner/${key}/model-best/vocab/strings.json
       deps:
       - Dockerfile
       - config.cfg
