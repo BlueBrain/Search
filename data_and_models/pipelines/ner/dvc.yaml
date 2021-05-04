@@ -97,21 +97,21 @@ stages:
     - pathway
     - protein
     do:
-    cmd: >-
-      python add_er.py
-      --etypes ${item}
-      --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
-      --model ../../models/ner/model-${item}/model-best/
-      --output_file ../../models/ner_er/model-${item}
-    deps:
-    - Dockerfile
-    - add_er.py
-    - ../../annotations/ner/rule_based_patterns.jsonl
-    - ../../models/ner/model-${item}/model-best/
-    params:
-    - eval.${item}
-    outs:
-    - ../../models/ner_er/model-${item}
+      cmd: >-
+        python add_er.py
+        --etypes ${item}
+        --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
+        --model ../../models/ner/model-${item}/model-best/
+        --output_file ../../models/ner_er/model-${item}
+      deps:
+      - Dockerfile
+      - add_er.py
+      - ../../annotations/ner/rule_based_patterns.jsonl
+      - ../../models/ner/model-${item}/model-best/
+      params:
+      - eval.${item}
+      outs:
+      - ../../models/ner_er/model-${item}
   evaluate:
     foreach:
     - cell_compartment
@@ -125,11 +125,11 @@ stages:
     - protein
     do:
       cmd: >-
-      python eval.py
-      --etype ${item}
-      --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
-      --model ../../models/ner_er/model-${item}
-      --output_file ../../metrics/ner/${item}.json
+        python eval.py
+        --etype ${item}
+        --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
+        --model ../../models/ner_er/model-${item}
+        --output_file ../../metrics/ner/${item}.json
       deps:
       - Dockerfile
       - eval.py
