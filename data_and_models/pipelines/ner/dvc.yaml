@@ -38,53 +38,52 @@ stages:
       - ../../annotations/ner/annotations_${key}.jsonl
   preprocess:
     foreach:
-    - annotations_cell_compartment
-    - annotations_cell_type
-    - annotations_chemical
-    - annotations_disease
-    - annotations_drug
-    - annotations_organ
-    - annotations_organism
-    - annotations_pathway
-    - annotations_protein
+    - cell_compartment
+    - cell_type
+    - chemical
+    - disease
+    - drug
+    - organ
+    - organism
+    - pathway
+    - protein
     do:
-      cmd: python preprocess.py ../../annotations/ner/${item}.jsonl
+      cmd: python preprocess.py ../../annotations/ner/annotations_${item}.jsonl
       deps:
       - Dockerfile
       - preprocess.py
-      - ../../annotations/ner/${item}.jsonl
+      - ../../annotations/ner/annotations_${item}.jsonl
       params:
       - train.corpora.dev_size
       - train.corpora.shuffle_seed
       outs:
-      - ../../annotations/ner/${item}.train.spacy
-      - ../../annotations/ner/${item}.dev.spacy
+      - ../../annotations/ner/annotations_${item}.train.spacy
+      - ../../annotations/ner/annotations_${item}.dev.spacy
   train:
     foreach:
-      model-cell_compartment: annotations_cell_compartment
-      model-cell_type: annotations_cell_type
-      model-chemical: annotations_chemical
-      model-disease: annotations_disease
-      model-drug: annotations_drug
-      model-organ: annotations_organ
-      model-organism: annotations_organism
-      model-pathway: annotations_pathway
-      model-protein: annotations_protein
+    - cell_compartment
+    - cell_type
+    - chemical
+    - disease
+    - drug
+    - organ
+    - organism
+    - pathway
+    - protein
     do:
       cmd: >-
         python -m spacy train
         config.cfg
-        --output ../../models/ner/${key}/
-        --gpu-id 0
-        --paths.train ../../annotations/ner/${item}.train.spacy
-        --paths.dev ../../annotations/ner/${item}.dev.spacy
+        --output ../../models/ner/model-${item}/
+        --paths.train ../../annotations/ner/annotations_${item}.train.spacy
+        --paths.dev ../../annotations/ner/annotations_${item}.dev.spacy
       deps:
       - Dockerfile
       - config.cfg
-      - ../../annotations/ner/${item}.train.spacy
-      - ../../annotations/ner/${item}.dev.spacy
+      - ../../annotations/ner/annotations_${item}.train.spacy
+      - ../../annotations/ner/annotations_${item}.dev.spacy
       outs:
-      - ../../models/ner/${key}/model-best/
+      - ../../models/ner/model-${item}/model-best/
   add_er:
     foreach:
     - cell_compartment
