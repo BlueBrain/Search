@@ -270,9 +270,11 @@ def remove_punctuation(df):
     for col in annotations_cols:
         for idx in df.index[is_punctuation & df[col].str.startswith("B-")]:
             i = idx
-            while df.iloc[i]["text"] in list(string.punctuation):
+            while i < len(df) - 1 and df.iloc[i]["text"] in list(string.punctuation):
                 i += 1
-            df.iloc[i, df.columns.get_loc(col)] = "B" + df.iloc[i][col][1:]
+            df.iloc[i, df.columns.get_loc(col)] = (
+                "B" + df.iloc[i][col][1:] if df.iloc[i][col] != "O" else "O"
+            )
 
     df_cleaned = df[~is_punctuation].reset_index(drop=True)
     return df_cleaned
