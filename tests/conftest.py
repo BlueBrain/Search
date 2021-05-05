@@ -26,10 +26,10 @@ import pandas as pd
 import pytest
 import spacy
 import sqlalchemy
+import torch
 from sqlalchemy.exc import OperationalError
 
 import docker
-import torch
 
 torch.manual_seed(42)
 
