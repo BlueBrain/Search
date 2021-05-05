@@ -391,16 +391,27 @@ def test_load_spacy_model(model_name, is_found):
 
 
 @pytest.mark.parametrize(
-    "obj,md5_expected",
+    "get_obj,md5_expected",
     [
-        (torch.tensor([8.0, 8.0, 5.0]), "5546f2fd52641b885a6c1ea15863e3b5"),
+        (lambda: torch.tensor([8.0, 8.0, 5.0]), "5546f2fd52641b885a6c1ea15863e3b5"),
         (
-            Sequential(Linear(3, 5), Linear(5, 2)),
+            lambda: {
+                "a": torch.tensor([8.0, 8.0, 5.0]),
+                "b": torch.tensor([3.0, 1.0, 2.0, 4.0]),
+                "c": torch.tensor([[1.0, 1.9], [1.2, 1.3]]),
+            },
+            "9ececc40bc9a3106c24752db8f77bf7a",
+        ),
+        (
+            lambda: Sequential(Linear(3, 5), Linear(5, 2)),
             "f6b79c070f2713f64af77cce3e9e2536",
         ),
     ],
 )
-def test_patched_torch_save(tmpdir, obj, md5_expected):
+def test_patched_torch_save(tmpdir, get_obj, md5_expected):
+    torch.manual_seed(42)
+    obj = get_obj()
+
     file_out = pathlib.Path(str(tmpdir)) / "output.pt"
 
     with patch("torch.serialization._save", patched_torch_save):

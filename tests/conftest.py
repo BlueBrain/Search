@@ -26,12 +26,9 @@ import pandas as pd
 import pytest
 import spacy
 import sqlalchemy
-import torch
 from sqlalchemy.exc import OperationalError
 
 import docker
-
-torch.manual_seed(42)
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 
