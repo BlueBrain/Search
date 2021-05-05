@@ -86,6 +86,7 @@ def main():
 
     df = remove_punctuation(df)
 
+    df.to_csv(f"annotations_{args.etype}.csv")
     iob_true = df["class"]
     iob_pred = df["class_pred"]
 
@@ -98,10 +99,9 @@ def main():
                 iob_pred,
                 mode=mode,
                 return_dict=True,
-                etypes_map={args.etype.upper(): params["etype_name"]},
             )[args.etype.upper()]
             metrics_dict = OrderedDict(
-                [(f"{mode}_{k}", float(v)) for k, v in metrics_dict.items()]
+                [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )
             all_metrics_dict.update(metrics_dict)
         json.dump(all_metrics_dict, f)
