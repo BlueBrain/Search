@@ -29,6 +29,9 @@ import sqlalchemy
 from sqlalchemy.exc import OperationalError
 
 import docker
+import torch
+
+torch.manual_seed(42)
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 

@@ -17,15 +17,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
 import pathlib
+from unittest.mock import patch
 
 import h5py
 import numpy as np
 import pandas as pd
 import pytest
 import spacy
+import torch
+from torch.nn import Linear, Sequential
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
+from bluesearch.utils import (
+    H5,
+    JSONL,
+    Timer,
+    load_ee_models_library,
+    load_spacy_model,
+    patched_torch_save,
+)
 
 
 class TestTimer:
@@ -377,3 +388,26 @@ def test_load_spacy_model(model_name, is_found):
     else:
         with pytest.raises(ModuleNotFoundError):
             load_spacy_model(model_name)
+
+
+@pytest.mark.parametrize(
+    "obj,md5_expected",
+    [
+        (torch.tensor([8.0, 8.0, 5.0]), "5546f2fd52641b885a6c1ea15863e3b5"),
+        (
+            Sequential(Linear(3, 5), Linear(5, 2)),
+            "f6b79c070f2713f64af77cce3e9e2536",
+        ),
+    ],
+)
+def test_patched_torch_save(tmpdir, obj, md5_expected):
+    file_out = pathlib.Path(str(tmpdir)) / "output.pt"
+
+    with patch("torch.serialization._save", patched_torch_save):
+        torch.save(obj, file_out)
+
+    with file_out.open("rb") as f:
+        data = f.read()
+        md5_returned = hashlib.md5(data).hexdigest()
+
+    assert md5_returned == md5_expected
