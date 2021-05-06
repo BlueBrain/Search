@@ -391,19 +391,28 @@ def test_load_spacy_model(model_name, is_found):
 
 
 @pytest.mark.parametrize(
-    "get_obj",
+    "get_obj,md5_expected",
     [
-        lambda: torch.tensor([8.0, 8.0, 5.0]),
-        lambda: {
-            "a": torch.tensor([8.0, 8.0, 5.0]),
-            "b": torch.tensor([3.0, 1.0, 2.0, 4.0]),
-            "c": torch.tensor([[1.0, 1.9], [1.2, 1.3]]),
-        },
-        lambda: Sequential(Linear(3, 5), Linear(5, 2)),
-        lambda: Sequential(Linear(3, 5), Linear(5, 2)).state_dict(),
+        (lambda: torch.tensor([8.0, 8.0, 5.0]), "7ed7d6525b5565778d8f27b4ca122d09"),
+        (
+            lambda: {
+                "a": torch.tensor([8.0, 8.0, 5.0]),
+                "b": torch.tensor([3.0, 1.0, 2.0, 4.0]),
+                "c": torch.tensor([[1.0, 1.9], [1.2, 1.3]]),
+            },
+            "9ececc40bc9a3106c24752db8f77bf7a",
+        ),
+        (
+            lambda: Sequential(Linear(3, 5), Linear(5, 2)),
+            "f6b79c070f2713f64af77cce3e9e2536",
+        ),
+        (
+            lambda: Sequential(Linear(3, 5), Linear(5, 2)).state_dict(),
+            "55a309ec6a538c08b8a30862f5bf44cd",
+        ),
     ],
 )
-def test_patched_torch_save(tmpdir, get_obj):
+def test_patched_torch_save(tmpdir, get_obj, md5_expected):
     file_out = pathlib.Path(str(tmpdir)) / "output.pt"
     md5_sums = []
 
@@ -418,4 +427,4 @@ def test_patched_torch_save(tmpdir, get_obj):
             data = f.read()
             md5_sums.append(hashlib.md5(data).hexdigest())
 
-    assert md5_sums[0] == md5_sums[1]
+    assert md5_sums[0] == md5_sums[1] == md5_expected
