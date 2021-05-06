@@ -27,7 +27,6 @@ from typing import Optional, Union, cast
 import numpy as np
 import pandas as pd
 import sklearn
-import spacy
 from spacy.tokens import Doc
 
 
