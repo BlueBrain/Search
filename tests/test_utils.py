@@ -400,6 +400,7 @@ def test_load_spacy_model(model_name, is_found):
             "c": torch.tensor([[1.0, 1.9], [1.2, 1.3]]),
         },
         lambda: Sequential(Linear(3, 5), Linear(5, 2)),
+        lambda: Sequential(Linear(3, 5), Linear(5, 2)).state_dict(),
     ],
 )
 def test_patched_torch_save(tmpdir, get_obj):
