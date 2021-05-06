@@ -403,13 +403,12 @@ def test_load_spacy_model(model_name, is_found):
     ],
 )
 def test_patched_torch_save(tmpdir, get_obj):
+    file_out = pathlib.Path(str(tmpdir)) / "output.pt"
     md5_sums = []
 
     for _ in range(2):
         torch.manual_seed(42)
         obj = get_obj()
-
-        file_out = pathlib.Path(str(tmpdir)) / "output.pt"
 
         with patch("torch.serialization._save", patched_torch_save):
             torch.save(obj, file_out)
