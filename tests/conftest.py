@@ -199,7 +199,7 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                         "article_id": article_id,
                         "paragraph_pos_in_article": sec_ix,
                         # from data/mining/request/ee_models_library.csv
-                        "mining_model": "data_and_models/models/ner_er/model1",
+                        "mining_model": "data_and_models/models/ner_er/model-organism",
                     }
                 )
                 temp_m.append(s)

@@ -92,7 +92,7 @@ prodigy ner.correct \
 - 634 tot sentences
 - Annotated by Emmanuelle Logette
 - Two iterations for those annotations (first one with pre-annotation from en_ner_craft_md, and second one with pre
--annotation from model2)
+-annotation from model2 (from Search<=v0.2.0))
   - 380 sentences for first iteration (+/- one hour to annotate)
   - 254 sentences for the second iteration
 - TAXON = ORGANISM

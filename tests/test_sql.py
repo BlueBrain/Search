@@ -206,7 +206,10 @@ class TestMiningCache:
 
         res = retrieve_mining_cache(
             identifiers,
-            ["data_and_models/models/ner_er/model1"],
+            [
+                "data_and_models/models/ner_er/model-organism",
+                "data_and_models/models/ner_er/model-chemical",
+            ],
             fake_sqlalchemy_engine,
         )
 
@@ -214,11 +217,11 @@ class TestMiningCache:
         assert len(res) == expected_len
 
     @pytest.mark.parametrize(
-        "mining_model", ["data_and_models/models/ner_er/model1", "wrong_model"]
+        "mining_model", ["data_and_models/models/ner_er/model-organism", "wrong_model"]
     )
     def test_retrieve_some(self, fake_sqlalchemy_engine, test_parameters, mining_model):
         identifiers = [(1, -1), (2, 1)]
-        if mining_model == "data_and_models/models/ner_er/model1":
+        if mining_model == "data_and_models/models/ner_er/model-organism":
             expected_len = (
                 1
                 * test_parameters["n_sections_per_article"]
@@ -232,7 +235,9 @@ class TestMiningCache:
         assert isinstance(res, pd.DataFrame)
         assert len(res) == expected_len
         assert set(res["article_id"].unique()) == (
-            {1, 2} if mining_model == "data_and_models/models/ner_er/model1" else set()
+            {1, 2}
+            if mining_model == "data_and_models/models/ner_er/model-organism"
+            else set()
         )
 
     def test_retrieve_none(self, fake_sqlalchemy_engine):
@@ -241,7 +246,7 @@ class TestMiningCache:
 
         res = retrieve_mining_cache(
             identifiers,
-            ["data_and_models/models/ner_er/model1"],
+            ["data_and_models/models/ner_er/model-organism"],
             fake_sqlalchemy_engine,
         )
 

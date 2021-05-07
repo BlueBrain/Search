@@ -312,7 +312,7 @@ def retrieve_mining_cache(identifiers, model_ids, engine):
     logger.debug(f"identifiers = {identifiers}")
     logger.debug(f"model_ids = {model_ids}")
     logger.debug(f"engine = {engine}")
-    model_ids = list(set(model_ids))
+    model_ids = tuple(set(model_ids))
 
     identifiers_arts = [int(a) for a, p in identifiers if p == -1]
 

@@ -6,15 +6,15 @@ eval:
   disease:
     etype_name: DISEASE
   cell_compartment:
-    etype_name: CELLULAR_COMPONENT
+    etype_name: CELL_COMPARTMENT
   drug:
-    etype_name: SIMPLE_CHEMICAL
+    etype_name: DRUG
   organ:
     etype_name: ORGAN
   chemical:
-    etype_name: CHEBI
+    etype_name: CHEMICAL
   organism:
-    etype_name: TAXON
+    etype_name: ORGANISM
   cell_type:
     etype_name: CELL_TYPE
   protein:
