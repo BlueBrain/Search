@@ -306,10 +306,10 @@ def unique_etypes(iob, return_counts=False, mode="entity"):
         return unique
     else:
         if mode == "entity":
-            unique_counts = [(iob == f"B-{etype}").sum() for etype in unique]
+            unique_counts = [(iob == f"B-{etype}").sum().item() for etype in unique]
         elif mode == "token":
             unique_counts = [
-                (iob.isin([f"B-{etype}", f"I-{etype}"])).sum() for etype in unique
+                (iob.isin([f"B-{etype}", f"I-{etype}"])).sum().item() for etype in unique
             ]
         else:
             raise ValueError(f"Mode '{mode}' is not available.")
@@ -443,9 +443,9 @@ def ner_report(
             ent_pred = iob_pred.isin(
                 [f"B-{etypes_map[etype]}", f"I-{etypes_map[etype]}"]
             )
-            n_true = ent_true.sum()
-            n_pred = ent_pred.sum()
-            true_pos = (ent_true & ent_pred).sum()
+            n_true = ent_true.sum().item()
+            n_pred = ent_pred.sum().item()
+            true_pos = (ent_true & ent_pred).sum().item()
         else:
             raise ValueError(f"Mode {mode} is not available.")
 
