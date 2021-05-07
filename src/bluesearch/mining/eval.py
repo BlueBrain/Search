@@ -309,7 +309,8 @@ def unique_etypes(iob, return_counts=False, mode="entity"):
             unique_counts = [(iob == f"B-{etype}").sum().item() for etype in unique]
         elif mode == "token":
             unique_counts = [
-                (iob.isin([f"B-{etype}", f"I-{etype}"])).sum().item() for etype in unique
+                (iob.isin([f"B-{etype}", f"I-{etype}"])).sum().item()
+                for etype in unique
             ]
         else:
             raise ValueError(f"Mode '{mode}' is not available.")
