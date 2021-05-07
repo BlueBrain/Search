@@ -17,15 +17,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
 import pathlib
+from unittest.mock import patch
 
 import h5py
 import numpy as np
 import pandas as pd
 import pytest
 import spacy
+import torch
+from torch.nn import Linear, Sequential
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
+from bluesearch.utils import (
+    H5,
+    JSONL,
+    Timer,
+    load_ee_models_library,
+    load_spacy_model,
+    patched_torch_save,
+)
 
 
 class TestTimer:
@@ -377,3 +388,43 @@ def test_load_spacy_model(model_name, is_found):
     else:
         with pytest.raises(ModuleNotFoundError):
             load_spacy_model(model_name)
+
+
+@pytest.mark.parametrize(
+    "get_obj,md5_expected",
+    [
+        (lambda: torch.tensor([8.0, 8.0, 5.0]), "7ed7d6525b5565778d8f27b4ca122d09"),
+        (
+            lambda: {
+                "a": torch.tensor([8.0, 8.0, 5.0]),
+                "b": torch.tensor([3.0, 1.0, 2.0, 4.0]),
+                "c": torch.tensor([[1.0, 1.9], [1.2, 1.3]]),
+            },
+            "9ececc40bc9a3106c24752db8f77bf7a",
+        ),
+        (
+            lambda: Sequential(Linear(3, 5), Linear(5, 2)),
+            "f6b79c070f2713f64af77cce3e9e2536",
+        ),
+        (
+            lambda: Sequential(Linear(3, 5), Linear(5, 2)).state_dict(),
+            "55a309ec6a538c08b8a30862f5bf44cd",
+        ),
+    ],
+)
+def test_patched_torch_save(tmpdir, get_obj, md5_expected):
+    file_out = pathlib.Path(str(tmpdir)) / "output.pt"
+    md5_sums = []
+
+    for _ in range(2):
+        torch.manual_seed(42)
+        obj = get_obj()
+
+        with patch("torch.serialization._save", patched_torch_save):
+            torch.save(obj, file_out)
+
+        with file_out.open("rb") as f:
+            data = f.read()
+            md5_sums.append(hashlib.md5(data).hexdigest())
+
+    assert md5_sums[0] == md5_sums[1] == md5_expected

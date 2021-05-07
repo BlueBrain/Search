@@ -17,15 +17,18 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import io
 import json
 import pathlib
 import time
-from typing import Any, Set, Union
+from typing import Any, Dict, Set, Union
 
 import h5py
 import numpy as np
 import pandas as pd
 import spacy
+import torch
+from torch.serialization import location_tag, normalize_storage_type
 
 
 class Timer:
@@ -575,3 +578,54 @@ If `model_name` is a package name, please install it using
 If `model_name` is a local path, please verify the pipeline path.
 """
             ) from err
+
+
+def patched_torch_save(obj, zip_file, pickle_module, pickle_protocol):
+    """Patches torch.serialization._save() to have deterministic binary output.
+
+    See related PR [1] and original source code for torch.serialization._save()
+    [2].
+
+    References
+    ----------
+    [1] https://github.com/pytorch/pytorch/pull/57536
+    [2] https://github.com/pytorch/pytorch/blob/133d8abbfc764a6e32e54a44113f46e715fe385c/torch/serialization.py#L457-L498
+    """  # noqa
+    serialized_storages = {}
+    id_map: Dict[int, str] = {}
+
+    def persistent_id(obj):
+        # FIXME: the docs say that persistent_id should only return a string
+        # but torch store returns tuples. This works only in the binary protocol
+        # see
+        # https://docs.python.org/2/library/pickle.html#pickling-and-unpickling-external-objects
+        # https://github.com/python/cpython/blob/master/Lib/pickle.py#L527-L537
+        if torch.is_storage(obj):
+            storage_type = normalize_storage_type(type(obj))
+            obj_key = id_map.setdefault(obj._cdata, str(len(id_map)))
+            location = location_tag(obj)
+            serialized_storages[obj_key] = obj
+
+            return ("storage", storage_type, obj_key, location, obj.size())
+        return None
+
+    # Write the pickle data for `obj`
+    data_buf = io.BytesIO()
+    pickler = pickle_module.Pickler(data_buf, protocol=pickle_protocol)
+    pickler.persistent_id = persistent_id
+    pickler.dump(obj)
+    data_value = data_buf.getvalue()
+    zip_file.write_record("data.pkl", data_value, len(data_value))
+
+    # Write each tensor to a file named tensor/the_tensor_key in the zip archive
+    for key in sorted(serialized_storages.keys()):
+        name = f"data/{key}"
+        storage = serialized_storages[key]
+        # given that we copy things around anyway, we might use storage.cpu()
+        # this means to that to get tensors serialized, you need to implement
+        # .cpu() on the underlying Storage
+        if storage.device.type != "cpu":
+            storage = storage.cpu()
+        # Now that it is on the CPU we can directly copy it into the zip file
+        num_bytes = storage.size() * storage.element_size()
+        zip_file.write_record(name, storage.data_ptr(), num_bytes)
