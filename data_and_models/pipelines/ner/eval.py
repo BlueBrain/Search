@@ -100,7 +100,7 @@ def main():
                 return_dict=True,
             )[args.etype.upper()]
             metrics_dict = OrderedDict(
-                [(f"{mode}_{k}", float(v)) for k, v in metrics_dict.items()]
+                [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )
             all_metrics_dict.update(metrics_dict)
         json.dump(all_metrics_dict, f)
