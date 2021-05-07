@@ -78,6 +78,7 @@ def main(
     print("Keep only valid texts...")
     valid_texts = [x for x in corpus if is_valid(x, duplicated_hashes)]
     print(f"...kept {len(valid_texts)} texts")
+    print(f"...that's {len(valid_texts) / len(corpus):.0%} of the total")
 
     print("Normalize labels...")
     total_spans = 0
@@ -90,32 +91,29 @@ def main(
                 span["label"] = label.upper()
                 normalized_spans += 1
     print(f"...normalized {normalized_spans} label spans (on {total_spans})")
+    print(f"...that's {normalized_spans/total_spans:.0%} of the total")
 
     renaming = "" if rename_into is None else f" (renamed into {rename_into})"
     print(f"Keep only label {keep_label}{renaming}...")
-    filtered_texts = []
-    spans_count = 0
+    output_texts = []
+    kept_spans = 0
     for text in valid_texts:
         filtered_spans = []
-        spans = text.get("spans", [])
-        if spans:
-            for span in spans:
-                if span["label"] == keep_label:
-                    if rename_into is not None:
-                        span["label"] = rename_into
-                    filtered_spans.append(span)
-            if filtered_spans:
-                text["spans"] = filtered_spans
-                spans_count += len(filtered_spans)
-                filtered_texts.append(text)
-        else:
-            filtered_texts.append(text)
-    print(f"...kept {len(filtered_texts)} texts and {spans_count} spans")
+        for span in text.get("spans", []):
+            if span["label"] == keep_label:
+                if rename_into is not None:
+                    span["label"] = rename_into
+                filtered_spans.append(span)
+        text["spans"] = filtered_spans
+        kept_spans += len(text["spans"])
+        output_texts.append(text)
+    print(f"...kept {kept_spans} label spans (on {total_spans})")
+    print(f"...that's {kept_spans / total_spans:.0%} of the total")
 
     print("Write cleaned annotations...")
-    target = keep_label if rename_into is None else rename_into
-    output_path = input_path.parent / f"annotations_{target.lower()}.jsonl"
-    srsly.write_jsonl(output_path, filtered_texts)
+    output_label = keep_label if rename_into is None else rename_into
+    output_path = input_path.parent / f"annotations_{output_label.lower()}.jsonl"
+    srsly.write_jsonl(output_path, output_texts)
     print(f"...wrote {output_path}")
 
 
