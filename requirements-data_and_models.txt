@@ -25,5 +25,4 @@ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_ner_jnlpba
 matplotlib==3.4.1
 scipy==1.6.2
 transformers==4.5.1
-cupy-cuda102==8.6.0
 spacy_lookups_data==1.0.0

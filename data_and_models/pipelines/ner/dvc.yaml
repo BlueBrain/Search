@@ -74,7 +74,6 @@ stages:
       cmd: >-
         python -m spacy train
         config.cfg
-        --gpu-id 0
         --output ../../models/ner/model-${item}/
         --paths.train ../../annotations/ner/annotations_${item}.train.spacy
         --paths.dev ../../annotations/ner/annotations_${item}.dev.spacy

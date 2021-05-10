@@ -97,9 +97,6 @@ EXTRAS_REQUIRE = {
         "matplotlib",
         "scipy",
         "transformers",
-        # For using GPUs with spaCy.
-        # Get the CUDA version for the pre-built wheel with 'nvcc --version'.
-        "cupy-cuda102",
         # For using a spaCy lemmatizer with mode='lookup'.
         "spacy_lookups_data",
     ],
