@@ -1,1 +1,1 @@
-{"entity_precision": 0.6351351351351351, "entity_recall": 0.618421052631579, "entity_f1-score": 0.6266666666666667, "entity_support": 76, "token_precision": 0.6578947368421053, "token_recall": 0.6024096385542169, "token_f1-score": 0.6289308176100629, "token_support": 83}
+{"entity_precision": 0.7962962962962963, "entity_recall": 0.5657894736842105, "entity_f1-score": 0.6615384615384615, "entity_support": 76, "token_precision": 0.8148148148148148, "token_recall": 0.5301204819277109, "token_f1-score": 0.6423357664233577, "token_support": 83}
