@@ -22,7 +22,7 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -78,8 +78,7 @@ def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
             )
 
         etypes = unique_etypes(x)
-        # cast() needed to tell mypy that fillna() doesn't return None here.
-        x_prev = cast(pd.Series, x.shift(periods=1).fillna("O", inplace=False))
+        x_prev = x.shift(periods=1).fillna("O", inplace=False)
         for etype in etypes:
             if (
                 x.isin([f"I-{etype}"]) & ~x_prev.isin([f"B-{etype}", f"I-{etype}"])
