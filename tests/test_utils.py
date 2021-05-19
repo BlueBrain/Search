@@ -21,11 +21,10 @@ import pathlib
 
 import h5py
 import numpy as np
-import pandas as pd
 import pytest
 import spacy
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
+from bluesearch.utils import H5, JSONL, Timer, load_spacy_model
 
 
 class TestTimer:
@@ -343,28 +342,6 @@ def test_load_save_jsonl(tmpdir):
     lo = JSONL.load_jsonl(path)
 
     assert li == lo
-
-
-def test_load_ee_models_library(tmpdir, monkeypatch):
-    fake_root_path = pathlib.Path(str(tmpdir)) / "data_and_models"
-
-    # Create directory structure and files
-    original_df = pd.DataFrame(
-        {"entity_type": ["A"], "model": ["model_1"], "entity_type_name": ["B"]}
-    )
-
-    csv_path = fake_root_path / "pipelines" / "ner" / "ee_models_library.csv"
-    csv_path.parent.mkdir(parents=True)
-    original_df.to_csv(csv_path)
-
-    df = load_ee_models_library(fake_root_path)
-
-    # Checks
-    assert isinstance(df, pd.DataFrame)
-    assert df["entity_type"][0] == "A"
-    assert df["model_path"][0] == str(fake_root_path / "models" / "ner_er" / "model_1")
-    assert df["model_id"][0] == "data_and_models/models/ner_er/model_1"
-    assert df["entity_type_name"][0] == "B"
 
 
 @pytest.mark.parametrize(
