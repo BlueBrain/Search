@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import pathlib
 
 import h5py
@@ -24,7 +25,14 @@ import numpy as np
 import pytest
 import spacy
 
-from bluesearch.utils import H5, JSONL, Timer, load_spacy_model
+from bluesearch.utils import (
+    H5,
+    JSONL,
+    Timer,
+    check_entity_type_consistency,
+    get_available_spacy_models,
+    load_spacy_model,
+)
 
 
 class TestTimer:
@@ -342,6 +350,58 @@ def test_load_save_jsonl(tmpdir):
     lo = JSONL.load_jsonl(path)
 
     assert li == lo
+
+
+@pytest.mark.parametrize(
+    "metadata,expected_value",
+    [
+        ({"wrongkey": "wrongvalue"}, False),  # labels key missing
+        ({"labels": "wrongvalue"}, False),  # ner key missing
+        ({"labels": {"ner": ["SEVERAL", "ENTITIES"]}}, False),  # several entities
+        ({"labels": {"ner": ["organism"]}}, False),  # entity lower
+        ({"labels": {"ner": ["ORGANISM"]}}, True),  # Good structure
+    ],
+)
+def test_check_entity_type_consistency(tmpdir, metadata, expected_value):
+    """Test that checks are working"""
+    # Wrong model directory name
+    wrong_model_dir = pathlib.Path(tmpdir) / "models" / "ner_er" / "wrongmodelname"
+    wrong_model_dir.mkdir(parents=True)
+    assert check_entity_type_consistency(wrong_model_dir) is False
+
+    # Missing meta.json file
+    good_model_dir = pathlib.Path(tmpdir) / "models" / "ner_er" / "model-organism"
+    good_model_dir.mkdir(parents=True)
+    assert check_entity_type_consistency(good_model_dir) is False
+
+    # meta.json structure
+    meta_path = good_model_dir / "meta.json"
+    with open(meta_path, "w") as f:
+        f.write(json.dumps(metadata))
+    assert check_entity_type_consistency(good_model_dir) is expected_value
+
+
+def test_get_available_spacy_models(spacy_model_path, entity_types):
+    """Test that available spacy models."""
+    models_dir = spacy_model_path / "models" / "ner_er"
+    expected_results = {
+        etype.upper(): models_dir / f"model-{etype.lower()}" for etype in entity_types
+    }
+    results = get_available_spacy_models(spacy_model_path)
+    assert isinstance(results, dict)
+    assert len(results) == 2
+    assert sorted(results.keys()) == sorted(entity_types)
+    assert results == expected_results
+
+
+@pytest.mark.filterwarnings()
+def test_get_available_spacy_models_warning(tmpdir):
+    """Test that available spacy models warnings."""
+    wrong_path = pathlib.Path(tmpdir) / "wrongpath"
+    wrong_model = wrong_path / "models" / "ner_er" / "wrongmodel"
+    wrong_model.mkdir(parents=True)
+    with pytest.warns(None):
+        _ = get_available_spacy_models(wrong_path)
 
 
 @pytest.mark.parametrize(
