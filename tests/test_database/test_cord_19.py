@@ -99,7 +99,7 @@ class TestDatabaseCreation:
     def test_database_content(self, real_sqlalchemy_engine):
         """Tests that the two tables expected has been created. """
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
-        tables_names = [table_name for table_name in inspector.get_table_names()]
+        tables_names = list(inspector.get_table_names())
         assert "sentences" in tables_names
         assert "articles" in tables_names
 
@@ -228,12 +228,8 @@ class TestDatabaseCreation:
         Tests that the schema of the fake database is always the same as
         the real one.
         """
-        real_tables_names = {
-            table_name for table_name in real_sqlalchemy_engine.table_names()
-        }
-        fake_tables_names = {
-            table_name for table_name in fake_sqlalchemy_engine.table_names()
-        }
+        real_tables_names = set(real_sqlalchemy_engine.table_names())
+        fake_tables_names = set(fake_sqlalchemy_engine.table_names())
 
         assert real_tables_names == {"articles", "sentences"}
         assert real_tables_names.issubset(fake_tables_names)

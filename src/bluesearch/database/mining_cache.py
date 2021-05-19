@@ -307,7 +307,7 @@ class CreateMiningCache:
 
     def _delete_rows(self):
         """Delete rows in the target table that will be re-populated."""
-        for model_id, model_schema in self.model_schemas.items():
+        for model_id, _model_schema in self.model_schemas.items():
             # Reformatted due to this bandit bug in python3.8:
             # https://github.com/PyCQA/bandit/issues/658
             query = (  # nosec
@@ -576,7 +576,7 @@ class CreateMiningCache:
         schema_df = self.ee_models_library
 
         model_schemas: Dict[str, Dict[str, Any]] = {}
-        for i, row in schema_df.iterrows():
+        for _i, row in schema_df.iterrows():
             entity_type_to = row["entity_type"]
             model_path = row["model_path"]
             model_id = row["model_id"]
