@@ -97,7 +97,7 @@ class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
     def test_database_content(self, real_sqlalchemy_engine):
-        """Tests that the two tables expected has been created. """
+        """Tests that the two tables expected has been created."""
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)
         tables_names = list(inspector.get_table_names())
         assert "sentences" in tables_names

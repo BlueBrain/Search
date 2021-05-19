@@ -65,7 +65,7 @@ class TestArticleSaver:
             assert not article_saver.has_paragraph(article_id, paragraph_id)
 
     def test_summaries(self, fake_sqlalchemy_engine, tmpdir):
-        """Test that article_saver is good. """
+        """Test that article_saver is good."""
 
         article_saver = ArticleSaver(connection=fake_sqlalchemy_engine)
 
