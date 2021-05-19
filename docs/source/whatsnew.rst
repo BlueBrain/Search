@@ -47,6 +47,7 @@ Latest
   :code:`ner_confusion_matrix` functions from :code:`bluesearch.mining.eval` submodule.
 - |Add| utility function :code:`_check_consistent_iob` inside
   :code:`bluesearch.mining.eval`.
+- |Change| upgrade linting tools in ``tox.ini``
 
 
 Version 0.1.2
