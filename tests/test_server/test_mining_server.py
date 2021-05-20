@@ -16,7 +16,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import shutil
 from io import StringIO
 from pathlib import Path
 from unittest.mock import Mock
@@ -26,13 +25,12 @@ import pytest
 
 from bluesearch.mining import SPECS
 from bluesearch.server.mining_server import MiningServer
-from bluesearch.utils import load_ee_models_library
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
 
 
 @pytest.fixture
-def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
+def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, entity_types):
     """Fixture to create a client for mining_server."""
 
     fake_load = Mock()
@@ -40,25 +38,10 @@ def mining_client(fake_sqlalchemy_engine, model_entities, monkeypatch, tmpdir):
 
     monkeypatch.setattr("bluesearch.server.mining_server.load_spacy_model", fake_load)
 
-    # This is the original CSV file with 3 columns:
-    # entity_type, model, entity_type_name
-    models_libs = TESTS_PATH / "data" / "mining" / "request" / "ee_models_library.csv"
-
-    # To load the library file we must use load_ee_models_library() as it
-    # converts the column "model" to two new columns "model_id" and "model_path"
-    # However, load_ee_models_library() assumes a particular directory
-    # structure, that's why we copy the original CSV to a new place with the
-    # correct directory structure.
-    tmpdir = Path(tmpdir)
-    new_csv_path = tmpdir / "pipelines" / "ner" / "ee_models_library.csv"
-    new_csv_path.parent.mkdir(parents=True)
-    shutil.copy(models_libs, new_csv_path)
-
-    # Load the model library
-    df_csv = load_ee_models_library(tmpdir)
+    ee_models_paths = {etype: Path("path/to/model") for etype in entity_types}
 
     mining_server_app = MiningServer(
-        models_libs={"ee": df_csv}, connection=fake_sqlalchemy_engine
+        models_libs={"ee": ee_models_paths}, connection=fake_sqlalchemy_engine
     )
     mining_server_app.config["TESTING"] = True
     with mining_server_app.test_client() as client:
@@ -82,18 +65,30 @@ class TestMiningServer:
         assert response.status_code == 200
         response_json = response.json
         missing_etypes = ["DISEASE", "CELL_TYPE", "PROTEIN", "ORGAN"]
-        assert response_json["warnings"] == [
-            f'No text mining model was found in the library for "{etype}".'
-            for etype in missing_etypes
-        ]
-        assert (
-            response_json["csv_extractions"].split("\n")[0]
-            == "entity,entity_type,property,"
-            "property_value,property_type,"
-            "property_value_type,"
-            "ontology_source,paper_id,"
-            "start_char,end_char"
+        assert sorted(response_json["warnings"]) == sorted(
+            [
+                f'No text mining model was found in the library for "{etype}".'
+                for etype in missing_etypes
+            ]
         )
+        extracted_columns_names = sorted(
+            response_json["csv_extractions"].split("\n")[0].split(",")
+        )
+        expected_columns_names = sorted(
+            [
+                "entity",
+                "entity_type",
+                "property",
+                "property_value",
+                "property_type",
+                "property_value_type",
+                "ontology_source",
+                "paper_id",
+                "start_char",
+                "end_char",
+            ]
+        )
+        assert expected_columns_names == extracted_columns_names
 
         # Test request with a missing text
         request_json = {}
@@ -122,6 +117,9 @@ class TestMiningServer:
         with open(schema_file, "r") as f:
             schema_request = f.read()
 
+        if not use_cache:
+            schema_request += "CARDINAL,,,,fake_ontology\nLAW,,,,fake_ontology"
+
         # Test a request with a missing "identifiers" key
         response = mining_client.post("/database", json={})
         assert list(response.json.keys()) == ["error"]
@@ -144,18 +142,32 @@ class TestMiningServer:
         assert response.status_code == 200
         assert response.headers["Content-Type"] == "application/json"
         missing_etypes = ["DISEASE", "CELL_TYPE", "PROTEIN", "ORGAN"]
-        assert response_json["warnings"] == [
-            f'No text mining model was found in the library for "{etype}".'
-            for etype in missing_etypes
-        ]
-        assert (
-            response_json["csv_extractions"].split("\n")[0]
-            == "entity,entity_type,property,"
-            "property_value,property_type,"
-            "property_value_type,"
-            "ontology_source,paper_id,"
-            "start_char,end_char"
+        if not use_cache:
+            missing_etypes += ["CARDINAL", "LAW"]
+        assert sorted(response_json["warnings"]) == sorted(
+            [
+                f'No text mining model was found in the library for "{etype}".'
+                for etype in missing_etypes
+            ]
         )
+        extracted_columns_names = sorted(
+            response_json["csv_extractions"].split("\n")[0].split(",")
+        )
+        expected_columns_names = sorted(
+            [
+                "entity",
+                "entity_type",
+                "property",
+                "property_value",
+                "property_type",
+                "property_value_type",
+                "ontology_source",
+                "paper_id",
+                "start_char",
+                "end_char",
+            ]
+        )
+        assert expected_columns_names == extracted_columns_names
 
     @pytest.mark.parametrize("debug", [True, False], ids=["debug", "specs"])
     def test_mining_cache_detailed(self, mining_client, test_parameters, debug):

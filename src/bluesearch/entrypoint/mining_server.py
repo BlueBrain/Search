@@ -23,7 +23,7 @@ import sys
 
 import sqlalchemy
 
-from ..utils import load_ee_models_library
+from ..utils import get_available_spacy_models
 from ._helper import configure_logging, get_var, run_server
 
 
@@ -74,8 +74,8 @@ def get_mining_app():
 
     # Create the server app
     logger.info("Creating the server app")
-    df_csv = load_ee_models_library(data_and_models_dir)
-    mining_app = MiningServer(models_libs={"ee": df_csv}, connection=engine)
+    ee_models_paths = get_available_spacy_models(data_and_models_dir)
+    mining_app = MiningServer(models_libs={"ee": ee_models_paths}, connection=engine)
 
     return mining_app
 
