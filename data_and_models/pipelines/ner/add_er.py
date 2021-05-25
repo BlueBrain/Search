@@ -21,9 +21,8 @@ from argparse import ArgumentParser
 import pathlib
 
 import spacy
-import yaml
 
-from bluesearch.mining import remap_entity_type
+from bluesearch.mining import global2model_patterns
 from bluesearch.utils import JSONL
 
 parser = ArgumentParser()
@@ -34,9 +33,6 @@ parser.add_argument(
     help="SpaCy model without an entity ruler. Can either be a SciSpacy model"
          '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
          "trained model.",
-)
-parser.add_argument(
-    "--etypes", required=True, type=str, help="Comma separated list of entity types.",
 )
 parser.add_argument(
     "--output_file",
@@ -54,17 +50,14 @@ args = parser.parse_args()
 
 
 def main():
-    print("Read params.yaml...")
-    params = yaml.safe_load(open("params.yaml"))["eval"]
-    external_etypes = [x.strip() for x in args.etypes.split(",")]
-    etype_mapping = {external.upper(): params[external]["etype_name"] for external in external_etypes}
     # Load and preprocess the annotations
     ner_model = spacy.load(args.model)
 
     print("Loading patterns")
     path_patterns = pathlib.Path(args.patterns_file)
     patterns = JSONL.load_jsonl(path_patterns)
-    modified_patterns = remap_entity_type(patterns, etype_mapping)
+    _, _, entity_type = args.model.rpartition("-")
+    modified_patterns = global2model_patterns(patterns, entity_type.upper())
     er_config = {"validate": True, "overwrite_ents": True}
     er = ner_model.add_pipe("entity_ruler", after="ner", config=er_config)
     er.add_patterns(modified_patterns)
