@@ -37,16 +37,7 @@ stages:
       outs:
       - ../../annotations/ner/annotations_${key}.jsonl
   preprocess:
-    foreach:
-    - cell_compartment
-    - cell_type
-    - chemical
-    - disease
-    - drug
-    - organ
-    - organism
-    - pathway
-    - protein
+    foreach: ${entities}
     do:
       cmd: python preprocess.py ../../annotations/ner/annotations_${item}.jsonl
       deps:
@@ -60,16 +51,7 @@ stages:
       - ../../annotations/ner/annotations_${item}.train.spacy
       - ../../annotations/ner/annotations_${item}.dev.spacy
   train:
-    foreach:
-    - cell_compartment
-    - cell_type
-    - chemical
-    - disease
-    - drug
-    - organ
-    - organism
-    - pathway
-    - protein
+    foreach: ${entities}
     do:
       cmd: >-
         python -m spacy train
@@ -85,16 +67,7 @@ stages:
       outs:
       - ../../models/ner/model-${item}/model-best/
   add_er:
-    foreach:
-    - cell_compartment
-    - cell_type
-    - chemical
-    - disease
-    - drug
-    - organ
-    - organism
-    - pathway
-    - protein
+    foreach: ${entities}
     do:
       cmd: >-
         python add_er.py
@@ -112,16 +85,7 @@ stages:
       outs:
       - ../../models/ner_er/model-${item}
   evaluate:
-    foreach:
-    - cell_compartment
-    - cell_type
-    - chemical
-    - disease
-    - drug
-    - organ
-    - organism
-    - pathway
-    - protein
+    foreach: ${entities}
     do:
       cmd: >-
         python eval.py

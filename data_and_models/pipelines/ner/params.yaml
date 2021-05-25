@@ -1,3 +1,13 @@
+entities:
+  - cell_compartment
+  - cell_type
+  - chemical
+  - disease
+  - drug
+  - organ
+  - organism
+  - pathway
+  - protein
 train:
   corpora:
     dev_size: 0.1  # (float) Proportion. | (int) Number of samples.
