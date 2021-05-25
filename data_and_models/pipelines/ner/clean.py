@@ -20,8 +20,6 @@ This script cleans annotations exported with Prodigy as .jsonl files.
 
 Run 'analyze.py' before to identify relevant cleaning rules.
 
-Usage: clean.py [OPTIONS] INPUT_PATH KEEP_LABEL [RENAME_INTO]
-
 First, this script keeps only valid texts from the annotations (see next paragraph).
 Second, this script normalizes entity labels (use upper case for labels in lower case).
 Third, this script keeps only the given entity label and renames it if necessary.
@@ -33,16 +31,14 @@ The output is one file. The file is put in the same directory as the input file.
 named following the pattern 'annotations_<entity_label>.jsonl'.
 """
 
-from collections import defaultdict
-from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 
 import srsly
 import typer
 
 
-def is_valid(example: Dict[str, Any], duplicated_hashes: set) -> bool:
+def is_valid(example: Dict[str, Any], duplicated_hashes: Set[str]) -> bool:
     accepted = example["answer"] == "accept"
     unique_hash = example["_input_hash"] not in duplicated_hashes
     return all((accepted, unique_hash))
@@ -87,7 +83,8 @@ def main(
         for span in text.get("spans", []):
             label = span["label"]
             total_spans += 1
-            if label.islower():
+            # Testing islower() is not sufficient (i.e. "ENTITy".islower() == False).
+            if not label.isupper():
                 span["label"] = label.upper()
                 normalized_spans += 1
     print(f"...normalized {normalized_spans} label spans (on {total_spans})")

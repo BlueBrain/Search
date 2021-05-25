@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import List, Union
 
 import pandas as pd
 import typer
@@ -31,17 +31,7 @@ Indeed, the computation of these counts relies on '_input_hash'.
 
 This code could be used either as a script or as a function.
 
-As a script, it lets analyze an individual annotation file with a detailed report:
-```
-Usage: analyze.py [OPTIONS] INPUT_PATH
-
-Arguments:
-  INPUT_PATH    [required]
-
-Options:
-  --verbose     [default: False]
-  --help        Show this message and exit.
-```
+As a script, it lets analyze an individual annotation file with a detailed report.
 
 As a function, it lets analyze several annotation files with a summary table:
 ```
@@ -84,7 +74,7 @@ METRICS = [
 ]
 
 
-def report(input_path: Path, verbose: bool) -> Dict[str, Union[int, float]]:
+def report(input_path: Path, verbose: bool) -> List[Union[int, float]]:
     print(f"Analyzing {input_path}...")
 
     results = []
@@ -100,7 +90,7 @@ def report(input_path: Path, verbose: bool) -> Dict[str, Union[int, float]]:
         msg(idx, f"### WARNING ### There might be an issue.")
 
     def critical(idx: int) -> None:
-        msg(idx, f"### CRITICAL ### There is an issue to investigated.")
+        msg(idx, f"### CRITICAL ### There is an issue to be investigated.")
 
     def presult(idx: int) -> None:
         print(f"\n{METRICS[idx]}: {results[idx]}")
@@ -113,7 +103,6 @@ def report(input_path: Path, verbose: bool) -> Dict[str, Union[int, float]]:
             print(df[columns].head(limit))
 
     def plabels(df: pd.DataFrame) -> None:
-        # FIXME
         counted = df.groupby("spans", as_index=False).count()
         print(counted.to_string(header=False, index=False))
 
