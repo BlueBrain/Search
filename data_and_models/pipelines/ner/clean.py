@@ -31,6 +31,7 @@ The output is one file. The file is put in the same directory as the input file.
 named following the pattern 'annotations_<entity_label>.jsonl'.
 """
 
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Optional, Set
 
@@ -57,14 +58,10 @@ def main(
     print(f"...read {len(corpus)} texts")
 
     print("Identify duplicated 'input_hash'...")
-    seen_hashes = set()
-    duplicated_hashes = set()
-    for x in corpus:
-        hash = x["_input_hash"]
-        if hash in seen_hashes:
-            duplicated_hashes.add(hash)
-        else:
-            seen_hashes.add(hash)
+    counter = Counter(x["_input_hash"] for x in corpus)
+    duplicated_hashes = [
+        input_hash for input_hash, count in counter.items() if count > 1
+    ]
     hashes_count = len(duplicated_hashes)
     print(f"...identified {hashes_count} hash(es)")
     if hashes_count > 0:
