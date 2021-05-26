@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import List, Union
 
 import pandas as pd
-import typer
 
 """
 This code lets analyze annotations in order to clean them for training NER models.
@@ -188,12 +188,23 @@ def report(input_path: Path, verbose: bool) -> List[Union[int, float]]:
     return results
 
 
-def main(
-    input_path: Path = typer.Argument(..., exists=True, dir_okay=False),
-    verbose: bool = typer.Option(False, "--verbose"),
-):
-    report(input_path, verbose)
+parser = ArgumentParser()
+parser.add_argument(
+    "input_path",
+    type=Path,
+    help="path of the annotations exported with Prodigy (.jsonl file)",
+)
+parser.add_argument(
+    "--verbose",
+    action="store_true",
+    help="display the concerned data for each summary metrics",
+)
+args = parser.parse_args()
+
+
+def main():
+    report(args.input_path, args.verbose)
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    main()

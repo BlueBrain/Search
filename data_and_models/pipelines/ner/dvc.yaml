@@ -29,7 +29,7 @@ stages:
         file: annotations9_EmmanuelleLogette_2020-07-08_raw6_CelltypeProtein
         label: protein
     do:
-      cmd: python clean.py ../../annotations/ner/${item.file}.jsonl ${item.label} ${key}
+      cmd: python clean.py ../../annotations/ner/${item.file}.jsonl ${item.label} --renamed_label ${key}
       deps:
       - Dockerfile
       - clean.py
