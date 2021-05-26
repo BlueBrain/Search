@@ -219,14 +219,18 @@ class SearchServer(Flask):
 
             self.logger.info(f"Search completed, got {len(sentence_ids)} results.")
 
-            response = dict(
-                sentence_ids=sentence_ids.tolist(),
-                similarities=similarities.tolist(),
-                stats=stats,
-            )
+            response = {
+                "sentence_ids": sentence_ids.tolist(),
+                "similarities": similarities.tolist(),
+                "stats": stats,
+            }
         else:
             self.logger.info("Search query is not JSON. Not processing.")
-            response = dict(sentence_ids=None, similarities=None, stats=None)
+            response = {
+                "sentence_ids": None,
+                "similarities": None,
+                "stats": None,
+            }
 
         response_json = jsonify(response)
 
