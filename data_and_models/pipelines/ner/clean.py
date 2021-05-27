@@ -50,7 +50,7 @@ parser.add_argument(
     help="keep only this entity label in the annotations (converted to upper case)",
 )
 parser.add_argument(
-    "--renamed_label",
+    "--renamed-label",
     type=str,
     help="rename the kept entity label with this new name (converted to upper case)",
 )
