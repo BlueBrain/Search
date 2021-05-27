@@ -51,6 +51,7 @@ Version 0.2.0a
   :code:`ner_confusion_matrix` functions from :code:`bluesearch.mining.eval` submodule.
 - |Add| utility function :code:`_check_consistent_iob` inside
   :code:`bluesearch.mining.eval`.
+  - |Change| upgrade linting tools in ``tox.ini``
 - |Change| for Transformer-based :code:`spaCy` pipelines for NER models
   instead of Tok2Vec-based :code:`scispaCy` pipelines.
 - |Change| for one entity per model instead of several entities per NER model.

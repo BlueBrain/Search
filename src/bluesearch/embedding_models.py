@@ -272,8 +272,8 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
     sentences = retrieve_sentences_from_sentence_ids(indices, connection)
     n_sentences = len(sentences)
 
-    all_embeddings = list()
-    all_ids = list()
+    all_embeddings = []
+    all_ids = []
 
     for batch_ix in range((n_sentences // batch_size) + 1):
         start_ix = batch_ix * batch_size

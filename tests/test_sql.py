@@ -191,7 +191,7 @@ class TestSQLQueries:
             * test_parameters["n_sentences_per_section"]
         )
         assert len(article_ids_dict) == num_sentences
-        article_ids = [x for x in article_ids_dict.values()]
+        article_ids = list(article_ids_dict.values())
         assert len(set(article_ids)) == test_parameters["n_articles"]
 
 

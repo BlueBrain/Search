@@ -1116,7 +1116,7 @@ class TestAttributeExtraction:
         df = extractor.extract_attributes(text, raw_attributes=True)
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 0
-        assert set(["attribute"]).issubset(set(df.columns))
+        assert {"attribute"}.issubset(set(df.columns))
 
 
 class TestAttributeAnnotationTab:

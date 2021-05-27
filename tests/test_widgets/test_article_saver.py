@@ -65,7 +65,7 @@ class TestArticleSaver:
             assert not article_saver.has_paragraph(article_id, paragraph_id)
 
     def test_summaries(self, fake_sqlalchemy_engine, tmpdir):
-        """Test that article_saver is good. """
+        """Test that article_saver is good."""
 
         article_saver = ArticleSaver(connection=fake_sqlalchemy_engine)
 
@@ -86,10 +86,9 @@ class TestArticleSaver:
             all_paragraph_pos_in_article = pd.read_sql(
                 sql_query, fake_sqlalchemy_engine
             )["paragraph_pos_in_article"].to_list()
-            all_articles_paragraphs_id[article_id] = [
-                paragraph_pos_in_article
-                for paragraph_pos_in_article in set(all_paragraph_pos_in_article)
-            ]
+            all_articles_paragraphs_id[article_id] = list(
+                set(all_paragraph_pos_in_article)
+            )
             # For all articles extract only the first of their paragraphs
             paragraph_pos_in_article = all_articles_paragraphs_id[article_id][0]
             article_saver.add_paragraph(article_id, paragraph_pos_in_article)

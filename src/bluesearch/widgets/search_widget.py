@@ -758,7 +758,7 @@ class SearchWidget(widgets.VBox):
         rows = []
         columns = ["Article ID", "Paragraph #", "Paragraph", "Article", "Title"]
         markers = {True: "✓", False: ""}
-        for article_id, paragraph_pos, sentence_id in self.history:
+        for article_id, paragraph_pos, _sentence_id in self.history:
             # Get saving status from the article saver
             if self.article_saver is None:
                 paragraph_saved = False
@@ -812,7 +812,7 @@ class SearchWidget(widgets.VBox):
     def _update_page_display(self):
         with self.widgets["out"]:
             print_whole_paragraph = self.widgets["print_paragraph"].value
-            self.radio_buttons = list()
+            self.radio_buttons = []
 
             self.widgets["out"].clear_output()
             start = self.current_page * self.results_per_page

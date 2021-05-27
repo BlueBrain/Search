@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""The setup script."""
 import os
 
 from setuptools import find_packages, setup
@@ -24,10 +24,10 @@ DESCRIPTION = (
 )
 
 LONG_DESCRIPTION = """
-Blue Brain Search is a text mining toolbox to perform semantic literature search 
+Blue Brain Search is a text mining toolbox to perform semantic literature search
 and structured information extraction from text sources.
 
-This project originated from the Blue Brain Project efforts on exploring and 
+This project originated from the Blue Brain Project efforts on exploring and
 mining the CORD-19 dataset."""
 
 CLASSIFIERS = [

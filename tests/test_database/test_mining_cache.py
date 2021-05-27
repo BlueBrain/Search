@@ -161,7 +161,7 @@ class TestMiner:
         miner, _, _ = miner_env
         miner.clean_up()
 
-        for logger_name, level, text in caplog.record_tuples:
+        for logger_name, level, _text in caplog.record_tuples:
             assert logger_name == str(miner)
             assert level == logging.INFO
 

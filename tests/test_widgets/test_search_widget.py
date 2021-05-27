@@ -404,7 +404,7 @@ def test_article_saver_gets_updated(
 
 
 def test_errors(fake_sqlalchemy_engine, monkeypatch, capsys):
-    """Check that widget raises an error when bbs search server not working. """
+    """Check that widget raises an error when bbs search server not working."""
 
     with pytest.raises(Exception):
         SearchWidget(

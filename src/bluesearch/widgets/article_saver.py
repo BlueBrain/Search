@@ -170,16 +170,16 @@ class ArticleSaver:
         just_paragraphs : set of tuple
             Set of tuple (article_id, paragraph_pos_in_article) chosen by the user.
         """
-        full_articles = set(
+        full_articles = {
             article_id
             for article_id, paragraph_pos_in_article in self.state
             if paragraph_pos_in_article == -1
-        )
-        just_paragraphs = set(
+        }
+        just_paragraphs = {
             (article_id, paragraph_pos_in_article)
             for article_id, paragraph_pos_in_article in self.state
             if paragraph_pos_in_article != -1 and article_id not in full_articles
-        )
+        }
         return full_articles, just_paragraphs
 
     def get_saved_items(self):
