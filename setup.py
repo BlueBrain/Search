@@ -68,10 +68,6 @@ INSTALL_REQUIRES = [
     "sentence-transformers",
     # >= 3.0.6 to include the fix for https://github.com/explosion/spaCy/pull/7603.
     "spacy>=3.0.6",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "typer",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "srsly",
     "torch",
 ]
 
@@ -97,6 +93,10 @@ EXTRAS_REQUIRE = {
         "matplotlib",
         "scipy",
         "transformers",
+        # Installed with spaCy.
+        "srsly",
+        # Installed with spaCy. Only for the temporary pipelines/ner/preprocess.py.
+        "typer",
     ],
 }
 
