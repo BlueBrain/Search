@@ -68,10 +68,6 @@ INSTALL_REQUIRES = [
     "sentence-transformers",
     # >= 3.0.6 to include the fix for https://github.com/explosion/spaCy/pull/7603.
     "spacy[transformers]>=3.0.6",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "typer",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "srsly",
     "torch",
 ]
 
@@ -99,6 +95,10 @@ EXTRAS_REQUIRE = {
         "transformers",
         # For using a spaCy lemmatizer with mode='lookup'.
         "spacy_lookups_data",
+        # Installed with spaCy.
+        "srsly",
+        # Installed with spaCy. Only for the temporary pipelines/ner/preprocess.py.
+        "typer",
     ],
 }
 
