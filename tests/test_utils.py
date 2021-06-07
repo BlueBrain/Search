@@ -377,7 +377,7 @@ def test_check_entity_type_consistency(tmpdir, metadata, expected_value):
     # meta.json structure
     meta_path = good_model_dir / "meta.json"
     with open(meta_path, "w") as f:
-        f.write(json.dumps(metadata))
+        json.dump(metadata, f)
     assert check_entity_type_consistency(good_model_dir) is expected_value
 
 

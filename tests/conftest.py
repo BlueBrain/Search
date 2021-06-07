@@ -324,16 +324,15 @@ def spacy_model_path(tmpdir, entity_types):
         etype_model_dir.mkdir()
         meta_path = etype_model_dir / "meta.json"
         with open(meta_path, "w") as f:
-            f.write(
-                json.dumps(
-                    {
-                        "labels": {
-                            "ner": [
-                                etype.upper(),
-                            ]
-                        }
+            json.dump(
+                {
+                    "labels": {
+                        "ner": [
+                            etype.upper(),
+                        ]
                     }
-                )
+                },
+                f,
             )
     return data_dir
 
