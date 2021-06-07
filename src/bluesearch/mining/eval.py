@@ -22,12 +22,11 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
 import sklearn
-import spacy
 from spacy.tokens import Doc
 
 
@@ -78,8 +77,7 @@ def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
             )
 
         etypes = unique_etypes(x)
-        # cast() needed to tell mypy that fillna() doesn't return None here.
-        x_prev = cast(pd.Series, x.shift(periods=1).fillna("O", inplace=False))
+        x_prev = x.shift(periods=1).fillna("O", inplace=False)
         for etype in etypes:
             if (
                 x.isin([f"I-{etype}"]) & ~x_prev.isin([f"B-{etype}", f"I-{etype}"])
@@ -195,30 +193,20 @@ def spacy2df(
     `ground_truth_tokenization=prodigy_table['text'].to_list()`.
     """
     doc = Doc(spacy_model.vocab, words=ground_truth_tokenization)
-    new_doc = doc
-    for _, pipe in spacy_model.pipeline:
-        if isinstance(
-            pipe,
-            (
-                spacy.pipeline.EntityRuler,
-                spacy.pipeline.EntityRecognizer,
-                spacy.pipeline.Lemmatizer,
-                spacy.pipeline.AttributeRuler,
-                spacy.pipeline.Tagger,
-            ),
-        ):
-            new_doc = pipe(new_doc)
 
-    new_doc.ents = tuple(
+    for _, pipe in spacy_model.pipeline:
+        doc = pipe(doc)
+
+    doc.ents = tuple(
         [
             e
-            for e in new_doc.ents
+            for e in doc.ents
             if excluded_entity_type is None or e.label_ != excluded_entity_type
         ]
     )
 
     all_rows = []
-    for token in new_doc:
+    for token in doc:
 
         if token.ent_iob_ == "O":
             all_rows.append(
@@ -263,9 +251,11 @@ def remove_punctuation(df):
     for col in annotations_cols:
         for idx in df.index[is_punctuation & df[col].str.startswith("B-")]:
             i = idx
-            while df.iloc[i]["text"] in list(string.punctuation):
+            while i < len(df) - 1 and df.iloc[i]["text"] in list(string.punctuation):
                 i += 1
-            df.iloc[i, df.columns.get_loc(col)] = "B" + df.iloc[i][col][1:]
+            df.iloc[i, df.columns.get_loc(col)] = (
+                "B" + df.iloc[i][col][1:] if df.iloc[i][col] != "O" else "O"
+            )
 
     df_cleaned = df[~is_punctuation].reset_index(drop=True)
     return df_cleaned

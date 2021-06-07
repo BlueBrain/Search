@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""The setup script."""
 import os
 
 from setuptools import find_packages, setup
@@ -24,10 +24,10 @@ DESCRIPTION = (
 )
 
 LONG_DESCRIPTION = """
-Blue Brain Search is a text mining toolbox to perform semantic literature search 
+Blue Brain Search is a text mining toolbox to perform semantic literature search
 and structured information extraction from text sources.
 
-This project originated from the Blue Brain Project efforts on exploring and 
+This project originated from the Blue Brain Project efforts on exploring and
 mining the CORD-19 dataset."""
 
 CLASSIFIERS = [
@@ -67,11 +67,7 @@ INSTALL_REQUIRES = [
     "scispacy>=0.4.0",
     "sentence-transformers",
     # >= 3.0.6 to include the fix for https://github.com/explosion/spaCy/pull/7603.
-    "spacy>=3.0.6",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "typer",
-    # From data_and_models/pipelines/ner/preprocess.py.
-    "srsly",
+    "spacy[transformers]>=3.0.6",
     "torch",
 ]
 
@@ -97,6 +93,12 @@ EXTRAS_REQUIRE = {
         "matplotlib",
         "scipy",
         "transformers",
+        # For using a spaCy lemmatizer with mode='lookup'.
+        "spacy_lookups_data",
+        # Installed with spaCy.
+        "srsly",
+        # Installed with spaCy. Only for the temporary pipelines/ner/preprocess.py.
+        "typer",
     ],
 }
 

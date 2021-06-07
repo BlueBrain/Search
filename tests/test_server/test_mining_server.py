@@ -183,7 +183,7 @@ class TestMiningServer:
         identifiers = [(1, 0), (2, -1), (3, 1)]
 
         expected_length = 0
-        for article_id, pos in identifiers:
+        for _article_id, pos in identifiers:
             n_paragraphs = test_parameters["n_sections_per_article"] if pos == -1 else 1
             expected_length += test_parameters["n_entities_per_section"] * n_paragraphs
 

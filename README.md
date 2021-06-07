@@ -755,4 +755,4 @@ This project was supported by funding to the Blue Brain
 Project, a research center of the Ecole polytechnique fédérale de Lausanne, from 
 the Swiss government's ETH Board of the Swiss Federal Institutes of Technology.
 
-COPYRIGHT 2021, Blue Brain Project/EPFL
+COPYRIGHT (c) 2021 Blue Brain Project/EPFL

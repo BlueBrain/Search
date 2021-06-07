@@ -29,8 +29,8 @@ RUN true \
 	&& apt-get install -y gcc g++ build-essential vim libfontconfig1
 RUN conda install -c carta mysqlclient
 
-# Instal BlueBrainSearach -- revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.1.2
+# Install Blue Brain Search -- revision can be a branch, sha, or tag
+ARG BBS_REVISION=v0.2.0a
 ADD . /src
 WORKDIR /src
 RUN git checkout $BBS_REVISION

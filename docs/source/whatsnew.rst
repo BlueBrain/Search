@@ -29,6 +29,10 @@ Legend
 
 Latest
 ======
+
+
+Version 0.2.0a
+==============
 - |Add| metrics file resulting from :code:`dvc` pipelines to :code:`git`.
   This allow now to use :code:`dvc metrics diff`.
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
@@ -47,6 +51,19 @@ Latest
   :code:`ner_confusion_matrix` functions from :code:`bluesearch.mining.eval` submodule.
 - |Add| utility function :code:`_check_consistent_iob` inside
   :code:`bluesearch.mining.eval`.
+- |Change| upgrade linting tools in ``tox.ini``
+- |Change| for Transformer-based :code:`spaCy` pipelines for NER models
+  instead of Tok2Vec-based :code:`scispaCy` pipelines.
+- |Change| for one entity per model instead of several entities per NER model.
+- |Change| :code:`pipelines/ner/dvc.yaml` to simplify and harmonize the
+  definition of the pipeline for training NER models.
+- |Add| :code:`annotations/ner/analyze.py`, a code to evaluate the data quality
+  of annotations. It could generate: 1) a detailed report for individual files
+  when used as a script and 2) a summary table for several files when used as
+  a function.
+- |Add| :code:`pipelines/ner/clean.py`, a script to clean annotations. It keeps
+  only valid texts, normalizes labels, keeps only a given label, and then
+  renames the label if necessary.
 - |Remove| :code:`ee_models_library.csv` and change the logic for one model per entity type.
 
 

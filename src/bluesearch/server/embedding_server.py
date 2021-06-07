@@ -192,7 +192,7 @@ class EmbeddingServer(Flask):
     @staticmethod
     def make_json_response(embedding):
         """Generate a json response."""
-        json_response = dict(embedding=[float(n) for n in embedding])
+        json_response = {"embedding": [float(n) for n in embedding]}
         response = jsonify(json_response)
 
         return response
