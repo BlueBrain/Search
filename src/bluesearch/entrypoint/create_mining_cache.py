@@ -106,6 +106,13 @@ def run_create_mining_cache(argv=None):
         """,
     )
     parser.add_argument(
+        "--device",
+        "-d",
+        type=str,
+        default="cpu",
+        help="Device to use for the inference {'cpu', 'gpu'}.",
+    )
+    parser.add_argument(
         "--log-file",
         "-l",
         type=str,
@@ -196,6 +203,7 @@ def run_create_mining_cache(argv=None):
         ee_models_library=ee_models_library,
         target_table_name=args.target_table_name,
         workers_per_model=args.n_processes_per_model,
+        device=args.device,
     )
 
     logger.info("Launching the mining")

@@ -541,14 +541,16 @@ def load_ee_models_library(
 
 
 def load_spacy_model(
-    model_name: Union[str, pathlib.Path], *args: Any, **kwargs: Any
+    model_name: Union[str, pathlib.Path], device: str = "cpu", *args: Any, **kwargs: Any
 ) -> spacy.language.Language:
     """Spacy model load with informative error message.
 
     Parameters
     ----------
-    model_name:
+    model_name :
         spaCy pipeline to load. It can be a package name or a local path.
+    device :
+        Device to load the spacy model {'cpu', 'gpu'}.
     *args, **kwargs:
         Arguments passed to `spacy.load()`
 
@@ -563,6 +565,8 @@ def load_spacy_model(
         If spaCy model loading failed due to non-existent package or local file.
     """
     try:
+        if device == "gpu":
+            spacy.require_gpu()
         return spacy.load(model_name, *args, **kwargs)
     except IOError as err:
         if str(err).startswith("[E050]"):

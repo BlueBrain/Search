@@ -67,6 +67,7 @@ class Miner:
         target_table,
         task_queue,
         can_finish,
+        device="cpu",
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
@@ -86,7 +87,7 @@ class Miner:
         self.engine.dispose()
 
         self.logger.info("Loading the NLP model")
-        self.model = load_spacy_model(self.model_path)
+        self.model = load_spacy_model(self.model_path, device=device)
 
     @classmethod
     def create_and_mine(
@@ -98,6 +99,7 @@ class Miner:
         target_table,
         task_queue,
         can_finish,
+        device,
     ):
         """Create a miner instance and start the mining loop.
 
@@ -132,6 +134,7 @@ class Miner:
             target_table=target_table,
             task_queue=task_queue,
             can_finish=can_finish,
+            device=device,
         )
 
         miner.work_loop()
@@ -275,6 +278,7 @@ class CreateMiningCache:
         ee_models_library,
         target_table_name,
         workers_per_model=1,
+        device="cpu",
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
         required_tables = ["articles", "sentences"]
@@ -289,6 +293,7 @@ class CreateMiningCache:
         self.target_table = target_table_name
         self.ee_models_library = ee_models_library
         self.workers_per_model = workers_per_model
+        self.device = device
 
         self.model_schemas = self._load_model_schemas()
 
@@ -453,6 +458,7 @@ class CreateMiningCache:
                         "target_table": self.target_table,
                         "task_queue": task_queues[model_id],
                         "can_finish": can_finish[model_id],
+                        "device": self.device,
                     },
                 )
                 worker_process.start()

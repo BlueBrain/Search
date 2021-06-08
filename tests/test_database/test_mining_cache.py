@@ -36,7 +36,7 @@ class TestMiner:
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bluesearch.database.mining_cache.load_spacy_model",
-            lambda model_path: model_entities,
+            lambda model_path, device: model_entities,
         )
 
         task_queue: mp.Queue = mp.Queue()
@@ -49,6 +49,7 @@ class TestMiner:
             target_table="mining_cache_temporary",
             task_queue=task_queue,
             can_finish=can_finish,
+            device="cpu",
         )
 
         return miner, task_queue, can_finish
@@ -61,7 +62,7 @@ class TestMiner:
         # Re-use the "en_core_web_sm" model in the model_entities fixture
         monkeypatch.setattr(
             "bluesearch.database.mining_cache.load_spacy_model",
-            lambda model_path: model_entities,
+            lambda model_path, device: model_entities,
         )
 
         Miner.create_and_mine(
@@ -72,6 +73,7 @@ class TestMiner:
             target_table="",
             task_queue=task_queue,
             can_finish=can_finish,
+            device="cpu",
         )
 
     def test_log_exception(self, miner_env, caplog):
