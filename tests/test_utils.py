@@ -400,7 +400,7 @@ def test_get_available_spacy_models_warning(tmpdir):
     wrong_path = pathlib.Path(tmpdir) / "wrongpath"
     wrong_model = wrong_path / "models" / "ner_er" / "wrongmodel"
     wrong_model.mkdir(parents=True)
-    with pytest.warns(None):
+    with pytest.warns(UserWarning):
         _ = get_available_spacy_models(wrong_path)
 
 
