@@ -17,7 +17,12 @@
 """Abstraction of scientific article data and related tools."""
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, List, Sequence, Tuple
+from dataclasses import dataclass
+from typing import Any, Dict, Generator, List, Mapping, Sequence, Tuple, Type, TypeVar
+
+# This is for annotating the return value of the Article.parse class method, see
+# https://github.com/python/typing/issues/254#issuecomment-661803922
+_T = TypeVar("_T", bound="Article")
 
 
 class ArticleParser(ABC):
@@ -155,18 +160,18 @@ class CORD19ArticleParser(ArticleParser):
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 
+@dataclass(frozen=True)
 class Article:
     """Abstraction of a scientific article and its contents."""
 
-    def __init__(self) -> None:
-        self.title = ""
-        self.authors: List[str] = []
-        self.abstract: List[str] = []
-        # We require py37+ so this dict is guaranteed insertion-ordered.
-        self.sections: Dict[str, List[str]] = {}
-        self.parsed = False
+    title: str
+    authors: Sequence[str]
+    abstract: Sequence[str]
+    # We require py37+ so dict is guaranteed insertion-ordered.
+    sections: Mapping[str, Sequence[str]]
 
-    def parse(self, parser: ArticleParser) -> None:
+    @classmethod
+    def parse(cls: Type[_T], parser: ArticleParser) -> _T:
         """Parse an article through a parser.
 
         Parameters
@@ -181,17 +186,16 @@ class Article:
             paragraph-wise duplicate sections are recognized as two non-adjacent
             blocks of paragraphs with the same title.
         """
-        if self.parsed:
-            raise RuntimeError("Can only parse the article once")
-        self.title = parser.get_title()
-        self.authors.extend(parser.iter_authors())
-        self.abstract.extend(parser.get_abstract())
+        title = parser.get_title()
+        authors = list(parser.iter_authors())
+        abstract = parser.get_abstract()
+        sections: Dict[str, List[str]] = {}
 
         # Collect sections
         current_section = None
         for section, paragraph in parser.iter_paragraphs():
-            if section not in self.sections:
-                self.sections[section] = []
+            if section not in sections:
+                sections[section] = []
             elif current_section != section:
                 # We've already seen that section title and it was not part of
                 # the current section.
@@ -200,9 +204,9 @@ class Article:
                     "sections will be merged into one."
                 )
             current_section = section
-            self.sections[section].append(paragraph)
+            sections[section].append(paragraph)
 
-        self.parsed = True
+        return cls(title, authors, abstract, sections)
 
     def iter_paragraphs(self, with_abstract: bool = True) -> Generator[str, Any, None]:
         """Iterate over all paragraphs in the article.
