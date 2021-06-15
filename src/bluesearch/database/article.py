@@ -85,16 +85,16 @@ class CORD19ArticleParser(ArticleParser):
         self.data = json_file
 
         # Check top-level keys
+        # the spec also includes "abstract" but it's missing from the PMC parses
         top_level_keys = {
             "paper_id",
             "metadata",
-            "abstract",
             "body_text",
             "bib_entries",
             "ref_entries",
             "back_matter",
         }
-        if set(json_file.keys()) != top_level_keys:
+        if not top_level_keys.issubset(json_file.keys()):
             raise ValueError(
                 "Incomplete JSON file. Missing keys: "
                 f"{top_level_keys - set(json_file.keys())}"
@@ -140,6 +140,9 @@ class CORD19ArticleParser(ArticleParser):
         list of str
             The paragraphs of the article abstract.
         """
+        if "abstract" not in self.data:
+            return []
+
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
     def iter_paragraphs(self) -> Generator[Tuple[str, str], None, None]:

@@ -126,6 +126,11 @@ class TestCORD19ArticleParser:
         for paragraph, paragraph_dict in zip(abstract, cord19_json_file["abstract"]):
             assert paragraph == paragraph_dict["text"]
 
+        # Check that if "abstract" is missing then an empty list is returned
+        del cord19_json_file["abstract"]
+        parser = CORD19ArticleParser(cord19_json_file)
+        assert parser.get_abstract() == []
+
     def test_iter_paragraphs(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
         paragraphs = tuple(parser.iter_paragraphs())
