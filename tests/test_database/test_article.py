@@ -1,6 +1,8 @@
+from itertools import chain
+
 import pytest
 
-from bluesearch.database.article import CORD19ArticleParser
+from bluesearch.database.article import Article, ArticleParser, CORD19ArticleParser
 
 
 @pytest.fixture()
@@ -46,6 +48,30 @@ def cord19_json_file():
         "back_matter": [],
     }
     return json_data
+
+
+class TestParser(ArticleParser):
+    def __init__(self):
+        self.title = "Test Title"
+        self.authors = ("Author 1", "Author 2")
+        self.abstract = ("Abstract paragraph 1", "Abstract paragraph 2")
+        self.paragraphs = [
+            ("Section 1", "Paragraph 1."),
+            ("Section 1", "Paragraph 2."),
+            ("Section 2", "Paragraph 1."),
+        ]
+
+    def get_title(self):
+        return self.title
+
+    def iter_authors(self):
+        yield from self.authors
+
+    def get_abstract(self):
+        return self.abstract
+
+    def iter_paragraphs(self):
+        yield from self.paragraphs
 
 
 class TestCORD19ArticleParser:
@@ -118,5 +144,38 @@ class TestCORD19ArticleParser:
 
 
 class TestArticle:
+    def test_parse(self):
+        # Test article parsing
+        parser = TestParser()
+        article = Article.parse(parser)
+        assert article.title == parser.title
+        assert tuple(article.authors) == parser.authors
 
-    ...
+        # Test iterating over all paragraphs in the article. By default the
+        # abstract is also included
+        paragraph_texts = [text for _section, text in parser.paragraphs]
+        for text, text_want in zip(
+            article.iter_paragraphs(), chain(parser.abstract, paragraph_texts)
+        ):
+            assert text == text_want
+
+        # Test excluding the paragraphs
+        for text, text_want in zip(
+            article.iter_paragraphs(with_abstract=False), paragraph_texts
+        ):
+            assert text == text_want
+
+        # If two duplicate section names are detected then a warning should be
+        # emitted. Add a paragraph from section 1 after section 2 to simulate
+        # this situation
+        parser.paragraphs.append(("Section 1", "Paragraph 3."))
+        with pytest.warns(UserWarning, match=r"(D|d)uplicate"):
+            Article.parse(parser)
+
+    def test_str(self):
+        parser = TestParser()
+        article = Article.parse(parser)
+        article_str = str(article)
+        assert parser.title in article_str
+        for author in parser.authors:
+            assert author in article_str
