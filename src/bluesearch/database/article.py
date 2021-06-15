@@ -18,7 +18,7 @@
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Mapping, Sequence, Tuple, Type, TypeVar
+from typing import Dict, Generator, List, Mapping, Sequence, Tuple, Type, TypeVar
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -39,7 +39,7 @@ class ArticleParser(ABC):
         """
 
     @abstractmethod
-    def iter_authors(self) -> Generator[str, Any, None]:
+    def iter_authors(self) -> Generator[str, None, None]:
         """Iterate over all author names.
 
         Yields
@@ -59,7 +59,7 @@ class ArticleParser(ABC):
         """
 
     @abstractmethod
-    def iter_paragraphs(self) -> Generator[Tuple[str, str], Any, None]:
+    def iter_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
         """Iterate over all paragraphs and titles of sections they are part of.
 
         Yields
@@ -110,7 +110,7 @@ class CORD19ArticleParser(ArticleParser):
         """
         return self.data["metadata"]["title"]
 
-    def iter_authors(self) -> Generator[str, Any, None]:
+    def iter_authors(self) -> Generator[str, None, None]:
         """Iterate over all author names.
 
         Yields
@@ -142,7 +142,7 @@ class CORD19ArticleParser(ArticleParser):
         """
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
-    def iter_paragraphs(self) -> Generator[Tuple[str, str], Any, None]:
+    def iter_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
         """Iterate over all paragraphs and titles of sections they are part of.
 
         Yields
@@ -208,7 +208,7 @@ class Article:
 
         return cls(title, authors, abstract, sections)
 
-    def iter_paragraphs(self, with_abstract: bool = True) -> Generator[str, Any, None]:
+    def iter_paragraphs(self, with_abstract: bool = True) -> Generator[str, None, None]:
         """Iterate over all paragraphs in the article.
 
         Parameters
