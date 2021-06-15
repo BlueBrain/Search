@@ -165,25 +165,17 @@ class TestArticle:
         assert tuple(article.authors) == parser.authors
 
         # Test iterating over all paragraphs in the article. By default the
-        # abstract is also included
-        paragraph_texts = [text for _section, text in parser.paragraphs]
-        for text, text_want in zip(
-            article.iter_paragraphs(), chain(parser.abstract, paragraph_texts)
-        ):
+        # abstract is not included
+        for text, text_want in zip(article.iter_paragraphs(), parser.paragraphs):
             assert text == text_want
 
-        # Test excluding the paragraphs
+        # This time test with the abstract paragraphs included.
+        abstract_paragraphs = [("Abstract", text) for text in parser.abstract]
         for text, text_want in zip(
-            article.iter_paragraphs(with_abstract=False), paragraph_texts
+            article.iter_paragraphs(with_abstract=True),
+            chain(abstract_paragraphs, parser.paragraphs),
         ):
             assert text == text_want
-
-        # If two duplicate section names are detected then a warning should be
-        # emitted. Add a paragraph from section 1 after section 2 to simulate
-        # this situation
-        parser.paragraphs.append(("Section 1", "Paragraph 3."))
-        with pytest.warns(UserWarning, match=r"(D|d)uplicate"):
-            Article.parse(parser)
 
     def test_str(self):
         parser = TestParser()

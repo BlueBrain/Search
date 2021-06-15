@@ -15,10 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Abstraction of scientific article data and related tools."""
-import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Generator, List, Mapping, Sequence, Tuple, Type, TypeVar
+from typing import Generator, List, Sequence, Tuple, Type, TypeVar
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -173,8 +172,7 @@ class Article:
     title: str
     authors: Sequence[str]
     abstract: Sequence[str]
-    # We require py37+ so dict is guaranteed insertion-ordered.
-    sections: Mapping[str, Sequence[str]]
+    section_paragraphs: Sequence[Tuple[str, str]]
 
     @classmethod
     def parse(cls: Type[_T], parser: ArticleParser) -> _T:
@@ -184,37 +182,17 @@ class Article:
         ----------
         parser
             An article parser instance.
-
-        Warns
-        -----
-        UserWarning
-            If duplicate section titles are encountered. Since the parsing is
-            paragraph-wise duplicate sections are recognized as two non-adjacent
-            blocks of paragraphs with the same title.
         """
         title = parser.get_title()
-        authors = list(parser.iter_authors())
+        authors = tuple(parser.iter_authors())
         abstract = parser.get_abstract()
-        sections: Dict[str, List[str]] = {}
+        section_paragraphs = tuple(parser.iter_paragraphs())
 
-        # Collect sections
-        current_section = None
-        for section, paragraph in parser.iter_paragraphs():
-            if section not in sections:
-                sections[section] = []
-            elif current_section != section:
-                # We've already seen that section title and it was not part of
-                # the current section.
-                warnings.warn(
-                    f"Duplicate section titles found in {parser}. The respective"
-                    "sections will be merged into one."
-                )
-            current_section = section
-            sections[section].append(paragraph)
+        return cls(title, authors, abstract, section_paragraphs)
 
-        return cls(title, authors, abstract, sections)
-
-    def iter_paragraphs(self, with_abstract: bool = True) -> Generator[str, None, None]:
+    def iter_paragraphs(
+        self, with_abstract: bool = False
+    ) -> Generator[Tuple[str, str], None, None]:
         """Iterate over all paragraphs in the article.
 
         Parameters
@@ -225,12 +203,14 @@ class Article:
         Yields
         ------
         str
-            One of the article paragraphs.
+            Section title of the section the paragraph is in.
+        str
+            The paragraph text.
         """
         if with_abstract:
-            yield from self.abstract
-        for section_paragraphs in self.sections.values():
-            yield from section_paragraphs
+            for paragraph in self.abstract:
+                yield "Abstract", paragraph
+        yield from self.section_paragraphs
 
     def __str__(self) -> str:
         """Get a short summary of the article statistics.
@@ -240,17 +220,27 @@ class Article:
         str
             A summary of the article statistics.
         """
+        # Collection information on text/paragraph lengths
+        abstract_length = sum(map(len, self.abstract))
+        section_lengths = {}
+        for section_title, text in self.section_paragraphs:
+            if section_title not in section_lengths:
+                section_lengths[section_title] = 0
+            section_lengths[section_title] += len(text)
+        main_text_length = sum(section_lengths.values())
+        all_text_length = abstract_length + main_text_length
+
+        # Construct the return string
         info_str = (
             f'Title    : "{self.title}"\n'
             f'Authors  : {", ".join(self.authors)}\n'
             f"Abstract : {len(self.abstract)} paragraph(s), "
-            f"{sum(map(len, self.abstract))} characters\n"
-            f"Sections : {len(self.sections)} section(s) "
-            f"{sum(sum(map(len, section)) for section in self.sections.values())} "
-            f"characters\n"
+            f"{abstract_length} characters\n"
+            f"Sections : {len(section_lengths)} section(s) "
+            f"{main_text_length} characters\n"
         )
-        for section in self.sections:
+        for section in section_lengths:
             info_str += f"- {section}\n"
-        info_str += f"Total text length : {sum(map(len, self.iter_paragraphs()))}\n"
+        info_str += f"Total text length : {all_text_length}\n"
 
         return info_str.strip()
