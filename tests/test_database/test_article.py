@@ -44,7 +44,13 @@ def cord19_json_file():
             },
         ],
         "bib_entries": {},
-        "ref_entries": {},
+        "ref_entries": {
+            "FIGREF7": {"text": "This figure shows...", "type": "figure"},
+            "TABREF23": {
+                "text": "The results are presented in the table above.",
+                "type": "table",
+            },
+        },
         "back_matter": [],
     }
     return json_data
@@ -125,7 +131,9 @@ class TestCORD19ArticleParser:
         paragraphs = tuple(parser.iter_paragraphs())
 
         # Check that all paragraphs were parsed
-        assert len(paragraphs) == len(cord19_json_file["body_text"])
+        n_body_text = len(cord19_json_file["body_text"])
+        n_ref_entries = len(cord19_json_file["ref_entries"])
+        assert len(paragraphs) == n_body_text + n_ref_entries
 
         # Check that all paragraph texts match
         for (section, text), paragraph_dict in zip(

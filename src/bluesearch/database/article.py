@@ -154,6 +154,9 @@ class CORD19ArticleParser(ArticleParser):
         """
         for paragraph in self.data["body_text"]:
             yield paragraph["section"], paragraph["text"]
+        # We've always included figure/table captions like this
+        for ref_entry in self.data["ref_entries"].values():
+            yield "Caption", ref_entry["text"]
 
     def __str__(self):
         """Get the string representation the the parser instance."""
