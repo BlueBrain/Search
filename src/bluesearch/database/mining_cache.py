@@ -25,6 +25,7 @@ import traceback
 from typing import Any, Dict, List
 
 import sqlalchemy
+import torch
 
 from ..mining.pipeline import run_pipeline
 from ..sql import retrieve_articles
@@ -77,6 +78,7 @@ class Miner:
         self.target_table_name = target_table
         self.task_queue = task_queue
         self.can_finish = can_finish
+        self.device = device
 
         self.n_tasks_done = 0
 
@@ -165,6 +167,9 @@ class Miner:
                     self.n_tasks_done += 1
                 except Exception:
                     self._log_exception(article_id)
+            # To avoid CUDA memory issue
+            if self.device == "gpu":
+                torch.cuda.empty_cache()
 
     def _generate_texts_with_metadata(self, article_ids):
         """Return a generator of (text, metadata_dict) for nlp.pipe.
