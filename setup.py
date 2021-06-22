@@ -92,6 +92,8 @@ EXTRAS_REQUIRE = {
         "dvc[ssh]>=2",
         "matplotlib",
         "scipy",
+        # To enable GPUs with spacy.
+        "spacy[cuda102]",
         "transformers",
         # For using a spaCy lemmatizer with mode='lookup'.
         "spacy_lookups_data",
