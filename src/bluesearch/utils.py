@@ -20,11 +20,11 @@
 import json
 import pathlib
 import time
-from typing import Any, Set, Union
+import warnings
+from typing import Any, Dict, Set, Union
 
 import h5py
 import numpy as np
-import pandas as pd
 import spacy
 
 
@@ -481,63 +481,90 @@ class MissingEnvironmentVariable(Exception):
     """Exception for missing environment variables."""
 
 
-def load_ee_models_library(
+def check_entity_type_consistency(model_path: Union[str, pathlib.Path]) -> bool:
+    """Check that entity type of the model name is the same as in the ner pipe.
+
+    Parameters
+    ----------
+    model_path
+        Path to a spacy model directory.
+
+    Returns
+    -------
+    bool
+        If true, the name of the model and the entity type name detected by the model
+        are consistent. Otherwise, it is not.
+    """
+    model_path = pathlib.Path(model_path)
+
+    _, dash, entity_type = model_path.stem.partition("-")
+
+    if dash != "-" or not entity_type.islower():
+        return False
+
+    meta_file = model_path / "meta.json"
+
+    if not meta_file.exists():
+        return False
+
+    with open(meta_file) as f:
+        metadata = json.load(f)
+
+    if "labels" not in metadata:
+        return False
+    if "ner" not in metadata["labels"]:
+        return False
+
+    detected_labels = metadata["labels"]["ner"]
+
+    if len(detected_labels) != 1:
+        return False
+
+    detected_entity_type = detected_labels[0]
+
+    if not detected_entity_type.isupper():
+        return False
+
+    return entity_type.upper() == detected_entity_type
+
+
+def get_available_spacy_models(
     data_and_models_dir: Union[str, pathlib.Path]
-) -> pd.DataFrame:
-    """Load the entity extraction library from disk.
-
-    The CSV file on disk contains the following columns:
-
-        - entity_type
-        - model
-        - entity_type_name
-
-    The "model" column is mapped to two new columns "model_id" and
-    "model_path" so that the returned data frame has the following
-    columns:
-
-        - entity_type
-        - entity_type_name
-        - model_path
-        - model_id
+) -> Dict[str, pathlib.Path]:
+    """List available spacy models for a given data directory.
 
     Parameters
     ----------
     data_and_models_dir
-        The local path to the "data_and_models" directory. The CSV file
-        will be loaded from `data_dir/pipelines/ner/ee_models_library.csv`.
+        Path to directory "data_and_models".
+        Should contains models/ner_er and models/er directories with all spacy models.
 
     Returns
     -------
-    df_library : pd.DataFrame
-        The entity extraction library loaded from disk.
+    models_dict
+        Dictionary mapping the entity type to the spacy model path detecting it.
+        Only the models following the naming convention are kept.
     """
     data_and_models_dir = pathlib.Path(data_and_models_dir)
-    if not data_and_models_dir.exists():
-        raise FileNotFoundError(f"Path {data_and_models_dir} does not exist")
-    if not data_and_models_dir.is_dir():
-        raise ValueError(f"{data_and_models_dir} must be a directory")
 
-    # Load the library file
-    library_path = data_and_models_dir / "pipelines" / "ner" / "ee_models_library.csv"
-    df_library = pd.read_csv(library_path)
+    models_dir = data_and_models_dir / "models" / "ner_er"
 
-    # Construct the model_path column
-    model_path = data_and_models_dir / "models" / "ner_er"
-    df_library["model_path"] = df_library["model"].apply(
-        lambda model_name: str(model_path / model_name)
-    )
+    available_models = [
+        model_path for model_path in models_dir.iterdir() if model_path.is_dir()
+    ]
+    models_dict = {}
+    for model_path in available_models:
+        if not check_entity_type_consistency(model_path):
+            warnings.warn(
+                f"Name of the model {model_path} is not consistent with "
+                "the detected entities. Therefore, this model was not "
+                "included into the list of available models."
+            )
+        else:
+            _, _, entity_type = model_path.stem.partition("-")
+            models_dict[entity_type.upper()] = model_path.resolve()
 
-    # Construct the model_id column
-    # Maybe come up with a better model_id in the future
-    df_library["model_id"] = df_library["model"].apply(
-        lambda model_name: f"data_and_models/models/ner_er/{model_name}"
-    )
-
-    # Drop the model column
-    df_library = df_library.drop("model", axis=1)
-
-    return df_library
+    return models_dict
 
 
 def load_spacy_model(

@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import time
 from pathlib import Path
 
@@ -198,8 +199,6 @@ def fill_db_data(engine, metadata_path, test_parameters, entity_types):
                         "end_char": ent_ix + 1,
                         "article_id": article_id,
                         "paragraph_pos_in_article": sec_ix,
-                        # from data/mining/request/ee_models_library.csv
-                        "mining_model": "data_and_models/models/ner_er/model-organism",
                     }
                 )
                 temp_m.append(s)
@@ -310,11 +309,32 @@ def metadata_path():
 @pytest.fixture(scope="session")
 def entity_types():
     """Entity types that can be used throughout tests."""
-    request_path = (
-        ROOT_PATH / "tests" / "data" / "mining" / "request" / "ee_models_library.csv"
-    )
+    return ["CHEMICAL", "ORGANISM"]
 
-    return list(pd.read_csv(request_path)["entity_type"].unique())
+
+@pytest.fixture()
+def spacy_model_path(tmpdir, entity_types):
+    """Structure of files for entity models."""
+    data_dir = Path(tmpdir) / "some" / "path"
+    models_dir = data_dir / "models" / "ner_er"
+    models_dir.mkdir(parents=True)
+
+    for etype in entity_types:
+        etype_model_dir = models_dir / f"model-{etype.lower()}"
+        etype_model_dir.mkdir()
+        meta_path = etype_model_dir / "meta.json"
+        with open(meta_path, "w") as f:
+            json.dump(
+                {
+                    "labels": {
+                        "ner": [
+                            etype.upper(),
+                        ]
+                    }
+                },
+                f,
+            )
+    return data_dir
 
 
 @pytest.fixture(scope="session")

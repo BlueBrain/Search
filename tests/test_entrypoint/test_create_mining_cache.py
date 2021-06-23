@@ -20,7 +20,6 @@
 import pathlib
 from unittest.mock import Mock
 
-import pandas as pd
 import pytest
 
 from bluesearch.entrypoint import run_create_mining_cache
@@ -56,7 +55,7 @@ def test_missing_sqlite_db():
         "db_url",
         "target_table_name",
         "n_processes_per_model",
-        "restrict_to_models",
+        "restrict_to_etypes",
     ),
     (
         (
@@ -64,14 +63,14 @@ def test_missing_sqlite_db():
             "my_url",
             "mysql_cache_table",
             4,
-            "path/to/model_1,path/to/model_2",
+            "CHEMICAL,ORGANISM",
         ),
         (
             "sqlite",
             "my_url",
             "sqlite_cache_table",
             12,
-            "path/to/model_3,invalid",
+            "CHEMICAL,invalid",
         ),
     ),
 )
@@ -82,38 +81,15 @@ def test_send_through(
     db_url,
     target_table_name,
     n_processes_per_model,
-    restrict_to_models,
+    restrict_to_etypes,
+    entity_types,
+    spacy_model_path,
 ):
     # Monkey-patching
-    data_dir = "/data_dir"
-    df_model_library = pd.DataFrame(
-        columns=["entity_type", "entity_type_name", "model_id", "model_path"],
-        data=[
-            [
-                "CELL_COMPARTMENT",
-                "CELLULAR_COMPONENT",
-                "path/to/model_1",
-                f"{data_dir}/path/to/model_1",
-            ],
-            [
-                "CELL_TYPE",
-                "CELL_TYPE",
-                "path/to/model_2",
-                f"{data_dir}/path/to/model_2",
-            ],
-            ["CHEMICAL", "CHEBI", "path/to/model_3", f"{data_dir}/path/to/model_3"],
-        ],
-    )
-    fake_load_ee_models_library = Mock()
-    fake_load_ee_models_library.return_value = df_model_library
     fake_sqlalchemy = Mock()
     fake_create_mining_cache = Mock()
     monkeypatch.setattr(
         "bluesearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
-    )
-    monkeypatch.setattr(
-        "bluesearch.entrypoint.create_mining_cache.load_ee_models_library",
-        fake_load_ee_models_library,
     )
     monkeypatch.setattr(
         "bluesearch.database.CreateMiningCache", fake_create_mining_cache
@@ -133,12 +109,12 @@ def test_send_through(
 
     # Construct arguments
     argv = [
-        "--data-and-models-dir=/some/fake/path",
+        f"--data-and-models-dir={spacy_model_path}",
         f"--db-type={db_type}",
         f"--db-url={db_url}",
         f"--target-table-name={target_table_name}",
         f"--n-processes-per-model={n_processes_per_model}",
-        f"--restrict-to-models={restrict_to_models}",
+        f"--restrict-to-etypes={restrict_to_etypes}",
     ]
 
     # Call entrypoint method
@@ -150,17 +126,13 @@ def test_send_through(
     fake_create_mining_cache.assert_called_once()
     args, kwargs = fake_create_mining_cache.call_args
 
-    # Construct the restricted model library data frame
-    selected_models = restrict_to_models.split(",")
-    df_model_library_selected = df_model_library[
-        df_model_library["model_id"].isin(selected_models).tolist()
-    ]
+    # Construct the restricted etypes
+    available_models = set(restrict_to_etypes.split(",")) & set(entity_types)
 
     # Check the args/kwargs
     assert kwargs["database_engine"] == fake_sqlalchemy.create_engine()
-    assert isinstance(kwargs["ee_models_library"], pd.DataFrame)
-    assert len(df_model_library_selected) > 0
-    assert kwargs["ee_models_library"].equals(df_model_library_selected)
+    assert isinstance(kwargs["ee_models_paths"], dict)
+    assert len(kwargs["ee_models_paths"]) == len(available_models)
     assert kwargs["target_table_name"] == target_table_name
     assert kwargs["workers_per_model"] == n_processes_per_model
 

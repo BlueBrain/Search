@@ -38,15 +38,8 @@ class MiningServer(Flask):
     ----------
     models_libs : dict of str
         Dictionary mapping each type of extraction ('ee' for entities,
-        're' for relations, 'ae' for attributes) to the `pd.DataFrame` with the
-        information on which model to use for the extraction of each entity,
-        relation, or attribute type, respectively. For 'ee', the dataframe
-        should have 3 columns: 'entity_type', 'model', 'entity_type_name'.
-
-         - 'entity_type': name of entity type, as called in the request schema
-         - 'model': name of a spaCy or scispaCy model (e.g. 'en_ner_craft_md')
-           or path to a custom trained spaCy model
-         - 'entity_type_name': name of entity type, as called in 'model.labels'
+        're' for relations, 'ae' for attributes) to the list of paths
+        of available models.
 
     connection : sqlalchemy.engine.Engine
         The database connection.
@@ -68,18 +61,10 @@ class MiningServer(Flask):
 
         self.logger.info("Loading the NER models")
         self.ee_models: Dict[str, spacy.language.Language] = {}
-        self.logger.debug(f"EE model library:\n{str(self.models_libs['ee'])}")
-        ee_models_meta = self.models_libs["ee"][
-            ["model_id", "model_path", "entity_type"]
-        ]
-        for model_id, model_path, entity_type in ee_models_meta.itertuples(index=False):
-            if model_id in self.ee_models:
-                self.logger.info(
-                    f"Entity type {entity_type}: model {model_id} already loaded"
-                )
-            else:
-                self.logger.info(f"Entity type {entity_type}: loading model {model_id}")
-                self.ee_models[model_id] = load_spacy_model(model_path)
+        self.logger.debug(f"EE models available:\n{str(self.models_libs['ee'])}")
+        for entity_type, model_path in models_libs["ee"].items():
+            self.logger.info(f"Entity type {entity_type}: loading model {model_path}")
+            self.ee_models[entity_type] = load_spacy_model(model_path)
 
         self.connection = connection
 
@@ -131,18 +116,28 @@ class MiningServer(Flask):
 
         return jsonify(response)
 
-    def ee_models_from_request_schema(self, schema_df):
-        """Find entity extraction model for entity types."""
-        schema_df = schema_df[schema_df["property"].isna()]
-        return schema_df.merge(self.models_libs["ee"], on="entity_type", how="left")[
-            [
-                "entity_type",
-                "model_id",
-                "model_path",
-                "entity_type_name",
-                "ontology_source",
-            ]
-        ]
+    def get_available_etypes(self, schema_df):
+        """Find entity extraction model for entity types.
+
+        Parameters
+        ----------
+        schema_df : pd.DataFrame
+            Schema of the client request.
+
+        Returns
+        -------
+        etypes : set[str]
+            Entity types requested and available on the server.
+        etypes_na : set[str]
+            Entity types requested but not available on the server.
+        """
+        detected_etypes = set(self.ee_models.keys())
+        requested_etypes = set(schema_df["entity_type"])
+
+        etypes = requested_etypes & detected_etypes
+        etypes_na = requested_etypes - detected_etypes
+
+        return etypes, etypes_na
 
     def pipeline_database(self):
         """Respond to a query on specific paragraphs in the database."""
@@ -175,36 +170,16 @@ class MiningServer(Flask):
             if use_cache:
                 self.logger.info("Using cache")
                 # determine which models are necessary
-                ee_models_info = self.ee_models_from_request_schema(schema_df)
-                etypes_na = ee_models_info[ee_models_info["model_id"].isna()][
-                    "entity_type"
-                ]
-                model_ids = ee_models_info[~ee_models_info["model_id"].isna()][
-                    "model_id"
-                ].to_list()
-                self.logger.debug(f"model_names = {model_ids}")
+                etypes, etypes_na = self.get_available_etypes(schema_df)
+                self.logger.debug(f"etypes = {etypes}")
+                self.logger.debug(f"etypes_na = {etypes_na}")
 
                 # get cached results
-                df_all = retrieve_mining_cache(identifiers, model_ids, self.connection)
+                df_all = retrieve_mining_cache(identifiers, etypes, self.connection)
                 self.logger.debug(f"cached results, df_all =\n{str(df_all)}")
 
-                # drop unwanted entity types
-                requested_etypes = schema_df["entity_type"].unique()
-                df_all = df_all[df_all["entity_type"].isin(requested_etypes)]
-                self.logger.debug(
-                    f"dropped unwanted entity types, df_all =\n{str(df_all)}"
-                )
-
                 # append the ontology source column
-                os_mapping = {
-                    et: os
-                    for _, (et, os) in ee_models_info[
-                        ["entity_type", "ontology_source"]
-                    ].iterrows()
-                }
-                df_all["ontology_source"] = df_all["entity_type"].apply(
-                    lambda x: os_mapping[x]
-                )
+                df_all = self.add_ontology_column(df_all, schema_df)
                 self.logger.debug(
                     f"appended ontology source column, df_all =\n{str(df_all)}"
                 )
@@ -244,7 +219,7 @@ class MiningServer(Flask):
                 ]
 
                 df_all, etypes_na = self.mine_texts(
-                    texts=texts, schema_request=schema_df, debug=debug
+                    texts=texts, schema_df=schema_df, debug=debug
                 )
             response = self.create_response(df_all, etypes_na)
             self.logger.info(f"Mining completed, extracted {len(df_all)} elements.")
@@ -280,7 +255,7 @@ class MiningServer(Flask):
 
             texts: Iterable[Tuple[str, Dict[Any, Any]]] = [(text, {})]
             df_all, etypes_na = self.mine_texts(
-                texts=texts, schema_request=schema_df, debug=debug
+                texts=texts, schema_df=schema_df, debug=debug
             )
             response = self.create_response(df_all, etypes_na)
         else:
@@ -291,42 +266,21 @@ class MiningServer(Flask):
 
         return response
 
-    def mine_texts(self, texts, schema_request, debug):
+    def mine_texts(self, texts, schema_df, debug):
         """Run mining pipeline on a given list of texts."""
         self.logger.info("Running the mining pipeline...")
 
-        ee_models_info = self.ee_models_from_request_schema(schema_request)
-        etypes_na = ee_models_info[ee_models_info["model_id"].isna()]["entity_type"]
-        ee_models_info = ee_models_info[~ee_models_info["model_id"].isna()]
+        etypes, etypes_na = self.get_available_etypes(schema_df)
 
         df_all = pd.DataFrame()
-        for model_id, info_slice in ee_models_info.groupby("model_id"):
-            ee_model = self.ee_models[model_id]
+        for etype in etypes:
+            ee_model = self.ee_models[etype]
             df = run_pipeline(
                 texts=texts, model_entities=ee_model, models_relations={}, debug=debug
             )
-            # Select only entity types for which this model is responsible
-            df = df[df["entity_type"].isin(info_slice["entity_type_name"])]
-            df.reset_index()
-
-            # Set ontology source as specified in the request
-            for _, row in info_slice.iterrows():
-                ont_src = row["ontology_source"]
-                etype_name = row["entity_type_name"]
-                df.loc[df["entity_type"] == etype_name, "ontology_source"] = ont_src
-
-            # Rename entity types using the model library info, so that
-            # we match the schema request
-            df = df.replace(
-                {
-                    "entity_type": dict(
-                        zip(info_slice["entity_type_name"], info_slice["entity_type"])
-                    )
-                }
-            )
-
             df_all = df_all.append(df)
 
+        df_all = self.add_ontology_column(df_all, schema_df)
         self.logger.info(f"Mining completed. Mined {len(df_all)} items.")
         return (
             df_all.sort_values(by=["paper_id", "start_char"], ignore_index=True),
@@ -343,6 +297,16 @@ class MiningServer(Flask):
                 self.logger.info(f'No "{k}" was provided. Stopping.')
                 return self.create_error_response(f'The request "{k}" is missing.')
         return False
+
+    @staticmethod
+    def add_ontology_column(df_all, schema_df):
+        """Add ontology column to dataframe."""
+        os_mapping = {
+            et: os
+            for _, (et, os) in schema_df[["entity_type", "ontology_source"]].iterrows()
+        }
+        df_all["ontology_source"] = df_all["entity_type"].apply(lambda x: os_mapping[x])
+        return df_all
 
     @staticmethod
     def read_df_from_str(df_str, drop_duplicates=True):
@@ -379,7 +343,7 @@ class MiningServer(Flask):
         ----------
         df_extractions : pd.DataFrame
             DataFrame containing all the elements extracted by text mining.
-        etypes_na : list[str]
+        etypes_na : Iterable[str]
             Entity types found in the request CSV file for which no available
             model was found in the library.
 

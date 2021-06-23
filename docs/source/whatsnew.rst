@@ -64,6 +64,7 @@ Version 0.2.0a
 - |Add| :code:`pipelines/ner/clean.py`, a script to clean annotations. It keeps
   only valid texts, normalizes labels, keeps only a given label, and then
   renames the label if necessary.
+- |Remove| :code:`ee_models_library.csv` and change the logic for one model per entity type.
 
 
 Version 0.1.2
