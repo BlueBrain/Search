@@ -20,7 +20,6 @@
 import pathlib
 from unittest.mock import Mock
 
-import pandas as pd
 import pytest
 
 from bluesearch.entrypoint import get_mining_app
@@ -35,7 +34,9 @@ from bluesearch.entrypoint import get_mining_app
         ("wrong", False),
     ),
 )
-def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
+def test_send_through(
+    tmpdir, monkeypatch, db_type, sqlite_db_exists, entity_types, spacy_model_path
+):
     tmpdir = pathlib.Path(str(tmpdir))
     logfile = tmpdir / "log.txt"
     db_path = tmpdir / "something.db"
@@ -49,13 +50,9 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     monkeypatch.setenv("BBS_MINING_DB_URL", str(db_path))
     monkeypatch.setenv("BBS_MINING_MYSQL_USER", "some_user")
     monkeypatch.setenv("BBS_MINING_MYSQL_PASSWORD", "some_pwd")
-    monkeypatch.setenv("BBS_DATA_AND_MODELS_DIR", "some_path")
+    monkeypatch.setenv("BBS_DATA_AND_MODELS_DIR", str(spacy_model_path))
 
     fake_sqlalchemy = Mock()
-    fake_load_ee_models_library = Mock()
-    fake_load_ee_models_library.return_value = pd.DataFrame(
-        columns=["entity_type", "model_id", "model_path", "entity_type_name"]
-    )
     fake_mining_server_inst = Mock()
     fake_mining_server_class = Mock(return_value=fake_mining_server_inst)
 
@@ -64,10 +61,6 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
     )
     monkeypatch.setattr(
         "bluesearch.entrypoint.mining_server.sqlalchemy", fake_sqlalchemy
-    )
-    monkeypatch.setattr(
-        "bluesearch.entrypoint.mining_server.load_ee_models_library",
-        fake_load_ee_models_library,
     )
 
     if db_type not in {"mysql", "sqlite"}:
@@ -83,4 +76,5 @@ def test_send_through(tmpdir, monkeypatch, db_type, sqlite_db_exists):
         assert not args
         assert kwargs["connection"] == fake_sqlalchemy.create_engine.return_value
         assert "ee" in kwargs["models_libs"]
-        assert isinstance(kwargs["models_libs"]["ee"], pd.DataFrame)
+        assert isinstance(kwargs["models_libs"]["ee"], dict)
+        assert len(kwargs["models_libs"]["ee"]) == len(entity_types)

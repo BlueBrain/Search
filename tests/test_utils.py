@@ -17,15 +17,22 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import pathlib
 
 import h5py
 import numpy as np
-import pandas as pd
 import pytest
 import spacy
 
-from bluesearch.utils import H5, JSONL, Timer, load_ee_models_library, load_spacy_model
+from bluesearch.utils import (
+    H5,
+    JSONL,
+    Timer,
+    check_entity_type_consistency,
+    get_available_spacy_models,
+    load_spacy_model,
+)
 
 
 class TestTimer:
@@ -345,26 +352,56 @@ def test_load_save_jsonl(tmpdir):
     assert li == lo
 
 
-def test_load_ee_models_library(tmpdir, monkeypatch):
-    fake_root_path = pathlib.Path(str(tmpdir)) / "data_and_models"
+@pytest.mark.parametrize(
+    "metadata,expected_value",
+    [
+        ({"wrongkey": "wrongvalue"}, False),  # labels key missing
+        ({"labels": "wrongvalue"}, False),  # ner key missing
+        ({"labels": {"ner": ["SEVERAL", "ENTITIES"]}}, False),  # several entities
+        ({"labels": {"ner": ["organism"]}}, False),  # entity lower
+        ({"labels": {"ner": ["ORGANISM"]}}, True),  # Good structure
+    ],
+)
+def test_check_entity_type_consistency(tmpdir, metadata, expected_value):
+    """Test that checks are working"""
+    # Wrong model directory name
+    wrong_model_dir = pathlib.Path(tmpdir) / "models" / "ner_er" / "wrongmodelname"
+    wrong_model_dir.mkdir(parents=True)
+    assert check_entity_type_consistency(wrong_model_dir) is False
 
-    # Create directory structure and files
-    original_df = pd.DataFrame(
-        {"entity_type": ["A"], "model": ["model_1"], "entity_type_name": ["B"]}
-    )
+    # Missing meta.json file
+    good_model_dir = pathlib.Path(tmpdir) / "models" / "ner_er" / "model-organism"
+    good_model_dir.mkdir(parents=True)
+    assert check_entity_type_consistency(good_model_dir) is False
 
-    csv_path = fake_root_path / "pipelines" / "ner" / "ee_models_library.csv"
-    csv_path.parent.mkdir(parents=True)
-    original_df.to_csv(csv_path)
+    # meta.json structure
+    meta_path = good_model_dir / "meta.json"
+    with open(meta_path, "w") as f:
+        json.dump(metadata, f)
+    assert check_entity_type_consistency(good_model_dir) is expected_value
 
-    df = load_ee_models_library(fake_root_path)
 
-    # Checks
-    assert isinstance(df, pd.DataFrame)
-    assert df["entity_type"][0] == "A"
-    assert df["model_path"][0] == str(fake_root_path / "models" / "ner_er" / "model_1")
-    assert df["model_id"][0] == "data_and_models/models/ner_er/model_1"
-    assert df["entity_type_name"][0] == "B"
+def test_get_available_spacy_models(spacy_model_path, entity_types):
+    """Test that available spacy models."""
+    models_dir = spacy_model_path / "models" / "ner_er"
+    expected_results = {
+        etype.upper(): models_dir / f"model-{etype.lower()}" for etype in entity_types
+    }
+    results = get_available_spacy_models(spacy_model_path)
+    assert isinstance(results, dict)
+    assert len(results) == 2
+    assert sorted(results.keys()) == sorted(entity_types)
+    assert results == expected_results
+
+
+@pytest.mark.filterwarnings()
+def test_get_available_spacy_models_warning(tmpdir):
+    """Test that available spacy models warnings."""
+    wrong_path = pathlib.Path(tmpdir) / "wrongpath"
+    wrong_model = wrong_path / "models" / "ner_er" / "wrongmodel"
+    wrong_model.mkdir(parents=True)
+    with pytest.warns(UserWarning):
+        _ = get_available_spacy_models(wrong_path)
 
 
 @pytest.mark.parametrize(

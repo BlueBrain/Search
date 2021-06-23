@@ -26,7 +26,7 @@ import sys
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
-from ..utils import load_ee_models_library
+from ..utils import get_available_spacy_models
 from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
@@ -47,8 +47,8 @@ def run_create_mining_cache(argv=None):
         type=str,
         help="""
         The local path to the "data_and_models" directory. It will
-        be used to load the ee_models_library.csv file from
-        <data-and-models-dir>/pipelines/ner/ee_models_library.csv
+        be used to load the available spacy models from
+        <data-and-models-dir>/models/ner_er/
 
         If missing, then the environment variable BBS_DATA_AND_MODELS_DIR
         will be read.
@@ -96,13 +96,13 @@ def run_create_mining_cache(argv=None):
         """,
     )
     parser.add_argument(
-        "--restrict-to-models",
+        "--restrict-to-etypes",
         type=str,
         default=None,
         help="""
-        Comma-separated list of models (as called in ee_models_library_file)
-        to be run to populate the cache. By default, all models in
-        ee_models_library_file are run.
+        Comma-separated list of entity types to detect
+        to populate the cache. By default, all models in
+        data_and_models/models/ner_er/ are run.
         """,
     )
     parser.add_argument(
@@ -179,28 +179,32 @@ def run_create_mining_cache(argv=None):
     database_engine = sqlalchemy.create_engine(database_url, poolclass=NullPool)
 
     # Load the models library
-    logger.info("Loading the models library")
-    ee_models_library = load_ee_models_library(args.data_and_models_dir)
+    logger.info("Loading the available spacy models")
+    ee_models_paths = get_available_spacy_models(args.data_and_models_dir)
 
     # Restrict to given models
-    if args.restrict_to_models is not None:
-        logger.info("Restricting to a subset of models")
-        model_selection = args.restrict_to_models.split(",")
-        model_selection = set(map(lambda s: s.strip(), model_selection))
-        for model_id in model_selection:
-            if model_id not in ee_models_library["model_id"].values:
+    if args.restrict_to_etypes is not None:
+        logger.info("Restricting to a subset of entity types")
+        etype_selection = args.restrict_to_etypes.split(",")
+        etype_selection = set(map(lambda s: s.strip().upper(), etype_selection))
+        for etype in etype_selection:
+            if etype not in ee_models_paths:
                 logger.warning(
-                    f"Can't restrict to model {model_id} because it is not "
-                    f"listed in the models library file. This entry will be ignored."
+                    f"Can't restrict to etype {etype} because it was not "
+                    f"found in data_and_models folder. This entry will be ignored."
                 )
-        keep_rows = ee_models_library["model_id"].isin(model_selection).tolist()
-        ee_models_library = ee_models_library[keep_rows]
+
+        ee_models_paths = {
+            etype: path
+            for etype, path in ee_models_paths.items()
+            if etype in etype_selection
+        }
 
     # Create the cache creation class and run the cache creation
     logger.info("Creating the cache miner")
     cache_creator = CreateMiningCache(
         database_engine=database_engine,
-        ee_models_library=ee_models_library,
+        ee_models_paths=ee_models_paths,
         target_table_name=args.target_table_name,
         workers_per_model=args.n_processes_per_model,
         device=args.device,

@@ -22,7 +22,7 @@ import logging
 import multiprocessing as mp
 import queue
 import traceback
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import sqlalchemy
 import torch
@@ -41,14 +41,9 @@ class Miner:
         URL of a database already containing tables `articles` and `sentences`.
         The URL should indicate database dialect and connection argument, e.g.
         `database_url = "postgresql://scott:tiger@localhost/test"`.
-    model_id : str
-        The model ID.
     model_path : str
         The path for loading the spacy model that will perform the
         named entity extraction.
-    entity_map : dict[str, str]
-        A map from entity types produced by the model to new
-        entity types that should appear in the cached results.
     target_table : str
         The target table name for the mining results.
     task_queue : multiprocessing.Queue
@@ -62,9 +57,7 @@ class Miner:
     def __init__(
         self,
         database_url,
-        model_id,
         model_path,
-        entity_map,
         target_table,
         task_queue,
         can_finish,
@@ -72,9 +65,7 @@ class Miner:
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
-        self.model_id = model_id
         self.model_path = model_path
-        self.entity_map = entity_map
         self.target_table_name = target_table
         self.task_queue = task_queue
         self.can_finish = can_finish
@@ -95,9 +86,7 @@ class Miner:
     def create_and_mine(
         cls,
         database_url,
-        model_id,
         model_path,
-        entity_map,
         target_table,
         task_queue,
         can_finish,
@@ -111,14 +100,9 @@ class Miner:
             URL of a database already containing tables `articles` and `sentences`.
             The URL should indicate database dialect and connection argument, e.g.
             `database_url = "postgresql://scott:tiger@localhost/test"`.
-        model_id : str
-            The model ID.
         model_path : str
             The path for loading the spacy model that will perform the
             named entity extraction.
-        entity_map : dict[str, str]
-            A map from entity types produced by the model to new
-            entity types that should appear in the cached results.
         target_table : str
             The target table name for the mining results.
         task_queue : multiprocessing.Queue
@@ -130,9 +114,7 @@ class Miner:
         """
         miner = cls(
             database_url=database_url,
-            model_id=model_id,
             model_path=model_path,
-            entity_map=entity_map,
             target_table=target_table,
             task_queue=task_queue,
             can_finish=can_finish,
@@ -222,17 +204,6 @@ class Miner:
             texts=texts, model_entities=self.model, models_relations={}, debug=True
         )
 
-        self.logger.debug("Filtering entity types")
-        # Keep only the entity types we care about
-        rows_to_keep = df_results["entity_type"].isin(self.entity_map)
-        df_results = df_results[rows_to_keep]
-
-        # Map model's names for entity types to desired entity types
-        df_results["entity_type"] = df_results["entity_type"].apply(
-            lambda entity_type: self.entity_map[entity_type]
-        )
-
-        df_results["mining_model"] = self.model_id
         df_results["mining_model_version"] = self.model.meta["version"]
         df_results["spacy_version"] = self.model.meta["spacy_version"]
 
@@ -267,9 +238,8 @@ class CreateMiningCache:
     ----------
     database_engine : sqlalchemy.engine.Engine
         Connection to the CORD-19 database.
-    ee_models_library : pd.DataFrame
-        Table with information on models responsible to mine each entity
-        type and how to rename entity types.
+    ee_models_paths : dict[str, pathlib.Path]
+        Dictionary mapping entity type to model path detecting it.
     target_table_name : str
         The target table name for the mining results.
     workers_per_model : int, optional
@@ -280,7 +250,7 @@ class CreateMiningCache:
     def __init__(
         self,
         database_engine,
-        ee_models_library,
+        ee_models_paths,
         target_table_name,
         workers_per_model=1,
         device="cpu",
@@ -296,11 +266,9 @@ class CreateMiningCache:
 
         self.engine = database_engine
         self.target_table = target_table_name
-        self.ee_models_library = ee_models_library
+        self.ee_models_paths = ee_models_paths
         self.workers_per_model = workers_per_model
         self.device = device
-
-        self.model_schemas = self._load_model_schemas()
 
     def construct(self):
         """Construct and populate the cache of mined results."""
@@ -317,15 +285,15 @@ class CreateMiningCache:
 
     def _delete_rows(self):
         """Delete rows in the target table that will be re-populated."""
-        for model_id, _model_schema in self.model_schemas.items():
+        for etype in self.ee_models_paths:
             # Reformatted due to this bandit bug in python3.8:
             # https://github.com/PyCQA/bandit/issues/658
             query = (  # nosec
-                f"DELETE FROM {self.target_table} WHERE mining_model = :mining_model"
+                f"DELETE FROM {self.target_table} WHERE entity_type = :etype"
             )
             self.engine.execute(
                 sqlalchemy.sql.text(query),
-                mining_model=model_id,
+                etype=etype,
             )
 
     def _schema_creation(self):
@@ -364,7 +332,6 @@ class CreateMiningCache:
             sqlalchemy.Column(
                 "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
             ),
-            sqlalchemy.Column("mining_model", sqlalchemy.Text(), nullable=False),
             sqlalchemy.Column(
                 "mining_model_version", sqlalchemy.Text(), nullable=False
             ),
@@ -435,12 +402,12 @@ class CreateMiningCache:
 
         # Flags to let the workers know there won't be any new tasks.
         can_finish: Dict[str, mp.synchronize.Event] = {
-            model_id: mp.Event() for model_id in self.model_schemas
+            etype: mp.Event() for etype in self.ee_models_paths
         }
 
         # Prepare the task queues for the workers - one task queue per model.
         task_queues: Dict[str, mp.Queue] = {
-            model_id: mp.Queue() for model_id in self.model_schemas
+            etype: mp.Queue() for etype in self.ee_models_paths
         }
 
         # Spawn the workers according to `workers_per_model`.
@@ -449,26 +416,24 @@ class CreateMiningCache:
         workers_by_queue: Dict[str, List[mp.Process]] = {
             queue_name: [] for queue_name in task_queues
         }
-        for model_id, model_schema in self.model_schemas.items():
+        for etype, model_path in self.ee_models_paths.items():
             for i in range(self.workers_per_model):
-                worker_name = f"{model_id}_{i}"
+                worker_name = f"{etype}_{i}"
                 worker_process = mp.Process(
                     name=worker_name,
                     target=Miner.create_and_mine,
                     kwargs={
                         "database_url": self.engine.url,
-                        "model_id": model_id,
-                        "model_path": model_schema["model_path"],
-                        "entity_map": model_schema["entity_map"],
+                        "model_path": model_path,
                         "target_table": self.target_table,
-                        "task_queue": task_queues[model_id],
-                        "can_finish": can_finish[model_id],
+                        "task_queue": task_queues[etype],
+                        "can_finish": can_finish[etype],
                         "device": self.device,
                     },
                 )
                 worker_process.start()
                 worker_processes.append(worker_process)
-                workers_by_queue[model_id].append(worker_process)
+                workers_by_queue[etype].append(worker_process)
 
         # Create tasks
         self.logger.info("Creating tasks")
@@ -555,48 +520,3 @@ class CreateMiningCache:
             self.mining_cache_table.c.start_char,
         ).create(bind=self.engine)
         self.logger.info("Done creating index on (par, art, char).")
-
-    def _load_model_schemas(self):
-        """Load the model schemas from a file.
-
-        The path to the CSV file containing the model schemas.
-        It should contain the following three columns:
-            1. Public entity type
-            2. Model path
-            3. Model's internal entity type
-
-        Returns
-        -------
-        model_schemas : dict
-            The model schemas in a dictionary of the following form:
-                model_schemas = {
-                    "model_id_1": {
-                        "model_path": "/path/to/model",
-                        "entity_map": {
-                            "model_entity_type_1": "public_entity_type_1",
-                            "model_entity_type_2": "public_entity_type_2",
-                        },
-                    },
-                    "model_id_2": {...},
-                }
-            The keys of this dictionary are model names produces form the
-            model paths by taking all characters that follow the last "/"
-            character, or the whole model path if there is no "/" character
-            in the model path.
-        """
-        schema_df = self.ee_models_library
-
-        model_schemas: Dict[str, Dict[str, Any]] = {}
-        for _i, row in schema_df.iterrows():
-            entity_type_to = row["entity_type"]
-            model_path = row["model_path"]
-            model_id = row["model_id"]
-            entity_type_from = row["entity_type_name"]
-            if model_id not in model_schemas:
-                model_schemas[model_id] = {}
-                model_schemas[model_id]["model_path"] = model_path
-                model_schemas[model_id]["entity_map"] = {}
-
-            model_schemas[model_id]["entity_map"][entity_type_from] = entity_type_to
-
-        return model_schemas

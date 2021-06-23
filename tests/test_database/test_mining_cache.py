@@ -19,6 +19,7 @@
 
 import logging
 import multiprocessing as mp
+import pathlib
 import queue
 import time
 
@@ -43,9 +44,7 @@ class TestMiner:
         can_finish = mp.Event()
         miner = Miner(
             database_url=fake_sqlalchemy_engine.url,
-            model_id="my_model",
             model_path="en_core_web_sm",
-            entity_map={"ORGAN": "ORGAN_ENTITY"},
             target_table="mining_cache_temporary",
             task_queue=task_queue,
             can_finish=can_finish,
@@ -67,9 +66,7 @@ class TestMiner:
 
         Miner.create_and_mine(
             database_url=fake_sqlalchemy_engine.url,
-            model_id="my_model",
             model_path="en_core_web_sm",
-            entity_map={},
             target_table="",
             task_queue=task_queue,
             can_finish=can_finish,
@@ -121,11 +118,7 @@ class TestMiner:
         assert len(df_result) == 1
         assert df_result.iloc[0]["article_id"] == fake_result["article_id"]
         assert df_result.iloc[0]["paper_id"] == fake_result["paper_id"]
-        assert (
-            df_result.iloc[0]["entity_type"]
-            == miner.entity_map[fake_result["entity_type"]]
-        )
-        assert "mining_model" in df_result.columns
+        assert df_result.iloc[0]["entity_type"] == fake_result["entity_type"]
         assert "mining_model_version" in df_result.columns
 
         miner.engine.execute(f"drop table {miner.target_table_name}")
@@ -175,19 +168,10 @@ class TestMiner:
 class TestCreateMiningCache:
     @pytest.fixture
     def cache_creator(self, fake_sqlalchemy_engine):
-        ee_models_library = pd.DataFrame(
-            [
-                {
-                    "entity_type": "type_1_public",
-                    "model_id": "my_model_1",
-                    "model_path": "/my/model/path",
-                    "entity_type_name": "type_1",
-                }
-            ]
-        )
+        ee_models_paths = {"type_1_public": pathlib.Path("/my/model/path")}
         cache_creator_instance = CreateMiningCache(
             database_engine=fake_sqlalchemy_engine,
-            ee_models_library=ee_models_library,
+            ee_models_paths=ee_models_paths,
             target_table_name="mining_cache_temporary",
             workers_per_model=2,
         )
@@ -197,15 +181,15 @@ class TestCreateMiningCache:
     def test_delete_rows(self, cache_creator):
         table_name = cache_creator.target_table
         engine = cache_creator.engine
-        model_schemas = cache_creator.model_schemas
+        ee_models_paths = cache_creator.ee_models_paths
 
         # Create a table with two rows, one with good model, one with bad
-        assert len(model_schemas) >= 1
-        valid_model = list(model_schemas.keys())[0]
+        assert len(ee_models_paths) >= 1
+        valid_etype = list(ee_models_paths.keys())[0]
         df = pd.DataFrame(
             [
-                {"mining_model": valid_model},
-                {"mining_model": valid_model + "_not_valid"},
+                {"entity_type": valid_etype},
+                {"entity_type": valid_etype + "_not_valid"},
             ]
         )
         with engine.begin() as con:
@@ -245,7 +229,6 @@ class TestCreateMiningCache:
             "end_char",
             "article_id",
             "paragraph_pos_in_article",
-            "mining_model",
             "mining_model_version",
             "spacy_version",
         }
@@ -255,13 +238,6 @@ class TestCreateMiningCache:
 
         # Clean up by deleting the table just created
         cache_creator.engine.execute(f"drop table {cache_creator.target_table}")
-
-    def test_load_model_schemas(self, cache_creator):
-        model_schemas = cache_creator._load_model_schemas()
-        assert isinstance(model_schemas, dict)
-        assert len(model_schemas) == 1
-        assert model_schemas["my_model_1"]["model_path"] == "/my/model/path"
-        assert model_schemas["my_model_1"]["entity_map"] == {"type_1": "type_1_public"}
 
     @staticmethod
     def fake_wait_miner(stop_now):
