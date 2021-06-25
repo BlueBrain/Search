@@ -26,7 +26,7 @@
 #
 # If the GPU support is not necessary, then another image,
 # for example "python:3.7" can be used.
-FROM nvidia/cuda:10.2-devel
+FROM nvidia/cuda:10.2-runtime
 
 # ARGs are only visible at build time and can be provided in
 # the docker-compose.yml file in the "args:" section or with the
@@ -54,29 +54,24 @@ ENV LANG=C.UTF-8
 # The environment variable $DEBIAN_FRONTENT is necessary to
 # prevent apt-get from prompting for the timezone and keyboard
 # layout configuration.
-RUN apt-get update && apt-get upgrade -y && apt-get update
+#
+# There are two dev-packages that are installed:
+# - libmysqlclient-dev
+# - python3.7-dev
+# This is intentional because otherwise "pip install SQLAlchemy[mysql]" breaks.
 RUN \
-DEBIAN_FRONTEND="noninteractive" \
+apt-get update &&\
+apt-get upgrade -y --no-install-recommends &&\
+apt-get update &&\
 TZ="Europe/Zurich" \
-apt-get install -y \
-    dpkg-dev gcc libbluetooth-dev libbz2-dev libc6-dev libexpat1-dev \
-    libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev libreadline-dev \
-    libsqlite3-dev libssl-dev make tk-dev wget xz-utils zlib1g-dev
-RUN \
-apt-get install -y \
-    gcc g++ build-essential \
-    curl git htop less man vim
-RUN \
-curl -sL https://deb.nodesource.com/setup_10.x -o nodesource_setup.sh &&\
-bash nodesource_setup.sh &&\
-rm nodesource_setup.sh &&\
-apt-get install -y nodejs
-RUN \
 DEBIAN_FRONTEND="noninteractive" \
-apt-get install -y \
-    libfontconfig1 \
-    libmysqlclient-dev default-libmysqlclient-dev
-
+apt-get install -y --no-install-recommends \
+    libbluetooth3 libbz2-1.0 libc6 libexpat1 \
+    libffi6 libgdbm5 liblzma5 libncursesw5 libreadline7 \
+    libsqlite3-0 libssl1.1 tk xz-utils zlib1g \
+    gcc g++ build-essential make \
+    curl git htop less man vim wget \
+    libfontconfig1 libmysqlclient-dev
 # Install Python 3.7 & pip 3.7
 #
 # The base image ("nvidia/cuda") does not have Python pre-installed. The
@@ -112,13 +107,19 @@ apt-get install -y \
 # "python3.7". Otherwise, "python" refers to "python2".
 # 
 RUN \
-apt-get install -y python3.7-dev python3.7-venv python3-pip && \
+DEBIAN_FRONTEND="noninteractive" \
+apt-get install -y --no-install-recommends \
+python3.7-dev python3.7-venv python3-pip && \
 python3.7 -m pip install --upgrade pip setuptools wheel && \
 update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
 
 # Install BBS requirements
 COPY requirements.txt /tmp
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+RUN \
+pip install --no-cache-dir -r /tmp/requirements.txt &&\
+pip install --no-cache-dir https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz &&\
+python -m spacy download en_core_web_sm &&\
+rm /tmp/requirements.txt
 
 # Add and configure users
 SHELL ["/bin/bash", "-c"]
@@ -127,13 +128,13 @@ COPY docker/utils.sh /tmp
 RUN \
 . /tmp/utils.sh && \
 groupadd -g 999 docker && \
-create_users "${BBS_USERS},bbs_user/1000" "docker" && \
+create_users "${BBS_USERS},guest/1000" "docker" && \
 configure_user
 
 # Entry point
 EXPOSE 8888
 RUN mkdir /workdir && chmod a+rwX /workdir
 WORKDIR /workdir
-USER bbsuser
+USER guest
 ENTRYPOINT ["env"]
 CMD ["bash", "-l"]
