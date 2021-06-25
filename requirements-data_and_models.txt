@@ -17,6 +17,7 @@
 
 PyYAML==5.4.1
 dvc[ssh]==2.0.17
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz
 matplotlib==3.4.1
 scipy==1.6.2
