@@ -7,7 +7,7 @@ sphinx:
   configuration: docs/conf.py
 
 build:
-    image: stable
+    image: latest
 
 python:
   version: 3.8
