@@ -115,11 +115,10 @@ update-alternatives --install /usr/local/bin/python python /usr/bin/python3.7 0
 
 # Install BBS requirements
 COPY requirements.txt /tmp
+COPY requirements-data_and_models.txt /tmp
 RUN \
-pip install --no-cache-dir -r /tmp/requirements.txt &&\
-pip install --no-cache-dir https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz &&\
-python -m spacy download en_core_web_sm &&\
-rm /tmp/requirements.txt
+pip install --no-cache-dir -r /tmp/requirements.txt -r /tmp/requirements-data_and_models.txt &&\
+rm /tmp/requirements.txt /tmp/requirements-data_and_models.txt
 
 # Add and configure users
 SHELL ["/bin/bash", "-c"]
