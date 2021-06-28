@@ -22,12 +22,13 @@ import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional, Union, overload
 
 import numpy as np
 import pandas as pd
 import sklearn
 from spacy.tokens import Doc
+from typing_extensions import Literal
 
 
 def _check_consistent_iob(iob_true: pd.Series, iob_pred: pd.Series) -> None:
@@ -360,6 +361,29 @@ def idx2text(tokens, idxs):
         index=idxs.index,
         dtype="str",
     )
+
+
+@overload
+def ner_report(
+    iob_true: pd.Series,
+    iob_pred: pd.Series,
+    mode: str = "entity",
+    etypes_map: Optional[dict] = None,
+    return_dict: Literal[False] = ...,
+) -> str:
+    ...
+
+
+@overload
+def ner_report(
+    iob_true: pd.Series,
+    iob_pred: pd.Series,
+    mode: str = "entity",
+    etypes_map: Optional[dict] = None,
+    *,
+    return_dict: Literal[True],
+) -> OrderedDict:
+    ...
 
 
 def ner_report(
