@@ -97,8 +97,8 @@ def report(input_path: Path, verbose: bool) -> List[Union[int, float]]:
         print(f"\n{METRICS[idx]}: {results[idx]}")
 
     def pdataframe(
-        df: pd.DataFrame, columns: List[str] = ["text", "spans"]
-    ) -> None:  # noqa: B006
+        df: pd.DataFrame, columns: List[str] = ["text", "spans"]  # noqa: B006
+    ) -> None:
         if verbose:
             limit = 10
             if len(df) > limit:

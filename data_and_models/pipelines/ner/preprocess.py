@@ -62,8 +62,8 @@ from spacy.util import get_words_and_spaces
 
 
 def main(
-    input_path: Path = typer.Argument(..., exists=True, dir_okay=False)
-):  # noqa: B008, E501
+    input_path: Path = typer.Argument(..., exists=True, dir_okay=False)  # noqa: B008
+):
     """Split and convert annotations from Prodigy."""
     print("Read params.yaml...")
     with open("params.yaml", "r") as fd:

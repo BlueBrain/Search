@@ -19,7 +19,7 @@
 
 import argparse
 import os
-import pickle
+import pickle  # nosec
 from collections import OrderedDict
 from pathlib import Path
 
