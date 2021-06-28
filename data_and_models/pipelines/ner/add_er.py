@@ -31,8 +31,8 @@ parser.add_argument(
     required=True,
     type=str,
     help="SpaCy model without an entity ruler. Can either be a SciSpacy model"
-         '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
-         "trained model.",
+    '(e.g. "en_ner_jnlpba_md"_ or the path to a custom'
+    "trained model.",
 )
 parser.add_argument(
     "--output_file",

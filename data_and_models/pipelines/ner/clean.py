@@ -103,9 +103,7 @@ def main():
     print(f"...normalized {normalized_spans} label spans (on {total_spans})")
     print(f"...that's {normalized_spans/total_spans:.0%} of the total")
 
-    renaming = (
-        "" if renamed_label is None else f" (renamed into {renamed_label})"
-    )
+    renaming = "" if renamed_label is None else f" (renamed into {renamed_label})"
     print(f"Keep only label {kept_label}{renaming}...")
     output_texts = []
     kept_spans = 0

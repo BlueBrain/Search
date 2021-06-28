@@ -41,8 +41,16 @@ parser.add_argument(
 )
 parser.add_argument(
     "--model",
-    choices=["biobert_nli_sts_cord19_v1", "bsv", "biobert_nli_sts",
-             "tf_idf", "count", "use", "sbert", "sbiobert"],
+    choices=[
+        "biobert_nli_sts_cord19_v1",
+        "bsv",
+        "biobert_nli_sts",
+        "tf_idf",
+        "count",
+        "use",
+        "sbert",
+        "sbiobert",
+    ],
     required=True,
     type=str,
     help="Name of the model to evaluate.",

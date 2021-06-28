@@ -50,8 +50,10 @@ train_entities = set(map(lemma, train_entities))
 test_entities = set(map(lemma, test_entities))
 pred_entities = set(map(lemma, pred_entities))
 
-print("{train, test, pred} = Unique token lemmata in the corresponding "
-      "sets with an entity type that is not 'O'")
+print(
+    "{train, test, pred} = Unique token lemmata in the corresponding "
+    "sets with an entity type that is not 'O'"
+)
 print()
 
 print("train - test")
@@ -86,7 +88,8 @@ print()
 print("How many of the unseen tokens were predicted?")
 seen = test_entities & train_entities
 unseen = test_entities - train_entities
-print(f"Out of {len(unseen)} unseen tokens "
-      f"{len(unseen & pred_entities)} were predicted")
-print(f"Out of {len(seen)} seen tokens"
-      f" {len(seen & pred_entities)} were predicted")
+print(
+    f"Out of {len(unseen)} unseen tokens "
+    f"{len(unseen & pred_entities)} were predicted"
+)
+print(f"Out of {len(seen)} seen tokens" f" {len(seen & pred_entities)} were predicted")

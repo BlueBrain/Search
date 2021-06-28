@@ -45,7 +45,10 @@ parser.add_argument(
     "trained model.",
 )
 parser.add_argument(
-    "--etype", required=True, type=str, help="Name of the entity type.",
+    "--etype",
+    required=True,
+    type=str,
+    help="Name of the entity type.",
 )
 parser.add_argument(
     "--output_file",
@@ -75,10 +78,9 @@ def main():
         df_pred.append(df_sentence)
 
     print("Formatting predctions")
-    df_pred = pd.concat(
-        df_pred,
-        ignore_index=True
-    ).rename(columns={"class": "class_pred"})
+    df_pred = pd.concat(df_pred, ignore_index=True).rename(
+        columns={"class": "class_pred"}
+    )
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
     # df = remove_punctuation(df)
     iob_true = df["class"]
