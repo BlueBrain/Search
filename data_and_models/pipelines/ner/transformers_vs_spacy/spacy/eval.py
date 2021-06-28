@@ -17,19 +17,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import pathlib
 import json
+import pathlib
 from argparse import ArgumentParser
 from pprint import pprint
 
 import pandas as pd
 import spacy
 
-from bluesearch.mining.eval import (
-    annotations2df,
-    spacy2df,
-    ner_report,
-)
+from bluesearch.mining.eval import annotations2df, ner_report, spacy2df
 
 parser = ArgumentParser()
 parser.add_argument(

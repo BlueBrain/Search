@@ -19,9 +19,9 @@
 
 import argparse
 import os
+import pickle
 from collections import OrderedDict
 from pathlib import Path
-import pickle
 
 import numpy as np
 import yaml

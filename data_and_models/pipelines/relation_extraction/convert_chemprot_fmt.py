@@ -18,7 +18,6 @@ import sys
 
 import pandas as pd
 
-
 logger = logging.getLogger("chemprot")
 
 

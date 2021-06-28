@@ -17,16 +17,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
-import pathlib
-import json
 
-from bluesearch.mining.eval import (
-    annotations2df,
-    remove_punctuation,
-    ner_report,
-)
+from bluesearch.mining.eval import annotations2df, ner_report, remove_punctuation
 
 parser = ArgumentParser()
 parser.add_argument(

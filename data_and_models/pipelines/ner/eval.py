@@ -17,19 +17,19 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
-import pathlib
-import json
 
 import pandas as pd
 import spacy
 
 from bluesearch.mining.eval import (
     annotations2df,
-    spacy2df,
-    remove_punctuation,
     ner_report,
+    remove_punctuation,
+    spacy2df,
 )
 
 parser = ArgumentParser()
