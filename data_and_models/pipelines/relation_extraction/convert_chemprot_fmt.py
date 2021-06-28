@@ -15,6 +15,7 @@ import logging
 import pathlib
 import re
 import sys
+from typing import Dict, cast
 
 import pandas as pd
 
@@ -184,7 +185,7 @@ def main(argv=None):
 
     # Collect all entities
     logger.info("Collecting all entities")
-    entities = {}
+    entities: Dict[int, Dict[int, tuple]] = {}
     for (
         abstract_id,
         entity_id,
@@ -265,7 +266,9 @@ def main(argv=None):
 
     # Process --keep-undefined-relations
     if not args.keep_undefined_relations:
-        df_sentences = df_sentences[df_sentences["group"] != 0]
+        df_sentences = cast(
+            pd.DataFrame, df_sentences[df_sentences["group"] != 0]  # type: ignore
+        )
 
     # Annotate entity types
     def annotate_scibert(row):
@@ -340,7 +343,7 @@ def main(argv=None):
         all_relations = df_sentences["relation"].unique()
         for relation in all_relations:
             df_binary = df_sentences[["sentence", "relation"]].copy()
-            df_binary["relation"] = df_binary["relation"].apply(
+            df_binary["relation"] = cast(pd.Series, df_binary["relation"]).apply(
                 lambda r: 1 if r == relation else 0
             )
             df_binary.to_csv(

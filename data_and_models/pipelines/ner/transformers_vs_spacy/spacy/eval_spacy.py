@@ -20,7 +20,9 @@
 import json
 import pathlib
 from argparse import ArgumentParser
+from collections import OrderedDict
 from pprint import pprint
+from typing import cast
 
 import pandas as pd
 import spacy
@@ -91,17 +93,20 @@ def main():
 
     print("Computing and saving metrics")
     output_file = pathlib.Path(args.output_file)
-    metrics_dict = ner_report(
-        iob_true,
-        iob_pred,
-        mode="token",
-        return_dict=True,
+    metrics_dict = cast(
+        OrderedDict,
+        ner_report(
+            iob_true,
+            iob_pred,
+            mode="token",
+            return_dict=True,
+        ),
     )
-    metrics_dict = dict(metrics_dict[args.etype])
+    etype_metrics_dict = dict(metrics_dict[args.etype])
     with output_file.open("w") as f:
-        json.dump(metrics_dict, f)
+        json.dump(etype_metrics_dict, f)
         f.write("\n")
-    pprint(metrics_dict)
+    pprint(etype_metrics_dict)
 
 
 if __name__ == "__main__":

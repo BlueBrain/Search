@@ -75,9 +75,9 @@ def main():
 
     print("Identify duplicated 'input_hash'...")
     counter = Counter(x["_input_hash"] for x in corpus)
-    duplicated_hashes = [
+    duplicated_hashes = {
         input_hash for input_hash, count in counter.items() if count > 1
-    ]
+    }
     hashes_count = len(duplicated_hashes)
     print(f"...identified {hashes_count} hash(es)")
     if hashes_count > 0:

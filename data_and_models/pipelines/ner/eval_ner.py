@@ -21,6 +21,7 @@ import json
 import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
+from typing import Dict, cast
 
 import pandas as pd
 import spacy
@@ -93,14 +94,17 @@ def main():
 
     output_file = pathlib.Path(args.output_file)
     with output_file.open("w") as f:
-        all_metrics_dict = OrderedDict()
+        all_metrics_dict: Dict[str, float] = OrderedDict()
         for mode in ["entity", "token"]:
-            metrics_dict = ner_report(
-                iob_true,
-                iob_pred,
-                mode=mode,
-                return_dict=True,
-            )[args.etype.upper()]
+            metrics_dict = cast(
+                OrderedDict,
+                ner_report(
+                    iob_true,
+                    iob_pred,
+                    mode=mode,
+                    return_dict=True,
+                )[args.etype.upper()],
+            )
             metrics_dict = OrderedDict(
                 [(f"{mode}_{k}", v) for k, v in metrics_dict.items()]
             )

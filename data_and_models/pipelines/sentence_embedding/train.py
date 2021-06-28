@@ -78,8 +78,8 @@ def main():
         )
         model._stop_words_id = 0
         print("Saving model to disk...")
-        with (out_dir / "model.pkl").open("wb") as f:
-            pickle.dump(model, f)
+        with (out_dir / "model.pkl").open("wb") as fp:
+            pickle.dump(model, fp)
     elif args.model == "count":
         model = CountVectorizer(**params["init_kwargs"])
         print("Training model...")
@@ -90,8 +90,8 @@ def main():
         )
         model._stop_words_id = 0
         print("Saving model to disk...")
-        with (out_dir / "model.pkl").open("wb") as f:
-            pickle.dump(model, f)
+        with (out_dir / "model.pkl").open("wb") as fp:
+            pickle.dump(model, fp)
     else:
         raise ValueError(f"Training not available for model {args.model}!")
 

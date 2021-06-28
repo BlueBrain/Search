@@ -78,7 +78,7 @@ def report(input_path: Path, verbose: bool) -> List[Union[int, float]]:
     """Create report of the annotations."""
     print(f"Analyzing {input_path}...")
 
-    results = []
+    results: List[float] = []
 
     def msg(idx: int, text: str) -> None:
         if results[idx] > 0:

@@ -21,6 +21,7 @@ import json
 import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
+from typing import Dict, cast
 
 from bluesearch.mining.eval import annotations2df, ner_report, remove_punctuation
 
@@ -70,14 +71,17 @@ def main():
 
     metrics_dict = {}
     for mode in ["entity", "token"]:
-        metrics_dict[mode] = ner_report(
-            iob_true,
-            iob_pred,
-            mode=mode,
-            return_dict=True,
+        metrics_dict[mode] = cast(
+            OrderedDict,
+            ner_report(
+                iob_true,
+                iob_pred,
+                mode=mode,
+                return_dict=True,
+            ),
         )
     for etype in metrics_dict["entity"]:
-        all_metrics_dict = OrderedDict()
+        all_metrics_dict: Dict[str, float] = OrderedDict()
         for mode in ["entity", "token"]:
             all_metrics_dict.update(
                 [(f"{mode}_{k}", v) for k, v in metrics_dict[mode][etype].items()]

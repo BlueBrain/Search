@@ -88,14 +88,14 @@ stages:
     foreach: ${entities}
     do:
       cmd: >-
-        python eval.py
+        python eval_ner.py
         --etype ${item}
         --annotation_files ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl,../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
         --model ../../models/ner_er/model-${item}
         --output_file ../../metrics/ner/${item}.json
       deps:
       - Dockerfile
-      - eval.py
+      - eval_ner.py
       - ../../annotations/ner/annotations10_EmmanuelleLogette_2020-08-28_raw1_raw5_10EntityTypes.jsonl
       - ../../annotations/ner/annotations12_EmmanuelleLogette_2020-08-28_raw7_10EntityTypes.jsonl
       - ../../models/ner_er/model-${item}
