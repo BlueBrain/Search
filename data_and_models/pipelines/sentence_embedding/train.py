@@ -55,6 +55,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Train sentence embedding models."""
     np.random.seed(args.seed)
 
     print("Reading params.yaml...")

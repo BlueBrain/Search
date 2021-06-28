@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
-This script cleans annotations exported with Prodigy as .jsonl files.
+Clean annotations exported with Prodigy as .jsonl files.
 
 Run 'analyze.py' before to identify relevant cleaning rules.
 
@@ -58,12 +58,14 @@ args = parser.parse_args()
 
 
 def is_valid(example: Dict[str, Any], duplicated_hashes: Set[str]) -> bool:
+    """Check that sentence is accepted and hash is unique."""
     accepted = example["answer"] == "accept"
     unique_hash = example["_input_hash"] not in duplicated_hashes
     return all((accepted, unique_hash))
 
 
 def main():
+    """Clean annotations."""
     kept_label = args.kept_label.upper()
     renamed_label = None if args.renamed_label is None else args.renamed_label.upper()
 

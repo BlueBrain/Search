@@ -41,7 +41,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "--model",
-    choices=["biobert_nli_sts_cord19_v1", "bsv", "biobert_nli_sts", "tf_idf", "count", "use", "sbert", "sbiobert"],
+    choices=["biobert_nli_sts_cord19_v1", "bsv", "biobert_nli_sts",
+             "tf_idf", "count", "use", "sbert", "sbiobert"],
     required=True,
     type=str,
     help="Name of the model to evaluate.",
@@ -57,6 +58,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Evaluate sentence embedding models."""
     print("Reading params.yaml...")
     params = yaml.safe_load(open("params.yaml"))["eval"][args.model]
     module = importlib.import_module("bluesearch.embedding_models")
@@ -69,8 +71,12 @@ def main():
     print("Computing test scores...")
     print(" - test 1: correlation metrics")
     y_true = df_sents["score"]
-    embeddings_1 = model.embed_many(model.preprocess_many(df_sents["sentence_1"].tolist()))
-    embeddings_2 = model.embed_many(model.preprocess_many(df_sents["sentence_2"].tolist()))
+    embeddings_1 = model.embed_many(
+        model.preprocess_many(df_sents["sentence_1"].tolist())
+    )
+    embeddings_2 = model.embed_many(
+        model.preprocess_many(df_sents["sentence_2"].tolist())
+    )
     y_pred = np.array(
         [
             cosine_similarity(e1[np.newaxis], e2[np.newaxis]).item()

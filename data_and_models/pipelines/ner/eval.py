@@ -24,7 +24,6 @@ import json
 
 import pandas as pd
 import spacy
-import yaml
 
 from bluesearch.mining.eval import (
     annotations2df,
@@ -63,9 +62,7 @@ args = parser.parse_args()
 
 
 def main():
-    print("Read params.yaml...")
-    params = yaml.safe_load(open("params.yaml"))["eval"][args.etype]
-
+    """Evaluate NER models."""
     # Load and preprocess the annotations
     df = annotations2df(args.annotation_files.split(","))
     ner_model = spacy.load(args.model)
@@ -80,7 +77,10 @@ def main():
         df_sentence["source"] = source
         df_pred.append(df_sentence)
 
-    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
+    df_pred = pd.concat(
+        df_pred,
+        ignore_index=True
+    ).rename(columns={"class": "class_pred"})
 
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
 

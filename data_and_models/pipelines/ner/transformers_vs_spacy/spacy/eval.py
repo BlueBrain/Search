@@ -20,17 +20,14 @@
 import pathlib
 import json
 from argparse import ArgumentParser
-from collections import OrderedDict
 from pprint import pprint
 
 import pandas as pd
 import spacy
-import yaml
 
 from bluesearch.mining.eval import (
     annotations2df,
     spacy2df,
-    remove_punctuation,
     ner_report,
 )
 
@@ -64,6 +61,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Evaluate NER models."""
     # Load and preprocess the annotations
     print("Loading data and model")
     df = annotations2df(args.annotation_files.split(","))
@@ -81,12 +79,15 @@ def main():
         df_pred.append(df_sentence)
 
     print("Formatting predctions")
-    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
+    df_pred = pd.concat(
+        df_pred,
+        ignore_index=True
+    ).rename(columns={"class": "class_pred"})
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
-    #df = remove_punctuation(df)
+    # df = remove_punctuation(df)
     iob_true = df["class"]
     iob_pred = df["class_pred"]
-    
+
     print("Saving predictions")
     df.to_pickle("df_test_pred.pkl")
 

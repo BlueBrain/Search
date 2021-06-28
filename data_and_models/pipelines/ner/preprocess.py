@@ -1,4 +1,5 @@
-# Adapted from https://github.com/explosion/projects/blob/v3/tutorials/ner_drugs/scripts/preprocess.py.
+# Adapted from
+# https://github.com/explosion/projects/blob/v3/tutorials/ner_drugs/scripts/preprocess.py.
 
 # MIT License
 #
@@ -40,7 +41,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
-This script splits and converts annotations from Prodigy <= v1.10.x.
+Split and convert annotations from Prodigy <= v1.10.x.
 
 First, this script splits the annotations into train and dev corpora.
 Second, this script converts .jsonl files from Prodigy to .spacy files.
@@ -60,7 +61,8 @@ from spacy.tokens import Doc, DocBin
 from spacy.util import get_words_and_spaces
 
 
-def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):
+def main(input_path: Path = typer.Argument(..., exists=True, dir_okay=False)):  # noqa: B008, E501
+    """Split and convert annotations from Prodigy."""
     print("Read params.yaml...")
     with open("params.yaml", "r") as fd:
         params = yaml.safe_load(fd)

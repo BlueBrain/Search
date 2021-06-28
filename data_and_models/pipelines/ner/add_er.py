@@ -50,6 +50,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Add entity ruler to NER models."""
     # Load and preprocess the annotations
     ner_model = spacy.load(args.model)
 

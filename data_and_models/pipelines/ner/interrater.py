@@ -55,6 +55,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Compute inter-rater agreement."""
     # Load and preprocess the annotations
     df_a1 = annotations2df(args.annotations1.split(","))
     df_a2 = annotations2df(args.annotations2.split(","))
