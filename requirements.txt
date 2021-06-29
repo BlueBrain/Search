@@ -14,11 +14,12 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 Flask==1.1.2
 SQLAlchemy[mysql,pymysql]==1.4.8
 catalogue==2.0.3
 cryptography==3.4.7
+en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 h5py==3.2.1
 ipython==7.22.0
 ipywidgets==7.6.3
