@@ -1,21 +1,38 @@
 stages:
   training_transformers:
-    cmd: python training_transformers/train.py --model_name_or_path clagator/biobert_v1.1_pubmed_nli_sts --train_data_file training_transformers/sentences-filtered_11-527-877.txt --eval_data_file training_transformers/biosses_sentences.txt --line_by_line --mlm --output_dir ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/ --do_train --do_eval --evaluation_strategy steps --per_device_train_batch_size 16 --per_device_eval_batch_size 16 --logging_dir ../../models/sentence_embedding__logs --logging_steps 5000 --save_steps 5000 --save_total_limit 20 --dataloader_num_workers 16
+    cmd: >-
+    python training_transformers/train.py
+    --model_name_or_path clagator/biobert_v1.1_pubmed_nli_sts
+    --train_data_file training_transformers/sentences-filtered_11-527-877.txt
+    --eval_data_file training_transformers/biosses_sentences.txt
+    --line_by_line
+    --mlm
+    --output_dir ../../models/sentence_embedding/biobert_cord19_v1/
+    --do_train
+    --do_eval
+    --evaluation_strategy steps
+    --per_device_train_batch_size 16
+    --per_device_eval_batch_size 16
+    --logging_dir ../../models/sentence_embedding__logs
+    --logging_steps 5000
+    --save_steps 5000
+    --save_total_limit 20
+    --dataloader_num_workers 16
     deps:
       - training_transformers/train.py
       - training_transformers/sentences-filtered_11-527-877.txt 
       - training_transformers/biosses_sentences.txt
       - Dockerfile
     outs:
-      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+      - ../../models/sentence_embedding/biobert_cord19_v1/
   fine_tuning_transformers:
-    cmd: python training_transformers/fine_tune.py ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/ ../../models/sentence_embedding/biobert_nli_sts_cord19_v1_fine_tuned/
+    cmd: python training_transformers/fine_tune.py ../../models/sentence_embedding/biobert_cord19_v1/ ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
     deps:
       - Dockerfile
       - training_transformers/fine_tune.py
-      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+      - ../../models/sentence_embedding/biobert_cord19_v1/
     outs:
-      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1_fine_tuned/
+      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
   training:
     foreach:
       - tf_idf
