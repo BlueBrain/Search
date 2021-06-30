@@ -53,6 +53,11 @@ INSTALL_REQUIRES = [
     "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
+    (
+        "en-core-sci-lg @ "
+        "https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/"
+        "v0.4.0/en_core_sci_lg-0.4.0.tar.gz"
+    ),
     "h5py",
     "ipython",
     "ipywidgets",
@@ -78,6 +83,11 @@ EXTRAS_REQUIRE = {
     "dev": [
         "Sphinx",
         "docker",
+        (
+            "en-core-web-sm @ "
+            "https://github.com/explosion/spacy-models/releases/download/"
+            "en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz",
+        ),
         "pytest-benchmark",
         "pytest-cov",
         "pytest>=4.6",

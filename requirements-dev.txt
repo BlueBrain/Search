@@ -17,6 +17,7 @@
 
 Sphinx==3.5.4
 docker==5.0.0
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
 pytest-benchmark==3.2.3
 pytest-cov==2.11.1
 pytest==6.2.3
