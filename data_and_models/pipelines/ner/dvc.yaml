@@ -64,6 +64,7 @@ stages:
       - config.cfg
       - ../../annotations/ner/annotations_${item}.train.spacy
       - ../../annotations/ner/annotations_${item}.dev.spacy
+      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/0_Transformer/
       outs:
       - ../../models/ner/model-${item}/model-best/
   add_er:
