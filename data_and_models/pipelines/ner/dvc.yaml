@@ -72,7 +72,6 @@ stages:
     do:
       cmd: >-
         python add_er.py
-        --etypes ${item}
         --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
         --model ../../models/ner/model-${item}/model-best/
         --output_file ../../models/ner_er/model-${item}
