@@ -1,3 +1,5 @@
+"""Append an entity ruler to a spacy pipeline."""
+
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -14,7 +16,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Append an entity ruler to a spacy pipeline."""
+
 from argparse import ArgumentParser
 import pathlib
 
