@@ -39,6 +39,8 @@ RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install -r requirements.txt
 RUN pip install -r requirements-data_and_models.txt
 RUN pip install $PWD[data_and_models]
+# Force the version of the script training_transformers/train.py
+RUN pip install transformers==3.4.0
 
 
 EXPOSE 8888
