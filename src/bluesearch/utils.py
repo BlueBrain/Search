@@ -594,8 +594,7 @@ def load_spacy_model(
     if device == "cuda":
         if not spacy.prefer_gpu():
             warnings.warn(
-                "GPUs seems to be not available. "
-                "Spacy is not able to allocate data on GPUs."
+                "GPUs are not available. " "Spacy is not able to allocate data on GPUs."
             )
     try:
         return spacy.load(model_name, *args, **kwargs)
