@@ -52,6 +52,8 @@ class Miner:
         A flag to indicate that the worker can stop waiting for new
         tasks. Unless this flag is set, the worker will continue
         polling the task queue for new tasks.
+    device : {'cpu', 'cuda'}
+        Device to load the mining model.
     """
 
     def __init__(
@@ -111,6 +113,8 @@ class Miner:
             A flag to indicate that the worker can stop waiting for new
             tasks. Unless this flag is set, the worker will continue
             polling the task queue for new tasks.
+        device : {'cpu', 'cuda'}
+            Device to load the mining model.
         """
         miner = cls(
             database_url=database_url,
@@ -150,7 +154,7 @@ class Miner:
                 except Exception:
                     self._log_exception(article_id)
             # To avoid CUDA memory issue
-            if self.device == "gpu":
+            if self.device == "cuda":
                 torch.cuda.empty_cache()
 
     def _generate_texts_with_metadata(self, article_ids):
@@ -245,6 +249,8 @@ class CreateMiningCache:
     workers_per_model : int, optional
         Number of max processes to spawn to run text mining and table
         population in parallel.
+    device : {'cpu', 'cuda'}
+        Device to load the mining models.
     """
 
     def __init__(

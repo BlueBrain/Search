@@ -109,6 +109,7 @@ def run_create_mining_cache(argv=None):
         "--device",
         "-d",
         type=str,
+        choices=["cpu", "cuda"],
         default="cpu",
         help="Device to use for the inference {'cpu', 'gpu'}.",
     )

@@ -576,8 +576,8 @@ def load_spacy_model(
     ----------
     model_name :
         spaCy pipeline to load. It can be a package name or a local path.
-    device :
-        Device to load the spacy model {'cpu', 'gpu'}.
+    device : {'cpu', 'cuda'}
+        Device to load the spacy model.
     *args, **kwargs:
         Arguments passed to `spacy.load()`
 
@@ -591,9 +591,13 @@ def load_spacy_model(
     ModuleNotFoundError
         If spaCy model loading failed due to non-existent package or local file.
     """
+    if device == "cuda":
+        if not spacy.prefer_gpu():
+            warnings.warn(
+                "GPUs seems to be not available. "
+                "Spacy is not able to allocate data on GPUs."
+            )
     try:
-        if device == "gpu":
-            spacy.require_gpu()
         return spacy.load(model_name, *args, **kwargs)
     except IOError as err:
         if str(err).startswith("[E050]"):
