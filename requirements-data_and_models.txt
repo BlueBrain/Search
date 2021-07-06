@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-cupy-cuda102==8.6.0
+#cupy-cuda102==8.6.0
 PyYAML==5.4.1
 dvc[ssh]==2.0.17
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.0.0/en_core_web_sm-3.0.0.tar.gz
