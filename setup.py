@@ -103,10 +103,11 @@ setup(
     long_description_content_type="text/x-rst",
     author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/Search",
+    download_url="https://pypi.python.org/pypi/bluesearch",
     project_urls={
         "Source": "https://github.com/BlueBrain/Search",
-        "Documentation": "https://bbpteam.epfl.ch/documentation",
-        "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BBS",
+        "Documentation": "https://blue-brain-search.readthedocs.io/en/stable/",
+        "Tracker": "https://github.com/BlueBrain/Search/issues",
     },
     license="-",
     classifiers=CLASSIFIERS,
