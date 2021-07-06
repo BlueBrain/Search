@@ -288,17 +288,7 @@ def main(argv=None):
         entity_2 = text[start_2:end_2]
         part_3 = text[end_2:]
 
-        text = (
-            part_1
-            + "<< "
-            + entity_1
-            + " >>"
-            + part_2
-            + "[[ "
-            + entity_2
-            + " ]]"
-            + part_3
-        )
+        text = f"""{part_1}<< {entity_1} >>{part_2}[[ {entity_2} ]]{part_3}"""
 
         return text
 
