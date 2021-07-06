@@ -70,13 +70,13 @@ class TestParser(ArticleParser):
     def get_title(self):
         return self.title
 
-    def iter_authors(self):
+    def get_authors(self):
         yield from self.authors
 
     def get_abstract(self):
         return self.abstract
 
-    def iter_paragraphs(self):
+    def get_paragraphs(self):
         yield from self.paragraphs
 
 
@@ -100,7 +100,7 @@ class TestCORD19ArticleParser:
 
     def test_iter_authors(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        authors = tuple(parser.iter_authors())
+        authors = tuple(parser.get_authors())
 
         # Check that all authors have been parsed
         assert len(authors) == len(cord19_json_file["metadata"]["authors"])
@@ -133,7 +133,7 @@ class TestCORD19ArticleParser:
 
     def test_iter_paragraphs(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        paragraphs = tuple(parser.iter_paragraphs())
+        paragraphs = tuple(parser.get_paragraphs())
 
         # Check that all paragraphs were parsed
         n_body_text = len(cord19_json_file["body_text"])

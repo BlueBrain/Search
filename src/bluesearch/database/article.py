@@ -17,7 +17,7 @@
 """Abstraction of scientific article data and related tools."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generator, List, Sequence, Tuple, Type, TypeVar
+from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -38,35 +38,34 @@ class ArticleParser(ABC):
         """
 
     @abstractmethod
-    def iter_authors(self) -> Generator[str, None, None]:
-        """Iterate over all author names.
+    def get_authors(self) -> Iterable[str]:
+        """Get all author names.
 
-        Yields
-        ------
-        str
-            Every author.
+        Returns
+        -------
+        iterable of str
+            All authors.
         """
 
     @abstractmethod
-    def get_abstract(self) -> Sequence[str]:
+    def get_abstract(self) -> Iterable[str]:
         """Get a sequence of paragraphs in the article abstract.
 
         Returns
         -------
-        sequence of str
+        iterable of str
             The paragraphs of the article abstract.
         """
 
     @abstractmethod
-    def iter_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
-        """Iterate over all paragraphs and titles of sections they are part of.
+    def get_paragraphs(self) -> Iterable[Tuple[str, str]]:
+        """Get all paragraphs and titles of sections they are part of.
 
-        Yields
-        ------
-        str
-            The section title.
-        str
-            The paragraph content.
+        Returns
+        -------
+        iterable of (str, str)
+            For each paragraph a tuple with two strings is returned. The first
+            is the section title, the second the paragraph content.
         """
 
 
@@ -109,8 +108,8 @@ class CORD19ArticleParser(ArticleParser):
         """
         return self.data["metadata"]["title"]
 
-    def iter_authors(self) -> Generator[str, None, None]:
-        """Iterate over all author names.
+    def get_authors(self) -> Generator[str, None, None]:
+        """Get all author names.
 
         Yields
         ------
@@ -144,8 +143,8 @@ class CORD19ArticleParser(ArticleParser):
 
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
-    def iter_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
-        """Iterate over all paragraphs and titles of sections they are part of.
+    def get_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+        """Get all paragraphs and titles of sections they are part of.
 
         Yields
         ------
@@ -184,9 +183,9 @@ class Article:
             An article parser instance.
         """
         title = parser.get_title()
-        authors = tuple(parser.iter_authors())
-        abstract = parser.get_abstract()
-        section_paragraphs = tuple(parser.iter_paragraphs())
+        authors = tuple(parser.get_authors())
+        abstract = tuple(parser.get_abstract())
+        section_paragraphs = tuple(parser.get_paragraphs())
 
         return cls(title, authors, abstract, section_paragraphs)
 
