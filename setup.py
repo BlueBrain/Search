@@ -107,7 +107,7 @@ setup(
     project_urls={
         "Source": "https://github.com/BlueBrain/Search",
         "Documentation": "https://blue-brain-search.readthedocs.io/en/stable/",
-        "Bug Tracker": "https://github.com/BlueBrain/Search/issues",
+        "Tracker": "https://github.com/BlueBrain/Search/issues",
     },
     license="-",
     classifiers=CLASSIFIERS,
