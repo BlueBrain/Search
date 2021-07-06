@@ -58,26 +58,30 @@ def cord19_json_file():
 
 class TestParser(ArticleParser):
     def __init__(self):
-        self.title = "Test Title"
-        self.authors = ("Author 1", "Author 2")
-        self.abstract = ("Abstract paragraph 1", "Abstract paragraph 2")
-        self.paragraphs = [
+        self._title = "Test Title"
+        self._authors = ("Author 1", "Author 2")
+        self._abstract = ("Abstract paragraph 1", "Abstract paragraph 2")
+        self._paragraphs = [
             ("Section 1", "Paragraph 1."),
             ("Section 1", "Paragraph 2."),
             ("Section 2", "Paragraph 1."),
         ]
 
-    def get_title(self):
-        return self.title
+    @property
+    def title(self):
+        return self._title
 
-    def get_authors(self):
-        yield from self.authors
+    @property
+    def authors(self):
+        yield from self._authors
 
-    def get_abstract(self):
-        return self.abstract
+    @property
+    def abstract(self):
+        return self._abstract
 
-    def get_paragraphs(self):
-        yield from self.paragraphs
+    @property
+    def paragraphs(self):
+        yield from self._paragraphs
 
 
 class TestCORD19ArticleParser:
@@ -94,13 +98,13 @@ class TestCORD19ArticleParser:
 
     def test_get_title(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        title = parser.get_title()
+        title = parser.title
         assert title != ""
         assert title == cord19_json_file["metadata"]["title"]
 
     def test_iter_authors(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        authors = tuple(parser.get_authors())
+        authors = tuple(parser.authors)
 
         # Check that all authors have been parsed
         assert len(authors) == len(cord19_json_file["metadata"]["authors"])
@@ -117,7 +121,7 @@ class TestCORD19ArticleParser:
 
     def test_get_abstract(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        abstract = parser.get_abstract()
+        abstract = parser.abstract
 
         # Check that all paragraphs were parsed
         assert len(abstract) == len(cord19_json_file["abstract"])
@@ -129,11 +133,11 @@ class TestCORD19ArticleParser:
         # Check that if "abstract" is missing then an empty list is returned
         del cord19_json_file["abstract"]
         parser = CORD19ArticleParser(cord19_json_file)
-        assert parser.get_abstract() == []
+        assert list(parser.abstract) == []
 
     def test_iter_paragraphs(self, cord19_json_file):
         parser = CORD19ArticleParser(cord19_json_file)
-        paragraphs = tuple(parser.get_paragraphs())
+        paragraphs = tuple(parser.paragraphs)
 
         # Check that all paragraphs were parsed
         n_body_text = len(cord19_json_file["body_text"])
@@ -162,7 +166,7 @@ class TestArticle:
         parser = TestParser()
         article = Article.parse(parser)
         assert article.title == parser.title
-        assert tuple(article.authors) == parser.authors
+        assert article.authors == tuple(parser.authors)
 
         # Test iterating over all paragraphs in the article. By default the
         # abstract is not included

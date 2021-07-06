@@ -27,8 +27,9 @@ _T = TypeVar("_T", bound="Article")
 class ArticleParser(ABC):
     """An abstract base class for article parsers."""
 
+    @property
     @abstractmethod
-    def get_title(self) -> str:
+    def title(self) -> str:
         """Get the article title.
 
         Returns
@@ -37,8 +38,9 @@ class ArticleParser(ABC):
             The article title.
         """
 
+    @property
     @abstractmethod
-    def get_authors(self) -> Iterable[str]:
+    def authors(self) -> Iterable[str]:
         """Get all author names.
 
         Returns
@@ -47,8 +49,9 @@ class ArticleParser(ABC):
             All authors.
         """
 
+    @property
     @abstractmethod
-    def get_abstract(self) -> Iterable[str]:
+    def abstract(self) -> Iterable[str]:
         """Get a sequence of paragraphs in the article abstract.
 
         Returns
@@ -57,8 +60,9 @@ class ArticleParser(ABC):
             The paragraphs of the article abstract.
         """
 
+    @property
     @abstractmethod
-    def get_paragraphs(self) -> Iterable[Tuple[str, str]]:
+    def paragraphs(self) -> Iterable[Tuple[str, str]]:
         """Get all paragraphs and titles of sections they are part of.
 
         Returns
@@ -98,7 +102,8 @@ class CORD19ArticleParser(ArticleParser):
                 f"{top_level_keys - set(json_file.keys())}"
             )
 
-    def get_title(self) -> str:
+    @property
+    def title(self) -> str:
         """Get the article title.
 
         Returns
@@ -108,7 +113,8 @@ class CORD19ArticleParser(ArticleParser):
         """
         return self.data["metadata"]["title"]
 
-    def get_authors(self) -> Generator[str, None, None]:
+    @property
+    def authors(self) -> Generator[str, None, None]:
         """Get all author names.
 
         Yields
@@ -130,7 +136,8 @@ class CORD19ArticleParser(ArticleParser):
             )
             yield author_str
 
-    def get_abstract(self) -> List[str]:
+    @property
+    def abstract(self) -> List[str]:
         """Get a sequence of paragraphs in the article abstract.
 
         Returns
@@ -143,7 +150,8 @@ class CORD19ArticleParser(ArticleParser):
 
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
-    def get_paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+    @property
+    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
         Yields
@@ -182,10 +190,10 @@ class Article:
         parser
             An article parser instance.
         """
-        title = parser.get_title()
-        authors = tuple(parser.get_authors())
-        abstract = tuple(parser.get_abstract())
-        section_paragraphs = tuple(parser.get_paragraphs())
+        title = parser.title
+        authors = tuple(parser.authors)
+        abstract = tuple(parser.abstract)
+        section_paragraphs = tuple(parser.paragraphs)
 
         return cls(title, authors, abstract, section_paragraphs)
 
