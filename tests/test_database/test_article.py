@@ -33,13 +33,6 @@ class SimpleTestParser(ArticleParser):
         yield from self._paragraphs
 
 
-# @pytest.fixture(params=sorted(jsons_path().rglob("*.json")))
-# def real_json_file(json_file_path):
-#     with json_file_path.open() as fp:
-#         json_file = json.load(fp)
-#         yield json_file
-
-
 class TestCORD19ArticleParser:
     def test_init(self, real_json_file):
         # Should be able to read real JSON files no problem.
