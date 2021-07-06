@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
 import time
 from pathlib import Path
 
@@ -31,6 +32,8 @@ from sqlalchemy.exc import OperationalError
 import docker
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
+CORD19_SAMPLE_PATH = ROOT_PATH / "tests" / "data" / "cord19_v35"
+CORD19_SAMPLE_ALL_JSON_PATHS = sorted(CORD19_SAMPLE_PATH.rglob("*.json"))
 
 
 @pytest.fixture(scope="session")
@@ -292,16 +295,25 @@ def fake_sqlalchemy_cnxn(fake_sqlalchemy_engine):
 @pytest.fixture(scope="session")
 def jsons_path():
     """Path to a directory where jsons are stored."""
-    jsons_path = ROOT_PATH / "tests" / "data" / "cord19_v35"
+    jsons_path = CORD19_SAMPLE_PATH
     assert jsons_path.exists()
 
     return jsons_path
 
 
+@pytest.fixture(
+    params=CORD19_SAMPLE_ALL_JSON_PATHS,
+    ids=(path.name for path in CORD19_SAMPLE_ALL_JSON_PATHS),
+)
+def real_json_file(request):
+    with request.param.open() as fp:
+        yield json.load(fp)
+
+
 @pytest.fixture(scope="session")
 def metadata_path():
     """Path to metadata.csv."""
-    metadata_path = ROOT_PATH / "tests" / "data" / "cord19_v35" / "metadata.csv"
+    metadata_path = CORD19_SAMPLE_PATH / "metadata.csv"
     assert metadata_path.exists()
 
     return metadata_path
