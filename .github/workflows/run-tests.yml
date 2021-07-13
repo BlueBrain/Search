@@ -11,11 +11,12 @@ jobs:
 
   run_test:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os: [ubuntu-latest, macos-latest]
         python-version: [
           3.7,
           3.8,
@@ -52,6 +53,10 @@ jobs:
       - name: linting and code style
         if: matrix.python-version == '3.7'
         run: tox -vv -e lint
+
+      - name: Homebrew mysql installation
+        if: matrix.os == 'macos-latest'
+        run: brew install mysql
 
       - name: tests and coverage
         run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
