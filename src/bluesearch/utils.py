@@ -594,11 +594,11 @@ def load_spacy_model(
     except IOError as err:
         if str(err).startswith("[E050]"):
             raise ModuleNotFoundError(
-                f"""
-Failed to load the following spaCy model:
-    model_name = "{model_name}"
-If `model_name` is a package name, please install it using
-    $ pip install ...
-If `model_name` is a local path, please verify the pipeline path.
-"""
+                "Failed to load the following spaCy model:"
+                f'    model_name = "{model_name}"'
+                "If model_name is a package name, please install it using"
+                "    $ pip install ..."
+                "If model_name is a local path, please verify the pipeline path."
             ) from err
+        else:
+            raise
