@@ -249,7 +249,7 @@ class CreateMiningCache:
         self.logger = logging.getLogger(self.__class__.__name__)
         required_tables = ["articles", "sentences"]
         for table_name in required_tables:
-            if not database_engine.has_table(table_name):
+            if not sqlalchemy.inspect(database_engine).has_table(table_name):
                 raise ValueError(
                     f"Database at {database_engine.url} does not "
                     f"contain required table {table_name}."
@@ -290,7 +290,7 @@ class CreateMiningCache:
         """Create the schemas of the different tables in the database."""
         metadata = sqlalchemy.MetaData()
 
-        if self.engine.has_table(self.target_table):
+        if sqlalchemy.inspect(self.engine).has_table(self.target_table):
             self.mining_cache_table = sqlalchemy.Table(
                 self.target_table, metadata, autoload=True, autoload_with=self.engine
             )
