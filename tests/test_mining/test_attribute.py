@@ -807,7 +807,7 @@ class TestAttributeExtraction:
 
         # Test 3
         response.status_code = 200
-        response._content = json.dumps({}).encode("utf-8")
+        response._content = json.dumps({"measurements": []}).encode("utf-8")
         measurements = extractor.get_grobid_measurements(text)
         assert len(measurements) == 0
 
