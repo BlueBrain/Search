@@ -48,8 +48,8 @@ dvc_pull_models() {
   fi
 
   # Pull the NER models in DVC
-  pushd "$DATA_AND_MODELS/pipelines/ner/" || exit
-  grep -Eo '\badd_er_[0-9]+\b' dvc.yaml | xargs dvc pull
+  pushd "$DATA_AND_MODELS/models/ner_er/" || exit
+  grep -E '^/model-' .gitignore | tr -d '/' | xargs dvc pull
   popd || exit
 }
 
