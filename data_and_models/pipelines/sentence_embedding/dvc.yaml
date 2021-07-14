@@ -1,23 +1,23 @@
 stages:
   training_transformers:
     cmd: >-
-    python training_transformers/train.py
-    --model_name_or_path clagator/biobert_v1.1_pubmed_nli_sts
-    --train_data_file training_transformers/sentences-filtered_11-527-877.txt
-    --eval_data_file training_transformers/biosses_sentences.txt
-    --line_by_line
-    --mlm
-    --output_dir ../../models/language_modeling/biobert_cord19_v1/
-    --do_train
-    --do_eval
-    --evaluation_strategy steps
-    --per_device_train_batch_size 16
-    --per_device_eval_batch_size 16
-    --logging_dir ../../models/language_modeling__logs
-    --logging_steps 5000
-    --save_steps 5000
-    --save_total_limit 20
-    --dataloader_num_workers 16
+      python training_transformers/train.py
+      --model_name_or_path clagator/biobert_v1.1_pubmed_nli_sts
+      --train_data_file training_transformers/sentences-filtered_11-527-877.txt
+      --eval_data_file training_transformers/biosses_sentences.txt
+      --line_by_line
+      --mlm
+      --output_dir ../../models/language_modeling/biobert_cord19_v1/
+      --do_train
+      --do_eval
+      --evaluation_strategy steps
+      --per_device_train_batch_size 16
+      --per_device_eval_batch_size 16
+      --logging_dir ../../models/language_modeling__logs
+      --logging_steps 5000
+      --save_steps 5000
+      --save_total_limit 20
+      --dataloader_num_workers 16
     deps:
       - training_transformers/train.py
       - training_transformers/sentences-filtered_11-527-877.txt 
@@ -60,14 +60,14 @@ stages:
       cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
         --model=${item} --output_dir=../../metrics/sentence_embedding
       deps:
-      - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      - Dockerfile
-      - eval.py
+        - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+        - Dockerfile
+        - eval.py
       params:
-      - eval.${item}
+        - eval.${item}
       outs:
-      - ../../metrics/sentence_embedding/${item}.csv
-      - ../../metrics/sentence_embedding/${item}.png
+        - ../../metrics/sentence_embedding/${item}.csv
+        - ../../metrics/sentence_embedding/${item}.png
       metrics:
-      - ../../metrics/sentence_embedding/${item}.json:
-          cache: false
+        - ../../metrics/sentence_embedding/${item}.json:
+            cache: false
