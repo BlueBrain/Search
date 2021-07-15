@@ -30,6 +30,9 @@ Legend
 Latest
 ======
 
+- |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
+  :code:`deps` elements and mixed models origin.
+
 
 Version 0.2.0
 ==============
