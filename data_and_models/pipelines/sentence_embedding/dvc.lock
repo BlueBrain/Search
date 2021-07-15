@@ -1,34 +1,5 @@
 schema: '2.0'
 stages:
-  evaluation@biobert_nli_sts:
-    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding
-    deps:
-    - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      md5: 92a4235ce8d292ff382ce008c31da45c
-      size: 14587
-    - path: Dockerfile
-      md5: 40cc1f69daca63c2e06e23c273976661
-      size: 1792
-    - path: eval.py
-      md5: 6e1ef54521c77c992c2fbc07be0c7bfe
-      size: 4513
-    params:
-      params.yaml:
-        eval.biobert_nli_sts:
-          class: SentTransformer
-          init_kwargs:
-            model_name_or_path: clagator/biobert_v1.1_pubmed_nli_sts
-    outs:
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts.csv
-      md5: c9607e9f8af75a105f34877083a8ac58
-      size: 1256
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts.json
-      md5: 1cee2a597035c7809511315ab727af9e
-      size: 104
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
-      md5: 49f0997c6d6a6e7e4e24602c077d2ebb
-      size: 153514
   training@tf_idf:
     cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       --model=tf_idf --output_dir=../../models/sentence_embedding/tf_idf
@@ -54,11 +25,15 @@ stages:
       nfiles: 1
   evaluation@tf_idf:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=tf_idf --output_dir=../../metrics/sentence_embedding
+      --model=tf_idf --output_dir=../../metrics/sentence_embedding/
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
+    - path: ../../models/sentence_embedding/tf_idf
+      md5: 596be598d693855496bd3a82894474a6.dir
+      size: 73230986
+      nfiles: 1
     - path: Dockerfile
       md5: 40cc1f69daca63c2e06e23c273976661
       size: 1792
@@ -106,11 +81,15 @@ stages:
       nfiles: 1
   evaluation@count:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=count --output_dir=../../metrics/sentence_embedding
+      --model=count --output_dir=../../metrics/sentence_embedding/
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
+    - path: ../../models/sentence_embedding/count
+      md5: 8a0b977a24fe5ed2293c3fcd0288a138.dir
+      size: 38375243
+      nfiles: 1
     - path: Dockerfile
       md5: 40cc1f69daca63c2e06e23c273976661
       size: 1792
@@ -133,13 +112,17 @@ stages:
     - path: ../../metrics/sentence_embedding/count.png
       md5: d68f0108ebe8c9772d13153c120471c4
       size: 86578
-  evaluation@sbert:
+  evaluation@biobert_nli_sts_cord19_v1:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=sbert --output_dir=../../metrics/sentence_embedding
+      --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding/
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
       size: 14587
+    - path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1
+      md5: 9dccac418759a8c53f5da608dbd9f835.dir
+      size: 433540587
+      nfiles: 9
     - path: Dockerfile
       md5: 40cc1f69daca63c2e06e23c273976661
       size: 1792
@@ -148,23 +131,23 @@ stages:
       size: 4513
     params:
       params.yaml:
-        eval.sbert:
+        eval.biobert_nli_sts_cord19_v1:
           class: SentTransformer
           init_kwargs:
-            model_name_or_path: bert-base-nli-mean-tokens
+            model_name_or_path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
     outs:
-    - path: ../../metrics/sentence_embedding/sbert.csv
-      md5: ababc62c9cae82486b214934af8932fe
-      size: 1211
-    - path: ../../metrics/sentence_embedding/sbert.json
-      md5: 612479388d464018e9dda436524e6850
-      size: 106
-    - path: ../../metrics/sentence_embedding/sbert.png
-      md5: 4b9704b24c4c51947a8fc73e03e244b2
-      size: 156836
-  evaluation@sbiobert:
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
+      md5: 189a76e04b25891a80d1f48e274e3427
+      size: 1256
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
+      md5: 46838a489f2ac96271300f74ea2f7894
+      size: 104
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
+      md5: cc48fb71482f54546c848da374490b7f
+      size: 153802
+  evaluation_external@sbiobert:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=sbiobert --output_dir=../../metrics/sentence_embedding
+      --model=sbiobert --output_dir=../../metrics/sentence_embedding/
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
@@ -191,9 +174,9 @@ stages:
     - path: ../../metrics/sentence_embedding/sbiobert.png
       md5: d4fbf9578be09263b6c5a082118172b2
       size: 155274
-  evaluation@biobert_nli_sts_cord19_v1:
+  evaluation_external@biobert_nli_sts:
     cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-      --model=biobert_nli_sts_cord19_v1 --output_dir=../../metrics/sentence_embedding
+      --model=biobert_nli_sts --output_dir=../../metrics/sentence_embedding/
     deps:
     - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       md5: 92a4235ce8d292ff382ce008c31da45c
@@ -206,17 +189,46 @@ stages:
       size: 4513
     params:
       params.yaml:
-        eval.biobert_nli_sts_cord19_v1:
+        eval.biobert_nli_sts:
           class: SentTransformer
           init_kwargs:
-            model_name_or_path: ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+            model_name_or_path: clagator/biobert_v1.1_pubmed_nli_sts
     outs:
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.csv
-      md5: 189a76e04b25891a80d1f48e274e3427
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts.csv
+      md5: c9607e9f8af75a105f34877083a8ac58
       size: 1256
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.json
-      md5: 46838a489f2ac96271300f74ea2f7894
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts.json
+      md5: 1cee2a597035c7809511315ab727af9e
       size: 104
-    - path: ../../metrics/sentence_embedding/biobert_nli_sts_cord19_v1.png
-      md5: cc48fb71482f54546c848da374490b7f
-      size: 153802
+    - path: ../../metrics/sentence_embedding/biobert_nli_sts.png
+      md5: 49f0997c6d6a6e7e4e24602c077d2ebb
+      size: 153514
+  evaluation_external@sbert:
+    cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      --model=sbert --output_dir=../../metrics/sentence_embedding/
+    deps:
+    - path: ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      md5: 92a4235ce8d292ff382ce008c31da45c
+      size: 14587
+    - path: Dockerfile
+      md5: 40cc1f69daca63c2e06e23c273976661
+      size: 1792
+    - path: eval.py
+      md5: 6e1ef54521c77c992c2fbc07be0c7bfe
+      size: 4513
+    params:
+      params.yaml:
+        eval.sbert:
+          class: SentTransformer
+          init_kwargs:
+            model_name_or_path: bert-base-nli-mean-tokens
+    outs:
+    - path: ../../metrics/sentence_embedding/sbert.csv
+      md5: ababc62c9cae82486b214934af8932fe
+      size: 1211
+    - path: ../../metrics/sentence_embedding/sbert.json
+      md5: 612479388d464018e9dda436524e6850
+      size: 106
+    - path: ../../metrics/sentence_embedding/sbert.png
+      md5: 4b9704b24c4c51947a8fc73e03e244b2
+      size: 156836
