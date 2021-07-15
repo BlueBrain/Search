@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """The setup script."""
-import os
-
 from setuptools import find_packages, setup
 
 DESCRIPTION = (
@@ -34,6 +32,7 @@ CLASSIFIERS = [
     "Development Status :: 4 - Beta",
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Operating System :: Unix",
+    "Operating System :: MacOS",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
@@ -63,18 +62,11 @@ INSTALL_REQUIRES = [
     "python-dotenv",
     "requests",
     "scikit-learn",
-    # >= 0.4.0 to be compatible with spaCy 3.
-    "scispacy>=0.4.0",
     "sentence-transformers",
     # >= 3.0.6 to include the fix for https://github.com/explosion/spaCy/pull/7603.
     "spacy[transformers]>=3.0.6",
     "torch",
 ]
-
-if os.environ.get("READTHEDOCS") == "True":
-    # see https://github.com/readthedocs/readthedocs-docker-images/issues/158
-    INSTALL_REQUIRES.remove("mysqlclient")
-
 
 EXTRAS_REQUIRE = {
     "dev": [
@@ -109,10 +101,11 @@ setup(
     long_description_content_type="text/x-rst",
     author="Blue Brain Project, EPFL",
     url="https://github.com/BlueBrain/Search",
+    download_url="https://pypi.python.org/pypi/bluesearch",
     project_urls={
         "Source": "https://github.com/BlueBrain/Search",
-        "Documentation": "https://bbpteam.epfl.ch/documentation",
-        "Tracker": "https://bbpteam.epfl.ch/project/issues/projects/BBS",
+        "Documentation": "https://blue-brain-search.readthedocs.io/en/stable/",
+        "Tracker": "https://github.com/BlueBrain/Search/issues",
     },
     license="-",
     classifiers=CLASSIFIERS,

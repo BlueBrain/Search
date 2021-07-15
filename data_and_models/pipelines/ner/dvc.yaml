@@ -64,17 +64,22 @@ stages:
       - config.cfg
       - ../../annotations/ner/annotations_${item}.train.spacy
       - ../../annotations/ner/annotations_${item}.dev.spacy
+      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/0_Transformer/
       outs:
       - ../../models/ner/model-${item}/model-best/
   add_er:
     foreach: ${entities}
     do:
+      # Regarding the use of 'sed':
+      # See for details https://github.com/BlueBrain/Search/pull/395.
+      # Will be removed by https://github.com/BlueBrain/Search/issues/310.
       cmd: >-
         python add_er.py
-        --etypes ${item}
         --patterns_file ../../annotations/ner/rule_based_patterns.jsonl
         --model ../../models/ner/model-${item}/model-best/
         --output_file ../../models/ner_er/model-${item}
+        &&
+        sed -i "s|$(pwd)/||g" ../../models/ner_er/model-${item}/transformer/model/*.json
       deps:
       - Dockerfile
       - add_er.py

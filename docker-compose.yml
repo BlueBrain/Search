@@ -28,8 +28,8 @@ services:
         - BBS_http_proxy
         - BBS_https_proxy
         - BBS_USERS
-    image: bbs_base
-    container_name: bbs_base
+    image: bbs-base
+    container_name: bbs-base
     networks:
       - bbs_network
 

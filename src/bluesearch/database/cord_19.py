@@ -27,7 +27,8 @@ import langdetect.lang_detect_exception
 import pandas as pd
 import sqlalchemy
 
-from ..utils import load_spacy_model
+from bluesearch.database.article import Article, CORD19ArticleParser
+from bluesearch.utils import load_spacy_model
 
 logger = logging.getLogger(__name__)
 
@@ -280,23 +281,14 @@ class CORD19DatabaseCreation:
 
         # Load json
         for json_path in jsons_path:
-            with open(self.data_path / json_path.strip()) as json_file:
-                file = json.load(json_file)
+            with open(self.data_path / json_path.strip()) as fp:
+                json_file_data = json.load(fp)
 
-            for section in file["body_text"]:
-                text = section["text"]
+            parser = CORD19ArticleParser(json_file_data)
+            article = Article.parse(parser)
+            for section_title, text in article.iter_paragraphs():
                 metadata = {
-                    "section_name": section["section"].title(),
-                    "article_id": article_id,
-                    "paragraph_pos_in_article": paragraph_pos_in_article,
-                }
-                paragraphs.append((text, metadata))
-                paragraph_pos_in_article += 1
-
-            for ref_entry in file["ref_entries"].values():
-                text = ref_entry["text"]
-                metadata = {
-                    "section_name": "Caption",
+                    "section_name": section_title,
                     "article_id": article_id,
                     "paragraph_pos_in_article": paragraph_pos_in_article,
                 }
