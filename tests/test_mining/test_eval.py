@@ -72,8 +72,8 @@ class TestAnnotations2df:
                 },
             ],
             "tokens": [
-                {"text": "Britney", "start": 0, "end": 7, "id": 0},
-                {"text": "Spears", "start": 8, "end": 14, "id": 1},
+                {"text": "Elvis", "start": 0, "end": 7, "id": 0},
+                {"text": "Presley", "start": 8, "end": 14, "id": 1},
                 {"text": "had", "start": 15, "end": 18, "id": 2},
                 {"text": "a", "start": 19, "end": 20, "id": 3},
                 {"text": "concert", "start": 21, "end": 28, "id": 4},
@@ -125,8 +125,8 @@ class TestAnnotations2df:
 class TestSpacy2df:
     def test_overall(self, model_entities):
         ground_truth_tokenization = [
-            "Britney",
-            "Spears",
+            "Elvis",
+            "Presley",
             "had",
             "a",
             "concert",
@@ -151,8 +151,8 @@ class TestSpacy2df:
     @pytest.mark.parametrize("excluded_entity_type", [None, "ET1", "ET2"])
     def test_exclusion(self, overwrite_ents, excluded_entity_type, model_entities):
         ground_truth_tokenization = [
-            "Britney",
-            "Spears",
+            "Elvis",
+            "Presley",
             "had",
             "a",
             "concert",

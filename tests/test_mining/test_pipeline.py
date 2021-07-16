@@ -33,7 +33,7 @@ from bluesearch.mining.relation import REModel
 @pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_overall(model_entities, debug, n_paragraphs):
     text = (
-        "This is a filler sentence. Britney Spears had a concert in "
+        "This is a filler sentence. Elvis Presley had a concert in "
         "Brazil yesterday. And I am a filler too."
     )
 
@@ -41,7 +41,7 @@ def test_overall(model_entities, debug, n_paragraphs):
     with pytest.raises(TypeError):
         run_pipeline([], model_entities, {("etype_1", "etype_2"): ["WRONG TYPE"]})
 
-    # entities are [Britney Spears, Brazil, yesterday]
+    # entities are [Elvis Presley, Brazil, yesterday]
     doc = model_entities(text)
     ents = list(doc.ents)
     sents = list(doc.sents)
@@ -100,7 +100,7 @@ def test_overall(model_entities, debug, n_paragraphs):
 @pytest.mark.parametrize("debug", [True, False], ids=["debug", "official_spec"])
 def test_without_relation(model_entities, debug, n_paragraphs):
     text = (
-        "This is a filler sentence. Britney Spears had a concert "
+        "This is a filler sentence. Elvis Presley had a concert "
         "in Brazil yesterday. And I am a filler too."
     )
 
