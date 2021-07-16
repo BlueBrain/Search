@@ -296,6 +296,7 @@ def fake_sqlalchemy_engine(
         yield engine
 
         container.kill()
+        client.close()
 
 
 @pytest.fixture(scope="session")
