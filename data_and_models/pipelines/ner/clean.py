@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
-This script cleans annotations exported with Prodigy as .jsonl files.
+Clean annotations exported with Prodigy as .jsonl files.
 
 Run 'analyze.py' before to identify relevant cleaning rules.
 
@@ -58,12 +58,14 @@ args = parser.parse_args()
 
 
 def is_valid(example: Dict[str, Any], duplicated_hashes: Set[str]) -> bool:
+    """Check that sentence is accepted and hash is unique."""
     accepted = example["answer"] == "accept"
     unique_hash = example["_input_hash"] not in duplicated_hashes
     return all((accepted, unique_hash))
 
 
 def main():
+    """Clean annotations."""
     kept_label = args.kept_label.upper()
     renamed_label = None if args.renamed_label is None else args.renamed_label.upper()
 
@@ -73,9 +75,9 @@ def main():
 
     print("Identify duplicated 'input_hash'...")
     counter = Counter(x["_input_hash"] for x in corpus)
-    duplicated_hashes = [
+    duplicated_hashes = {
         input_hash for input_hash, count in counter.items() if count > 1
-    ]
+    }
     hashes_count = len(duplicated_hashes)
     print(f"...identified {hashes_count} hash(es)")
     if hashes_count > 0:
@@ -101,9 +103,7 @@ def main():
     print(f"...normalized {normalized_spans} label spans (on {total_spans})")
     print(f"...that's {normalized_spans/total_spans:.0%} of the total")
 
-    renaming = (
-        "" if renamed_label is None else f" (renamed into {renamed_label})"
-    )
+    renaming = "" if renamed_label is None else f" (renamed into {renamed_label})"
     print(f"Keep only label {kept_label}{renaming}...")
     output_texts = []
     kept_spans = 0

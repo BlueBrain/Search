@@ -17,20 +17,20 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
-import pathlib
-import json
+from typing import Dict
 
 import pandas as pd
 import spacy
-import yaml
 
 from bluesearch.mining.eval import (
     annotations2df,
-    spacy2df,
-    remove_punctuation,
     ner_report,
+    remove_punctuation,
+    spacy2df,
 )
 
 parser = ArgumentParser()
@@ -49,7 +49,10 @@ parser.add_argument(
     help="SpaCy model to evaluate.",
 )
 parser.add_argument(
-    "--etype", required=True, type=str, help="Name of the entity type.",
+    "--etype",
+    required=True,
+    type=str,
+    help="Name of the entity type.",
 )
 parser.add_argument(
     "--output_file",
@@ -61,9 +64,7 @@ args = parser.parse_args()
 
 
 def main():
-    print("Read params.yaml...")
-    params = yaml.safe_load(open("params.yaml"))["eval"][args.etype]
-
+    """Evaluate NER models."""
     # Load and preprocess the annotations
     df = annotations2df(args.annotation_files.split(","))
     ner_model = spacy.load(args.model)
@@ -78,7 +79,9 @@ def main():
         df_sentence["source"] = source
         df_pred.append(df_sentence)
 
-    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
+    df_pred = pd.concat(df_pred, ignore_index=True).rename(
+        columns={"class": "class_pred"}
+    )
 
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
 
@@ -89,7 +92,7 @@ def main():
 
     output_file = pathlib.Path(args.output_file)
     with output_file.open("w") as f:
-        all_metrics_dict = OrderedDict()
+        all_metrics_dict: Dict[str, float] = OrderedDict()
         for mode in ["entity", "token"]:
             metrics_dict = ner_report(
                 iob_true,
