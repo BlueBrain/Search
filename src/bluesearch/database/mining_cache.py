@@ -25,6 +25,7 @@ import traceback
 from typing import Dict, List
 
 import sqlalchemy
+import torch
 
 from ..mining.pipeline import run_pipeline
 from ..sql import retrieve_articles
@@ -51,6 +52,8 @@ class Miner:
         A flag to indicate that the worker can stop waiting for new
         tasks. Unless this flag is set, the worker will continue
         polling the task queue for new tasks.
+    device : {'cpu', 'cuda'}
+        Device to load the mining model.
     """
 
     def __init__(
@@ -60,6 +63,7 @@ class Miner:
         target_table,
         task_queue,
         can_finish,
+        device="cpu",
     ):
         self.name = mp.current_process().name
         self.engine = sqlalchemy.create_engine(database_url)
@@ -67,6 +71,7 @@ class Miner:
         self.target_table_name = target_table
         self.task_queue = task_queue
         self.can_finish = can_finish
+        self.device = device
 
         self.n_tasks_done = 0
 
@@ -77,7 +82,7 @@ class Miner:
         self.engine.dispose()
 
         self.logger.info("Loading the NLP model")
-        self.model = load_spacy_model(self.model_path)
+        self.model = load_spacy_model(self.model_path, device=device)
 
     @classmethod
     def create_and_mine(
@@ -87,6 +92,7 @@ class Miner:
         target_table,
         task_queue,
         can_finish,
+        device,
     ):
         """Create a miner instance and start the mining loop.
 
@@ -107,6 +113,8 @@ class Miner:
             A flag to indicate that the worker can stop waiting for new
             tasks. Unless this flag is set, the worker will continue
             polling the task queue for new tasks.
+        device : {'cpu', 'cuda'}
+            Device to load the mining model.
         """
         miner = cls(
             database_url=database_url,
@@ -114,6 +122,7 @@ class Miner:
             target_table=target_table,
             task_queue=task_queue,
             can_finish=can_finish,
+            device=device,
         )
 
         miner.work_loop()
@@ -144,6 +153,9 @@ class Miner:
                     self.n_tasks_done += 1
                 except Exception:
                     self._log_exception(article_id)
+            # To avoid CUDA memory issue
+            if self.device == "cuda":
+                torch.cuda.empty_cache()
 
     def _generate_texts_with_metadata(self, article_ids):
         """Return a generator of (text, metadata_dict) for nlp.pipe.
@@ -237,6 +249,8 @@ class CreateMiningCache:
     workers_per_model : int, optional
         Number of max processes to spawn to run text mining and table
         population in parallel.
+    device : {'cpu', 'cuda'}
+        Device to load the mining models.
     """
 
     def __init__(
@@ -245,6 +259,7 @@ class CreateMiningCache:
         ee_models_paths,
         target_table_name,
         workers_per_model=1,
+        device="cpu",
     ):
         self.logger = logging.getLogger(self.__class__.__name__)
         required_tables = ["articles", "sentences"]
@@ -259,6 +274,7 @@ class CreateMiningCache:
         self.target_table = target_table_name
         self.ee_models_paths = ee_models_paths
         self.workers_per_model = workers_per_model
+        self.device = device
 
     def construct(self):
         """Construct and populate the cache of mined results."""
@@ -418,6 +434,7 @@ class CreateMiningCache:
                         "target_table": self.target_table,
                         "task_queue": task_queues[etype],
                         "can_finish": can_finish[etype],
+                        "device": self.device,
                     },
                 )
                 worker_process.start()
