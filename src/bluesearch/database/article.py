@@ -19,6 +19,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar
 
+from lxml import etree
+
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
 _T = TypeVar("_T", bound="Article")
@@ -71,6 +73,96 @@ class ArticleParser(ABC):
             For each paragraph a tuple with two strings is returned. The first
             is the section title, the second the paragraph content.
         """
+
+
+class PubmedXMLParser(ArticleParser):
+    """Parser for Pubmed XML files.
+
+    Parameters
+    ----------
+    path
+        The path to the XML-file (also NXML) from Pubmed/PMC.
+    """
+    def __init__(self, path: str) -> None:
+        self.content = etree.parse(path)
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        tree_title = self.content.find(".//title-group/article-title")
+        title = " ".join(t for t in tree_title.itertext())
+        full_title = ' '.join(title.split())
+        return full_title or ""
+
+    @property
+    def authors(self) -> Generator[str, None, None]:
+        """Get all author names.
+
+        Yields
+        ------
+        str
+            Every author.
+        """
+        tree_author = self.content.xpath('.//contrib-group/contrib[@contrib-type="author"]')
+        for author in tree_author:
+            author_str = author.find("name/given-names").text + \
+                         author.find("name/surname").text
+            yield author_str or ""
+
+    @property
+    def abstract(self) -> Generator[str]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Yields
+        -------
+        str
+            The paragraphs of the article abstract.
+        """
+        abstract_tree = self.content.findall(".//abstract")
+        for a in abstract_tree:
+            for t in a.itertext():
+                yield " ".join(t.split())
+
+    @property
+    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Yields
+        ------
+        str
+            The section title.
+        str
+            The paragraph content.
+        """
+        paragraphs = self.content.xpath("//body//p")
+        for paragraph in paragraphs:
+            section = " ".join(paragraph.find("../title").split()) or ""
+            yield section, paragraph
+
+        figs = self.content.findall(".//fig")
+        if figs is not None:
+            for fig in figs:
+                fig_captions = fig.find("caption").getchildren()
+                caption = " ".join(fig_captions)
+                yield "Caption", caption
+
+        tables = self.content.xpath(".//body.//sec.//table-wrap")
+        if tables is not None:
+            for table in tables:
+                # table caption
+                if table.find("caption/p") is not None:
+                    caption = table.find("caption/p")
+                elif table.find("caption/title") is not None:
+                    caption = table.find("caption/title")
+                else:
+                    caption = None
+                yield "Caption", caption
 
 
 class CORD19ArticleParser(ArticleParser):
@@ -168,7 +260,7 @@ class CORD19ArticleParser(ArticleParser):
             yield "Caption", ref_entry["text"]
 
     def __str__(self):
-        """Get the string representation the the parser instance."""
+        """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 
