@@ -19,7 +19,7 @@ PyYAML==5.4.1
 dvc[ssh]==2.5.4
 matplotlib==3.4.2
 scipy==1.7.0
-transformers==4.6.1
 spacy_lookups_data==1.0.2
 srsly==2.4.1
+transformers==4.6.1
 typer==0.3.2
