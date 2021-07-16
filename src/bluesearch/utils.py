@@ -568,14 +568,16 @@ def get_available_spacy_models(
 
 
 def load_spacy_model(
-    model_name: Union[str, pathlib.Path], *args: Any, **kwargs: Any
+    model_name: Union[str, pathlib.Path], device: str = "cpu", *args: Any, **kwargs: Any
 ) -> spacy.language.Language:
     """Spacy model load with informative error message.
 
     Parameters
     ----------
-    model_name:
+    model_name :
         spaCy pipeline to load. It can be a package name or a local path.
+    device : {'cpu', 'cuda'}
+        Device to load the spacy model.
     *args, **kwargs:
         Arguments passed to `spacy.load()`
 
@@ -589,6 +591,11 @@ def load_spacy_model(
     ModuleNotFoundError
         If spaCy model loading failed due to non-existent package or local file.
     """
+    if device == "cuda":
+        if not spacy.prefer_gpu():
+            warnings.warn(
+                "GPUs are not available. " "Spacy is not able to allocate data on GPUs."
+            )
     try:
         return spacy.load(model_name, *args, **kwargs)
     except IOError as err:
