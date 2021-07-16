@@ -1,3 +1,4 @@
+"""Analyze tokens of the different sets (test, train and pred)."""
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -18,19 +19,21 @@
 import pandas as pd
 import spacy
 
-
 nlp = spacy.load("en_core_web_lg", disable=["vocab", "ner"])
 
 
 def unroll_rows(df):
+    """Unroll sentences into dataframe whose rows are words."""
     return pd.concat([pd.DataFrame(row.to_dict()) for i, row in df.iterrows()])
 
 
 def poor_venn(set1, set2):
+    """Compute VENN of two sets."""
     print(f"[ {len(set1 - set2)} | {len(set1 & set2)} | {len(set2 - set1)} ]")
 
 
 def lemma(word):
+    """Compute lemma of word."""
     return next(iter(nlp(word.lower()))).lemma_
 
 
@@ -47,7 +50,10 @@ train_entities = set(map(lemma, train_entities))
 test_entities = set(map(lemma, test_entities))
 pred_entities = set(map(lemma, pred_entities))
 
-print("{train, test, pred} = Unique token lemmata in the corresponding sets with an entity type that is not 'O'")
+print(
+    "{train, test, pred} = Unique token lemmata in the corresponding "
+    "sets with an entity type that is not 'O'"
+)
 print()
 
 print("train - test")
@@ -82,5 +88,8 @@ print()
 print("How many of the unseen tokens were predicted?")
 seen = test_entities & train_entities
 unseen = test_entities - train_entities
-print(f"Out of {len(unseen)} unseen tokens {len(unseen & pred_entities)} were predicted")
-print(f"Out of {len(seen)} seen tokens {len(seen & pred_entities)} were predicted")
+print(
+    f"Out of {len(unseen)} unseen tokens "
+    f"{len(unseen & pred_entities)} were predicted"
+)
+print(f"Out of {len(seen)} seen tokens" f" {len(seen & pred_entities)} were predicted")

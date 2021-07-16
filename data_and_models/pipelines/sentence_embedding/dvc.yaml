@@ -23,12 +23,12 @@ stages:
       - sbert
       - sbiobert
     do:
-      cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      cmd: python eval_se.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
         --model=${item} --output_dir=../../metrics/sentence_embedding
       deps:
       - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       - Dockerfile
-      - eval.py
+      - eval_se.py
       params:
       - eval.${item}
       outs:

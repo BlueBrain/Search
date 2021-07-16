@@ -15,14 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from argparse import ArgumentParser
-from pathlib import Path
-from typing import List, Union
-
-import pandas as pd
-
 """
-This code lets analyze annotations in order to clean them for training NER models.
+Analyze annotations in order to clean them for training NER models.
 
 When there are duplicated '_input_hash', the following counts might NOT be accurate:
   - accepted texts w/ multiple labels,
@@ -61,6 +55,12 @@ table = pd.DataFrame(rows, index=indexes, columns=METRICS)
 ```
 """
 
+from argparse import ArgumentParser
+from pathlib import Path
+from typing import List, Union
+
+import pandas as pd
+
 METRICS = [
     "total texts",
     "ignored texts w/o spans",
@@ -75,31 +75,34 @@ METRICS = [
 
 
 def report(input_path: Path, verbose: bool) -> List[Union[int, float]]:
+    """Create report of the annotations."""
     print(f"Analyzing {input_path}...")
 
-    results = []
+    results: List[Union[int, float]] = []
 
     def msg(idx: int, text: str) -> None:
         if results[idx] > 0:
             print(text)
 
     def info(idx: int) -> None:
-        msg(idx, f"### INFO ### This might not be expected.")
+        msg(idx, "### INFO ### This might not be expected.")
 
     def warn(idx: int) -> None:
-        msg(idx, f"### WARNING ### There might be an issue.")
+        msg(idx, "### WARNING ### There might be an issue.")
 
     def critical(idx: int) -> None:
-        msg(idx, f"### CRITICAL ### There is an issue to be investigated.")
+        msg(idx, "### CRITICAL ### There is an issue to be investigated.")
 
     def presult(idx: int) -> None:
         print(f"\n{METRICS[idx]}: {results[idx]}")
 
-    def pdataframe(df: pd.DataFrame, columns: List[str] = ["text", "spans"]) -> None:
+    def pdataframe(
+        df: pd.DataFrame, columns: List[str] = ["text", "spans"]  # noqa: B006
+    ) -> None:
         if verbose:
             limit = 10
             if len(df) > limit:
-                print(f"(only the first 10 rows are displayed)")
+                print("(only the first 10 rows are displayed)")
             print(df[columns].head(limit))
 
     def plabels(df: pd.DataFrame) -> None:
@@ -203,6 +206,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Launch the report."""
     report(args.input_path, args.verbose)
 
 

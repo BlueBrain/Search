@@ -31,8 +31,10 @@ Latest
 ======
 
 
-Version 0.2.0a
+Version 0.2.0
 ==============
+**July 1, 2021**
+
 - |Add| metrics file resulting from :code:`dvc` pipelines to :code:`git`.
   This allow now to use :code:`dvc metrics diff`.
 - |Change| dependencies required to run the code of :code:`data_and_models/` are not
