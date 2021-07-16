@@ -190,6 +190,15 @@ class TestEmbeddingModels:
         assert fake_embed.call_count == 3
 
 
+# There's a warning/exception raised about unclosed docker sockets. Seems
+# it could be coming from the fake_sqlalchemy_engine fixture where a docker
+# container is spawned for the mysql tests. The error could be related to
+# this issue: https://github.com/docker/docker-py/issues/1293
+# I don't know why it's raised in this particular test, maybe because it's
+# the first test using docker. I tried changing different things in the said
+# fixture, but without success. Last resort solution was to ignore this
+# warning using the decorator below.
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @pytest.mark.parametrize("batch_size", [1, 5, 1000])
 def test_compute_database(
     fake_sqlalchemy_engine,
