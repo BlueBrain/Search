@@ -162,7 +162,7 @@ class AttributeExtractor:
             msg = f"GROBID request problem. Code: {response.status_code}"
             warnings.warn(msg)
         else:
-            response_json = json.loads(response.text)
+            response_json = json.loads(response.content)
             if "measurements" in response_json:
                 measurements = response_json["measurements"]
 
@@ -597,7 +597,7 @@ class AttributeExtractor:
                 self.core_nlp_url + request_params, data=request_data
             )
             response.raise_for_status()
-            response_json = json.loads(response.text)
+            response_json = json.loads(response.content)
         except requests.exceptions.RequestException:
             warnings.warn("There was a problem contacting the CoreNLP server.")
         except AssertionError:
