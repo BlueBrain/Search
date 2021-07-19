@@ -29,6 +29,10 @@ Legend
 
 Latest
 ======
+- |Add| :code:`ArticleParser` abstract class representing a generic interface
+  for parsing articles.
+- |Add| :code:`CORD19ArticleParser` to parse CORD-19 articles in JSON format.
+- |Add| :code:`PubmedXMLParser` to parse PubMed articles in XML JATS format.
 
 
 Version 0.2.0
