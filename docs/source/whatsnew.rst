@@ -30,6 +30,8 @@ Legend
 Latest
 ======
 
+- |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
+  :code:`deps` elements and mixed models origin.
 - |Fix| the incorrect maximum input length to the transformer model used as
   backbone for the NER models.
 

@@ -17,16 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import json
+import pathlib
 from argparse import ArgumentParser
 from collections import OrderedDict
-import pathlib
-import json
+from typing import Dict
 
-from bluesearch.mining.eval import (
-    annotations2df,
-    remove_punctuation,
-    ner_report,
-)
+from bluesearch.mining.eval import annotations2df, ner_report, remove_punctuation
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -55,6 +52,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Compute inter-rater agreement."""
     # Load and preprocess the annotations
     df_a1 = annotations2df(args.annotations1.split(","))
     df_a2 = annotations2df(args.annotations2.split(","))
@@ -80,7 +78,7 @@ def main():
             return_dict=True,
         )
     for etype in metrics_dict["entity"]:
-        all_metrics_dict = OrderedDict()
+        all_metrics_dict: Dict[str, float] = OrderedDict()
         for mode in ["entity", "token"]:
             all_metrics_dict.update(
                 [(f"{mode}_{k}", v) for k, v in metrics_dict[mode][etype].items()]

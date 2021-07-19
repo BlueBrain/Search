@@ -7,16 +7,17 @@ corresponding labels columns. To use this script:
 https://biocreative.bioinformatics.udel.edu/news/corpora/chemprot-corpus-biocreative-vi/
 - Unzip ChemProt_Corpus.zip file and then unzip chemprot_training.zip, ... files
 - Launch command line:
-python chemprot.py chemprot_test_gs/ output_dir/ --annotation-style {"biobert", "scibert"}
+python chemprot.py chemprot_test_gs/ output_dir/
+--annotation-style {"biobert", "scibert"}
 """
 import argparse
 import logging
 import pathlib
 import re
 import sys
+from typing import Dict, cast
 
 import pandas as pd
-
 
 logger = logging.getLogger("chemprot")
 
@@ -121,7 +122,9 @@ def read_files(input_dir):
         ],
     )
     # Replace GENE-Y and GENE-N by GENE
-    df_entities.loc[df_entities["entity_type"].isin(["GENE-Y", "GENE-N"]), "entity_type"] = "GENE"
+    df_entities.loc[
+        df_entities["entity_type"].isin(["GENE-Y", "GENE-N"]), "entity_type"
+    ] = "GENE"
 
     df_relations = pd.read_csv(
         file_relations,
@@ -157,7 +160,9 @@ def main(argv=None):
     parser.add_argument("input_dir")
     parser.add_argument("output_dir")
     parser.add_argument("--binary-classification", "-b", action="store_true")
-    parser.add_argument("--annotation-style", choices=["scibert", "biobert"], required=True)
+    parser.add_argument(
+        "--annotation-style", choices=["scibert", "biobert"], required=True
+    )
     parser.add_argument("--discard-non-eval", "-d", action="store_true")
     parser.add_argument("--keep-undefined-relations", "-k", action="store_true")
     args = parser.parse_args(argv)
@@ -180,8 +185,15 @@ def main(argv=None):
 
     # Collect all entities
     logger.info("Collecting all entities")
-    entities = {}
-    for abstract_id, entity_id, entity_type, start_char, end_char, entity in df_entities.itertuples(index=False):
+    entities: Dict[int, Dict[int, tuple]] = {}
+    for (
+        abstract_id,
+        entity_id,
+        entity_type,
+        start_char,
+        end_char,
+        entity,
+    ) in df_entities.itertuples(index=False):
         if abstract_id not in entities:
             entities[abstract_id] = {}
         entities[abstract_id][entity_id] = (entity_type, start_char, end_char, entity)
@@ -190,8 +202,25 @@ def main(argv=None):
     logger.info("Building the sentence dataframe")
     bad_sentence_count = 0
     output_rows = []
-    column_names = ("sentence", "start_1", "end_1", "type_1", "start_2", "end_2", "type_2", "relation", "group")
-    for abstract_id, group, evaluate, relation, arg_1, arg_2 in df_relations.itertuples(index=False):
+    column_names = (
+        "sentence",
+        "start_1",
+        "end_1",
+        "type_1",
+        "start_2",
+        "end_2",
+        "type_2",
+        "relation",
+        "group",
+    )
+    for (
+        abstract_id,
+        group,
+        _evaluate,
+        relation,
+        arg_1,
+        arg_2,
+    ) in df_relations.itertuples(index=False):
         text, sentence_boundaries = abstracts[abstract_id]
         type_1, start_1, end_1, entity_1 = entities[abstract_id][arg_1]
         type_2, start_2, end_2, entity_2 = entities[abstract_id][arg_2]
@@ -200,13 +229,19 @@ def main(argv=None):
         # equivalent check:
         # if not (end_1 < start_2 or end_2 < start_1)
         if start_2 < end_1 and start_1 < end_2:
-            logger.warning(f"Overlapping entities: {start_1}:{end_1} and {start_2}:{end_2}")
+            logger.warning(
+                f"Overlapping entities: {start_1}:{end_1} " f"and {start_2}:{end_2}"
+            )
             continue
 
         for start, end in sentence_boundaries:
             if start <= start_1 < end:
                 # consistency check
-                if not (start < end_1 <= end) or not (start <= start_2 < end) or not (start < end_2 <= end):
+                if (
+                    not (start < end_1 <= end)
+                    or not (start <= start_2 < end)
+                    or not (start < end_2 <= end)
+                ):
                     # raise ValueError("Consistency check failed")
                     logger.warning(f"Bad sentence: {text[start:end]}")
                     bad_sentence_count += 1
@@ -222,7 +257,7 @@ def main(argv=None):
                     end_2 - start,
                     type_2,
                     relation,
-                    group
+                    group,
                 )
                 output_rows.append(row)
                 break
@@ -231,7 +266,9 @@ def main(argv=None):
 
     # Process --keep-undefined-relations
     if not args.keep_undefined_relations:
-        df_sentences = df_sentences[df_sentences["group"] != 0]
+        df_sentences = cast(
+            pd.DataFrame, df_sentences[df_sentences["group"] != 0]  # type: ignore
+        )
 
     # Annotate entity types
     def annotate_scibert(row):
@@ -251,7 +288,7 @@ def main(argv=None):
         entity_2 = text[start_2:end_2]
         part_3 = text[end_2:]
 
-        text = part_1 + "<< " + entity_1 + " >>" + part_2 + "[[ " + entity_2 + " ]]" + part_3
+        text = f"""{part_1}<< {entity_1} >>{part_2}[[ {entity_2} ]]{part_3}"""
 
         return text
 
@@ -296,7 +333,9 @@ def main(argv=None):
         all_relations = df_sentences["relation"].unique()
         for relation in all_relations:
             df_binary = df_sentences[["sentence", "relation"]].copy()
-            df_binary["relation"] = df_binary["relation"].apply(lambda r: 1 if r == relation else 0)
+            df_binary["relation"] = cast(pd.Series, df_binary["relation"]).apply(
+                lambda r: 1 if r == relation else 0
+            )
             df_binary.to_csv(
                 output_dir / f"{split_type}_{relation}.tsv",
                 sep="\t",
