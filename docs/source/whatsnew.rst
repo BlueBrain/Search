@@ -32,6 +32,7 @@ Latest
 
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
   :code:`deps` elements and mixed models origin.
+- |Add| :code:`BioBERT NLI+STS CORD-19 v1` building script as a DVC pipeline.
 
 
 Version 0.2.0
