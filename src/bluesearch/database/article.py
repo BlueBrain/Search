@@ -144,7 +144,7 @@ class PubmedXMLParser(ArticleParser):
         str
             The paragraph content.
         """
-        paragraphs = self.content.xpath("//body//p")
+        paragraphs = self.content.xpath("//body//p[not(parent::caption)]")
         for paragraph in paragraphs:
 
             text = self.text_content(paragraph)
@@ -154,7 +154,7 @@ class PubmedXMLParser(ArticleParser):
 
             yield section or "", text
 
-        figs = self.content.findall(".//fig")
+        figs = self.content.findall("//body//fig")
         if figs is not None:
             for fig in figs:
                 try:
@@ -186,7 +186,7 @@ class PubmedXMLParser(ArticleParser):
 
         Returns
         -------
-        text
+        str
             Entire text of the element.
         """
         return "".join(t for t in element.itertext())
