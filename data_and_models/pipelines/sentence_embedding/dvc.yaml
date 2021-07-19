@@ -20,10 +20,10 @@ stages:
       --save_total_limit 20
       --dataloader_num_workers 16
     deps:
+    - Dockerfile
     - training_transformers/train.py
     - training_transformers/sentences-filtered_11-527-877.txt
     - training_transformers/biosses_sentences.txt
-    - Dockerfile
     outs:
     - ../../models/language_modeling/biobert_cord19_v1/
   fine_tuning_transformers:
@@ -42,9 +42,9 @@ stages:
       cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
         --model=${item} --output_dir=../../models/sentence_embedding/${item}
       deps:
-      - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       - Dockerfile
       - train.py
+      - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
       params:
       - train.${item}
       outs:
