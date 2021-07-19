@@ -89,10 +89,10 @@ stages:
       - eval_se.py
       - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       params:
-        - eval.${item}
+      - eval.${item}
       outs:
-        - ../../metrics/sentence_embedding/${item}.csv
-        - ../../metrics/sentence_embedding/${item}.png
+      - ../../metrics/sentence_embedding/${item}.csv
+      - ../../metrics/sentence_embedding/${item}.png
       metrics:
-        - ../../metrics/sentence_embedding/${item}.json:
-            cache: false
+      - ../../metrics/sentence_embedding/${item}.json:
+          cache: false
