@@ -86,7 +86,7 @@ class PubmedXMLParser(ArticleParser):
     """
 
     def __init__(self, path: Union[str, Path]) -> None:
-        self.content = etree.parse(str(path))
+        self.content = etree.parse(str(path))  # nosec
 
     @property
     def title(self) -> str:
@@ -114,9 +114,7 @@ class PubmedXMLParser(ArticleParser):
         authors = self.content.xpath('//contrib-group/contrib[@contrib-type="author"]')
         for author in authors:
             try:
-                given_names = (
-                    self.text_content(author.find("name/given-names")) or ""
-                )
+                given_names = self.text_content(author.find("name/given-names")) or ""
                 surname = self.text_content(author.find("name/surname")) or ""
                 author_str = given_names + " " + surname
                 yield author_str.strip()
