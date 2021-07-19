@@ -20,20 +20,20 @@ stages:
       --save_total_limit 20
       --dataloader_num_workers 16
     deps:
-      - training_transformers/train.py
-      - training_transformers/sentences-filtered_11-527-877.txt 
-      - training_transformers/biosses_sentences.txt
-      - Dockerfile
+    - training_transformers/train.py
+    - training_transformers/sentences-filtered_11-527-877.txt
+    - training_transformers/biosses_sentences.txt
+    - Dockerfile
     outs:
-      - ../../models/language_modeling/biobert_cord19_v1/
+    - ../../models/language_modeling/biobert_cord19_v1/
   fine_tuning_transformers:
     cmd: python training_transformers/fine_tune.py ../../models/language_modeling/biobert_cord19_v1/ ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
     deps:
-      - Dockerfile
-      - training_transformers/fine_tune.py
-      - ../../models/language_modeling/biobert_cord19_v1/
+    - Dockerfile
+    - training_transformers/fine_tune.py
+    - ../../models/language_modeling/biobert_cord19_v1/
     outs:
-      - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+    - ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
   training:
     foreach:
       - tf_idf
@@ -42,13 +42,13 @@ stages:
       cmd: python train.py --sentences_file=../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
         --model=${item} --output_dir=../../models/sentence_embedding/${item}
       deps:
-        - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
-        - Dockerfile
-        - train.py
+      - ../../annotations/sentence_embedding/cord19_v47_sentences_pre.txt
+      - Dockerfile
+      - train.py
       params:
-        - train.${item}
+      - train.${item}
       outs:
-        - ../../models/sentence_embedding/${item}
+      - ../../models/sentence_embedding/${item}
   evaluation:
     foreach:
       - biobert_nli_sts_cord19_v1
