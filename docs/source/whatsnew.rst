@@ -30,6 +30,9 @@ Legend
 Latest
 ======
 
+- |Fix| the incorrect maximum input length to the transformer model used as
+  backbone for the NER models.
+
 
 Version 0.2.0
 ==============
