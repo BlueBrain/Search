@@ -17,22 +17,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import pathlib
 import json
+import pathlib
 from argparse import ArgumentParser
-from collections import OrderedDict
 from pprint import pprint
 
 import pandas as pd
 import spacy
-import yaml
 
-from bluesearch.mining.eval import (
-    annotations2df,
-    spacy2df,
-    remove_punctuation,
-    ner_report,
-)
+from bluesearch.mining.eval import annotations2df, ner_report, spacy2df
 
 parser = ArgumentParser()
 parser.add_argument(
@@ -50,7 +43,10 @@ parser.add_argument(
     help="SpaCy model to evaluate.",
 )
 parser.add_argument(
-    "--etype", required=True, type=str, help="Name of the entity type.",
+    "--etype",
+    required=True,
+    type=str,
+    help="Name of the entity type.",
 )
 parser.add_argument(
     "--output_file",
@@ -62,6 +58,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Evaluate NER models."""
     # Load and preprocess the annotations
     print("Loading data and model")
     df = annotations2df(args.annotation_files.split(","))
@@ -79,12 +76,14 @@ def main():
         df_pred.append(df_sentence)
 
     print("Formatting predctions")
-    df_pred = pd.concat(df_pred, ignore_index=True).rename(columns={"class": "class_pred"})
+    df_pred = pd.concat(df_pred, ignore_index=True).rename(
+        columns={"class": "class_pred"}
+    )
     df = df.merge(df_pred, on=["source", "id", "text"], how="inner")
-    #df = remove_punctuation(df)
+    # df = remove_punctuation(df)
     iob_true = df["class"]
     iob_pred = df["class_pred"]
-    
+
     print("Saving predictions")
     df.to_pickle("df_test_pred.pkl")
 
@@ -96,11 +95,11 @@ def main():
         mode="token",
         return_dict=True,
     )
-    metrics_dict = dict(metrics_dict[args.etype])
+    etype_metrics_dict = dict(metrics_dict[args.etype])
     with output_file.open("w") as f:
-        json.dump(metrics_dict, f)
+        json.dump(etype_metrics_dict, f)
         f.write("\n")
-    pprint(metrics_dict)
+    pprint(etype_metrics_dict)
 
 
 if __name__ == "__main__":

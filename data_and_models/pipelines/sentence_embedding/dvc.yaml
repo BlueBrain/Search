@@ -52,18 +52,42 @@ stages:
   evaluation:
     foreach:
       - biobert_nli_sts_cord19_v1
-      - biobert_nli_sts
       - tf_idf
       - count
+    do:
+      cmd: >-
+        python eval_se.py
+        --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+        --model=${item}
+        --output_dir=../../metrics/sentence_embedding/
+      deps:
+      - Dockerfile
+      - eval_se.py
+      - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+      - ../../models/sentence_embedding/${item}
+      params:
+      - eval.${item}
+      outs:
+      - ../../metrics/sentence_embedding/${item}.csv
+      - ../../metrics/sentence_embedding/${item}.png
+      metrics:
+      - ../../metrics/sentence_embedding/${item}.json:
+          cache: false
+  evaluation_external:
+    foreach:
+      - biobert_nli_sts
       - sbert
       - sbiobert
     do:
-      cmd: python eval.py --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-        --model=${item} --output_dir=../../metrics/sentence_embedding
+      cmd: >-
+        python eval_se.py
+        --annotation_files=../../annotations/sentence_embedding/sentence_similarity_cord19.csv
+        --model=${item}
+        --output_dir=../../metrics/sentence_embedding/
       deps:
-        - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
-        - Dockerfile
-        - eval.py
+      - Dockerfile
+      - eval_se.py
+      - ../../annotations/sentence_embedding/sentence_similarity_cord19.csv
       params:
         - eval.${item}
       outs:

@@ -19,9 +19,9 @@
 
 import argparse
 import os
+import pickle  # nosec
 from collections import OrderedDict
 from pathlib import Path
-import pickle
 
 import numpy as np
 import yaml
@@ -55,6 +55,7 @@ args = parser.parse_args()
 
 
 def main():
+    """Train sentence embedding models."""
     np.random.seed(args.seed)
 
     print("Reading params.yaml...")
@@ -77,8 +78,8 @@ def main():
         )
         model._stop_words_id = 0
         print("Saving model to disk...")
-        with (out_dir / "model.pkl").open("wb") as f:
-            pickle.dump(model, f)
+        with (out_dir / "model.pkl").open("wb") as fp:
+            pickle.dump(model, fp)
     elif args.model == "count":
         model = CountVectorizer(**params["init_kwargs"])
         print("Training model...")
@@ -89,8 +90,8 @@ def main():
         )
         model._stop_words_id = 0
         print("Saving model to disk...")
-        with (out_dir / "model.pkl").open("wb") as f:
-            pickle.dump(model, f)
+        with (out_dir / "model.pkl").open("wb") as fp:
+            pickle.dump(model, fp)
     else:
         raise ValueError(f"Training not available for model {args.model}!")
 
