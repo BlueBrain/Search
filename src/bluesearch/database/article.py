@@ -86,7 +86,7 @@ class PubmedXMLParser(ArticleParser):
     """
 
     def __init__(self, path: Union[str, Path]) -> None:
-        self.content = etree.parse(path)  # nosec
+        self.content = etree.parse(str(path))
 
     @property
     def title(self) -> str:
@@ -115,9 +115,9 @@ class PubmedXMLParser(ArticleParser):
         for author in authors:
             try:
                 given_names = (
-                    self.text_content(author.find("name/given-names").text) or ""
+                    self.text_content(author.find("name/given-names")) or ""
                 )
-                surname = self.text_content(author.find("name/surname").text) or ""
+                surname = self.text_content(author.find("name/surname")) or ""
                 author_str = given_names + " " + surname
                 yield author_str.strip()
             except AttributeError:

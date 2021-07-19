@@ -44,7 +44,7 @@ class SimpleTestParser(ArticleParser):
 @pytest.fixture(scope="session")
 def pubmed_xml_parser():
     path = pathlib.Path(__file__).parent.parent / "data" / "sample_file.xml"
-    parser = PubmedXMLParser(str(path.absolute()))
+    parser = PubmedXMLParser(path.absolute())
     return parser
 
 
@@ -83,8 +83,10 @@ class TestPubmedXMLArticleParser:
             assert isinstance(paragraph, tuple)
             assert isinstance(paragraph[0], str)
             assert isinstance(paragraph[1], str)
-            if i >= 7:
-                assert paragraph[0] == "Caption"
+            if i == 7:
+                assert paragraph[0] == "Figure Caption"
+            if i > 7:
+                assert paragraph[0] == "Table Caption"
 
         assert paragraphs[0] == ("", "Paragraph 1")
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
