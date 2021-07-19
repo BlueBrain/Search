@@ -17,7 +17,8 @@
 """Abstraction of scientific article data and related tools."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar
+from pathlib import Path
+from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar, Union
 
 from lxml import etree
 
@@ -76,14 +77,15 @@ class ArticleParser(ABC):
 
 
 class PubmedXMLParser(ArticleParser):
-    """Parser for Pubmed XML files.
+    """Parser for PubMed XML files using the JATS Journal Publishing DTD.
 
     Parameters
     ----------
     path
-        The path to the XML-file (also NXML) from Pubmed/PMC.
+        The path to the XML file from PubMed.
     """
-    def __init__(self, path: str) -> None:
+
+    def __init__(self, path: Union[str, Path]) -> None:
         self.content = etree.parse(path)
 
     @property
@@ -95,11 +97,10 @@ class PubmedXMLParser(ArticleParser):
         str
             The article title.
         """
-        tree_title = self.content.find(".//title-group/article-title")
-        if tree_title is None:
+        titles = self.content.find("//title-group/article-title")
+        if titles is None:
             return ""
-        title = self.text_content(tree_title)
-        return title or ""
+        return self.text_content(titles)
 
     @property
     def authors(self) -> Generator[str, None, None]:
@@ -108,16 +109,20 @@ class PubmedXMLParser(ArticleParser):
         Yields
         ------
         str
-            Every author.
+            Every author, in the format "Given_Name(s) Surname".
         """
-        tree_author = self.content.xpath('.//contrib-group/contrib[@contrib-type="author"]')
-        for author in tree_author:
+        authors = self.content.xpath('//contrib-group/contrib[@contrib-type="author"]')
+        for author in authors:
             try:
-                given_names = author.find("name/given-names").text or ""
-                surname = author.find("name/surname").text or ""
+                given_names = (
+                    self.text_content(author.find("name/given-names").text) or ""
+                )
+                surname = self.text_content(author.find("name/surname").text) or ""
                 author_str = given_names + " " + surname
                 yield author_str.strip()
             except AttributeError:
+                # In rare cases, an author may not have a given name or a surname,
+                # e.g. it could be an organization. We decide to skip those.
                 continue
 
     @property
@@ -126,10 +131,10 @@ class PubmedXMLParser(ArticleParser):
 
         Yields
         -------
-        str
+        paragraph_text
             The paragraphs of the article abstract.
         """
-        abstract_pars = self.content.findall(".//abstract//p")
+        abstract_pars = self.content.findall("//abstract//p")
         for paragraph in abstract_pars:
             yield self.text_content(paragraph) or ""
 
@@ -137,48 +142,50 @@ class PubmedXMLParser(ArticleParser):
     def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
+        Paragraphs can be parts of text body, or figure or table captions.
+
         Yields
         ------
-        str
+        section_title
             The section title.
-        str
+        paragraph_text
             The paragraph content.
         """
+        # Paragraphs of text body
         paragraphs = self.content.xpath("//body//p[not(parent::caption)]")
         for paragraph in paragraphs:
-
             text = self.text_content(paragraph)
             section = paragraph.find("../title")
             if section is not None:
                 section = self.text_content(section)
-
             yield section or "", text
 
+        # Figure captions
         figs = self.content.findall("//body//fig")
         if figs is not None:
             for fig in figs:
                 try:
                     fig_captions = fig.find("caption").getchildren()
                     caption = " ".join([self.text_content(c) for c in fig_captions])
-                    yield "Caption", caption
+                    yield "Figure Caption", caption
                 except AttributeError:
                     continue
 
+        # Table captions
         tables = self.content.xpath("//body//table-wrap")
         if tables is not None:
             for table in tables:
-                # table caption
                 if table.find("caption/p") is not None:
                     caption = self.text_content(table.find("caption/p"))
                 elif table.find("caption/title") is not None:
                     caption = self.text_content(table.find("caption/title"))
                 else:
                     caption = None
-                yield "Caption", caption or ""
+                yield "Table Caption", caption or ""
 
     @staticmethod
     def text_content(element: etree._Element) -> str:
-        """Parse lxml.etree._Element to string.
+        """Extracts all text of an element and of its descendants (at any depth).
 
         Parameters
         ----------
@@ -186,8 +193,8 @@ class PubmedXMLParser(ArticleParser):
 
         Returns
         -------
-        str
-            Entire text of the element.
+        text
+            Entire text of the element and its descendants.
         """
         return "".join(t for t in element.itertext())
 

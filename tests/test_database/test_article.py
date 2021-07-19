@@ -5,7 +5,12 @@ from itertools import chain
 import pytest
 from lxml import etree
 
-from bluesearch.database.article import Article, ArticleParser, CORD19ArticleParser, PubmedXMLParser
+from bluesearch.database.article import (
+    Article,
+    ArticleParser,
+    CORD19ArticleParser,
+    PubmedXMLParser,
+)
 
 
 class SimpleTestParser(ArticleParser):
@@ -36,7 +41,7 @@ class SimpleTestParser(ArticleParser):
         yield from self._paragraphs
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def pubmed_xml_parser():
     path = pathlib.Path(__file__).parent.parent / "data" / "sample_file.xml"
     path = str(path.absolute())
@@ -50,7 +55,7 @@ class TestPubmedXMLArticleParser:
 
     def test_title(self, pubmed_xml_parser):
         title = pubmed_xml_parser.title
-        assert title == 'Article Title'
+        assert title == "Article Title"
 
     def test_authors(self, pubmed_xml_parser):
         authors = pubmed_xml_parser.authors
@@ -82,9 +87,9 @@ class TestPubmedXMLArticleParser:
             if i >= 7:
                 assert paragraph[0] == "Caption"
 
-        assert paragraphs[0] == ('', 'Paragraph 1')
-        assert paragraphs[3] == ('Section Title 1', 'Paragraph Section 1')
-        assert paragraphs[4] == ('Section Title 2', 'Paragraph Section 2')
+        assert paragraphs[0] == ("", "Paragraph 1")
+        assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
+        assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
 
 
 class TestCORD19ArticleParser:
