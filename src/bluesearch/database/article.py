@@ -164,17 +164,17 @@ class PubmedXMLParser(ArticleParser):
                 except AttributeError:
                     continue
 
-        tables = self.content.xpath(".//body.//sec.//table-wrap")
+        tables = self.content.xpath("//body//table-wrap")
         if tables is not None:
             for table in tables:
                 # table caption
                 if table.find("caption/p") is not None:
-                    caption = table.find("caption/p")
+                    caption = self.text_content(table.find("caption/p"))
                 elif table.find("caption/title") is not None:
-                    caption = table.find("caption/title")
+                    caption = self.text_content(table.find("caption/title"))
                 else:
                     caption = None
-                yield "Caption", caption
+                yield "Caption", caption or ""
 
     @staticmethod
     def text_content(element: etree._Element) -> str:
