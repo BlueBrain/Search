@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<!DOCTYPE article PUBLIC "-//NLM//DTD JATS (Z39.96) Journal Publishing DTD v1.2 20190208//EN" "JATS-journalpublishing1.dtd">
+<article
+article-type="research-article"
+dtd-version="1.2" xml:lang="en"
+xmlns:mml="http://www.w3.org/1998/Math/MathML"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+<front>
+<journal-meta>
+<journal-id journal-id-type="pmc">Journal ID PMC</journal-id>
+<journal-id journal-id-type="pubmed">Journal ID PubMed</journal-id>
+<journal-id journal-id-type="publisher">Journal ID Publisher</journal-id>
+<issn>XXXX-XXXX</issn>
+<publisher>
+<publisher-name>Publisher Name</publisher-name>
+</publisher>
+</journal-meta>
+<article-meta>
+<article-id pub-id-type="publisher-id">Publisher ID</article-id>
+<article-id pub-id-type="publisher-id">Publisher ID 2</article-id>
+<article-id pub-id-type="doi">DOI</article-id>
+<article-id pub-id-type="other">other</article-id>
+<article-id pub-id-type="pmid">PMID</article-id>
+<article-version vocab="JAV" 
+  vocab-identifier="http://www.niso.org/publications/rp/RP-8-2008.pdf"
+  vocab-term="Version of Record"
+  article-version-type="VoR"  
+  >Version of Record</article-version>
+<article-categories>
+<subj-group>
+<subject>Subject 1</subject>
+</subj-group>
+</article-categories>
+<title-group>
+<article-title>Article Title</article-title>
+</title-group>
+<contrib-group>
+<contrib contrib-type="author">
+<name>
+<surname>Author Surname 1</surname>
+<given-names>Author Given Names 1</given-names>
+</name>
+</contrib>
+<contrib contrib-type="author">
+<name>
+<surname>Author Surname 2</surname>
+<given-names>Author Given Names 2</given-names>
+</name>
+</contrib>
+</contrib-group>
+<contrib-group>
+<contrib>
+<name>
+<surname>Surname 1</surname>
+<given-names>Given Names 1</given-names>
+</name>
+</contrib>
+</contrib-group>
+<contrib-group>
+<contrib contrib-type="reviewer">
+<name>
+<surname>Reviewer Surname 1</surname>
+<given-names>Reviewer Given Names 1</given-names>
+</name>
+</contrib>
+</contrib-group>
+<aff id="aff-1">Affiliation 1</aff>
+<pub-date date-type="pub" publication-format="print" iso-8601-date="yyyy-mm-dd">
+<day>dd</day>
+<month>m</month>
+<year>yyyy</year>
+</pub-date>
+<pub-date date-type="pub" publication-format="electronic" iso-8601-date="yyyy-mm-dd">
+<day>dd</day>
+<month>m</month>
+<year>yyyy</year>
+</pub-date>
+<history>
+<date date-type="received" iso-8601-date="yyyy-mm-dd">
+<day>dd</day>
+<month>mm</month>
+<year>yyyy</year>
+</date>
+<date date-type="accepted" iso-8601-date="yyyy-mm-dd">
+<day>dd</day>
+<month>mm</month>
+<year>yyyy</year>
+</date>
+</history>
+<permissions>
+<copyright-statement>Copyright Statement</copyright-statement>
+<copyright-year>yyyy</copyright-year>
+</permissions>
+<abstract>
+<p>Abstract Paragraph 1</p><p>Abstract Paragraph <italic>2</italic></p>
+</abstract>
+</article-meta>
+</front>
+<body>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+  <p>Paragraph 3</p>
+<sec>
+<title>Section Title 1</title>
+<p>Paragraph Section 1</p>
+<fig id="F1">
+<label>Figure 1</label>
+<caption>
+<p>Figure 1 Caption</p>
+</caption>
+</fig>
+<table-wrap id="T1">
+<label>Table 1</label>
+<caption>
+<title>Table 1 Caption</title>
+</caption>
+<table>
+</table>
+  </table-wrap>
+  <sec>
+<title>Section Title 2</title>
+<p>Paragraph Section 2</p>
+<table-wrap id="T2">
+  <label>Table 2</label>
+<caption>
+<p>Table 2 Caption</p>
+</caption>
+<table>
+</table>
+    </table-wrap>
+    <table-wrap id="T3">
+<label>Table 3</label>
+<caption>
+</caption>
+<table>
+</table>
+</table-wrap>
+<p>Paragraph 2 Section 2</p>
+  </sec>
+</sec>
+<sec sec-type="discussion">
+<title>Discussion</title>
+<p>Paragraph Discussion</p>
+</sec>
+</body>
+<back>
+<ack>
+<p>Acknowledgement</p>
+</ack>
+<ref-list>
+<ref id="B1">
+<label>1</label>
+<element-citation publication-type="journal" publication-format="print">
+<person-group person-group-type="author">
+<name>
+<surname>Surname 1 Reference 1</surname>
+<given-names>Given Names 1 Reference 1</given-names>
+</name>
+<name>
+<surname>Surname 2 Reference 1</surname>
+<given-names>Given Names 2 Reference 1</given-names>
+</name>
+</person-group>
+<source>Source 1</source>
+<year iso-8601-date="yyyy">yyyy</year>
+<volume>XX</volume>
+<fpage>XX</fpage>
+<lpage>XX</lpage>
+<pub-id pub-id-type="pmid">PMID Reference 1</pub-id>
+</element-citation>
+</ref>
+<ref id="B2">
+<label>2</label>
+<element-citation publication-type="journal" publication-format="print">
+<person-group person-group-type="author">
+<name>
+<surname>Surname 1 Reference 2</surname>
+<given-names>Given Names 1 Reference 2</given-names>
+</name>
+</person-group>
+<source>Source 2</source>
+<year iso-8601-date="yyyy">yyyy</year>
+<volume>XXX</volume>
+<fpage>xxx</fpage>
+<lpage>xxx</lpage>
+<pub-id pub-id-type="pmid">PMID Reference 2</pub-id>
+</element-citation>
+</ref>
+</ref-list>
+</back>
+</article>

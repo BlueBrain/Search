@@ -1,8 +1,11 @@
+import inspect
+import pathlib
 from itertools import chain
 
 import pytest
+from lxml import etree
 
-from bluesearch.database.article import Article, ArticleParser, CORD19ArticleParser
+from bluesearch.database.article import Article, ArticleParser, CORD19ArticleParser, PubmedXMLParser
 
 
 class SimpleTestParser(ArticleParser):
@@ -31,6 +34,57 @@ class SimpleTestParser(ArticleParser):
     @property
     def paragraphs(self):
         yield from self._paragraphs
+
+
+@pytest.fixture(scope='session')
+def pubmed_xml_parser():
+    path = pathlib.Path(__file__).parent.parent / "data" / "sample_file.xml"
+    path = str(path.absolute())
+    parser = PubmedXMLParser(path)
+    return parser
+
+
+class TestPubmedXMLArticleParser:
+    def test_init(self, pubmed_xml_parser):
+        assert isinstance(pubmed_xml_parser.content, etree._ElementTree)
+
+    def test_title(self, pubmed_xml_parser):
+        title = pubmed_xml_parser.title
+        assert title == 'Article Title'
+
+    def test_authors(self, pubmed_xml_parser):
+        authors = pubmed_xml_parser.authors
+        assert inspect.isgenerator(authors)
+        authors = tuple(authors)
+
+        assert len(authors) == 2
+        assert authors[0] == "Author Given Names 1 Author Surname 1"
+        assert authors[1] == "Author Given Names 2 Author Surname 2"
+
+    def test_abstract(self, pubmed_xml_parser):
+        abstract = pubmed_xml_parser.abstract
+        assert inspect.isgenerator(abstract)
+        abstract = tuple(abstract)
+        assert len(abstract) == 2
+        assert abstract[0] == "Abstract Paragraph 1"
+        assert abstract[1] == "Abstract Paragraph 2"
+
+    def test_paragraphs(self, pubmed_xml_parser):
+        paragraphs = pubmed_xml_parser.paragraphs
+        assert inspect.isgenerator(paragraphs)
+        paragraphs = tuple(paragraphs)
+        assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
+
+        for i, paragraph in enumerate(paragraphs):
+            assert isinstance(paragraph, tuple)
+            assert isinstance(paragraph[0], str)
+            assert isinstance(paragraph[1], str)
+            if i >= 7:
+                assert paragraph[0] == "Caption"
+
+        assert paragraphs[0] == ('', 'Paragraph 1')
+        assert paragraphs[3] == ('Section Title 1', 'Paragraph Section 1')
+        assert paragraphs[4] == ('Section Title 2', 'Paragraph Section 2')
 
 
 class TestCORD19ArticleParser:
