@@ -44,8 +44,7 @@ class SimpleTestParser(ArticleParser):
 @pytest.fixture(scope="session")
 def pubmed_xml_parser():
     path = pathlib.Path(__file__).parent.parent / "data" / "sample_file.xml"
-    path = str(path.absolute())
-    parser = PubmedXMLParser(path)
+    parser = PubmedXMLParser(str(path.absolute()))
     return parser
 
 

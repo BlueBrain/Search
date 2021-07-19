@@ -20,7 +20,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar, Union
 
-from lxml import etree
+from lxml import etree  # nosec
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -86,7 +86,7 @@ class PubmedXMLParser(ArticleParser):
     """
 
     def __init__(self, path: Union[str, Path]) -> None:
-        self.content = etree.parse(path)
+        self.content = etree.parse(path)  # nosec
 
     @property
     def title(self) -> str:
@@ -130,7 +130,7 @@ class PubmedXMLParser(ArticleParser):
         """Get a sequence of paragraphs in the article abstract.
 
         Yields
-        -------
+        ------
         paragraph_text
             The paragraphs of the article abstract.
         """
@@ -180,12 +180,12 @@ class PubmedXMLParser(ArticleParser):
                 elif table.find("caption/title") is not None:
                     caption = self.text_content(table.find("caption/title"))
                 else:
-                    caption = None
-                yield "Table Caption", caption or ""
+                    caption = ""
+                yield "Table Caption", caption
 
     @staticmethod
     def text_content(element: etree._Element) -> str:
-        """Extracts all text of an element and of its descendants (at any depth).
+        """Extract all text of an element and of its descendants (at any depth).
 
         Parameters
         ----------
