@@ -27,7 +27,10 @@ stages:
     outs:
     - ../../models/language_modeling/biobert_cord19_v1/
   fine_tuning_transformers:
-    cmd: python training_transformers/fine_tune.py ../../models/language_modeling/biobert_cord19_v1/ ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
+    cmd: >-
+      python training_transformers/fine_tune.py
+      ../../models/language_modeling/biobert_cord19_v1/
+      ../../models/sentence_embedding/biobert_nli_sts_cord19_v1/
     deps:
     - Dockerfile
     - training_transformers/fine_tune.py
