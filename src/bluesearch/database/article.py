@@ -96,9 +96,10 @@ class PubmedXMLParser(ArticleParser):
             The article title.
         """
         tree_title = self.content.find(".//title-group/article-title")
-        title = " ".join(t for t in tree_title.itertext())
-        full_title = ' '.join(title.split())
-        return full_title or ""
+        if tree_title is None:
+            return ""
+        title = self.text_content(tree_title)
+        return title or ""
 
     @property
     def authors(self) -> Generator[str, None, None]:
@@ -111,12 +112,16 @@ class PubmedXMLParser(ArticleParser):
         """
         tree_author = self.content.xpath('.//contrib-group/contrib[@contrib-type="author"]')
         for author in tree_author:
-            author_str = author.find("name/given-names").text + \
-                         author.find("name/surname").text
-            yield author_str or ""
+            try:
+                given_names = author.find("name/given-names").text or ""
+                surname = author.find("name/surname").text or ""
+                author_str = given_names + " " + surname
+                yield author_str.strip()
+            except AttributeError:
+                continue
 
     @property
-    def abstract(self) -> Generator[str]:
+    def abstract(self) -> Generator[str, None, None]:
         """Get a sequence of paragraphs in the article abstract.
 
         Yields
@@ -124,10 +129,9 @@ class PubmedXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        abstract_tree = self.content.findall(".//abstract")
-        for a in abstract_tree:
-            for t in a.itertext():
-                yield " ".join(t.split())
+        abstract_pars = self.content.findall(".//abstract//p")
+        for paragraph in abstract_pars:
+            yield self.text_content(paragraph) or ""
 
     @property
     def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
@@ -142,15 +146,23 @@ class PubmedXMLParser(ArticleParser):
         """
         paragraphs = self.content.xpath("//body//p")
         for paragraph in paragraphs:
-            section = " ".join(paragraph.find("../title").split()) or ""
-            yield section, paragraph
+
+            text = self.text_content(paragraph)
+            section = paragraph.find("../title")
+            if section is not None:
+                section = self.text_content(section)
+
+            yield section or "", text
 
         figs = self.content.findall(".//fig")
         if figs is not None:
             for fig in figs:
-                fig_captions = fig.find("caption").getchildren()
-                caption = " ".join(fig_captions)
-                yield "Caption", caption
+                try:
+                    fig_captions = fig.find("caption").getchildren()
+                    caption = " ".join([self.text_content(c) for c in fig_captions])
+                    yield "Caption", caption
+                except AttributeError:
+                    continue
 
         tables = self.content.xpath(".//body.//sec.//table-wrap")
         if tables is not None:
@@ -163,6 +175,21 @@ class PubmedXMLParser(ArticleParser):
                 else:
                     caption = None
                 yield "Caption", caption
+
+    @staticmethod
+    def text_content(element: etree._Element) -> str:
+        """Parse lxml.etree._Element to string.
+
+        Parameters
+        ----------
+        element
+
+        Returns
+        -------
+        text
+            Entire text of the element.
+        """
+        return "".join(t for t in element.itertext())
 
 
 class CORD19ArticleParser(ArticleParser):
