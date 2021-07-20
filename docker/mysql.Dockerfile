@@ -17,10 +17,10 @@
 
 FROM mysql:8
 
-ENV HTTP_PROXY="http://bbpproxy.epfl.ch:80"
-ENV HTTPS_PROXY="http://bbpproxy.epfl.ch:80"
-ENV http_proxy="http://bbpproxy.epfl.ch:80"
-ENV https_proxy="http://bbpproxy.epfl.ch:80"
+# ENV HTTP_PROXY="http://bbpproxy.epfl.ch:80"
+# ENV HTTPS_PROXY="http://bbpproxy.epfl.ch:80"
+# ENV http_proxy="http://bbpproxy.epfl.ch:80"
+# ENV https_proxy="http://bbpproxy.epfl.ch:80"
 
 # Set timezone for correct timestamp, install usefule packages
 ENV TZ="Europe/Zurich"
