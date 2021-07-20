@@ -1,7 +1,10 @@
 stages:
   training_transformers:
     cmd: >-
-      CUDA_VISIBLE_DEVICES=0,1,2,3
+      NGPUS=4 &&
+      NGPUS_AVAIL=$(nvidia-smi --list-gpus | wc -l) &&
+      if [ "$NGPUS" -gt "$NGPUS_AVAIL" ]; then echo "$NGPUS > $NGPUS_AVAIL: Not enough available GPUs!" && return 1; fi &&
+      CUDA_VISIBLE_DEVICES=$(seq 0 $(($NGPUS - 1)) | paste -sd,)
       python training_transformers/train.py
       --model_name_or_path clagator/biobert_v1.1_pubmed_nli_sts
       --train_data_file training_transformers/sentences-filtered_11-527-877.txt
