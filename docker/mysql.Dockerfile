@@ -22,15 +22,23 @@ ENV HTTPS_PROXY="http://bbpproxy.epfl.ch:80"
 ENV http_proxy="http://bbpproxy.epfl.ch:80"
 ENV https_proxy="http://bbpproxy.epfl.ch:80"
 
+# Set timezone for correct timestamp, install usefule packages
 ENV TZ="Europe/Zurich"
-RUN apt-get update && apt-get install -y --no-install-recommends man vim less procps
+RUN \
+apt-get update &&\
+apt-get install -y --no-install-recommends man vim less procps &&\
+apt-get clean &&\
+rm -r /var/lib/apt/lists/*
 
 # Limit incremental binary log to 7 days. This is a system variable and has to
 # go in the [mysqld] section, which is in docker.cnf
 # Accordingly it would make sense to do file dumps every 7 days
 RUN echo "binlog_expire_logs_seconds = 604800" >> /etc/mysql/conf.d/docker.cnf
 
+# Install the backup script
 COPY docker/mysql-make-backup /usr/local/bin/make-backup
 RUN chmod +x /usr/local/bin/make-backup
+
+# Pre-initialize the docker volume for the backup
 VOLUME ["/backup"]
 
