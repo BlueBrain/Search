@@ -32,6 +32,8 @@ Latest
 
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
   :code:`deps` elements and mixed models origin.
+- |Fix| the incorrect maximum input length to the transformer model used as
+  backbone for the NER models.
 - |Add| :code:`BioBERT NLI+STS CORD-19 v1` building script as a DVC pipeline.
 
 
