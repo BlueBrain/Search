@@ -30,7 +30,7 @@ RUN true \
 RUN conda install -c carta mysqlclient
 
 # Instal BlueBrainSearach -- revision can be a branch, sha, or tag
-ARG BBS_REVISION=v0.2.0
+ARG BBS_REVISION=v0.2.1
 ADD . /src
 WORKDIR /src
 RUN git checkout $BBS_REVISION
