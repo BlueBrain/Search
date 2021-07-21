@@ -123,6 +123,7 @@ setup(
     extras_require=EXTRAS_REQUIRE,
     entry_points={
         "console_scripts": [
+            "bbs_database = bluesearch.entrypoint.database.parent:main",
             "compute_embeddings = bluesearch.entrypoint:run_compute_embeddings",
             "create_database = bluesearch.entrypoint:run_create_database",
             "create_mining_cache = bluesearch.entrypoint:run_create_mining_cache",
