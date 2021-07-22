@@ -77,5 +77,8 @@ def run(
         parser_inst = parser_cls(path)
 
     article = article_module.Article.parse(parser_inst)
-    print(article.title)
+
+    with engine.connect() as con:
+        query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
+        con.execute(query, {"title": article.title})
 
