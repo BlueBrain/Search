@@ -63,10 +63,3 @@ def run(
     # Construction
     with engine.begin() as connection:
         metadata.create_all(connection)
-
-
-if __name__ == "__main__":
-    parser = get_parser()
-    args = parser.parse_args()
-    run(**vars(args))
-
