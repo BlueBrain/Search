@@ -41,7 +41,7 @@ import sys  # Added.
 from transformers import set_seed
 
 # Set a random seed. Use the same value as during training (default value).
-set_seed(42)
+set_seed(42)  # Added.
 
 #### Just some code to print debug information to stdout
 logging.basicConfig(format='%(asctime)s - %(message)s',
