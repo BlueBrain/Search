@@ -28,9 +28,11 @@ def engine_sqlite(tmpdir):
 
     return eng
 
+
 def test_mysql_not_implemented():
     with pytest.raises(NotImplementedError):
         main(["add", "a", "b", "c", "--db-type=mysql"])
+
 
 def test_unknown_parser():
     with pytest.raises(ValueError, match="Unsupported parser"):
@@ -39,7 +41,7 @@ def test_unknown_parser():
 
 def test_sqlite_cord19(engine_sqlite, jsons_path):
     # Create a dummy database
-    path_jsons  = pathlib.Path(__file__).parent.parent.parent / "data" / "cord19_v35"
+    path_jsons = pathlib.Path(__file__).parent.parent.parent / "data" / "cord19_v35"
     all_paths = sorted(path_jsons.rglob("*.json"))
 
     n_articles = len(all_paths)
@@ -58,7 +60,6 @@ def test_sqlite_cord19(engine_sqlite, jsons_path):
     # Check
     with engine_sqlite.begin() as connection:
         query = """SELECT COUNT(*) FROM ARTICLES"""
-        n_rows, = connection.execute(query).fetchone()
+        (n_rows,) = connection.execute(query).fetchone()
 
     assert n_rows == n_articles > 0
-

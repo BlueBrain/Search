@@ -47,7 +47,6 @@ def run(
     else:
         raise ValueError(f"Unrecognize database type {db_type}")  # pragma: nocover
 
-
     metadata = sqlalchemy.MetaData()
 
     # Creation of the schema of the tables

@@ -50,8 +50,8 @@ def run(
     db_url: str,
     parser: str,
     path: str,
-    db_type:str,
-    ) -> None:
+    db_type: str,
+) -> None:
     """Add an entry to the database."""
 
     if db_type == "sqlite":
@@ -82,4 +82,3 @@ def run(
     with engine.connect() as con:
         query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
         con.execute(query, {"title": article.title})
-

@@ -9,6 +9,7 @@ def test_mysql_not_implemented():
     with pytest.raises(NotImplementedError):
         main(["init", "a", "--db-type=mysql"])
 
+
 def test_sqlite(tmpdir):
     tmpdir = pathlib.Path(str(tmpdir))
     db_path = tmpdir / "database.db"
