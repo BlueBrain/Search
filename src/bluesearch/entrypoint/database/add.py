@@ -9,6 +9,7 @@ import bluesearch.database.article as article_module
 
 
 def get_parser() -> argparse.ArgumentParser:
+    """Create a parser."""
     parser = argparse.ArgumentParser(
         description="Add entries.",
     )
@@ -52,7 +53,11 @@ def run(
     path: str,
     db_type: str,
 ) -> None:
-    """Add an entry to the database."""
+    """Add an entry to the database.
+
+    Parameter description and potential defaults are documented inside of the
+    `get_parser` function.
+    """
 
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")

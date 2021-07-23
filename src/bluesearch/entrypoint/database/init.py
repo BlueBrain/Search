@@ -6,6 +6,7 @@ import sqlalchemy
 
 
 def get_parser() -> argparse.ArgumentParser:
+    """Create a parser."""
     parser = argparse.ArgumentParser(
         description="Initialize.",
     )
@@ -37,7 +38,11 @@ def run(
     db_url: str,
     db_type: str,
 ) -> None:
-    """Initialize database."""
+    """Initialize database.
+
+    Parameter description and potential defaults are documented inside of the
+    `get_parser` function.
+    """
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
