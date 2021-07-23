@@ -29,20 +29,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         add_help=False,
     )
 
+    command_map = {
+        "add": run_add,
+        "init": run_init,
+    }
+
     # Do parsing
     args = parent_parser.parse_args(argv)
 
-    print(args)
     kwargs = vars(args)
     command = kwargs.pop("command")
 
     # Run logic
-    if command == "add":
-        run_add(**kwargs)
-    elif command == "init":
-        run_init(**kwargs)
-    else:
-        pass  # pragma: nocover
+    command_map[command](**kwargs)
 
     return 0
 
