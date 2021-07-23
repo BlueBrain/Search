@@ -1,7 +1,6 @@
+"""Adding an article to the database."""
 import argparse
 import json
-import sys
-from typing import List, Optional
 
 import sqlalchemy
 
@@ -58,7 +57,6 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 

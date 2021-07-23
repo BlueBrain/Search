@@ -1,6 +1,5 @@
+"""Initialization of the database."""
 import argparse
-import sys
-from typing import List, Optional
 
 import sqlalchemy
 

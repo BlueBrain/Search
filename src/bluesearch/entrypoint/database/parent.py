@@ -1,3 +1,4 @@
+"""Module implementing the high level CLI logic."""
 import argparse
 import sys
 from typing import List, Optional
@@ -9,6 +10,11 @@ from .init import run as run_init
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    """Run CLI.
+
+    This is the main entrypoint that defines different commands
+    using subparsers.
+    """
     parent_parser = argparse.ArgumentParser(description="Database management utilities")
 
     subparsers = parent_parser.add_subparsers(dest="command", required=True)
