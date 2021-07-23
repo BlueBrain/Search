@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 
-MYSQL_USER="$1"
-export MYSQL_PWD="$2"
-DB_NAME="$3"
+DB_NAME="$1"
 FILENAME="/backup/$(date +%Y%m%d-%H%M%S)-${DB_NAME}.sql"
 
-# Check arguments
-if [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PWD" ] || [ -z "$DB_NAME" ]
+# Check MySQL credentials are in the environment
+if [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PWD" ]
 then
-    echo "Usage: $(basename $0) MYSQL-USER MYSQL-PWD DB-NAME"
+    echo "The variables MYSQL_USER and MYSQL_PWD need to be in the environment"
+    exit 1
+fi
+
+# Check argument
+if [ -z "$DB_NAME" ]
+then
+    echo "Usage: $(basename $0) DB-NAME"
     exit 1
 fi
 
