@@ -2,8 +2,11 @@ import argparse
 import sys
 from typing import List, Optional
 
-from .add import get_parser as get_parser_add, run as run_add
-from .init import get_parser as get_parser_init, run as run_init
+from .add import get_parser as get_parser_add
+from .add import run as run_add
+from .init import get_parser as get_parser_init
+from .init import run as run_init
+
 
 def main(argv: Optional[List[str]] = None) -> int:
     parent_parser = argparse.ArgumentParser(description="Database management utilities")

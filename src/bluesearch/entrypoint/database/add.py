@@ -7,6 +7,7 @@ import sqlalchemy
 
 import bluesearch.database.article as article_module
 
+
 def get_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Add entries.",
