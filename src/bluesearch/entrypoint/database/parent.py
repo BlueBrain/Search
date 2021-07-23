@@ -41,9 +41,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         run_add(**kwargs)
     elif command == "init":
         run_init(**kwargs)
+    else:
+        pass  # pragma: nocover
 
     return 0
 
 if __name__ == "__main__":
-    sys.exit(main())
-
+    sys.exit(main())  # pragma: nocover

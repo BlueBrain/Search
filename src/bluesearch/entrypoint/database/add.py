@@ -60,7 +60,7 @@ def run(
         raise NotImplementedError
 
     else:
-        raise ValueError(f"Unrecognize database type {db_type}.")
+        raise ValueError(f"Unrecognize database type {db_type}.")  # pragma: nocover
 
     valid_parsers = [x.__name__ for x in article_module.ArticleParser.__subclasses__()]
 
@@ -74,7 +74,7 @@ def run(
         with open(path, "r") as f:
             parser_inst = parser_cls(json.load(f))
     else:
-        parser_inst = parser_cls(path)
+        parser_inst = parser_cls(path)  # not covered since we do not have other parsers
 
     article = article_module.Article.parse(parser_inst)
 

@@ -45,7 +45,7 @@ def run(
         raise NotImplementedError
 
     else:
-        raise ValueError(f"Unrecognize database type {db_type}")
+        raise ValueError(f"Unrecognize database type {db_type}")  # pragma: nocover
 
 
     metadata = sqlalchemy.MetaData()

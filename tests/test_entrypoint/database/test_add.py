@@ -28,6 +28,14 @@ def engine_sqlite(tmpdir):
 
     return eng
 
+def test_mysql_not_implemented():
+    with pytest.raises(NotImplementedError):
+        main(["add", "a", "b", "c", "--db-type=mysql"])
+
+def test_unknown_parser():
+    with pytest.raises(ValueError, match="Unsupported parser"):
+        main(["add", "dburl", "WrongParser", "path_to_files"])
+
 
 def test_sqlite_cord19(engine_sqlite, jsons_path):
     # Create a dummy database
