@@ -22,7 +22,7 @@ FROM mysql:8
 # ENV http_proxy="http://bbpproxy.epfl.ch:80"
 # ENV https_proxy="http://bbpproxy.epfl.ch:80"
 
-# Set timezone for correct timestamp, install usefule packages
+# Set timezone for correct timestamp, install useful packages
 ENV TZ="Europe/Zurich"
 RUN \
 apt-get update &&\
@@ -41,4 +41,3 @@ RUN chmod +x /usr/local/bin/make-backup
 
 # Pre-initialize the docker volume for the backup
 VOLUME ["/backup"]
-
