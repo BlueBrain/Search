@@ -31,6 +31,6 @@ python-dotenv==0.18.0
 requests==2.26.0
 scikit-learn==0.24.2
 sentence-transformers==2.0.0
-spacy==3.1.0
+spacy==3.0.7
 spacy-transformers==1.0.3
 torch==1.9.0
