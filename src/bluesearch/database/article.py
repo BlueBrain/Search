@@ -129,7 +129,7 @@ class PubmedXMLParser(ArticleParser):
 
         Yields
         ------
-        paragraph_text
+        str
             The paragraphs of the article abstract.
         """
         abstract_pars = self.content.findall("//abstract//p")
@@ -144,9 +144,9 @@ class PubmedXMLParser(ArticleParser):
 
         Yields
         ------
-        section_title
+        section : str
             The section title.
-        paragraph_text
+        text : str
             The paragraph content.
         """
         # Paragraphs of text body
@@ -187,11 +187,12 @@ class PubmedXMLParser(ArticleParser):
 
         Parameters
         ----------
-        element
+        element : etree._Element
+            XML element to parse.
 
         Returns
         -------
-        text
+        str
             Entire text of the element and its descendants.
         """
         return "".join(t for t in element.itertext())
