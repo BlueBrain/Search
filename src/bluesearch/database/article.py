@@ -152,21 +152,17 @@ class PubmedXMLParser(ArticleParser):
         for paragraph in paragraphs:
             text = self.text_content(paragraph)
             section = paragraph.find("../title")
-            if section is None:
-                section_title = ""
-            else:
-                section_title = self.text_content(section)
+            section_title = self.text_content(section)
             yield section_title, text
 
         # Figure captions
         figs = self.content.findall("//body//fig") or []
         for fig in figs:
-            try:
-                fig_captions = fig.find("caption").getchildren()
-                caption = " ".join([self.text_content(c) for c in fig_captions])
-                yield "Figure Caption", caption
-            except AttributeError:
+            fig_captions = fig.find("caption")
+            if fig_captions is None:
                 continue
+            caption = " ".join(self.text_content(c) for c in fig_captions.getchildren())
+            yield "Figure Caption", caption
 
         # Table captions
         tables = self.content.xpath("//body//table-wrap") or []
