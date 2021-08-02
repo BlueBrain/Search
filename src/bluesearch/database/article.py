@@ -98,8 +98,6 @@ class PubmedXMLParser(ArticleParser):
             The article title.
         """
         titles = self.content.find("//title-group/article-title")
-        if titles is None:
-            return ""
         return self.text_content(titles)
 
     @property
@@ -114,8 +112,8 @@ class PubmedXMLParser(ArticleParser):
         authors = self.content.xpath('//contrib-group/contrib[@contrib-type="author"]')
         for author in authors:
             try:
-                given_names = self.text_content(author.find("name/given-names")) or ""
-                surname = self.text_content(author.find("name/surname")) or ""
+                given_names = self.text_content(author.find("name/given-names"))
+                surname = self.text_content(author.find("name/surname"))
                 author_str = given_names + " " + surname
                 yield author_str.strip()
             except AttributeError:
@@ -134,7 +132,7 @@ class PubmedXMLParser(ArticleParser):
         """
         abstract_pars = self.content.findall("//abstract//p")
         for paragraph in abstract_pars:
-            yield self.text_content(paragraph) or ""
+            yield self.text_content(paragraph)
 
     @property
     def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
@@ -154,32 +152,28 @@ class PubmedXMLParser(ArticleParser):
         for paragraph in paragraphs:
             text = self.text_content(paragraph)
             section = paragraph.find("../title")
-            if section is not None:
-                section = self.text_content(section)
-            yield section or "", text
+            if section is None:
+                section_title = ""
+            else:
+                section_title = self.text_content(section)
+            yield section_title, text
 
         # Figure captions
-        figs = self.content.findall("//body//fig")
-        if figs is not None:
-            for fig in figs:
-                try:
-                    fig_captions = fig.find("caption").getchildren()
-                    caption = " ".join([self.text_content(c) for c in fig_captions])
-                    yield "Figure Caption", caption
-                except AttributeError:
-                    continue
+        figs = self.content.findall("//body//fig") or []
+        for fig in figs:
+            try:
+                fig_captions = fig.find("caption").getchildren()
+                caption = " ".join([self.text_content(c) for c in fig_captions])
+                yield "Figure Caption", caption
+            except AttributeError:
+                continue
 
         # Table captions
-        tables = self.content.xpath("//body//table-wrap")
-        if tables is not None:
-            for table in tables:
-                if table.find("caption/p") is not None:
-                    caption = self.text_content(table.find("caption/p"))
-                elif table.find("caption/title") is not None:
-                    caption = self.text_content(table.find("caption/title"))
-                else:
-                    caption = ""
-                yield "Table Caption", caption
+        tables = self.content.xpath("//body//table-wrap") or []
+        for table in tables:
+            caption_element = table.find("caption/p") or table.find("caption/title")
+            caption = self.text_content(caption_element)
+            yield "Table Caption", caption
 
     @staticmethod
     def text_content(element: etree._Element) -> str:
@@ -187,7 +181,7 @@ class PubmedXMLParser(ArticleParser):
 
         Parameters
         ----------
-        element : etree._Element
+        element : etree._Element or None
             XML element to parse.
 
         Returns
@@ -195,7 +189,10 @@ class PubmedXMLParser(ArticleParser):
         str
             Entire text of the element and its descendants.
         """
-        return "".join(t for t in element.itertext())
+        if element is None:
+            return ""
+        else:
+            return "".join(element.itertext())
 
 
 class CORD19ArticleParser(ArticleParser):
