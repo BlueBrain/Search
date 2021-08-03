@@ -18,7 +18,17 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar, Union
+from typing import (
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from lxml import etree  # nosec
 
@@ -111,15 +121,14 @@ class PubmedXMLParser(ArticleParser):
         """
         authors = self.content.xpath('//contrib-group/contrib[@contrib-type="author"]')
         for author in authors:
-            try:
-                given_names = self.text_content(author.find("name/given-names"))
-                surname = self.text_content(author.find("name/surname"))
-                author_str = given_names + " " + surname
-                yield author_str.strip()
-            except AttributeError:
+            given_names = self.text_content(author.find("name/given-names"))
+            surname = self.text_content(author.find("name/surname"))
+            if given_names == "" or surname == "":
                 # In rare cases, an author may not have a given name or a surname,
                 # e.g. it could be an organization. We decide to skip those.
                 continue
+            author_str = given_names + " " + surname
+            yield author_str.strip()
 
     @property
     def abstract(self) -> Generator[str, None, None]:
@@ -172,7 +181,7 @@ class PubmedXMLParser(ArticleParser):
             yield "Table Caption", caption
 
     @staticmethod
-    def text_content(element: etree._Element) -> str:
+    def text_content(element: Optional[etree._Element]) -> str:
         """Extract all text of an element and of its descendants (at any depth).
 
         Parameters
