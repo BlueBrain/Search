@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+DB_NAME="$1"
+FILENAME="/backup/$(date +%Y%m%d-%H%M%S)-${DB_NAME}.sql"
+
+# Check MySQL credentials are in the environment
+if [ -z "$MYSQL_USER" ] || [ -z "$MYSQL_PWD" ]
+then
+    echo "The variables MYSQL_USER and MYSQL_PWD need to be in the environment"
+    exit 1
+fi
+
+# Check argument
+if [ -z "$DB_NAME" ]
+then
+    echo "Usage: $(basename $0) DB-NAME"
+    exit 1
+fi
+
+# Test credentials
+mysql -u "$MYSQL_USER" -e "quit" >& /dev/null
+if [ "$?" -ne "0" ]
+then
+    echo "Access to database denied. Wrong credentials?"
+    exit 1
+fi
+
+# Test if database exists
+mysql -u "$MYSQL_USER" -e "use $DB_NAME" >& /dev/null
+if [ "$?" -ne "0" ]
+then
+    echo "Database ${DB_NAME} doesn't exist"
+    exit 1
+fi
+
+# Make backup
+echo "Saving back-up to $FILENAME"
+/usr/bin/mysqldump -u "$MYSQL_USER" "$DB_NAME" -RE --triggers > "${FILENAME}"
+echo "Back-up finished."
+
