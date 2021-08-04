@@ -65,7 +65,8 @@ INSTALL_REQUIRES = [
     "sentence-transformers",
     # >= 3.0.6 to include the fix for https://github.com/explosion/spaCy/pull/7603.
     "spacy[transformers]>=3.0.6",
-    "torch",
+    # torch==1.9.0 contains patch allowing reproducible saving of models
+    "torch>=1.9.0",
 ]
 
 EXTRAS_REQUIRE = {

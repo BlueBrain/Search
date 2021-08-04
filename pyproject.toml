@@ -25,4 +25,4 @@ requires = [
 
 [tool.black]
 extend-exclude = """data_and_models/pipelines/ner/transformers_vs_spacy/transformers/
-|data_and_models/pipelines/sentence_embedding/scripts/"""
+|data_and_models/pipelines/sentence_embedding/training_transformers/"""

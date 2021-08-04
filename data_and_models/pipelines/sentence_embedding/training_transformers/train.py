@@ -1,6 +1,8 @@
 # This script is for transformers v3.4.0.
 # It is from https://github.com/huggingface/transformers/blob/v3.4.0/examples/language-modeling/run_language_modeling.py.
-# No changes have been done. Indeed, fast tokenizers cannot be used with transformers v3.4.0.
+# One change has been made: 'model_max_length=512 has been added to AutoTokenizer.from_pretrained().
+# Note: Fast tokenizers cannot be used with transformers v3.4.0.
+# For maintainability, changes have been limited to the minimum and the style was kept.
 
 # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors and The HuggingFace Inc. team.
@@ -225,7 +227,7 @@ def main():
     if model_args.tokenizer_name:
         tokenizer = AutoTokenizer.from_pretrained(model_args.tokenizer_name, cache_dir=model_args.cache_dir)
     elif model_args.model_name_or_path:
-        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, cache_dir=model_args.cache_dir)
+        tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path, cache_dir=model_args.cache_dir, model_max_length=512)
     else:
         raise ValueError(
             "You are instantiating a new tokenizer from scratch. This is not supported, but you can do it from another script, save it,"
