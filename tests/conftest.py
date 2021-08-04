@@ -19,6 +19,7 @@
 
 import json
 import time
+import warnings
 from pathlib import Path
 
 import h5py
@@ -29,7 +30,21 @@ import spacy
 import sqlalchemy
 from sqlalchemy.exc import OperationalError
 
-import docker
+with warnings.catch_warnings():
+    # warnings raised in docker==5.0.0
+    warnings.filterwarnings(
+        "ignore",
+        r"The _yaml extension module is now located at yaml\._yaml",
+        DeprecationWarning,
+        r"_yaml",
+    )
+    warnings.filterwarnings(
+        "ignore",
+        r"the imp module is deprecated in favour of importlib",
+        DeprecationWarning,
+        r"invoke",
+    )
+    import docker
 
 ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 CORD19_SAMPLE_PATH = ROOT_PATH / "tests" / "data" / "cord19_v35"
@@ -281,6 +296,7 @@ def fake_sqlalchemy_engine(
         yield engine
 
         container.kill()
+        client.close()
 
 
 @pytest.fixture(scope="session")
