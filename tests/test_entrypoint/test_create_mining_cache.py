@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bluesearch.entrypoint import run_create_mining_cache
+from bluesearch.entrypoint.create_mining_cache import run_create_mining_cache
 
 
 def test_help(capsys):

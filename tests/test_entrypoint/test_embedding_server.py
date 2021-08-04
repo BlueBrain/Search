@@ -20,7 +20,7 @@
 import pathlib
 from unittest.mock import Mock
 
-from bluesearch.entrypoint import get_embedding_app
+from bluesearch.entrypoint.embedding_server import get_embedding_app
 from bluesearch.server.embedding_server import EmbeddingServer
 
 

@@ -123,12 +123,12 @@ setup(
     extras_require=EXTRAS_REQUIRE,
     entry_points={
         "console_scripts": [
-            "compute_embeddings = bluesearch.entrypoint:run_compute_embeddings",
-            "create_database = bluesearch.entrypoint:run_create_database",
-            "create_mining_cache = bluesearch.entrypoint:run_create_mining_cache",
-            "embedding_server = bluesearch.entrypoint:run_embedding_server",
-            "mining_server = bluesearch.entrypoint:run_mining_server",
-            "search_server = bluesearch.entrypoint:run_search_server",
+            "compute_embeddings = bluesearch.entrypoint.compute_embeddings:run_compute_embeddings",
+            "create_database = bluesearch.entrypoint.create_database:run_create_database",
+            "create_mining_cache = bluesearch.entrypoint.create_mining_cache:run_create_mining_cache",
+            "embedding_server = bluesearch.entrypoint.embedding_server:run_embedding_server",
+            "mining_server = bluesearch.entrypoint.mining_server:run_mining_server",
+            "search_server = bluesearch.entrypoint.search_server:run_search_server",
         ]
     },
 )

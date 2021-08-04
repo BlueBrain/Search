@@ -24,7 +24,7 @@ import numpy as np
 import pytest
 import torch
 
-from bluesearch.entrypoint import run_compute_embeddings
+from bluesearch.entrypoint.compute_embeddings import run_compute_embeddings
 
 N_GPUS = torch.cuda.device_count()
 
