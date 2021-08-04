@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bluesearch.entrypoint.create_mining_cache import run_create_mining_cache
+from bluesearch.entrypoint.mining_cache import run_create_mining_cache
 
 
 def test_help(capsys):
@@ -89,7 +89,7 @@ def test_send_through(
     fake_sqlalchemy = Mock()
     fake_create_mining_cache = Mock()
     monkeypatch.setattr(
-        "bluesearch.entrypoint.create_mining_cache.sqlalchemy", fake_sqlalchemy
+        "bluesearch.entrypoint.mining_cache.sqlalchemy", fake_sqlalchemy
     )
     monkeypatch.setattr(
         "bluesearch.database.CreateMiningCache", fake_create_mining_cache
@@ -98,7 +98,7 @@ def test_send_through(
         "bluesearch.database.CreateMiningCache", fake_create_mining_cache
     )
     monkeypatch.setattr(
-        "bluesearch.entrypoint.create_mining_cache.getpass.getpass",
+        "bluesearch.entrypoint.mining_cache.getpass.getpass",
         lambda _: "fake_password",
     )
 
