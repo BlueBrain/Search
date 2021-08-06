@@ -23,14 +23,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser_add = get_parser_add()
     parser_init = get_parser_init()
 
-    _ = subparsers.add_parser(
+    subparsers.add_parser(
         "add",
         description=parser_add.description,
         help=parser_add.description,
         parents=[parser_add],
         add_help=False,
     )
-    _ = subparsers.add_parser(
+    subparsers.add_parser(
         "init",
         description=parser_init.description,
         help=parser_init.description,
