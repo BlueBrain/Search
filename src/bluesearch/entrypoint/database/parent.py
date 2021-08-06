@@ -1,7 +1,7 @@
 """Module implementing the high level CLI logic."""
 import argparse
 import sys
-from typing import List, Optional
+from typing import Optional, Sequence
 
 from .add import get_parser as get_parser_add
 from .add import run as run_add
@@ -9,7 +9,7 @@ from .init import get_parser as get_parser_init
 from .init import run as run_init
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run CLI.
 
     This is the main entrypoint that defines different commands
