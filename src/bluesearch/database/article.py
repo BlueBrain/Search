@@ -97,6 +97,7 @@ class PubmedXMLParser(ArticleParser):
     """
 
     def __init__(self, path: Union[str, Path]) -> None:
+        super().__init__()
         self.content = ElementTree.parse(str(path))
 
     @property
