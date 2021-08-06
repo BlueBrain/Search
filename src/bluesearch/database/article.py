@@ -109,7 +109,7 @@ class PubmedXMLParser(ArticleParser):
         str
             The article title.
         """
-        titles = self.content.find("//title-group/article-title")
+        titles = self.content.find(".//title-group/article-title")
         return self.text_content(titles)
 
     @property
@@ -122,7 +122,7 @@ class PubmedXMLParser(ArticleParser):
             Every author, in the format "Given_Name(s) Surname".
         """
         authors = self.content.findall(
-            "//contrib-group/contrib" '[@contrib-type="author"]'
+            ".//contrib-group/contrib[@contrib-type='author']"
         )
         for author in authors:
             given_names = self.text_content(author.find("name/given-names"))
@@ -143,7 +143,7 @@ class PubmedXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        abstract_pars = self.content.findall("//abstract//p")
+        abstract_pars = self.content.findall(".//abstract//p")
         for paragraph in abstract_pars:
             yield self.text_content(paragraph)
 
@@ -177,16 +177,16 @@ class PubmedXMLParser(ArticleParser):
                 yield section_title, text
 
         # Figure captions
-        figs = self.content.findall("//body//fig") or []
+        figs = self.content.findall(".//body//fig") or []
         for fig in figs:
             fig_captions = fig.find("caption")
             if fig_captions is None:
                 continue
-            caption = " ".join(self.text_content(c) for c in fig_captions.getchildren())
+            caption = " ".join(self.text_content(c) for c in list(fig_captions))
             yield "Figure Caption", caption
 
         # Table captions
-        tables = self.content.findall("//body//table-wrap") or []
+        tables = self.content.findall(".//body//table-wrap") or []
         for table in tables:
             caption_element = table.find("caption/p") or table.find("caption/title")
             caption = self.text_content(caption_element)
@@ -206,7 +206,7 @@ class PubmedXMLParser(ArticleParser):
             section_title = ""
             section_paragraphs = []
 
-            for element in sec.getchildren():
+            for element in list(sec):
 
                 if element.tag == "title":
                     section_title = self.text_content(element)
