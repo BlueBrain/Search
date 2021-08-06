@@ -1,9 +1,9 @@
 import inspect
 import pathlib
 from itertools import chain
+from xml.etree.ElementTree import ElementTree
 
 import pytest
-from lxml import etree
 
 from bluesearch.database.article import (
     Article,
@@ -50,7 +50,7 @@ def pubmed_xml_parser(test_data_path):
 
 class TestPubmedXMLArticleParser:
     def test_init(self, pubmed_xml_parser):
-        assert isinstance(pubmed_xml_parser.content, etree._ElementTree)
+        assert isinstance(pubmed_xml_parser.content, ElementTree)
 
     def test_title(self, pubmed_xml_parser):
         title = pubmed_xml_parser.title

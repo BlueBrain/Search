@@ -29,8 +29,9 @@ from typing import (
     TypeVar,
     Union,
 )
+from xml.etree.ElementTree import Element  # nosec
 
-from lxml import etree  # nosec
+from defusedxml import ElementTree
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -96,7 +97,7 @@ class PubmedXMLParser(ArticleParser):
     """
 
     def __init__(self, path: Union[str, Path]) -> None:
-        self.content = etree.parse(str(path))  # nosec
+        self.content = ElementTree.parse(str(path))
 
     @property
     def title(self) -> str:
@@ -119,7 +120,9 @@ class PubmedXMLParser(ArticleParser):
         str
             Every author, in the format "Given_Name(s) Surname".
         """
-        authors = self.content.xpath('//contrib-group/contrib[@contrib-type="author"]')
+        authors = self.content.findall(
+            "//contrib-group/contrib" '[@contrib-type="author"]'
+        )
         for author in authors:
             given_names = self.text_content(author.find("name/given-names"))
             surname = self.text_content(author.find("name/surname"))
@@ -157,12 +160,20 @@ class PubmedXMLParser(ArticleParser):
             The paragraph content.
         """
         # Paragraphs of text body
-        paragraphs = self.content.xpath("//body//p[not(parent::caption)]")
-        for paragraph in paragraphs:
-            text = self.text_content(paragraph)
-            section = paragraph.find("../title")
-            section_title = self.text_content(section)
-            yield section_title, text
+        abstract_p = self.content.findall(".//abstract/p")
+        caption_p = self.content.findall(".//caption/p")
+        acknowlegd_p = self.content.findall(".//ack/p")
+
+        exclude_list = abstract_p + caption_p + acknowlegd_p
+
+        section_dirs = self.get_sections()
+        for paragraph in self.content.findall(".//p"):
+            if paragraph not in exclude_list:
+                text = self.text_content(paragraph)
+                section_title = ""
+                if paragraph in section_dirs:
+                    section_title = section_dirs[paragraph]
+                yield section_title, text
 
         # Figure captions
         figs = self.content.findall("//body//fig") or []
@@ -174,14 +185,42 @@ class PubmedXMLParser(ArticleParser):
             yield "Figure Caption", caption
 
         # Table captions
-        tables = self.content.xpath("//body//table-wrap") or []
+        tables = self.content.findall("//body//table-wrap") or []
         for table in tables:
             caption_element = table.find("caption/p") or table.find("caption/title")
             caption = self.text_content(caption_element)
             yield "Table Caption", caption
 
+    def get_sections(self) -> dict:
+        """Extract sections information.
+
+        Returns
+        -------
+        sections_dir : dict
+            Dictionary whose keys are paragraphs and value are section title.
+        """
+        sections_dir = {}
+        for sec in self.content.findall(".//sec"):
+
+            section_title = ""
+            section_paragraphs = []
+
+            for element in sec.getchildren():
+
+                if element.tag == "title":
+                    section_title = self.text_content(element)
+                elif element.tag == "p":
+                    section_paragraphs.append(element)
+                else:
+                    continue
+
+            for paragraph in section_paragraphs:
+                sections_dir[paragraph] = section_title
+
+        return sections_dir
+
     @staticmethod
-    def text_content(element: Optional[etree._Element]) -> str:
+    def text_content(element: Optional[Element]) -> str:
         """Extract all text of an element and of its descendants (at any depth).
 
         Parameters
