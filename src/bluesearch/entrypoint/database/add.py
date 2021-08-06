@@ -76,7 +76,7 @@ def run(
 
     # We should unify this somehow to make sure all parsers have the same constructor
     if parser == "CORD19ArticleParser":
-        with open(path, "r") as f:
+        with open(path) as f:
             parser_inst = parser_cls(json.load(f))
     else:
         parser_inst = parser_cls(path)  # not covered since we do not have other parsers
