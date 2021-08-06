@@ -52,12 +52,12 @@ INSTALL_REQUIRES = [
     "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
+    "defusedxml",
     "h5py",
     "ipython",
     "ipywidgets",
     "jupyterlab>=3",
     "langdetect",
-    "lxml",
     "numpy>=1.20.1",
     "pandas>=1",
     "python-dotenv",
