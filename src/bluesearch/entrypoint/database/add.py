@@ -1,6 +1,7 @@
 """Adding an article to the database."""
 import argparse
 import json
+import pickle
 
 import sqlalchemy
 
@@ -10,7 +11,7 @@ import bluesearch.database.article as article_module
 def get_parser() -> argparse.ArgumentParser:
     """Create a parser."""
     parser = argparse.ArgumentParser(
-        description="Add entries.",
+        description="Add entries to the database.",
     )
     parser.add_argument(
         "db_url",
@@ -26,14 +27,9 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
-        "parser",
-        type=str,
-        help="""Parser class.""",
-    )
-    parser.add_argument(
         "path",
         type=str,
-        help="""Path to the file/directory to be parsed.""",
+        help="""Path to the parsed file.""",
     )
     parser.add_argument(
         "--db-type",
@@ -48,7 +44,6 @@ def get_parser() -> argparse.ArgumentParser:
 def run(
     *,
     db_url: str,
-    parser: str,
     path: str,
     db_type: str,
 ) -> None:
@@ -67,21 +62,8 @@ def run(
         # This branch never reached because of `choices` in `argparse`
         raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
 
-    valid_parsers = [x.__name__ for x in article_module.ArticleParser.__subclasses__()]
-
-    if parser not in valid_parsers:
-        raise ValueError(f"Unsupported parser {parser}. Valid parsers: {valid_parsers}")
-
-    parser_cls = getattr(article_module, parser)
-
-    # We should unify this somehow to make sure all parsers have the same constructor
-    if parser == "CORD19ArticleParser":
-        with open(path) as f:
-            parser_inst = parser_cls(json.load(f))
-    else:
-        parser_inst = parser_cls(path)  # not covered since we do not have other parsers
-
-    article = article_module.Article.parse(parser_inst)
+    with open(path, "rb") as f:
+        article = pickle.load(f)
 
     with engine.connect() as con:
         query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")

@@ -1,8 +1,10 @@
 import pathlib
+import pickle
 
 import pytest
 import sqlalchemy
 
+from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
@@ -31,27 +33,30 @@ def engine_sqlite(tmpdir):
 
 def test_mysql_not_implemented():
     with pytest.raises(NotImplementedError):
-        main(["add", "a", "b", "c", "--db-type=mysql"])
+        main(["add", "a", "b", "--db-type=mysql"])
 
 
-def test_unknown_parser():
-    with pytest.raises(ValueError, match="Unsupported parser"):
-        main(["add", "dburl", "WrongParser", "path_to_files"])
+def test_sqlite_cord19(engine_sqlite, tmpdir):
+    input_folder = pathlib.Path(str(tmpdir))
+    n_files = 3
+
+    input_paths = [input_folder / f"{i}.pkl" for i in range(n_files)]
+
+    for i, input_path in enumerate(input_paths):
+        article = Article(
+            title=f"title_{i}",
+            authors=[f"author_{i}"],
+            abstract=f"abstract_{i}",
+            section_paragraphs=[("Conclusion", f"conclusion_{i}")],
+        )
+        with open(input_path, "wb") as f:
+            pickle.dump(article, f)
 
 
-def test_sqlite_cord19(engine_sqlite, jsons_path):
-    # Create a dummy database
-    path_jsons = pathlib.Path(__file__).parent.parent.parent / "data" / "cord19_v35"
-    all_paths = sorted(path_jsons.rglob("*.json"))
-
-    n_articles = len(all_paths)
-
-    for path in all_paths:
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            "CORD19ArticleParser",
-            str(path),
+            str(input_path),
             "--db-type=sqlite",
         ]
 
@@ -62,4 +67,4 @@ def test_sqlite_cord19(engine_sqlite, jsons_path):
         query = """SELECT COUNT(*) FROM ARTICLES"""
         (n_rows,) = connection.execute(query).fetchone()
 
-    assert n_rows == n_articles > 0
+    assert n_rows == n_files > 0
