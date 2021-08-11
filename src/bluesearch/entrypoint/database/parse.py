@@ -3,7 +3,10 @@ import argparse
 import json
 import pickle
 
-import bluesearch.database.article as article_module
+from bluesearch.database.article import (
+    Article,
+    CORD19ArticleParser,
+)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -40,23 +43,14 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    valid_parsers = [x.__name__ for x in article_module.ArticleParser.__subclasses__()]
-
-    if parser not in valid_parsers:
-        raise ValueError(f"Unsupported parser {parser}. Valid parsers: {valid_parsers}")
-
-    parser_cls = getattr(article_module, parser)
-
-    # We should unify this somehow to make sure all parsers have the same constructor
     if parser == "CORD19ArticleParser":
         with open(input_path) as f:
-            parser_inst = parser_cls(json.load(f))
-    else:
-        parser_inst = parser_cls(
-            input_path
-        )  # not covered since we do not have other parsers
+            parser_inst = CORD19ArticleParser(json.load(f))
 
-    article = article_module.Article.parse(parser_inst)
+    else:
+        raise ValueError(f"Unsupported parser {parser}")
+
+    article = Article.parse(parser_inst)
 
     with open(output_path, "wb") as f:
         pickle.dump(article, f)
