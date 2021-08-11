@@ -11,7 +11,6 @@ from .parse import get_parser as get_parser_parse
 from .parse import run as run_parse
 
 
-
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run CLI.
 

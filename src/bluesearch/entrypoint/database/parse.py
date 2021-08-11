@@ -54,7 +54,9 @@ def run(
         with open(input_path) as f:
             parser_inst = parser_cls(json.load(f))
     else:
-        parser_inst = parser_cls(input_path)  # not covered since we do not have other parsers
+        parser_inst = parser_cls(
+            input_path
+        )  # not covered since we do not have other parsers
 
     article = article_module.Article.parse(parser_inst)
 

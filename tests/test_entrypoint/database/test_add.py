@@ -52,7 +52,6 @@ def test_sqlite_cord19(engine_sqlite, tmpdir):
         with open(input_path, "wb") as f:
             pickle.dump(article, f)
 
-
         args_and_opts = [
             "add",
             engine_sqlite.url.database,

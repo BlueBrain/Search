@@ -7,6 +7,7 @@ import sqlalchemy
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
+
 def test_unknown_parser():
     with pytest.raises(ValueError, match="Unsupported parser"):
         main(["parse", "WrongParser", "path_to_input", "path_to_output"])
@@ -25,7 +26,7 @@ def test_cord19(jsons_path, tmpdir):
             "parse",
             "CORD19ArticleParser",
             str(input_path),
-            str(output_folder / input_path.name)
+            str(output_folder / input_path.name),
         ]
 
         main(args_and_opts)
@@ -40,4 +41,3 @@ def test_cord19(jsons_path, tmpdir):
         with open(output_path, "rb") as f:
             loaded_article = pickle.load(f)
             assert isinstance(loaded_article, Article)
-
