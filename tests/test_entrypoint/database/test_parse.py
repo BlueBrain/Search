@@ -2,7 +2,6 @@ import pathlib
 import pickle
 
 import pytest
-import sqlalchemy
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main

@@ -1,11 +1,8 @@
 """Adding an article to the database."""
 import argparse
-import json
 import pickle
 
 import sqlalchemy
-
-import bluesearch.database.article as article_module
 
 
 def get_parser() -> argparse.ArgumentParser:

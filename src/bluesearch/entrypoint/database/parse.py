@@ -3,8 +3,6 @@ import argparse
 import json
 import pickle
 
-import sqlalchemy
-
 import bluesearch.database.article as article_module
 
 
