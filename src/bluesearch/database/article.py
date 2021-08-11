@@ -177,19 +177,23 @@ class PubmedXMLParser(ArticleParser):
                 yield section_title, text
 
         # Figure captions
-        figs = self.content.findall(".//body//fig")
+        figs = self.content.findall(".//fig")
         for fig in figs:
-            fig_captions = fig.find("caption")
+            fig_captions = fig.findall("caption")
             if fig_captions is None:
                 continue
             caption = " ".join(self.text_content(c) for c in list(fig_captions))
             yield "Figure Caption", caption
 
         # Table captions
-        tables = self.content.findall(".//body//table-wrap")
+        tables = self.content.findall(".//table-wrap")
         for table in tables:
-            caption_element = table.find("caption/p") or table.find("caption/title")
-            caption = self.text_content(caption_element)
+            caption_elements = table.findall(".//caption/p") or table.findall(
+                ".//caption/title"
+            )
+            if caption_elements is None:
+                continue
+            caption = " ".join(self.text_content(c) for c in caption_elements)
             yield "Table Caption", caption
 
     def get_sections(self) -> dict:
