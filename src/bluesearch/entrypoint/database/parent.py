@@ -7,6 +7,9 @@ from .add import get_parser as get_parser_add
 from .add import run as run_add
 from .init import get_parser as get_parser_init
 from .init import run as run_init
+from .parse import get_parser as get_parser_parse
+from .parse import run as run_parse
+
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -22,6 +25,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Initialize subparsers
     parser_add = get_parser_add()
     parser_init = get_parser_init()
+    parser_parse = get_parser_parse()
 
     subparsers.add_parser(
         "add",
@@ -37,10 +41,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parents=[parser_init],
         add_help=False,
     )
+    subparsers.add_parser(
+        "parse",
+        description=parser_parse.description,
+        help=parser_parse.description,
+        parents=[parser_parse],
+        add_help=False,
+    )
 
     command_map = {
         "add": run_add,
         "init": run_init,
+        "parse": run_parse,
     }
 
     # Do parsing
