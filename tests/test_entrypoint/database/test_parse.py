@@ -14,8 +14,7 @@ def test_unknown_parser():
 
 def test_cord19(jsons_path, tmpdir):
     # Create a dummy database
-    path_jsons = pathlib.Path(__file__).parent.parent.parent / "data" / "cord19_v35"
-    all_input_paths = sorted(path_jsons.rglob("*.json"))
+    all_input_paths = sorted(jsons_path.rglob("*.json"))
     output_folder = pathlib.Path(str(tmpdir))
 
     n_articles = len(all_input_paths)
