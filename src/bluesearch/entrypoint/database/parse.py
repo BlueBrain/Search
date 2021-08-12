@@ -1,7 +1,7 @@
 """Parsing an article."""
 import argparse
 import json
-import pickle
+import pickle  # nosec
 
 from bluesearch.database.article import (
     Article,

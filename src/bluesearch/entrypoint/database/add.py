@@ -1,6 +1,6 @@
 """Adding an article to the database."""
 import argparse
-import pickle
+import pickle  # nosec
 
 import sqlalchemy
 
@@ -60,7 +60,7 @@ def run(
         raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
 
     with open(path, "rb") as f:
-        article = pickle.load(f)
+        article = pickle.load(f)  # nosec
 
     with engine.connect() as con:
         query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
