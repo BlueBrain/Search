@@ -32,29 +32,6 @@ from bluesearch.utils import load_spacy_model
 
 logger = logging.getLogger(__name__)
 
-
-def generate_unique_identifiers(metadata: pd.DataFrame) -> pd.DataFrame:
-    """Generate unique identifiers for papers from multiple sources.
-
-    Each group of papers having the same or no value for the existing identifiers gets
-    a new and unique identifier.
-
-    Parameters
-    ----------
-    metadata
-        Table of the paper metadata. It must contain several identifiers. The expected
-        identifier columns are: 'doi', 'pmcid', 'pubmed_id', and 'arxiv_id'.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Table of the paper metadata with the generated unique identifiers added.
-    """
-    IDENTIFIERS = ["doi", "pmcid", "pubmed_id", "arxiv_id"]
-    # FIXME
-    return None
-
-
 def mark_bad_sentences(engine, sentences_table_name):
     """Flag bad sentences in SQL database.
 
