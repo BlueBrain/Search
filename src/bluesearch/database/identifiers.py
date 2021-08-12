@@ -99,7 +99,7 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
 
     df["cluster"] = df[step2_columns].apply(_row_cluster, axis=1)
 
-    # Step 6: Generate a UUID for each cluster.
+    # Step 4: Generate a UUID for each cluster.
 
     def _generate_uuid(_) -> str:
         """Generate a UUID."""
@@ -107,6 +107,6 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
 
     df["cluster_uuid"] = df.groupby("cluster")["cluster"].transform(_generate_uuid)
 
-    # Step 7: Return the generated UUID per cluster of identifiers.
+    # Step 5: Return the generated UUID per cluster of identifiers.
 
     return df[[*identifiers, "cluster_uuid"]]
