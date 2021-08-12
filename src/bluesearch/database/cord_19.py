@@ -32,6 +32,7 @@ from bluesearch.utils import load_spacy_model
 
 logger = logging.getLogger(__name__)
 
+
 def mark_bad_sentences(engine, sentences_table_name):
     """Flag bad sentences in SQL database.
 
