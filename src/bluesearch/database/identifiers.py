@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import functools
 from typing import List, Union
 from uuid import uuid4
 
@@ -43,32 +44,36 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
     pandas.DataFrame
         Generated UUIDs with the given identifiers. The index is the same as the input.
     """
-    # Step 0: Create a copy with only the columns with the identifiers.
+
+    def step_columns(step: int) -> List[str]:
+        """Create column names for the given step and identifiers."""
+        return [f"step{step}_{x}" for x in identifiers]
+
+    # Step 0: Create a copy of the metadata with only the identifiers.
 
     df = metadata[identifiers].copy()
 
-    # Step 1: Cluster papers per identifier (i.e. column-wise).
+    # Step 1: Cluster papers per identifier, column-wise.
 
-    # The types of the output elements are a bit too complex to be specified.
-    def _retrieve_indices(x: Union[pd.Series, pd.DataFrame]) -> List:
+    # The types of the output list elements are a bit too complex to be specified.
+    def _column_cluster(x: Union[pd.Series, pd.DataFrame]) -> List:
         """Return the row indices of the cluster, for each row."""
         return [x.index.array] * len(x)
 
-    step1_columns = [f"step1_{x}" for x in identifiers]
+    step1_columns = step_columns(1)
 
     for identifier, column in zip(identifiers, step1_columns):
         dropped = df.dropna(subset=[identifier])
         grouped = dropped.groupby(identifier, sort=False)
-        transformed = grouped[identifier].transform(_retrieve_indices)
-        df[column] = transformed
+        df[column] = grouped[identifier].transform(_column_cluster)
 
-    # Step 2: Let cluster papers with non-conflicting identifiers (i.e. cluster-wise).
+    # Step 2: Handle NAs to cluster papers with non-conflicting identifiers.
 
-    # The types of the input and output elements are a bit too complex to be specified.
+    # The types of 'x' and the output are a bit too complex to be specified.
     def _remove_index(x, index: int):
-        """Remove the given index from the array, if it has more than two elements."""
-        if isinstance(x, ExtensionArray) and len(x) > 2:
-            # Use to_numpy() to please typing checks (pandas-stubs==1.2.0.1).
+        """Remove the given index from the cluster."""
+        if isinstance(x, ExtensionArray):
+            # Use to_numpy() to pass typing checks (pandas-stubs==1.2.0.1).
             return np.delete(x, np.where(x.to_numpy() == index))
         else:
             return x
@@ -80,41 +85,28 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
         else:
             return x
 
-    step2_columns = [f"step2_{x}" for x in identifiers]
+    step2_columns = step_columns(2)
+
     df[step2_columns] = df[step1_columns].apply(_handle_nans, axis=1)
 
-    # Step 3: Compute the size of each cluster.
+    # Step 3: Cluster papers per identifier, row-wise.
 
-    step3_columns = [f"step3_{x}" for x in identifiers]
-    df[step3_columns] = df[step2_columns].applymap(len, na_action="ignore")
-
-    # Step 4: Select the smallest cluster per paper.
-
-    offset = len(df.columns) - len(step3_columns) - len(step2_columns)
-
-    def _identify_cluster(x: pd.Series) -> int:
-        """Identify the column position of the cluster."""
-        return x.argmin() + offset
-
-    df["cluster_column"] = df[step3_columns].apply(_identify_cluster, axis=1)
-
-    # Step 5: Create a hashable representation of each cluster.
-
-    def _retrieve_cluster(x: pd.Series) -> str:
-        """Retrieve the cluster as a string (hashable)."""
-        cluster = x[x["cluster_column"]]
+    def _row_cluster(x: pd.Series) -> str:
+        """Compute the smallest cluster per row, as a hashable representation."""
+        intersect = functools.partial(np.intersect1d, assume_unique=True)
+        cluster = functools.reduce(intersect, x.dropna())
         return np.array_str(cluster)
 
-    df["cluster"] = df.apply(_retrieve_cluster, axis=1)
+    df["cluster"] = df[step2_columns].apply(_row_cluster, axis=1)
 
     # Step 6: Generate a UUID for each cluster.
 
     def _generate_uuid(_) -> str:
-        """Generate a unique identifier."""
+        """Generate a UUID."""
         return str(uuid4())
 
     df["cluster_uuid"] = df.groupby("cluster")["cluster"].transform(_generate_uuid)
 
-    # Step 7: Return the generated UUID per identifiers cluster.
+    # Step 7: Return the generated UUID per cluster of identifiers.
 
     return df[[*identifiers, "cluster_uuid"]]
