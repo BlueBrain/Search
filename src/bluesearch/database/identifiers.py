@@ -26,7 +26,9 @@ import pandas as pd
 from pandas.api.extensions import ExtensionArray
 
 
-def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFrame:
+def generate_uuids(
+    metadata: pd.DataFrame, identifiers: List[str], debug: bool = False
+) -> pd.DataFrame:
     """Generate UUIDs for papers with multiple sources / identifiers.
 
     Papers are clustered if they have the same or no value for the given identifiers.
@@ -40,6 +42,8 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
         Paper metadata including the given identifiers.
     identifiers
         Columns of the identifiers.
+    debug
+        True to include the output of each intermediate steps of the algorithm.
 
     Returns
     -------
@@ -111,4 +115,7 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
 
     # Step 5: Return the generated UUID per cluster of identifiers.
 
-    return df[[*identifiers, "cluster_uuid"]]
+    if debug:
+        return df
+    else:
+        return df[[*identifiers, "cluster_uuid"]]
