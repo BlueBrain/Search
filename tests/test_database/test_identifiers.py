@@ -16,58 +16,79 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from typing import List
 
 import pandas as pd
 
 from bluesearch.database.identifiers import generate_uuids
 
-DATA = [
-    # Should be assigned different UUIDs.
-    # - No shared values.
+# Should be assigned different UUIDs.
+DATA_DIFFERENT = [
+    # No shared values.
     ("a_1", "b_1"),
     ("a_2", "b_2"),
-    # - No shared values (NAs, right).
+    # No shared values (NAs, right).
     ("a_3", None),
     ("a_4", None),
-    # - No shared values (NAs, left).
+    # No shared values (NAs, left).
     (None, "b_3"),
     (None, "b_4"),
-    # - A conflicting value (right).
+    # A conflicting value (right).
     ("a_5", "b_5"),
     ("a_5", "b_6"),
-    # - A conflicting value (left).
+    # A conflicting value (right, with NA).
     ("a_6", "b_7"),
-    ("a_7", "b_7"),
-    # Should be assigned same UUID.
-    # - All values shared.
-    ("a_8", "b_8"),
-    ("a_8", "b_8"),
-    # - No conflicting value (after, right).
-    ("a_9", "b_9"),
-    ("a_9", None),
-    # - No conflicting value (after, left).
+    ("a_6", "b_8"),
+    ("a_6", None),
+    # A conflicting value (left).
+    ("a_7", "b_9"),
+    ("a_8", "b_9"),
+    # A conflicting value (left, with NA).
+    ("a_9", "b_10"),
     ("a_10", "b_10"),
     (None, "b_10"),
-    # - No conflicting value (before, right).
-    ("a_11", None),
-    ("a_11", "b_11"),
-    # - No conflicting value (before, left).
-    (None, "b_12"),
-    ("a_12", "b_12"),
 ]
+
+# Should be assigned same UUID.
+DATA_SAME = [
+    # All values shared.
+    ("a_1", "b_1"),
+    ("a_1", "b_1"),
+    # No conflicting value (after, right).
+    ("a_2", "b_2"),
+    ("a_2", None),
+    # No conflicting value (after, left).
+    ("a_3", "b_3"),
+    (None, "b_3"),
+    # No conflicting value (before, right).
+    ("a_4", None),
+    ("a_4", "b_4"),
+    # No conflicting value (before, left).
+    (None, "b_5"),
+    ("a_5", "b_5"),
+]
+
 IDENTIFIERS = ["id_1", "id_2"]
 
 
+def check(result: pd.DataFrame, expected: List) -> None:
+    """Check if the resulting cluster are as expected."""
+    indices = result.groupby("cluster_uuid", sort=False).groups.values()
+    clusters = list(map(lambda x: x.to_list(), indices))
+    assert clusters == expected
+
+
 class TestClustering:
-    def test_generate_uuids(self):
-        metadata = pd.DataFrame(DATA, columns=IDENTIFIERS)
-        results = generate_uuids(metadata, IDENTIFIERS)
+    def test_generate_uuids_different(self):
+        metadata = pd.DataFrame(DATA_DIFFERENT, columns=IDENTIFIERS)
+        result = generate_uuids(metadata, IDENTIFIERS)
+        count = len(result)
+        expected = [[i] for i in range(count)]
+        check(result, expected)
 
-        indices = results.groupby("cluster_uuid", sort=False).groups.values()
-        clusters = list(map(lambda x: x.to_list(), indices))
-
-        different = [[i] for i in range(10)]
-        same = [[i, j] for i, j in zip(range(10, 19, 2), range(11, 20, 2))]
-        expected = different + same
-
-        assert clusters == expected
+    def test_generate_uuids_same(self):
+        metadata = pd.DataFrame(DATA_SAME, columns=IDENTIFIERS)
+        result = generate_uuids(metadata, IDENTIFIERS)
+        count = len(result)
+        expected = [[i, j] for i, j in zip(range(0, count, 2), range(1, count, 2))]
+        check(result, expected)
