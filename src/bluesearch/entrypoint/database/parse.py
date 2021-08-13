@@ -3,10 +3,7 @@ import argparse
 import json
 import pickle  # nosec
 
-from bluesearch.database.article import (
-    Article,
-    CORD19ArticleParser,
-)
+from bluesearch.database.article import Article, CORD19ArticleParser
 
 
 def get_parser() -> argparse.ArgumentParser:
