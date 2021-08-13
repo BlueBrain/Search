@@ -71,8 +71,8 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
 
     # The types of 'x' and the output are a bit too complex to be specified.
     def _remove_index(x, index: int):
-        """Remove the given index from the cluster."""
-        if isinstance(x, ExtensionArray):
+        """Remove the given index from the cluster, if it is not the only index."""
+        if isinstance(x, ExtensionArray) and len(x) > 1:
             # Use to_numpy() to pass typing checks (pandas-stubs==1.2.0.1).
             return np.delete(x, np.where(x.to_numpy() == index))
         else:
@@ -109,4 +109,4 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
 
     # Step 5: Return the generated UUID per cluster of identifiers.
 
-    return df[[*identifiers, "cluster_uuid"]]
+    return df  # [[*identifiers, "cluster_uuid"]]
