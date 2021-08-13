@@ -49,5 +49,5 @@ def run(
 
     article = Article.parse(parser_inst)
 
-    with open(output_path, "wb") as f:
-        pickle.dump(article, f)
+    with open(output_path, "wb") as f:  # type: ignore
+        pickle.dump(article, f)  # type: ignore
