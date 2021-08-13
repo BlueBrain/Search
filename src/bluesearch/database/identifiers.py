@@ -32,6 +32,8 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
     Papers are clustered if they have the same or no value for the given identifiers.
     Each paper cluster is assigned a UUID.
 
+    Note: Papers with all given identifiers unspecified are ignored.
+
     Parameters
     ----------
     metadata
@@ -49,9 +51,9 @@ def generate_uuids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFra
         """Create column names for the given step and identifiers."""
         return [f"step{step}_{x}" for x in identifiers]
 
-    # Step 0: Create a copy of the metadata with only the identifiers.
+    # Step 0: Select only the identifiers, drop empty rows, and create a copy.
 
-    df = metadata[identifiers].copy()
+    df = metadata[identifiers].dropna(how="all").copy()
 
     # Step 1: Cluster papers per identifier, column-wise.
 
