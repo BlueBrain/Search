@@ -1,4 +1,4 @@
-"""Tests covering the handling of identifiers."""
+"""Tests covering the handling of IDENTIFIERS."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
@@ -21,32 +21,53 @@ import pandas as pd
 
 from bluesearch.database.identifiers import generate_uuids
 
+DATA = [
+    # Should be assigned different UUIDs.
+    # - No shared values.
+    ("a_1", "b_1"),
+    ("a_2", "b_2"),
+    # - No shared values (NAs, right).
+    ("a_3", None),
+    ("a_4", None),
+    # - No shared values (NAs, left).
+    (None, "b_3"),
+    (None, "b_4"),
+    # - A conflicting value (right).
+    ("a_5", "b_5"),
+    ("a_5", "b_6"),
+    # - A conflicting value (left).
+    ("a_6", "b_7"),
+    ("a_7", "b_7"),
+    # Should be assigned same UUID.
+    # - All values shared.
+    ("a_8", "b_8"),
+    ("a_8", "b_8"),
+    # - No conflicting value (after, right).
+    ("a_9", "b_9"),
+    ("a_9", None),
+    # - No conflicting value (after, left).
+    ("a_10", "b_10"),
+    (None, "b_10"),
+    # - No conflicting value (before, right).
+    ("a_11", None),
+    ("a_11", "b_11"),
+    # - No conflicting value (before, left).
+    (None, "b_12"),
+    ("a_12", "b_12"),
+]
+IDENTIFIERS = ["id_1", "id_2"]
+
 
 class TestClustering:
     def test_generate_uuids(self):
-        data = [
-            # Should be assigned different UUIDs.
-            (None, "a"),
-            (None, "b"),
-            ("1", None),
-            ("2", None),
-            ("1", "a"),
-            ("1", "b"),
-            ("2", "a"),
-            ("2", "b"),
-            # Should be assigned same UUID.
-            (None, "c"),
-            ("3", "c"),
-            # Should be assigned same UUID.
-            ("4", None),
-            ("4", "d"),
-        ]
-        identifiers = ["id_1", "id_2"]
-        metadata = pd.DataFrame(data, columns=identifiers)
-
-        results = generate_uuids(metadata, identifiers)
+        metadata = pd.DataFrame(DATA, columns=IDENTIFIERS)
+        results = generate_uuids(metadata, IDENTIFIERS)
 
         indices = results.groupby("cluster_uuid", sort=False).groups.values()
         clusters = list(map(lambda x: x.to_list(), indices))
-        expected = [[0], [1], [2], [3], [4], [5], [6], [7], [8, 9], [10, 11]]
+
+        different = [[i] for i in range(10)]
+        same = [[i, j] for i, j in zip(range(10, 19, 2), range(11, 20, 2))]
+        expected = different + same
+
         assert clusters == expected
