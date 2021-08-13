@@ -1,4 +1,4 @@
-"""Tests covering the handling of IDENTIFIERS."""
+"""Tests covering the handling of identifiers."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
