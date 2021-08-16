@@ -101,7 +101,11 @@ def generate_uuids(
         # We can speed-up processing with 'assume_unique' as index values are unique.
         intersect = functools.partial(np.intersect1d, assume_unique=True)
         cluster = functools.reduce(intersect, x.dropna())
-        return np.array_str(cluster)
+        if cluster.size == 0:
+            # No intersection is due to step 2. So, the cluster contains only the row.
+            return f"[{x.name}]"
+        else:
+            return np.array_str(cluster)
 
     df["cluster"] = df[step2_columns].apply(_row_cluster, axis=1)
 
