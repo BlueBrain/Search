@@ -16,95 +16,87 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from typing import List
+
+from typing import List, Union
 
 import pandas as pd
+import pytest
 
 from bluesearch.database.identifiers import generate_uuids
 
 # Should be assigned different UUIDs.
-DATA_DIFFERENT_2 = [
+ALL_DIFFERENT = [
     # No shared values.
-    ("a_1", "b_1"),
-    ("a_2", "b_2"),
+    (0, "a_1", "b_1"),
+    (1, "a_2", "b_2"),
     # No shared values (NAs, right).
-    ("a_3", None),
-    ("a_4", None),
+    (2, "a_3", None),
+    (3, "a_4", None),
     # No shared values (NAs, left).
-    (None, "b_3"),
-    (None, "b_4"),
+    (4, None, "b_3"),
+    (5, None, "b_4"),
     # A conflicting value (right).
-    ("a_5", "b_5"),
-    ("a_5", "b_6"),
+    (6, "a_5", "b_5"),
+    (7, "a_5", "b_6"),
     # A conflicting value (right, with NA).
-    ("a_6", "b_7"),
-    ("a_6", "b_8"),
-    ("a_6", None),
+    (8, "a_6", "b_7"),
+    (9, "a_6", "b_8"),
+    (10, "a_6", None),
     # A conflicting value (left).
-    ("a_7", "b_9"),
-    ("a_8", "b_9"),
+    (11, "a_7", "b_9"),
+    (12, "a_8", "b_9"),
     # A conflicting value (left, with NA).
-    ("a_9", "b_10"),
-    ("a_10", "b_10"),
-    (None, "b_10"),
+    (13, "a_9", "b_10"),
+    (14, "a_10", "b_10"),
+    (15, None, "b_10"),
 ]
 
 # Should be assigned different UUIDs.
-DATA_DIFFERENT_3 = [
-    ("a_1", "b_1", "c_1"),
-    ("a_1", "b_2", None),
-    ("a_2", "b_3", "c_2"),
-    ("a_3", "b_3", None),
+EMPTY_CLUSTERS = [
+    (0, "a_1", "b_1", "c_1"),
+    (1, "a_1", "b_2", None),
+    (2, "a_2", "b_3", "c_2"),
+    (3, "a_3", "b_3", None),
 ]
 
-# Should be assigned same UUID.
-DATA_SAME = [
+# Should be assigned same UUID per pair.
+IDENTICAL_PAIRS = [
     # All values shared.
-    ("a_1", "b_1"),
-    ("a_1", "b_1"),
+    (0, "a_1", "b_1"),
+    (0, "a_1", "b_1"),
     # No conflicting value (after, right).
-    ("a_2", "b_2"),
-    ("a_2", None),
+    (1, "a_2", "b_2"),
+    (1, "a_2", None),
     # No conflicting value (after, left).
-    ("a_3", "b_3"),
-    (None, "b_3"),
+    (2, "a_3", "b_3"),
+    (2, None, "b_3"),
     # No conflicting value (before, right).
-    ("a_4", None),
-    ("a_4", "b_4"),
+    (3, "a_4", None),
+    (3, "a_4", "b_4"),
     # No conflicting value (before, left).
-    (None, "b_5"),
-    ("a_5", "b_5"),
+    (4, None, "b_5"),
+    (4, "a_5", "b_5"),
 ]
 
-IDENTIFIERS_2 = ["id_1", "id_2"]
-IDENTIFIERS_3 = [*IDENTIFIERS_2, "id_3"]
 
-
-def check(result: pd.DataFrame, expected: List) -> None:
-    """Check if the resulting cluster are as expected."""
-    indices = result.groupby("cluster_uuid", sort=False).groups.values()
-    clusters = list(map(lambda x: x.to_list(), indices))
-    assert clusters == expected
+def clusters(df: pd.DataFrame, column: Union[str, int]) -> List[List[int]]:
+    """Return the clusters according to the given column."""
+    indices = df.groupby(column, sort=False).groups.values()
+    return list(map(lambda x: x.to_list(), indices))
 
 
 class TestClustering:
-    def test_generate_uuids_different(self):
-        metadata = pd.DataFrame(DATA_DIFFERENT_2, columns=IDENTIFIERS_2)
-        result = generate_uuids(metadata, IDENTIFIERS_2)
-        count = len(result)
-        expected = [[i] for i in range(count)]
-        check(result, expected)
-
-    def test_generate_uuids_same(self):
-        metadata = pd.DataFrame(DATA_SAME, columns=IDENTIFIERS_2)
-        result = generate_uuids(metadata, IDENTIFIERS_2)
-        count = len(result)
-        expected = [[i, j] for i, j in zip(range(0, count, 2), range(1, count, 2))]
-        check(result, expected)
-
-    def test_generate_uuids_empty(self):
-        metadata = pd.DataFrame(DATA_DIFFERENT_3, columns=IDENTIFIERS_3)
-        result = generate_uuids(metadata, IDENTIFIERS_3)
-        count = len(result)
-        expected = [[i] for i in range(count)]
-        check(result, expected)
+    @pytest.mark.parametrize(
+        "data",
+        [
+            pytest.param(ALL_DIFFERENT, id="all_different"),
+            pytest.param(EMPTY_CLUSTERS, id="empty_clusters"),
+            pytest.param(IDENTICAL_PAIRS, id="identical_pairs"),
+        ],
+    )
+    def test_generate_uuids(self, data):
+        metadata = pd.DataFrame(data)
+        expected = clusters(metadata, 0)
+        result = generate_uuids(metadata, metadata.columns[1:])
+        found = clusters(result, "cluster_uuid")
+        assert found == expected
