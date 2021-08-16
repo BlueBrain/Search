@@ -96,6 +96,15 @@ EXTRAS_REQUIRE = {
     ],
 }
 
+CONSOLE_SCRIPTS = [
+    "compute_embeddings = bluesearch.entrypoint.embeddings:run_compute_embeddings",
+    "create_database = bluesearch.entrypoint.database:run_create_database",
+    "create_mining_cache = bluesearch.entrypoint.mining_cache:run_create_mining_cache",
+    "embedding_server = bluesearch.entrypoint.embedding_server:run_embedding_server",
+    "mining_server = bluesearch.entrypoint.mining_server:run_mining_server",
+    "search_server = bluesearch.entrypoint.search_server:run_search_server",
+]
+
 setup(
     name="bluesearch",
     description=DESCRIPTION,
@@ -123,14 +132,5 @@ setup(
     python_requires=PYTHON_REQUIRES,
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRAS_REQUIRE,
-    entry_points={
-        "console_scripts": [
-            "compute_embeddings = bluesearch.entrypoint:run_compute_embeddings",
-            "create_database = bluesearch.entrypoint:run_create_database",
-            "create_mining_cache = bluesearch.entrypoint:run_create_mining_cache",
-            "embedding_server = bluesearch.entrypoint:run_embedding_server",
-            "mining_server = bluesearch.entrypoint:run_mining_server",
-            "search_server = bluesearch.entrypoint:run_search_server",
-        ]
-    },
+    entry_points={"console_scripts": CONSOLE_SCRIPTS},
 )

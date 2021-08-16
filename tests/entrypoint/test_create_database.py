@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bluesearch.entrypoint.create_database import run_create_database
+from bluesearch.entrypoint.database import run_create_database
 
 
 @pytest.mark.parametrize(
@@ -76,10 +76,8 @@ def test_send_through(
             db_url.touch()
 
     monkeypatch.setattr("builtins.input", Mock())
-    monkeypatch.setattr("bluesearch.entrypoint.create_database.getpass", fake_getpass)
-    monkeypatch.setattr(
-        "bluesearch.entrypoint.create_database.sqlalchemy", fake_sqlalchemy
-    )
+    monkeypatch.setattr("bluesearch.entrypoint.database.getpass", fake_getpass)
+    monkeypatch.setattr("bluesearch.entrypoint.database.sqlalchemy", fake_sqlalchemy)
     monkeypatch.setattr(
         "bluesearch.database.CORD19DatabaseCreation", fake_database_creation
     )
