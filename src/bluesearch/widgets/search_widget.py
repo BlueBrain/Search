@@ -205,7 +205,7 @@ class SearchWidget(widgets.VBox):
                 "Stronger",
             ],  # ['None', 'Weak', 'Mild', 'Strong', 'Stronger']
             disabled=False,
-            style={"description_width": "initial", "button_width": "80px"},
+            style={"description_width": "initial"},
             description="Deprioritization strength",
         )
 
@@ -244,7 +244,7 @@ class SearchWidget(widgets.VBox):
             ],
             value=_Save.ARTICLE,
             disabled=False,
-            style={"description_width": "initial", "button_width": "200px"},
+            style={"description_width": "initial"},
             description="Default saving: ",
         )
 
