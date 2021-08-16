@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bluesearch.entrypoint import get_mining_app
+from bluesearch.entrypoint.mining_server import get_mining_app
 
 
 @pytest.mark.parametrize(

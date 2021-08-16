@@ -24,7 +24,7 @@ import numpy as np
 import pytest
 import torch
 
-from bluesearch.entrypoint import run_compute_embeddings
+from bluesearch.entrypoint.embeddings import run_compute_embeddings
 
 N_GPUS = torch.cuda.device_count()
 
@@ -66,9 +66,7 @@ def test_send_through(
     fake_sqlalchemy = Mock()
 
     monkeypatch.setattr("bluesearch.embedding_models.MPEmbedder", fake_mpe_class)
-    monkeypatch.setattr(
-        "bluesearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
-    )
+    monkeypatch.setattr("bluesearch.entrypoint.embeddings.sqlalchemy", fake_sqlalchemy)
 
     # Prepare CLI input
     db_url = "my-sql-server.ch/my_db"
