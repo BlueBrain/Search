@@ -23,7 +23,7 @@ import pandas as pd
 from bluesearch.database.identifiers import generate_uuids
 
 # Should be assigned different UUIDs.
-DATA_DIFFERENT = [
+DATA_DIFFERENT_2 = [
     # No shared values.
     ("a_1", "b_1"),
     ("a_2", "b_2"),
@@ -49,6 +49,14 @@ DATA_DIFFERENT = [
     (None, "b_10"),
 ]
 
+# Should be assigned different UUIDs.
+DATA_DIFFERENT_3 = [
+    ("a_1", "b_1", "c_1"),
+    ("a_1", "b_2", None),
+    ("a_2", "b_3", "c_2"),
+    ("a_3", "b_3", None),
+]
+
 # Should be assigned same UUID.
 DATA_SAME = [
     # All values shared.
@@ -68,7 +76,8 @@ DATA_SAME = [
     ("a_5", "b_5"),
 ]
 
-IDENTIFIERS = ["id_1", "id_2"]
+IDENTIFIERS_2 = ["id_1", "id_2"]
+IDENTIFIERS_3 = [*IDENTIFIERS_2, "id_3"]
 
 
 def check(result: pd.DataFrame, expected: List) -> None:
@@ -80,15 +89,22 @@ def check(result: pd.DataFrame, expected: List) -> None:
 
 class TestClustering:
     def test_generate_uuids_different(self):
-        metadata = pd.DataFrame(DATA_DIFFERENT, columns=IDENTIFIERS)
-        result = generate_uuids(metadata, IDENTIFIERS)
+        metadata = pd.DataFrame(DATA_DIFFERENT_2, columns=IDENTIFIERS_2)
+        result = generate_uuids(metadata, IDENTIFIERS_2)
         count = len(result)
         expected = [[i] for i in range(count)]
         check(result, expected)
 
     def test_generate_uuids_same(self):
-        metadata = pd.DataFrame(DATA_SAME, columns=IDENTIFIERS)
-        result = generate_uuids(metadata, IDENTIFIERS)
+        metadata = pd.DataFrame(DATA_SAME, columns=IDENTIFIERS_2)
+        result = generate_uuids(metadata, IDENTIFIERS_2)
         count = len(result)
         expected = [[i, j] for i, j in zip(range(0, count, 2), range(1, count, 2))]
+        check(result, expected)
+
+    def test_generate_uuids_empty(self):
+        metadata = pd.DataFrame(DATA_DIFFERENT_3, columns=IDENTIFIERS_3)
+        result = generate_uuids(metadata, IDENTIFIERS_3)
+        count = len(result)
+        expected = [[i] for i in range(count)]
         check(result, expected)
