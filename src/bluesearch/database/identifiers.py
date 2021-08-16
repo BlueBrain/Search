@@ -55,7 +55,7 @@ def generate_uuids(
         """Create column names for the given step and identifiers."""
         return [f"step{step}_{x}" for x in identifiers]
 
-    # Step 0: Select only the identifiers, drop empty rows, and create a copy.
+    # Step 0: Select only the given identifiers, drop empty rows, and create a copy.
 
     df = metadata[identifiers].dropna(how="all").copy()
 
@@ -69,8 +69,7 @@ def generate_uuids(
     step1_columns = step_columns(1)
 
     for identifier, column in zip(identifiers, step1_columns):
-        dropped = df.dropna(subset=[identifier])
-        grouped = dropped.groupby(identifier, sort=False)
+        grouped = df.dropna(subset=[identifier]).groupby(identifier, sort=False)
         df[column] = grouped[identifier].transform(_column_cluster)
 
     # Step 2: Handle NAs to cluster papers with non-conflicting identifiers.
@@ -99,6 +98,7 @@ def generate_uuids(
 
     def _row_cluster(x: pd.Series) -> str:
         """Compute the smallest cluster per row, as a hashable representation."""
+        # We can speed-up processing with 'assume_unique' as index values are unique.
         intersect = functools.partial(np.intersect1d, assume_unique=True)
         cluster = functools.reduce(intersect, x.dropna())
         return np.array_str(cluster)
