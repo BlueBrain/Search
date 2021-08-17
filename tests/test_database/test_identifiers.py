@@ -25,6 +25,7 @@ import pytest
 from bluesearch.database.identifiers import generate_uuids
 
 # Should be assigned different UUIDs.
+
 ALL_DIFFERENT = [
     # No shared values.
     (0, "a_1", "b_1"),
@@ -51,7 +52,6 @@ ALL_DIFFERENT = [
     (15, None, "b_10"),
 ]
 
-# Should be assigned different UUIDs.
 EMPTY_CLUSTERS = [
     (0, "a_1", "b_1", "c_1"),
     (1, "a_1", "b_2", None),
@@ -60,6 +60,7 @@ EMPTY_CLUSTERS = [
 ]
 
 # Should be assigned same UUID per pair.
+
 IDENTICAL_PAIRS = [
     # All values shared.
     (0, "a_1", "b_1"),
@@ -78,6 +79,11 @@ IDENTICAL_PAIRS = [
     (4, "a_5", "b_5"),
 ]
 
+CROSS_NAS = [
+    ("a_1", "b_1", None),
+    ("a_1", None, "c_1"),
+]
+
 
 def clusters(df: pd.DataFrame, column: Union[str, int]) -> List[List[int]]:
     """Return the clusters according to the given column."""
@@ -92,6 +98,7 @@ class TestClustering:
             pytest.param(ALL_DIFFERENT, id="all_different"),
             pytest.param(EMPTY_CLUSTERS, id="empty_clusters"),
             pytest.param(IDENTICAL_PAIRS, id="identical_pairs"),
+            pytest.param(CROSS_NAS, id="cross_nas"),
         ],
     )
     def test_generate_uuids(self, data):
