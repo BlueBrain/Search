@@ -80,8 +80,8 @@ IDENTICAL_PAIRS = [
 ]
 
 CROSS_NAS = [
-    ("a_1", "b_1", None),
-    ("a_1", None, "c_1"),
+    (0, "a_1", "b_1", None),
+    (0, "a_1", None, "c_1"),
 ]
 
 
