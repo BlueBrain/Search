@@ -1,4 +1,4 @@
-"""Tests covering the handling of identifiers."""
+"""Tests covering the clustering of identifiers."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
@@ -26,7 +26,7 @@ from bluesearch.database.identifiers import generate_uuids
 
 # Should be assigned different UUIDs.
 
-ALL_DIFFERENT = [
+DIFFERENT_BASIC = [
     # No shared values.
     (0, "a_1", "b_1"),
     (1, "a_2", "b_2"),
@@ -52,16 +52,43 @@ ALL_DIFFERENT = [
     (15, None, "b_10"),
 ]
 
-EMPTY_CLUSTERS = [
-    (0, "a_1", "b_1", "c_1"),
-    (1, "a_1", "b_2", None),
-    (2, "a_2", "b_3", "c_2"),
-    (3, "a_3", "b_3", None),
+DIFFERENT_ORDER = [
+    # A conflicting value (right, with NA, before).
+    (0, "a_1", None),
+    (1, "a_1", "b_1"),
+    (2, "a_1", "b_2"),
+    # A conflicting value (right, with NA, after).
+    (3, "a_2", "b_3"),
+    (4, "a_2", "b_4"),
+    (5, "a_2", None),
+    # A conflicting value (left, with NA, before).
+    (6, None, "b_5"),
+    (7, "a_3", "b_5"),
+    (8, "a_4", "b_5"),
+    # A conflicting value (left, with NA, after).
+    (9, "a_5", "b_6"),
+    (10, "a_6", "b_6"),
+    (11, None, "b_6"),
+]
+
+DIFFERENT_COMPLEX = [
+    # A conflicting value (left and NA middle).
+    (0, "a_1", None, "c_1"),
+    (1, "a_2", "b_1", "c_1"),
+    # A conflicting value (left and NA right).
+    (2, "a_3", "b_2", None),
+    (3, "a_4", "b_2", "c_2"),
+    # A conflicting value (middle and NA left).
+    (4, None, "b_3", "c_3"),
+    (5, "a_5", "b_4", "c_3"),
+    # A conflicting value (middle and NA right).
+    (6, "a_6", "b_5", None),
+    (7, "a_6", "b_6", "c_4"),
 ]
 
 # Should be assigned same UUID per pair.
 
-IDENTICAL_PAIRS = [
+IDENTICAL_BASIC = [
     # All values shared.
     (0, "a_1", "b_1"),
     (0, "a_1", "b_1"),
@@ -79,9 +106,16 @@ IDENTICAL_PAIRS = [
     (4, "a_5", "b_5"),
 ]
 
-CROSS_NAS = [
-    (0, "a_1", "b_1", None),
+IDENTICAL_COMPLEX = [
+    # No conflicting value (middle and right).
     (0, "a_1", None, "c_1"),
+    (0, "a_1", "b_1", None),
+    # No conflicting value (left and right).
+    (1, None, "b_2", "c_2"),
+    (1, "a_2", "b_2", None),
+    # No conflicting value (left and middle).
+    (2, None, "b_3", "c_3"),
+    (2, "a_3", None, "c_3"),
 ]
 
 
@@ -95,10 +129,11 @@ class TestClustering:
     @pytest.mark.parametrize(
         "data",
         [
-            pytest.param(ALL_DIFFERENT, id="all_different"),
-            pytest.param(EMPTY_CLUSTERS, id="empty_clusters"),
-            pytest.param(IDENTICAL_PAIRS, id="identical_pairs"),
-            pytest.param(CROSS_NAS, id="cross_nas"),
+            pytest.param(DIFFERENT_BASIC, id="different_basic_cases"),
+            pytest.param(DIFFERENT_ORDER, id="different_processing_order"),
+            pytest.param(DIFFERENT_COMPLEX, id="different_complex_cases"),
+            pytest.param(IDENTICAL_BASIC, id="identical_basic_cases"),
+            pytest.param(IDENTICAL_COMPLEX, id="identical_complex_cases"),
         ],
     )
     def test_generate_uuids(self, data):
