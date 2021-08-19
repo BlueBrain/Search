@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import (
+    Dict,
     Generator,
     Iterable,
     List,
@@ -163,9 +164,9 @@ class PubmedXMLParser(ArticleParser):
         # Paragraphs of text body
         abstract_p = self.content.findall(".//abstract/p")
         caption_p = self.content.findall(".//caption/p")
-        acknowlegd_p = self.content.findall(".//ack/p")
+        acknowledg_p = self.content.findall(".//ack/p")
 
-        exclude_list = abstract_p + caption_p + acknowlegd_p
+        exclude_list = abstract_p + caption_p + acknowledg_p
 
         section_dirs = self.get_sections()
         for paragraph in self.content.findall(".//p"):
@@ -196,33 +197,31 @@ class PubmedXMLParser(ArticleParser):
             caption = " ".join(self.text_content(c) for c in caption_elements)
             yield "Table Caption", caption
 
-    def get_sections(self) -> dict:
+    def get_sections(self) -> Dict[Element, str]:
         """Extract sections information.
 
         Returns
         -------
-        sections_dir : dict
+        sections : dict
             Dictionary whose keys are paragraphs and value are section title.
         """
-        sections_dir = {}
+        sections = {}
         for sec in self.content.findall(".//sec"):
 
             section_title = ""
             section_paragraphs = []
 
-            for element in list(sec):
+            for element in sec:
 
                 if element.tag == "title":
                     section_title = self.text_content(element)
                 elif element.tag == "p":
                     section_paragraphs.append(element)
-                else:
-                    continue
 
             for paragraph in section_paragraphs:
-                sections_dir[paragraph] = section_title
+                sections[paragraph] = section_title
 
-        return sections_dir
+        return sections
 
     @staticmethod
     def text_content(element: Optional[Element]) -> str:
