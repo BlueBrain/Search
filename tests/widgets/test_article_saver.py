@@ -20,7 +20,7 @@
 import numpy as np
 import pandas as pd
 
-from bluesearch.widgets import ArticleSaver
+from bluesearch.widgets.article_saver import ArticleSaver
 
 
 class TestArticleSaver:

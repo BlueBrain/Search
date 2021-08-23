@@ -16,15 +16,3 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from .article_saver import ArticleSaver
-from .mining_schema import MiningSchema
-from .mining_widget import MiningWidget
-from .search_widget import SearchWidget
-
-__all__ = [
-    "ArticleSaver",
-    "MiningSchema",
-    "MiningWidget",
-    "SearchWidget",
-]
