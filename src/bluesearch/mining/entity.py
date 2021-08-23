@@ -44,7 +44,7 @@ class PatternCreator:
 
     Examples
     --------
-    >>> from bluesearch.mining import PatternCreator
+    >>> from bluesearch.mining.entity import PatternCreator
     >>>
     >>> pc = PatternCreator()
     >>> pc.add("FOOD", [{"LOWER": "oreo"}])
