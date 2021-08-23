@@ -25,8 +25,8 @@ import pytest
 from spacy.language import Language
 from spacy.tokens import Doc, Span
 
-from bluesearch.mining import StartWithTheSameLetter, run_pipeline
-from bluesearch.mining.relation import REModel
+from bluesearch.mining.pipeline import run_pipeline
+from bluesearch.mining.relation import REModel, StartWithTheSameLetter
 
 
 @pytest.mark.parametrize("n_paragraphs", [0, 1, 5])

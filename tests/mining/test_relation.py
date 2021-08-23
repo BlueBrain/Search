@@ -22,7 +22,7 @@ from unittest.mock import Mock
 import pytest
 from spacy.tokens import Doc, Span
 
-from bluesearch.mining import ChemProt, StartWithTheSameLetter, annotate
+from bluesearch.mining.relation import ChemProt, StartWithTheSameLetter, annotate
 
 
 def test_annotate(model_entities):

@@ -28,7 +28,7 @@ import requests
 import spacy
 from IPython.display import HTML
 
-from bluesearch.mining import AttributeAnnotationTab, AttributeExtractor
+from bluesearch.mining.attribute import AttributeAnnotationTab, AttributeExtractor
 
 
 @pytest.fixture(scope="session")

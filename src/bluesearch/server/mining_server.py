@@ -26,7 +26,7 @@ from flask import Flask, jsonify, request
 
 import bluesearch
 
-from ..mining import SPECS, run_pipeline
+from ..mining.pipeline import SPECS, run_pipeline
 from ..sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
 from ..utils import load_spacy_model
 

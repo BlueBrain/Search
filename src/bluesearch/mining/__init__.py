@@ -16,26 +16,3 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from .attribute import AttributeAnnotationTab, AttributeExtractor, TextCollectionWidget
-from .entity import PatternCreator, check_patterns_agree, global2model_patterns
-from .eval import annotations2df, spacy2df
-from .pipeline import SPECS, run_pipeline
-from .relation import ChemProt, REModel, StartWithTheSameLetter, annotate
-
-__all__ = [
-    "AttributeExtractor",
-    "AttributeAnnotationTab",
-    "ChemProt",
-    "PatternCreator",
-    "REModel",
-    "SPECS",
-    "StartWithTheSameLetter",
-    "TextCollectionWidget",
-    "annotate",
-    "annotations2df",
-    "check_patterns_agree",
-    "global2model_patterns",
-    "run_pipeline",
-    "spacy2df",
-]
