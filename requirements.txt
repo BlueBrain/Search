@@ -23,7 +23,7 @@ en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.
 h5py==3.3.0
 ipython==7.25.0
 ipywidgets==7.6.3
-jupyterlab==3.0.16
+jupyterlab==3.0.17
 langdetect==1.0.9
 numpy==1.21.0
 pandas==1.3.0
