@@ -161,14 +161,18 @@ class PubmedXMLParser(ArticleParser):
         text : str
             The paragraph content.
         """
-        # Paragraphs of text body
+        # Abstract are removed because already parsed in abstract property.
         abstract_p = self.content.findall(".//abstract/p")
+        # Caption are removed because already parsed later in the current method
+        # with the section name "Caption".
         caption_p = self.content.findall(".//caption/p")
+        # Acknowledgements are removed because not useful.
         acknowledg_p = self.content.findall(".//ack/p")
 
         exclude_list = abstract_p + caption_p + acknowledg_p
 
-        section_dirs = self.get_sections()
+        # Paragraphs of text body
+        section_dirs = self.get_paragraphs_sections_mapping()
         for paragraph in self.content.findall(".//p"):
             if paragraph not in exclude_list:
                 text = self.text_content(paragraph)
@@ -197,15 +201,15 @@ class PubmedXMLParser(ArticleParser):
             caption = " ".join(self.text_content(c) for c in caption_elements)
             yield "Table Caption", caption
 
-    def get_sections(self) -> Dict[Element, str]:
-        """Extract sections information.
+    def get_paragraphs_sections_mapping(self) -> Dict[Element, str]:
+        """Construct mapping between all paragraphs and their section name.
 
         Returns
         -------
-        sections : dict
+        mapping : dict
             Dictionary whose keys are paragraphs and value are section title.
         """
-        sections = {}
+        mapping = {}
         for sec in self.content.findall(".//sec"):
 
             section_title = ""
@@ -219,9 +223,9 @@ class PubmedXMLParser(ArticleParser):
                     section_paragraphs.append(element)
 
             for paragraph in section_paragraphs:
-                sections[paragraph] = section_title
+                mapping[paragraph] = section_title
 
-        return sections
+        return mapping
 
     @staticmethod
     def text_content(element: Optional[Element]) -> str:
