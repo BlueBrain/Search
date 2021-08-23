@@ -244,7 +244,7 @@ class PubmedXMLParser(ArticleParser):
         if element is None:
             return ""
         else:
-            return "".join(element.itertext())
+            return "".join(element.itertext()).strip()
 
 
 class CORD19ArticleParser(ArticleParser):
