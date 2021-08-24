@@ -41,13 +41,13 @@ def run(
     `get_parser` function.
     """
     if parser == "CORD19ArticleParser":
-        with open(input_path) as f:
-            parser_inst = CORD19ArticleParser(json.load(f))
+        with open(input_path) as f_input:
+            parser_inst = CORD19ArticleParser(json.load(f_input))
 
     else:
         raise ValueError(f"Unsupported parser {parser}")
 
     article = Article.parse(parser_inst)
 
-    with open(output_path, "wb") as f:  # type: ignore
-        pickle.dump(article, f)  # type: ignore
+    with open(output_path, "wb") as f_output:
+        pickle.dump(article, f_output)
