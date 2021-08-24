@@ -25,6 +25,7 @@ import pytest
 @pytest.mark.parametrize(
     "entrypoint_name",
     [
+        "bbs_database",
         "compute_embeddings",
         "create_database",
         "create_mining_cache",
