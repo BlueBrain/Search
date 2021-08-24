@@ -1,6 +1,5 @@
 """Module implementing the high level CLI logic."""
 import argparse
-import sys
 from typing import Optional, Sequence
 
 from .add import get_parser as get_parser_add
