@@ -64,7 +64,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     command_map[command](**kwargs)  # type: ignore
 
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: nocover
