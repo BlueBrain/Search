@@ -572,8 +572,10 @@ def ner_errors(
             idxs_all = idxs_true.merge(
                 idxs_pred, on=["start", "end"], indicator="i", how="outer"
             )
-            idxs_false_neg = idxs_all.query('i == "left_only"').drop("i", 1)
-            idxs_false_pos = idxs_all.query('i == "right_only"').drop("i", 1)
+            idxs_false_neg = idxs_all.query('i == "left_only"').drop(labels="i", axis=1)
+            idxs_false_pos = idxs_all.query('i == "right_only"').drop(
+                labels="i", axis=1
+            )
             report[etype] = {
                 "false_neg": sorted(idx2text(tokens, idxs_false_neg).tolist()),
                 "false_pos": sorted(idx2text(tokens, idxs_false_pos).tolist()),

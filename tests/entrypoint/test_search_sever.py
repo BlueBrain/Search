@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
-from bluesearch.entrypoint import get_search_app
+from bluesearch.entrypoint.search_server import get_search_app
 from bluesearch.server.search_server import SearchServer
 
 

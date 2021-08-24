@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-FROM continuumio/miniconda3:4.9.2
+FROM nvcr.io/nvidia/pytorch:21.06-py3
 
 ENV HTTP_PROXY='http://bbpproxy.epfl.ch:80/'
 ENV HTTPS_PROXY='http://bbpproxy.epfl.ch:80/'
@@ -39,6 +39,8 @@ RUN rm -rf /opt/conda/lib/python3.8/site-packages/ruamel*
 RUN pip install -r requirements.txt
 RUN pip install -r requirements-data_and_models.txt
 RUN pip install $PWD[data_and_models]
+# Force the version of the script training_transformers/train.py
+RUN pip install transformers==3.4.0
 
 
 EXPOSE 8888
