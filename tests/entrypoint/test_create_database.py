@@ -22,7 +22,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from bluesearch.entrypoint.database import run_create_database
+from bluesearch.entrypoint.create_database import run_create_database
 
 
 @pytest.mark.parametrize(
