@@ -123,7 +123,7 @@ def run_create_database(argv=None):
     # Import libraries
     logger.info("Loading libraries")
 
-    from ..database import CORD19DatabaseCreation, mark_bad_sentences
+    from ..database.cord_19 import CORD19DatabaseCreation, mark_bad_sentences
 
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")

@@ -27,8 +27,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bluesearch.database import CreateMiningCache
-from bluesearch.database.mining_cache import Miner
+from bluesearch.database.mining_cache import CreateMiningCache, Miner
 
 
 class TestMiner:

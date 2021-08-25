@@ -35,8 +35,8 @@ import torch
 from IPython.display import HTML
 
 from bluesearch.search import SearchEngine
-from bluesearch.widgets import ArticleSaver, SearchWidget
-from bluesearch.widgets.search_widget import _Save
+from bluesearch.widgets.article_saver import ArticleSaver
+from bluesearch.widgets.search_widget import SearchWidget, _Save
 
 
 class SearchWidgetBot:

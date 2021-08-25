@@ -155,7 +155,7 @@ def run_create_mining_cache(argv=None):
 
     # Loading libraries
     logger.info("Loading libraries")
-    from ..database import CreateMiningCache
+    from ..database.mining_cache import CreateMiningCache
 
     # Database type
     logger.info("Parsing the database type")

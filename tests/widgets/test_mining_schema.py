@@ -19,7 +19,7 @@
 
 import pytest
 
-from bluesearch.widgets import MiningSchema
+from bluesearch.widgets.mining_schema import MiningSchema
 
 
 def test_add_entity():

@@ -23,7 +23,7 @@ from unittest.mock import Mock
 import pandas as pd
 import pytest
 
-from bluesearch.mining import SPECS
+from bluesearch.mining.pipeline import SPECS
 from bluesearch.server.mining_server import MiningServer
 
 TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory

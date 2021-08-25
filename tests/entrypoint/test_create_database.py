@@ -81,10 +81,10 @@ def test_send_through(
         "bluesearch.entrypoint.create_database.sqlalchemy", fake_sqlalchemy
     )
     monkeypatch.setattr(
-        "bluesearch.database.CORD19DatabaseCreation", fake_database_creation
+        "bluesearch.database.cord_19.CORD19DatabaseCreation", fake_database_creation
     )
     monkeypatch.setattr(
-        "bluesearch.database.mark_bad_sentences", fake_mark_bad_sentences
+        "bluesearch.database.cord_19.mark_bad_sentences", fake_mark_bad_sentences
     )
 
     argv = [

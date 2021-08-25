@@ -27,7 +27,9 @@ import pandas as pd
 import responses
 from IPython.display import HTML
 
-from bluesearch.widgets import ArticleSaver, MiningSchema, MiningWidget
+from bluesearch.widgets.article_saver import ArticleSaver
+from bluesearch.widgets.mining_schema import MiningSchema
+from bluesearch.widgets.mining_widget import MiningWidget
 
 
 class MiningWidgetBot:

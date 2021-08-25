@@ -26,15 +26,16 @@ import pandas as pd
 import pytest
 import spacy
 
-from bluesearch.mining import annotations2df, spacy2df
 from bluesearch.mining.eval import (
     _check_consistent_iob,
+    annotations2df,
     idx2text,
     iob2idx,
     ner_confusion_matrix,
     ner_errors,
     ner_report,
     remove_punctuation,
+    spacy2df,
     unique_etypes,
 )
 

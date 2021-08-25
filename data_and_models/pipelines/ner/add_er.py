@@ -22,7 +22,7 @@ from argparse import ArgumentParser
 
 import spacy
 
-from bluesearch.mining import global2model_patterns
+from bluesearch.mining.entity import global2model_patterns
 from bluesearch.utils import JSONL
 
 parser = ArgumentParser()

@@ -24,7 +24,7 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
-from bluesearch.database import CORD19DatabaseCreation, mark_bad_sentences
+from bluesearch.database.cord_19 import CORD19DatabaseCreation, mark_bad_sentences
 
 
 @pytest.fixture()

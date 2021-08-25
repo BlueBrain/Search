@@ -92,10 +92,7 @@ def test_send_through(
         "bluesearch.entrypoint.mining_cache.sqlalchemy", fake_sqlalchemy
     )
     monkeypatch.setattr(
-        "bluesearch.database.CreateMiningCache", fake_create_mining_cache
-    )
-    monkeypatch.setattr(
-        "bluesearch.database.CreateMiningCache", fake_create_mining_cache
+        "bluesearch.database.mining_cache.CreateMiningCache", fake_create_mining_cache
     )
     monkeypatch.setattr(
         "bluesearch.entrypoint.mining_cache.getpass.getpass",
