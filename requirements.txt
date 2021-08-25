@@ -19,6 +19,7 @@ Flask==2.0.1
 SQLAlchemy[mysql,pymysql]==1.4.21
 catalogue==2.0.4
 cryptography==3.4.7
+defusedxml==0.6.0
 en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz
 h5py==3.3.0
 ipython==7.25.0

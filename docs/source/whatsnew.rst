@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| :code:`PubmedXMLParser` to parse PubMed articles in XML JATS format.
 
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
   :code:`deps` elements and mixed models origin.
@@ -75,7 +76,9 @@ Version 0.2.0
   only valid texts, normalizes labels, keeps only a given label, and then
   renames the label if necessary.
 - |Remove| :code:`ee_models_library.csv` and change the logic for one model per entity type.
-
+- |Add| :code:`ArticleParser` abstract class representing a generic interface
+  for parsing articles.
+- |Add| :code:`CORD19ArticleParser` to parse CORD-19 articles in JSON format.
 
 Version 0.1.2
 =============
