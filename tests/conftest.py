@@ -334,6 +334,12 @@ def metadata_path():
 
 
 @pytest.fixture(scope="session")
+def test_data_path():
+    """Path to data folder."""
+    return ROOT_PATH / "tests" / "data"
+
+
+@pytest.fixture(scope="session")
 def entity_types():
     """Entity types that can be used throughout tests."""
     return ["CHEMICAL", "ORGANISM"]

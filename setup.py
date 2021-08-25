@@ -52,6 +52,7 @@ INSTALL_REQUIRES = [
     "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
+    "defusedxml",
     "h5py",
     "ipython",
     "ipywidgets",
@@ -96,8 +97,9 @@ EXTRAS_REQUIRE = {
 }
 
 CONSOLE_SCRIPTS = [
+    "bbs_database = bluesearch.entrypoint.database.parent:main",
     "compute_embeddings = bluesearch.entrypoint.embeddings:run_compute_embeddings",
-    "create_database = bluesearch.entrypoint.database:run_create_database",
+    "create_database = bluesearch.entrypoint.create_database:run_create_database",
     "create_mining_cache = bluesearch.entrypoint.mining_cache:run_create_mining_cache",
     "embedding_server = bluesearch.entrypoint.embedding_server:run_embedding_server",
     "mining_server = bluesearch.entrypoint.mining_server:run_mining_server",
