@@ -3,7 +3,7 @@ import argparse
 import json
 import pickle  # nosec
 
-from bluesearch.database.article import Article, CORD19ArticleParser
+from bluesearch.database.article import Article, CORD19ArticleParser, PubmedXMLParser
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -14,6 +14,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "parser",
         type=str,
+        choices=("CORD19ArticleParser", "PubmedXMLParser"),
         help="""Parser class.""",
     )
     parser.add_argument(
@@ -43,6 +44,8 @@ def run(
     if parser == "CORD19ArticleParser":
         with open(input_path) as f_input:
             parser_inst = CORD19ArticleParser(json.load(f_input))
+    elif parser == "PubmedXMLParser":
+        parser_inst = PubmedXMLParser(input_path)
 
     else:
         raise ValueError(f"Unsupported parser {parser}")
