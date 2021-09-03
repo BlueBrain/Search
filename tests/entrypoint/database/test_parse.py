@@ -13,8 +13,9 @@ def test_unknown_parser():
 
     # argparse exists with error 2, so we need to "unpack" the exception
     except SystemExit as e:
-        assert f"invalid choice: '{wrong_parser}'" in e.__context__.args[1]
-        assert isinstance(e.__context__, ArgumentError)
+        context = BaseException(e.__context__)
+        assert f"invalid choice: '{wrong_parser}'" in context.args[1]
+        assert isinstance(context, ArgumentError)
 
 
 def test_cord19(jsons_path, tmpdir):
