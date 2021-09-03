@@ -3,7 +3,12 @@ import argparse
 import json
 import pickle  # nosec
 
-from bluesearch.database.article import Article, CORD19ArticleParser, PubmedXMLParser
+from bluesearch.database.article import (
+    Article,
+    ArticleParser,
+    CORD19ArticleParser,
+    PubmedXMLParser,
+)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -41,6 +46,7 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    parser_inst: ArticleParser
     if parser == "CORD19ArticleParser":
         with open(input_path) as f_input:
             parser_inst = CORD19ArticleParser(json.load(f_input))
