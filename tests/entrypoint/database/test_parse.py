@@ -13,7 +13,7 @@ def test_unknown_parser():
 
     # argparse exists with error 2, so we need to "unpack" the exception
     except SystemExit as e:
-        assert f"invalid choice: '{wrong_parser}'" in e.__context__.message
+        assert f"invalid choice: '{wrong_parser}'" in e.__context__.args[1]
         assert isinstance(e.__context__, ArgumentError)
 
 
