@@ -1,15 +1,20 @@
 import pathlib
 import pickle
-
-import pytest
+from argparse import ArgumentError
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
 def test_unknown_parser():
-    with pytest.raises(ValueError, match="Unsupported parser"):
-        main(["parse", "WrongParser", "path_to_input", "path_to_output"])
+    wrong_parser = "WrongParser"
+    try:
+        main(["parse", wrong_parser, "path_to_input", "path_to_output"])
+
+    # argparse exists with error 2, so we need to "unpack" the exception
+    except SystemExit as e:
+        assert f"invalid choice: '{wrong_parser}'" in e.__context__.message
+        assert isinstance(e.__context__, ArgumentError)
 
 
 def test_cord19(jsons_path, tmpdir):
