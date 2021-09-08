@@ -37,6 +37,11 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     -------
     meshs : list of dict
         List containing all meshs of the Journal.
+
+    Raises
+    ------
+    ElementTree.ParseError
+        If more than one result is found with the given request.
     """
     url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]report=xml"
 
