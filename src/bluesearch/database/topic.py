@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Utils for journal/articles topics."""
+import html
 import pathlib
 from typing import Dict, Iterable, List, Optional, Union
 from xml.etree.ElementTree import Element  # nosec
@@ -49,15 +50,7 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
 
     # The response is an escaped HTML format,
     # we need to change some characters of the response to have a valid xml.
-    text = (
-        response.content.decode()
-        .replace("<pre>", "")
-        .replace("</pre>", "")
-        .replace("\n", "")
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("><", ">    <")
-    )
+    text = html.unescape(response.content.decode())
 
     try:
         content = ElementTree.fromstring(text)
@@ -66,7 +59,9 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
         # It is the case for less than 1 % of the journal from PMC
         raise ElementTree.ParseError("The parsing did not work")
 
-    mesh_headings = content.findall("./NLMCatalogRecord/MeshHeadingList/MeshHeading")
+    mesh_headings = content.findall(
+        "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
+    )
     meshs = get_mesh_from_nlm_catalog(mesh_headings)
 
     return meshs
@@ -102,9 +97,9 @@ def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     pubmed_to_meshs = {}
 
     for article in pubmed_articles:
-        pubmed_id = article.findall(
+        pubmed_id = article.find(
             "./PubmedData/ArticleIdList/ArticleId[@IdType='pubmed']"
-        )[0].text
+        ).text
         mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
         meshs = get_mesh_from_pubmed(mesh_headings)
         pubmed_to_meshs[pubmed_id] = meshs
@@ -165,7 +160,7 @@ def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
 
             name = elem.text
             if name is not None:
-                name = name.replace("&amp;", "&")
+                name = html.unescape(name)
 
             if elem.tag == "DescriptorName":
                 descriptor_name.append(
