@@ -233,7 +233,7 @@ class PubmedXMLParser(ArticleParser):
 
         Parameters
         ----------
-        element : etree._Element or None
+        element
             XML element to parse.
 
         Returns
