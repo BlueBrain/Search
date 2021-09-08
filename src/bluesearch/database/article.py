@@ -21,24 +21,10 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import (
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Generator, Iterable, Sequence
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
-
-# This is for annotating the return value of the Article.parse class method, see
-# https://github.com/python/typing/issues/254#issuecomment-661803922
-_T = TypeVar("_T", bound="Article")
 
 
 class ArticleParser(ABC):
@@ -79,7 +65,7 @@ class ArticleParser(ABC):
 
     @property
     @abstractmethod
-    def paragraphs(self) -> Iterable[Tuple[str, str]]:
+    def paragraphs(self) -> Iterable[tuple[str, str]]:
         """Get all paragraphs and titles of sections they are part of.
 
         Returns
@@ -99,7 +85,7 @@ class PubmedXMLParser(ArticleParser):
         The path to the XML file from PubMed.
     """
 
-    def __init__(self, path: Union[str, Path]) -> None:
+    def __init__(self, path: str | Path) -> None:
         super().__init__()
         self.content = ElementTree.parse(str(path))
 
@@ -151,7 +137,7 @@ class PubmedXMLParser(ArticleParser):
             yield self._element_to_str(paragraph)
 
     @property
-    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
         Paragraphs can be parts of text body, or figure or table captions.
@@ -203,7 +189,7 @@ class PubmedXMLParser(ArticleParser):
             caption = " ".join(self._element_to_str(c) for c in caption_elements)
             yield "Table Caption", caption
 
-    def get_paragraphs_sections_mapping(self) -> Dict[Element, str]:
+    def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
         """Construct mapping between all paragraphs and their section name.
 
         Returns
@@ -372,7 +358,7 @@ class CORD19ArticleParser(ArticleParser):
             yield author_str
 
     @property
-    def abstract(self) -> List[str]:
+    def abstract(self) -> list[str]:
         """Get a sequence of paragraphs in the article abstract.
 
         Returns
@@ -386,7 +372,7 @@ class CORD19ArticleParser(ArticleParser):
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
     @property
-    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
         Yields
@@ -414,10 +400,10 @@ class Article:
     title: str
     authors: Sequence[str]
     abstract: Sequence[str]
-    section_paragraphs: Sequence[Tuple[str, str]]
+    section_paragraphs: Sequence[tuple[str, str]]
 
     @classmethod
-    def parse(cls: Type[_T], parser: ArticleParser) -> _T:
+    def parse(cls, parser: ArticleParser) -> Article:
         """Parse an article through a parser.
 
         Parameters
@@ -434,7 +420,7 @@ class Article:
 
     def iter_paragraphs(
         self, with_abstract: bool = False
-    ) -> Generator[Tuple[str, str], None, None]:
+    ) -> Generator[tuple[str, str], None, None]:
         """Iterate over all paragraphs in the article.
 
         Parameters
