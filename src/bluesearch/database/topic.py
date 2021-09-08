@@ -42,6 +42,10 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     ------
     ElementTree.ParseError
         If more than one result is found with the given request.
+
+    References
+    ----------
+    https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
     url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]report=xml"
 
@@ -82,6 +86,10 @@ def request_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     pubmed_to_meshs : dict
         Dictionary containing Pubmed IDs as keys with corresponding
         Medical Subject Headings list as values.
+
+    References
+    ----------
+    https://dataguide.nlm.nih.gov/eutilities/utilities.html#efetch
     """
     pubmed_str = ",".join(pubmed_ids)
     url = (
