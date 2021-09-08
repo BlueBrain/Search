@@ -62,7 +62,7 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
     mesh_headings = content.findall(
         "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
     )
-    meshs = get_mesh_from_nlm_catalog(mesh_headings)
+    meshs = _get_mesh_from_nlm_catalog(mesh_headings)
 
     return meshs
 
@@ -104,7 +104,7 @@ def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
             continue
         pubmed_id = pubmed_id_tag.text
         mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
-        meshs = get_mesh_from_pubmed(mesh_headings)
+        meshs = _get_mesh_from_pubmed(mesh_headings)
         pubmed_to_meshs[pubmed_id] = meshs
 
     return pubmed_to_meshs
@@ -132,7 +132,7 @@ def get_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]
         return pmid_tag.text
 
 
-def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from nlmcatalog parsing.
 
     Parameters
@@ -174,7 +174,7 @@ def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     return meshs
 
 
-def get_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _get_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from efetch pubmed parsing.
 
     Parameters
