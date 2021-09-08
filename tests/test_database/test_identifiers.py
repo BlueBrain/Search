@@ -123,6 +123,7 @@ class TestClustering:
             pytest.param(DIFFERENT_BASIC, id="different_basic_cases"),
             pytest.param(DIFFERENT_ORDER, id="different_processing_order"),
             pytest.param(DIFFERENT_COMPLEX, id="different_complex_cases"),
+            pytest.param(IDENTICAL, id="identical_cases"),
         ],
     )
     def test_generate_uids(self, data):
