@@ -22,9 +22,9 @@ from typing import List, Union
 import pandas as pd
 import pytest
 
-from bluesearch.database.identifiers import generate_uuids
+from bluesearch.database.identifiers import generate_uids
 
-# Should be assigned different UUIDs.
+# Should be assigned different UIDs.
 
 DIFFERENT_BASIC = [
     # No shared values.
@@ -84,38 +84,29 @@ DIFFERENT_COMPLEX = [
     # A conflicting value (middle and NA right).
     (6, "a_6", "b_5", None),
     (7, "a_6", "b_6", "c_4"),
+    # No conflicting value (middle and right).
+    (8, "a_7", None, "c_5"),
+    (9, "a_7", "b_7", None),
+    # No conflicting value (left and right).
+    (10, None, "b_8", "c_6"),
+    (11, "a_8", "b_8", None),
+    # No conflicting value (left and middle).
+    (12, None, "b_9", "c_7"),
+    (13, "a_9", None, "c_7"),
 ]
 
-# Should be assigned same UUID per pair.
+# Should be assigned same UID per pair.
 
-IDENTICAL_BASIC = [
+IDENTICAL = [
     # All values shared.
     (0, "a_1", "b_1"),
     (0, "a_1", "b_1"),
-    # No conflicting value (after, right).
-    (1, "a_2", "b_2"),
+    # Shared values (NAs, right).
     (1, "a_2", None),
-    # No conflicting value (after, left).
-    (2, "a_3", "b_3"),
-    (2, None, "b_3"),
-    # No conflicting value (before, right).
-    (3, "a_4", None),
-    (3, "a_4", "b_4"),
-    # No conflicting value (before, left).
-    (4, None, "b_5"),
-    (4, "a_5", "b_5"),
-]
-
-IDENTICAL_COMPLEX = [
-    # No conflicting value (middle and right).
-    (0, "a_1", None, "c_1"),
-    (0, "a_1", "b_1", None),
-    # No conflicting value (left and right).
-    (1, None, "b_2", "c_2"),
-    (1, "a_2", "b_2", None),
-    # No conflicting value (left and middle).
-    (2, None, "b_3", "c_3"),
-    (2, "a_3", None, "c_3"),
+    (1, "a_2", None),
+    # Shared values (NAs, left).
+    (2, None, "b_2"),
+    (2, None, "b_2"),
 ]
 
 
@@ -132,13 +123,11 @@ class TestClustering:
             pytest.param(DIFFERENT_BASIC, id="different_basic_cases"),
             pytest.param(DIFFERENT_ORDER, id="different_processing_order"),
             pytest.param(DIFFERENT_COMPLEX, id="different_complex_cases"),
-            pytest.param(IDENTICAL_BASIC, id="identical_basic_cases"),
-            pytest.param(IDENTICAL_COMPLEX, id="identical_complex_cases"),
         ],
     )
-    def test_generate_uuids(self, data):
+    def test_generate_uids(self, data):
         metadata = pd.DataFrame(data)
         expected = clusters(metadata, 0)
-        result = generate_uuids(metadata, metadata.columns[1:])
-        found = clusters(result, "cluster_uuid")
+        result = generate_uids(metadata, metadata.columns[1:])
+        found = clusters(result, "uid")
         assert found == expected

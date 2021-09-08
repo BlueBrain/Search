@@ -17,24 +17,37 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-import functools
-from typing import List, Union
-from uuid import uuid4
+from typing import List, Tuple
 
-import numpy as np
 import pandas as pd
-from pandas.api.extensions import ExtensionArray
 
 
-def generate_uuids(
-    metadata: pd.DataFrame, identifiers: List[str], debug: bool = False
-) -> pd.DataFrame:
-    """Generate UUIDs for papers with multiple sources / identifiers.
+def generate_uid(identifiers: Tuple) -> int:
+    """Generate a deterministic UID for the given identifiers.
 
-    Papers are clustered if they have the same or no value for the given identifiers.
-    Each paper cluster is assigned a UUID.
+    Parameters
+    ----------
+    identifiers
+        Values of the identifiers.
 
-    Note: Papers with all given identifiers unspecified are ignored.
+    Returns
+    -------
+    int
+        A deterministic UID.
+    """
+    return hash(identifiers)
+
+
+def generate_uids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFrame:
+    """Generate UIDs for papers with multiple sources, identifiers.
+
+    Papers with the same values for the given identifiers get the same UID.
+
+    Missing values should have the value 'None', which is considered a value by itself.
+    Then, identifiers (a, None) and identifiers (a, b) have two different UIDs.
+    Papers with all given identifiers unspecified have 'None' as UID.
+
+    The generation of the UID is deterministic.
 
     Parameters
     ----------
@@ -42,84 +55,23 @@ def generate_uuids(
         Paper metadata including the given identifiers.
     identifiers
         Columns of the identifiers.
-    debug
-        True to include the output of each intermediate steps of the algorithm.
 
     Returns
     -------
     pandas.DataFrame
-        Generated UUIDs with the given identifiers. The index is the same as the input.
+        Paper metadata with a new column with the generated UIDs.
     """
+    # Ignore papers without values for the given identifiers.
 
-    def step_columns(step: int) -> List[str]:
-        """Create column names for the given step and identifiers."""
-        return [f"step{step}_{x}" for x in identifiers]
+    df = metadata.dropna(how="all", subset=identifiers)
 
-    # Step 0: Select only the given identifiers, drop empty rows, and create a copy.
+    # Generate a UID per paper group.
 
-    df = metadata[identifiers].dropna(how="all").copy()
+    def _uid(x: pd.Series) -> int:
+        values = tuple(x.to_list())
+        uid = generate_uid(values)
+        return uid
 
-    # Step 1: Cluster papers per identifier, column-wise.
+    metadata["uid"] = df[identifiers].apply(_uid, axis=1)
 
-    # The types of the output list elements are a bit too complex to be specified.
-    def _column_cluster(x: Union[pd.Series, pd.DataFrame]) -> List:
-        """Return the row indices of the cluster, for each row."""
-        return [x.index.array] * len(x)
-
-    step1_columns = step_columns(1)
-
-    for identifier, column in zip(identifiers, step1_columns):
-        grouped = df.dropna(subset=[identifier]).groupby(identifier, sort=False)
-        df[column] = grouped[identifier].transform(_column_cluster)
-
-    # Step 2: Handle NAs to cluster papers with non-conflicting identifiers.
-
-    # The types of 'x' and the output are a bit too complex to be specified.
-    def _remove_index(x, index: int):
-        """Remove the given index from the cluster, if it is not the only index."""
-        if isinstance(x, ExtensionArray) and len(x) > 1:
-            # Use to_numpy() to pass typing checks (pandas-stubs==1.2.0.1).
-            return np.delete(x, np.where(x.to_numpy() == index))
-        else:
-            return x
-
-    def _handle_nans(x: pd.Series) -> Union[pd.Series, pd.DataFrame]:
-        """Remove the row index from the cluster, if the row contains NAs."""
-        if x.hasnans:
-            return x.apply(_remove_index, index=x.name)
-        else:
-            return x
-
-    step2_columns = step_columns(2)
-
-    df[step2_columns] = df[step1_columns].apply(_handle_nans, axis=1)
-
-    # Step 3: Cluster papers per identifier, row-wise.
-
-    def _row_cluster(x: pd.Series) -> str:
-        """Compute the smallest cluster per row, as a hashable representation."""
-        # We can speed-up processing with 'assume_unique' as index values are unique.
-        intersect = functools.partial(np.intersect1d, assume_unique=True)
-        cluster = functools.reduce(intersect, x.dropna())
-        if cluster.size == 0:
-            # No intersection is due to step 2. So, the cluster contains only the row.
-            return f"[{x.name}]"
-        else:
-            return np.array_str(cluster)
-
-    df["cluster"] = df[step2_columns].apply(_row_cluster, axis=1)
-
-    # Step 4: Generate a UUID for each cluster.
-
-    def _generate_uuid(_) -> str:
-        """Generate a UUID."""
-        return str(uuid4())
-
-    df["cluster_uuid"] = df.groupby("cluster")["cluster"].transform(_generate_uuid)
-
-    # Step 5: Return the generated UUID per cluster of identifiers.
-
-    if debug:
-        return df
-    else:
-        return df[[*identifiers, "cluster_uuid"]]
+    return metadata
