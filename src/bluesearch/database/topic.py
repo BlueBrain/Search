@@ -148,15 +148,15 @@ def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     meshs = []
     for mesh in mesh_headings:
 
-        mesh_id = None
-        if "URI" in mesh.attrib.keys():
-            mesh_id = mesh.attrib["URI"].rpartition("/")[-1]
+        mesh_id = mesh.attrib.get("URI", None)
+        if mesh_id is not None:
+            *_, mesh_id = mesh_id.rpartition("/")
 
         descriptor_name = []
         qualifier_name = []
 
         for elem in mesh:
-            major_topic = True if elem.attrib["MajorTopicYN"] == "Y" else False
+            major_topic = elem.get("MajorTopicYN") == "Y"
 
             name = elem.text
             if name is not None:
@@ -200,13 +200,13 @@ def get_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
 
                 attributes = info.attrib
 
-                mesh_id = None
-                if "UI" in attributes.keys():
-                    mesh_id = attributes["UI"]
+                mesh_id = attributes.get("UI", None)
+                if mesh_id is not None:
+                    *_, mesh_id = mesh_id.rpartition("/")
 
                 major_topic = None
-                if "MajorTopicYN" in attributes.keys():
-                    major_topic = True if attributes["MajorTopicYN"] == "Y" else False
+                if "MajorTopicYN" in attributes:
+                    major_topic = attributes["MajorTopicYN"] == "Y"
 
                 if info.tag == "DescriptorName":
                     descriptor_name.append(
