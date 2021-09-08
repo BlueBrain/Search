@@ -17,8 +17,8 @@ def test_get_mesh_from_nlm_ta(test_data_path):
 
     responses.add(
         responses.GET,
-        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Trauma+Surg+Acute+Care+Open"
-        "%5Bta%5D&report=xml&format=xml",
+        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Trauma Surg Acute Care Open"
+        "[ta]report=xml",
         body=body.encode("utf-8"),
     )
 
@@ -57,8 +57,7 @@ def test_get_mesh_from_nlm_ta(test_data_path):
 
     responses.add(
         responses.GET,
-        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Wrong+Title"
-        "%5Bta%5D&report=xml&format=xml",
+        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Wrong+Title[ta]report=xml",
         status=404,
     )
 

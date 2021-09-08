@@ -38,11 +38,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     meshs : list of dict
         List containing all meshs of the Journal.
     """
-    nlm_ta_api = "+".join(nlm_ta.split(" "))
-    url = (
-        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?"
-        f"term={nlm_ta_api}%5Bta%5D&report=xml&format=xml"
-    )
+    url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]report=xml"
 
     response = requests.get(url)
     if not response.ok:
