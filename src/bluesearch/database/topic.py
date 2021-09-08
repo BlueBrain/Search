@@ -97,9 +97,12 @@ def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     pubmed_to_meshs = {}
 
     for article in pubmed_articles:
-        pubmed_id = article.find(
+        pubmed_id_tag = article.find(
             "./PubmedData/ArticleIdList/ArticleId[@IdType='pubmed']"
-        ).text
+        )
+        if pubmed_id_tag is None:
+            continue
+        pubmed_id = pubmed_id_tag.text
         mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
         meshs = get_mesh_from_pubmed(mesh_headings)
         pubmed_to_meshs[pubmed_id] = meshs
@@ -122,14 +125,11 @@ def get_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]
         Pubmed ID of the given article
     """
     content = ElementTree.parse(path)
-    article_id = content.findall("./front/article-meta/article-id[@pub-id-type='pmid']")
-
-    if len(article_id) == 1:
-        pubmed_id = article_id[0].text
+    pmid_tag = content.find("./front/article-meta/article-id[@pub-id-type='pmid']")
+    if pmid_tag is None:
+        return None
     else:
-        pubmed_id = None
-
-    return pubmed_id
+        return pmid_tag.text
 
 
 def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
