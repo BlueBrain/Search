@@ -25,7 +25,7 @@ from defusedxml import ElementTree
 
 
 # Journal Topic
-def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
+def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
     """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
 
     Parameters
@@ -62,13 +62,13 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
     mesh_headings = content.findall(
         "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
     )
-    meshs = _get_mesh_from_nlm_catalog(mesh_headings)
+    meshs = _parse_mesh_from_nlm_catalog(mesh_headings)
 
     return meshs
 
 
 # Article Topic
-def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
+def request_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     """Retrieve Medical Subject Headings from Pubmed ID.
 
     Parameters
@@ -104,14 +104,14 @@ def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
             continue
         pubmed_id = pubmed_id_tag.text
         mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
-        meshs = _get_mesh_from_pubmed(mesh_headings)
+        meshs = _parse_mesh_from_pubmed(mesh_headings)
         pubmed_to_meshs[pubmed_id] = meshs
 
     return pubmed_to_meshs
 
 
 # Utils
-def get_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]:
+def extract_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]:
     """Retrieve Pubmed ID from PMC XML file.
 
     Parameters
@@ -132,7 +132,7 @@ def get_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]
         return pmid_tag.text
 
 
-def _get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _parse_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from nlmcatalog parsing.
 
     Parameters
@@ -174,7 +174,7 @@ def _get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     return meshs
 
 
-def _get_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from efetch pubmed parsing.
 
     Parameters

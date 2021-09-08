@@ -3,9 +3,9 @@ import responses
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
-    get_mesh_from_nlm_ta,
-    get_mesh_from_pubmed_id,
-    get_pubmed_id_from_pmc_file,
+    extract_pubmed_id_from_pmc_file,
+    request_mesh_from_nlm_ta,
+    request_mesh_from_pubmed_id,
 )
 
 
@@ -50,7 +50,7 @@ def test_get_mesh_from_nlm_ta(test_data_path):
         },
     ]
 
-    meshs = get_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
+    meshs = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
     assert isinstance(meshs, list)
     assert len(meshs) == 3
     assert meshs == expected_output
@@ -63,7 +63,7 @@ def test_get_mesh_from_nlm_ta(test_data_path):
     )
 
     with pytest.raises(HTTPError):
-        get_mesh_from_nlm_ta("Wrong Title")
+        request_mesh_from_nlm_ta("Wrong Title")
 
 
 @responses.activate
@@ -228,7 +228,7 @@ def test_get_mesh_from_pubmedid(test_data_path):
         ],
     }
 
-    meshs = get_mesh_from_pubmed_id(["26633866", "31755206"])
+    meshs = request_mesh_from_pubmed_id(["26633866", "31755206"])
     assert isinstance(meshs, dict)
     assert list(meshs.keys()) == ["26633866", "31755206"]
     assert meshs == expected_output
@@ -241,10 +241,10 @@ def test_get_mesh_from_pubmedid(test_data_path):
     )
 
     with pytest.raises(HTTPError):
-        get_mesh_from_pubmed_id(["0"])
+        request_mesh_from_pubmed_id(["0"])
 
 
 def test_get_pubmedid(test_data_path):
     path = test_data_path / "sample_file.xml"
-    pubmed_id = get_pubmed_id_from_pmc_file(path)
+    pubmed_id = extract_pubmed_id_from_pmc_file(path)
     assert pubmed_id == "PMID"
