@@ -59,8 +59,6 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
         .replace("><", ">    <")
     )
 
-    print(text)
-
     try:
         content = ElementTree.fromstring(text)
     except ElementTree.ParseError:
