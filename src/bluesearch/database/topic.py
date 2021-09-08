@@ -114,7 +114,7 @@ def get_mesh_from_pubmedid(pubmed_ids: Iterable[str]) -> Dict:
 
 
 # Utils
-def get_pubmed_id(path: Union[str, pathlib.Path]) -> str:
+def get_pubmed_id(path: Union[str, pathlib.Path]) -> Optional[str]:
     """Retrieve Pubmed ID from PMC XML file.
 
     Parameters
