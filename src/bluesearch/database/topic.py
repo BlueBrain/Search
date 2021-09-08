@@ -16,7 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Utils for journal/articles topics."""
 import pathlib
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Optional, Union
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -29,12 +29,13 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
 
     Parameters
     ----------
-    nlm_ta : str
+    nlm_ta
         NLM Title Abbreviation of Journal.
 
     Returns
     -------
-    mesh :
+    meshs : list of dict
+        List containing all meshs of the Journal.
     """
     nlm_ta_api = "+".join(nlm_ta.split(" "))
     url = (
@@ -46,7 +47,7 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
     if not response.ok:
         raise ValueError("The request did not work")
 
-    # The response is a fake xml,
+    # The response is an escaped HTML format,
     # we need to change some characters of the response to have a valid xml.
     text = (
         response.content.decode()
@@ -68,18 +69,18 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
         raise ElementTree.ParseError("The parsing did not work")
 
     mesh_headings = content.findall("./NLMCatalogRecord/MeshHeadingList/MeshHeading")
-    meshs = get_mesh_from_nlmcatalog(mesh_headings)
+    meshs = get_mesh_from_nlm_catalog(mesh_headings)
 
     return meshs
 
 
 # Article Topic
-def get_mesh_from_pubmedid(pubmed_ids: Iterable[str]) -> Dict:
+def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     """Retrieve Medical Subject Headings from Pubmed ID.
 
     Parameters
     ----------
-    pubmed_ids : iterable of str
+    pubmed_ids
         List of Pubmed IDs.
 
     Returns
@@ -114,12 +115,12 @@ def get_mesh_from_pubmedid(pubmed_ids: Iterable[str]) -> Dict:
 
 
 # Utils
-def get_pubmed_id(path: Union[str, pathlib.Path]) -> Optional[str]:
+def get_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]:
     """Retrieve Pubmed ID from PMC XML file.
 
     Parameters
     ----------
-    path : str or pathlib.Path
+    path
         Path to PMC XML.
 
     Returns
@@ -138,12 +139,12 @@ def get_pubmed_id(path: Union[str, pathlib.Path]) -> Optional[str]:
     return pubmed_id
 
 
-def get_mesh_from_nlmcatalog(mesh_headings: Element) -> List[Dict]:
+def get_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from nlmcatalog parsing.
 
     Parameters
     ----------
-    mesh_headings : Element
+    mesh_headings
         XML parsing element containing all Medical Subject Headings.
 
     Returns
@@ -180,12 +181,12 @@ def get_mesh_from_nlmcatalog(mesh_headings: Element) -> List[Dict]:
     return meshs
 
 
-def get_mesh_from_pubmed(mesh_headings: Element) -> List[Dict]:
+def get_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
     """Retrieve Medical Subject Headings from efetch pubmed parsing.
 
     Parameters
     ----------
-    mesh_headings : Element
+    mesh_headings
         XML parsing element containing all Medical Subject Headings.
 
     Returns

@@ -3,8 +3,8 @@ import responses
 
 from bluesearch.database.topic import (
     get_mesh_from_nlm_ta,
-    get_mesh_from_pubmedid,
-    get_pubmed_id,
+    get_mesh_from_pubmed_id,
+    get_pubmed_id_from_pmc_file,
 )
 
 
@@ -227,7 +227,7 @@ def test_get_mesh_from_pubmedid(test_data_path):
         ],
     }
 
-    meshs = get_mesh_from_pubmedid(["26633866", "31755206"])
+    meshs = get_mesh_from_pubmed_id(["26633866", "31755206"])
     assert isinstance(meshs, dict)
     assert list(meshs.keys()) == ["26633866", "31755206"]
     assert meshs == expected_output
@@ -240,10 +240,10 @@ def test_get_mesh_from_pubmedid(test_data_path):
     )
 
     with pytest.raises(ValueError):
-        get_mesh_from_pubmedid(["0"])
+        get_mesh_from_pubmed_id(["0"])
 
 
 def test_get_pubmedid(test_data_path):
     path = test_data_path / "sample_file.xml"
-    pubmed_id = get_pubmed_id(path)
+    pubmed_id = get_pubmed_id_from_pmc_file(path)
     assert pubmed_id == "PMID"
