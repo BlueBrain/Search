@@ -46,7 +46,7 @@ def get_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
 
     response = requests.get(url)
     if not response.ok:
-        raise ValueError("The request did not work")
+        response.raise_for_status()
 
     # The response is an escaped HTML format,
     # we need to change some characters of the response to have a valid xml.
@@ -90,7 +90,7 @@ def get_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
     response = requests.get(url)
 
     if not response.ok:
-        raise ValueError("The request did not work")
+        response.raise_for_status()
 
     content = ElementTree.fromstring(response.content.decode())
     pubmed_articles = content.findall("./PubmedArticle")

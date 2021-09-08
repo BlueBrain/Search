@@ -1,5 +1,6 @@
 import pytest
 import responses
+from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     get_mesh_from_nlm_ta,
@@ -61,7 +62,7 @@ def test_get_mesh_from_nlm_ta(test_data_path):
         status=404,
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPError):
         get_mesh_from_nlm_ta("Wrong Title")
 
 
@@ -239,7 +240,7 @@ def test_get_mesh_from_pubmedid(test_data_path):
         status=404,
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPError):
         get_mesh_from_pubmed_id(["0"])
 
 
