@@ -50,8 +50,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]&report=xml"
 
     response = requests.get(url)
-    if not response.ok:
-        response.raise_for_status()
+    response.raise_for_status()
 
     # The response is an escaped HTML format,
     # we need to change some characters of the response to have a valid xml.
