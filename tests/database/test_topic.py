@@ -11,9 +11,13 @@ from bluesearch.database.topic import (
 
 class TestGetMeshFromNlmTa:
     @pytest.mark.network
-    def test_real_request(self):
+    def test_real_request_works(self):
         nlm_ta = "Trauma Surg Acute Care Open"
-        expected_descriptors = {"Critical Care", "Emergency Treatment", "Wounds and Injuries"}
+        expected_descriptors = {
+            "Critical Care",
+            "Emergency Treatment",
+            "Wounds and Injuries",
+        }
 
         mesh = request_mesh_from_nlm_ta(nlm_ta)
 
@@ -43,7 +47,11 @@ class TestGetMeshFromNlmTa:
             },
             {
                 "descriptor": [
-                    {"name": "Emergency Treatment", "major_topic": False, "ID": "D004638"}
+                    {
+                        "name": "Emergency Treatment",
+                        "major_topic": False,
+                        "ID": "D004638",
+                    }
                 ],
                 "qualifiers": [],
             },
