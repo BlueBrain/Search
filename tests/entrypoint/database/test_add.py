@@ -48,7 +48,7 @@ def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
         main(args_and_opts)
 
     # Check
-    query = """SELECT COUNT(*) FROM ARTICLES"""
+    query = """SELECT COUNT(*) FROM articles"""
     (n_rows,) = bbs_database_session.execute(query).fetchone()
 
     assert n_rows == n_files > 0

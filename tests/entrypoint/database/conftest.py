@@ -1,8 +1,10 @@
 import pathlib
+import time
 
 import docker
 import pytest
 import sqlalchemy
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 
 def fill_db(engine):
@@ -46,7 +48,7 @@ def bbs_database_engine(tmp_path_factory, bbs_database_backend):
         yield engine
 
     else:
-        port_number = 22346
+        port_number = 22342
         client = docker.from_env()
         container = client.containers.run(
             image="mysql:latest",
@@ -79,7 +81,7 @@ def bbs_database_engine(tmp_path_factory, bbs_database_backend):
         engine = sqlalchemy.create_engine(
             f"mysql+pymysql://root:my-secret-pw" f"@127.0.0.1:{port_number}/test"
         )
-        fill_db(engine, metadata_path, test_parameters, entity_types)
+        fill_db(engine)
 
         yield engine
 
