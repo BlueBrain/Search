@@ -1,6 +1,5 @@
 import pathlib
 import pickle
-from unittest.mock import MagicMock
 
 import pytest
 import sqlalchemy
@@ -24,12 +23,6 @@ def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
 
     input_paths = [input_folder / f"{i}.pkl" for i in range(n_files)]
 
-    # Mocking and patching
-    fake_sqlalchemy = MagicMock()
-    fake_sqlalchemy.create_engine().connect().__enter__.return_value = bbs_database_session
-    fake_sqlalchemy.text = sqlalchemy.text
-    monkeypatch.setattr("bluesearch.entrypoint.database.add.sqlalchemy", fake_sqlalchemy)
-
     for i, input_path in enumerate(input_paths):
         article = Article(
             title=f"title_{i}",
@@ -52,5 +45,4 @@ def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
     query = """SELECT COUNT(*) FROM ARTICLES"""
     (n_rows,) = bbs_database_session.execute(query).fetchone()
 
-    breakpoint()
     assert n_rows == n_files > 0

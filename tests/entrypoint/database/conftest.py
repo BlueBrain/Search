@@ -1,4 +1,5 @@
 import pathlib
+from unittest.mock import MagicMock
 
 import docker
 import pytest
@@ -88,9 +89,19 @@ def bbs_database_engine(tmp_path_factory, bbs_database_backend):
 
 
 @pytest.fixture(scope='function')
-def bbs_database_session(bbs_database_engine):
+def bbs_database_session(bbs_database_engine, monkeypatch):
     session = sessionmaker(bind=bbs_database_engine)()
+
+    fake_create_engine = MagicMock()
+
+    # Patch engine.connect() context manager
+    fake_create_engine().connect().__enter__.return_value = session
+
+    # Keep existing functionality
+    monkeypatch.setattr("bluesearch.entrypoint.database.add.sqlalchemy.create_engine", fake_create_engine)
+
     yield session
+
     session.flush()
     session.rollback()
     session.close()
