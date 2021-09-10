@@ -41,7 +41,7 @@ def bbs_database_backend(request):
 @pytest.fixture(scope="session")
 def bbs_database_engine(tmp_path_factory, bbs_database_backend):
     if bbs_database_backend == "sqlite":
-        db_path = tmp_path_factory.mktemp("db", numbered=False) / "bbs_database_test.db"
+        db_path = tmp_path_factory.mktemp("bbs_db", numbered=False) / "bbs_database_test.db"
         pathlib.Path(db_path).touch()
         engine = sqlalchemy.create_engine(f"sqlite:///{db_path}")
         fill_db(engine)
