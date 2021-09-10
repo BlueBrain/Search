@@ -22,7 +22,7 @@ from typing import List, Union
 import pandas as pd
 import pytest
 
-from bluesearch.database.identifiers import generate_uids
+from bluesearch.database.identifiers import generate_uid, generate_uids
 
 # Should be assigned different UIDs.
 
@@ -117,6 +117,29 @@ def clusters(df: pd.DataFrame, column: Union[str, int]) -> List[List[int]]:
 
 
 class TestClustering:
+    @pytest.mark.parametrize(
+        "identifiers, expected",
+        [
+            pytest.param(
+                ("a", "b"), "aca14e654bc28ce1c1e8131004244d64", id="without-none"
+            ),
+            pytest.param(
+                ("a", None), "4b515f920fbbc7954fc5a68bb746b109", id="with-none"
+            ),
+        ],
+    )
+    def test_generate_uid(self, identifiers, expected):
+        # By running this test several times and on different platforms during the CI,
+        # this test checks that 'generate_uid(...)' is deterministic across platforms
+        # and Python processes.
+
+        result = generate_uid(identifiers)
+        assert result == expected
+
+        # Check determinism.
+        result_bis = generate_uid(identifiers)
+        assert result == result_bis
+
     @pytest.mark.parametrize(
         "data",
         [
