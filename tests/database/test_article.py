@@ -1,9 +1,10 @@
 import inspect
 import pathlib
+import xml.etree.ElementTree
 from itertools import chain
-from xml.etree.ElementTree import ElementTree
 
 import pytest
+from defusedxml import ElementTree
 
 from bluesearch.database.article import (
     Article,
@@ -50,7 +51,7 @@ def pubmed_xml_parser(test_data_path):
 
 class TestPubmedXMLArticleParser:
     def test_init(self, pubmed_xml_parser):
-        assert isinstance(pubmed_xml_parser.content, ElementTree)
+        assert isinstance(pubmed_xml_parser.content, xml.etree.ElementTree.ElementTree)
 
     def test_title(self, pubmed_xml_parser):
         title = pubmed_xml_parser.title
@@ -91,6 +92,51 @@ class TestPubmedXMLArticleParser:
         assert paragraphs[0] == ("", "Paragraph 1")
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
         assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
+
+    @pytest.mark.parametrize(
+        ("input_xml", "expected_inner_text"),
+        (
+            ("<p>Simple paragraph.</p>", "Simple paragraph."),
+            ("<p>Nested <p>paragraph</p>.</p>", "Nested paragraph."),
+            (
+                "<p>Paragraph <italic>with</italic> some <bold>styles</bold>.</p>",
+                "Paragraph with some styles.",
+            ),
+            ("<p>Paragraph with &quot;escapes&#34;.</p>", 'Paragraph with "escapes".'),
+        ),
+    )
+    def test_inner_text_extraction(
+        self, pubmed_xml_parser, input_xml, expected_inner_text
+    ):
+        element = ElementTree.fromstring(input_xml)
+        inner_text = pubmed_xml_parser._inner_text(element)
+        assert inner_text == expected_inner_text
+
+    @pytest.mark.parametrize(
+        ("input_xml", "expected_str"),
+        (
+            ("<p>Simple paragraph.</p>", "Simple paragraph."),
+            ("<bold>Bold text</bold>", "Bold text"),
+            ("<italic>Italic text</italic>", "Italic text"),
+            ("<underline>Underlined text</underline>", "Underlined text"),
+            ("<monospace>Monospaced text</monospace>", "Monospaced text"),
+            ("<xref>Hawking20</xref>", "Hawking20"),
+            ("<sub>subbed</sub>", "_subbed"),
+            ("<sup>supped</sup>", "^supped"),
+            ("<inline-formula>Completely ignored</inline-formula>", "FORMULA"),
+            ("<disp-formula>Block formula</disp-formula>", "\nFORMULA-BLOCK"),
+            ("<ext-link>https://www.google.com</ext-link>", "URL"),
+            ("<uri>file:///path/to/file</uri>", "URL"),
+            ("<email>me@domain.ai</email>", "EMAIL"),
+        ),
+    )
+    def test_element_to_str_works(self, pubmed_xml_parser, input_xml, expected_str):
+        element = ElementTree.fromstring(input_xml)
+        element_str = pubmed_xml_parser._element_to_str(element)
+        assert element_str == expected_str
+
+    def test_element_to_str_of_none(self, pubmed_xml_parser):
+        assert pubmed_xml_parser._element_to_str(None) == ""
 
 
 class TestCORD19ArticleParser:
