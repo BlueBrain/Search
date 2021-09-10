@@ -17,12 +17,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import hashlib
 from typing import List, Tuple
 
 import pandas as pd
 
 
-def generate_uid(identifiers: Tuple) -> int:
+def generate_uid(identifiers: Tuple) -> str:
     """Generate a deterministic UID for the given identifiers.
 
     Parameters
@@ -35,7 +36,9 @@ def generate_uid(identifiers: Tuple) -> int:
     int
         A deterministic UID.
     """
-    return hash(identifiers)
+    data = str(identifiers).encode()
+    hashed = hashlib.md5(data).hexdigest()  # nosec
+    return hashed
 
 
 def generate_uids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFrame:
@@ -67,7 +70,7 @@ def generate_uids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFram
 
     # Generate a UID per paper group.
 
-    def _uid(x: pd.Series) -> int:
+    def _uid(x: pd.Series) -> str:
         values = tuple(x.to_list())
         uid = generate_uid(values)
         return uid
