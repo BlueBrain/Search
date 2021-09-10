@@ -9,50 +9,61 @@ from bluesearch.database.topic import (
 )
 
 
-@responses.activate
-def test_get_mesh_from_nlm_ta(test_data_path):
-    with open(test_data_path / "nlmcatalog_response.txt") as f:
-        body = f.read()
+class TestGetMeshFromNlmTa:
+    @pytest.mark.network
+    def test_real_request(self):
+        nlm_ta = "Trauma Surg Acute Care Open"
+        expected_descriptors = {"Critical Care", "Emergency Treatment", "Wounds and Injuries"}
 
-    responses.add(
-        responses.GET,
-        (
-            "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-            "term=Trauma Surg Acute Care Open[ta]&report=xml&format=text"
-        ),
-        body=body,
-    )
+        mesh = request_mesh_from_nlm_ta(nlm_ta)
 
-    expected_output = [
-        {
-            "descriptor": [
-                {"name": "Critical Care", "major_topic": False, "ID": "D003422"}
-            ],
-            "qualifiers": [],
-        },
-        {
-            "descriptor": [
-                {"name": "Emergency Treatment", "major_topic": False, "ID": "D004638"}
-            ],
-            "qualifiers": [],
-        },
-        {
-            "descriptor": [
-                {
-                    "name": "Wounds and Injuries",
-                    "major_topic": False,
-                    "ID": "D014947Q000517",
-                }
-            ],
-            "qualifiers": [
-                {"name": "prevention & control", "major_topic": False},
-                {"name": "surgery", "major_topic": True},
-            ],
-        },
-    ]
+        assert len(mesh) == 3
+        assert {item["descriptor"][0]["name"] for item in mesh} == expected_descriptors
 
-    mesh = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
-    assert mesh == expected_output
+    @responses.activate
+    def test_normal_behaviour_works(self, test_data_path):
+        with open(test_data_path / "nlmcatalog_response.txt") as f:
+            body = f.read()
+
+        responses.add(
+            responses.GET,
+            (
+                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
+                "term=Trauma Surg Acute Care Open[ta]&report=xml&format=text"
+            ),
+            body=body,
+        )
+
+        expected_output = [
+            {
+                "descriptor": [
+                    {"name": "Critical Care", "major_topic": False, "ID": "D003422"}
+                ],
+                "qualifiers": [],
+            },
+            {
+                "descriptor": [
+                    {"name": "Emergency Treatment", "major_topic": False, "ID": "D004638"}
+                ],
+                "qualifiers": [],
+            },
+            {
+                "descriptor": [
+                    {
+                        "name": "Wounds and Injuries",
+                        "major_topic": False,
+                        "ID": "D014947Q000517",
+                    }
+                ],
+                "qualifiers": [
+                    {"name": "prevention & control", "major_topic": False},
+                    {"name": "surgery", "major_topic": True},
+                ],
+            },
+        ]
+
+        mesh = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
+        assert mesh == expected_output
 
 
 @responses.activate
