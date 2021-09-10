@@ -8,35 +8,12 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
-@pytest.fixture()
-def engine_sqlite(tmpdir):
-    db_url = pathlib.Path(str(tmpdir)) / "database.db"
-    eng = sqlalchemy.create_engine(f"sqlite:///{db_url}")
-
-    # Schema
-    metadata = sqlalchemy.MetaData()
-    sqlalchemy.Table(
-        "articles",
-        metadata,
-        sqlalchemy.Column(
-            "article_id", sqlalchemy.Integer(), primary_key=True, autoincrement=True
-        ),
-        sqlalchemy.Column("title", sqlalchemy.Text()),
-    )
-
-    # Table
-    with eng.begin() as connection:
-        metadata.create_all(connection)
-
-    return eng
-
-
 def test_mysql_not_implemented():
     with pytest.raises(NotImplementedError):
         main(["add", "a", "b", "--db-type=mysql"])
 
 
-def test_sqlite_cord19(engine_sqlite, tmpdir):
+def test_sqlite_cord19(bbs_database_engine, tmpdir):
     input_folder = pathlib.Path(str(tmpdir))
     n_files = 3
 
@@ -54,7 +31,7 @@ def test_sqlite_cord19(engine_sqlite, tmpdir):
 
         args_and_opts = [
             "add",
-            engine_sqlite.url.database,
+            bbs_database_engine.url.database,
             str(input_path),
             "--db-type=sqlite",
         ]
@@ -62,7 +39,7 @@ def test_sqlite_cord19(engine_sqlite, tmpdir):
         main(args_and_opts)
 
     # Check
-    with engine_sqlite.begin() as connection:
+    with bbs_database_engine.begin() as connection:
         query = """SELECT COUNT(*) FROM ARTICLES"""
         (n_rows,) = connection.execute(query).fetchone()
 
