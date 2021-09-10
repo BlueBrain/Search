@@ -103,7 +103,10 @@ class TestPubmedXMLArticleParser:
                 "Paragraph with some styles.",
             ),
             ("<p>Paragraph with &quot;escapes&#34;.</p>", 'Paragraph with "escapes".'),
-            ("<p><p>Sub-tags</p> at beginning and <p>end</p>.</p>", "Sub-tags at beginning and end."),
+            (
+                "<p><p>Sub-tags</p> at beginning and <p>end</p>.</p>",
+                "Sub-tags at beginning and end.",
+            ),
         ),
     )
     def test_inner_text_extraction(
@@ -132,7 +135,7 @@ class TestPubmedXMLArticleParser:
             (
                 "<unknown-tag>Default: extract inner text.</unknown-tag>",
                 "Default: extract inner text.",
-            )
+            ),
         ),
     )
     def test_element_to_str_works(self, pubmed_xml_parser, input_xml, expected_str):
