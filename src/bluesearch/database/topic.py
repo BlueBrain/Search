@@ -15,9 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Utils for journal/articles topics."""
+from __future__ import annotations
+
 import html
 import pathlib
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Iterable
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -25,7 +27,7 @@ from defusedxml import ElementTree
 
 
 # Journal Topic
-def request_mesh_from_nlm_ta(nlm_ta: str) -> Optional[List[Dict[str, Union[str, List[str]]]]]:
+def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
 
     Parameters
@@ -35,7 +37,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> Optional[List[Dict[str, Union[str, 
 
     Returns
     -------
-    meshs : list of dict
+    meshs
         List containing all meshs of the Journal.
 
     Raises
@@ -105,7 +107,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> Optional[List[Dict[str, Union[str, 
 
 
 # Article Topic
-def request_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
+def request_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> dict:
     """Retrieve Medical Subject Headings from Pubmed ID.
 
     Parameters
@@ -152,7 +154,7 @@ def request_mesh_from_pubmed_id(pubmed_ids: Iterable[str]) -> Dict:
 
 
 # Utils
-def extract_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[str]:
+def extract_pubmed_id_from_pmc_file(path: str | pathlib.Path) -> str | None:
     """Retrieve Pubmed ID from PMC XML file.
 
     Parameters
@@ -173,7 +175,7 @@ def extract_pubmed_id_from_pmc_file(path: Union[str, pathlib.Path]) -> Optional[
         return pmid_tag.text
 
 
-def _parse_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _parse_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> list[dict]:
     """Retrieve Medical Subject Headings from nlmcatalog parsing.
 
     Parameters
@@ -215,7 +217,7 @@ def _parse_mesh_from_nlm_catalog(mesh_headings: Iterable[Element]) -> List[Dict]
     return meshs
 
 
-def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> List[Dict]:
+def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
     """Retrieve Medical Subject Headings from efetch pubmed parsing.
 
     Parameters
