@@ -107,6 +107,7 @@ class TestPubmedXMLArticleParser:
                 "<p><p>Sub-tags</p> at beginning and <p>end</p>.</p>",
                 "Sub-tags at beginning and end.",
             ),
+            ("<p>My email is <email>me@epfl.ch</email></p>", "My email is EMAIL"),
         ),
     )
     def test_inner_text_extraction(
