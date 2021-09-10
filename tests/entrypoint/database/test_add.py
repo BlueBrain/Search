@@ -1,5 +1,6 @@
 import pathlib
 import pickle
+from unittest.mock import MagicMock
 
 import pytest
 import sqlalchemy
@@ -16,12 +17,17 @@ def test_mysql_not_implemented():
 
 @pytest.mark.parametrize("a", [1, 2])
 def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
-    bbs_database_engine = bbs_database_session.get_bind()
+    # Patching
+    fake_create_engine = MagicMock()
+    fake_create_engine().connect().__enter__.return_value = bbs_database_session
+
+    monkeypatch.setattr("bluesearch.entrypoint.database.add.sqlalchemy.create_engine", fake_create_engine)
 
     input_folder = pathlib.Path(str(tmpdir))
     n_files = 3
 
     input_paths = [input_folder / f"{i}.pkl" for i in range(n_files)]
+
 
     for i, input_path in enumerate(input_paths):
         article = Article(
@@ -35,7 +41,7 @@ def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
 
         args_and_opts = [
             "add",
-            bbs_database_engine.url.database,
+            "some-database-url",
             str(input_path),
             "--db-type=sqlite",
         ]
