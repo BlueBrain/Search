@@ -145,9 +145,7 @@ def test_mp_real(
     tmpdir = pathlib.Path(str(tmpdir))
     fake_sqlalchemy = Mock()
     fake_sqlalchemy.create_engine.return_value = fake_sqlalchemy_engine
-    monkeypatch.setattr(
-        "bluesearch.entrypoint.embeddings.sqlalchemy", fake_sqlalchemy
-    )
+    monkeypatch.setattr("bluesearch.entrypoint.embeddings.sqlalchemy", fake_sqlalchemy)
 
     outfile = tmpdir / "output.h5"
     db_url = fake_sqlalchemy_engine.url
