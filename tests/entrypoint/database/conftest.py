@@ -3,6 +3,7 @@ import pathlib
 import docker
 import pytest
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 
 def fill_db(engine):
     metadata = sqlalchemy.MetaData()
@@ -88,8 +89,8 @@ def bbs_database_engine(tmp_path_factory, bbs_database_backend):
 
 @pytest.fixture(scope='function')
 def bbs_database_session(bbs_database_engine):
-    transaction = bbs_database_engine.begin()
-    session = sqlalchemy.orgm.sessionmaker()(bind=bbs_database_engine)
+    session = sessionmaker(bind=bbs_database_engine)()
     yield session
+    session.flush()
+    session.rollback()
     session.close()
-    transaction.rollback()

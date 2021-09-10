@@ -1,5 +1,6 @@
 import pathlib
 import pickle
+from unittest.mock import MagicMock
 
 import pytest
 import sqlalchemy
@@ -8,16 +9,26 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
+@pytest.mark.xfail
 def test_mysql_not_implemented():
     with pytest.raises(NotImplementedError):
         main(["add", "a", "b", "--db-type=mysql"])
 
 
-def test_sqlite_cord19(bbs_database_engine, tmpdir):
+@pytest.mark.parametrize("a", [1, 2])
+def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
+    bbs_database_engine = bbs_database_session.get_bind()
+
     input_folder = pathlib.Path(str(tmpdir))
     n_files = 3
 
     input_paths = [input_folder / f"{i}.pkl" for i in range(n_files)]
+
+    # Mocking and patching
+    fake_sqlalchemy = MagicMock()
+    fake_sqlalchemy.create_engine().connect().__enter__.return_value = bbs_database_session
+    fake_sqlalchemy.text = sqlalchemy.text
+    monkeypatch.setattr("bluesearch.entrypoint.database.add.sqlalchemy", fake_sqlalchemy)
 
     for i, input_path in enumerate(input_paths):
         article = Article(
@@ -35,12 +46,11 @@ def test_sqlite_cord19(bbs_database_engine, tmpdir):
             str(input_path),
             "--db-type=sqlite",
         ]
-
         main(args_and_opts)
 
     # Check
-    with bbs_database_engine.begin() as connection:
-        query = """SELECT COUNT(*) FROM ARTICLES"""
-        (n_rows,) = connection.execute(query).fetchone()
+    query = """SELECT COUNT(*) FROM ARTICLES"""
+    (n_rows,) = bbs_database_session.execute(query).fetchone()
 
+    breakpoint()
     assert n_rows == n_files > 0
