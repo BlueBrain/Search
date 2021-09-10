@@ -1,5 +1,8 @@
+import re
+
 import pytest
 import responses
+from defusedxml.ElementTree import ParseError
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
@@ -21,6 +24,7 @@ class TestGetMeshFromNlmTa:
 
         mesh = request_mesh_from_nlm_ta(nlm_ta)
 
+        assert mesh is not None
         assert len(mesh) == 3
         assert {item["descriptor"][0]["name"] for item in mesh} == expected_descriptors
 
@@ -72,6 +76,97 @@ class TestGetMeshFromNlmTa:
 
         mesh = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
         assert mesh == expected_output
+
+    def test_ampersands_are_flagged(self):
+        nlm_ta = "Title with &#x0201c;ampersands&#x0201d"
+        with pytest.raises(ValueError, match="Ampersands not allowed"):
+            request_mesh_from_nlm_ta(nlm_ta)
+
+    @responses.activate
+    def test_unexpected_response_doc_header_flagged(self):
+        responses.add(
+            responses.GET,
+            re.compile(""),
+            body="should start with a fixed header",
+        )
+        with pytest.raises(RuntimeError, match="Unexpected response"):
+            request_mesh_from_nlm_ta("Some title")
+
+    @responses.activate
+    def test_unexpected_response_doc_footer_flagged(self):
+        header = (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
+            "<pre>"
+        )
+        responses.add(
+            responses.GET,
+            re.compile(""),
+            body=f"{header}the footer is missing though",
+        )
+        with pytest.raises(RuntimeError, match="Unexpected response"):
+            request_mesh_from_nlm_ta("Some title")
+
+    @responses.activate
+    def test_no_nlm_ta_found_gives_none(self):
+        header = (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
+            "<pre>"
+        )
+        footer = "</pre>"
+        # Empty body means no results were found
+        body = ""
+
+        responses.add(
+            responses.GET,
+            re.compile(""),
+            body=f"{header}{body}{footer}",
+        )
+        mesh = request_mesh_from_nlm_ta("Some title")
+        assert mesh is None
+
+    @responses.activate
+    def test_invalid_xml_raises_correctly(self):
+        header = (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
+            "<pre>"
+        )
+        footer = "</pre>"
+        body = "<<invalid-xml>"
+
+        responses.add(
+            responses.GET,
+            re.compile(""),
+            body=f"{header}{body}{footer}",
+        )
+        with pytest.raises(ParseError, match="The parsing did not work"):
+            request_mesh_from_nlm_ta("Some title")
+
+    @responses.activate
+    def test_root_tag_is_checked(self):
+        header = (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
+            "<pre>"
+        )
+        footer = "</pre>"
+        body = "<wrong-root-tag>Should be NCBICatalogRecord.</wrong-root-tag>"
+
+        responses.add(
+            responses.GET,
+            re.compile(""),
+            body=f"{header}{body}{footer}",
+        )
+        with pytest.raises(
+            RuntimeError, match="Expected to find the NCBICatalogRecord tag"
+        ):
+            request_mesh_from_nlm_ta("Some title")
 
 
 @responses.activate
