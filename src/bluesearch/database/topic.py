@@ -25,7 +25,7 @@ from defusedxml import ElementTree
 
 
 # Journal Topic
-def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]]]]:
+def request_mesh_from_nlm_ta(nlm_ta: str) -> Optional[List[Dict[str, Union[str, List[str]]]]]:
     """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
 
     Parameters
@@ -47,14 +47,43 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
-    url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]&report=xml"
+    if "&" in nlm_ta:
+        raise ValueError(
+            "Ampersands not allowed in the NLM title abbreviation. "
+            f"Try unescaping HTML characters first. Got:\n{nlm_ta}"
+        )
+
+    # The "format=text" parameter only matters when no result was found. With
+    # this parameter the returned text will be an empty string. See the
+    # corresponding check further below. Without this parameter the output is
+    # an HTML page, which is impossible to parse.
+    base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
+    url = f"{base_url}?term={nlm_ta}[ta]&report=xml&format=text"
 
     response = requests.get(url)
     response.raise_for_status()
 
-    # The response is an escaped HTML format,
-    # we need to change some characters of the response to have a valid xml.
-    text = html.unescape(response.text)
+    # The way NCBI responds to these queries is weird: it takes the XML file,
+    # escapes all XML tags and wraps it into a pair of <pre> tag inside an HTML
+    # response with a fixed header
+    # So we need to check if the response is in exactly this form, strip away the
+    # HTML part, and unescape the XML tags.
+    text = response.text.strip()
+    header = (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+        '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
+        "<pre>"
+    )
+    footer = "</pre>"
+    if not text.startswith(header) or not text.endswith(footer):
+        raise RuntimeError(f"Unexpected response for query\n{url}")
+    text = html.unescape(text[len(header):-len(footer)]).strip()
+
+    # Empty text means topic abbreviation was not found. See comment about the
+    # parameter "format=text" above.
+    if text == "":
+        return None
 
     try:
         content = ElementTree.fromstring(text)
@@ -63,8 +92,12 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
         # It is the case for less than 1 % of the journal from PMC
         raise ElementTree.ParseError("The parsing did not work")
 
+    if not content.tag == "NCBICatalogRecord":
+        raise RuntimeError(
+            f"Expected to find the NCBICatalogRecord tag but got {content.tag}"
+        )
     mesh_headings = content.findall(
-        "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
+        "./NLMCatalogRecord/MeshHeadingList/MeshHeading"
     )
     meshs = _parse_mesh_from_nlm_catalog(mesh_headings)
 
