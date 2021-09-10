@@ -243,18 +243,13 @@ class PubmedXMLParser(ArticleParser):
         str
             The inner text and sub-elements converted to one single string.
         """
-        parts = []
-        text = html.unescape(element.text or "")
-        if text:
-            parts.append(text)
+        text_parts = [html.unescape(element.text or "")]
         for sub_element in element:
             # recursively parse the sub-element
-            parts.append(self._element_to_str(sub_element))
+            text_parts.append(self._element_to_str(sub_element))
             # don't forget the text after the sub-element
-            text = html.unescape(sub_element.tail or "")
-            if text:
-                parts.append(text)
-        return "".join(parts).strip()
+            text_parts.append(html.unescape(sub_element.tail or ""))
+        return "".join(text_parts).strip()
 
     def _element_to_str(self, element: Element | None) -> str:
         """Convert an element and all its contents to a string.
