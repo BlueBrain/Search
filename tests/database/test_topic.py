@@ -11,15 +11,16 @@ from bluesearch.database.topic import (
 
 @responses.activate
 def test_get_mesh_from_nlm_ta(test_data_path):
-
     with open(test_data_path / "nlmcatalog_response.txt") as f:
         body = f.read()
 
     responses.add(
         responses.GET,
-        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Trauma Surg Acute Care Open"
-        "[ta]report=xml",
-        body=body.encode("utf-8"),
+        (
+            "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
+            "term=Trauma Surg Acute Care Open[ta]&report=xml&format=text"
+        ),
+        body=body,
     )
 
     expected_output = [
@@ -50,19 +51,8 @@ def test_get_mesh_from_nlm_ta(test_data_path):
         },
     ]
 
-    meshs = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
-    assert isinstance(meshs, list)
-    assert len(meshs) == 3
-    assert meshs == expected_output
-
-    responses.add(
-        responses.GET,
-        "https://www.ncbi.nlm.nih.gov/nlmcatalog/?term=Wrong+Title[ta]report=xml",
-        status=404,
-    )
-
-    with pytest.raises(HTTPError):
-        request_mesh_from_nlm_ta("Wrong Title")
+    mesh = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
+    assert mesh == expected_output
 
 
 @responses.activate
