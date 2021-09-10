@@ -47,7 +47,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
-    url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]report=xml"
+    url = f"https://www.ncbi.nlm.nih.gov/nlmcatalog/?term={nlm_ta}[ta]&report=xml"
 
     response = requests.get(url)
     if not response.ok:
@@ -55,7 +55,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> List[Dict[str, Union[str, List[str]
 
     # The response is an escaped HTML format,
     # we need to change some characters of the response to have a valid xml.
-    text = html.unescape(response.content.decode())
+    text = html.unescape(response.text)
 
     try:
         content = ElementTree.fromstring(text)
