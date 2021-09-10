@@ -1,4 +1,4 @@
-"""Collection of tests focusing on the compute_embeddings entrypoint."""
+"""Collection of tests focusing on the embeddings entrypoint."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
@@ -146,7 +146,7 @@ def test_mp_real(
     fake_sqlalchemy = Mock()
     fake_sqlalchemy.create_engine.return_value = fake_sqlalchemy_engine
     monkeypatch.setattr(
-        "bluesearch.entrypoint.compute_embeddings.sqlalchemy", fake_sqlalchemy
+        "bluesearch.entrypoint.embeddings.sqlalchemy", fake_sqlalchemy
     )
 
     outfile = tmpdir / "output.h5"
