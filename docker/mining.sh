@@ -26,4 +26,4 @@ dvc_pull_models "$BBS_DATA_AND_MODELS_DIR"
 
 # Launch mining server
 pip install gunicorn
-gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint:get_mining_app()'
+gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 7200 'bluesearch.entrypoint.mining_server:get_mining_app()'

@@ -17,7 +17,22 @@
 """Abstraction of scientific article data and related tools."""
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Generator, Iterable, List, Sequence, Tuple, Type, TypeVar
+from pathlib import Path
+from typing import (
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
+from xml.etree.ElementTree import Element  # nosec
+
+from defusedxml import ElementTree
 
 # This is for annotating the return value of the Article.parse class method, see
 # https://github.com/python/typing/issues/254#issuecomment-661803922
@@ -71,6 +86,165 @@ class ArticleParser(ABC):
             For each paragraph a tuple with two strings is returned. The first
             is the section title, the second the paragraph content.
         """
+
+
+class PubmedXMLParser(ArticleParser):
+    """Parser for PubMed XML files using the JATS Journal Publishing DTD.
+
+    Parameters
+    ----------
+    path
+        The path to the XML file from PubMed.
+    """
+
+    def __init__(self, path: Union[str, Path]) -> None:
+        super().__init__()
+        self.content = ElementTree.parse(str(path))
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        titles = self.content.find(".//title-group/article-title")
+        return self.text_content(titles)
+
+    @property
+    def authors(self) -> Generator[str, None, None]:
+        """Get all author names.
+
+        Yields
+        ------
+        str
+            Every author, in the format "Given_Name(s) Surname".
+        """
+        authors = self.content.findall(
+            ".//contrib-group/contrib[@contrib-type='author']"
+        )
+        for author in authors:
+            given_names = self.text_content(author.find("name/given-names"))
+            surname = self.text_content(author.find("name/surname"))
+            if given_names == "" or surname == "":
+                # In rare cases, an author may not have a given name or a surname,
+                # e.g. it could be an organization. We decide to skip those.
+                continue
+            author_str = given_names + " " + surname
+            yield author_str.strip()
+
+    @property
+    def abstract(self) -> Generator[str, None, None]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Yields
+        ------
+        str
+            The paragraphs of the article abstract.
+        """
+        abstract_pars = self.content.findall(".//abstract//p")
+        for paragraph in abstract_pars:
+            yield self.text_content(paragraph)
+
+    @property
+    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Paragraphs can be parts of text body, or figure or table captions.
+
+        Yields
+        ------
+        section : str
+            The section title.
+        text : str
+            The paragraph content.
+        """
+        # Abstract are removed because already parsed in abstract property.
+        abstract_p = self.content.findall(".//abstract/p")
+        # Caption are removed because already parsed later in the current method
+        # with the section name "Caption".
+        caption_p = self.content.findall(".//caption/p")
+        # Acknowledgements are removed because not useful.
+        acknowledg_p = self.content.findall(".//ack/p")
+
+        exclude_list = abstract_p + caption_p + acknowledg_p
+
+        # Paragraphs of text body
+        section_dirs = self.get_paragraphs_sections_mapping()
+        for paragraph in self.content.findall(".//p"):
+            if paragraph not in exclude_list:
+                text = self.text_content(paragraph)
+                section_title = ""
+                if paragraph in section_dirs:
+                    section_title = section_dirs[paragraph]
+                yield section_title, text
+
+        # Figure captions
+        figs = self.content.findall(".//fig")
+        for fig in figs:
+            fig_captions = fig.findall("caption")
+            if fig_captions is None:
+                continue
+            caption = " ".join(self.text_content(c) for c in list(fig_captions))
+            yield "Figure Caption", caption
+
+        # Table captions
+        tables = self.content.findall(".//table-wrap")
+        for table in tables:
+            caption_elements = table.findall(".//caption/p") or table.findall(
+                ".//caption/title"
+            )
+            if caption_elements is None:
+                continue
+            caption = " ".join(self.text_content(c) for c in caption_elements)
+            yield "Table Caption", caption
+
+    def get_paragraphs_sections_mapping(self) -> Dict[Element, str]:
+        """Construct mapping between all paragraphs and their section name.
+
+        Returns
+        -------
+        mapping : dict
+            Dictionary whose keys are paragraphs and value are section title.
+        """
+        mapping = {}
+        for sec in self.content.findall(".//sec"):
+
+            section_title = ""
+            section_paragraphs = []
+
+            for element in sec:
+
+                if element.tag == "title":
+                    section_title = self.text_content(element)
+                elif element.tag == "p":
+                    section_paragraphs.append(element)
+
+            for paragraph in section_paragraphs:
+                mapping[paragraph] = section_title
+
+        return mapping
+
+    @staticmethod
+    def text_content(element: Optional[Element]) -> str:
+        """Extract all text of an element and of its descendants (at any depth).
+
+        Parameters
+        ----------
+        element : etree._Element or None
+            XML element to parse.
+
+        Returns
+        -------
+        str
+            Entire text of the element and its descendants.
+        """
+        if element is None:
+            return ""
+        else:
+            return "".join(element.itertext()).strip()
 
 
 class CORD19ArticleParser(ArticleParser):
@@ -168,7 +342,7 @@ class CORD19ArticleParser(ArticleParser):
             yield "Caption", ref_entry["text"]
 
     def __str__(self):
-        """Get the string representation the the parser instance."""
+        """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 

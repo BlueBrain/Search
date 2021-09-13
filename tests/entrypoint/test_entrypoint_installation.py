@@ -1,4 +1,4 @@
-"""Embedding and Mining Databases."""
+"""Tests covering entrypoint installation."""
 
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
@@ -16,3 +16,23 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+import subprocess
+
+import pytest
+
+
+@pytest.mark.parametrize(
+    "entrypoint_name",
+    [
+        "bbs_database",
+        "compute_embeddings",
+        "create_database",
+        "create_mining_cache",
+        "embedding_server",
+        "mining_server",
+        "search_server",
+    ],
+)
+def test_entrypoint(entrypoint_name):
+    subprocess.check_call([entrypoint_name, "--help"])
