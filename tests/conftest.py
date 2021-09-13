@@ -46,7 +46,7 @@ with warnings.catch_warnings():
     )
     import docker
 
-ROOT_PATH = Path(__file__).resolve().parent.parent
+ROOT_PATH = Path(__file__).resolve().parent.parent  # root of the repository
 CORD19_SAMPLE_PATH = ROOT_PATH / "tests" / "data" / "cord19_v35"
 CORD19_SAMPLE_ALL_JSON_PATHS = sorted(CORD19_SAMPLE_PATH.rglob("*.json"))
 
