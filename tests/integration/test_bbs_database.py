@@ -1,8 +1,8 @@
 import pathlib
-import pytest
 import time
 
 import docker
+import pytest
 import sqlalchemy
 from sqlalchemy.exc import OperationalError
 
