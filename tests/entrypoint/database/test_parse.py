@@ -21,6 +21,7 @@ def test_unknown_article_type():
     assert isinstance(context, ArgumentError)
     assert f"invalid choice: '{wrong_type}'" in str(context)
 
+
 def test_cord19(jsons_path, tmpdir):
     # Create a dummy database
     all_input_paths = sorted(jsons_path.rglob("*.json"))
