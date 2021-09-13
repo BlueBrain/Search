@@ -1,6 +1,5 @@
 import pathlib
 import pytest
-from typing import Optional
 import time
 
 import docker

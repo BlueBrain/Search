@@ -1,7 +1,5 @@
 import pathlib
 
-import pytest
-
 from bluesearch.entrypoint.database.parent import main
 
 
