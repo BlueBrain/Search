@@ -62,6 +62,45 @@ def run(
     with open(path, "rb") as f:
         article = pickle.load(f)  # nosec
 
+    # Article table.
+
+    articles_mapping = {
+        "title": article.title,
+        "authors": ", ".join(article.authors),
+        "abstract": "\n".join(article.abstract),
+    }
+    articles_keys = articles_mapping.keys()
+    articles_fields = ", ".join(articles_keys)
+    articles_binds = f":{', :'.join(articles_keys)}"
+
     with engine.connect() as con:
-        query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
-        con.execute(query, {"title": article.title})
+        query = sqlalchemy.text(
+            f"INSERT INTO articles({articles_fields}) VALUES({articles_binds})"
+        )
+        con.execute(query, articles_mapping)
+
+    article_id = 1  # FIXME
+
+    # Sentence table.
+
+    mappings = []
+    for position, (section, text) in enumerate(article.section_paragraphs):
+        sentences_mapping = {
+            "section_name": section,
+            "text": text,
+            "article_id": article_id,
+            "paragraph_pos_in_article": position,
+            "sentence_pos_in_paragraph": 1,  # FIXME
+        }
+        mappings.append(sentences_mapping)
+
+    sentences_keys = sentences_mapping.keys()
+    sentences_fields = ", ".join(sentences_keys)
+    sentences_binds = f":{', :'.join(sentences_keys)}"
+
+    with engine.connect() as con:
+        for mapping in mappings:
+            query = sqlalchemy.text(
+                f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
+            )
+            con.execute(query, mapping)
