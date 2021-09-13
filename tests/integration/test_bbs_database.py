@@ -86,7 +86,7 @@ def test_bbs_database(tmpdir, setup_backend, jsons_path):
     for input_path in all_input_paths:
         args_and_opts_parse = [
             "parse",
-            "CORD19ArticleParser",
+            "cord19-json",
             str(input_path),
             str(parsed_files_dir / f"{input_path.stem}.pkl"),
         ]
