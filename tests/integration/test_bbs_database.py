@@ -110,6 +110,6 @@ def test_bbs_database(tmpdir, setup_backend, jsons_path):
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
 
     query = "SELECT COUNT(*) FROM articles"
-    (n_rows,) = engine.execute(query).fetchone()
+    (n_rows,) = engine.execute(query).fetchone()  # type: ignore
 
     assert n_rows == n_files > 0
