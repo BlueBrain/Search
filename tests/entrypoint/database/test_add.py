@@ -31,11 +31,6 @@ def engine_sqlite(tmpdir):
     return eng
 
 
-def test_mysql_not_implemented():
-    with pytest.raises(NotImplementedError):
-        main(["add", "a", "b", "--db-type=mysql"])
-
-
 def test_sqlite_cord19(engine_sqlite, tmpdir):
     input_folder = pathlib.Path(str(tmpdir))
     n_files = 3
