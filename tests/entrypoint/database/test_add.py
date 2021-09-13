@@ -9,12 +9,6 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
-@pytest.mark.xfail
-def test_mysql_not_implemented():
-    with pytest.raises(NotImplementedError):
-        main(["add", "a", "b", "--db-type=mysql"])
-
-
 @pytest.mark.parametrize("a", [1, 2])
 def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
     # Patching
