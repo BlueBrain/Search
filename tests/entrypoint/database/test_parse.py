@@ -1,5 +1,6 @@
 import pathlib
 import pickle
+from argparse import ArgumentError
 
 import pytest
 
@@ -7,9 +8,18 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
-def test_unknown_parser():
-    with pytest.raises(ValueError, match="Unsupported parser"):
-        main(["parse", "WrongParser", "path_to_input", "path_to_output"])
+def test_unknown_article_type():
+    wrong_type = "wrong-type"
+
+    with pytest.raises(SystemExit) as exc_info:
+        main(["parse", wrong_type, "path_to_input", "path_to_output"])
+
+    # argparse exists with error 2, so we need to "unpack" the exception
+    exc = exc_info.value
+    context = exc.__context__
+    assert exc.code == 2
+    assert isinstance(context, ArgumentError)
+    assert f"invalid choice: '{wrong_type}'" in str(context)
 
 
 def test_cord19(jsons_path, tmpdir):
@@ -22,7 +32,7 @@ def test_cord19(jsons_path, tmpdir):
     for input_path in all_input_paths:
         args_and_opts = [
             "parse",
-            "CORD19ArticleParser",
+            "cord19-json",
             str(input_path),
             str(output_folder / input_path.name),
         ]
