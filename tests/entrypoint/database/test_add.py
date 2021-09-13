@@ -1,6 +1,5 @@
 import pathlib
 import pickle
-from unittest.mock import MagicMock
 
 import pytest
 import sqlalchemy
@@ -9,19 +8,39 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
-@pytest.mark.parametrize("a", [1, 2])
-def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
-    # Patching
-    fake_create_engine = MagicMock()
-    fake_create_engine().connect().__enter__.return_value = bbs_database_session
+@pytest.fixture()
+def engine_sqlite(tmpdir):
+    db_url = pathlib.Path(str(tmpdir)) / "database.db"
+    eng = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
-    monkeypatch.setattr("bluesearch.entrypoint.database.add.sqlalchemy.create_engine", fake_create_engine)
+    # Schema
+    metadata = sqlalchemy.MetaData()
+    sqlalchemy.Table(
+        "articles",
+        metadata,
+        sqlalchemy.Column(
+            "article_id", sqlalchemy.Integer(), primary_key=True, autoincrement=True
+        ),
+        sqlalchemy.Column("title", sqlalchemy.Text()),
+    )
 
+    # Table
+    with eng.begin() as connection:
+        metadata.create_all(connection)
+
+    return eng
+
+
+def test_mysql_not_implemented():
+    with pytest.raises(NotImplementedError):
+        main(["add", "a", "b", "--db-type=mysql"])
+
+
+def test_sqlite_cord19(engine_sqlite, tmpdir):
     input_folder = pathlib.Path(str(tmpdir))
     n_files = 3
 
     input_paths = [input_folder / f"{i}.pkl" for i in range(n_files)]
-
 
     for i, input_path in enumerate(input_paths):
         article = Article(
@@ -35,14 +54,16 @@ def test_sqlite_cord19(bbs_database_session, tmpdir, monkeypatch, a):
 
         args_and_opts = [
             "add",
-            "some-database-url",
+            engine_sqlite.url.database,
             str(input_path),
             "--db-type=sqlite",
         ]
+
         main(args_and_opts)
 
     # Check
-    query = """SELECT COUNT(*) FROM articles"""
-    (n_rows,) = bbs_database_session.execute(query).fetchone()
+    with engine_sqlite.begin() as connection:
+        query = """SELECT COUNT(*) FROM ARTICLES"""
+        (n_rows,) = connection.execute(query).fetchone()
 
     assert n_rows == n_files > 0
