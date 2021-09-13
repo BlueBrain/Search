@@ -19,8 +19,7 @@ def test_unknown_article_type():
     context = exc.__context__
     assert exc.code == 2
     assert isinstance(context, ArgumentError)
-    assert f"invalid choice: '{wrong_type}'" in context.args[1]
-
+    assert f"invalid choice: '{wrong_type}'" in str(context)
 
 def test_cord19(jsons_path, tmpdir):
     # Create a dummy database
