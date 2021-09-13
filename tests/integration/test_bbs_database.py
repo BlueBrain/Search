@@ -9,6 +9,9 @@ from sqlalchemy.exc import OperationalError
 
 from bluesearch.entrypoint.database.parent import main
 
+ROOT_PATH = pathlib.Path(__file__).resolve().parent.parent.parent
+CORD19_SAMPLE_PATH = ROOT_PATH / "tests" / "data" / "cord19_v35"
+
 
 @pytest.fixture(params=["sqlite", "mysql"])
 def setup_backend(request, tmpdir):
@@ -64,14 +67,15 @@ def setup_backend(request, tmpdir):
         raise ValueError
 
 
-def test_bbs_database(tmpdir, jsons_path, setup_backend):
+def test_bbs_database(tmpdir, setup_backend):
     # Parameters
     db_type, db_url = setup_backend
-    temp_path = pathlib.Path(str(tmpdir))
 
+    temp_path = pathlib.Path(str(tmpdir))
     parsed_files_dir = temp_path / "parsed"
     parsed_files_dir.mkdir()
-    all_input_paths = sorted(jsons_path.rglob("*.json"))
+
+    all_input_paths = sorted(CORD19_SAMPLE_PATH.rglob("*.json"))
     n_files = len(all_input_paths)
 
     # Initialization
@@ -112,4 +116,4 @@ def test_bbs_database(tmpdir, jsons_path, setup_backend):
     query = "SELECT COUNT(*) FROM articles"
     (n_rows,) = engine.execute(query).fetchone()
 
-    assert n_rows == n_files
+    assert n_rows == n_files > 0
