@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| research of topic at journal and article levels in :code:`topic` module.
 - |Add| :code:`PubmedXMLParser` to parse PubMed articles in XML JATS format.
 
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
