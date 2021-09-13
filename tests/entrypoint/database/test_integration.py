@@ -60,7 +60,6 @@ def setup_backend(request, tmpdir):
         container.kill()
         client.close()
 
-
     else:
         raise ValueError
 
@@ -109,7 +108,6 @@ def test_bbs_database(tmpdir, jsons_path, setup_backend):
 
     elif db_type == "mysql":
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
-
 
     query = "SELECT COUNT(*) FROM articles"
     (n_rows,) = engine.execute(query).fetchone()
