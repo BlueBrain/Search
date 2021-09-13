@@ -33,7 +33,7 @@ def generate_uid(identifiers: Tuple) -> str:
 
     Returns
     -------
-    int
+    str
         A deterministic UID.
     """
     data = str(identifiers).encode()
@@ -75,6 +75,6 @@ def generate_uids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFram
         uid = generate_uid(values)
         return uid
 
-    metadata["uid"] = df[identifiers].apply(_uid, axis=1)
+    df["uid"] = df[identifiers].apply(_uid, axis=1)
 
-    return metadata
+    return df
