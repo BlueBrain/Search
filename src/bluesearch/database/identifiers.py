@@ -17,14 +17,20 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import hashlib
-from typing import List, Tuple
-
-import pandas as pd
 
 
-def generate_uid(identifiers: Tuple) -> str:
-    """Generate a deterministic UID for the given identifiers.
+def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
+    """Generate a deterministic UID for the given paper identifiers.
+
+    Papers with the same values for the given identifiers get the same UID.
+
+    Missing values should have the value 'None', which is considered a value by itself.
+    Then, identifiers (a, None) and identifiers (a, b) have two different UIDs.
+
+    Papers with all given identifiers unspecified have 'None' as UID.
 
     Parameters
     ----------
@@ -33,48 +39,12 @@ def generate_uid(identifiers: Tuple) -> str:
 
     Returns
     -------
-    str
-        A deterministic UID.
+    str or None
+        A deterministic UID. The value is 'None' if all given identifiers are 'None'.
     """
-    data = str(identifiers).encode()
-    hashed = hashlib.md5(data).hexdigest()  # nosec
-    return hashed
-
-
-def generate_uids(metadata: pd.DataFrame, identifiers: List[str]) -> pd.DataFrame:
-    """Generate UIDs for papers with multiple sources, identifiers.
-
-    Papers with the same values for the given identifiers get the same UID.
-
-    Missing values should have the value 'None', which is considered a value by itself.
-    Then, identifiers (a, None) and identifiers (a, b) have two different UIDs.
-    Papers with all given identifiers unspecified have 'None' as UID.
-
-    The generation of the UID is deterministic.
-
-    Parameters
-    ----------
-    metadata
-        Paper metadata including the given identifiers.
-    identifiers
-        Columns of the identifiers.
-
-    Returns
-    -------
-    pandas.DataFrame
-        Paper metadata with a new column with the generated UIDs.
-    """
-    # Ignore papers without values for the given identifiers.
-
-    df = metadata.dropna(how="all", subset=identifiers)
-
-    # Generate a UID per paper group.
-
-    def _uid(x: pd.Series) -> str:
-        values = tuple(x.to_list())
-        uid = generate_uid(values)
-        return uid
-
-    df["uid"] = df[identifiers].apply(_uid, axis=1)
-
-    return df
+    if all(x is None for x in identifiers):
+        return None
+    else:
+        data = str(identifiers).encode()
+        hashed = hashlib.md5(data).hexdigest()  # nosec
+        return hashed
