@@ -41,6 +41,7 @@ Latest
 - |Add| :code:`BioBERT NLI+STS CORD-19 v1` building script as a DVC pipeline.
 - |Fix| the incorrect maximum input length to the transformer model used as
   backbone for the sentence embedding model :code:`BioBERT NLI+STS CORD-19 v1`.
+- |Add| deterministic generation of paper UIDs based on paper identifiers.
 
 
 Version 0.2.0

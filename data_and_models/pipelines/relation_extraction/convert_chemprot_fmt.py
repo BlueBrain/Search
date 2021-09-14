@@ -333,7 +333,7 @@ def main(argv=None):
         all_relations = df_sentences["relation"].unique()
         for relation in all_relations:
             df_binary = df_sentences[["sentence", "relation"]].copy()
-            df_binary["relation"] = cast(pd.Series, df_binary["relation"]).apply(
+            df_binary["relation"] = df_binary["relation"].apply(
                 lambda r: 1 if r == relation else 0
             )
             df_binary.to_csv(
