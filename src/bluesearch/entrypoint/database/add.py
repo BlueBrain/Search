@@ -4,6 +4,8 @@ import pickle  # nosec
 
 import sqlalchemy
 
+from bluesearch.database.identifiers import generate_uid
+
 
 def get_parser() -> argparse.ArgumentParser:
     """Create a parser."""
@@ -64,7 +66,11 @@ def run(
 
     # Article table.
 
+    # TODO At the moment, no identifiers are extracted. This is a patch waiting for it.
+    article_id = generate_uid((article.title,))
+
     articles_mapping = {
+        "article_id": article_id,
         "title": article.title,
         "authors": ", ".join(article.authors),
         "abstract": "\n".join(article.abstract),
@@ -78,8 +84,6 @@ def run(
             f"INSERT INTO articles({articles_fields}) VALUES({articles_binds})"
         )
         con.execute(query, articles_mapping)
-
-    article_id = 1  # FIXME
 
     # Sentence table.
 

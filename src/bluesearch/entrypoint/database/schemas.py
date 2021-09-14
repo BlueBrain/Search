@@ -24,6 +24,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     MetaData,
+    String,
     Table,
     Text,
     UniqueConstraint,
@@ -35,7 +36,7 @@ def schema_articles(metadata: MetaData) -> None:
     Table(
         "articles",
         metadata,
-        Column("article_id", Integer(), primary_key=True, autoincrement=True),
+        Column("article_id", String(32), primary_key=True),
         Column("doi", Text()),
         Column("pmc_id", Text()),
         Column("pubmed_id", Text()),
