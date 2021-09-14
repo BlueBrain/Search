@@ -5,6 +5,7 @@ import pickle  # nosec
 import sqlalchemy
 
 from bluesearch.database.identifiers import generate_uid
+from bluesearch.utils import load_spacy_model
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -69,42 +70,45 @@ def run(
     # TODO At the moment, no identifiers are extracted. This is a patch waiting for it.
     article_id = generate_uid((article.title,))
 
-    articles_mapping = {
+    article_mapping = {
         "article_id": article_id,
         "title": article.title,
         "authors": ", ".join(article.authors),
         "abstract": "\n".join(article.abstract),
     }
-    articles_keys = articles_mapping.keys()
-    articles_fields = ", ".join(articles_keys)
-    articles_binds = f":{', :'.join(articles_keys)}"
+    article_keys = article_mapping.keys()
+    article_fields = ", ".join(article_keys)
+    article_binds = f":{', :'.join(article_keys)}"
 
     with engine.connect() as con:
         query = sqlalchemy.text(
-            f"INSERT INTO articles({articles_fields}) VALUES({articles_binds})"
+            f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
         )
-        con.execute(query, articles_mapping)
+        con.execute(query, article_mapping)
 
     # Sentence table.
 
-    mappings = []
-    for position, (section, text) in enumerate(article.section_paragraphs):
-        sentences_mapping = {
-            "section_name": section,
-            "text": text,
-            "article_id": article_id,
-            "paragraph_pos_in_article": position,
-            "sentence_pos_in_paragraph": 1,  # FIXME
-        }
-        mappings.append(sentences_mapping)
+    sentence_mappings = []
+    swapped = ((text, section) for section, text in article.section_paragraphs)
+    nlp = load_spacy_model("en_core_sci_lg", disable=["tagger", "ner"])
+    for pposition, (document, section) in enumerate(nlp.pipe(swapped, as_tuples=True)):
+        for sposition, sentence in enumerate(document.sents):
+            sentence_mapping = {
+                "section_name": section,
+                "text": sentence.text,
+                "article_id": article_id,
+                "paragraph_pos_in_article": pposition,
+                "sentence_pos_in_paragraph": sposition,
+            }
+        sentence_mappings.append(sentence_mapping)
 
-    sentences_keys = sentences_mapping.keys()
+    sentences_keys = sentence_mapping.keys()
     sentences_fields = ", ".join(sentences_keys)
     sentences_binds = f":{', :'.join(sentences_keys)}"
 
     with engine.connect() as con:
-        for mapping in mappings:
+        for sentence_mapping in sentence_mappings:
             query = sqlalchemy.text(
                 f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
             )
-            con.execute(query, mapping)
+            con.execute(query, sentence_mapping)
