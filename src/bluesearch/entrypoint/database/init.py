@@ -3,6 +3,8 @@ import argparse
 
 import sqlalchemy
 
+from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
+
 
 def get_parser() -> argparse.ArgumentParser:
     """Create a parser."""
@@ -55,54 +57,8 @@ def run(
     metadata = sqlalchemy.MetaData()
 
     # Creation of the schema of the tables
-    sqlalchemy.Table(
-        "articles",
-        metadata,
-        sqlalchemy.Column(
-            "article_id", sqlalchemy.Integer(), primary_key=True, autoincrement=True
-        ),
-        sqlalchemy.Column("doi", sqlalchemy.Text()),
-        sqlalchemy.Column("pmc_id", sqlalchemy.Text()),
-        sqlalchemy.Column("pubmed_id", sqlalchemy.Text()),
-        sqlalchemy.Column("title", sqlalchemy.Text()),
-        sqlalchemy.Column("authors", sqlalchemy.Text()),
-        sqlalchemy.Column("abstract", sqlalchemy.Text()),
-        sqlalchemy.Column("journal", sqlalchemy.Text()),
-        sqlalchemy.Column("publish_time", sqlalchemy.Date()),
-        sqlalchemy.Column("license", sqlalchemy.Text()),
-        sqlalchemy.Column("is_english", sqlalchemy.Boolean()),
-    )
-    sqlalchemy.Table(
-        "sentences",
-        metadata,
-        sqlalchemy.Column(
-            "sentence_id",
-            sqlalchemy.Integer(),
-            primary_key=True,
-            autoincrement=True,
-        ),
-        sqlalchemy.Column("section_name", sqlalchemy.Text()),
-        sqlalchemy.Column("text", sqlalchemy.Text()),
-        sqlalchemy.Column(
-            "article_id",
-            sqlalchemy.Integer(),
-            sqlalchemy.ForeignKey("articles.article_id"),
-            nullable=False,
-        ),
-        sqlalchemy.Column(
-            "paragraph_pos_in_article", sqlalchemy.Integer(), nullable=False
-        ),
-        sqlalchemy.Column(
-            "sentence_pos_in_paragraph", sqlalchemy.Integer(), nullable=False
-        ),
-        sqlalchemy.UniqueConstraint(
-            "article_id",
-            "paragraph_pos_in_article",
-            "sentence_pos_in_paragraph",
-            name="sentence_unique_identifier",
-        ),
-        sqlalchemy.Column("is_bad", sqlalchemy.Boolean(), server_default="0"),
-    )
+    schema_articles(metadata)
+    schema_sentences(metadata)
 
     # Construction
     with engine.begin() as connection:

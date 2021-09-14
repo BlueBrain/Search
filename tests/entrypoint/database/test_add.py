@@ -6,6 +6,7 @@ import sqlalchemy
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
+from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
 
 
 @pytest.fixture()
@@ -15,14 +16,8 @@ def engine_sqlite(tmpdir):
 
     # Schema
     metadata = sqlalchemy.MetaData()
-    sqlalchemy.Table(
-        "articles",
-        metadata,
-        sqlalchemy.Column(
-            "article_id", sqlalchemy.Integer(), primary_key=True, autoincrement=True
-        ),
-        sqlalchemy.Column("title", sqlalchemy.Text()),
-    )
+    schema_articles(metadata)
+    schema_sentences(metadata)
 
     # Table
     with eng.begin() as connection:
