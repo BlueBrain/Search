@@ -86,7 +86,7 @@ def run(
     for inp in inputs:
         parser_inst: ArticleParser
         if article_type == "cord19-json":
-            with inp.open("r") as f_inp:
+            with inp.open() as f_inp:
                 parser_inst = CORD19ArticleParser(json.load(f_inp))
         elif article_type == "pmc-xml":
             parser_inst = PubmedXMLParser(inp)
