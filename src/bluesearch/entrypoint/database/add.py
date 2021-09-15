@@ -1,6 +1,24 @@
-"""Adding an article to the database."""
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Adding articles to the database."""
 import argparse
 import pickle  # nosec
+from pathlib import Path
+from typing import Iterable
 
 import sqlalchemy
 
@@ -24,9 +42,9 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
-        "path",
-        type=str,
-        help="""Path to the parsed file.""",
+        "parsed_path",
+        type=Path,
+        help="Path to a parsed file or to a directory of parsed files.",
     )
     parser.add_argument(
         "--db-type",
@@ -41,7 +59,7 @@ def get_parser() -> argparse.ArgumentParser:
 def run(
     *,
     db_url: str,
-    path: str,
+    parsed_path: Path,
     db_type: str,
 ) -> None:
     """Add an entry to the database.
@@ -59,9 +77,22 @@ def run(
         # This branch never reached because of `choices` in `argparse`
         raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
 
-    with open(path, "rb") as f:
-        article = pickle.load(f)  # nosec
+    inputs: Iterable[Path]
+    if parsed_path.is_file():
+        inputs = [parsed_path]
+    elif parsed_path.is_dir():
+        inputs = parsed_path.glob("*")
+    else:
+        raise ValueError(
+            "Argument 'parsed_path' should be a path to an existing file or directory!"
+        )
+
+    titles = []
+    for inp in inputs:
+        with inp.open("rb") as f:
+            article = pickle.load(f)  # nosec
+        titles.append({"title": article.title})
 
     with engine.connect() as con:
         query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
-        con.execute(query, {"title": article.title})
+        con.execute(query, *titles)

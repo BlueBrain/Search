@@ -1,4 +1,3 @@
-import pathlib
 import pickle
 from argparse import ArgumentError
 
@@ -22,30 +21,53 @@ def test_unknown_article_type():
     assert f"invalid choice: '{wrong_type}'" in str(context)
 
 
-def test_cord19(jsons_path, tmpdir):
-    # Create a dummy database
-    all_input_paths = sorted(jsons_path.rglob("*.json"))
-    output_folder = pathlib.Path(str(tmpdir))
+def test_cord19_json(jsons_path, tmp_path):
+    path_to_json = jsons_path / "document_parses" / "pmc_json"
+    json_files = sorted(path_to_json.glob("*.json"))
+    assert len(json_files) > 0
 
-    n_articles = len(all_input_paths)
-
-    for input_path in all_input_paths:
+    # Test parsing single file
+    for i, inp_file in enumerate(json_files):
+        out_dir = tmp_path / str(i)
         args_and_opts = [
             "parse",
             "cord19-json",
-            str(input_path),
-            str(output_folder / input_path.name),
+            str(inp_file),
+            str(out_dir),
         ]
-
         main(args_and_opts)
+        out_files = list(out_dir.glob("*"))
 
-    # Check
-    output_paths = list(output_folder.iterdir())
-    n_files = len(output_paths)
-
-    assert n_files == n_articles > 0
-
-    for output_path in output_paths:
-        with open(output_path, "rb") as f:
+        assert len(out_files) == 1
+        assert out_files[0].name == inp_file.stem + ".pkl"
+        with out_files[0].open("rb") as f:
             loaded_article = pickle.load(f)
             assert isinstance(loaded_article, Article)
+
+    # Test parsing multiple files
+    out_dir = tmp_path / "all"
+    args_and_opts = [
+        "parse",
+        "cord19-json",
+        str(path_to_json),
+        str(out_dir),
+    ]
+    main(args_and_opts)
+    out_files = sorted(out_dir.glob("*"))
+
+    assert len(out_files) == len(json_files)
+    for inp_file, out_file in zip(json_files, out_files):
+        assert out_file.name == inp_file.stem + ".pkl"
+        with out_file.open("rb") as f:
+            loaded_article = pickle.load(f)
+            assert isinstance(loaded_article, Article)
+
+    # Test parsing something that doesn't exist
+    with pytest.raises(ValueError):
+        args_and_opts = [
+            "parse",
+            "cord19-json",
+            str(path_to_json / "dir_that_does_not_exists"),
+            str(out_dir),
+        ]
+        main(args_and_opts)
