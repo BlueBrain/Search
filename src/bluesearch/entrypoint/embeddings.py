@@ -26,7 +26,11 @@ from typing import Optional
 import numpy as np
 import sqlalchemy
 
-from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
+from bluesearch.entrypoint._helper import (
+    CombinedHelpFormatter,
+    configure_logging,
+    parse_args_or_environment,
+)
 
 
 def run_compute_embeddings(argv=None):
@@ -177,7 +181,7 @@ def run_compute_embeddings(argv=None):
 
     # Imports (they are here to make --help quick)
     logger.info("Loading libraries")
-    from ..embedding_models import MPEmbedder
+    from bluesearch.embedding_models import MPEmbedder
 
     # Database related
     logger.info("SQL Alchemy Engine creation ....")

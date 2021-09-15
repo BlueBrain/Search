@@ -23,8 +23,8 @@ import textwrap
 
 import pandas as pd
 
-from .._css import style
-from ..sql import (
+from bluesearch._css import style
+from bluesearch.sql import (
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
     retrieve_paragraph,

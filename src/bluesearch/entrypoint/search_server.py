@@ -23,13 +23,13 @@ import sys
 
 import sqlalchemy
 
-from ._helper import configure_logging, get_var, run_server
+from bluesearch.entrypoint._helper import configure_logging, get_var, run_server
 
 
 def get_search_app():
     """Construct the search flask app."""
-    from ..server.search_server import SearchServer
-    from ..utils import H5
+    from bluesearch.server.search_server import SearchServer
+    from bluesearch.utils import H5
 
     # Read configuration
     log_file = get_var("BBS_SEARCH_LOG_FILE", check_not_set=False)

@@ -20,7 +20,7 @@
 import pandas as pd
 import spacy
 
-from .relation import REModel, annotate
+from bluesearch.mining.relation import REModel, annotate
 
 SPECS = [
     "entity",

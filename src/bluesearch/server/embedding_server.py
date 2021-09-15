@@ -24,8 +24,7 @@ import textwrap
 from flask import Flask, jsonify, make_response, request
 
 import bluesearch
-
-from .invalid_usage_exception import InvalidUsage
+from bluesearch.server.invalid_usage_exception import InvalidUsage
 
 
 class EmbeddingServer(Flask):

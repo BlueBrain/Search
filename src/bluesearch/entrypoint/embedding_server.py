@@ -20,13 +20,13 @@
 import logging
 import sys
 
-from ..embedding_models import get_embedding_model
-from ._helper import configure_logging, get_var, run_server
+from bluesearch.embedding_models import get_embedding_model
+from bluesearch.entrypoint._helper import configure_logging, get_var, run_server
 
 
 def get_embedding_app():
     """Construct the embedding flask app."""
-    from ..server.embedding_server import EmbeddingServer
+    from bluesearch.server.embedding_server import EmbeddingServer
 
     # Read configuration
     log_file = get_var("BBS_EMBEDDING_LOG_FILE", check_not_set=False)

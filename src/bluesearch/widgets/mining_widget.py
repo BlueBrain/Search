@@ -26,8 +26,8 @@ import pandas as pd
 import requests
 from IPython.display import HTML, display
 
-from .._css import style
-from ..utils import Timer
+from bluesearch._css import style
+from bluesearch.utils import Timer
 
 DEFAULT_MINING_TEXT = """Autophagy maintains tumour growth through circulating
  arginine. Autophagy captures intracellular components and delivers them to

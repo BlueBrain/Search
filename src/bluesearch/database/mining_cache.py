@@ -27,9 +27,9 @@ from typing import Dict, List
 import sqlalchemy
 import torch
 
-from ..mining.pipeline import run_pipeline
-from ..sql import retrieve_articles
-from ..utils import load_spacy_model
+from bluesearch.mining.pipeline import run_pipeline
+from bluesearch.sql import retrieve_articles
+from bluesearch.utils import load_spacy_model
 
 
 class Miner:
