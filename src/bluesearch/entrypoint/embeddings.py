@@ -26,7 +26,11 @@ from typing import Optional
 import numpy as np
 import sqlalchemy
 
-from bluesearch.entrypoint._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
+from bluesearch.entrypoint._helper import (
+    CombinedHelpFormatter,
+    configure_logging,
+    parse_args_or_environment,
+)
 
 
 def run_compute_embeddings(argv=None):

@@ -26,8 +26,12 @@ import sys
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
+from bluesearch.entrypoint._helper import (
+    CombinedHelpFormatter,
+    configure_logging,
+    parse_args_or_environment,
+)
 from bluesearch.utils import get_available_spacy_models
-from bluesearch.entrypoint._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_create_mining_cache(argv=None):

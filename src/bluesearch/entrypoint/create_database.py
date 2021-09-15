@@ -25,7 +25,11 @@ import sys
 
 import sqlalchemy
 
-from bluesearch.entrypoint._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
+from bluesearch.entrypoint._helper import (
+    CombinedHelpFormatter,
+    configure_logging,
+    parse_args_or_environment,
+)
 
 
 def run_create_database(argv=None):
