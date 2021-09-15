@@ -28,8 +28,8 @@ import numpy as np
 import sentence_transformers
 import sqlalchemy
 
-from .sql import retrieve_sentences_from_sentence_ids
-from .utils import H5
+from bluesearch.sql import retrieve_sentences_from_sentence_ids
+from bluesearch.utils import H5
 
 logger = logging.getLogger(__name__)
 

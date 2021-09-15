@@ -2,12 +2,12 @@
 import argparse
 from typing import Optional, Sequence
 
-from .add import get_parser as get_parser_add
-from .add import run as run_add
-from .init import get_parser as get_parser_init
-from .init import run as run_init
-from .parse import get_parser as get_parser_parse
-from .parse import run as run_parse
+from bluesearch.entrypoint.database.add import get_parser as get_parser_add
+from bluesearch.entrypoint.database.add import run as run_add
+from bluesearch.entrypoint.database.init import get_parser as get_parser_init
+from bluesearch.entrypoint.database.init import run as run_init
+from bluesearch.entrypoint.database.parse import get_parser as get_parser_parse
+from bluesearch.entrypoint.database.parse import run as run_parse
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
