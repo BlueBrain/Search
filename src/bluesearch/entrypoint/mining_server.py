@@ -23,8 +23,8 @@ import sys
 
 import sqlalchemy
 
-from bluesearch.utils import get_available_spacy_models
 from bluesearch.entrypoint._helper import configure_logging, get_var, run_server
+from bluesearch.utils import get_available_spacy_models
 
 
 def get_mining_app():

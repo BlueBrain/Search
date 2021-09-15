@@ -23,7 +23,6 @@ import torch
 from flask import Flask, jsonify, request
 
 import bluesearch
-
 from bluesearch.embedding_models import EmbeddingModel, get_embedding_model
 from bluesearch.search import SearchEngine
 from bluesearch.utils import H5

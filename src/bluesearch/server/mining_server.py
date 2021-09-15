@@ -25,7 +25,6 @@ import spacy
 from flask import Flask, jsonify, request
 
 import bluesearch
-
 from bluesearch.mining.pipeline import SPECS, run_pipeline
 from bluesearch.sql import retrieve_articles, retrieve_mining_cache, retrieve_paragraph
 from bluesearch.utils import load_spacy_model
