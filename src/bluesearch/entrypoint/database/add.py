@@ -1,11 +1,5 @@
 """Adding an article to the database."""
 import argparse
-import pickle  # nosec
-
-import sqlalchemy
-
-from bluesearch.database.identifiers import generate_uid
-from bluesearch.utils import load_spacy_model
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -52,6 +46,13 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import pickle  # nosec
+
+    import sqlalchemy
+
+    from bluesearch.database.identifiers import generate_uid
+    from bluesearch.utils import load_spacy_model
+
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
@@ -100,9 +101,15 @@ def run(
                 "paragraph_pos_in_article": pposition,
                 "sentence_pos_in_paragraph": sposition,
             }
-        sentence_mappings.append(sentence_mapping)
+            sentence_mappings.append(sentence_mapping)
 
-    sentences_keys = sentence_mapping.keys()
+    sentences_keys = [
+        "section_name",
+        "text",
+        "article_id",
+        "paragraph_pos_in_article",
+        "sentence_pos_in_paragraph",
+    ]
     sentences_fields = ", ".join(sentences_keys)
     sentences_binds = f":{', :'.join(sentences_keys)}"
 

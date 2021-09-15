@@ -1,10 +1,6 @@
 """Initialization of the database."""
 import argparse
 
-import sqlalchemy
-
-from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
-
 
 def get_parser() -> argparse.ArgumentParser:
     """Create a parser."""
@@ -44,6 +40,10 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import sqlalchemy
+
+    from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
+
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
