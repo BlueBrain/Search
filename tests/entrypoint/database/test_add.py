@@ -58,7 +58,11 @@ def test_sqlite_cord19(engine_sqlite, tmpdir):
 
     # Check
     with engine_sqlite.begin() as connection:
-        query = """SELECT COUNT(*) FROM ARTICLES"""
-        (n_rows,) = connection.execute(query).fetchone()
+        query_articles = """SELECT COUNT(*) FROM ARTICLES"""
+        (n_rows_articles,) = connection.execute(query_articles).fetchone()
 
-    assert n_rows == n_files > 0
+        query_sentences = """SELECT COUNT(*) FROM sentences"""
+        (n_rows_sentences,) = connection.execute(query_sentences).fetchone()
+
+    assert n_rows_articles == n_files > 0
+    assert n_rows_sentences > 0
