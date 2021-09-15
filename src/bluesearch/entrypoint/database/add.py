@@ -91,7 +91,7 @@ def run(
 
     sentence_mappings = []
     swapped = ((text, section) for section, text in article.section_paragraphs)
-    nlp = load_spacy_model("en_core_sci_lg", disable=["tagger", "ner"])
+    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
     for pposition, (document, section) in enumerate(nlp.pipe(swapped, as_tuples=True)):
         for sposition, sentence in enumerate(document.sents):
             sentence_mapping = {
