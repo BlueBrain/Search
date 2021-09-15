@@ -25,7 +25,7 @@ import sys
 
 import sqlalchemy
 
-from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
+from bluesearch.entrypoint._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_create_database(argv=None):
@@ -123,7 +123,7 @@ def run_create_database(argv=None):
     # Import libraries
     logger.info("Loading libraries")
 
-    from ..database.cord_19 import CORD19DatabaseCreation, mark_bad_sentences
+    from bluesearch.database.cord_19 import CORD19DatabaseCreation, mark_bad_sentences
 
     # Initialise SQL database engine
     logger.info("Initialising the SQL database engine")

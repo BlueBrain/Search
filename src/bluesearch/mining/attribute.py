@@ -29,7 +29,7 @@ import requests
 from IPython.display import HTML, display
 from spacy import displacy
 
-from .._css import style
+from bluesearch._css import style
 
 logger = logging.getLogger(__name__)
 

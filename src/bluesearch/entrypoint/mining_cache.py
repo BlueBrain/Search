@@ -26,8 +26,8 @@ import sys
 import sqlalchemy
 from sqlalchemy.pool import NullPool
 
-from ..utils import get_available_spacy_models
-from ._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
+from bluesearch.utils import get_available_spacy_models
+from bluesearch.entrypoint._helper import CombinedHelpFormatter, configure_logging, parse_args_or_environment
 
 
 def run_create_mining_cache(argv=None):
@@ -155,7 +155,7 @@ def run_create_mining_cache(argv=None):
 
     # Loading libraries
     logger.info("Loading libraries")
-    from ..database.mining_cache import CreateMiningCache
+    from bluesearch.database.mining_cache import CreateMiningCache
 
     # Database type
     logger.info("Parsing the database type")

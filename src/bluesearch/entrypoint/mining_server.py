@@ -23,13 +23,13 @@ import sys
 
 import sqlalchemy
 
-from ..utils import get_available_spacy_models
-from ._helper import configure_logging, get_var, run_server
+from bluesearch.utils import get_available_spacy_models
+from bluesearch.entrypoint._helper import configure_logging, get_var, run_server
 
 
 def get_mining_app():
     """Construct the mining flask app."""
-    from ..server.mining_server import MiningServer
+    from bluesearch.server.mining_server import MiningServer
 
     # Read configuration
     log_file = get_var("BBS_MINING_LOG_FILE", check_not_set=False)

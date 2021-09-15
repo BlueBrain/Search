@@ -24,9 +24,9 @@ from flask import Flask, jsonify, request
 
 import bluesearch
 
-from ..embedding_models import EmbeddingModel, get_embedding_model
-from ..search import SearchEngine
-from ..utils import H5
+from bluesearch.embedding_models import EmbeddingModel, get_embedding_model
+from bluesearch.search import SearchEngine
+from bluesearch.utils import H5
 
 
 class SearchServer(Flask):

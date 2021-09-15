@@ -33,14 +33,14 @@ import pandas as pd
 import requests
 from IPython.display import HTML, display
 
-from .._css import style
-from ..sql import (
+from bluesearch._css import style
+from bluesearch.sql import (
     get_titles,
     retrieve_article_metadata_from_article_id,
     retrieve_paragraph_from_sentence_id,
     retrieve_sentences_from_sentence_ids,
 )
-from ..utils import Timer
+from bluesearch.utils import Timer
 
 logger = logging.getLogger(__name__)
 
