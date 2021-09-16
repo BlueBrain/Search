@@ -77,7 +77,7 @@ def run(
     if input_path.is_file():
         inputs = [input_path]
     elif input_path.is_dir():
-        inputs = input_path.glob("*")
+        inputs = sorted(input_path.glob("*"))
     else:
         raise ValueError(
             "Argument 'input_path' should be a path to an existing file or directory!"

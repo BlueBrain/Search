@@ -81,7 +81,7 @@ def run(
     if parsed_path.is_file():
         inputs = [parsed_path]
     elif parsed_path.is_dir():
-        inputs = parsed_path.glob("*")
+        inputs = sorted(parsed_path.glob("*"))
     else:
         raise ValueError(
             "Argument 'parsed_path' should be a path to an existing file or directory!"
