@@ -68,7 +68,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
     (n_rows,) = engine_sqlite.execute(query).fetchone()
     assert n_rows == n_files
 
-    engine_sqlite.execute("DELETE FROM articles WHERE True")
+    engine_sqlite.execute("DELETE FROM articles")
     (n_rows,) = engine_sqlite.execute(query).fetchone()
     assert n_rows == 0
 
