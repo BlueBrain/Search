@@ -23,8 +23,8 @@ import numpy as np
 import torch
 import torch.nn.functional as nnf
 
-from .sql import SentenceFilter, retrieve_article_ids
-from .utils import Timer
+from bluesearch.sql import SentenceFilter, retrieve_article_ids
+from bluesearch.utils import Timer
 
 logger = logging.getLogger(__name__)
 
