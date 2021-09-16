@@ -18,6 +18,7 @@
 import argparse
 import json
 import pickle  # nosec
+import warnings
 from pathlib import Path
 from typing import Iterable
 
@@ -83,20 +84,26 @@ def run(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
 
+    output_path.mkdir(exist_ok=True)
+
     for inp in inputs:
-        parser_inst: ArticleParser
-        if article_type == "cord19-json":
-            with inp.open() as f_inp:
-                parser_inst = CORD19ArticleParser(json.load(f_inp))
-        elif article_type == "pmc-xml":
-            parser_inst = PubmedXMLParser(inp)
-        else:
-            raise ValueError(f"Unsupported article type {article_type}")
+        try:
+            parser_inst: ArticleParser
+            if article_type == "cord19-json":
+                with inp.open() as f_inp:
+                    parser_inst = CORD19ArticleParser(json.load(f_inp))
+            elif article_type == "pmc-xml":
+                parser_inst = PubmedXMLParser(inp)
+            else:
+                raise ValueError(f"Unsupported article type {article_type}")
 
-        article = Article.parse(parser_inst)
+            article = Article.parse(parser_inst)
 
-        output_path.mkdir(exist_ok=True)
-        out = (output_path / inp.name).with_suffix(".pkl")
+            out = (output_path / inp.name).with_suffix(".pkl")
+            with out.open("wb") as f_out:
+                pickle.dump(article, f_out)
 
-        with out.open("wb") as f_out:
-            pickle.dump(article, f_out)
+        except Exception as e:
+            warnings.warn(
+                f'Failed parsing file "{inp}":\n {e}', category=RuntimeWarning
+            )
