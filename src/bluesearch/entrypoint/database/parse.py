@@ -96,8 +96,7 @@ def run(
         article = Article.parse(parser_inst)
 
         output_path.mkdir(exist_ok=True)
-        # If we used .with_suffix(), then we would get file.pdf.xml --> file.pkl
-        out = output_path / (inp.stem + ".pkl")
+        out = (output_path / inp.name).with_suffix(".pkl")
 
         with out.open("wb") as f_out:
             pickle.dump(article, f_out)
