@@ -126,6 +126,8 @@ class TestPubmedXMLArticleParser:
             ("<underline>Underlined text</underline>", "Underlined text"),
             ("<monospace>Monospaced text</monospace>", "Monospaced text"),
             ("<xref>Hawking20</xref>", "Hawking20"),
+            ("<sc>Text in small caps</sc>", "Text in small caps"),
+            ("<styled-content>Cool style</styled-content>", "Cool style"),
             ("<sub>subbed</sub>", "_subbed"),
             ("<sup>supped</sup>", "^supped"),
             ("<inline-formula>Completely ignored</inline-formula>", "FORMULA"),

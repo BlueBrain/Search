@@ -267,7 +267,17 @@ class PubmedXMLParser(ArticleParser):
         if element is None:
             return ""
 
-        if element.tag in {"p", "bold", "italic", "underline", "monospace", "xref"}:
+        if element.tag in {
+            "bold",
+            "italic",
+            "monospace",
+            "p",
+            "sc",
+            "styled-content",
+            "underline",
+            "xref",
+        }:
+            # Mostly styling tags for which getting the inner text is enough.
             # Currently this is the same as the default handling. Writing it out
             # explicitly here to decouple from the default handling, which may
             # change in the future.
