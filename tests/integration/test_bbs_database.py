@@ -1,4 +1,3 @@
-import pathlib
 import time
 
 import docker
@@ -10,10 +9,10 @@ from bluesearch.entrypoint.database.parent import main
 
 
 @pytest.fixture(params=["sqlite", "mysql"])
-def setup_backend(request, tmpdir):
+def setup_backend(request, tmp_path):
     backend = request.param
     if backend == "sqlite":
-        db_url = pathlib.Path(str(tmpdir)) / "db.sqlite"
+        db_url = tmp_path / "db.sqlite"
         yield "sqlite", str(db_url)
 
     elif backend == "mysql":
@@ -63,12 +62,11 @@ def setup_backend(request, tmpdir):
         raise ValueError
 
 
-def test_bbs_database(tmpdir, setup_backend, jsons_path):
+def test_bbs_database(tmp_path, setup_backend, jsons_path):
     # Parameters
     db_type, db_url = setup_backend
 
-    temp_path = pathlib.Path(str(tmpdir))
-    parsed_files_dir = temp_path / "parsed"
+    parsed_files_dir = tmp_path / "parsed"
     parsed_files_dir.mkdir()
 
     all_input_paths = sorted(jsons_path.rglob("*.json"))
