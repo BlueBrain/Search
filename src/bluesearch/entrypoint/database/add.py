@@ -114,8 +114,11 @@ def run(
         }
         article_mappings.append(article_mapping)
 
-        swapped = ((text, section) for section, text in article.section_paragraphs)
-        for ppos, (doc, section) in enumerate(nlp.pipe(swapped, as_tuples=True)):
+        swapped = (
+            (text, (section, ppos))
+            for ppos, (section, text) in enumerate(article.section_paragraphs)
+        )
+        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True):
             for spos, sent in enumerate(doc.sents):
                 sentence_mapping = {
                     "section_name": section,

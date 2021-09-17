@@ -69,9 +69,12 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
     assert n_rows_sentences > 0
 
     engine_sqlite.execute("DELETE FROM articles")
-
     (n_rows_articles,) = engine_sqlite.execute(query_articles).fetchone()
     assert n_rows_articles == 0
+
+    engine_sqlite.execute("DELETE FROM sentences")
+    (n_rows_sentences,) = engine_sqlite.execute(query_sentences).fetchone()
+    assert n_rows_sentences == 0
 
     # Test adding multiple articles
     args_and_opts = [
