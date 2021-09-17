@@ -28,6 +28,7 @@ def get_docker_client():
 
     return client
 
+
 def check_image_available(client, image):
     """Check if a given image is downloaded.
 
