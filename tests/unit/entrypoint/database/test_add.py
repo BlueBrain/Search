@@ -30,11 +30,6 @@ def engine_sqlite(tmp_path):
     return eng
 
 
-def test_mysql_not_implemented():
-    with pytest.raises(NotImplementedError):
-        main(["add", "a", "b", "--db-type=mysql"])
-
-
 def test_sqlite_cord19(engine_sqlite, tmp_path):
     path_to_pkl = tmp_path / "pkl_files"
     path_to_pkl.mkdir()

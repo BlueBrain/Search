@@ -26,7 +26,7 @@ import pytest
 from bluesearch.mining.pipeline import SPECS
 from bluesearch.server.mining_server import MiningServer
 
-TESTS_PATH = Path(__file__).resolve().parent.parent  # path to tests directory
+TESTS_PATH = Path(__file__).resolve().parent.parent.parent  # path to tests directory
 
 
 @pytest.fixture
