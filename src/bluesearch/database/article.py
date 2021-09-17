@@ -15,28 +15,16 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Abstraction of scientific article data and related tools."""
+from __future__ import annotations
+
+import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import (
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Generator, Iterable, Sequence
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
-
-# This is for annotating the return value of the Article.parse class method, see
-# https://github.com/python/typing/issues/254#issuecomment-661803922
-_T = TypeVar("_T", bound="Article")
 
 
 class ArticleParser(ABC):
@@ -77,7 +65,7 @@ class ArticleParser(ABC):
 
     @property
     @abstractmethod
-    def paragraphs(self) -> Iterable[Tuple[str, str]]:
+    def paragraphs(self) -> Iterable[tuple[str, str]]:
         """Get all paragraphs and titles of sections they are part of.
 
         Returns
@@ -97,7 +85,7 @@ class PubmedXMLParser(ArticleParser):
         The path to the XML file from PubMed.
     """
 
-    def __init__(self, path: Union[str, Path]) -> None:
+    def __init__(self, path: str | Path) -> None:
         super().__init__()
         self.content = ElementTree.parse(str(path))
 
@@ -111,7 +99,7 @@ class PubmedXMLParser(ArticleParser):
             The article title.
         """
         titles = self.content.find(".//title-group/article-title")
-        return self.text_content(titles)
+        return self._element_to_str(titles)
 
     @property
     def authors(self) -> Generator[str, None, None]:
@@ -126,8 +114,8 @@ class PubmedXMLParser(ArticleParser):
             ".//contrib-group/contrib[@contrib-type='author']"
         )
         for author in authors:
-            given_names = self.text_content(author.find("name/given-names"))
-            surname = self.text_content(author.find("name/surname"))
+            given_names = self._element_to_str(author.find("name/given-names"))
+            surname = self._element_to_str(author.find("name/surname"))
             if given_names == "" or surname == "":
                 # In rare cases, an author may not have a given name or a surname,
                 # e.g. it could be an organization. We decide to skip those.
@@ -146,10 +134,10 @@ class PubmedXMLParser(ArticleParser):
         """
         abstract_pars = self.content.findall(".//abstract//p")
         for paragraph in abstract_pars:
-            yield self.text_content(paragraph)
+            yield self._element_to_str(paragraph)
 
     @property
-    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
         Paragraphs can be parts of text body, or figure or table captions.
@@ -175,7 +163,7 @@ class PubmedXMLParser(ArticleParser):
         section_dirs = self.get_paragraphs_sections_mapping()
         for paragraph in self.content.findall(".//p"):
             if paragraph not in exclude_list:
-                text = self.text_content(paragraph)
+                text = self._element_to_str(paragraph)
                 section_title = ""
                 if paragraph in section_dirs:
                     section_title = section_dirs[paragraph]
@@ -187,7 +175,7 @@ class PubmedXMLParser(ArticleParser):
             fig_captions = fig.findall("caption")
             if fig_captions is None:
                 continue
-            caption = " ".join(self.text_content(c) for c in list(fig_captions))
+            caption = " ".join(self._element_to_str(c) for c in list(fig_captions))
             yield "Figure Caption", caption
 
         # Table captions
@@ -198,10 +186,10 @@ class PubmedXMLParser(ArticleParser):
             )
             if caption_elements is None:
                 continue
-            caption = " ".join(self.text_content(c) for c in caption_elements)
+            caption = " ".join(self._element_to_str(c) for c in caption_elements)
             yield "Table Caption", caption
 
-    def get_paragraphs_sections_mapping(self) -> Dict[Element, str]:
+    def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
         """Construct mapping between all paragraphs and their section name.
 
         Returns
@@ -218,7 +206,7 @@ class PubmedXMLParser(ArticleParser):
             for element in sec:
 
                 if element.tag == "title":
-                    section_title = self.text_content(element)
+                    section_title = self._element_to_str(element)
                 elif element.tag == "p":
                     section_paragraphs.append(element)
 
@@ -227,24 +215,88 @@ class PubmedXMLParser(ArticleParser):
 
         return mapping
 
-    @staticmethod
-    def text_content(element: Optional[Element]) -> str:
-        """Extract all text of an element and of its descendants (at any depth).
+    def _inner_text(self, element: Element) -> str:
+        """Convert all inner text and sub-elements to one string.
+
+        In short, we collect all the inner text while also converting all
+        sub-elements that we encounter to strings using ``self._element_to_str``.
+        All escaped HTML in the raw text is unescaped.
+
+        For example, if schematically the element is given by
+
+            element = "<p>I <bold>like</bold> python &amp; ice cream.<p>"
+
+        then ``_inner_text(element)`` would give
+
+            "I like python & ice cream."
+
+        provided that "<bold>like</bold>" is resolved to "like" by the
+        ``self._element_to_str`` method.
 
         Parameters
         ----------
-        element : etree._Element or None
-            XML element to parse.
+        element
+            The input XML element.
 
         Returns
         -------
         str
-            Entire text of the element and its descendants.
+            The inner text and sub-elements converted to one single string.
+        """
+        text_parts = [html.unescape(element.text or "")]
+        for sub_element in element:
+            # recursively parse the sub-element
+            text_parts.append(self._element_to_str(sub_element))
+            # don't forget the text after the sub-element
+            text_parts.append(html.unescape(sub_element.tail or ""))
+        return "".join(text_parts).strip()
+
+    def _element_to_str(self, element: Element | None) -> str:
+        """Convert an element and all its contents to a string.
+
+        Parameters
+        ----------
+        element
+            The input XML element.
+
+        Returns
+        -------
+        str
+            A parsed string representation of the input XML element.
         """
         if element is None:
             return ""
+
+        if element.tag in {
+            "bold",
+            "italic",
+            "monospace",
+            "p",
+            "sc",
+            "styled-content",
+            "underline",
+            "xref",
+        }:
+            # Mostly styling tags for which getting the inner text is enough.
+            # Currently this is the same as the default handling. Writing it out
+            # explicitly here to decouple from the default handling, which may
+            # change in the future.
+            return self._inner_text(element)
+        elif element.tag == "sub":
+            return f"_{self._inner_text(element)}"
+        elif element.tag == "sup":
+            return f"^{self._inner_text(element)}"
+        elif element.tag == "inline-formula":
+            return "FORMULA"
+        elif element.tag == "disp-formula":
+            return "\nFORMULA-BLOCK"
+        elif element.tag in {"ext-link", "uri"}:
+            return "URL"
+        elif element.tag == "email":
+            return "EMAIL"
         else:
-            return "".join(element.itertext()).strip()
+            # Default handling for all other element tags
+            return self._inner_text(element)
 
 
 class CORD19ArticleParser(ArticleParser):
@@ -311,7 +363,7 @@ class CORD19ArticleParser(ArticleParser):
             yield author_str
 
     @property
-    def abstract(self) -> List[str]:
+    def abstract(self) -> list[str]:
         """Get a sequence of paragraphs in the article abstract.
 
         Returns
@@ -325,7 +377,7 @@ class CORD19ArticleParser(ArticleParser):
         return [paragraph["text"] for paragraph in self.data["abstract"]]
 
     @property
-    def paragraphs(self) -> Generator[Tuple[str, str], None, None]:
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
         """Get all paragraphs and titles of sections they are part of.
 
         Yields
@@ -353,10 +405,10 @@ class Article:
     title: str
     authors: Sequence[str]
     abstract: Sequence[str]
-    section_paragraphs: Sequence[Tuple[str, str]]
+    section_paragraphs: Sequence[tuple[str, str]]
 
     @classmethod
-    def parse(cls: Type[_T], parser: ArticleParser) -> _T:
+    def parse(cls, parser: ArticleParser) -> Article:
         """Parse an article through a parser.
 
         Parameters
@@ -373,7 +425,7 @@ class Article:
 
     def iter_paragraphs(
         self, with_abstract: bool = False
-    ) -> Generator[Tuple[str, str], None, None]:
+    ) -> Generator[tuple[str, str], None, None]:
         """Iterate over all paragraphs in the article.
 
         Parameters
