@@ -1,6 +1,5 @@
 import pathlib
 
-import pytest
 import sqlalchemy
 
 from bluesearch.entrypoint.database.parent import main
