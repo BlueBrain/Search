@@ -81,7 +81,7 @@ def run(
     article_fields = ", ".join(article_keys)
     article_binds = f":{', :'.join(article_keys)}"
 
-    with engine.connect() as con:
+    with engine.begin() as con:
         query = sqlalchemy.text(
             f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
         )
@@ -113,7 +113,7 @@ def run(
     sentences_fields = ", ".join(sentences_keys)
     sentences_binds = f":{', :'.join(sentences_keys)}"
 
-    with engine.connect() as con:
+    with engine.begin() as con:
         for sentence_mapping in sentence_mappings:
             query = sqlalchemy.text(
                 f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
