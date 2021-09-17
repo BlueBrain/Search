@@ -59,7 +59,7 @@ def schema_sentences(metadata: MetaData) -> None:
         Column("section_name", Text()),
         Column("text", Text()),
         Column(
-            "article_id", Integer(), ForeignKey("articles.article_id"), nullable=False
+            "article_id", String(32), ForeignKey("articles.article_id"), nullable=False
         ),
         Column("paragraph_pos_in_article", Integer(), nullable=False),
         Column("sentence_pos_in_paragraph", Integer(), nullable=False),
