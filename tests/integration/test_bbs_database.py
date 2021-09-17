@@ -10,6 +10,10 @@ from bluesearch.entrypoint.database.parent import main
 
 
 def get_docker_client():
+    """Try to instantatie a docker client.
+
+    If the daemon is not running then None is returned.
+    """
     warnings.filterwarnings(
         action="ignore",
         message="unclosed",
@@ -25,6 +29,10 @@ def get_docker_client():
     return client
 
 def check_image_available(client, image):
+    """Check if a given image is downloaded.
+
+    There is no automatic download logic.
+    """
     expected_tag = f"{image}:latest"
 
     return expected_tag in {img.tags[0] for img in client.images.list()}
