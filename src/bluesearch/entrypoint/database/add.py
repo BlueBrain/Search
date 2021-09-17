@@ -75,7 +75,7 @@ def run(
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
     elif db_type == "mysql":
-        raise NotImplementedError
+        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
 
     else:
         # This branch never reached because of `choices` in `argparse`
