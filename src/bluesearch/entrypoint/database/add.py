@@ -1,5 +1,22 @@
-"""Adding an article to the database."""
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Adding articles to the database."""
 import argparse
+from pathlib import Path
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -21,9 +38,9 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
-        "path",
-        type=str,
-        help="""Path to the parsed file.""",
+        "parsed_path",
+        type=Path,
+        help="Path to a parsed file or to a directory of parsed files.",
     )
     parser.add_argument(
         "--db-type",
@@ -38,7 +55,7 @@ def get_parser() -> argparse.ArgumentParser:
 def run(
     *,
     db_url: str,
-    path: str,
+    parsed_path: Path,
     db_type: str,
 ) -> None:
     """Add an entry to the database.
@@ -47,6 +64,7 @@ def run(
     `get_parser` function.
     """
     import pickle  # nosec
+    from typing import Iterable
 
     import sqlalchemy
 
@@ -63,45 +81,62 @@ def run(
         # This branch never reached because of `choices` in `argparse`
         raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
 
-    with open(path, "rb") as f:
-        article = pickle.load(f)  # nosec
+    inputs: Iterable[Path]
+    if parsed_path.is_file():
+        inputs = [parsed_path]
+    elif parsed_path.is_dir():
+        inputs = sorted(parsed_path.glob("*.pkl"))
+    else:
+        raise ValueError(
+            "Argument 'parsed_path' should be a path to an existing file or directory!"
+        )
 
-    # Article table.
+    articles = []
+    for inp in inputs:
+        with inp.open("rb") as f:
+            article = pickle.load(f)  # nosec
+            articles.append(article)
 
-    # TODO At the moment, no identifiers are extracted. This is a patch waiting for it.
-    article_id = generate_uid((article.title,))
+    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
-    article_mapping = {
-        "article_id": article_id,
-        "title": article.title,
-        "authors": ", ".join(article.authors),
-        "abstract": "\n".join(article.abstract),
-    }
-    article_keys = article_mapping.keys()
+    article_mappings = []
+    sentence_mappings = []
+
+    for article in articles:
+
+        # TODO At the moment, no identifiers are extracted. This is a patch meanwhile.
+        article_id = generate_uid((article.title,))
+        article_mapping = {
+            "article_id": article_id,
+            "title": article.title,
+            "authors": ", ".join(article.authors),
+            "abstract": "\n".join(article.abstract),
+        }
+        article_mappings.append(article_mapping)
+
+        swapped = ((text, section) for section, text in article.section_paragraphs)
+        for ppos, (doc, section) in enumerate(nlp.pipe(swapped, as_tuples=True)):
+            for spos, sent in enumerate(doc.sents):
+                sentence_mapping = {
+                    "section_name": section,
+                    "text": sent.text,
+                    "article_id": article_id,
+                    "paragraph_pos_in_article": ppos,
+                    "sentence_pos_in_paragraph": spos,
+                }
+                sentence_mappings.append(sentence_mapping)
+
+    # Persistence.
+
+    article_keys = ["article_id", "title", "authors", "abstract"]
     article_fields = ", ".join(article_keys)
     article_binds = f":{', :'.join(article_keys)}"
+    article_query = sqlalchemy.text(
+        f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
+    )
 
     with engine.begin() as con:
-        query = sqlalchemy.text(
-            f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
-        )
-        con.execute(query, article_mapping)
-
-    # Sentence table.
-
-    sentence_mappings = []
-    swapped = ((text, section) for section, text in article.section_paragraphs)
-    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
-    for pposition, (document, section) in enumerate(nlp.pipe(swapped, as_tuples=True)):
-        for sposition, sentence in enumerate(document.sents):
-            sentence_mapping = {
-                "section_name": section,
-                "text": sentence.text,
-                "article_id": article_id,
-                "paragraph_pos_in_article": pposition,
-                "sentence_pos_in_paragraph": sposition,
-            }
-            sentence_mappings.append(sentence_mapping)
+        con.execute(article_query, *article_mappings)
 
     sentences_keys = [
         "section_name",
@@ -112,10 +147,9 @@ def run(
     ]
     sentences_fields = ", ".join(sentences_keys)
     sentences_binds = f":{', :'.join(sentences_keys)}"
+    sentence_query = sqlalchemy.text(
+        f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
+    )
 
     with engine.begin() as con:
-        for sentence_mapping in sentence_mappings:
-            query = sqlalchemy.text(
-                f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
-            )
-            con.execute(query, sentence_mapping)
+        con.execute(sentence_query, *sentence_mappings)
