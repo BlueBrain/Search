@@ -119,8 +119,7 @@ def run(
             (text, (section, ppos))
             for ppos, (section, text) in enumerate(article.section_paragraphs)
         )
-        for text, (section, ppos) in swapped:
-            doc = nlp(text)
+        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True):
             for spos, sent in enumerate(doc.sents):
                 sentence_mapping = {
                     "section_name": section,
