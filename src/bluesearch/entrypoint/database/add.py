@@ -52,6 +52,24 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def sentences(nlp, article_id, swapped):
+    """Get sentences from paragraphs."""
+    sentence_mappings = []
+    # Using spaCy Language.pipe() gives an issue on Python 3.7 and Ubuntu 20.04.
+    for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True, n_process=1):
+        for spos, sent in enumerate(doc.sents):
+            sentence_mapping = {
+                "section_name": section,
+                # Using 'sent.text' gives an issue on Python 3.7 and Ubuntu 20.04.
+                "text": str(sent),
+                "article_id": article_id,
+                "paragraph_pos_in_article": ppos,
+                "sentence_pos_in_paragraph": spos,
+            }
+            sentence_mappings.append(sentence_mapping)
+    return sentence_mappings
+
+
 def run(
     *,
     db_url: str,
@@ -101,7 +119,6 @@ def run(
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
     article_mappings = []
-    sentence_mappings = []
 
     for article in articles:
 
@@ -119,18 +136,7 @@ def run(
             (text, (section, ppos))
             for ppos, (section, text) in enumerate(article.section_paragraphs)
         )
-        # Using spaCy Language.pipe() gives an issue on Python 3.7 and Ubuntu 20.04.
-        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True, n_process=1):
-            for spos, sent in enumerate(doc.sents):
-                sentence_mapping = {
-                    "section_name": section,
-                    # Using 'sent.text' gives an issue on Python 3.7 and Ubuntu 20.04.
-                    "text": str(sent),
-                    "article_id": article_id,
-                    "paragraph_pos_in_article": ppos,
-                    "sentence_pos_in_paragraph": spos,
-                }
-                sentence_mappings.append(sentence_mapping)
+        sentence_mappings = sentences(nlp, article_id, swapped)
 
     # Persistence.
 
