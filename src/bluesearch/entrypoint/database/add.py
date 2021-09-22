@@ -123,7 +123,8 @@ def run(
             for spos, sent in enumerate(doc.sents):
                 sentence_mapping = {
                     "section_name": section,
-                    "text": sent.text,
+                    # FIXME sent.text
+                    "text": f"The sentence is of length {len(sent.text)}.",
                     "article_id": article_id,
                     "paragraph_pos_in_article": ppos,
                     "sentence_pos_in_paragraph": spos,
