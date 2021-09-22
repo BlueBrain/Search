@@ -75,7 +75,8 @@ def run(
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
     elif db_type == "mysql":
-        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
+        # Not using 'charset=utf8mb4' gives an issue on Python 3.7 and Ubuntu 20.04.
+        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}?charset=utf8mb4")
 
     else:
         # This branch never reached because of `choices` in `argparse`
