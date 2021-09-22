@@ -157,5 +157,7 @@ def run(
         f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
     )
 
+    sentence_mappings = list(sentence_mappings)
+
     with engine.begin() as con:
         con.execute(sentence_query, *sentence_mappings)
