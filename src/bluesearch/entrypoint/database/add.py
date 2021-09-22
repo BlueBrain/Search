@@ -115,12 +115,9 @@ def run(
         }
         article_mappings.append(article_mapping)
 
-        swapped = (
-            (text, (section, ppos))
-            for ppos, (section, text) in enumerate(article.section_paragraphs)
-        )
         # Using spaCy Language.pipe() gives an issue on Python 3.7 and Ubuntu 20.04.
-        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True, n_process=1):
+        for ppos, (section, text) in enumerate(article.section_paragraphs):
+            doc = nlp(text)
             for spos, sent in enumerate(doc.sents):
                 sentence_mapping = {
                     "section_name": section,
@@ -156,8 +153,6 @@ def run(
     sentence_query = sqlalchemy.text(
         f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
     )
-
-    sentence_mappings = list(sentence_mappings)
 
     with engine.begin() as con:
         con.execute(sentence_query, *sentence_mappings)
