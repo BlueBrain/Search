@@ -75,7 +75,7 @@ def run(
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
     elif db_type == "mysql":
-        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}?charset=utf8mb4")
+        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
 
     else:
         # This branch never reached because of `choices` in `argparse`
@@ -123,6 +123,7 @@ def run(
             for spos, sent in enumerate(doc.sents):
                 sentence_mapping = {
                     "section_name": section,
+                    # Using 'sent.text' gives an issue on Python 3.7 and Ubuntu 20.04.
                     "text": str(sent),
                     "article_id": article_id,
                     "paragraph_pos_in_article": ppos,
