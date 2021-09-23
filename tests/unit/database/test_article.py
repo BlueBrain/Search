@@ -24,6 +24,10 @@ class SimpleTestParser(ArticleParser):
             ("Section 1", "Paragraph 2."),
             ("Section 2", "Paragraph 1."),
         ]
+        self._pubmed_id = "pubmed_id"
+        self._pmc_id = "pmc_id"
+        self._doi = "doi"
+        self._uid = "fake_uid"
 
     @property
     def title(self):
@@ -40,6 +44,22 @@ class SimpleTestParser(ArticleParser):
     @property
     def paragraphs(self):
         yield from self._paragraphs
+
+    @property
+    def pubmed_id(self):
+        return self._pubmed_id
+
+    @property
+    def pmc_id(self):
+        return self._pmc_id
+
+    @property
+    def doi(self):
+        return self._doi
+
+    @property
+    def uid(self):
+        return self._uid
 
 
 @pytest.fixture(scope="session")
@@ -92,6 +112,26 @@ class TestPubmedXMLArticleParser:
         assert paragraphs[0] == ("", "Paragraph 1")
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
         assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
+
+    def test_pubmed_id(self, pubmed_xml_parser):
+        pubmed_id = pubmed_xml_parser.pubmed_id
+        assert isinstance(pubmed_id, str)
+        assert pubmed_id == "PMID"
+
+    def test_pmc_id(self, pubmed_xml_parser):
+        pmc_id = pubmed_xml_parser.pmc_id
+        assert isinstance(pmc_id, str)
+        assert pmc_id == "PMC"
+
+    def test_doi(self, pubmed_xml_parser):
+        doi = pubmed_xml_parser.doi
+        assert isinstance(doi, str)
+        assert doi == "DOI"
+
+    def test_uid(self, pubmed_xml_parser):
+        uid = pubmed_xml_parser.uid
+        assert isinstance(uid, str)
+        assert len(uid) == 32
 
     @pytest.mark.parametrize(
         ("input_xml", "expected_inner_text"),
@@ -213,6 +253,29 @@ class TestCORD19ArticleParser:
         ):
             assert section == paragraph_dict["section"]
             assert text == paragraph_dict["text"]
+
+    def test_pubmed_id(self, real_json_file):
+        # There is no Pubmed ID specified in the schema of CORD19 json files
+        parser = CORD19ArticleParser(real_json_file)
+        pubmed_id = parser.pubmed_id
+        assert pubmed_id is None
+
+    def test_pmc_id(self, real_json_file):
+        parser = CORD19ArticleParser(real_json_file)
+        pmc_id = parser.pmc_id
+        assert isinstance(pmc_id, str)
+
+    def test_doi(self, real_json_file):
+        # There is no DOI specified in the schema of CORD19 json files
+        parser = CORD19ArticleParser(real_json_file)
+        doi = parser.doi
+        assert doi is None
+
+    def test_uid(self, real_json_file):
+        parser = CORD19ArticleParser(real_json_file)
+        uid = parser.uid
+        assert isinstance(uid, str)
+        assert len(uid) == 32
 
     def test_str(self, real_json_file):
         parser = CORD19ArticleParser(real_json_file)
