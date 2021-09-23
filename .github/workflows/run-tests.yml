@@ -54,6 +54,12 @@ jobs:
         if: matrix.python-version == '3.7'
         run: tox -vv -e lint
 
+      - name: start MySQL on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo systemctl start mysql.service
+          mysql -e 'CREATE DATABASE test;' -uroot -proot
+
       - name: Homebrew mysql installation
         if: matrix.os == 'macos-latest'
         run: brew install mysql
