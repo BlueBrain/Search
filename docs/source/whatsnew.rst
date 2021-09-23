@@ -43,6 +43,8 @@ Latest
   backbone for the sentence embedding model :code:`BioBERT NLI+STS CORD-19 v1`.
 - |Add| deterministic generation of paper UIDs based on paper identifiers.
 - |Change| relative imports into absolute ones.
+- |Add| the tables :code:`articles` and :code:`sentences` for
+  :code:`bbs_database init` and :code:`bbs_database add`.
 
 
 Version 0.2.0
