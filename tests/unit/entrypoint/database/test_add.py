@@ -5,6 +5,7 @@ import sqlalchemy
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
+from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
 
 
 @pytest.fixture()
@@ -14,14 +15,8 @@ def engine_sqlite(tmp_path):
 
     # Schema
     metadata = sqlalchemy.MetaData()
-    sqlalchemy.Table(
-        "articles",
-        metadata,
-        sqlalchemy.Column(
-            "article_id", sqlalchemy.Integer(), primary_key=True, autoincrement=True
-        ),
-        sqlalchemy.Column("title", sqlalchemy.Text()),
-    )
+    schema_articles(metadata)
+    schema_sentences(metadata)
 
     # Table
     with eng.begin() as connection:
@@ -49,7 +44,8 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         with pkl_file.open("wb") as f:
             pickle.dump(article, f)
 
-    query = "SELECT COUNT(*) FROM articles"
+    query_articles = "SELECT COUNT(*) FROM articles"
+    query_sentences = "SELECT COUNT(*) FROM sentences"
 
     # Test adding single article
     for pkl_file in pkl_files:
@@ -60,12 +56,20 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
             "--db-type=sqlite",
         ]
         main(args_and_opts)
-    (n_rows,) = engine_sqlite.execute(query).fetchone()
-    assert n_rows == n_files
+
+    (n_rows_articles,) = engine_sqlite.execute(query_articles).fetchone()
+    assert n_rows_articles == n_files
+
+    (n_rows_sentences,) = engine_sqlite.execute(query_sentences).fetchone()
+    assert n_rows_sentences > 0
 
     engine_sqlite.execute("DELETE FROM articles")
-    (n_rows,) = engine_sqlite.execute(query).fetchone()
-    assert n_rows == 0
+    (n_rows_articles,) = engine_sqlite.execute(query_articles).fetchone()
+    assert n_rows_articles == 0
+
+    engine_sqlite.execute("DELETE FROM sentences")
+    (n_rows_sentences,) = engine_sqlite.execute(query_sentences).fetchone()
+    assert n_rows_sentences == 0
 
     # Test adding multiple articles
     args_and_opts = [
@@ -75,8 +79,12 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         "--db-type=sqlite",
     ]
     main(args_and_opts)
-    (n_rows,) = engine_sqlite.execute(query).fetchone()
-    assert n_rows == n_files
+
+    (n_rows_articles,) = engine_sqlite.execute(query_articles).fetchone()
+    assert n_rows_articles == n_files
+
+    (n_rows_sentences,) = engine_sqlite.execute(query_sentences).fetchone()
+    assert n_rows_sentences > 0
 
     # Test adding something that does not exist
     with pytest.raises(ValueError):

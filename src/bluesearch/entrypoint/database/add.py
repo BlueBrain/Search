@@ -16,11 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Adding articles to the database."""
 import argparse
-import pickle  # nosec
 from pathlib import Path
-from typing import Iterable
-
-import sqlalchemy
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -67,6 +63,14 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import pickle  # nosec
+    from typing import Iterable
+
+    import sqlalchemy
+
+    from bluesearch.database.identifiers import generate_uid
+    from bluesearch.utils import load_spacy_model
+
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
@@ -87,12 +91,68 @@ def run(
             "Argument 'parsed_path' should be a path to an existing file or directory!"
         )
 
-    titles = []
+    articles = []
     for inp in inputs:
         with inp.open("rb") as f:
             article = pickle.load(f)  # nosec
-        titles.append({"title": article.title})
+            articles.append(article)
 
-    with engine.connect() as con:
-        query = sqlalchemy.text("INSERT INTO articles(title) VALUES(:title)")
-        con.execute(query, *titles)
+    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
+
+    article_mappings = []
+    sentence_mappings = []
+
+    for article in articles:
+
+        # TODO At the moment, no identifiers are extracted. This is a patch meanwhile.
+        article_id = generate_uid((article.title,))
+        article_mapping = {
+            "article_id": article_id,
+            "title": article.title,
+            "authors": ", ".join(article.authors),
+            "abstract": "\n".join(article.abstract),
+        }
+        article_mappings.append(article_mapping)
+
+        swapped = (
+            (text, (section, ppos))
+            for ppos, (section, text) in enumerate(article.section_paragraphs)
+        )
+        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True):
+            for spos, sent in enumerate(doc.sents):
+                sentence_mapping = {
+                    "section_name": section,
+                    "text": sent.text,
+                    "article_id": article_id,
+                    "paragraph_pos_in_article": ppos,
+                    "sentence_pos_in_paragraph": spos,
+                }
+                sentence_mappings.append(sentence_mapping)
+
+    # Persistence.
+
+    article_keys = ["article_id", "title", "authors", "abstract"]
+    article_fields = ", ".join(article_keys)
+    article_binds = f":{', :'.join(article_keys)}"
+    article_query = sqlalchemy.text(
+        f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
+    )
+
+    with engine.begin() as con:
+        con.execute(article_query, *article_mappings)
+
+    sentences_keys = [
+        "section_name",
+        "text",
+        "article_id",
+        "paragraph_pos_in_article",
+        "sentence_pos_in_paragraph",
+    ]
+    sentences_fields = ", ".join(sentences_keys)
+    sentences_binds = f":{', :'.join(sentences_keys)}"
+    sentence_query = sqlalchemy.text(
+        f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
+    )
+
+    with engine.begin() as con:
+        con.execute(sentence_query, *sentence_mappings)
