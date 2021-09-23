@@ -22,7 +22,7 @@ from bluesearch.entrypoint.database.parent import main
                         sys.version_info.minor == 7,
                     )
                 ),
-                reason="see issue #",
+                reason="see issue #456",
             ),
         ),
     ]
