@@ -21,7 +21,7 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
+from typing import Generator, Iterable, Optional, Sequence
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -518,6 +518,10 @@ class Article:
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[tuple[str, str]]
+    pubmed_id: Optional[str]
+    pmc_id: Optional[str]
+    doi: Optional[str]
+    uid: Optional[str]
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -532,8 +536,14 @@ class Article:
         authors = tuple(parser.authors)
         abstract = tuple(parser.abstract)
         section_paragraphs = tuple(parser.paragraphs)
+        pubmed_id = parser.pubmed_id
+        pmc_id = parser.pmc_id
+        doi = parser.doi
+        uid = parser.uid
 
-        return cls(title, authors, abstract, section_paragraphs)
+        return cls(
+            title, authors, abstract, section_paragraphs, pubmed_id, pmc_id, doi, uid
+        )
 
     def iter_paragraphs(
         self, with_abstract: bool = False
