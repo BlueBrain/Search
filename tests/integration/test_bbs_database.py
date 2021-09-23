@@ -1,3 +1,4 @@
+import sys
 import time
 
 import docker
@@ -8,7 +9,24 @@ from sqlalchemy.exc import OperationalError
 from bluesearch.entrypoint.database.parent import main
 
 
-@pytest.fixture(params=["sqlite", "mysql"])
+@pytest.fixture(
+    params=[
+        "sqlite",
+        pytest.param(
+            "mysql",
+            marks=pytest.mark.skipif(
+                all(
+                    (
+                        sys.platform == "linux",
+                        sys.version_info.major == 3,
+                        sys.version_info.minor == 7,
+                    )
+                ),
+                reason="see issue #",
+            ),
+        ),
+    ]
+)
 def setup_backend(request, tmp_path):
     backend = request.param
     if backend == "sqlite":
