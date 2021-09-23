@@ -72,9 +72,9 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
     all_input_paths = sorted(jsons_path.rglob("*.json"))
 
     # 16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json and PMC7223769.xml.json are the
-    # same article. Currently, the population of the database is not incremental. So,
-    # the case where the same article is added two times is not handled yet. The patch
-    # below is to move forward until the incremental population is implemented.
+    # same article. In the presence of duplicates, currently, the code stops with an
+    # 'IntegrityError' from MySQL. The patch below is to move forward until the code
+    # does not stop anymore.
     all_input_paths = [x for x in all_input_paths if x.name != "PMC7223769.xml.json"]
 
     n_files = len(all_input_paths)
