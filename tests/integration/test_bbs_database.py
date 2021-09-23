@@ -12,9 +12,6 @@ def setup_backend(request, tmp_path):
         yield "sqlite", str(db_url)
 
     elif backend == "mysql":
-        engine = sqlalchemy.create_engine("mysql+pymysql://root:root@127.0.0.1:3306")
-        # Should throw a OperationalError if MySQL is not ready yet.
-        engine.execute("show databases")
         yield "mysql", "root:root@127.0.0.1:3306/test"
     else:
         raise ValueError
