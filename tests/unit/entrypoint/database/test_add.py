@@ -1,7 +1,6 @@
-import pickle
-
 import pytest
 import sqlalchemy
+from serde.json import to_json
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
@@ -26,11 +25,11 @@ def engine_sqlite(tmp_path):
 
 
 def test_sqlite_cord19(engine_sqlite, tmp_path):
-    path_to_pkl = tmp_path / "pkl_files"
-    path_to_pkl.mkdir()
+    path_to_json = tmp_path / "json_files"
+    path_to_json.mkdir()
     n_files = 3
 
-    pkl_files = [path_to_pkl / f"{i}.pkl" for i in range(n_files)]
+    json_files = [path_to_json / f"{i}.json" for i in range(n_files)]
     articles = [
         Article(
             title=f"title_{i}",
@@ -40,19 +39,19 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         )
         for i in range(n_files)
     ]
-    for article, pkl_file in zip(articles, pkl_files):
-        with pkl_file.open("wb") as f:
-            pickle.dump(article, f)
+    for article, json_file in zip(articles, json_files):
+        serialized = to_json(article)
+        json_file.write_text(serialized, "utf-8")
 
     query_articles = "SELECT COUNT(*) FROM articles"
     query_sentences = "SELECT COUNT(*) FROM sentences"
 
     # Test adding single article
-    for pkl_file in pkl_files:
+    for json_file in json_files:
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(pkl_file),
+            str(json_file),
             "--db-type=sqlite",
         ]
         main(args_and_opts)
@@ -75,7 +74,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
     args_and_opts = [
         "add",
         engine_sqlite.url.database,
-        str(path_to_pkl),
+        str(path_to_json),
         "--db-type=sqlite",
     ]
     main(args_and_opts)
@@ -91,7 +90,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(path_to_pkl / "dir_that_does_not_exists"),
+            str(path_to_json / "dir_that_does_not_exists"),
             "--db-type=sqlite",
         ]
         main(args_and_opts)

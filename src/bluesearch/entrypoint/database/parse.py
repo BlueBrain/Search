@@ -17,10 +17,11 @@
 """Parsing articles."""
 import argparse
 import json
-import pickle  # nosec
 import warnings
 from pathlib import Path
 from typing import Iterable
+
+from serde.json import to_json
 
 from bluesearch.database.article import (
     Article,
@@ -99,9 +100,9 @@ def run(
 
             article = Article.parse(parser_inst)
 
-            out = (output_path / inp.name).with_suffix(".pkl")
-            with out.open("wb") as f_out:
-                pickle.dump(article, f_out)
+            serialized = to_json(article)
+            out = (output_path / inp.name).with_suffix(".json")
+            out.write_text(serialized, "utf-8")
 
         except Exception as e:
             warnings.warn(

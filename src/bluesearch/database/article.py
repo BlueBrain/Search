@@ -21,10 +21,11 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
+from typing import Generator, Iterable, List, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
+from serde import deserialize, serialize
 
 
 class ArticleParser(ABC):
@@ -398,14 +399,16 @@ class CORD19ArticleParser(ArticleParser):
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 
+@deserialize
+@serialize
 @dataclass(frozen=True)
 class Article:
     """Abstraction of a scientific article and its contents."""
 
     title: str
-    authors: Sequence[str]
-    abstract: Sequence[str]
-    section_paragraphs: Sequence[tuple[str, str]]
+    authors: List[str]
+    abstract: List[str]
+    section_paragraphs: List[Tuple[str, str]]
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -417,9 +420,9 @@ class Article:
             An article parser instance.
         """
         title = parser.title
-        authors = tuple(parser.authors)
-        abstract = tuple(parser.abstract)
-        section_paragraphs = tuple(parser.paragraphs)
+        authors = list(parser.authors)
+        abstract = list(parser.abstract)
+        section_paragraphs = list(parser.paragraphs)
 
         return cls(title, authors, abstract, section_paragraphs)
 

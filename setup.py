@@ -60,6 +60,7 @@ INSTALL_REQUIRES = [
     "langdetect",
     "numpy>=1.20.1",
     "pandas>=1",
+    "pyserde",
     "python-dotenv",
     "requests",
     "scikit-learn",
