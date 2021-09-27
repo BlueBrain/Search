@@ -21,11 +21,13 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, List, Tuple
+from typing import Generator, Iterable, List, Optional, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
 from serde import deserialize, serialize
+
+from bluesearch.database.identifiers import generate_uid
 
 
 class ArticleParser(ABC):
@@ -76,6 +78,51 @@ class ArticleParser(ABC):
             is the section title, the second the paragraph content.
         """
 
+    @property
+    def pubmed_id(self) -> Optional[str]:
+        """Get Pubmed ID.
+
+        Returns
+        -------
+        str or None
+            Pubmed ID if specified, otherwise None.
+        """
+        return None
+
+    @property
+    def pmc_id(self) -> Optional[str]:
+        """Get PMC ID.
+
+        Returns
+        -------
+        str or None
+            PMC ID if specified, otherwise None.
+        """
+        return None
+
+    @property
+    def doi(self) -> Optional[str]:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        return None
+
+    @property
+    def uid(self) -> Optional[str]:
+        """Generate unique ID of the article based on different identifiers.
+
+        Returns
+        -------
+        str or None
+            If at least one identifier exists, unique id is created. Otherwise,
+            the returned uid is None.
+        """
+        return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
+
 
 class PubmedXMLParser(ArticleParser):
     """Parser for PubMed XML files using the JATS Journal Publishing DTD.
@@ -89,6 +136,7 @@ class PubmedXMLParser(ArticleParser):
     def __init__(self, path: str | Path) -> None:
         super().__init__()
         self.content = ElementTree.parse(str(path))
+        self.ids = self.get_ids()
 
     @property
     def title(self) -> str:
@@ -189,6 +237,59 @@ class PubmedXMLParser(ArticleParser):
                 continue
             caption = " ".join(self._element_to_str(c) for c in caption_elements)
             yield "Table Caption", caption
+
+    @property
+    def pubmed_id(self) -> Optional[str]:
+        """Get Pubmed ID.
+
+        Returns
+        -------
+        str or None
+            Pubmed ID if specified, otherwise None.
+        """
+        return self.ids.get("pmid")
+
+    @property
+    def pmc_id(self) -> Optional[str]:
+        """Get PMC ID.
+
+        Returns
+        -------
+        str or None
+            PMC ID if specified, otherwise None.
+        """
+        return self.ids.get("pmc")
+
+    @property
+    def doi(self) -> Optional[str]:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        return self.ids.get("doi")
+
+    def get_ids(self) -> dict[str, str]:
+        """Get all specified IDs of the paper.
+
+        Returns
+        -------
+        ids : dict
+            Dictionary whose keys are ids type and value are ids values.
+        """
+        ids = {}
+        article_ids = self.content.findall("./front/article-meta/article-id")
+
+        for article_id in article_ids:
+
+            if "pub-id-type" not in article_id.attrib.keys():
+                continue
+
+            ids[article_id.attrib["pub-id-type"]] = article_id.text
+
+        return ids
 
     def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
         """Construct mapping between all paragraphs and their section name.
@@ -394,6 +495,17 @@ class CORD19ArticleParser(ArticleParser):
         for ref_entry in self.data["ref_entries"].values():
             yield "Caption", ref_entry["text"]
 
+    @property
+    def pmc_id(self) -> Optional[str]:
+        """Get PMC ID.
+
+        Returns
+        -------
+        str or None
+            PMC ID if specified, otherwise None.
+        """
+        return self.data.get("paper_id")
+
     def __str__(self):
         """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
@@ -409,6 +521,10 @@ class Article:
     authors: List[str]
     abstract: List[str]
     section_paragraphs: List[Tuple[str, str]]
+    pubmed_id: Optional[str]
+    pmc_id: Optional[str]
+    doi: Optional[str]
+    uid: Optional[str]
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -423,8 +539,14 @@ class Article:
         authors = list(parser.authors)
         abstract = list(parser.abstract)
         section_paragraphs = list(parser.paragraphs)
+        pubmed_id = parser.pubmed_id
+        pmc_id = parser.pmc_id
+        doi = parser.doi
+        uid = parser.uid
 
-        return cls(title, authors, abstract, section_paragraphs)
+        return cls(
+            title, authors, abstract, section_paragraphs, pubmed_id, pmc_id, doi, uid
+        )
 
     def iter_paragraphs(
         self, with_abstract: bool = False

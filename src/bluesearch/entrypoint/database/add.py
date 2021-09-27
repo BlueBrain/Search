@@ -69,7 +69,6 @@ def run(
     from serde.json import from_json
 
     from bluesearch.database.article import Article
-    from bluesearch.database.identifiers import generate_uid
     from bluesearch.utils import load_spacy_model
 
     if db_type == "sqlite":
@@ -105,13 +104,14 @@ def run(
 
     for article in articles:
 
-        # TODO At the moment, no identifiers are extracted. This is a patch meanwhile.
-        article_id = generate_uid((article.title,))
         article_mapping = {
-            "article_id": article_id,
+            "article_id": article.uid,
             "title": article.title,
             "authors": ", ".join(article.authors),
             "abstract": "\n".join(article.abstract),
+            "pubmed_id": article.pubmed_id,
+            "pmc_id": article.pmc_id,
+            "doi": article.doi,
         }
         article_mappings.append(article_mapping)
 
@@ -124,7 +124,7 @@ def run(
                 sentence_mapping = {
                     "section_name": section,
                     "text": sent.text,
-                    "article_id": article_id,
+                    "article_id": article.uid,
                     "paragraph_pos_in_article": ppos,
                     "sentence_pos_in_paragraph": spos,
                 }
@@ -132,7 +132,15 @@ def run(
 
     # Persistence.
 
-    article_keys = ["article_id", "title", "authors", "abstract"]
+    article_keys = [
+        "article_id",
+        "title",
+        "authors",
+        "abstract",
+        "pubmed_id",
+        "pmc_id",
+        "doi",
+    ]
     article_fields = ", ".join(article_keys)
     article_binds = f":{', :'.join(article_keys)}"
     article_query = sqlalchemy.text(

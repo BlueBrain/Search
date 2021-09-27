@@ -20,6 +20,7 @@
             <article-id pub-id-type="publisher-id">Publisher ID</article-id>
             <article-id pub-id-type="publisher-id">Publisher ID 2</article-id>
             <article-id pub-id-type="doi">DOI</article-id>
+            <article-id pub-id-type="pmc">PMC</article-id>
             <article-id pub-id-type="other">other</article-id>
             <article-id pub-id-type="pmid">PMID</article-id>
             <article-version vocab="JAV"
