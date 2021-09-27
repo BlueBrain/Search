@@ -78,7 +78,7 @@ class ArticleParser(ABC):
         """
 
     @property
-    def pubmed_id(self) -> str | None:
+    def pubmed_id(self) -> Optional[str]:
         """Get Pubmed ID.
 
         Returns
@@ -89,7 +89,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def pmc_id(self) -> str | None:
+    def pmc_id(self) -> Optional[str]:
         """Get PMC ID.
 
         Returns
@@ -100,7 +100,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def doi(self) -> str | None:
+    def doi(self) -> Optional[str]:
         """Get DOI.
 
         Returns
@@ -111,7 +111,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def uid(self) -> str | None:
+    def uid(self) -> Optional[str]:
         """Generate unique ID of the article based on different identifiers.
 
         Returns
@@ -238,7 +238,7 @@ class PubmedXMLParser(ArticleParser):
             yield "Table Caption", caption
 
     @property
-    def pubmed_id(self) -> str | None:
+    def pubmed_id(self) -> Optional[str]:
         """Get Pubmed ID.
 
         Returns
@@ -249,7 +249,7 @@ class PubmedXMLParser(ArticleParser):
         return self.ids.get("pmid")
 
     @property
-    def pmc_id(self) -> str | None:
+    def pmc_id(self) -> Optional[str]:
         """Get PMC ID.
 
         Returns
@@ -260,7 +260,7 @@ class PubmedXMLParser(ArticleParser):
         return self.ids.get("pmc")
 
     @property
-    def doi(self) -> str | None:
+    def doi(self) -> Optional[str]:
         """Get DOI.
 
         Returns
@@ -495,7 +495,7 @@ class CORD19ArticleParser(ArticleParser):
             yield "Caption", ref_entry["text"]
 
     @property
-    def pmc_id(self) -> str | None:
+    def pmc_id(self) -> Optional[str]:
         """Get PMC ID.
 
         Returns
@@ -503,7 +503,7 @@ class CORD19ArticleParser(ArticleParser):
         str or None
             PMC ID if specified, otherwise None.
         """
-        return self.data["paper_id"]
+        return self.data.get("paper_id")
 
     def __str__(self):
         """Get the string representation of the parser instance."""
