@@ -93,6 +93,11 @@ class TestPubmedXMLArticleParser:
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
         assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
 
+    def test_journal_title(self, pubmed_xml_parser):
+        journal_title = pubmed_xml_parser.journal_title
+        assert isinstance(journal_title, str)
+        assert journal_title == "Journal Title"
+
     @pytest.mark.parametrize(
         ("input_xml", "expected_inner_text"),
         (

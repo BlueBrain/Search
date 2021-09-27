@@ -37,7 +37,8 @@ class TestGetMeshFromNlmTa:
             responses.GET,
             (
                 "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                "term=Trauma Surgery And Acute Care Open[Journal]&report=xml&format=text"
+                "term=Trauma Surgery And Acute Care Open[Journal]"
+                "&report=xml&format=text"
             ),
             body=body,
         )

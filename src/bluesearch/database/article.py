@@ -21,7 +21,7 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
+from typing import Generator, Iterable, Optional, Sequence
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -74,6 +74,17 @@ class ArticleParser(ABC):
             For each paragraph a tuple with two strings is returned. The first
             is the section title, the second the paragraph content.
         """
+
+    @property
+    def journal_title(self) -> Optional[str]:
+        """Get Journal Title of the Article.
+
+        Returns
+        -------
+        str or None
+            The Journal Title if specified.
+        """
+        return None
 
 
 class PubmedXMLParser(ArticleParser):
@@ -188,6 +199,23 @@ class PubmedXMLParser(ArticleParser):
                 continue
             caption = " ".join(self._element_to_str(c) for c in caption_elements)
             yield "Table Caption", caption
+
+    @property
+    def journal_title(self) -> Optional[str]:
+        """Get Journal Title of the Article.
+
+        Returns
+        -------
+        str or None
+            The Journal Title if specified.
+        """
+        journal_title = self.content.find(
+            "./front/journal-meta/journal-title-group/journal-title"
+        )
+        if journal_title is None:
+            return None
+        else:
+            return journal_title.text
 
     def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
         """Construct mapping between all paragraphs and their section name.

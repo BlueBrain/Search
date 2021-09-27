@@ -11,6 +11,7 @@
             <journal-id journal-id-type="pmc">Journal ID PMC</journal-id>
             <journal-id journal-id-type="pubmed">Journal ID PubMed</journal-id>
             <journal-id journal-id-type="publisher">Journal ID Publisher</journal-id>
+            <journal-title-group><journal-title>Journal Title</journal-title></journal-title-group>
             <issn>XXXX-XXXX</issn>
             <publisher>
                 <publisher-name>Publisher Name</publisher-name>
