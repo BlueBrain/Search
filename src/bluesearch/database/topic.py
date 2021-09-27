@@ -27,13 +27,13 @@ from defusedxml import ElementTree
 
 
 # Journal Topic
-def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
-    """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
+def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
+    """Retrieve Medical Subject Heading from Journal's NLM Title.
 
     Parameters
     ----------
-    nlm_ta
-        NLM Title Abbreviation of Journal.
+    journal_title
+        NLM Title of Journal.
 
     Returns
     -------
@@ -49,10 +49,10 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
-    if "&" in nlm_ta:
+    if "&" in journal_title:
         raise ValueError(
             "Ampersands not allowed in the NLM title abbreviation. "
-            f"Try unescaping HTML characters first. Got:\n{nlm_ta}"
+            f"Try unescaping HTML characters first. Got:\n{journal_title}"
         )
 
     # The "format=text" parameter only matters when no result was found. With
@@ -60,7 +60,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f"{base_url}?term={nlm_ta}[ta]&report=xml&format=text"
+    url = f"{base_url}?term={journal_title}[Journal]&report=xml&format=text"
 
     response = requests.get(url)
     response.raise_for_status()
