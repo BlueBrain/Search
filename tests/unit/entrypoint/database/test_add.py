@@ -37,6 +37,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
             authors=[f"author_{i}"],
             abstract=f"abstract_{i}",
             section_paragraphs=[("Conclusion", f"conclusion_{i}")],
+            journal_title=f"journal_title_{i}",
         )
         for i in range(n_files)
     ]

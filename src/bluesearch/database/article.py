@@ -434,6 +434,7 @@ class Article:
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[tuple[str, str]]
+    journal_title: Optional[str]
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -448,8 +449,9 @@ class Article:
         authors = tuple(parser.authors)
         abstract = tuple(parser.abstract)
         section_paragraphs = tuple(parser.paragraphs)
+        journal_title = parser.journal_title
 
-        return cls(title, authors, abstract, section_paragraphs)
+        return cls(title, authors, abstract, section_paragraphs, journal_title)
 
     def iter_paragraphs(
         self, with_abstract: bool = False
@@ -499,6 +501,7 @@ class Article:
             f"{abstract_length} characters\n"
             f"Sections : {len(section_lengths)} section(s) "
             f"{main_text_length} characters\n"
+            f"Journal  : {self.journal_title}"
         )
         for section in section_lengths:
             info_str += f"- {section}\n"
