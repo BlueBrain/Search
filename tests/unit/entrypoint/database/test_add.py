@@ -34,7 +34,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         Article(
             title=f"title_{i}",
             authors=[f"author_{i}"],
-            abstract=f"abstract_{i}",
+            abstract=[f"abstract_{i}"],
             section_paragraphs=[("Conclusion", f"conclusion_{i}")],
             uid=f"uid_{i}",
             pubmed_id=f"pubmed_id_{i}",
