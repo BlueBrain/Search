@@ -80,7 +80,7 @@ class TestPubmedXMLArticleParser:
     def test_authors(self, pubmed_xml_parser):
         authors = pubmed_xml_parser.authors
         assert inspect.isgenerator(authors)
-        authors = list(authors)
+        authors = tuple(authors)
 
         assert len(authors) == 2
         assert authors[0] == "Author Given Names 1 Author Surname 1"
@@ -89,7 +89,7 @@ class TestPubmedXMLArticleParser:
     def test_abstract(self, pubmed_xml_parser):
         abstract = pubmed_xml_parser.abstract
         assert inspect.isgenerator(abstract)
-        abstract = list(abstract)
+        abstract = tuple(abstract)
         assert len(abstract) == 2
         assert abstract[0] == "Abstract Paragraph 1"
         assert abstract[1] == "Abstract Paragraph 2"
@@ -97,7 +97,7 @@ class TestPubmedXMLArticleParser:
     def test_paragraphs(self, pubmed_xml_parser):
         paragraphs = pubmed_xml_parser.paragraphs
         assert inspect.isgenerator(paragraphs)
-        paragraphs = list(paragraphs)
+        paragraphs = tuple(paragraphs)
         assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
 
         for i, paragraph in enumerate(paragraphs):
@@ -209,7 +209,7 @@ class TestCORD19ArticleParser:
 
     def test_authors(self, real_json_file):
         parser = CORD19ArticleParser(real_json_file)
-        authors = list(parser.authors)
+        authors = tuple(parser.authors)
 
         # Check that all authors have been parsed
         assert len(authors) == len(real_json_file["metadata"]["authors"])
@@ -240,7 +240,7 @@ class TestCORD19ArticleParser:
 
     def test_paragraphs(self, real_json_file):
         parser = CORD19ArticleParser(real_json_file)
-        paragraphs = list(parser.paragraphs)
+        paragraphs = tuple(parser.paragraphs)
 
         # Check that all paragraphs were parsed
         n_body_text = len(real_json_file["body_text"])
@@ -292,7 +292,7 @@ class TestArticle:
         parser = SimpleTestParser()
         article = Article.parse(parser)
         assert article.title == parser.title
-        assert article.authors == list(parser.authors)
+        assert article.authors == tuple(parser.authors)
 
         # Test iterating over all paragraphs in the article. By default the
         # abstract is not included

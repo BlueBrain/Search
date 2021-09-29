@@ -21,7 +21,7 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, List, Optional, Tuple
+from typing import Generator, Iterable, Optional, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -518,9 +518,9 @@ class Article:
     """Abstraction of a scientific article and its contents."""
 
     title: str
-    authors: List[str]
-    abstract: List[str]
-    section_paragraphs: List[Tuple[str, str]]
+    authors: Tuple[str, ...]
+    abstract: Tuple[str, ...]
+    section_paragraphs: Tuple[Tuple[str, str], ...]
     pubmed_id: Optional[str]
     pmc_id: Optional[str]
     doi: Optional[str]
@@ -536,9 +536,9 @@ class Article:
             An article parser instance.
         """
         title = parser.title
-        authors = list(parser.authors)
-        abstract = list(parser.abstract)
-        section_paragraphs = list(parser.paragraphs)
+        authors = tuple(parser.authors)
+        abstract = tuple(parser.abstract)
+        section_paragraphs = tuple(parser.paragraphs)
         pubmed_id = parser.pubmed_id
         pmc_id = parser.pmc_id
         doi = parser.doi
