@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Change| serialization of processed articles from Pickle to JSON format.
 - |Add| command line entrypoints :code:`bbs_database init`,
   :code:`bbs_database parse`, and :code:`bbs_database add` to initialize
   a literature database, parse, and integrate articles.

@@ -1,5 +1,3 @@
-import pickle
-
 import pytest
 import sqlalchemy
 
@@ -26,11 +24,11 @@ def engine_sqlite(tmp_path):
 
 
 def test_sqlite_cord19(engine_sqlite, tmp_path):
-    path_to_pkl = tmp_path / "pkl_files"
-    path_to_pkl.mkdir()
+    parsed_dir = tmp_path / "parsed_files"
+    parsed_dir.mkdir()
     n_files = 3
 
-    pkl_files = [path_to_pkl / f"{i}.pkl" for i in range(n_files)]
+    parsed_files = [parsed_dir / f"{i}.json" for i in range(n_files)]
     articles = [
         Article(
             title=f"title_{i}",
@@ -44,19 +42,19 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         )
         for i in range(n_files)
     ]
-    for article, pkl_file in zip(articles, pkl_files):
-        with pkl_file.open("wb") as f:
-            pickle.dump(article, f)
+    for article, parsed_file in zip(articles, parsed_files):
+        serialized = article.to_json()
+        parsed_file.write_text(serialized, "utf-8")
 
     query_articles = "SELECT COUNT(*) FROM articles"
     query_sentences = "SELECT COUNT(*) FROM sentences"
 
     # Test adding single article
-    for pkl_file in pkl_files:
+    for parsed_file in parsed_files:
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(pkl_file),
+            str(parsed_file),
             "--db-type=sqlite",
         ]
         main(args_and_opts)
@@ -79,7 +77,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
     args_and_opts = [
         "add",
         engine_sqlite.url.database,
-        str(path_to_pkl),
+        str(parsed_dir),
         "--db-type=sqlite",
     ]
     main(args_and_opts)
@@ -95,7 +93,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(path_to_pkl / "dir_that_does_not_exists"),
+            str(parsed_dir / "dir_that_does_not_exists"),
             "--db-type=sqlite",
         ]
         main(args_and_opts)

@@ -63,11 +63,11 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import pickle  # nosec
     from typing import Iterable
 
     import sqlalchemy
 
+    from bluesearch.database.article import Article
     from bluesearch.utils import load_spacy_model
 
     if db_type == "sqlite":
@@ -84,7 +84,7 @@ def run(
     if parsed_path.is_file():
         inputs = [parsed_path]
     elif parsed_path.is_dir():
-        inputs = sorted(parsed_path.glob("*.pkl"))
+        inputs = sorted(parsed_path.glob("*.json"))
     else:
         raise ValueError(
             "Argument 'parsed_path' should be a path to an existing file or directory!"
@@ -92,9 +92,9 @@ def run(
 
     articles = []
     for inp in inputs:
-        with inp.open("rb") as f:
-            article = pickle.load(f)  # nosec
-            articles.append(article)
+        serialized = inp.read_text("utf-8")
+        article = Article.from_json(serialized)
+        articles.append(article)
 
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
