@@ -34,6 +34,7 @@ Latest
   the NLP model to get sentences (fail faster).
 - |Change| the behaviour of :code:`bbs_database add` when no sentence was
   extracted from the given path, Now, stop with a :code:`RuntimeWarning`.
+- |Change| serialization of processed articles from Pickle to JSON format.
 - |Add| command line entrypoints :code:`bbs_database init`,
   :code:`bbs_database parse`, and :code:`bbs_database add` to initialize
   a literature database, parse, and integrate articles.
