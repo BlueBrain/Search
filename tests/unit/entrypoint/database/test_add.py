@@ -100,16 +100,16 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
 
 
 def test_no_articles(tmp_path):
-    empty_dir = tmp_path / "empty"
-    empty_dir.mkdir()
+    parsed_dir = tmp_path / "empty"
+    parsed_dir.mkdir()
 
     with pytest.raises(RuntimeWarning, match=r"No article was loaded from '.*'!"):
-        main(["add", "test.db", str(empty_dir)])
+        main(["add", "test.db", str(parsed_dir)])
 
 
 def test_no_sentences(tmp_path, engine_sqlite):
-    path_dir = tmp_path / "parsed_files"
-    path_dir.mkdir()
+    parsed_dir = tmp_path / "parsed_files"
+    parsed_dir.mkdir()
 
     article = Article(
         title="Title",
@@ -122,9 +122,9 @@ def test_no_sentences(tmp_path, engine_sqlite):
         uid="UID",
     )
 
-    path = path_dir / "article.pkl"
-    with path.open("wb") as f:
-        pickle.dump(article, f)
+    serialized = article.to_json()
+    parsed_file = parsed_dir / "article.pkl"
+    parsed_file.write_text(serialized, "utf-8")
 
     with pytest.raises(RuntimeWarning, match=r"No sentence was extracted from '.*'!"):
-        main(["add", engine_sqlite.url.database, str(path)])
+        main(["add", engine_sqlite.url.database, str(parsed_file)])
