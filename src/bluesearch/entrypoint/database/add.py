@@ -66,7 +66,6 @@ def run(
     from typing import Iterable
 
     import sqlalchemy
-    from serde.json import from_json
 
     from bluesearch.database.article import Article
     from bluesearch.utils import load_spacy_model
@@ -94,7 +93,7 @@ def run(
     articles = []
     for inp in inputs:
         serialized = inp.read_text("utf-8")
-        article = from_json(Article, serialized)
+        article = Article.from_json(serialized)
         articles.append(article)
 
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])

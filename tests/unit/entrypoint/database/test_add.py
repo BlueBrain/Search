@@ -1,6 +1,5 @@
 import pytest
 import sqlalchemy
-from serde.json import to_json
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
@@ -25,11 +24,11 @@ def engine_sqlite(tmp_path):
 
 
 def test_sqlite_cord19(engine_sqlite, tmp_path):
-    path_to_json = tmp_path / "json_files"
-    path_to_json.mkdir()
+    parsed_dir = tmp_path / "parsed_files"
+    parsed_dir.mkdir()
     n_files = 3
 
-    json_files = [path_to_json / f"{i}.json" for i in range(n_files)]
+    parsed_files = [parsed_dir / f"{i}.json" for i in range(n_files)]
     articles = [
         Article(
             title=f"title_{i}",
@@ -43,19 +42,19 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         )
         for i in range(n_files)
     ]
-    for article, json_file in zip(articles, json_files):
-        serialized = to_json(article)
-        json_file.write_text(serialized, "utf-8")
+    for article, parsed_file in zip(articles, parsed_files):
+        serialized = article.to_json()
+        parsed_file.write_text(serialized, "utf-8")
 
     query_articles = "SELECT COUNT(*) FROM articles"
     query_sentences = "SELECT COUNT(*) FROM sentences"
 
     # Test adding single article
-    for json_file in json_files:
+    for parsed_file in parsed_files:
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(json_file),
+            str(parsed_file),
             "--db-type=sqlite",
         ]
         main(args_and_opts)
@@ -78,7 +77,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
     args_and_opts = [
         "add",
         engine_sqlite.url.database,
-        str(path_to_json),
+        str(parsed_dir),
         "--db-type=sqlite",
     ]
     main(args_and_opts)
@@ -94,7 +93,7 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
         args_and_opts = [
             "add",
             engine_sqlite.url.database,
-            str(path_to_json / "dir_that_does_not_exists"),
+            str(parsed_dir / "dir_that_does_not_exists"),
             "--db-type=sqlite",
         ]
         main(args_and_opts)

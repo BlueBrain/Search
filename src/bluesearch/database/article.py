@@ -21,11 +21,11 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Tuple
+from typing import Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
-from serde import deserialize, serialize
+from mashumaro import DataClassJSONMixin
 
 from bluesearch.database.identifiers import generate_uid
 
@@ -511,16 +511,14 @@ class CORD19ArticleParser(ArticleParser):
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 
-@deserialize
-@serialize
 @dataclass(frozen=True)
-class Article:
+class Article(DataClassJSONMixin):
     """Abstraction of a scientific article and its contents."""
 
     title: str
-    authors: Tuple[str, ...]
-    abstract: Tuple[str, ...]
-    section_paragraphs: Tuple[Tuple[str, str], ...]
+    authors: Sequence[str]
+    abstract: Sequence[str]
+    section_paragraphs: Sequence[Tuple[str, str]]
     pubmed_id: Optional[str]
     pmc_id: Optional[str]
     doi: Optional[str]

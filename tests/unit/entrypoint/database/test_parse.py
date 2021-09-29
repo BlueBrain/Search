@@ -1,7 +1,6 @@
 from argparse import ArgumentError
 
 import pytest
-from serde.json import from_json
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
@@ -42,7 +41,7 @@ def test_cord19_json(jsons_path, tmp_path):
         assert out_files[0].name == inp_file.stem + ".json"
 
         serialized = out_files[0].read_text("utf-8")
-        loaded_article = from_json(Article, serialized)
+        loaded_article = Article.from_json(serialized)
         assert isinstance(loaded_article, Article)
 
     # Test parsing multiple files
@@ -62,7 +61,7 @@ def test_cord19_json(jsons_path, tmp_path):
         assert out_file.name == inp_file.stem + ".json"
 
         serialized = out_file.read_text("utf-8")
-        loaded_article = from_json(Article, serialized)
+        loaded_article = Article.from_json(serialized)
         assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist

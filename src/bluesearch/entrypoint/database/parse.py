@@ -21,8 +21,6 @@ import warnings
 from pathlib import Path
 from typing import Iterable
 
-from serde.json import to_json
-
 from bluesearch.database.article import (
     Article,
     ArticleParser,
@@ -100,7 +98,7 @@ def run(
 
             article = Article.parse(parser_inst)
 
-            serialized = to_json(article)
+            serialized = article.to_json()
             out = (output_path / inp.name).with_suffix(".json")
             out.write_text(serialized, "utf-8")
 
