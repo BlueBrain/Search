@@ -29,6 +29,11 @@ Legend
 
 Latest
 ======
+- |Change| the behaviour of :code:`bbs_database add` when no article was loaded
+  from the given path. Now, stop with a :code:`RuntimeWarning` and don't load
+  the NLP model to get sentences (fail faster).
+- |Change| the behaviour of :code:`bbs_database add` when no sentence was
+  extracted from the given path, Now, stop with a :code:`RuntimeWarning`.
 - |Add| command line entrypoints :code:`bbs_database init`,
   :code:`bbs_database parse`, and :code:`bbs_database add` to initialize
   a literature database, parse, and integrate articles.
