@@ -97,3 +97,34 @@ def test_sqlite_cord19(engine_sqlite, tmp_path):
             "--db-type=sqlite",
         ]
         main(args_and_opts)
+
+
+def test_no_articles(tmp_path):
+    parsed_dir = tmp_path / "empty"
+    parsed_dir.mkdir()
+
+    with pytest.raises(RuntimeWarning, match=r"No article was loaded from '.*'!"):
+        main(["add", "test.db", str(parsed_dir)])
+
+
+def test_no_sentences(tmp_path, engine_sqlite):
+    parsed_dir = tmp_path / "parsed_files"
+    parsed_dir.mkdir()
+
+    article = Article(
+        title="Title",
+        authors=["Author"],
+        abstract="Abstract",
+        section_paragraphs=[],
+        pubmed_id="PubMed ID",
+        pmc_id="PMC ID",
+        doi="DOI",
+        uid="UID",
+    )
+
+    serialized = article.to_json()
+    parsed_file = parsed_dir / "article.pkl"
+    parsed_file.write_text(serialized, "utf-8")
+
+    with pytest.raises(RuntimeWarning, match=r"No sentence was extracted from '.*'!"):
+        main(["add", engine_sqlite.url.database, str(parsed_file)])

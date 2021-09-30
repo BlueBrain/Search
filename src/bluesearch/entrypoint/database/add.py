@@ -96,6 +96,9 @@ def run(
         article = Article.from_json(serialized)
         articles.append(article)
 
+    if not articles:
+        raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
+
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
     article_mappings = []
@@ -148,6 +151,9 @@ def run(
 
     with engine.begin() as con:
         con.execute(article_query, *article_mappings)
+
+    if not sentence_mappings:
+        raise RuntimeWarning(f"No sentence was extracted from '{parsed_path}'!")
 
     sentences_keys = [
         "section_name",
