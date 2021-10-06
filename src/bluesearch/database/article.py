@@ -335,15 +335,17 @@ class PubMedXML(ArticleParser):
 
         for author in author_list:
             last_name, fore_name = None, None
-            if author.
-            for elem in author:
-                if elem.tag == "LastName":
-                    last_name = elem.text
-                elif elem.tag == "ForeName":
-                    fore_name = elem.text
+            # Author entries with 'ValidYN' == 'N' are incorrect entries:
+            # https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/190101/att-ValidYN.html.
+            if author.get("ValidYN", "Y") == "Y":
+                for elem in author:
+                    if elem.tag == "LastName":
+                        last_name = elem.text
+                    elif elem.tag == "ForeName":
+                        fore_name = elem.text
 
-            author_str = (fore_name or "") + " " + (last_name or "")
-            yield author_str.strip()
+                author_str = (fore_name or "") + " " + (last_name or "")
+                yield author_str.strip()
 
     @property
     def abstract(self) -> Iterable[str]:
