@@ -302,8 +302,9 @@ class PubmedXMLParser(ArticleParser):
 class PubMedXML(ArticleParser):
     """Parser for PubMed abstract."""
 
-    def __init__(self, article):
-        self.content = article
+    def __init__(self, path: str | Path) -> None:
+        super().__init__()
+        self.content = ElementTree.parse(str(path))
 
     @property
     def title(self) -> str:
@@ -334,6 +335,7 @@ class PubMedXML(ArticleParser):
 
         for author in author_list:
             last_name, fore_name = None, None
+            if author.
             for elem in author:
                 if elem.tag == "LastName":
                     last_name = elem.text
