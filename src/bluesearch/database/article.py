@@ -21,7 +21,7 @@ import html
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
+from typing import Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -297,6 +297,93 @@ class PubmedXMLParser(ArticleParser):
         else:
             # Default handling for all other element tags
             return self._inner_text(element)
+
+
+class PubMedXML(ArticleParser):
+    """Parser for PubMed abstract."""
+
+    def __init__(self, article):
+        self.content = article
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        title = self.content.find("./MedlineCitation/Article/ArticleTitle")
+        return title.text
+
+    @property
+    def authors(self) -> Iterable[str]:
+        """Get all author names.
+
+        Returns
+        -------
+        iterable of str
+            All authors.
+        """
+        author_list = self.content.find("./MedlineCitation/Article/AuthorList")
+        if author_list is None:
+            return [
+                "",
+            ]
+
+        for author in author_list:
+            last_name, fore_name = None, None
+            for elem in author:
+                if elem.tag == "LastName":
+                    last_name = elem.text
+                elif elem.tag == "ForeName":
+                    fore_name = elem.text
+
+            author_str = (fore_name or "") + " " + (last_name or "")
+            yield author_str.strip()
+
+    @property
+    def abstract(self) -> Iterable[str]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Returns
+        -------
+        iterable of str
+            The paragraphs of the article abstract.
+        """
+        abstract_parts = self.content.find("./MedlineCitation/Article/Abstract")
+        if abstract_parts is None:
+            return [
+                "",
+            ]
+
+        for abstract in abstract_parts:
+            yield abstract.text
+
+    @property
+    def paragraphs(self) -> Iterable[Tuple[str, str]]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Returns
+        -------
+        iterable of (str, str)
+            For each paragraph a tuple with two strings is returned. The first
+            is the section title, the second the paragraph content.
+        """
+        yield
+
+    @property
+    def pubmed_id(self) -> Optional[str]:
+        """Get Pubmed ID.
+
+        Returns
+        -------
+        str or None
+            Pubmed ID if specified, otherwise None.
+        """
+        pubmed_id = self.content.find("./MedlineCitation/PMID")
+        yield pubmed_id.text
 
 
 class CORD19ArticleParser(ArticleParser):
