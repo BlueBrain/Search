@@ -25,6 +25,7 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
+    PubMedXML,
     PubmedXMLParser,
 )
 
@@ -37,7 +38,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "article_type",
         type=str,
-        choices=("cord19-json", "pmc-xml"),
+        choices=("cord19-json", "pmc-xml", "pubmed-xml"),
         help="""
         Article format. If parsing several articles, all articles
         must have same format.
@@ -93,6 +94,8 @@ def run(
                     parser_inst = CORD19ArticleParser(json.load(f_inp))
             elif article_type == "pmc-xml":
                 parser_inst = PubmedXMLParser(inp)
+            elif article_type == "pubmed-xml":
+                parser_inst = PubMedXML(inp)
             else:
                 raise ValueError(f"Unsupported article type {article_type}")
 
