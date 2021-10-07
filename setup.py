@@ -60,6 +60,8 @@ INSTALL_REQUIRES = [
     "langdetect",
     "numpy>=1.20.1",
     "pandas>=1",
+    # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
+    "mashumaro",
     "python-dotenv",
     "requests",
     "scikit-learn",

@@ -1,4 +1,3 @@
-import pickle
 from argparse import ArgumentError
 
 import pytest
@@ -39,10 +38,11 @@ def test_cord19_json(jsons_path, tmp_path):
         out_files = list(out_dir.glob("*"))
 
         assert len(out_files) == 1
-        assert out_files[0].name == inp_file.stem + ".pkl"
-        with out_files[0].open("rb") as f:
-            loaded_article = pickle.load(f)
-            assert isinstance(loaded_article, Article)
+        assert out_files[0].name == inp_file.stem + ".json"
+
+        serialized = out_files[0].read_text("utf-8")
+        loaded_article = Article.from_json(serialized)
+        assert isinstance(loaded_article, Article)
 
     # Test parsing multiple files
     out_dir = tmp_path / "all"
@@ -56,11 +56,13 @@ def test_cord19_json(jsons_path, tmp_path):
     out_files = sorted(out_dir.glob("*"))
 
     assert len(out_files) == len(json_files)
+
     for inp_file, out_file in zip(json_files, out_files):
-        assert out_file.name == inp_file.stem + ".pkl"
-        with out_file.open("rb") as f:
-            loaded_article = pickle.load(f)
-            assert isinstance(loaded_article, Article)
+        assert out_file.name == inp_file.stem + ".json"
+
+        serialized = out_file.read_text("utf-8")
+        loaded_article = Article.from_json(serialized)
+        assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist
     with pytest.raises(ValueError):

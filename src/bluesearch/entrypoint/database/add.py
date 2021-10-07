@@ -63,12 +63,11 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import pickle  # nosec
     from typing import Iterable
 
     import sqlalchemy
 
-    from bluesearch.database.identifiers import generate_uid
+    from bluesearch.database.article import Article
     from bluesearch.utils import load_spacy_model
 
     if db_type == "sqlite":
@@ -85,7 +84,7 @@ def run(
     if parsed_path.is_file():
         inputs = [parsed_path]
     elif parsed_path.is_dir():
-        inputs = sorted(parsed_path.glob("*.pkl"))
+        inputs = sorted(parsed_path.glob("*.json"))
     else:
         raise ValueError(
             "Argument 'parsed_path' should be a path to an existing file or directory!"
@@ -93,9 +92,12 @@ def run(
 
     articles = []
     for inp in inputs:
-        with inp.open("rb") as f:
-            article = pickle.load(f)  # nosec
-            articles.append(article)
+        serialized = inp.read_text("utf-8")
+        article = Article.from_json(serialized)
+        articles.append(article)
+
+    if not articles:
+        raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
@@ -104,13 +106,14 @@ def run(
 
     for article in articles:
 
-        # TODO At the moment, no identifiers are extracted. This is a patch meanwhile.
-        article_id = generate_uid((article.title,))
         article_mapping = {
-            "article_id": article_id,
+            "article_id": article.uid,
             "title": article.title,
             "authors": ", ".join(article.authors),
             "abstract": "\n".join(article.abstract),
+            "pubmed_id": article.pubmed_id,
+            "pmc_id": article.pmc_id,
+            "doi": article.doi,
         }
         article_mappings.append(article_mapping)
 
@@ -123,7 +126,7 @@ def run(
                 sentence_mapping = {
                     "section_name": section,
                     "text": sent.text,
-                    "article_id": article_id,
+                    "article_id": article.uid,
                     "paragraph_pos_in_article": ppos,
                     "sentence_pos_in_paragraph": spos,
                 }
@@ -131,7 +134,15 @@ def run(
 
     # Persistence.
 
-    article_keys = ["article_id", "title", "authors", "abstract"]
+    article_keys = [
+        "article_id",
+        "title",
+        "authors",
+        "abstract",
+        "pubmed_id",
+        "pmc_id",
+        "doi",
+    ]
     article_fields = ", ".join(article_keys)
     article_binds = f":{', :'.join(article_keys)}"
     article_query = sqlalchemy.text(
@@ -140,6 +151,9 @@ def run(
 
     with engine.begin() as con:
         con.execute(article_query, *article_mappings)
+
+    if not sentence_mappings:
+        raise RuntimeWarning(f"No sentence was extracted from '{parsed_path}'!")
 
     sentences_keys = [
         "section_name",
