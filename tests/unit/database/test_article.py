@@ -232,12 +232,17 @@ class TestPubMedXML:
     def test_pubmed_id(self, pubmed_xml):
         pubmed_id = pubmed_xml.pubmed_id
         assert isinstance(pubmed_id, str)
-        assert pubmed_id == "PubMed ID"
+        assert pubmed_id == "123456"
+
+    def test_doi(self, pubmed_xml):
+        doi = pubmed_xml.doi
+        assert isinstance(doi, str)
+        assert doi == "10.0123/issn.0123-4567"
 
     def test_uid(self, pubmed_xml):
         uid = pubmed_xml.uid
         assert isinstance(uid, str)
-        assert uid == "643f8754d6ed3d79bfc02c8b7be287e9"
+        assert uid == "acadbb5a0cc00deeeae273bb0da12c9e"
 
 
 class TestCORD19ArticleParser:

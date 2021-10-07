@@ -489,8 +489,22 @@ class PubMedXML(ArticleParser):
         str or None
             Pubmed ID if specified, otherwise None.
         """
-        pubmed_id = self.content.find("./MedlineCitation/PMID")
+        pubmed_id = self.content.find(
+            "./PubmedData/ArticleIdList/ArticleId[@IdType='pubmed']"
+        )
         return pubmed_id.text
+
+    @property
+    def doi(self) -> Optional[str]:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        doi = self.content.find("./PubmedData/ArticleIdList/ArticleId[@IdType='doi']")
+        return doi.text
 
 
 class CORD19ArticleParser(ArticleParser):

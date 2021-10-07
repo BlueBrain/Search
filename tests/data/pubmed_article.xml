@@ -1,6 +1,6 @@
 <PubmedArticle>
     <MedlineCitation Status="MEDLINE" Owner="NLM">
-        <PMID Version="1">PubMed ID</PMID>
+        <PMID Version="1">123456</PMID>
         <DateCompleted>
             <Year>2020</Year>
             <Month>01</Month>
@@ -114,7 +114,7 @@
         </History>
         <PublicationStatus>ppublish</PublicationStatus>
         <ArticleIdList>
-            <ArticleId IdType="pubmed">1</ArticleId>
+            <ArticleId IdType="pubmed">123456</ArticleId>
             <ArticleId IdType="doi">10.0123/issn.0123-4567</ArticleId>
         </ArticleIdList>
     </PubmedData>
