@@ -452,14 +452,14 @@ class PubMedXML(ArticleParser):
         iterable of str
             The paragraphs of the article abstract.
         """
-        abstract_parts = self.content.find("./MedlineCitation/Article/Abstract")
-        if abstract_parts is None:
-            return [
-                "",
-            ]
+        paragraphs = self.content.find("./MedlineCitation/Article/Abstract")
 
-        for abstract in abstract_parts:
-            yield abstract.text
+        if paragraphs is None:
+            # No paragraphs to parse: stop and return an empty iterable.
+            return ()
+
+        for paragraph in paragraphs:
+            yield paragraph.text
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
