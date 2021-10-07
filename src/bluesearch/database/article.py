@@ -477,7 +477,8 @@ class PubMedXML(ArticleParser):
             For each paragraph a tuple with two strings is returned. The first
             is the section title, the second the paragraph content.
         """
-        yield
+        # No paragraph to parse in PubMed article sets: yield an empty generator.
+        yield from ()
 
     @property
     def pubmed_id(self) -> Optional[str]:
