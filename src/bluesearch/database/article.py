@@ -489,7 +489,7 @@ class PubMedXML(ArticleParser):
             Pubmed ID if specified, otherwise None.
         """
         pubmed_id = self.content.find("./MedlineCitation/PMID")
-        yield pubmed_id.text
+        return pubmed_id.text
 
 
 class CORD19ArticleParser(ArticleParser):
