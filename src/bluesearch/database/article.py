@@ -429,25 +429,19 @@ class PubMedXML(ArticleParser):
         iterable of str
             All authors.
         """
-        author_list = self.content.find("./MedlineCitation/Article/AuthorList")
-        if author_list is None:
-            return [
-                "",
-            ]
+        authors = self.content.find("./MedlineCitation/Article/AuthorList")
 
-        for author in author_list:
-            last_name, fore_name = None, None
+        if authors is None:
+            # No author to parse: stop and return an empty iterable.
+            return ()
+
+        for author in authors:
             # Author entries with 'ValidYN' == 'N' are incorrect entries:
             # https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/190101/att-ValidYN.html.
             if author.get("ValidYN", "Y") == "Y":
-                for elem in author:
-                    if elem.tag == "LastName":
-                        last_name = elem.text
-                    elif elem.tag == "ForeName":
-                        fore_name = elem.text
-
-                author_str = (fore_name or "") + " " + (last_name or "")
-                yield author_str.strip()
+                forenames = author.find("ForeName")
+                lastname = author.find("LastName")
+                yield f"{forenames.text} {lastname.text}"
 
     @property
     def abstract(self) -> Iterable[str]:
