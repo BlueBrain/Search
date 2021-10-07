@@ -10,6 +10,7 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
+    PubMedXML,
     PubmedXMLParser,
 )
 
@@ -188,6 +189,55 @@ class TestPubmedXMLArticleParser:
 
     def test_element_to_str_of_none(self, pubmed_xml_parser):
         assert pubmed_xml_parser._element_to_str(None) == ""
+
+
+@pytest.fixture(scope="session")
+def pubmed_xml(test_data_path):
+    path = pathlib.Path(test_data_path) / "pubmed_article.xml"
+    parser = PubMedXML(path.resolve())
+    return parser
+
+
+class TestPubMedXML:
+    def test_init(self, pubmed_xml):
+        assert isinstance(pubmed_xml.content, xml.etree.ElementTree.ElementTree)
+
+    def test_title(self, pubmed_xml):
+        title = pubmed_xml.title
+        assert title == "Article Title"
+
+    def test_authors(self, pubmed_xml):
+        authors = pubmed_xml.authors
+        assert inspect.isgenerator(authors)
+        authors = tuple(authors)
+
+        assert len(authors) == 2
+        assert authors[0] == "Forenames 1 Lastname 1"
+        assert authors[1] == "Forenames 2 Lastname 2"
+
+    def test_abstract(self, pubmed_xml):
+        abstract = pubmed_xml.abstract
+        assert inspect.isgenerator(abstract)
+        abstract = tuple(abstract)
+        assert len(abstract) == 2
+        assert abstract[0] == "Abstract Paragraph 1"
+        assert abstract[1] == "Abstract Paragraph 2"
+
+    def test_paragraphs(self, pubmed_xml):
+        paragraphs = pubmed_xml.paragraphs
+        assert inspect.isgenerator(paragraphs)
+        paragraphs = tuple(paragraphs)
+        assert len(paragraphs) == 0
+
+    def test_pubmed_id(self, pubmed_xml):
+        pubmed_id = pubmed_xml.pubmed_id
+        assert isinstance(pubmed_id, str)
+        assert pubmed_id == "PubMed ID"
+
+    def test_uid(self, pubmed_xml):
+        uid = pubmed_xml.uid
+        assert isinstance(uid, str)
+        assert uid == "643f8754d6ed3d79bfc02c8b7be287e9"
 
 
 class TestCORD19ArticleParser:
