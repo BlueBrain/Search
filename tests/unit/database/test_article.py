@@ -193,7 +193,16 @@ class TestPubmedXMLArticleParser:
 
 @pytest.fixture(scope="session")
 def pubmed_xml(test_data_path):
+    """Parse a 'PubmedArticle' in a 'PubmedArticleSet'."""
     path = pathlib.Path(test_data_path) / "pubmed_article.xml"
+    parser = PubMedXML(path.resolve())
+    return parser
+
+
+@pytest.fixture(scope="session")
+def pubmed_xml_minimal(test_data_path):
+    """Parse a 'PubmedArticle' in a 'PubmedArticleSet' having only required elements."""
+    path = pathlib.Path(test_data_path) / "pubmed_article_minimal.xml"
     parser = PubMedXML(path.resolve())
     return parser
 
@@ -210,10 +219,16 @@ class TestPubMedXML:
         authors = pubmed_xml.authors
         assert inspect.isgenerator(authors)
         authors = tuple(authors)
-
         assert len(authors) == 2
         assert authors[0] == "Forenames 1 Lastname 1"
         assert authors[1] == "Forenames 2 Lastname 2"
+
+    def test_no_authors(self, pubmed_xml_minimal):
+        authors = pubmed_xml_minimal.authors
+        assert inspect.isgenerator(authors)
+        authors = tuple(authors)
+        assert len(authors) == 0
+        assert authors == ()
 
     def test_abstract(self, pubmed_xml):
         abstract = pubmed_xml.abstract
@@ -223,11 +238,19 @@ class TestPubMedXML:
         assert abstract[0] == "Abstract Paragraph 1"
         assert abstract[1] == "Abstract Paragraph 2"
 
-    def test_paragraphs(self, pubmed_xml):
+    def test_no_abstract(self, pubmed_xml_minimal):
+        abstract = pubmed_xml_minimal.abstract
+        assert inspect.isgenerator(abstract)
+        abstract = tuple(abstract)
+        assert len(abstract) == 0
+        assert abstract == ()
+
+    def test_no_paragraphs(self, pubmed_xml):
         paragraphs = pubmed_xml.paragraphs
         assert inspect.isgenerator(paragraphs)
         paragraphs = tuple(paragraphs)
         assert len(paragraphs) == 0
+        assert paragraphs == ()
 
     def test_pubmed_id(self, pubmed_xml):
         pubmed_id = pubmed_xml.pubmed_id
