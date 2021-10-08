@@ -262,6 +262,10 @@ class TestPubMedXML:
         assert isinstance(doi, str)
         assert doi == "10.0123/issn.0123-4567"
 
+    def test_no_doi(self, pubmed_xml_minimal):
+        doi = pubmed_xml_minimal.doi
+        assert doi is None
+
     def test_uid(self, pubmed_xml):
         uid = pubmed_xml.uid
         assert isinstance(uid, str)

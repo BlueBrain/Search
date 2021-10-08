@@ -506,7 +506,7 @@ class PubMedXML(ArticleParser):
             DOI if specified, otherwise None.
         """
         doi = self.content.find("./PubmedData/ArticleIdList/ArticleId[@IdType='doi']")
-        return doi.text
+        return None if doi is None else doi.text
 
 
 class CORD19ArticleParser(ArticleParser):
