@@ -35,9 +35,9 @@
             </Abstract>
             <AuthorList CompleteYN="Y">
                 <Author ValidYN="N">
-                    <LastName>Incorrect Lastname 0</LastName>
-                    <ForeName>Incorrect Forenames 0</ForeName>
-                    <Initials>IF</Initials>
+                    <LastName>Incorrect Lastname 1</LastName>
+                    <ForeName>Incorrect Forenames 1</ForeName>
+                    <Initials>IF1</Initials>
                 </Author>
                 <Author ValidYN="Y">
                     <LastName>Lastname 1</LastName>
