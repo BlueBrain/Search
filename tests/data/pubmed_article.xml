@@ -46,8 +46,6 @@
                 </Author>
                 <Author ValidYN="Y">
                     <LastName>Lastname 2</LastName>
-                    <ForeName>Forenames 2</ForeName>
-                    <Initials>F2</Initials>
                 </Author>
             </AuthorList>
             <Language>eng</Language>

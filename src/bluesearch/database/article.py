@@ -438,10 +438,16 @@ class PubMedXML(ArticleParser):
         for author in authors:
             # Author entries with 'ValidYN' == 'N' are incorrect entries:
             # https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/190101/att-ValidYN.html.
-            if author.get("ValidYN", "Y") == "Y":
-                forenames = author.find("ForeName")
+            if author.get("ValidYN") == "Y":
+                # Fields which are always present.
                 lastname = author.find("LastName")
-                yield f"{forenames.text} {lastname.text}"
+                # Fields which could be absent.
+                forenames = author.find("ForeName")
+
+                if forenames is None:
+                    yield lastname.text
+                else:
+                    yield f"{forenames.text} {lastname.text}"
 
     @property
     def abstract(self) -> Iterable[str]:

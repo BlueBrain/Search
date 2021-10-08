@@ -221,7 +221,7 @@ class TestPubMedXML:
         authors = tuple(authors)
         assert len(authors) == 2
         assert authors[0] == "Forenames 1 Lastname 1"
-        assert authors[1] == "Forenames 2 Lastname 2"
+        assert authors[1] == "Lastname 2"
 
     def test_no_authors(self, pubmed_xml_minimal):
         authors = pubmed_xml_minimal.authors
