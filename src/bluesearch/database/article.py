@@ -495,6 +495,20 @@ class PubMedXML(ArticleParser):
         return pubmed_id.text
 
     @property
+    def pmc_id(self) -> Optional[str]:
+        """Get PMC ID.
+
+        Returns
+        -------
+        str or None
+            PMC ID if specified, otherwise None.
+        """
+        pmc_id = self.content.find(
+            "./PubmedData/ArticleIdList/ArticleId[@IdType='pmc']"
+        )
+        return None if pmc_id is None else pmc_id.text
+
+    @property
     def doi(self) -> Optional[str]:
         """Get DOI.
 

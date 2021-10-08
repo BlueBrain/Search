@@ -113,6 +113,7 @@
         <PublicationStatus>ppublish</PublicationStatus>
         <ArticleIdList>
             <ArticleId IdType="pubmed">123456</ArticleId>
+            <ArticleId IdType="pmc">PMC12345</ArticleId>
             <ArticleId IdType="doi">10.0123/issn.0123-4567</ArticleId>
         </ArticleIdList>
     </PubmedData>

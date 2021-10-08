@@ -257,6 +257,15 @@ class TestPubMedXML:
         assert isinstance(pubmed_id, str)
         assert pubmed_id == "123456"
 
+    def test_pmc_id(self, pubmed_xml):
+        pmc_id = pubmed_xml.pmc_id
+        assert isinstance(pmc_id, str)
+        assert pmc_id == "PMC12345"
+
+    def test_no_pmc_id(self, pubmed_xml_minimal):
+        pmc_id = pubmed_xml_minimal.pmc_id
+        assert pmc_id is None
+
     def test_doi(self, pubmed_xml):
         doi = pubmed_xml.doi
         assert isinstance(doi, str)
@@ -269,7 +278,7 @@ class TestPubMedXML:
     def test_uid(self, pubmed_xml):
         uid = pubmed_xml.uid
         assert isinstance(uid, str)
-        assert uid == "acadbb5a0cc00deeeae273bb0da12c9e"
+        assert uid == "645314d7b040d1e2b8ec7dbf9dd192c7"
 
 
 class TestCORD19ArticleParser:
