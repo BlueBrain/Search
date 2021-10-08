@@ -452,7 +452,9 @@ class PubMedXML(ArticleParser):
         iterable of str
             The paragraphs of the article abstract.
         """
-        paragraphs = self.content.find("./MedlineCitation/Article/Abstract")
+        paragraphs = self.content.findall(
+            "./MedlineCitation/Article/Abstract/AbstractText"
+        )
 
         if paragraphs is None:
             # No paragraphs to parse: stop and return an empty iterable.
