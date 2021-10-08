@@ -491,9 +491,7 @@ class PubMedXML(ArticleParser):
         str or None
             Pubmed ID if specified, otherwise None.
         """
-        pubmed_id = self.content.find(
-            "./PubmedData/ArticleIdList/ArticleId[@IdType='pubmed']"
-        )
+        pubmed_id = self.content.find("./MedlineCitation/PMID")
         return pubmed_id.text
 
     @property
