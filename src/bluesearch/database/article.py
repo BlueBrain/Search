@@ -462,7 +462,7 @@ class PubMedXML(ArticleParser):
             yield paragraph.text
 
     @property
-    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
+    def paragraphs(self) -> Iterable[tuple[str, str]]:
         """Get all paragraphs and titles of sections they are part of.
 
         Returns
