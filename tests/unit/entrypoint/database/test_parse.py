@@ -6,7 +6,7 @@ from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
 
 
-def test_unknown_article_type():
+def test_unknown_input_type():
     wrong_type = "wrong-type"
 
     with pytest.raises(SystemExit) as exc_info:
