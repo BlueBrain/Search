@@ -406,6 +406,7 @@ class PubMedXML(ArticleParser):
 
     def __init__(self, data: Element | Path | str) -> None:
         super().__init__()
+        self.content: ElementTree
         if isinstance(data, Element):
             self.content = data
         else:
