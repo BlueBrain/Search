@@ -247,8 +247,6 @@ class TestPubMedXMLArticleParser:
 
     def test_no_paragraphs(self, pubmed_xml_parser):
         paragraphs = pubmed_xml_parser.paragraphs
-        assert inspect.isgenerator(paragraphs)
-        paragraphs = tuple(paragraphs)
         assert len(paragraphs) == 0
         assert paragraphs == ()
 
