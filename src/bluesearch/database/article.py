@@ -401,7 +401,7 @@ class PMCXMLParser(ArticleParser):
             return self._inner_text(element)
 
 
-class PubMedXML(ArticleParser):
+class PubMedXMLParser(ArticleParser):
     """Parser for PubMed abstract."""
 
     def __init__(self, path: str | Path) -> None:

@@ -26,7 +26,7 @@ from bluesearch.database.article import (
     ArticleParser,
     CORD19ArticleParser,
     PMCXMLParser,
-    PubMedXML,
+    PubMedXMLParser,
 )
 
 
@@ -95,7 +95,7 @@ def run(
             elif article_type == "pmc-xml":
                 parser_inst = PMCXMLParser(inp)
             elif article_type == "pubmed-xml":
-                parser_inst = PubMedXML(inp)
+                parser_inst = PubMedXMLParser(inp)
             else:
                 raise ValueError(f"Unsupported article type {article_type}")
 

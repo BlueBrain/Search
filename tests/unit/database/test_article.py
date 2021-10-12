@@ -11,7 +11,7 @@ from bluesearch.database.article import (
     ArticleParser,
     CORD19ArticleParser,
     PMCXMLParser,
-    PubMedXML,
+    PubMedXMLParser,
 )
 
 
@@ -195,7 +195,7 @@ class TestPMCXMLArticleParser:
 def pubmed_xml_parser(test_data_path):
     """Parse a 'PubmedArticle' in a 'PubmedArticleSet'."""
     path = pathlib.Path(test_data_path) / "pubmed_article.xml"
-    parser = PubMedXML(path.resolve())
+    parser = PubMedXMLParser(path.resolve())
     return parser
 
 
@@ -203,7 +203,7 @@ def pubmed_xml_parser(test_data_path):
 def pubmed_xml_parser_minimal(test_data_path):
     """Parse a 'PubmedArticle' in a 'PubmedArticleSet' having only required elements."""
     path = pathlib.Path(test_data_path) / "pubmed_article_minimal.xml"
-    parser = PubMedXML(path.resolve())
+    parser = PubMedXMLParser(path.resolve())
     return parser
 
 
