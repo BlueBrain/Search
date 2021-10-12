@@ -1,3 +1,4 @@
+import json
 from argparse import ArgumentError
 
 import pytest
@@ -38,7 +39,11 @@ def test_cord19_json(jsons_path, tmp_path):
         out_files = list(out_dir.glob("*"))
 
         assert len(out_files) == 1
-        assert out_files[0].name == inp_file.stem + ".json"
+
+        with out_files[0].open() as f:
+            data = json.load(f)
+            uid = data["uid"]
+            assert out_files[0].name == f"{uid}.json"
 
         serialized = out_files[0].read_text("utf-8")
         loaded_article = Article.from_json(serialized)
@@ -57,8 +62,11 @@ def test_cord19_json(jsons_path, tmp_path):
 
     assert len(out_files) == len(json_files)
 
-    for inp_file, out_file in zip(json_files, out_files):
-        assert out_file.name == inp_file.stem + ".json"
+    for out_file in out_files:
+        with out_file.open() as f:
+            data = json.load(f)
+            uid = data["uid"]
+            assert out_file.name == f"{uid}.json"
 
         serialized = out_file.read_text("utf-8")
         loaded_article = Article.from_json(serialized)
