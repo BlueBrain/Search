@@ -124,8 +124,8 @@ class ArticleParser(ABC):
         return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
 
 
-class PubmedXMLParser(ArticleParser):
-    """Parser for PubMed XML files using the JATS Journal Publishing DTD.
+class PMCXMLParser(ArticleParser):
+    """Parser for PubMed Central XML files using the JATS Journal Publishing DTD.
 
     Parameters
     ----------

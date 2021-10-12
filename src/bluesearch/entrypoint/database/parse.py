@@ -25,8 +25,8 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
+    PMCXMLParser,
     PubMedXML,
-    PubmedXMLParser,
 )
 
 
@@ -93,7 +93,7 @@ def run(
                 with inp.open() as f_inp:
                     parser_inst = CORD19ArticleParser(json.load(f_inp))
             elif article_type == "pmc-xml":
-                parser_inst = PubmedXMLParser(inp)
+                parser_inst = PMCXMLParser(inp)
             elif article_type == "pubmed-xml":
                 parser_inst = PubMedXML(inp)
             else:
