@@ -1,10 +1,48 @@
 import json
 from argparse import ArgumentError
+from pathlib import Path
 
 import pytest
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
+from bluesearch.entrypoint.database.parse import iter_parsers
+
+
+@pytest.mark.parametrize(
+    "input_type, path, article_uids",
+    [
+        pytest.param(
+            "cord19-json",
+            "cord19_v35/document_parses/pmc_json/PMC7186928.xml.json",
+            ["84389eb01e19e3e17011deec5a785b52"],
+            id="cord19-json",
+        ),
+        pytest.param(
+            "pmc-xml",
+            "sample_file.xml",
+            ["97c1ee74607e1c2d99e4fa6f0877b044"],
+            id="pmc-xml",
+        ),
+        pytest.param(
+            "pubmed-xml",
+            "pubmed_article.xml",
+            ["645314d7b040d1e2b8ec7dbf9dd192c7"],
+            id="pubmed-xml",
+        ),
+        pytest.param(
+            "pubmed-xml-set",
+            "pubmed_articles.xml",
+            ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"],
+            id="pubmed-xml-set",
+        ),
+    ],
+)
+def test_iter_parsers(input_type, path, article_uids):
+    input_path = Path("tests/data/") / path
+    parsers = iter_parsers(input_type, input_path)
+    for parser, uid in zip(parsers, article_uids):
+        assert parser.uid == uid
 
 
 def test_unknown_input_type():
