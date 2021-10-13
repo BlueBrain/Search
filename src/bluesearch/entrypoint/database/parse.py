@@ -119,7 +119,7 @@ def run(
                 output_file = output_dir / f"{article.uid}.json"
 
                 if output_file.exists():
-                    raise FileExistsError
+                    raise FileExistsError(f"Output '{output_file}' already exists!")
                 else:
                     serialized = article.to_json()
                     output_file.write_text(serialized, "utf-8")
