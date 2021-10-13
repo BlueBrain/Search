@@ -124,8 +124,8 @@ class ArticleParser(ABC):
         return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
 
 
-class PubmedXMLParser(ArticleParser):
-    """Parser for PubMed XML files using the JATS Journal Publishing DTD.
+class PMCXMLParser(ArticleParser):
+    """Parser for PubMed Central XML files using the JATS Journal Publishing DTD.
 
     Parameters
     ----------
@@ -399,6 +399,124 @@ class PubmedXMLParser(ArticleParser):
         else:
             # Default handling for all other element tags
             return self._inner_text(element)
+
+
+class PubMedXMLParser(ArticleParser):
+    """Parser for PubMed abstract."""
+
+    def __init__(self, path: str | Path) -> None:
+        super().__init__()
+        self.content = ElementTree.parse(str(path))
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        title = self.content.find("./MedlineCitation/Article/ArticleTitle")
+        return title.text
+
+    @property
+    def authors(self) -> Iterable[str]:
+        """Get all author names.
+
+        Returns
+        -------
+        iterable of str
+            All authors.
+        """
+        authors = self.content.find("./MedlineCitation/Article/AuthorList")
+
+        if authors is None:
+            # No author to parse: stop and return an empty iterable.
+            return ()
+
+        for author in authors:
+            # Author entries with 'ValidYN' == 'N' are incorrect entries:
+            # https://dtd.nlm.nih.gov/ncbi/pubmed/doc/out/190101/att-ValidYN.html.
+            if author.get("ValidYN") == "Y":
+                # Fields which are always present.
+                lastname = author.find("LastName")
+                # Fields which could be absent.
+                forenames = author.find("ForeName")
+
+                if forenames is None:
+                    yield lastname.text
+                else:
+                    yield f"{forenames.text} {lastname.text}"
+
+    @property
+    def abstract(self) -> Iterable[str]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Returns
+        -------
+        iterable of str
+            The paragraphs of the article abstract.
+        """
+        paragraphs = self.content.find("./MedlineCitation/Article/Abstract")
+
+        if paragraphs is None:
+            # No paragraphs to parse: stop and return an empty iterable.
+            return ()
+
+        for paragraph in paragraphs.iter("AbstractText"):
+            yield paragraph.text
+
+    @property
+    def paragraphs(self) -> Iterable[tuple[str, str]]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Returns
+        -------
+        iterable of (str, str)
+            For each paragraph a tuple with two strings is returned. The first
+            is the section title, the second the paragraph content.
+        """
+        # No paragraph to parse in PubMed article sets: return an empty iterable.
+        return ()
+
+    @property
+    def pubmed_id(self) -> Optional[str]:
+        """Get Pubmed ID.
+
+        Returns
+        -------
+        str or None
+            Pubmed ID if specified, otherwise None.
+        """
+        pubmed_id = self.content.find("./MedlineCitation/PMID")
+        return pubmed_id.text
+
+    @property
+    def pmc_id(self) -> Optional[str]:
+        """Get PMC ID.
+
+        Returns
+        -------
+        str or None
+            PMC ID if specified, otherwise None.
+        """
+        pmc_id = self.content.find(
+            "./PubmedData/ArticleIdList/ArticleId[@IdType='pmc']"
+        )
+        return None if pmc_id is None else pmc_id.text
+
+    @property
+    def doi(self) -> Optional[str]:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        doi = self.content.find("./PubmedData/ArticleIdList/ArticleId[@IdType='doi']")
+        return None if doi is None else doi.text
 
 
 class CORD19ArticleParser(ArticleParser):
