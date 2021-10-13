@@ -119,3 +119,18 @@ def test_cord19_json(jsons_path, tmp_path):
             str(out_dir),
         ]
         main(args_and_opts)
+
+
+def test_pubmed_xml_set(tmp_path):
+    input_path = "tests/data/pubmed_articles.xml"
+    main(["parse", "pubmed-xml-set", input_path, str(tmp_path)])
+    files = sorted(tmp_path.iterdir())
+    assert len(files) == 2
+
+    uids = ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"]
+    for file, uid in zip(files, uids):
+        assert file.name == f"{uid}.json"
+        with file.open() as f:
+            data = json.load(f)
+            loaded_uid = data["uid"]
+            assert loaded_uid == uid
