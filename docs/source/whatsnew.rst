@@ -40,7 +40,7 @@ Latest
   :code:`bbs_database parse`, and :code:`bbs_database add` to initialize
   a literature database, parse, and integrate articles.
 - |Add| research of topic at journal and article levels in :code:`topic` module.
-- |Add| :code:`PubmedXMLParser` to parse PubMed articles in XML JATS format.
+- |Add| :code:`PMCXMLParser` to parse PubMed articles in XML JATS format.
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
   :code:`deps` elements and mixed models origin.
 - |Fix| the incorrect maximum input length to the transformer model used as

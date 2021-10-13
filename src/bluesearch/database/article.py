@@ -124,8 +124,8 @@ class ArticleParser(ABC):
         return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
 
 
-class PubmedXMLParser(ArticleParser):
-    """Parser for PubMed XML files using the JATS Journal Publishing DTD.
+class PMCXMLParser(ArticleParser):
+    """Parser for PubMed Central XML files using the JATS Journal Publishing DTD.
 
     Parameters
     ----------
@@ -401,7 +401,7 @@ class PubmedXMLParser(ArticleParser):
             return self._inner_text(element)
 
 
-class PubMedXML(ArticleParser):
+class PubMedXMLParser(ArticleParser):
     """Parser for PubMed abstract."""
 
     def __init__(self, data: Element | Path | str) -> None:
@@ -462,15 +462,13 @@ class PubMedXML(ArticleParser):
         iterable of str
             The paragraphs of the article abstract.
         """
-        paragraphs = self.content.findall(
-            "./MedlineCitation/Article/Abstract/AbstractText"
-        )
+        paragraphs = self.content.find("./MedlineCitation/Article/Abstract")
 
         if paragraphs is None:
             # No paragraphs to parse: stop and return an empty iterable.
             return ()
 
-        for paragraph in paragraphs:
+        for paragraph in paragraphs.iter("AbstractText"):
             yield paragraph.text
 
     @property
@@ -483,8 +481,8 @@ class PubMedXML(ArticleParser):
             For each paragraph a tuple with two strings is returned. The first
             is the section title, the second the paragraph content.
         """
-        # No paragraph to parse in PubMed article sets: yield an empty generator.
-        yield from ()
+        # No paragraph to parse in PubMed article sets: return an empty iterable.
+        return ()
 
     @property
     def pubmed_id(self) -> Optional[str]:

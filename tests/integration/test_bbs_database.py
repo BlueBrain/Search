@@ -15,13 +15,7 @@ from bluesearch.entrypoint.database.parent import main
         pytest.param(
             "mysql",
             marks=pytest.mark.skipif(
-                all(
-                    (
-                        sys.platform == "linux",
-                        sys.version_info.major == 3,
-                        sys.version_info.minor == 7,
-                    )
-                ),
+                sys.platform == "linux",
                 reason="see issue #456",
             ),
         ),

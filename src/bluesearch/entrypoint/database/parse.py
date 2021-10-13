@@ -27,8 +27,8 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
-    PubMedXML,
-    PubmedXMLParser,
+    PMCXMLParser,
+    PubMedXMLParser,
 )
 
 
@@ -73,15 +73,15 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
             yield CORD19ArticleParser(data)
 
     elif input_type == "pmc-xml":
-        yield PubmedXMLParser(input_path)
+        yield PMCXMLParser(input_path)
 
     elif input_type == "pubmed-xml":
-        yield PubMedXML(input_path)
+        yield PubMedXMLParser(input_path)
 
     elif input_type == "pubmed-xml-set":
         articles = ElementTree.parse(str(input_path))
         for article in articles.iter("PubmedArticle"):
-            yield PubMedXML(article)
+            yield PubMedXMLParser(article)
 
     else:
         raise ValueError(f"Unsupported input type '{input_type}'!")
