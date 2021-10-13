@@ -218,9 +218,10 @@ class TestPubMedXMLArticleParser:
     def test_authors(self, pubmed_xml_parser):
         authors = pubmed_xml_parser.authors
         authors = tuple(authors)
-        assert len(authors) == 2
+        assert len(authors) == 3
         assert authors[0] == "Forenames 1 Lastname 1"
         assert authors[1] == "Lastname 2"
+        assert authors[2] == ""
 
     def test_no_authors(self, pubmed_xml_parser_minimal):
         authors = pubmed_xml_parser_minimal.authors
