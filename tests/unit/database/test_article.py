@@ -217,7 +217,6 @@ class TestPubMedXMLArticleParser:
 
     def test_authors(self, pubmed_xml_parser):
         authors = pubmed_xml_parser.authors
-        assert inspect.isgenerator(authors)
         authors = tuple(authors)
         assert len(authors) == 2
         assert authors[0] == "Forenames 1 Lastname 1"
@@ -225,14 +224,12 @@ class TestPubMedXMLArticleParser:
 
     def test_no_authors(self, pubmed_xml_parser_minimal):
         authors = pubmed_xml_parser_minimal.authors
-        assert inspect.isgenerator(authors)
         authors = tuple(authors)
         assert len(authors) == 0
         assert authors == ()
 
     def test_abstract(self, pubmed_xml_parser):
         abstract = pubmed_xml_parser.abstract
-        assert inspect.isgenerator(abstract)
         abstract = tuple(abstract)
         assert len(abstract) == 2
         assert abstract[0] == "Abstract Paragraph 1"
@@ -240,7 +237,6 @@ class TestPubMedXMLArticleParser:
 
     def test_no_abstract(self, pubmed_xml_parser_minimal):
         abstract = pubmed_xml_parser_minimal.abstract
-        assert inspect.isgenerator(abstract)
         abstract = tuple(abstract)
         assert len(abstract) == 0
         assert abstract == ()
