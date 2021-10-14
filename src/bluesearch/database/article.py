@@ -444,12 +444,10 @@ class PubMedXMLParser(ArticleParser):
                 # 'ForeName' is an optional field only used with 'LastName'.
                 forenames = author.find("ForeName")
 
-                name = []
-                if forenames is not None:
-                    name.append(forenames.text)
-                if lastname is not None:
-                    name.append(lastname.text)
-                yield " ".join(name)
+                parts = (forenames, lastname)
+                name = [x.text for x in parts if x is not None]
+                if len(name) > 0:
+                    yield " ".join(name)
 
     @property
     def abstract(self) -> Iterable[str]:
