@@ -637,10 +637,10 @@ class Article(DataClassJSONMixin):
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[Tuple[str, str]]
-    pubmed_id: Optional[str]
-    pmc_id: Optional[str]
-    doi: Optional[str]
-    uid: Optional[str]
+    pubmed_id: Optional[str] = None
+    pmc_id: Optional[str] = None
+    doi: Optional[str] = None
+    uid: Optional[str] = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
