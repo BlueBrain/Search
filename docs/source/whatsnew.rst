@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| default value :code:`None` for optional fields of :code:`Article`.
 - |Add| an :code:`ArticleParser` for metadata and abstracts from :code:`PubMed`.
 - |Change| the behaviour of :code:`bbs_database add` when no article was loaded
   from the given path. Now, stop with a :code:`RuntimeWarning` and don't load
