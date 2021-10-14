@@ -372,6 +372,17 @@ class TestCORD19ArticleParser:
 
 
 class TestArticle:
+    def test_optional_defaults(self):
+        article = Article(
+            title="",
+            authors=("",),
+            abstract=("",),
+            section_paragraphs=(("", ""),),
+        )
+        optional_fields = ["pubmed_id", "pmc_id", "doi", "uid"]
+        for field in optional_fields:
+            assert getattr(article, field) is None
+
     def test_parse(self):
         # Test article parsing
         parser = SimpleTestParser()
