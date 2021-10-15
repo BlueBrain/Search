@@ -404,9 +404,13 @@ class PMCXMLParser(ArticleParser):
 class PubMedXMLParser(ArticleParser):
     """Parser for PubMed abstract."""
 
-    def __init__(self, path: str | Path) -> None:
+    def __init__(self, data: Element | Path | str) -> None:
         super().__init__()
-        self.content = ElementTree.parse(str(path))
+        self.content: ElementTree
+        if isinstance(data, Element):
+            self.content = data
+        else:
+            self.content = ElementTree.parse(str(data))
 
     @property
     def title(self) -> str:

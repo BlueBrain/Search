@@ -30,6 +30,7 @@ Legend
 Latest
 ======
 - |Add| default value :code:`None` for optional fields of :code:`Article`.
+- |Add| loading of metadata and abstracts from :code:`PubMed`.
 - |Fix| parsing in :code:`PubMed` metadata of authors with a
   :code:`<CollectiveName>` instead of a :code:`<LastName>`.
 - |Add| an :code:`ArticleParser` for metadata and abstracts from :code:`PubMed`.
