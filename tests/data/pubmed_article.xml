@@ -47,6 +47,9 @@
                 <Author ValidYN="Y">
                     <LastName>Lastname 2</LastName>
                 </Author>
+                <Author ValidYN="Y">
+                    <CollectiveName>Collective name</CollectiveName>
+                </Author>
             </AuthorList>
             <Language>eng</Language>
             <GrantList CompleteYN="Y">
