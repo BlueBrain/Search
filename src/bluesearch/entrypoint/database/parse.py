@@ -19,7 +19,9 @@ import argparse
 import json
 import warnings
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator
+
+from defusedxml import ElementTree
 
 from bluesearch.database.article import (
     Article,
@@ -36,11 +38,11 @@ def get_parser() -> argparse.ArgumentParser:
         description="Parse one or several articles.",
     )
     parser.add_argument(
-        "article_type",
+        "input_type",
         type=str,
-        choices=("cord19-json", "pmc-xml", "pubmed-xml"),
+        choices=("cord19-json", "pmc-xml", "pubmed-xml", "pubmed-xml-set"),
         help="""
-        Article format. If parsing several articles, all articles
+        Format of the input. If parsing several articles, all articles
         must have same format.
         """,
     )
@@ -53,7 +55,7 @@ def get_parser() -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
-        "output_path",
+        "output_dir",
         type=Path,
         help="""
         Path to a directory where parsed article(s) will be saved.
@@ -63,11 +65,33 @@ def get_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
+    """Return an iterator of initialized parsers for the given input."""
+    if input_type == "cord19-json":
+        with input_path.open() as f:
+            data = json.load(f)
+            yield CORD19ArticleParser(data)
+
+    elif input_type == "pmc-xml":
+        yield PMCXMLParser(input_path)
+
+    elif input_type == "pubmed-xml":
+        yield PubMedXMLParser(input_path)
+
+    elif input_type == "pubmed-xml-set":
+        articles = ElementTree.parse(str(input_path))
+        for article in articles.iter("PubmedArticle"):
+            yield PubMedXMLParser(article)
+
+    else:
+        raise ValueError(f"Unsupported input type '{input_type}'!")
+
+
 def run(
     *,
-    article_type: str,
+    input_type: str,
     input_path: Path,
-    output_path: Path,
+    output_dir: Path,
 ) -> None:
     """Parse one or several articles.
 
@@ -84,28 +108,23 @@ def run(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
 
-    output_path.mkdir(exist_ok=True)
+    output_dir.mkdir(exist_ok=True)
 
-    for inp in inputs:
+    for input_path in inputs:
         try:
-            parser_inst: ArticleParser
-            if article_type == "cord19-json":
-                with inp.open() as f_inp:
-                    parser_inst = CORD19ArticleParser(json.load(f_inp))
-            elif article_type == "pmc-xml":
-                parser_inst = PMCXMLParser(inp)
-            elif article_type == "pubmed-xml":
-                parser_inst = PubMedXMLParser(inp)
-            else:
-                raise ValueError(f"Unsupported article type {article_type}")
+            parsers = iter_parsers(input_type, input_path)
 
-            article = Article.parse(parser_inst)
+            for parser in parsers:
+                article = Article.parse(parser)
+                output_file = output_dir / f"{article.uid}.json"
 
-            serialized = article.to_json()
-            out = (output_path / inp.name).with_suffix(".json")
-            out.write_text(serialized, "utf-8")
+                if output_file.exists():
+                    raise FileExistsError(f"Output '{output_file}' already exists!")
+                else:
+                    serialized = article.to_json()
+                    output_file.write_text(serialized, "utf-8")
 
         except Exception as e:
             warnings.warn(
-                f'Failed parsing file "{inp}":\n {e}', category=RuntimeWarning
+                f'Failed parsing file "{input_path}":\n {e}', category=RuntimeWarning
             )
