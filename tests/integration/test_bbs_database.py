@@ -1,4 +1,3 @@
-import sys
 import time
 
 import docker
@@ -12,13 +11,7 @@ from bluesearch.entrypoint.database.parent import main
 @pytest.fixture(
     params=[
         "sqlite",
-        pytest.param(
-            "mysql",
-            marks=pytest.mark.skipif(
-                sys.platform == "linux",
-                reason="see issue #456",
-            ),
-        ),
+        "mysql",
     ]
 )
 def setup_backend(request, tmp_path):
