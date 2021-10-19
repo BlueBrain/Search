@@ -55,21 +55,13 @@ def setup_backend(request, tmp_path):
         else:
             raise TimeoutError("Could not spawn the MySQL container.")
 
-        print("BEFORE CREATE DB")
-
         engine.execute("create database test")
         engine.dispose()
 
-        print("BEFORE YIELD")
-
         yield "mysql", f"root:my-secret-pw@127.0.0.1:{port}/test",
-
-        print("AFTER YIELD")
 
         container.kill()
         client.close()
-
-        print("AFTER DOCKER TEAR-DOWN")
 
     else:
         raise ValueError
