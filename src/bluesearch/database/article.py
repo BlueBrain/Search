@@ -645,6 +645,7 @@ class TEIXMLParser(ArticleParser):
     def __init__(self, xml_content: str):
         self.content = ElementTree.fromstring(xml_content)
         self.tei_namespace = {"tei": "http://www.tei-c.org/ns/1.0"}
+        self._tei_ids: dict[str, str] | None = None
 
     @property
     def title(self) -> str:
@@ -736,7 +737,7 @@ class TEIXMLParser(ArticleParser):
                 yield "Figure Caption", caption_str
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -744,15 +745,29 @@ class TEIXMLParser(ArticleParser):
         str or None
             DOI if specified, otherwise None.
         """
-        doi = self.content.find(
-            "./tei:teiHeader/tei:fileDesc/tei:sourceDesc"
-            "/tei:biblStruct/tei:idno[@type='DOI']",
-            self.tei_namespace,
-        )
-        if doi is None:
-            return None
-        else:
-            return doi.text
+        return self.tei_ids.get("DOI")
+
+    @property
+    def tei_ids(self) -> dict:
+        """Exctract all IDs of the TEI XML.
+
+        Returns
+        -------
+        dict
+            Dictionary containing all the IDs of the TEI XML content
+            with the key being the ID type and the value being the ID value.
+        """
+        if self._tei_ids is None:
+            self._tei_ids = {}
+            for idno in self.content.findall(
+                "./tei:teiHeader/tei:fileDesc/tei:sourceDesc"
+                "/tei:biblStruct/tei:idno",
+                self.tei_namespace,
+            ):
+                id_type = idno.get("type")
+                self._tei_ids[id_type] = idno.text
+
+        return self._tei_ids
 
     def _element_to_str(self, element: Element | None) -> str:
         """Convert an element and all its contents to a string.
