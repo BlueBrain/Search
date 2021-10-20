@@ -633,6 +633,121 @@ class CORD19ArticleParser(ArticleParser):
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
 
+class TEIXMLParser(ArticleParser):
+    """Parser for TEI XML files.
+
+    Parameters
+    ----------
+    xml_content
+        The content of a TEI XML file.
+    """
+
+    def __init__(self, xml_content: str):
+        self.content = ElementTree.fromstring(xml_content)
+        self.tei_namespace = {"tei": "http://www.tei-c.org/ns/1.0"}
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        title = self.content.find(
+            "./tei:teiHeader/tei:fileDesc/tei:titleStmt/", self.tei_namespace
+        )
+        return title.text or ""
+
+    @property
+    def authors(self) -> Generator[str, None, None]:
+        """Get all author names.
+
+        Yields
+        ------
+        str
+            Every author, in the format "Given_Name(s) Surname".
+        """
+        for pers_name in self.content.findall(
+            "./tei:teiHeader/tei:fileDesc/tei:sourceDesc/tei:biblStruct/tei:analytic"
+            "/tei:author/tei:persName",
+            self.tei_namespace,
+        ):
+            forename = pers_name.find("./tei:forename", self.tei_namespace)
+            surname = pers_name.find("./tei:surname", self.tei_namespace)
+            forename_str = forename.text if forename is not None else ""
+            surname_str = surname.text if surname is not None else ""
+            yield f"{forename_str} {surname_str}".strip()
+
+    @property
+    def abstract(self) -> Generator[str, None, None]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Yields
+        ------
+        str
+            The paragraphs of the article abstract.
+        """
+        for p in self.content.findall(
+            "./tei:teiHeader/tei:profileDesc/tei:abstract/tei:div/tei:p",
+            self.tei_namespace,
+        ):
+            yield p.text
+
+    @property
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Paragraphs can be parts of text body, or figure or table captions.
+
+        Yields
+        ------
+        section_title : str
+            The section title.
+        text : str
+            The paragraph content.
+        """
+        for section_div in self.content.findall(
+            "./tei:text/tei:body/tei:div", self.tei_namespace
+        ):
+            head = section_div.find("./tei:head", self.tei_namespace)
+            section_title = head.text if head is not None else ""
+            for p in section_div.findall("./tei:p", self.tei_namespace):
+                text = "".join(p.itertext())
+                yield section_title, text
+
+        # Figure and Table Caption
+        for figure in self.content.findall(
+            "./tei:text/tei:body/tei:figure", self.tei_namespace
+        ):
+            caption = figure.find("./tei:figDesc", self.tei_namespace)
+            caption_str = caption.text if caption is not None else ""
+            if figure.get("type") == "table":
+                yield "Table Caption", caption_str
+            else:
+                yield "Figure Caption", caption_str
+
+    @property
+    def doi(self) -> Optional[str]:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        doi = self.content.find(
+            "./tei:teiHeader/tei:fileDesc/tei:sourceDesc"
+            "/tei:biblStruct/tei:idno[@type='DOI']",
+            self.tei_namespace,
+        )
+        if doi is None:
+            return None
+        else:
+            return doi.text
+
+
 @dataclass(frozen=True)
 class Article(DataClassJSONMixin):
     """Abstraction of a scientific article and its contents."""
