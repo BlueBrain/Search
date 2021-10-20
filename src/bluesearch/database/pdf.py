@@ -16,22 +16,26 @@
 import requests
 
 
-def convert_pdfs_to_tei_xml(pdf_content: bytes, host: str, port: str) -> str:
-    """Convert PDF file to TEI XML.
+def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: str) -> str:
+    """Convert PDF file to TEI XML using GROBID server.
+
+    This function uses the GROBID API service to convert PDF to a TEI XML format.
+    In order to setup GROBID server, follow the instructions from
+    https://grobid.readthedocs.io/en/latest/Grobid-docker/.
 
     Parameters
     ----------
     pdf_content
-        Pdf content
+        PDF content
     host
-        Host of the server.
+        Host of the GROBID server.
     port
-        Port of the server.
+        Port of the GROBID server.
 
     Returns
     -------
     str
-        TEI XML parsing of the pdf content.
+        TEI XML parsing of the PDF content.
     """
     url = f"http://{host}:{port}/api/processFulltextDocument"
     files = {
