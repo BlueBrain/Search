@@ -658,7 +658,7 @@ class TEIXMLParser(ArticleParser):
         title = self.content.find(
             "./tei:teiHeader/tei:fileDesc/tei:titleStmt/", self.tei_namespace
         )
-        return title.text or ""
+        return self._element_to_str(title)
 
     @property
     def authors(self) -> Generator[str, None, None]:
@@ -676,8 +676,8 @@ class TEIXMLParser(ArticleParser):
         ):
             forename = pers_name.find("./tei:forename", self.tei_namespace)
             surname = pers_name.find("./tei:surname", self.tei_namespace)
-            forename_str = forename.text if forename is not None else ""
-            surname_str = surname.text if surname is not None else ""
+            forename_str = self._element_to_str(forename)
+            surname_str = self._element_to_str(surname)
             yield f"{forename_str} {surname_str}".strip()
 
     @property
@@ -693,7 +693,10 @@ class TEIXMLParser(ArticleParser):
             "./tei:teiHeader/tei:profileDesc/tei:abstract/tei:div/tei:p",
             self.tei_namespace,
         ):
-            yield p.text
+            p_str = self._element_to_str(p)
+            if not p_str:
+                continue
+            yield p_str
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -714,7 +717,9 @@ class TEIXMLParser(ArticleParser):
             head = section_div.find("./tei:head", self.tei_namespace)
             section_title = head.text if head is not None else ""
             for p in section_div.findall("./tei:p", self.tei_namespace):
-                text = "".join(p.itertext())
+                text = self._element_to_str(p)
+                if not text:
+                    continue
                 yield section_title, text
 
         # Figure and Table Caption
@@ -722,7 +727,9 @@ class TEIXMLParser(ArticleParser):
             "./tei:text/tei:body/tei:figure", self.tei_namespace
         ):
             caption = figure.find("./tei:figDesc", self.tei_namespace)
-            caption_str = caption.text if caption is not None else ""
+            caption_str = self._element_to_str(caption)
+            if not caption_str:
+                continue
             if figure.get("type") == "table":
                 yield "Table Caption", caption_str
             else:
@@ -746,6 +753,23 @@ class TEIXMLParser(ArticleParser):
             return None
         else:
             return doi.text
+
+    def _element_to_str(self, element: Element | None) -> str:
+        """Convert an element and all its contents to a string.
+
+        Parameters
+        ----------
+        element
+            The input XML element.
+
+        Returns
+        -------
+        str
+            A parsed string representation of the input XML element.
+        """
+        if element is None:
+            return ""
+        return "".join(element.itertext())
 
 
 @dataclass(frozen=True)
