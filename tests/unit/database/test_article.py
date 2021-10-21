@@ -392,7 +392,7 @@ class TestTEIXMLArticleParser:
     def test_abstract(self, tei_xml_parser):
         abstract = list(tei_xml_parser.abstract)
         assert len(abstract) == 1
-        assert abstract[0] == "Abstract Paragraph 1"
+        assert abstract[0] == "Abstract Paragraph 1."
 
     def test_authors(self, tei_xml_parser):
         authors = list(tei_xml_parser.authors)
@@ -408,8 +408,8 @@ class TestTEIXMLArticleParser:
         assert paragraphs[4][0] == "Figure Caption"
         assert paragraphs[6][0] == "Table Caption"
 
-        assert paragraphs[0][1] == "Paragraph 1 of Head 1"
-        assert paragraphs[3][1] == "Paragraph 2 of (0) Head 2"
+        assert paragraphs[0][1] == "Paragraph 1 of Head 1."
+        assert paragraphs[3][1] == "Paragraph 2 of (0) Head 2."
         assert paragraphs[4][1] == "Fig. 1. Title."
         assert paragraphs[6][1] == "Table 1. Title."
 
