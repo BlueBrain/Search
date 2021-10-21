@@ -814,7 +814,9 @@ class TEIXMLParser(ArticleParser):
         RuntimeError
             If a tag is encountered that is neither <p> nor <formula>.
         """
-        prefix = f"{{{self.tei_namespace['tei']}}}"
+        # In TEI XML all tags are prefixed with the namespace.
+        ns = self.tei_namespace["tei"]
+        prefix = f"{{{ns}}}" if ns else ""
         # At every change ensure that there's no space at the end of text
         text = ""
 
