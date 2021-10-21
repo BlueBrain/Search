@@ -421,16 +421,22 @@ class TestTEIXMLArticleParser:
     @pytest.mark.parametrize(
         ("xml_content", "expected_texts"),
         (
-            ("", tuple()),
-            ("<p></p>", tuple()),
+            ("", ()),
+            ("<p></p>", ()),
             ("<p>Hello.</p>", ("Hello.",)),
             ("<p>Hello</p>", ("Hello.",)),
             ("<p>Hello.</p><p>There.</p>", ("Hello.", "There.")),
             ("<p>Hello</p><p>There.</p>", ("Hello.", "There.")),
             ("<p>Hello</p><p>there.</p>", ("Hello there.",)),
-            ("<p>This is cool: </p><formula>a + b = c</formula>", ("This is cool: FORMULA.",)),
-            ("<p>As </p><formula>x = 5</formula><p>shows...</p>", ("As FORMULA shows...",))
-        )
+            (
+                "<p>This is cool: </p><formula>a + b = c</formula>",
+                ("This is cool: FORMULA.",),
+            ),
+            (
+                "<p>As </p><formula>x = 5</formula><p>shows...</p>",
+                ("As FORMULA shows...",),
+            ),
+        ),
     )
     def test_build_texts(self, xml_content, expected_texts):
         parser = TEIXMLParser(f"<xml>{xml_content}</xml>")
