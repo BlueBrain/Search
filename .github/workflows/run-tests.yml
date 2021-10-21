@@ -31,6 +31,8 @@ jobs:
             tox-env: py39
 
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: cancel previous workflows that are still running
         uses: styfle/cancel-workflow-action@0.8.0
