@@ -829,7 +829,9 @@ class TEIXMLParser(ArticleParser):
 
         for child in elements:
             if child.tag == prefix + "p":
-                p_text = self._element_to_str(child)
+                p_text = self._element_to_str(child).strip()
+                if not p_text:
+                    continue
                 if p_text[0] in string.ascii_uppercase:
                     # The sentence in the text has finished.
                     # Yield and start a new one
