@@ -16,7 +16,7 @@ xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.co
 				<biblStruct>
 					<analytic>
 						<author>
-							<persName><forename type="first">Forename 1</forename><surname>Surname 1</surname></persName>
+							<persName><forename type="first">Forename 1</forename><forename type="middle">Middle 1</forename><surname>Surname 1</surname></persName>
 							<email>hushunbo@lyu.edu.cn</email>
 							<affiliation key="aff0">
 								<orgName type="department">Affiliation 1</orgName>

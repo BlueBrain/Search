@@ -675,11 +675,14 @@ class TEIXMLParser(ArticleParser):
             "/tei:author/tei:persName",
             self.tei_namespace,
         ):
-            forename = pers_name.find("./tei:forename", self.tei_namespace)
-            surname = pers_name.find("./tei:surname", self.tei_namespace)
-            forename_str = self._element_to_str(forename)
-            surname_str = self._element_to_str(surname)
-            yield f"{forename_str} {surname_str}".strip()
+            parts = [
+                pers_name.find("./tei:forename[@type='first']", self.tei_namespace),
+                pers_name.find("./tei:forename[@type='middle']", self.tei_namespace),
+                pers_name.find("./tei:surname", self.tei_namespace),
+            ]
+
+            parts = [self._element_to_str(part) for part in parts]
+            yield " ".join([part for part in parts if part]).strip()
 
     @property
     def abstract(self) -> Generator[str, None, None]:

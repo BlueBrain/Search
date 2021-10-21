@@ -397,7 +397,7 @@ class TestTEIXMLArticleParser:
     def test_authors(self, tei_xml_parser):
         authors = list(tei_xml_parser.authors)
         assert len(authors) == 2
-        assert authors[0] == "Forename 1 Surname 1"
+        assert authors[0] == "Forename 1 Middle 1 Surname 1"
         assert authors[1] == "Surname 2"
 
     def test_paragraphs(self, tei_xml_parser):
