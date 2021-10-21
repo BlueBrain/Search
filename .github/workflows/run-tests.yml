@@ -55,6 +55,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+
       - name: linting and code style
         if: matrix.python-version == '3.7'
         run: tox -vv -e lint
@@ -65,10 +69,6 @@ jobs:
 
       - name: tests and coverage
         run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
 
       - name: docs
         if: matrix.python-version == '3.7'
