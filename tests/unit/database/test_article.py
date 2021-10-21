@@ -1,7 +1,7 @@
 import inspect
 import pathlib
 import xml.etree.ElementTree
-from itertools import chain
+from itertools import chain, zip_longest
 
 import pytest
 from defusedxml import ElementTree
@@ -417,6 +417,36 @@ class TestTEIXMLArticleParser:
         doi = tei_xml_parser.doi
         assert isinstance(doi, str)
         assert doi == "DOI 1"
+
+    @pytest.mark.parametrize(
+        ("xml_content", "expected_texts"),
+        (
+            ("", tuple()),
+            ("<p></p>", tuple()),
+            ("<p>Hello.</p>", ("Hello.",)),
+            ("<p>Hello</p>", ("Hello.",)),
+            ("<p>Hello.</p><p>There.</p>", ("Hello.", "There.")),
+            ("<p>Hello</p><p>There.</p>", ("Hello.", "There.")),
+            ("<p>Hello</p><p>there.</p>", ("Hello there.",)),
+            ("<p>This is cool: </p><formula>a + b = c</formula>", ("This is cool: FORMULA.",)),
+            ("<p>As </p><formula>x = 5</formula><p>shows...</p>", ("As FORMULA shows...",))
+        )
+    )
+    def test_build_texts(self, xml_content, expected_texts):
+        parser = TEIXMLParser(f"<xml>{xml_content}</xml>")
+        # Patch the namespace because it's not used in test examples
+        parser.tei_namespace["tei"] = ""
+
+        texts = parser._build_texts(parser.content)
+        for text, expected_text in zip_longest(texts, expected_texts, fillvalue=None):
+            assert text == expected_text
+
+    def test_build_texts_raises_for_unknown_tag(self):
+        parser = TEIXMLParser("<xml><hahaha>HAHAHA</hahaha></xml>")
+        with pytest.raises(RuntimeError, match=r"Unexpected tag"):
+            for _ in parser._build_texts(parser.content):
+                # Do nothing, just force the generator to run
+                pass
 
 
 class TestArticle:
