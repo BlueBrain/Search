@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import html
+import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -693,14 +694,11 @@ class TEIXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        for p in self.content.findall(
-            "./tei:teiHeader/tei:profileDesc/tei:abstract/tei:div/tei:p",
+        for div in self.content.findall(
+            "./tei:teiHeader/tei:profileDesc/tei:abstract/tei:div",
             self.tei_namespace,
         ):
-            p_str = self._element_to_str(p)
-            if not p_str:
-                continue
-            yield p_str
+            yield from self._build_texts(div)
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -715,15 +713,17 @@ class TEIXMLParser(ArticleParser):
         text : str
             The paragraph content.
         """
-        for section_div in self.content.findall(
-            "./tei:text/tei:body/tei:div", self.tei_namespace
+        for div in self.content.findall(
+            "./tei:text/tei:body/tei:div",
+            self.tei_namespace,
         ):
-            head = section_div.find("./tei:head", self.tei_namespace)
-            section_title = head.text if head is not None else ""
-            for p in section_div.findall("./tei:p", self.tei_namespace):
-                text = self._element_to_str(p)
-                if not text:
-                    continue
+            head = div.find("./tei:head", self.tei_namespace)
+            section_title = self._element_to_str(head)
+            text_elements = []
+            for child in div:
+                if not child.tag.endswith("head"):
+                    text_elements.append(child)
+            for text in self._build_texts(text_elements):
                 yield section_title, text
 
         # Figure and Table Caption
@@ -772,7 +772,8 @@ class TEIXMLParser(ArticleParser):
 
         return self._tei_ids
 
-    def _element_to_str(self, element: Element | None) -> str:
+    @staticmethod
+    def _element_to_str(element: Element | None) -> str:
         """Convert an element and all its contents to a string.
 
         Parameters
@@ -788,6 +789,64 @@ class TEIXMLParser(ArticleParser):
         if element is None:
             return ""
         return "".join(element.itertext())
+
+    def _build_texts(self, elements: Iterable[Element]) -> Generator[str, None, None]:
+        """Compose paragraphs and formulas to meaningful texts.
+
+        In the abstract and main text of TEI XML parsers one finds a mix of
+        <p> and <formula> tags. Several of these tags could be part of one
+        sentence. This method tries to reconstruct sentences that are
+        partitioned in this way. The formulas are replaced by the FORMULA
+        placeholder.
+
+        Parameters
+        ----------
+        elements
+            An iterable of <p> and <formula> elements.
+
+        Yields
+        ------
+        str
+            One or more sentences as one string.
+
+        Raises
+        ------
+        RuntimeError
+            If a tag is encountered that is neither <p> nor <formula>.
+        """
+        prefix = f"{{{self.tei_namespace['tei']}}}"
+        # At every change ensure that there's no space at the end of text
+        text = ""
+
+        def if_non_empty(text_: str) -> Generator[str, None, None]:
+            """Yield if text is non-empty and make sure it ends with a period."""
+            if text_:
+                if not text_.endswith("."):
+                    text_ += "."
+                yield text_
+
+        for child in elements:
+            if child.tag == prefix + "p":
+                p_text = self._element_to_str(child)
+                if p_text[0] in string.ascii_uppercase:
+                    # The sentence in the text has finished.
+                    # Yield and start a new one
+                    yield from if_non_empty(text)
+                    text = p_text
+                else:
+                    # The sentence in the text continues
+                    text += " " + p_text
+            elif child.tag == prefix + "formula":
+                # Maybe use FORMULA-BLOCK instead?
+                text += " FORMULA"
+            else:
+                all_text = "".join(self._element_to_str(e) for e in elements)
+                raise RuntimeError(
+                    f"Unexpected tag: {child.tag}\nall text:\n{all_text}"
+                )
+
+        # Yield the last remaining text
+        yield from if_non_empty(text)
 
 
 @dataclass(frozen=True)
