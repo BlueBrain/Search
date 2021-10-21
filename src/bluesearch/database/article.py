@@ -752,7 +752,7 @@ class TEIXMLParser(ArticleParser):
 
     @property
     def tei_ids(self) -> dict:
-        """Exctract all IDs of the TEI XML.
+        """Extract all IDs of the TEI XML.
 
         Returns
         -------
