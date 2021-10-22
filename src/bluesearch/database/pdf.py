@@ -16,7 +16,7 @@
 import requests
 
 
-def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: str) -> str:
+def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: int) -> str:
     """Convert PDF file to TEI XML using GROBID server.
 
     This function uses the GROBID API service to convert PDF to a TEI XML format.
