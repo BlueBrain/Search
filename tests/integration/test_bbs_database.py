@@ -1,3 +1,4 @@
+import random
 import time
 
 import docker
@@ -28,7 +29,7 @@ def setup_backend(request, tmp_path):
         except docker.errors.DockerException:
             pytest.skip()
 
-        port = 22346
+        port = random.randint(1024, 49151)
         container = client.containers.run(
             image="mysql:latest",
             environment={"MYSQL_ROOT_PASSWORD": "my-secret-pw"},
