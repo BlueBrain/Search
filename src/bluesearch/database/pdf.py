@@ -38,14 +38,7 @@ def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: str) -> str:
         TEI XML parsing of the PDF content.
     """
     url = f"http://{host}:{port}/api/processFulltextDocument"
-    files = {
-        "input": (
-            "",
-            pdf_content,
-            "application/pdf",
-            {"Expires": "0"},
-        )
-    }
+    files = {"input": pdf_content}
     headers = {"Accept": "application/xml"}
     timeout = 60
 
