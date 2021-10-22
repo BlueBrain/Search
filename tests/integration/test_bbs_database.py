@@ -99,19 +99,18 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
             "parse",
             "cord19-json",
             str(input_path),
-            str(parsed_files_dir / f"{input_path.stem}.pkl"),
+            str(parsed_files_dir),
         ]
         main(args_and_opts_parse)
 
     # Adding parsed files to the database
-    for parsed_file in parsed_files_dir.iterdir():
-        args_and_opts_add = [
-            "add",
-            str(db_url),
-            str(parsed_file),
-            f"--db-type={db_type}",
-        ]
-        main(args_and_opts_add)
+    args_and_opts_add = [
+        "add",
+        str(db_url),
+        str(parsed_files_dir),
+        f"--db-type={db_type}",
+    ]
+    main(args_and_opts_add)
 
     # Asserts
     if db_type == "sqlite":
