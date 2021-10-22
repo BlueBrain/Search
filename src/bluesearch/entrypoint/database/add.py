@@ -99,7 +99,7 @@ def run(
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
-    nlp = load_spacy_model("en_core_web_sm", disable=["ner"])
+    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
     article_mappings = []
     sentence_mappings = []
