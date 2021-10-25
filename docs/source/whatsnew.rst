@@ -29,11 +29,22 @@ Legend
 
 Latest
 ======
+- |Add| default value :code:`None` for optional fields of :code:`Article`.
+- |Add| loading of metadata and abstracts from :code:`PubMed`.
+- |Fix| parsing in :code:`PubMed` metadata of authors with a
+  :code:`<CollectiveName>` instead of a :code:`<LastName>`.
+- |Add| an :code:`ArticleParser` for metadata and abstracts from :code:`PubMed`.
+- |Change| the behaviour of :code:`bbs_database add` when no article was loaded
+  from the given path. Now, stop with a :code:`RuntimeWarning` and don't load
+  the NLP model to get sentences (fail faster).
+- |Change| the behaviour of :code:`bbs_database add` when no sentence was
+  extracted from the given path, Now, stop with a :code:`RuntimeWarning`.
+- |Change| serialization of processed articles from Pickle to JSON format.
 - |Add| command line entrypoints :code:`bbs_database init`,
   :code:`bbs_database parse`, and :code:`bbs_database add` to initialize
   a literature database, parse, and integrate articles.
 - |Add| research of topic at journal and article levels in :code:`topic` module.
-- |Add| :code:`PubmedXMLParser` to parse PubMed articles in XML JATS format.
+- |Add| :code:`PMCXMLParser` to parse PubMed articles in XML JATS format.
 - |Fix| DVC pipeline named :code:`sentence_embedding` regarding missing
   :code:`deps` elements and mixed models origin.
 - |Fix| the incorrect maximum input length to the transformer model used as
@@ -43,6 +54,8 @@ Latest
   backbone for the sentence embedding model :code:`BioBERT NLI+STS CORD-19 v1`.
 - |Add| deterministic generation of paper UIDs based on paper identifiers.
 - |Change| relative imports into absolute ones.
+- |Add| the tables :code:`articles` and :code:`sentences` for
+  :code:`bbs_database init` and :code:`bbs_database add`.
 
 
 Version 0.2.0

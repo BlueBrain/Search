@@ -1,13 +1,51 @@
-import pickle
+import json
 from argparse import ArgumentError
+from pathlib import Path
 
 import pytest
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
+from bluesearch.entrypoint.database.parse import iter_parsers
 
 
-def test_unknown_article_type():
+@pytest.mark.parametrize(
+    "input_type, path, article_uids",
+    [
+        pytest.param(
+            "cord19-json",
+            "cord19_v35/document_parses/pmc_json/PMC7186928.xml.json",
+            ["84389eb01e19e3e17011deec5a785b52"],
+            id="cord19-json",
+        ),
+        pytest.param(
+            "pmc-xml",
+            "sample_file.xml",
+            ["97c1ee74607e1c2d99e4fa6f0877b044"],
+            id="pmc-xml",
+        ),
+        pytest.param(
+            "pubmed-xml",
+            "pubmed_article.xml",
+            ["645314d7b040d1e2b8ec7dbf9dd192c7"],
+            id="pubmed-xml",
+        ),
+        pytest.param(
+            "pubmed-xml-set",
+            "pubmed_articles.xml",
+            ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"],
+            id="pubmed-xml-set",
+        ),
+    ],
+)
+def test_iter_parsers(input_type, path, article_uids):
+    input_path = Path("tests/data/") / path
+    parsers = iter_parsers(input_type, input_path)
+    for parser, uid in zip(parsers, article_uids):
+        assert parser.uid == uid
+
+
+def test_unknown_input_type():
     wrong_type = "wrong-type"
 
     with pytest.raises(SystemExit) as exc_info:
@@ -39,10 +77,15 @@ def test_cord19_json(jsons_path, tmp_path):
         out_files = list(out_dir.glob("*"))
 
         assert len(out_files) == 1
-        assert out_files[0].name == inp_file.stem + ".pkl"
-        with out_files[0].open("rb") as f:
-            loaded_article = pickle.load(f)
-            assert isinstance(loaded_article, Article)
+
+        with out_files[0].open() as f:
+            data = json.load(f)
+            uid = data["uid"]
+            assert out_files[0].name == f"{uid}.json"
+
+        serialized = out_files[0].read_text("utf-8")
+        loaded_article = Article.from_json(serialized)
+        assert isinstance(loaded_article, Article)
 
     # Test parsing multiple files
     out_dir = tmp_path / "all"
@@ -56,11 +99,16 @@ def test_cord19_json(jsons_path, tmp_path):
     out_files = sorted(out_dir.glob("*"))
 
     assert len(out_files) == len(json_files)
-    for inp_file, out_file in zip(json_files, out_files):
-        assert out_file.name == inp_file.stem + ".pkl"
-        with out_file.open("rb") as f:
-            loaded_article = pickle.load(f)
-            assert isinstance(loaded_article, Article)
+
+    for out_file in out_files:
+        with out_file.open() as f:
+            data = json.load(f)
+            uid = data["uid"]
+            assert out_file.name == f"{uid}.json"
+
+        serialized = out_file.read_text("utf-8")
+        loaded_article = Article.from_json(serialized)
+        assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist
     with pytest.raises(ValueError):
@@ -71,3 +119,18 @@ def test_cord19_json(jsons_path, tmp_path):
             str(out_dir),
         ]
         main(args_and_opts)
+
+
+def test_pubmed_xml_set(tmp_path):
+    input_path = "tests/data/pubmed_articles.xml"
+    main(["parse", "pubmed-xml-set", input_path, str(tmp_path)])
+    files = sorted(tmp_path.iterdir())
+    assert len(files) == 2
+
+    uids = ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"]
+    for file, uid in zip(files, uids):
+        assert file.name == f"{uid}.json"
+        with file.open() as f:
+            data = json.load(f)
+            loaded_uid = data["uid"]
+            assert loaded_uid == uid

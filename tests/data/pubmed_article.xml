@@ -1,0 +1,123 @@
+<PubmedArticle>
+    <MedlineCitation Status="MEDLINE" Owner="NLM">
+        <PMID Version="1">123456</PMID>
+        <DateCompleted>
+            <Year>2020</Year>
+            <Month>01</Month>
+            <Day>01</Day>
+        </DateCompleted>
+        <DateRevised>
+            <Year>2020</Year>
+            <Month>07</Month>
+            <Day>01</Day>
+        </DateRevised>
+        <Article PubModel="Print">
+            <Journal>
+                <ISSN IssnType="Print">0123-4567</ISSN>
+                <JournalIssue CitedMedium="Print">
+                    <Volume>1</Volume>
+                    <Issue>1</Issue>
+                    <PubDate>
+                        <Year>2020</Year>
+                        <Month>Dec</Month>
+                    </PubDate>
+                </JournalIssue>
+                <Title>Journal Title</Title>
+                <ISOAbbreviation>Jour Ti</ISOAbbreviation>
+            </Journal>
+            <ArticleTitle>Article Title</ArticleTitle>
+            <Pagination>
+                <MedlinePgn>012-34</MedlinePgn>
+            </Pagination>
+            <Abstract>
+                <AbstractText>Abstract Paragraph 1</AbstractText>
+                <AbstractText>Abstract Paragraph 2</AbstractText>
+            </Abstract>
+            <AuthorList CompleteYN="Y">
+                <Author ValidYN="N">
+                    <LastName>Incorrect Lastname 1</LastName>
+                    <ForeName>Incorrect Forenames 1</ForeName>
+                    <Initials>IF1</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Lastname 1</LastName>
+                    <ForeName>Forenames 1</ForeName>
+                    <Initials>F1</Initials>
+                </Author>
+                <Author ValidYN="Y">
+                    <LastName>Lastname 2</LastName>
+                </Author>
+                <Author ValidYN="Y">
+                    <CollectiveName>Collective name</CollectiveName>
+                </Author>
+            </AuthorList>
+            <Language>eng</Language>
+            <GrantList CompleteYN="Y">
+                <Grant>
+                    <GrantID>AB_CD_01234/5</GrantID>
+                    <Agency>ABC</Agency>
+                    <Country>Grant Country</Country>
+                </Grant>
+            </GrantList>
+            <PublicationTypeList>
+                <PublicationType UI="D012345">Journal Article</PublicationType>
+                <PublicationType UI="D678901">MeSH Publication Type</PublicationType>
+            </PublicationTypeList>
+        </Article>
+        <MedlineJournalInfo>
+            <Country>Journal Country</Country>
+            <MedlineTA>Medline TA</MedlineTA>
+            <NlmUniqueID>0123456</NlmUniqueID>
+            <ISSNLinking>0123-4567</ISSNLinking>
+        </MedlineJournalInfo>
+        <ChemicalList>
+            <Chemical>
+                <RegistryNumber>1</RegistryNumber>
+                <NameOfSubstance UI="D234567">Substance Name 1</NameOfSubstance>
+            </Chemical>
+            <Chemical>
+                <RegistryNumber>2</RegistryNumber>
+                <NameOfSubstance UI="D890123">Substance Name 2</NameOfSubstance>
+            </Chemical>
+        </ChemicalList>
+        <CitationSubset>IM</CitationSubset>
+        <MeshHeadingList>
+            <MeshHeading>
+                <DescriptorName UI="D456789" MajorTopicYN="Y">Major Topic</DescriptorName>
+            </MeshHeading>
+            <MeshHeading>
+                <DescriptorName UI="D234567" MajorTopicYN="N">Minor Topic</DescriptorName>
+                <QualifierName UI="Q012345" MajorTopicYN="N">MeSH Qualifier</QualifierName>
+            </MeshHeading>
+        </MeshHeadingList>
+    </MedlineCitation>
+    <PubmedData>
+        <History>
+            <PubMedPubDate PubStatus="pubmed">
+                <Year>2019</Year>
+                <Month>1</Month>
+                <Day>1</Day>
+            </PubMedPubDate>
+            <PubMedPubDate PubStatus="medline">
+                <Year>2019</Year>
+                <Month>1</Month>
+                <Day>1</Day>
+                <Hour>0</Hour>
+                <Minute>1</Minute>
+            </PubMedPubDate>
+            <PubMedPubDate PubStatus="entrez">
+                <Year>2019</Year>
+                <Month>1</Month>
+                <Day>1</Day>
+                <Hour>0</Hour>
+                <Minute>0</Minute>
+            </PubMedPubDate>
+        </History>
+        <PublicationStatus>ppublish</PublicationStatus>
+        <ArticleIdList>
+            <ArticleId IdType="pubmed">123456</ArticleId>
+            <ArticleId IdType="pmc">PMC12345</ArticleId>
+            <ArticleId IdType="doi">10.0123/issn.0123-4567</ArticleId>
+        </ArticleIdList>
+    </PubmedData>
+</PubmedArticle>

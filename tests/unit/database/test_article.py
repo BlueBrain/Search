@@ -1,15 +1,17 @@
 import inspect
 import pathlib
+import xml.etree.ElementTree
 from itertools import chain
-from xml.etree.ElementTree import ElementTree
 
 import pytest
+from defusedxml import ElementTree
 
 from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
-    PubmedXMLParser,
+    PMCXMLParser,
+    PubMedXMLParser,
 )
 
 
@@ -23,6 +25,10 @@ class SimpleTestParser(ArticleParser):
             ("Section 1", "Paragraph 2."),
             ("Section 2", "Paragraph 1."),
         ]
+        self._pubmed_id = "pubmed_id"
+        self._pmc_id = "pmc_id"
+        self._doi = "doi"
+        self._uid = "fake_uid"
 
     @property
     def title(self):
@@ -40,24 +46,40 @@ class SimpleTestParser(ArticleParser):
     def paragraphs(self):
         yield from self._paragraphs
 
+    @property
+    def pubmed_id(self):
+        return self._pubmed_id
+
+    @property
+    def pmc_id(self):
+        return self._pmc_id
+
+    @property
+    def doi(self):
+        return self._doi
+
+    @property
+    def uid(self):
+        return self._uid
+
 
 @pytest.fixture(scope="session")
-def pubmed_xml_parser(test_data_path):
+def pmc_xml_parser(test_data_path):
     path = pathlib.Path(test_data_path) / "sample_file.xml"
-    parser = PubmedXMLParser(path.resolve())
+    parser = PMCXMLParser(path.resolve())
     return parser
 
 
-class TestPubmedXMLArticleParser:
-    def test_init(self, pubmed_xml_parser):
-        assert isinstance(pubmed_xml_parser.content, ElementTree)
+class TestPMCXMLArticleParser:
+    def test_init(self, pmc_xml_parser):
+        assert isinstance(pmc_xml_parser.content, xml.etree.ElementTree.ElementTree)
 
-    def test_title(self, pubmed_xml_parser):
-        title = pubmed_xml_parser.title
+    def test_title(self, pmc_xml_parser):
+        title = pmc_xml_parser.title
         assert title == "Article Title"
 
-    def test_authors(self, pubmed_xml_parser):
-        authors = pubmed_xml_parser.authors
+    def test_authors(self, pmc_xml_parser):
+        authors = pmc_xml_parser.authors
         assert inspect.isgenerator(authors)
         authors = tuple(authors)
 
@@ -65,16 +87,16 @@ class TestPubmedXMLArticleParser:
         assert authors[0] == "Author Given Names 1 Author Surname 1"
         assert authors[1] == "Author Given Names 2 Author Surname 2"
 
-    def test_abstract(self, pubmed_xml_parser):
-        abstract = pubmed_xml_parser.abstract
+    def test_abstract(self, pmc_xml_parser):
+        abstract = pmc_xml_parser.abstract
         assert inspect.isgenerator(abstract)
         abstract = tuple(abstract)
         assert len(abstract) == 2
         assert abstract[0] == "Abstract Paragraph 1"
         assert abstract[1] == "Abstract Paragraph 2"
 
-    def test_paragraphs(self, pubmed_xml_parser):
-        paragraphs = pubmed_xml_parser.paragraphs
+    def test_paragraphs(self, pmc_xml_parser):
+        paragraphs = pmc_xml_parser.paragraphs
         assert inspect.isgenerator(paragraphs)
         paragraphs = tuple(paragraphs)
         assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
@@ -91,6 +113,166 @@ class TestPubmedXMLArticleParser:
         assert paragraphs[0] == ("", "Paragraph 1")
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
         assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
+
+    def test_pubmed_id(self, pmc_xml_parser):
+        pubmed_id = pmc_xml_parser.pubmed_id
+        assert isinstance(pubmed_id, str)
+        assert pubmed_id == "PMID"
+
+    def test_pmc_id(self, pmc_xml_parser):
+        pmc_id = pmc_xml_parser.pmc_id
+        assert isinstance(pmc_id, str)
+        assert pmc_id == "PMC"
+
+    def test_doi(self, pmc_xml_parser):
+        doi = pmc_xml_parser.doi
+        assert isinstance(doi, str)
+        assert doi == "DOI"
+
+    def test_uid(self, pmc_xml_parser):
+        uid = pmc_xml_parser.uid
+        assert isinstance(uid, str)
+        assert len(uid) == 32
+
+    @pytest.mark.parametrize(
+        ("input_xml", "expected_inner_text"),
+        (
+            ("<p>Simple paragraph.</p>", "Simple paragraph."),
+            ("<p>Nested <p>paragraph</p>.</p>", "Nested paragraph."),
+            (
+                "<p>Paragraph <italic>with</italic> some <bold>styles</bold>.</p>",
+                "Paragraph with some styles.",
+            ),
+            ("<p>Paragraph with &quot;escapes&#34;.</p>", 'Paragraph with "escapes".'),
+            (
+                "<p><p>Sub-tags</p> at beginning and <p>end</p>.</p>",
+                "Sub-tags at beginning and end.",
+            ),
+            ("<p>My email is <email>me@epfl.ch</email></p>", "My email is EMAIL"),
+        ),
+    )
+    def test_inner_text_extraction(
+        self, pmc_xml_parser, input_xml, expected_inner_text
+    ):
+        element = ElementTree.fromstring(input_xml)
+        inner_text = pmc_xml_parser._inner_text(element)
+        assert inner_text == expected_inner_text
+
+    @pytest.mark.parametrize(
+        ("input_xml", "expected_str"),
+        (
+            ("<p>Simple paragraph.</p>", "Simple paragraph."),
+            ("<bold>Bold text</bold>", "Bold text"),
+            ("<italic>Italic text</italic>", "Italic text"),
+            ("<underline>Underlined text</underline>", "Underlined text"),
+            ("<monospace>Monospaced text</monospace>", "Monospaced text"),
+            ("<xref>Hawking20</xref>", "Hawking20"),
+            ("<sc>Text in small caps</sc>", "Text in small caps"),
+            ("<styled-content>Cool style</styled-content>", "Cool style"),
+            ("<sub>subbed</sub>", "_subbed"),
+            ("<sup>supped</sup>", "^supped"),
+            ("<inline-formula>Completely ignored</inline-formula>", "FORMULA"),
+            ("<disp-formula>Block formula</disp-formula>", "\nFORMULA-BLOCK"),
+            ("<ext-link>https://www.google.com</ext-link>", "URL"),
+            ("<uri>file:///path/to/file</uri>", "URL"),
+            ("<email>me@domain.ai</email>", "EMAIL"),
+            (
+                "<unknown-tag>Default: extract inner text.</unknown-tag>",
+                "Default: extract inner text.",
+            ),
+        ),
+    )
+    def test_element_to_str_works(self, pmc_xml_parser, input_xml, expected_str):
+        element = ElementTree.fromstring(input_xml)
+        element_str = pmc_xml_parser._element_to_str(element)
+        assert element_str == expected_str
+
+    def test_element_to_str_of_none(self, pmc_xml_parser):
+        assert pmc_xml_parser._element_to_str(None) == ""
+
+
+@pytest.fixture(scope="session")
+def pubmed_xml_parser(test_data_path):
+    """Parse a 'PubmedArticle' in a 'PubmedArticleSet'."""
+    path = pathlib.Path(test_data_path) / "pubmed_article.xml"
+    parser = PubMedXMLParser(path.resolve())
+    return parser
+
+
+@pytest.fixture(scope="session")
+def pubmed_xml_parser_minimal(test_data_path):
+    """Parse a 'PubmedArticle' in a 'PubmedArticleSet' having only required elements."""
+    path = pathlib.Path(test_data_path) / "pubmed_article_minimal.xml"
+    parser = PubMedXMLParser(path.resolve())
+    return parser
+
+
+class TestPubMedXMLArticleParser:
+    def test_init(self, pubmed_xml_parser):
+        assert isinstance(pubmed_xml_parser.content, xml.etree.ElementTree.ElementTree)
+
+    def test_title(self, pubmed_xml_parser):
+        title = pubmed_xml_parser.title
+        assert title == "Article Title"
+
+    def test_authors(self, pubmed_xml_parser):
+        authors = pubmed_xml_parser.authors
+        authors = tuple(authors)
+        assert len(authors) == 2
+        assert authors[0] == "Forenames 1 Lastname 1"
+        assert authors[1] == "Lastname 2"
+
+    def test_no_authors(self, pubmed_xml_parser_minimal):
+        authors = pubmed_xml_parser_minimal.authors
+        authors = tuple(authors)
+        assert len(authors) == 0
+        assert authors == ()
+
+    def test_abstract(self, pubmed_xml_parser):
+        abstract = pubmed_xml_parser.abstract
+        abstract = tuple(abstract)
+        assert len(abstract) == 2
+        assert abstract[0] == "Abstract Paragraph 1"
+        assert abstract[1] == "Abstract Paragraph 2"
+
+    def test_no_abstract(self, pubmed_xml_parser_minimal):
+        abstract = pubmed_xml_parser_minimal.abstract
+        abstract = tuple(abstract)
+        assert len(abstract) == 0
+        assert abstract == ()
+
+    def test_no_paragraphs(self, pubmed_xml_parser):
+        paragraphs = pubmed_xml_parser.paragraphs
+        assert len(paragraphs) == 0
+        assert paragraphs == ()
+
+    def test_pubmed_id(self, pubmed_xml_parser):
+        pubmed_id = pubmed_xml_parser.pubmed_id
+        assert isinstance(pubmed_id, str)
+        assert pubmed_id == "123456"
+
+    def test_pmc_id(self, pubmed_xml_parser):
+        pmc_id = pubmed_xml_parser.pmc_id
+        assert isinstance(pmc_id, str)
+        assert pmc_id == "PMC12345"
+
+    def test_no_pmc_id(self, pubmed_xml_parser_minimal):
+        pmc_id = pubmed_xml_parser_minimal.pmc_id
+        assert pmc_id is None
+
+    def test_doi(self, pubmed_xml_parser):
+        doi = pubmed_xml_parser.doi
+        assert isinstance(doi, str)
+        assert doi == "10.0123/issn.0123-4567"
+
+    def test_no_doi(self, pubmed_xml_parser_minimal):
+        doi = pubmed_xml_parser_minimal.doi
+        assert doi is None
+
+    def test_uid(self, pubmed_xml_parser):
+        uid = pubmed_xml_parser.uid
+        assert isinstance(uid, str)
+        assert uid == "645314d7b040d1e2b8ec7dbf9dd192c7"
 
 
 class TestCORD19ArticleParser:
@@ -157,6 +339,29 @@ class TestCORD19ArticleParser:
             assert section == paragraph_dict["section"]
             assert text == paragraph_dict["text"]
 
+    def test_pubmed_id(self, real_json_file):
+        # There is no Pubmed ID specified in the schema of CORD19 json files
+        parser = CORD19ArticleParser(real_json_file)
+        pubmed_id = parser.pubmed_id
+        assert pubmed_id is None
+
+    def test_pmc_id(self, real_json_file):
+        parser = CORD19ArticleParser(real_json_file)
+        pmc_id = parser.pmc_id
+        assert isinstance(pmc_id, str)
+
+    def test_doi(self, real_json_file):
+        # There is no DOI specified in the schema of CORD19 json files
+        parser = CORD19ArticleParser(real_json_file)
+        doi = parser.doi
+        assert doi is None
+
+    def test_uid(self, real_json_file):
+        parser = CORD19ArticleParser(real_json_file)
+        uid = parser.uid
+        assert isinstance(uid, str)
+        assert len(uid) == 32
+
     def test_str(self, real_json_file):
         parser = CORD19ArticleParser(real_json_file)
         parser_str = str(parser)
@@ -167,6 +372,17 @@ class TestCORD19ArticleParser:
 
 
 class TestArticle:
+    def test_optional_defaults(self):
+        article = Article(
+            title="",
+            authors=("",),
+            abstract=("",),
+            section_paragraphs=(("", ""),),
+        )
+        optional_fields = ["pubmed_id", "pmc_id", "doi", "uid"]
+        for field in optional_fields:
+            assert getattr(article, field) is None
+
     def test_parse(self):
         # Test article parsing
         parser = SimpleTestParser()

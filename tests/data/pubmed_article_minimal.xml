@@ -1,0 +1,26 @@
+<PubmedArticle>
+    <MedlineCitation Status="MEDLINE">
+        <PMID Version="1">123456</PMID>
+        <Article PubModel="Print">
+            <Journal>
+                <JournalIssue CitedMedium="Print">
+                    <PubDate>
+                        <Year>2020</Year>
+                    </PubDate>
+                </JournalIssue>
+            </Journal>
+            <ArticleTitle>Article Title</ArticleTitle>
+            <Pagination>
+                <MedlinePgn>012-34</MedlinePgn>
+            </Pagination>
+            <Language>eng</Language>
+            <PublicationTypeList>
+                <PublicationType UI="D012345">Journal Article</PublicationType>
+                <PublicationType UI="D678901">MeSH Publication Type</PublicationType>
+            </PublicationTypeList>
+        </Article>
+        <MedlineJournalInfo>
+            <MedlineTA>Medline TA</MedlineTA>
+        </MedlineJournalInfo>
+    </MedlineCitation>
+</PubmedArticle>
