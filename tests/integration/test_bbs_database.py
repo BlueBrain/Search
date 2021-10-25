@@ -20,7 +20,7 @@ def get_docker_client():
     try:
         subprocess.check_call(["docker", "info"])
 
-    except subprocess.CalledProcessError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         return None
 
     return docker.from_env()
