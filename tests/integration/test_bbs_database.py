@@ -1,6 +1,5 @@
 import subprocess
 import time
-import warnings
 
 import docker
 import pytest
