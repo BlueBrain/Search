@@ -2,6 +2,7 @@
 import argparse
 from typing import Optional, Sequence
 
+from bluesearch.entrypoint.database import convert_pdf
 from bluesearch.entrypoint.database.add import get_parser as get_parser_add
 from bluesearch.entrypoint.database.add import run as run_add
 from bluesearch.entrypoint.database.init import get_parser as get_parser_init
@@ -47,10 +48,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         add_help=False,
     )
 
+    convert_pdf.init_parser(subparsers.add_parser("convert-pdf"))
+
     command_map = {
         "add": run_add,
         "init": run_init,
         "parse": run_parse,
+        "convert-pdf": convert_pdf.run,
     }
 
     # Do parsing
