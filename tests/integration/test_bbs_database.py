@@ -47,10 +47,10 @@ def setup_backend(request, tmp_path):
         client = get_docker_client()
 
         if client is None:
-            pytest.skip()
+            pytest.skip("Docker daemon is not running")
 
         if not check_image_available(client, backend):
-            pytest.skip()
+            pytest.skip(f"Docker image for {backend} backend is missing")
 
         port = 22346
         container = client.containers.run(
