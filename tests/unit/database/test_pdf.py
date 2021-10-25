@@ -15,3 +15,4 @@ def test_conversion_pdf(monkeypatch):
 
     result = grobid_pdf_to_tei_xml(b"", host="fake_host", port=8888)
     assert result == "body"
+    assert len(responses.calls) == 1
