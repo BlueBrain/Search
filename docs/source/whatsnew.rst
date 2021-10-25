@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| parsing of PDFs through a GROBID server.
 - |Add| default value :code:`None` for optional fields of :code:`Article`.
 - |Add| loading of metadata and abstracts from :code:`PubMed`.
 - |Fix| parsing in :code:`PubMed` metadata of authors with a
