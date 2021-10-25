@@ -10,7 +10,7 @@ from bluesearch.entrypoint.database.parent import main
 
 
 def get_docker_client():
-    """Try to instantatie a docker client.
+    """Try to instantiate docker client.
 
     If the daemon is not running then None is returned.
 
@@ -26,16 +26,6 @@ def get_docker_client():
     return docker.from_env()
 
 
-def check_image_available(client, image):
-    """Check if a given image is downloaded.
-
-    There is no automatic download logic.
-    """
-    expected_tag = f"{image}:latest"
-
-    return expected_tag in {img.tags[0] for img in client.images.list() if img.tags}
-
-
 @pytest.fixture(params=["sqlite", "mysql", "mariadb"])
 def setup_backend(request, tmp_path):
     backend = request.param
@@ -48,9 +38,6 @@ def setup_backend(request, tmp_path):
 
         if client is None:
             pytest.skip("Docker daemon is not running")
-
-        if not check_image_available(client, backend):
-            pytest.skip(f"Docker image for {backend} backend is missing")
 
         port = 22346
         container = client.containers.run(
