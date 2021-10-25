@@ -36,7 +36,9 @@ def check_image_available(client, image):
     """
     expected_tag = f"{image}:latest"
 
-    return expected_tag in {img.tags[0] for img in client.images.list()}
+    return expected_tag in {
+        img.tags[0] for img in client.images.list() if img.tags
+    }
 
 
 @pytest.fixture(params=["sqlite", "mysql", "mariadb"])
