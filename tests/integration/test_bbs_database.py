@@ -1,3 +1,4 @@
+import subprocess
 import time
 import warnings
 
@@ -13,20 +14,17 @@ def get_docker_client():
     """Try to instantatie a docker client.
 
     If the daemon is not running then None is returned.
-    """
-    warnings.filterwarnings(
-        action="ignore",
-        message="unclosed",
-        category=ResourceWarning,
-    )
-    try:
-        client = docker.from_env()
-        client.ping()
 
-    except docker.errors.DockerException:
+    We avoid using `docker.from_env` when the daemon is not running
+    since it is causing socket related issues.
+    """
+    try:
+        subprocess.check_call(["docker", "info"])
+
+    except subprocess.CalledProcessError:
         return None
 
-    return client
+    return docker.from_env()
 
 
 def check_image_available(client, image):
