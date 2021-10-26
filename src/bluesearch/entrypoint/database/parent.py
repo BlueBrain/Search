@@ -47,8 +47,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parents=[parser_parse],
         add_help=False,
     )
-
-    convert_pdf.init_parser(subparsers.add_parser("convert-pdf"))
+    convert_pdf_parser = subparsers.add_parser(
+        "convert-pdf",
+        help="Convert a PDF file to a TEI XML file.",
+    )
+    convert_pdf.init_parser(convert_pdf_parser)
 
     command_map = {
         "add": run_add,
