@@ -49,6 +49,15 @@ def run(
 ) -> None:
     """Run the convert-pdf subcommand.
 
+    Note that the names and types of the parameters should match the parser
+    arguments added in ``init_parser``. The purpose of the matching is to be
+    able to combine the functions in this way:
+
+    >>> import argparse
+    >>> parser = init_parser(argparse.ArgumentParser())
+    >>> args = parser.parse_args()
+    >>> run(**vars(args))
+
     Parameters
     ----------
     grobid_host
