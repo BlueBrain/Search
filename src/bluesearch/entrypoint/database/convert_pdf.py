@@ -28,7 +28,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     file. It's assumed that the GROBID service is running under the
     host/port combination provided.
 
-    For more information on how to host such a survice refer to the official
+    For more information on how to host such a service refer to the official
     documentation: https://grobid.readthedocs.io/en/latest/Grobid-docker
     """
     parser.description = textwrap.dedent(description)
@@ -37,31 +37,31 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "grobid_host",
         type=str,
         metavar="GROBID-HOST",
-        help="The host of the GROBID server."
+        help="The host of the GROBID server.",
     )
     parser.add_argument(
         "grobid_port",
         type=int,
         metavar="GROBID-PORT",
-        help="The port of the GROBID server."
+        help="The port of the GROBID server.",
     )
     parser.add_argument(
         "input_pdf_path",
         type=pathlib.Path,
         metavar="INPUT-PDF-PATH",
-        help="The path of the input PDF file."
+        help="The path of the input PDF file.",
     )
     parser.add_argument(
         "output_xml_path",
         type=pathlib.Path,
         metavar="OUTPUT-XML-PATH",
-        help="The path of the output XML file."
+        help="The path of the output XML file.",
     )
     parser.add_argument(
         "--force",
         "-f",
         action="store_true",
-        help="Overwrite the output file if it already exits."
+        help="Overwrite the output file if it already exits.",
     )
 
     return parser
@@ -104,17 +104,11 @@ def run(
     int
         The exit code of the command
     """
-    print("host:", grobid_host, type(grobid_host))
-    print("port:", grobid_port, type(grobid_port))
-    print("pdf path:", input_pdf_path, type(input_pdf_path))
-    print("output path:", output_xml_path, type(output_xml_path))
-    print("force:", force, type(force))
-
     # Check if the input file exists
     if not input_pdf_path.exists():
         print(
             f"ERROR: The input file {str(input_pdf_path)!r} does not exist.",
-            file=sys.stderr
+            file=sys.stderr,
         )
         return 1
 
@@ -123,11 +117,31 @@ def run(
         print(
             f"ERROR: The output file {str(output_xml_path)!r} already exists. "
             "Either delete it or use the --force option to overwrite it.",
-            file=sys.stderr
+            file=sys.stderr,
         )
         return 1
 
+    # Read the PDF file
+    print("Reading the PDF file... ", end="")
+    with input_pdf_path.open("rb") as fh_pdf:
+        pdf_content = fh_pdf.read()
+    print("OK")
+
+    # Convert the PDF to XML
+    print("Converting PDF to XML... ", end="")
     from bluesearch.database.pdf import grobid_pdf_to_tei_xml
+
+    xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
+    print("OK")
+
+    # Write the XML file
+    print("Writing the XML file to disk... ", end="")
+    with output_xml_path.open("w") as fh_xml:
+        n_bytes = fh_xml.write(xml_content)
+    print("OK")
+    print(f"Wrote {n_bytes} bytes to {output_xml_path.resolve().as_uri()}")
+
+    print("Success.")
 
     return 0
 
