@@ -154,7 +154,7 @@ def run(
     logger.info("Writing the XML file to disk")
     with output_xml_path.open("w") as fh_xml:
         n_bytes = fh_xml.write(xml_content)
-    logger.info(f"Wrote %d bytes to %s", n_bytes, output_xml_path.resolve().as_uri())
+    logger.info("Wrote %d bytes to %s", n_bytes, output_xml_path.resolve().as_uri())
 
     logger.info("Success.")
 
