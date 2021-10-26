@@ -102,6 +102,9 @@ def run(
     >>> args = parser.parse_args()
     >>> run(**vars(args))
 
+    This will run the convert-pdf subcommand implemented here as a standalone
+    application.
+
     Parameters
     ----------
     grobid_host
@@ -160,25 +163,3 @@ def run(
     print("Success.")
 
     return 0
-
-
-def main(argv: Sequence[Text] | None = None) -> int:
-    """Run the convert-xml command as a standalone application.
-
-    Parameters
-    ----------
-    argv
-        The argument vector.
-
-    Returns
-    -------
-    int
-        The exit code of the program.
-    """
-    parser = init_parser(argparse.ArgumentParser())
-    args = parser.parse_args(argv)
-    return run(**vars(args))
-
-
-if __name__ == "__main__":
-    sys.exit(main())
