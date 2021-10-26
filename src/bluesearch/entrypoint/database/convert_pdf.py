@@ -32,10 +32,10 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """
     parser.description = textwrap.dedent(description)
 
-    parser.add_argument("grobid_host")
-    parser.add_argument("grobid_port", type=int)
-    parser.add_argument("input_pdf_path")
-    parser.add_argument("output_xml_path")
+    parser.add_argument("grobid_host", metavar="GROBID-HOST")
+    parser.add_argument("grobid_port", type=int, metavar="GROBID-PORT")
+    parser.add_argument("input_pdf_path", metavar="INPUT-PDF-PATH")
+    parser.add_argument("output_xml_path", metavar="OUTPUT-XML-PATH")
 
     return parser
 
