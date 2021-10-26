@@ -55,9 +55,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     command_map = {
         "add": run_add,
+        "convert-pdf": convert_pdf.run,
         "init": run_init,
         "parse": run_parse,
-        "convert-pdf": convert_pdf.run,
     }
 
     # Do parsing
