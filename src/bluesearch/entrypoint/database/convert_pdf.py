@@ -21,7 +21,6 @@ import argparse
 import pathlib
 import sys
 import textwrap
-from typing import Sequence, Text
 
 
 def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
