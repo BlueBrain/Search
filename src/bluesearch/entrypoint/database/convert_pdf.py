@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import sys
 import textwrap
 from typing import Sequence, Text
 
@@ -72,11 +73,16 @@ def main(argv: Sequence[Text] | None = None) -> None:
     ----------
     argv
         The argument vector.
+
+    Returns
+    -------
+    int
+        The exit code of the program.
     """
     parser = init_parser(argparse.ArgumentParser())
     args = parser.parse_args(argv)
-    run(**vars(args))
+    return run(**vars(args))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

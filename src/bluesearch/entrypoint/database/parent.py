@@ -64,6 +64,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     command = kwargs.pop("command")
 
     # Run logic
-    command_map[command](**kwargs)  # type: ignore
-
-    return 0
+    return command_map[command](**kwargs)  # type: ignore
