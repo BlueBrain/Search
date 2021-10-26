@@ -33,10 +33,36 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """
     parser.description = textwrap.dedent(description)
 
-    parser.add_argument("grobid_host", metavar="GROBID-HOST")
-    parser.add_argument("grobid_port", type=int, metavar="GROBID-PORT")
-    parser.add_argument("input_pdf_path", metavar="INPUT-PDF-PATH")
-    parser.add_argument("output_xml_path", metavar="OUTPUT-XML-PATH")
+    parser.add_argument(
+        "grobid_host",
+        type=str,
+        metavar="GROBID-HOST",
+        help="The host of the GROBID server."
+    )
+    parser.add_argument(
+        "grobid_port",
+        type=int,
+        metavar="GROBID-PORT",
+        help="The port of the GROBID server."
+    )
+    parser.add_argument(
+        "input_pdf_path",
+        type=pathlib.Path,
+        metavar="INPUT-PDF-PATH",
+        help="The path of the input PDF file."
+    )
+    parser.add_argument(
+        "output_xml_path",
+        type=pathlib.Path,
+        metavar="OUTPUT-XML-PATH",
+        help="The path of the output XML file."
+    )
+    parser.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        help="Overwrite the output file if it already exits."
+    )
 
     return parser
 
@@ -46,7 +72,9 @@ def run(
     grobid_port: int,
     input_pdf_path: pathlib.Path,
     output_xml_path: pathlib.Path,
-) -> None:
+    *,
+    force: bool,
+) -> int:
     """Run the convert-pdf subcommand.
 
     Note that the names and types of the parameters should match the parser
@@ -68,14 +96,43 @@ def run(
         The path to the input PDF file.
     output_xml_path
         The path to the output XML file.
+    force
+        If true overwrite the output file if it already exists.
+
+    Returns
+    -------
+    int
+        The exit code of the command
     """
-    print("host:", grobid_host)
-    print("port:", grobid_port)
-    print("pdf path:", input_pdf_path)
-    print("output path:", output_xml_path)
+    print("host:", grobid_host, type(grobid_host))
+    print("port:", grobid_port, type(grobid_port))
+    print("pdf path:", input_pdf_path, type(input_pdf_path))
+    print("output path:", output_xml_path, type(output_xml_path))
+    print("force:", force, type(force))
+
+    # Check if the input file exists
+    if not input_pdf_path.exists():
+        print(
+            f"ERROR: The input file {str(input_pdf_path)!r} does not exist.",
+            file=sys.stderr
+        )
+        return 1
+
+    # Check if the output file already exists
+    if output_xml_path.exists() and not force:
+        print(
+            f"ERROR: The output file {str(output_xml_path)!r} already exists. "
+            "Either delete it or use the --force option to overwrite it.",
+            file=sys.stderr
+        )
+        return 1
+
+    from bluesearch.database.pdf import grobid_pdf_to_tei_xml
+
+    return 0
 
 
-def main(argv: Sequence[Text] | None = None) -> None:
+def main(argv: Sequence[Text] | None = None) -> int:
     """Run the convert-xml command as a standalone application.
 
     Parameters
