@@ -18,9 +18,11 @@
 from __future__ import annotations
 
 import argparse
+import logging
 import pathlib
-import sys
 import textwrap
+
+logger = logging.getLogger(__name__)
 
 
 def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -124,41 +126,36 @@ def run(
     """
     # Check if the input file exists
     if not input_pdf_path.exists():
-        print(
-            f"ERROR: The input file {str(input_pdf_path)!r} does not exist.",
-            file=sys.stderr,
+        logger.error(
+            f"The input file {str(input_pdf_path)!r} does not exist.",
         )
         return 1
 
     # Check if the output file already exists
     if output_xml_path.exists() and not force:
-        print(
-            f"ERROR: The output file {str(output_xml_path)!r} already exists. "
+        logger.error(
+            f"The output file {str(output_xml_path)!r} already exists. "
             "Either delete it or use the --force option to overwrite it.",
-            file=sys.stderr,
         )
         return 1
 
     # Read the PDF file
-    print("Reading the PDF file... ", end="")
+    logger.info("Reading the PDF file")
     with input_pdf_path.open("rb") as fh_pdf:
         pdf_content = fh_pdf.read()
-    print("OK")
 
     # Convert the PDF to XML
-    print("Converting PDF to XML... ", end="")
+    logger.info("Converting PDF to XML")
     from bluesearch.database.pdf import grobid_pdf_to_tei_xml
 
     xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
-    print("OK")
 
     # Write the XML file
-    print("Writing the XML file to disk... ", end="")
+    logger.info("Writing the XML file to disk")
     with output_xml_path.open("w") as fh_xml:
         n_bytes = fh_xml.write(xml_content)
-    print("OK")
-    print(f"Wrote {n_bytes} bytes to {output_xml_path.resolve().as_uri()}")
+    logger.info(f"Wrote %d bytes to %s", n_bytes, output_xml_path.resolve().as_uri())
 
-    print("Success.")
+    logger.info("Success.")
 
     return 0
