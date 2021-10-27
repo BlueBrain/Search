@@ -1,6 +1,7 @@
 """Module implementing the high level CLI logic."""
 import argparse
 import logging
+import sys
 from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import convert_pdf
@@ -82,6 +83,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Setup logging
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
+    root_logger.addHandler(logging.StreamHandler(sys.stdout))
 
     # Run logic
     return command_map[command](**kwargs)  # type: ignore

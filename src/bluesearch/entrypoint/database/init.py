@@ -43,6 +43,7 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    logger.info("Importing dependencies")
     import sqlalchemy
 
     from bluesearch.entrypoint.database.schemas import schema_articles, schema_sentences
@@ -66,3 +67,5 @@ def run(
     # Construction
     with engine.begin() as connection:
         metadata.create_all(connection)
+
+    logger.info("Done")
