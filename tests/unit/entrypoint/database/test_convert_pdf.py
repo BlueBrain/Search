@@ -58,17 +58,25 @@ class TestRun:
 
     @unittest.mock.patch("bluesearch.database.pdf.grobid_pdf_to_tei_xml")
     def test_pdf_conversion_works(self, grobid_pdf_to_tei_xml, tmp_path):
+        # Prepare the input PDF file
         input_pdf_file = tmp_path / "my-file.pdf"
-        input_pdf_file.touch()
+        with input_pdf_file.open("wb") as fh:
+            fh.write(b"PDF file content")
+
+        # Prepare the output XML file path
         output_xml_file = tmp_path / "my-file.xml"
 
+        # Set up the mock
         grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
+
+        # Call the entry point
         exit_code = convert_pdf.run(
             "host", 1234, input_pdf_file, output_xml_file, force=False
         )
+
+        # Checks
         assert exit_code == 0
         grobid_pdf_to_tei_xml.assert_called_once()
-        grobid_pdf_to_tei_xml.assert_called_with(b"", "host", 1234)
-
+        grobid_pdf_to_tei_xml.assert_called_with(b"PDF file content", "host", 1234)
         with output_xml_file.open() as fh:
             assert fh.read() == "<xml>parsed</xml>"
