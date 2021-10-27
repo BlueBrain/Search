@@ -26,7 +26,13 @@ def get_docker_client():
     return docker.from_env()
 
 
-@pytest.fixture(params=["sqlite", "mysql", "mariadb"])
+@pytest.fixture(
+    params=[
+        "sqlite",
+        # "mysql",  # not used in production and slows down CI
+        "mariadb",
+    ]
+)
 def setup_backend(request, tmp_path):
     backend = request.param
     if backend == "sqlite":
