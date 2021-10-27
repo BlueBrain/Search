@@ -41,7 +41,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     """
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
     description = """
-    Parse a PDF file using and the GROBID service and produce a TEI XML
+    Parse a PDF file using the GROBID service and produce a TEI XML
     file. It's assumed that the GROBID service is running under the
     host/port combination provided.
 
