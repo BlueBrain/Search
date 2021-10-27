@@ -83,7 +83,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Setup logging
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
-    root_logger.addHandler(logging.StreamHandler(sys.stdout))
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
 
     # Run logic
     return command_map[command](**kwargs)  # type: ignore
