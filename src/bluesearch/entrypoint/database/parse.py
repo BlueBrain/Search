@@ -114,6 +114,8 @@ def run(
     output_dir.mkdir(exist_ok=True)
 
     for input_path in inputs:
+        logger.info(f"Parsing {input_path.name}")
+
         try:
             parsers = iter_parsers(input_type, input_path)
 
@@ -131,3 +133,5 @@ def run(
             warnings.warn(
                 f'Failed parsing file "{input_path}":\n {e}', category=RuntimeWarning
             )
+
+    logger.info("Done")
