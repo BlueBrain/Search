@@ -2,6 +2,7 @@
 import argparse
 from typing import Optional, Sequence
 
+from bluesearch.entrypoint.database import convert_pdf
 from bluesearch.entrypoint.database.add import get_parser as get_parser_add
 from bluesearch.entrypoint.database.add import run as run_add
 from bluesearch.entrypoint.database.init import get_parser as get_parser_init
@@ -46,9 +47,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parents=[parser_parse],
         add_help=False,
     )
+    convert_pdf_parser = subparsers.add_parser(
+        "convert-pdf",
+        help="Convert a PDF file to a TEI XML file.",
+    )
+    convert_pdf.init_parser(convert_pdf_parser)
 
     command_map = {
         "add": run_add,
+        "convert-pdf": convert_pdf.run,
         "init": run_init,
         "parse": run_parse,
     }
@@ -60,6 +67,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     command = kwargs.pop("command")
 
     # Run logic
-    command_map[command](**kwargs)  # type: ignore
-
-    return 0
+    return command_map[command](**kwargs)  # type: ignore
