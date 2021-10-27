@@ -1,5 +1,6 @@
 """Module implementing the high level CLI logic."""
 import argparse
+import logging
 from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import convert_pdf
@@ -17,9 +18,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     This is the main entrypoint that defines different commands
     using subparsers.
     """
-    parent_parser = argparse.ArgumentParser(description="Database management utilities")
-
-    subparsers = parent_parser.add_subparsers(dest="command", required=True)
+    parser = argparse.ArgumentParser(
+        description="Database management utilities"
+    )
+    parent_parser = argparse.ArgumentParser(
+        add_help=False,
+    )
+    parent_parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Controls the verbosity",
+        action="store_true",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Initialize subparsers
     parser_add = get_parser_add()
@@ -30,26 +41,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "add",
         description=parser_add.description,
         help=parser_add.description,
-        parents=[parser_add],
+        parents=[parser_add, parent_parser],
         add_help=False,
     )
     subparsers.add_parser(
         "init",
         description=parser_init.description,
         help=parser_init.description,
-        parents=[parser_init],
+        parents=[parser_init, parent_parser],
         add_help=False,
     )
     subparsers.add_parser(
         "parse",
         description=parser_parse.description,
         help=parser_parse.description,
-        parents=[parser_parse],
+        parents=[parser_parse, parent_parser],
         add_help=False,
     )
     convert_pdf_parser = subparsers.add_parser(
         "convert-pdf",
         help="Convert a PDF file to a TEI XML file.",
+        parents=[parent_parser],
     )
     convert_pdf.init_parser(convert_pdf_parser)
 
@@ -61,10 +73,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
 
     # Do parsing
-    args = parent_parser.parse_args(argv)
+    args = parser.parse_args(argv)
 
     kwargs = vars(args)
     command = kwargs.pop("command")
+    verbose = kwargs.pop("verbose")
+
+    # Setup logging
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     # Run logic
     return command_map[command](**kwargs)  # type: ignore

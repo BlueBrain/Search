@@ -16,7 +16,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Adding articles to the database."""
 import argparse
+import logging
 from pathlib import Path
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_parser() -> argparse.ArgumentParser:

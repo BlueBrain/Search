@@ -1,5 +1,8 @@
 """Initialization of the database."""
 import argparse
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_parser() -> argparse.ArgumentParser:

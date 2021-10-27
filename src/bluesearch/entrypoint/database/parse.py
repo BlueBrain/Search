@@ -17,6 +17,7 @@
 """Parsing articles."""
 import argparse
 import json
+import logging
 import warnings
 from pathlib import Path
 from typing import Iterable, Iterator
@@ -30,6 +31,8 @@ from bluesearch.database.article import (
     PMCXMLParser,
     PubMedXMLParser,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_parser() -> argparse.ArgumentParser:
