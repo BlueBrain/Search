@@ -1,3 +1,4 @@
+import subprocess
 import time
 
 import docker
@@ -8,10 +9,28 @@ from sqlalchemy.exc import OperationalError
 from bluesearch.entrypoint.database.parent import main
 
 
+def get_docker_client():
+    """Try to instantiate docker client.
+
+    If the daemon is not running then None is returned.
+
+    We avoid using `docker.from_env` when the daemon is not running
+    since it is causing socket related issues.
+    """
+    try:
+        subprocess.run(["docker", "info"], check=True)
+
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return None
+
+    return docker.from_env()
+
+
 @pytest.fixture(
     params=[
         "sqlite",
-        "mysql",
+        # "mysql",  # not used in production and slows down CI
+        "mariadb",
     ]
 )
 def setup_backend(request, tmp_path):
@@ -20,17 +39,15 @@ def setup_backend(request, tmp_path):
         db_url = tmp_path / "db.sqlite"
         yield "sqlite", str(db_url)
 
-    elif backend == "mysql":
-        try:
-            client = docker.from_env()
-            client.ping()
+    elif backend in {"mariadb", "mysql"}:
+        client = get_docker_client()
 
-        except docker.errors.DockerException:
-            pytest.skip()
+        if client is None:
+            pytest.skip("Docker daemon is not running")
 
         port = 22346
         container = client.containers.run(
-            image="mysql:latest",
+            image=f"{backend}:latest",
             environment={"MYSQL_ROOT_PASSWORD": "my-secret-pw"},
             ports={"3306/tcp": port},
             detach=True,
@@ -53,12 +70,12 @@ def setup_backend(request, tmp_path):
                 time.sleep(0.1)
                 continue
         else:
-            raise TimeoutError("Could not spawn the MySQL container.")
+            raise TimeoutError("Could not spawn the container.")
 
         engine.execute("create database test")
         engine.dispose()
 
-        yield "mysql", f"root:my-secret-pw@127.0.0.1:{port}/test",
+        yield backend, f"root:my-secret-pw@127.0.0.1:{port}/test",
 
         container.kill()
         client.close()
@@ -115,7 +132,7 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
     if db_type == "sqlite":
         engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
 
-    elif db_type == "mysql":
+    elif db_type in {"mysql", "mariadb"}:
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
 
     query = "SELECT COUNT(*) FROM articles"
