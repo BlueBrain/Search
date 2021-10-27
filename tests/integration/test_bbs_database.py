@@ -18,7 +18,7 @@ def get_docker_client():
     since it is causing socket related issues.
     """
     try:
-        subprocess.check_call(["docker", "info"])
+        subprocess.run(["docker", "info"], check=True)
 
     except (FileNotFoundError, subprocess.CalledProcessError):
         return None
