@@ -4,9 +4,10 @@ import logging
 import sys
 from typing import Optional, Sequence
 
-from bluesearch.entrypoint.database import convert_pdf
-from bluesearch.entrypoint.database.add import get_parser as get_parser_add
-from bluesearch.entrypoint.database.add import run as run_add
+from bluesearch.entrypoint.database import (
+        add,
+        convert_pdf,
+)
 from bluesearch.entrypoint.database.init import get_parser as get_parser_init
 from bluesearch.entrypoint.database.init import run as run_init
 from bluesearch.entrypoint.database.parse import get_parser as get_parser_parse
@@ -34,17 +35,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Initialize subparsers
-    parser_add = get_parser_add()
     parser_init = get_parser_init()
     parser_parse = get_parser_parse()
 
-    subparsers.add_parser(
+    add_parser = subparsers.add_parser(
         "add",
-        description=parser_add.description,
-        help=parser_add.description,
-        parents=[parser_add, parent_parser],
-        add_help=False,
+        help="Add parsed files to the database.",
+        parents=[parent_parser],
     )
+    add.init_parser(add_parser)
+
+    convert_pdf_parser = subparsers.add_parser(
+        "convert-pdf",
+        help="Convert a PDF file to a TEI XML file.",
+        parents=[parent_parser],
+    )
+    convert_pdf.init_parser(convert_pdf_parser)
+
     subparsers.add_parser(
         "init",
         description=parser_init.description,
@@ -59,15 +66,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         parents=[parser_parse, parent_parser],
         add_help=False,
     )
-    convert_pdf_parser = subparsers.add_parser(
-        "convert-pdf",
-        help="Convert a PDF file to a TEI XML file.",
-        parents=[parent_parser],
-    )
-    convert_pdf.init_parser(convert_pdf_parser)
 
     command_map = {
-        "add": run_add,
+        "add": add.run,
         "convert-pdf": convert_pdf.run,
         "init": run_init,
         "parse": run_parse,

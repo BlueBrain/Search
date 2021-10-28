@@ -23,11 +23,23 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-def get_parser() -> argparse.ArgumentParser:
-    """Create a parser."""
-    parser = argparse.ArgumentParser(
-        description="Add entries to the database.",
-    )
+def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Initialise the argument parser for the add subcommand.
+
+    Parameters
+    ----------
+    parser
+        The argument parser to initialise.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The initialised argument parser. The same object as the `parser`
+        argument.
+    """
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
+    parser.description = "Add entries to the database."
+
     parser.add_argument(
         "db_url",
         type=str,
@@ -174,3 +186,5 @@ def run(
 
     with engine.begin() as con:
         con.execute(sentence_query, *sentence_mappings)
+
+    return 0
