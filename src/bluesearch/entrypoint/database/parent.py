@@ -99,4 +99,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Run logic
     chosen_cmd = [cmd for cmd in cmds if cmd.name == command][0]
 
-    return chosen_cmd.run(**kwargs)  # type: ignore
+    return chosen_cmd.run(**kwargs)

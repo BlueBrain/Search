@@ -72,7 +72,7 @@ def run(
     db_url: str,
     parsed_path: Path,
     db_type: str,
-) -> None:
+) -> int:
     """Add an entry to the database.
 
     Parameter description and potential defaults are documented inside of the

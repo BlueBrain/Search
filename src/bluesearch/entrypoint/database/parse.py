@@ -107,7 +107,7 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
-) -> None:
+) -> int:
     """Parse one or several articles.
 
     Parameter description and potential defaults are documented inside of the
@@ -147,3 +147,5 @@ def run(
             )
 
     logger.info("Done")
+
+    return 0

@@ -49,7 +49,7 @@ def run(
     *,
     db_url: str,
     db_type: str,
-) -> None:
+) -> int:
     """Initialize database.
 
     Parameter description and potential defaults are documented inside of the
@@ -81,3 +81,5 @@ def run(
         metadata.create_all(connection)
 
     logger.info("Done")
+
+    return 0
