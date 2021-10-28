@@ -11,6 +11,18 @@ from bluesearch.entrypoint.database import (
     parse
 )
 
+def _setup_logging(logging_level: int):
+    root_logger = logging.getLogger()
+
+    root_logger.setLevel(logging_level)
+
+    fmt = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+    formatter = logging.Formatter(fmt)
+
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+
+    root_logger.addHandler(handler)
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run CLI.
@@ -83,13 +95,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         1: logging.INFO,
         2: logging.DEBUG,
     }
+    _setup_logging(logging_level_map[verbose])
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging_level_map[verbose])
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(formatter)
-    root_logger.addHandler(handler)
 
     # Run logic
     return command_map[command](**kwargs)  # type: ignore
