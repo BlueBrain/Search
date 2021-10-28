@@ -5,12 +5,11 @@ import sys
 from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import (
-        add,
-        convert_pdf,
-        init,
+    add,
+    convert_pdf,
+    init,
+    parse
 )
-from bluesearch.entrypoint.database.parse import get_parser as get_parser_parse
-from bluesearch.entrypoint.database.parse import run as run_parse
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -34,8 +33,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # Initialize subparsers
-    parser_parse = get_parser_parse()
-
     add_parser = subparsers.add_parser(
         "add",
         help="Add parsed files to the database.",
@@ -52,24 +49,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     init_parser = subparsers.add_parser(
         "init",
-        help="Initialize a database.""",
+        help="Initialize a database.",
         parents=[parent_parser],
     )
     init.init_parser(init_parser)
 
-    subparsers.add_parser(
+    parse_parser = subparsers.add_parser(
         "parse",
-        description=parser_parse.description,
-        help=parser_parse.description,
-        parents=[parser_parse, parent_parser],
-        add_help=False,
+        help="Parse raw files.",
+        parents=[parent_parser],
     )
+    parse.init_parser(parse_parser)
+
 
     command_map = {
         "add": add.run,
         "convert-pdf": convert_pdf.run,
         "init": init.run,
-        "parse": run_parse,
+        "parse": parse.run,
     }
 
     # Do parsing
