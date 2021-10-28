@@ -5,11 +5,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def get_parser() -> argparse.ArgumentParser:
-    """Create a parser."""
-    parser = argparse.ArgumentParser(
-        description="Initialize.",
-    )
+def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Initialise the argument parser for the init subcommand.
+
+    Parameters
+    ----------
+    parser
+        The argument parser to initialise.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The initialised argument parser. The same object as the `parser`
+        argument.
+    """
+    parser.formatter_class = argparse.RawDescriptionHelpFormatter
+    description = """Initialize a database."""
+
     parser.add_argument(
         "db_url",
         type=str,

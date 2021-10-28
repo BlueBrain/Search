@@ -38,7 +38,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         argument.
     """
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
-    parser.description = "Add entries to the database."
+    parser.description = "Add entries to a database."
 
     parser.add_argument(
         "db_url",
