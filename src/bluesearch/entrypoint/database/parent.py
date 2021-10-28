@@ -28,7 +28,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "-v",
         "--verbose",
         help="Controls the verbosity",
-        action="store_true",
+        action="count",
+        default=0,
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -74,11 +75,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     kwargs = vars(args)
     command = kwargs.pop("command")
-    verbose = kwargs.pop("verbose")
+    verbose = min(kwargs.pop("verbose"), 2)
 
     # Setup logging
+    logging_level_map = {
+        0: logging.WARNING,
+        1: logging.INFO,
+        2: logging.DEBUG,
+    }
+
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
+    root_logger.setLevel(logging_level_map[verbose])
     formatter = logging.Formatter("%(asctime)s - %(name)s - %(message)s")
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
