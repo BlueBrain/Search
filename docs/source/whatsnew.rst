@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| article parser for TEI XML files.
 - |Add| CLI subcommand ``bbs_database convert-pdf``.
 - |Add| parsing of PDFs through a GROBID server.
 - |Add| default value :code:`None` for optional fields of :code:`Article`.

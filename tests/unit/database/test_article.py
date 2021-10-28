@@ -1,7 +1,7 @@
 import inspect
 import pathlib
 import xml.etree.ElementTree
-from itertools import chain
+from itertools import chain, zip_longest
 
 import pytest
 from defusedxml import ElementTree
@@ -12,6 +12,7 @@ from bluesearch.database.article import (
     CORD19ArticleParser,
     PMCXMLParser,
     PubMedXMLParser,
+    TEIXMLParser,
 )
 
 
@@ -67,6 +68,17 @@ class SimpleTestParser(ArticleParser):
 def pmc_xml_parser(test_data_path):
     path = pathlib.Path(test_data_path) / "sample_file.xml"
     parser = PMCXMLParser(path.resolve())
+    return parser
+
+
+@pytest.fixture(scope="session")
+def tei_xml_parser(test_data_path):
+    path = pathlib.Path(test_data_path) / "tei_file.tei.xml"
+
+    with open(path) as f:
+        xml_content = f.read()
+
+    parser = TEIXMLParser(xml_content)
     return parser
 
 
@@ -369,6 +381,78 @@ class TestCORD19ArticleParser:
         # Should be "CORD-19 article ID=<value>" or similar
         assert "CORD-19" in parser_str
         assert str(real_json_file["paper_id"]) in parser_str
+
+
+class TestTEIXMLArticleParser:
+    def test_title(self, tei_xml_parser):
+        title = tei_xml_parser.title
+        assert isinstance(title, str)
+        assert title == "Article Title"
+
+    def test_abstract(self, tei_xml_parser):
+        abstract = list(tei_xml_parser.abstract)
+        assert len(abstract) == 1
+        assert abstract[0] == "Abstract Paragraph 1."
+
+    def test_authors(self, tei_xml_parser):
+        authors = list(tei_xml_parser.authors)
+        assert len(authors) == 2
+        assert authors[0] == "Forename 1 Middle 1 Surname 1"
+        assert authors[1] == "Surname 2"
+
+    def test_paragraphs(self, tei_xml_parser):
+        paragraphs = list(tei_xml_parser.paragraphs)
+        assert len(paragraphs) == 7
+        assert paragraphs[0][0] == "Head 1"
+        assert paragraphs[2][0] == "Head 2"
+        assert paragraphs[4][0] == "Figure Caption"
+        assert paragraphs[6][0] == "Table Caption"
+
+        assert paragraphs[0][1] == "Paragraph 1 of Head 1."
+        assert paragraphs[3][1] == "Paragraph 2 of (0) Head 2."
+        assert paragraphs[4][1] == "Fig. 1. Title."
+        assert paragraphs[6][1] == "Table 1. Title."
+
+    def test_doi(self, tei_xml_parser):
+        doi = tei_xml_parser.doi
+        assert isinstance(doi, str)
+        assert doi == "DOI 1"
+
+    @pytest.mark.parametrize(
+        ("xml_content", "expected_texts"),
+        (
+            ("", ()),
+            ("<p></p>", ()),
+            ("<p>Hello.</p>", ("Hello.",)),
+            ("<p>Hello</p>", ("Hello.",)),
+            ("<p>Hello.</p><p>There.</p>", ("Hello.", "There.")),
+            ("<p>Hello</p><p>There.</p>", ("Hello.", "There.")),
+            ("<p>Hello</p><p>there.</p>", ("Hello there.",)),
+            (
+                "<p>This is cool: </p><formula>a + b = c</formula>",
+                ("This is cool: FORMULA.",),
+            ),
+            (
+                "<p>As </p><formula>x = 5</formula><p>shows...</p>",
+                ("As FORMULA shows...",),
+            ),
+        ),
+    )
+    def test_build_texts(self, xml_content, expected_texts):
+        parser = TEIXMLParser(f"<xml>{xml_content}</xml>")
+        # Patch the namespace because it's not used in test examples
+        parser.tei_namespace["tei"] = ""
+
+        texts = parser._build_texts(parser.content)
+        for text, expected_text in zip_longest(texts, expected_texts, fillvalue=None):
+            assert text == expected_text
+
+    def test_build_texts_raises_for_unknown_tag(self):
+        parser = TEIXMLParser("<xml><hahaha>HAHAHA</hahaha></xml>")
+        with pytest.raises(RuntimeError, match=r"Unexpected tag"):
+            for _ in parser._build_texts(parser.content):
+                # Do nothing, just force the generator to run
+                pass
 
 
 class TestArticle:

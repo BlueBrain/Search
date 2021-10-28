@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import html
+import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -631,6 +632,225 @@ class CORD19ArticleParser(ArticleParser):
     def __str__(self):
         """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
+
+
+class TEIXMLParser(ArticleParser):
+    """Parser for TEI XML files.
+
+    Parameters
+    ----------
+    xml_content
+        The content of a TEI XML file.
+    """
+
+    def __init__(self, xml_content: str):
+        self.content = ElementTree.fromstring(xml_content)
+        self.tei_namespace = {"tei": "http://www.tei-c.org/ns/1.0"}
+        self._tei_ids: dict[str, str] | None = None
+
+    @property
+    def title(self) -> str:
+        """Get the article title.
+
+        Returns
+        -------
+        str
+            The article title.
+        """
+        title = self.content.find(
+            "./tei:teiHeader/tei:fileDesc/tei:titleStmt/", self.tei_namespace
+        )
+        return self._element_to_str(title)
+
+    @property
+    def authors(self) -> Generator[str, None, None]:
+        """Get all author names.
+
+        Yields
+        ------
+        str
+            Every author, in the format "Given_Name(s) Surname".
+        """
+        for pers_name in self.content.findall(
+            "./tei:teiHeader/tei:fileDesc/tei:sourceDesc/tei:biblStruct/tei:analytic"
+            "/tei:author/tei:persName",
+            self.tei_namespace,
+        ):
+            parts = [
+                pers_name.find("./tei:forename[@type='first']", self.tei_namespace),
+                pers_name.find("./tei:forename[@type='middle']", self.tei_namespace),
+                pers_name.find("./tei:surname", self.tei_namespace),
+            ]
+
+            parts = [self._element_to_str(part) for part in parts]
+            yield " ".join([part for part in parts if part]).strip()
+
+    @property
+    def abstract(self) -> Generator[str, None, None]:
+        """Get a sequence of paragraphs in the article abstract.
+
+        Yields
+        ------
+        str
+            The paragraphs of the article abstract.
+        """
+        for div in self.content.findall(
+            "./tei:teiHeader/tei:profileDesc/tei:abstract/tei:div",
+            self.tei_namespace,
+        ):
+            yield from self._build_texts(div)
+
+    @property
+    def paragraphs(self) -> Generator[tuple[str, str], None, None]:
+        """Get all paragraphs and titles of sections they are part of.
+
+        Paragraphs can be parts of text body, or figure or table captions.
+
+        Yields
+        ------
+        section_title : str
+            The section title.
+        text : str
+            The paragraph content.
+        """
+        for div in self.content.findall(
+            "./tei:text/tei:body/tei:div",
+            self.tei_namespace,
+        ):
+            head = div.find("./tei:head", self.tei_namespace)
+            section_title = self._element_to_str(head)
+            text_elements = []
+            for child in div:
+                if not child.tag.endswith("head"):
+                    text_elements.append(child)
+            for text in self._build_texts(text_elements):
+                yield section_title, text
+
+        # Figure and Table Caption
+        for figure in self.content.findall(
+            "./tei:text/tei:body/tei:figure", self.tei_namespace
+        ):
+            caption = figure.find("./tei:figDesc", self.tei_namespace)
+            caption_str = self._element_to_str(caption)
+            if not caption_str:
+                continue
+            if figure.get("type") == "table":
+                yield "Table Caption", caption_str
+            else:
+                yield "Figure Caption", caption_str
+
+    @property
+    def doi(self) -> str | None:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        return self.tei_ids.get("DOI")
+
+    @property
+    def tei_ids(self) -> dict:
+        """Extract all IDs of the TEI XML.
+
+        Returns
+        -------
+        dict
+            Dictionary containing all the IDs of the TEI XML content
+            with the key being the ID type and the value being the ID value.
+        """
+        if self._tei_ids is None:
+            self._tei_ids = {}
+            for idno in self.content.findall(
+                "./tei:teiHeader/tei:fileDesc/tei:sourceDesc"
+                "/tei:biblStruct/tei:idno",
+                self.tei_namespace,
+            ):
+                id_type = idno.get("type")
+                self._tei_ids[id_type] = idno.text
+
+        return self._tei_ids
+
+    @staticmethod
+    def _element_to_str(element: Element | None) -> str:
+        """Convert an element and all its contents to a string.
+
+        Parameters
+        ----------
+        element
+            The input XML element.
+
+        Returns
+        -------
+        str
+            A parsed string representation of the input XML element.
+        """
+        if element is None:
+            return ""
+        return "".join(element.itertext())
+
+    def _build_texts(self, elements: Iterable[Element]) -> Generator[str, None, None]:
+        """Compose paragraphs and formulas to meaningful texts.
+
+        In the abstract and main text of TEI XML parsers one finds a mix of
+        <p> and <formula> tags. Several of these tags could be part of one
+        sentence. This method tries to reconstruct sentences that are
+        partitioned in this way. The formulas are replaced by the FORMULA
+        placeholder.
+
+        Parameters
+        ----------
+        elements
+            An iterable of <p> and <formula> elements.
+
+        Yields
+        ------
+        str
+            One or more sentences as one string.
+
+        Raises
+        ------
+        RuntimeError
+            If a tag is encountered that is neither <p> nor <formula>.
+        """
+        # In TEI XML all tags are prefixed with the namespace.
+        ns = self.tei_namespace["tei"]
+        prefix = f"{{{ns}}}" if ns else ""
+        # At every change ensure that there's no space at the end of text
+        text = ""
+
+        def if_non_empty(text_: str) -> Generator[str, None, None]:
+            """Yield if text is non-empty and make sure it ends with a period."""
+            if text_:
+                if not text_.endswith("."):
+                    text_ += "."
+                yield text_
+
+        for child in elements:
+            if child.tag == prefix + "p":
+                p_text = self._element_to_str(child).strip()
+                if not p_text:
+                    continue
+                if p_text[0] in string.ascii_uppercase:
+                    # The sentence in the text has finished.
+                    # Yield and start a new one
+                    yield from if_non_empty(text)
+                    text = p_text
+                else:
+                    # The sentence in the text continues
+                    text += " " + p_text
+            elif child.tag == prefix + "formula":
+                # Maybe use FORMULA-BLOCK instead?
+                text += " FORMULA"
+            else:
+                all_text = "".join(self._element_to_str(e) for e in elements)
+                raise RuntimeError(
+                    f"Unexpected tag: {child.tag}\nall text:\n{all_text}"
+                )
+
+        # Yield the last remaining text
+        yield from if_non_empty(text)
 
 
 @dataclass(frozen=True)

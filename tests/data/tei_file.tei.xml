@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xml:space="preserve" xmlns="http://www.tei-c.org/ns/1.0" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="http://www.tei-c.org/ns/1.0 https://raw.githubusercontent.com/kermitt2/grobid/master/grobid-home/schemas/xsd/Grobid.xsd"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+	<teiHeader xml:lang="en">
+		<fileDesc>
+			<titleStmt>
+				<title level="a" type="main">Article Title</title>
+			</titleStmt>
+			<publicationStmt>
+				<publisher/>
+				<availability status="unknown"><licence/></availability>
+			</publicationStmt>
+			<sourceDesc>
+				<biblStruct>
+					<analytic>
+						<author>
+							<persName><forename type="first">Forename 1</forename><forename type="middle">Middle 1</forename><surname>Surname 1</surname></persName>
+							<email>hushunbo@lyu.edu.cn</email>
+							<affiliation key="aff0">
+								<orgName type="department">Affiliation 1</orgName>
+								<orgName type="institution">Institution 1</orgName>
+							</affiliation>
+						</author>
+						<author>
+							<persName><surname>Surname 2</surname></persName>
+							<affiliation key="aff0">
+								<orgName type="department">Affiliation 2</orgName>
+								<orgName type="institution">Institution 2</orgName>
+								<address>
+								</address>
+							</affiliation>
+						</author>
+						<title level="a" type="main">Article Title</title>
+					</analytic>
+					<monogr>
+						<imprint>
+							<date/>
+						</imprint>
+					</monogr>
+					<idno type="MD5">MD5</idno>
+					<idno type="DOI">DOI 1</idno>
+				</biblStruct>
+			</sourceDesc>
+		</fileDesc>
+		<encodingDesc>
+			<appInfo>
+				<application version="0.7.0" ident="GROBID" when="2021-10-20T08:39+0000">
+					<desc>GROBID - A machine learning software for extracting information from scholarly documents</desc>
+					<ref target="https://github.com/kermitt2/grobid"/>
+				</application>
+			</appInfo>
+		</encodingDesc>
+		<profileDesc>
+			<textClass>
+				<keywords>
+					<term>Keyword 1</term>
+					<term>Keyword 2</term>
+					<term>Keyword 3</term>
+					<term>Keyword 4</term>
+				</keywords>
+			</textClass>
+			<abstract>
+				<div xmlns="http://www.tei-c.org/ns/1.0"><p>Abstract Paragraph 1</p></div>
+			</abstract>
+		</profileDesc>
+	</teiHeader>
+	<text xml:lang="en">
+		<body>
+			<div xmlns="http://www.tei-c.org/ns/1.0"><head n="1">Head 1</head><p>Paragraph 1 of Head 1</p><p>Paragraph 2 of Head 1</p></div>
+			<div xmlns="http://www.tei-c.org/ns/1.0"><head n="2">Head 2</head><p>Paragraph 1 of Head 2</p><p>Paragraph 2 of <ref type="bibr" target="#b0">(0)</ref> Head 2</p></div>
+			<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_1"><head>Fig. 1 .</head><label>1
+			</label><figDesc>Fig. 1. Title.</figDesc><graphic coords="4,58.47,53.75,335.17,158.95" type="bitmap" /></figure>
+			<figure xmlns="http://www.tei-c.org/ns/1.0" xml:id="fig_2"><head>Fig. 2 .</head><label>2
+			</label><figDesc>Fig. 2. Title.</figDesc><graphic coords="6,57.48,177.89,337.78,77.29" type="bitmap" /></figure>
+			<figure xmlns="http://www.tei-c.org/ns/1.0" type="table" xml:id="tab_0"><head>Table 1 .</head><label>1</label>
+				<figDesc>Table 1. Title.</figDesc><table /></figure>
+		</body>
+		<back>
+			<div type="acknowledgement">
+				<div xmlns="http://www.tei-c.org/ns/1.0" />
+			</div>
+			<div type="references">
+				<listBibl>
+<biblStruct xml:id="b0">
+	<analytic>
+		<title level="a" type="main">Title of Reference 1,</title>
+		<author>
+			<persName><forename type="first">F</forename><forename type="middle">M</forename><surname>Surname
+			</surname></persName>
+		</author>
+		<author>
+			<persName><forename type="first">F</forename><forename type="middle">M</forename><surname>Surname 2
+			</surname></persName>
+		</author>
+	</analytic>
+	<monogr>
+		<title level="j">Title</title>
+		<imprint>
+			<biblScope unit="volume">Volume</biblScope>
+			<biblScope unit="page" from="0" to="4" />
+			<date type="published" when="2021" />
+		</imprint>
+	</monogr>
+</biblStruct>
+				</listBibl>
+			</div>
+		</back>
+	</text>
+</TEI>
