@@ -50,7 +50,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         argument.
     """
     parser.formatter_class = argparse.RawDescriptionHelpFormatter
-    parser.description="Parse one or several articles."
+    parser.description = "Parse one or several articles."
 
     parser.add_argument(
         "input_type",

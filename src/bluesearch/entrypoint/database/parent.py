@@ -4,12 +4,8 @@ import logging
 import sys
 from typing import Optional, Sequence
 
-from bluesearch.entrypoint.database import (
-    add,
-    convert_pdf,
-    init,
-    parse
-)
+from bluesearch.entrypoint.database import add, convert_pdf, init, parse
+
 
 def _setup_logging(logging_level: int):
     root_logger = logging.getLogger()
@@ -24,15 +20,14 @@ def _setup_logging(logging_level: int):
 
     root_logger.addHandler(handler)
 
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run CLI.
 
     This is the main entrypoint that defines different commands
     using subparsers.
     """
-    parser = argparse.ArgumentParser(
-        description="Database management utilities"
-    )
+    parser = argparse.ArgumentParser(description="Database management utilities")
     parent_parser = argparse.ArgumentParser(
         add_help=False,
     )
@@ -74,7 +69,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     parse.init_parser(parse_parser)
 
-
     command_map = {
         "add": add.run,
         "convert-pdf": convert_pdf.run,
@@ -96,7 +90,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         2: logging.DEBUG,
     }
     _setup_logging(logging_level_map[verbose])
-
 
     # Run logic
     return command_map[command](**kwargs)  # type: ignore
