@@ -42,7 +42,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=0,
     )
 
-    # Define all commands
+    # Define all commands, order matters (--help)
     cmds = [
         Cmd(
             name="add",
