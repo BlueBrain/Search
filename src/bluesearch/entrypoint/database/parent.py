@@ -2,9 +2,12 @@
 import argparse
 import logging
 import sys
+from collections import namedtuple
 from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import add, convert_pdf, init, parse
+
+Cmd = namedtuple("Cmd", "name help init_parser run")
 
 
 def _setup_logging(logging_level: int):
@@ -38,43 +41,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         action="count",
         default=0,
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # Define all commands
+    cmds = [
+        Cmd(
+            name="add",
+            help="Add parsed files to the database.",
+            init_parser=add.init_parser,
+            run=add.run,
+        ),
+        Cmd(
+            name="convert-pdf",
+            help="Convert a PDF file to a TEI XML file.",
+            init_parser=convert_pdf.init_parser,
+            run=convert_pdf.run,
+        ),
+        Cmd(
+            name="init",
+            help="Initialize a database.",
+            init_parser=init.init_parser,
+            run=init.run,
+        ),
+        Cmd(
+            name="parse",
+            help="Parse raw files.",
+            init_parser=parse.init_parser,
+            run=parse.run,
+        ),
+    ]
 
     # Initialize subparsers
-    add_parser = subparsers.add_parser(
-        "add",
-        help="Add parsed files to the database.",
-        parents=[parent_parser],
-    )
-    add.init_parser(add_parser)
-
-    convert_pdf_parser = subparsers.add_parser(
-        "convert-pdf",
-        help="Convert a PDF file to a TEI XML file.",
-        parents=[parent_parser],
-    )
-    convert_pdf.init_parser(convert_pdf_parser)
-
-    init_parser = subparsers.add_parser(
-        "init",
-        help="Initialize a database.",
-        parents=[parent_parser],
-    )
-    init.init_parser(init_parser)
-
-    parse_parser = subparsers.add_parser(
-        "parse",
-        help="Parse raw files.",
-        parents=[parent_parser],
-    )
-    parse.init_parser(parse_parser)
-
-    command_map = {
-        "add": add.run,
-        "convert-pdf": convert_pdf.run,
-        "init": init.run,
-        "parse": parse.run,
-    }
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for cmd in cmds:
+        cmd.init_parser(
+            subparsers.add_parser(
+                cmd.name,
+                help=cmd.help,
+                parents=[parent_parser],
+            )
+        )
 
     # Do parsing
     args = parser.parse_args(argv)
@@ -92,4 +97,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _setup_logging(logging_level_map[verbose])
 
     # Run logic
-    return command_map[command](**kwargs)  # type: ignore
+    chosen_cmd = [cmd for cmd in cmds if cmd.name == command][0]
+
+    return chosen_cmd.run(**kwargs)  # type: ignore
