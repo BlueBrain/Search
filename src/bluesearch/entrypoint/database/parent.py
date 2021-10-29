@@ -10,7 +10,7 @@ from bluesearch.entrypoint.database import add, convert_pdf, init, parse
 Cmd = namedtuple("Cmd", "name help init_parser run")
 
 
-def _setup_logging(logging_level: int):
+def _setup_logging(logging_level: int) -> None:
     root_logger = logging.getLogger()
 
     root_logger.setLevel(logging_level)
