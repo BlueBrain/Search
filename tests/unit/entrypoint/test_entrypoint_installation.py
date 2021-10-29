@@ -35,4 +35,4 @@ import pytest
     ],
 )
 def test_entrypoint(entrypoint_name):
-    subprocess.check_call([entrypoint_name, "--help"])
+    subprocess.run([entrypoint_name, "--help"], check=True)
