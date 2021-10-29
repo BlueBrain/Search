@@ -80,6 +80,6 @@ def run(
     with engine.begin() as connection:
         metadata.create_all(connection)
 
-    logger.info("Done")
+    logger.info("Initialization done")
 
     return 0

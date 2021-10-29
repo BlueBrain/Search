@@ -114,8 +114,11 @@ def run(
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
+    logger.info("Loading spacy model")
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
+
+    logger.info("Splitting text into sentences")
     article_mappings = []
     sentence_mappings = []
 
@@ -164,6 +167,7 @@ def run(
         f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
     )
 
+    logger.info("Adding entries to the articles table")
     with engine.begin() as con:
         con.execute(article_query, *article_mappings)
 
@@ -183,7 +187,9 @@ def run(
         f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
     )
 
+    logger.info("Adding entries to the sentences table")
     with engine.begin() as con:
         con.execute(sentence_query, *sentence_mappings)
 
+    logger.info("Adding done")
     return 0

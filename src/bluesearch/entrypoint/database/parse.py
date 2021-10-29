@@ -146,6 +146,6 @@ def run(
                 f'Failed parsing file "{input_path}":\n {e}', category=RuntimeWarning
             )
 
-    logger.info("Done")
+    logger.info("Parsing done")
 
     return 0
