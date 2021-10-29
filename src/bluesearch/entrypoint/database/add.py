@@ -36,7 +36,6 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         The initialised argument parser. The same object as the `parser`
         argument.
     """
-    parser.formatter_class = argparse.RawDescriptionHelpFormatter
     parser.description = "Add entries to a database."
 
     parser.add_argument(
