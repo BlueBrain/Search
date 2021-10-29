@@ -31,16 +31,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     using subparsers.
     """
     parser = argparse.ArgumentParser(description="Database management utilities")
-    parent_parser = argparse.ArgumentParser(
-        add_help=False,
-    )
-    parent_parser.add_argument(
-        "-v",
-        "--verbose",
-        help="Controls the verbosity",
-        action="count",
-        default=0,
-    )
 
     # Define all commands, order matters (--help)
     cmds = [
@@ -70,6 +60,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ),
     ]
 
+    # Create a verbosity parser (it will be a parent of all subparsers)
+    verbosity_parser = argparse.ArgumentParser(
+        add_help=False,
+    )
+    verbosity_parser.add_argument(
+        "-v",
+        "--verbose",
+        help=(
+            "Controls the verbosity by setting the logging level. "
+            "Default: WARNING, -v: INFO, -vv: DEBUG"
+        ),
+        action="count",
+        default=0,
+    )
+
     # Initialize subparsers
     subparsers = parser.add_subparsers(dest="command", required=True)
     for cmd in cmds:
@@ -77,7 +82,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             subparsers.add_parser(
                 cmd.name,
                 help=cmd.help,
-                parents=[parent_parser],
+                parents=[verbosity_parser],
             )
         )
 
