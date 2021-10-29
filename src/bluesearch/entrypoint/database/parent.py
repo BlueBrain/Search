@@ -7,7 +7,7 @@ from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import add, convert_pdf, init, parse
 
-Cmd = namedtuple("Cmd", ["name", "help", "init_parser", "run"])
+Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
 
 
 def _setup_logging(logging_level: int) -> None:
@@ -33,32 +33,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Database management utilities")
 
     # Define all commands, order matters (--help)
-    cmds = [
-        Cmd(
-            name="add",
+    cmds = {
+        "add": Cmd(
             help="Add parsed files to the database.",
             init_parser=add.init_parser,
             run=add.run,
         ),
-        Cmd(
-            name="convert-pdf",
+        "convert-pdf": Cmd(
             help="Convert a PDF file to a TEI XML file.",
             init_parser=convert_pdf.init_parser,
             run=convert_pdf.run,
         ),
-        Cmd(
-            name="init",
+        "init": Cmd(
             help="Initialize a database.",
             init_parser=init.init_parser,
             run=init.run,
         ),
-        Cmd(
-            name="parse",
+        "parse": Cmd(
             help="Parse raw files.",
             init_parser=parse.init_parser,
             run=parse.run,
         ),
-    ]
+    }
 
     # Create a verbosity parser (it will be a parent of all subparsers)
     verbosity_parser = argparse.ArgumentParser(
@@ -77,10 +73,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Initialize subparsers
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for cmd in cmds:
+    for cmd_name, cmd in cmds.items():
         cmd.init_parser(
             subparsers.add_parser(
-                cmd.name,
+                cmd_name,
                 help=cmd.help,
                 parents=[verbosity_parser],
             )
@@ -102,6 +98,4 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _setup_logging(logging_level_map[verbose])
 
     # Run logic
-    chosen_cmd = [cmd for cmd in cmds if cmd.name == command][0]
-
-    return chosen_cmd.run(**kwargs)
+    return cmds[command].run(**kwargs)
