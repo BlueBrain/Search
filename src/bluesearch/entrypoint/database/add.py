@@ -117,7 +117,6 @@ def run(
     logger.info("Loading spacy model")
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
-
     logger.info("Splitting text into sentences")
     article_mappings = []
     sentence_mappings = []
