@@ -7,7 +7,7 @@ from typing import Optional, Sequence
 
 from bluesearch.entrypoint.database import add, convert_pdf, init, parse
 
-Cmd = namedtuple("Cmd", "name help init_parser run")
+Cmd = namedtuple("Cmd", ["name", "help", "init_parser", "run"])
 
 
 def _setup_logging(logging_level: int) -> None:
