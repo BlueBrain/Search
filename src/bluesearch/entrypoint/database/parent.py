@@ -13,14 +13,16 @@ Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
 def _setup_logging(logging_level: int) -> None:
     root_logger = logging.getLogger()
 
+    # Logging level
     root_logger.setLevel(logging_level)
 
+    # Formatter
     fmt = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
     formatter = logging.Formatter(fmt)
 
+    # Handler
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-
     root_logger.addHandler(handler)
 
 
