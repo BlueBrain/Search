@@ -125,13 +125,13 @@ class ArticleParser(ABC):
         return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
 
 
-class PMCXMLParser(ArticleParser):
-    """Parser for PubMed Central XML files using the JATS Journal Publishing DTD.
+class JATSXMLParser(ArticleParser):
+    """Parser for JATS XML files.
 
     Parameters
     ----------
     path
-        The path to the XML file from PubMed.
+        The path to a JATS XML file.
     """
 
     def __init__(self, path: str | Path) -> None:

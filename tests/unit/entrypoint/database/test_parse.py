@@ -19,10 +19,10 @@ from bluesearch.entrypoint.database.parse import iter_parsers
             id="cord19-json",
         ),
         pytest.param(
-            "pmc-xml",
-            "sample_file.xml",
+            "jats-xml",
+            "jats_article.xml",
             ["97c1ee74607e1c2d99e4fa6f0877b044"],
-            id="pmc-xml",
+            id="jats-xml",
         ),
         pytest.param(
             "pubmed-xml",
