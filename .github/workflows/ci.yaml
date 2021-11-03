@@ -1,17 +1,13 @@
-name: ci testing
-
-
+name: CI
 on:
-  push:
-    branches: master
   pull_request:
-
+  push:
+    branches: [master]
   workflow_dispatch:
     inputs:
       debug_enabled:
-        description: 'Run the build with tmate debugging enabled'
+        description: "Run the build with tmate debugging enabled"
         required: false
-        default: false
 
 jobs:
 
