@@ -38,6 +38,8 @@ jobs:
         run: tox -vv -e ${{ matrix.tox-env }}
   unit-tests:
     runs-on: ${{ matrix.os }}
+    env:
+      PIP_CACHE_DIR: .cache/pip
     strategy:
       fail-fast: false
       matrix:
@@ -64,7 +66,7 @@ jobs:
       - name: Set up pip cache
         uses: actions/cache@v2
         with:
-          path: ~/.cache/pip
+          path: .cache/pip
           key: ${{ matrix.tox-env }}-${{ matrix.os }}-${{ hashFiles('tox.ini') }}
       - name: Set up environment
         run: |
