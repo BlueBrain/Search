@@ -84,7 +84,7 @@ def setup_backend(request, tmp_path):
         raise ValueError
 
 
-def test_bbs_database(tmp_path, setup_backend, jsons_path):
+def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
     # Parameters
     db_type, db_url = setup_backend
 
@@ -106,6 +106,7 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
         "init",
         str(db_url),
         f"--db-type={db_type}",
+        "-v",
     ]
     main(args_and_opts_init)
 
@@ -116,6 +117,7 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
             "cord19-json",
             str(input_path),
             str(parsed_files_dir),
+            "-v",
         ]
         main(args_and_opts_parse)
 
@@ -125,6 +127,7 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
         str(db_url),
         str(parsed_files_dir),
         f"--db-type={db_type}",
+        "-v",
     ]
     main(args_and_opts_add)
 
@@ -139,3 +142,11 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path):
     (n_rows,) = engine.execute(query).fetchone()  # type: ignore
 
     assert n_rows == n_files > 0
+
+    # Check logging
+    expected_messages = {
+        "Initialization done",
+        "Parsing done",
+        "Adding done",
+    }
+    assert expected_messages.issubset({r.message for r in caplog.records})

@@ -17,6 +17,7 @@
 """Parsing articles."""
 import argparse
 import json
+import logging
 import warnings
 from pathlib import Path
 from typing import Iterable, Iterator
@@ -31,12 +32,25 @@ from bluesearch.database.article import (
     PubMedXMLParser,
 )
 
+logger = logging.getLogger(__name__)
 
-def get_parser() -> argparse.ArgumentParser:
-    """Create a parser."""
-    parser = argparse.ArgumentParser(
-        description="Parse one or several articles.",
-    )
+
+def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Initialise the argument parser for the parse subcommand.
+
+    Parameters
+    ----------
+    parser
+        The argument parser to initialise.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The initialised argument parser. The same object as the `parser`
+        argument.
+    """
+    parser.description = "Parse one or several articles."
+
     parser.add_argument(
         "input_type",
         type=str,
@@ -92,7 +106,7 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
-) -> None:
+) -> int:
     """Parse one or several articles.
 
     Parameter description and potential defaults are documented inside of the
@@ -111,6 +125,8 @@ def run(
     output_dir.mkdir(exist_ok=True)
 
     for input_path in inputs:
+        logger.info(f"Parsing {input_path.name}")
+
         try:
             parsers = iter_parsers(input_type, input_path)
 
@@ -128,3 +144,7 @@ def run(
             warnings.warn(
                 f'Failed parsing file "{input_path}":\n {e}', category=RuntimeWarning
             )
+
+    logger.info("Parsing done")
+
+    return 0

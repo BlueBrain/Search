@@ -16,14 +16,28 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Adding articles to the database."""
 import argparse
+import logging
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
 
-def get_parser() -> argparse.ArgumentParser:
-    """Create a parser."""
-    parser = argparse.ArgumentParser(
-        description="Add entries to the database.",
-    )
+
+def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
+    """Initialise the argument parser for the add subcommand.
+
+    Parameters
+    ----------
+    parser
+        The argument parser to initialise.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        The initialised argument parser. The same object as the `parser`
+        argument.
+    """
+    parser.description = "Add entries to a database."
+
     parser.add_argument(
         "db_url",
         type=str,
@@ -57,7 +71,7 @@ def run(
     db_url: str,
     parsed_path: Path,
     db_type: str,
-) -> None:
+) -> int:
     """Add an entry to the database.
 
     Parameter description and potential defaults are documented inside of the
@@ -99,8 +113,10 @@ def run(
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
+    logger.info("Loading spacy model")
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
 
+    logger.info("Splitting text into sentences")
     article_mappings = []
     sentence_mappings = []
 
@@ -149,6 +165,7 @@ def run(
         f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
     )
 
+    logger.info("Adding entries to the articles table")
     with engine.begin() as con:
         con.execute(article_query, *article_mappings)
 
@@ -168,5 +185,9 @@ def run(
         f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
     )
 
+    logger.info("Adding entries to the sentences table")
     with engine.begin() as con:
         con.execute(sentence_query, *sentence_mappings)
+
+    logger.info("Adding done")
+    return 0

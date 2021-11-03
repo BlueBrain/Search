@@ -1,14 +1,29 @@
 """Module implementing the high level CLI logic."""
 import argparse
+import logging
+import sys
+from collections import namedtuple
 from typing import Optional, Sequence
 
-from bluesearch.entrypoint.database import convert_pdf
-from bluesearch.entrypoint.database.add import get_parser as get_parser_add
-from bluesearch.entrypoint.database.add import run as run_add
-from bluesearch.entrypoint.database.init import get_parser as get_parser_init
-from bluesearch.entrypoint.database.init import run as run_init
-from bluesearch.entrypoint.database.parse import get_parser as get_parser_parse
-from bluesearch.entrypoint.database.parse import run as run_parse
+from bluesearch.entrypoint.database import add, convert_pdf, init, parse
+
+Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
+
+
+def _setup_logging(logging_level: int) -> None:
+    root_logger = logging.getLogger()
+
+    # Logging level
+    root_logger.setLevel(logging_level)
+
+    # Formatter
+    fmt = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+    formatter = logging.Formatter(fmt)
+
+    # Handler
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+    root_logger.addHandler(handler)
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -17,54 +32,72 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     This is the main entrypoint that defines different commands
     using subparsers.
     """
-    parent_parser = argparse.ArgumentParser(description="Database management utilities")
+    parser = argparse.ArgumentParser(description="Database management utilities")
 
-    subparsers = parent_parser.add_subparsers(dest="command", required=True)
-
-    # Initialize subparsers
-    parser_add = get_parser_add()
-    parser_init = get_parser_init()
-    parser_parse = get_parser_parse()
-
-    subparsers.add_parser(
-        "add",
-        description=parser_add.description,
-        help=parser_add.description,
-        parents=[parser_add],
-        add_help=False,
-    )
-    subparsers.add_parser(
-        "init",
-        description=parser_init.description,
-        help=parser_init.description,
-        parents=[parser_init],
-        add_help=False,
-    )
-    subparsers.add_parser(
-        "parse",
-        description=parser_parse.description,
-        help=parser_parse.description,
-        parents=[parser_parse],
-        add_help=False,
-    )
-    convert_pdf_parser = subparsers.add_parser(
-        "convert-pdf",
-        help="Convert a PDF file to a TEI XML file.",
-    )
-    convert_pdf.init_parser(convert_pdf_parser)
-
-    command_map = {
-        "add": run_add,
-        "convert-pdf": convert_pdf.run,
-        "init": run_init,
-        "parse": run_parse,
+    # Define all commands, order matters (--help)
+    cmds = {
+        "add": Cmd(
+            help="Add parsed files to the database.",
+            init_parser=add.init_parser,
+            run=add.run,
+        ),
+        "convert-pdf": Cmd(
+            help="Convert a PDF file to a TEI XML file.",
+            init_parser=convert_pdf.init_parser,
+            run=convert_pdf.run,
+        ),
+        "init": Cmd(
+            help="Initialize a database.",
+            init_parser=init.init_parser,
+            run=init.run,
+        ),
+        "parse": Cmd(
+            help="Parse raw files.",
+            init_parser=parse.init_parser,
+            run=parse.run,
+        ),
     }
 
+    # Create a verbosity parser (it will be a parent of all subparsers)
+    verbosity_parser = argparse.ArgumentParser(
+        add_help=False,
+    )
+    verbosity_parser.add_argument(
+        "-v",
+        "--verbose",
+        help=(
+            "Controls the verbosity by setting the logging level. "
+            "Default: WARNING, -v: INFO, -vv: DEBUG"
+        ),
+        action="count",
+        default=0,
+    )
+
+    # Initialize subparsers
+    subparsers = parser.add_subparsers(dest="command", required=True)
+    for cmd_name, cmd in cmds.items():
+        cmd.init_parser(
+            subparsers.add_parser(
+                cmd_name,
+                help=cmd.help,
+                parents=[verbosity_parser],
+            )
+        )
+
     # Do parsing
-    args = parent_parser.parse_args(argv)
+    args = parser.parse_args(argv)
 
     kwargs = vars(args)
     command = kwargs.pop("command")
+    verbose = min(kwargs.pop("verbose"), 2)
+
+    # Setup logging
+    logging_level_map = {
+        0: logging.WARNING,
+        1: logging.INFO,
+        2: logging.DEBUG,
+    }
+    _setup_logging(logging_level_map[verbose])
 
     # Run logic
-    return command_map[command](**kwargs)  # type: ignore
+    return cmds[command].run(**kwargs)

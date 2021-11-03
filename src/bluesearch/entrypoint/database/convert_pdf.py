@@ -156,6 +156,6 @@ def run(
         n_bytes = fh_xml.write(xml_content)
     logger.info("Wrote %d bytes to %s", n_bytes, output_xml_path.resolve().as_uri())
 
-    logger.info("Success.")
+    logger.info("PDF conversion done")
 
     return 0
