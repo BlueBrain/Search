@@ -128,6 +128,8 @@ class ArticleParser(ABC):
 class JATSXMLParser(ArticleParser):
     """Parser for JATS XML files.
 
+    This could be used for articles from PubMed Central, bioRxiv, and medRxiv.
+
     Parameters
     ----------
     path

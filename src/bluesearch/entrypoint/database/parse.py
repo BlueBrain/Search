@@ -42,8 +42,9 @@ def get_parser() -> argparse.ArgumentParser:
         type=str,
         choices=("cord19-json", "jats-xml", "pubmed-xml", "pubmed-xml-set"),
         help="""
-        Format of the input. If parsing several articles, all articles
-        must have same format.
+        Format of the input.
+        If parsing several articles, all articles must have the same format.
+        'jats-xml' could be used for articles from PubMed Central, bioRxiv, and medRxiv.
         """,
     )
     parser.add_argument(
