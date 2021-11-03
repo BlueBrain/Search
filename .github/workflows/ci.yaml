@@ -10,7 +10,30 @@ on:
         required: false
 
 jobs:
-
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel previous workflows that are still running
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: lint-${{ runner.os }}-${{ hashFiles('tox.ini') }}
+      - name: Set up environment
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install tox
+      - name: Lint
+        run: tox -vv -e lint
   run_test:
 
     runs-on: ${{ matrix.os }}
@@ -54,10 +77,6 @@ jobs:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
-
-      - name: linting and code style
-        if: matrix.python-version == '3.7'
-        run: tox -vv -e lint
 
       - name: Homebrew mysql installation
         if: matrix.os == 'macos-latest'
