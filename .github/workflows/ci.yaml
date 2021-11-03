@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: packaging-${{ runner.os }}-${{ hashFiles('tox.ini') }}
+          key: docs-${{ runner.os }}-${{ hashFiles('tox.ini') }}
       - name: Set up environment
         run: |
           pip install --upgrade pip wheel setuptools
