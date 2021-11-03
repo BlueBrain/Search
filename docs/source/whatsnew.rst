@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Change| split the CI job into smaller jobs
 - |Add| article parser for TEI XML files.
 - |Add| CLI subcommand ``bbs_database convert-pdf``.
 - |Add| parsing of PDFs through a GROBID server.
