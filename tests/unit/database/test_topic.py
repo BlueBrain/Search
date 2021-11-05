@@ -348,6 +348,6 @@ def test_get_mesh_from_pubmedid(test_data_path):
 
 
 def test_get_pubmedid(test_data_path):
-    path = test_data_path / "sample_file.xml"
+    path = test_data_path / "jats_article.xml"
     pubmed_id = extract_pubmed_id_from_pmc_file(path)
     assert pubmed_id == "PMID"

@@ -28,7 +28,7 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
-    PMCXMLParser,
+    JATSXMLParser,
     PubMedXMLParser,
 )
 
@@ -54,10 +54,11 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "input_type",
         type=str,
-        choices=("cord19-json", "pmc-xml", "pubmed-xml", "pubmed-xml-set"),
+        choices=("cord19-json", "jats-xml", "pubmed-xml", "pubmed-xml-set"),
         help="""
-        Format of the input. If parsing several articles, all articles
-        must have same format.
+        Format of the input.
+        If parsing several articles, all articles must have the same format.
+        'jats-xml' could be used for articles from PubMed Central, bioRxiv, and medRxiv.
         """,
     )
     parser.add_argument(
@@ -86,8 +87,8 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
             data = json.load(f)
             yield CORD19ArticleParser(data)
 
-    elif input_type == "pmc-xml":
-        yield PMCXMLParser(input_path)
+    elif input_type == "jats-xml":
+        yield JATSXMLParser(input_path)
 
     elif input_type == "pubmed-xml":
         yield PubMedXMLParser(input_path)
