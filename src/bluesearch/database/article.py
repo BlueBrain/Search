@@ -242,8 +242,8 @@ class JATSXMLParser(ArticleParser):
         # Table captions
         tables = self.content.findall("./body//table-wrap")
         for table in tables:
-            caption_elements = table.findall("./caption/p") or table.findall(
-                "./caption/title"
+            caption_elements = table.findall(".//caption/p") or table.findall(
+                ".//caption/title"
             )
             if caption_elements is None:
                 continue
