@@ -186,7 +186,12 @@ class JATSXMLParser(ArticleParser):
         """
         abstract_pars = self.content.findall("./front/article-meta/abstract//p")
         for paragraph in abstract_pars:
-            yield self._element_to_str(paragraph)
+            # Check if paragraph has paragraphs as children
+            if not paragraph.findall(".//p"):
+                text = self._element_to_str(paragraph)
+                # Check if text is not empty
+                if text:
+                    yield text
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -207,7 +212,7 @@ class JATSXMLParser(ArticleParser):
         # with the section name "Caption".
         caption_p = self.content.findall("./body//caption/p")
         # Acknowledgements are removed because not useful.
-        acknowledg_p = self.content.findall("./back/ack/p")
+        acknowledg_p = self.content.findall("./back/ack//p")
 
         exclude_list = abstract_p + caption_p + acknowledg_p
 
