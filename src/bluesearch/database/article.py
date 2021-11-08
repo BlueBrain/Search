@@ -185,9 +185,11 @@ class JATSXMLParser(ArticleParser):
             The paragraphs of the article abstract.
         """
         abstract_pars = self.content.findall("./front/article-meta/abstract//p")
+        children_p = []
         for paragraph in abstract_pars:
-            # Check if paragraph has paragraphs as children
-            if not paragraph.findall(".//p"):
+            # Check if paragraph is not child of another paragraph
+            children_p += paragraph.findall(".//p")
+            if paragraph not in children_p:
                 text = self._element_to_str(paragraph)
                 # Check if text is not empty
                 if text:
@@ -217,11 +219,13 @@ class JATSXMLParser(ArticleParser):
         exclude_list = abstract_p + caption_p + acknowledg_p
 
         # Paragraphs of text body
+        children_p = []
         section_dirs = self.get_paragraphs_sections_mapping()
         for paragraph in self.content.findall(".//p"):
             # Check that paragraph is not in the exclude list and
-            # that paragraph does not have paragraph(s) as children.
-            if paragraph not in exclude_list and not paragraph.findall(".//p"):
+            # that paragraph is not child of another paragraph.
+            if paragraph not in exclude_list and paragraph not in children_p:
+                children_p += paragraph.findall(".//p")
                 text = self._element_to_str(paragraph)
                 section_title = ""
                 if paragraph in section_dirs:
