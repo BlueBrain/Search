@@ -150,7 +150,7 @@ class JATSXMLParser(ArticleParser):
         str
             The article title.
         """
-        titles = self.content.find(".//title-group/article-title")
+        titles = self.content.find("./front/article-meta/title-group/article-title")
         return self._element_to_str(titles)
 
     @property
@@ -163,7 +163,7 @@ class JATSXMLParser(ArticleParser):
             Every author, in the format "Given_Name(s) Surname".
         """
         authors = self.content.findall(
-            ".//contrib-group/contrib[@contrib-type='author']"
+            "./front/article-meta/contrib-group/contrib[@contrib-type='author']"
         )
         for author in authors:
             given_names = self._element_to_str(author.find("name/given-names"))
@@ -184,7 +184,7 @@ class JATSXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        abstract_pars = self.content.findall(".//abstract//p")
+        abstract_pars = self.content.findall("./front/article-meta/abstract//p")
         for paragraph in abstract_pars:
             yield self._element_to_str(paragraph)
 
@@ -202,44 +202,49 @@ class JATSXMLParser(ArticleParser):
             The paragraph content.
         """
         # Abstract are removed because already parsed in abstract property.
-        abstract_p = self.content.findall(".//abstract/p")
+        abstract_p = self.content.findall("./front/article-meta/abstract//p")
         # Caption are removed because already parsed later in the current method
         # with the section name "Caption".
-        caption_p = self.content.findall(".//caption/p")
+        caption_p = self.content.findall("./body//caption/p")
         # Acknowledgements are removed because not useful.
-        acknowledg_p = self.content.findall(".//ack/p")
+        acknowledg_p = self.content.findall("./back/ack/p")
 
         exclude_list = abstract_p + caption_p + acknowledg_p
 
         # Paragraphs of text body
         section_dirs = self.get_paragraphs_sections_mapping()
         for paragraph in self.content.findall(".//p"):
-            if paragraph not in exclude_list:
+            # Check that paragraph is not in the exclude list and
+            # that paragraph does not have paragraph(s) as children.
+            if paragraph not in exclude_list and not paragraph.findall(".//p"):
                 text = self._element_to_str(paragraph)
                 section_title = ""
                 if paragraph in section_dirs:
                     section_title = section_dirs[paragraph]
-                yield section_title, text
+                if text:
+                    yield section_title, text
 
         # Figure captions
-        figs = self.content.findall(".//fig")
+        figs = self.content.findall("./body//fig")
         for fig in figs:
             fig_captions = fig.findall("caption")
             if fig_captions is None:
                 continue
             caption = " ".join(self._element_to_str(c) for c in list(fig_captions))
-            yield "Figure Caption", caption
+            if caption:
+                yield "Figure Caption", caption
 
         # Table captions
-        tables = self.content.findall(".//table-wrap")
+        tables = self.content.findall("./body//table-wrap")
         for table in tables:
-            caption_elements = table.findall(".//caption/p") or table.findall(
-                ".//caption/title"
+            caption_elements = table.findall("./caption/p") or table.findall(
+                "./caption/title"
             )
             if caption_elements is None:
                 continue
             caption = " ".join(self._element_to_str(c) for c in caption_elements)
-            yield "Table Caption", caption
+            if caption:
+                yield "Table Caption", caption
 
     @property
     def pubmed_id(self) -> Optional[str]:
@@ -354,7 +359,7 @@ class JATSXMLParser(ArticleParser):
             text_parts.append(self._element_to_str(sub_element))
             # don't forget the text after the sub-element
             text_parts.append(html.unescape(sub_element.tail or ""))
-        return "".join(text_parts).strip()
+        return "".join(text_parts).replace("\xa0", " ").replace("\u2009", " ").strip()
 
     def _element_to_str(self, element: Element | None) -> str:
         """Convert an element and all its contents to a string.
