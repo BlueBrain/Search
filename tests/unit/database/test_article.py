@@ -10,7 +10,7 @@ from bluesearch.database.article import (
     Article,
     ArticleParser,
     CORD19ArticleParser,
-    PMCXMLParser,
+    JATSXMLParser,
     PubMedXMLParser,
     TEIXMLParser,
 )
@@ -65,9 +65,9 @@ class SimpleTestParser(ArticleParser):
 
 
 @pytest.fixture(scope="session")
-def pmc_xml_parser(test_data_path):
-    path = pathlib.Path(test_data_path) / "sample_file.xml"
-    parser = PMCXMLParser(path.resolve())
+def jats_xml_parser(test_data_path):
+    path = pathlib.Path(test_data_path) / "jats_article.xml"
+    parser = JATSXMLParser(path.resolve())
     return parser
 
 
@@ -82,16 +82,16 @@ def tei_xml_parser(test_data_path):
     return parser
 
 
-class TestPMCXMLArticleParser:
-    def test_init(self, pmc_xml_parser):
-        assert isinstance(pmc_xml_parser.content, xml.etree.ElementTree.ElementTree)
+class TestJATSXMLArticleParser:
+    def test_init(self, jats_xml_parser):
+        assert isinstance(jats_xml_parser.content, xml.etree.ElementTree.ElementTree)
 
-    def test_title(self, pmc_xml_parser):
-        title = pmc_xml_parser.title
+    def test_title(self, jats_xml_parser):
+        title = jats_xml_parser.title
         assert title == "Article Title"
 
-    def test_authors(self, pmc_xml_parser):
-        authors = pmc_xml_parser.authors
+    def test_authors(self, jats_xml_parser):
+        authors = jats_xml_parser.authors
         assert inspect.isgenerator(authors)
         authors = tuple(authors)
 
@@ -99,16 +99,16 @@ class TestPMCXMLArticleParser:
         assert authors[0] == "Author Given Names 1 Author Surname 1"
         assert authors[1] == "Author Given Names 2 Author Surname 2"
 
-    def test_abstract(self, pmc_xml_parser):
-        abstract = pmc_xml_parser.abstract
+    def test_abstract(self, jats_xml_parser):
+        abstract = jats_xml_parser.abstract
         assert inspect.isgenerator(abstract)
         abstract = tuple(abstract)
         assert len(abstract) == 2
         assert abstract[0] == "Abstract Paragraph 1"
         assert abstract[1] == "Abstract Paragraph 2"
 
-    def test_paragraphs(self, pmc_xml_parser):
-        paragraphs = pmc_xml_parser.paragraphs
+    def test_paragraphs(self, jats_xml_parser):
+        paragraphs = jats_xml_parser.paragraphs
         assert inspect.isgenerator(paragraphs)
         paragraphs = tuple(paragraphs)
         assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
@@ -126,23 +126,23 @@ class TestPMCXMLArticleParser:
         assert paragraphs[3] == ("Section Title 1", "Paragraph Section 1")
         assert paragraphs[4] == ("Section Title 2", "Paragraph Section 2")
 
-    def test_pubmed_id(self, pmc_xml_parser):
-        pubmed_id = pmc_xml_parser.pubmed_id
+    def test_pubmed_id(self, jats_xml_parser):
+        pubmed_id = jats_xml_parser.pubmed_id
         assert isinstance(pubmed_id, str)
         assert pubmed_id == "PMID"
 
-    def test_pmc_id(self, pmc_xml_parser):
-        pmc_id = pmc_xml_parser.pmc_id
+    def test_pmc_id(self, jats_xml_parser):
+        pmc_id = jats_xml_parser.pmc_id
         assert isinstance(pmc_id, str)
         assert pmc_id == "PMC"
 
-    def test_doi(self, pmc_xml_parser):
-        doi = pmc_xml_parser.doi
+    def test_doi(self, jats_xml_parser):
+        doi = jats_xml_parser.doi
         assert isinstance(doi, str)
         assert doi == "DOI"
 
-    def test_uid(self, pmc_xml_parser):
-        uid = pmc_xml_parser.uid
+    def test_uid(self, jats_xml_parser):
+        uid = jats_xml_parser.uid
         assert isinstance(uid, str)
         assert len(uid) == 32
 
@@ -164,10 +164,10 @@ class TestPMCXMLArticleParser:
         ),
     )
     def test_inner_text_extraction(
-        self, pmc_xml_parser, input_xml, expected_inner_text
+        self, jats_xml_parser, input_xml, expected_inner_text
     ):
         element = ElementTree.fromstring(input_xml)
-        inner_text = pmc_xml_parser._inner_text(element)
+        inner_text = jats_xml_parser._inner_text(element)
         assert inner_text == expected_inner_text
 
     @pytest.mark.parametrize(
@@ -194,13 +194,13 @@ class TestPMCXMLArticleParser:
             ),
         ),
     )
-    def test_element_to_str_works(self, pmc_xml_parser, input_xml, expected_str):
+    def test_element_to_str_works(self, jats_xml_parser, input_xml, expected_str):
         element = ElementTree.fromstring(input_xml)
-        element_str = pmc_xml_parser._element_to_str(element)
+        element_str = jats_xml_parser._element_to_str(element)
         assert element_str == expected_str
 
-    def test_element_to_str_of_none(self, pmc_xml_parser):
-        assert pmc_xml_parser._element_to_str(None) == ""
+    def test_element_to_str_of_none(self, jats_xml_parser):
+        assert jats_xml_parser._element_to_str(None) == ""
 
 
 @pytest.fixture(scope="session")

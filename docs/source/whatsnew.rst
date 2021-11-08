@@ -30,6 +30,9 @@ Legend
 Latest
 ======
 - |Change| split the CI job into smaller jobs
+- |Change| for :code:`bbs_database parse` the value for :code:`input_type` from
+  :code:`pmc-xml` to :code:`jats-xml`.
+- |Change| name for :code:`PMCXMLParser` to :code:`JATSXMLParser`.
 - |Add| article parser for TEI XML files.
 - |Add| CLI subcommand ``bbs_database convert-pdf``.
 - |Add| parsing of PDFs through a GROBID server.
