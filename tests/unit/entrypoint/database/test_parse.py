@@ -134,3 +134,33 @@ def test_pubmed_xml_set(tmp_path):
             data = json.load(f)
             loaded_uid = data["uid"]
             assert loaded_uid == uid
+
+
+def test_dry_run(capsys):
+    input_path = "tests/data/cord19_v35/"
+    main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
+    captured = capsys.readouterr()
+    assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
+
+
+def test_recursive(tmp_path):
+    input_path = "tests/data/cord19_v35/document_parses/pdf_json/"
+    main(["parse", "cord19-json", input_path, str(tmp_path), "--recursive"])
+    filenames = sorted(x.name for x in tmp_path.iterdir())
+    expected = [
+        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
+        "bd8c3ef147501fab67a1f75d99c4327c.json",
+    ]
+    assert filenames == expected
+
+
+def test_filtering(tmp_path):
+    input_path = "tests/data/cord19_v35/"
+    options = ["--recursive", "--match-filename", "[a-z0-9]+\\.json"]
+    main(["parse", "cord19-json", input_path, str(tmp_path), *options])
+    filenames = sorted(x.name for x in tmp_path.iterdir())
+    expected = [
+        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
+        "bd8c3ef147501fab67a1f75d99c4327c.json",
+    ]
+    assert filenames == expected
