@@ -146,14 +146,20 @@ def run(
         inputs = [input_path]
 
     elif input_path.is_dir():
-        pattern = "**/*" if recursive else "*"
-        paths = sorted(input_path.glob(pattern))
+        if recursive:
+            pattern = "**/*"
+        else:
+            pattern = "*"
+        files = (x for x in input_path.glob(pattern) if x.is_file())
 
         if match_filename:
             regex = re.compile(match_filename)
-            inputs = sorted(x for x in paths if regex.fullmatch(x.name))
+            selected = (x for x in files if regex.fullmatch(x.name))
         else:
-            inputs = paths
+            selected = files
+
+        inputs = sorted(selected)
+
     else:
         raise ValueError(
             "Argument 'input_path' should be a path to an existing file or directory!"
