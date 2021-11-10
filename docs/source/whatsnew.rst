@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Change| split the CI job into smaller jobs
 - |Change| for :code:`bbs_database parse` the value for :code:`input_type` from
   :code:`pmc-xml` to :code:`jats-xml`.
 - |Change| name for :code:`PMCXMLParser` to :code:`JATSXMLParser`.
