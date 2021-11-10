@@ -29,6 +29,12 @@ Legend
 
 Latest
 ======
+- |Add| option ``--dry-run`` for ``bbs_database parse`` to display files to
+  parse without parsing them.
+- |Add| option ``--recursive`` for ``bbs_database parse`` to parse files
+  recursively.
+- |Add| option ``--match-filename`` for ``bbs_database parse`` to parse only
+  files with a name matching a given regular expression.
 - |Change| for :code:`bbs_database parse` the value for :code:`input_type` from
   :code:`pmc-xml` to :code:`jats-xml`.
 - |Change| name for :code:`PMCXMLParser` to :code:`JATSXMLParser`.
