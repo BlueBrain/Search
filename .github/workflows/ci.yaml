@@ -1,0 +1,86 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: "Run the build with tmate debugging enabled"
+        required: false
+jobs:
+  tox:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tox-env: [lint, docs, check-packaging]
+    steps:
+      - name: Cancel previous workflows that are still running
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetch all history with version tags
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.7"
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ matrix.tox-env }}-${{ runner.os }}-${{ hashFiles('tox.ini') }}
+      - name: Set up environment
+        run: |
+          pip install --upgrade pip wheel setuptools
+          pip install tox
+      - name: Run tox ${{ matrix.tox-env }}
+        run: tox -vv -e ${{ matrix.tox-env }}
+  unit-tests:
+    runs-on: ${{ matrix.os }}
+    env:
+      PIP_CACHE_DIR: .cache/pip
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: [3.7, 3.8, 3.9]
+        include:
+          - python-version: 3.7
+            tox-env: py37
+          - python-version: 3.8
+            tox-env: py38
+          - python-version: 3.9
+            tox-env: py39
+    steps:
+      - name: Cancel previous workflows that are still running
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # fetch all history with version tags
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: .cache/pip
+          key: ${{ matrix.tox-env }}-${{ matrix.os }}-${{ hashFiles('tox.ini') }}
+      - name: Set up environment
+        run: |
+          pip install --upgrade pip
+          pip install tox
+      - name: Set up tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+      - name: Install mysql
+        if: matrix.os == 'macos-latest'
+        run: brew install mysql
+      - name: Run unit tests
+        run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes

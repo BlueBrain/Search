@@ -22,6 +22,12 @@ requires = [
     "setuptools_scm[toml]>=3.4",
     "wheel",
 ]
+# This is pip's default value if the build-backend key is missing
+# Ref: https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/#fallback-behaviour
+# Tox with tox.isolated_build = true needs this key to be defined explicitly.
+# Setuptools instructs setting build-backend without __legacy__, ref:
+# https://setuptools.pypa.io/en/latest/build_meta.html#how-to-use-it
+build-backend = "setuptools.build_meta"
 
 [tool.black]
 extend-exclude = """data_and_models/pipelines/ner/transformers_vs_spacy/transformers/

@@ -35,6 +35,7 @@ Latest
   recursively.
 - |Add| option ``--match-filename`` for ``bbs_database parse`` to parse only
   files with a name matching a given regular expression.
+- |Change| split the CI job into smaller jobs
 - |Change| for :code:`bbs_database parse` the value for :code:`input_type` from
   :code:`pmc-xml` to :code:`jats-xml`.
 - |Change| name for :code:`PMCXMLParser` to :code:`JATSXMLParser`.
