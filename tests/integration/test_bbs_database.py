@@ -2,6 +2,7 @@ import subprocess
 import time
 
 import docker
+import pg8000
 import pytest
 import sqlalchemy
 from sqlalchemy.exc import OperationalError
@@ -31,6 +32,7 @@ def get_docker_client():
         "sqlite",
         # "mysql",  # not used in production and slows down CI
         "mariadb",
+        "postgres",
     ]
 )
 def setup_backend(request, tmp_path):
@@ -39,17 +41,55 @@ def setup_backend(request, tmp_path):
         db_url = tmp_path / "db.sqlite"
         yield "sqlite", str(db_url)
 
-    elif backend in {"mariadb", "mysql"}:
+    elif backend in {"mariadb", "mysql", "postgres"}:
+        # Check if docker client ready
         client = get_docker_client()
 
         if client is None:
             pytest.skip("Docker daemon is not running")
 
+        # Define backend specific logic
+        env_map = {
+            "mariadb": "MYSQL_ROOT_PASSWORD",
+            "mysql": "MYSQL_ROOT_PASSWORD",
+            "postgres": "POSTGRES_PASSWORD",
+        }
+
+        driver_map = {
+            "mariadb": "mysql+pymysql",
+            "mysql": "mysql+pymysql",
+            "postgres": "postgresql+pg8000",
+        }
+
+        port_map = {
+            "mariadb": 3306,
+            "mysql": 3306,
+            "postgres": 5432,
+        }
+
+        user_map = {
+            "mariadb": "root",
+            "mysql": "root",
+            "postgres": "postgres",
+        }
+
+        show_databases_map = {
+            "mariadb": "show databases",
+            "mysql": "show databases",
+            "postgres": "select datname from pg_database;",
+        }
+
+        create_database_map = {
+            "mariadb": "create database test",
+            "mysql": "create database test",
+            "postgres": "create database test;",
+        }
+
         port = 22346
         container = client.containers.run(
             image=f"{backend}:latest",
-            environment={"MYSQL_ROOT_PASSWORD": "my-secret-pw"},
-            ports={"3306/tcp": port},
+            environment={f"{env_map[backend]}": "my-secret-pw"},
+            ports={f"{port_map[backend]}/tcp": port},
             detach=True,
             auto_remove=True,
         )
@@ -60,19 +100,19 @@ def setup_backend(request, tmp_path):
         while time.perf_counter() - start < max_waiting_time:
             try:
                 engine = sqlalchemy.create_engine(
-                    f"mysql+pymysql://root:my-secret-pw@127.0.0.1:{port}/"
+                    f"{driver_map[backend]}://{user_map[backend]}:my-secret-pw@127.0.0.1:{port}/"
                 )
                 # Container ready?
-                engine.execute("show databases")
+                engine.execute(show_databases_map[backend]).fetchall()
                 break
-            except OperationalError:
+            except (OperationalError, pg8000.core.struct.error):
                 # Container not ready, pause and then try again
                 time.sleep(0.1)
                 continue
         else:
             raise TimeoutError("Could not spawn the container.")
 
-        engine.execute("create database test")
+        engine.execute(create_database_map[backend])
         engine.dispose()
 
         yield backend, f"root:my-secret-pw@127.0.0.1:{port}/test",
