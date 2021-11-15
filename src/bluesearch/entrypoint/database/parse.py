@@ -152,11 +152,13 @@ def run(
             pattern = "*"
         files = (x for x in input_path.glob(pattern) if x.is_file())
 
-        if match_filename:
+        if match_filename is None:
+            selected = files
+        elif match_filename == "":
+            raise ValueError("Value for argument 'match-filename' should not be empty!")
+        else:
             regex = re.compile(match_filename)
             selected = (x for x in files if regex.fullmatch(x.name))
-        else:
-            selected = files
 
         inputs = sorted(selected)
 

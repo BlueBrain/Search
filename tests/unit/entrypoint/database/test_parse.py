@@ -164,3 +164,11 @@ def test_filtering(tmp_path):
         "bd8c3ef147501fab67a1f75d99c4327c.json",
     ]
     assert filenames == expected
+
+
+def test_filtering_empty(tmp_path):
+    message = "Value for argument 'match-filename' should not be empty!"
+    input_path = "tests/data/cord19_v35/"
+    options = ["--recursive", "--match-filename", ""]
+    with pytest.raises(ValueError, match=message):
+        main(["parse", "cord19-json", input_path, str(tmp_path), *options])
