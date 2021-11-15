@@ -30,7 +30,7 @@ def get_docker_client():
 @pytest.fixture(
     params=[
         "sqlite",
-        # "mysql",  # not used in production and slows down CI
+        "mysql",  # not used in production and slows down CI
         "mariadb",
         "postgres",
     ]
@@ -100,7 +100,8 @@ def setup_backend(request, tmp_path):
         while time.perf_counter() - start < max_waiting_time:
             try:
                 engine = sqlalchemy.create_engine(
-                    f"{driver_map[backend]}://{user_map[backend]}:my-secret-pw@127.0.0.1:{port}/"
+                    f"{driver_map[backend]}://{user_map[backend]}:my-secret-pw@127.0.0.1:{port}/",
+                    isolation_level="AUTOCOMMIT",
                 )
                 # Container ready?
                 engine.execute(show_databases_map[backend]).fetchall()
@@ -115,7 +116,7 @@ def setup_backend(request, tmp_path):
         engine.execute(create_database_map[backend])
         engine.dispose()
 
-        yield backend, f"root:my-secret-pw@127.0.0.1:{port}/test",
+        yield backend, f"{user_map[backend]}:my-secret-pw@127.0.0.1:{port}/test",
 
         container.kill()
         client.close()
@@ -177,6 +178,10 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
 
     elif db_type in {"mysql", "mariadb"}:
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
+
+    elif db_type == "postgres":
+        engine = sqlalchemy.create_engine(f"postgres+pg8000//{db_url}")
+
 
     query = "SELECT COUNT(*) FROM articles"
     (n_rows,) = engine.execute(query).fetchone()  # type: ignore
