@@ -5,7 +5,7 @@ import docker
 import pg8000
 import pytest
 import sqlalchemy
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import InterfaceError, OperationalError
 
 from bluesearch.entrypoint.database.parent import main
 
@@ -106,7 +106,12 @@ def setup_backend(request, tmp_path):
                 # Container ready?
                 engine.execute(show_databases_map[backend]).fetchall()
                 break
-            except (OperationalError, pg8000.core.struct.error):
+            except (
+                ConnectionResetError,
+                InterfaceError,
+                OperationalError,
+                pg8000.core.struct.error,
+            ):
                 # Container not ready, pause and then try again
                 time.sleep(0.1)
                 continue
@@ -181,7 +186,6 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
 
     elif db_type == "postgres":
         engine = sqlalchemy.create_engine(f"postgresql+pg8000://{db_url}")
-
 
     query = "SELECT COUNT(*) FROM articles"
     (n_rows,) = engine.execute(query).fetchone()  # type: ignore
