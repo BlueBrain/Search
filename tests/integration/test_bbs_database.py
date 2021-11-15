@@ -180,7 +180,7 @@ def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
 
     elif db_type == "postgres":
-        engine = sqlalchemy.create_engine(f"postgres+pg8000//{db_url}")
+        engine = sqlalchemy.create_engine(f"postgresql+pg8000://{db_url}")
 
 
     query = "SELECT COUNT(*) FROM articles"
