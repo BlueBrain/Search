@@ -79,6 +79,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-m",
         "--match-filename",
         type=str,
         help="""
@@ -87,6 +88,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-R",
         "--recursive",
         action="store_true",
         help="""
@@ -94,6 +96,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-n",
         "--dry-run",
         action="store_true",
         help="""
