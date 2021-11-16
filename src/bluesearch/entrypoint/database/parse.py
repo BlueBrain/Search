@@ -18,9 +18,10 @@
 import argparse
 import json
 import logging
+import re
 import warnings
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterable, Iterator, Optional
 
 from defusedxml import ElementTree
 
@@ -77,6 +78,32 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         If it does not exist yet, a directory with this path is created.
         """,
     )
+    parser.add_argument(
+        "-m",
+        "--match-filename",
+        type=str,
+        help="""
+        Parse only files with a name matching the given regular expression.
+        Ignored when 'input_path' is a path to a file.
+        """,
+    )
+    parser.add_argument(
+        "-R",
+        "--recursive",
+        action="store_true",
+        help="""
+        Parse files recursively.
+        """,
+    )
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="""
+        Display files to parse without parsing them.
+        Especially useful when using '--match-filename' and / or '--recursive'.
+        """,
+    )
     return parser
 
 
@@ -107,6 +134,9 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
+    match_filename: Optional[str],
+    recursive: bool,
+    dry_run: bool,
 ) -> int:
     """Parse one or several articles.
 
@@ -114,14 +144,36 @@ def run(
     `get_parser` function.
     """
     inputs: Iterable[Path]
+
     if input_path.is_file():
         inputs = [input_path]
+
     elif input_path.is_dir():
-        inputs = sorted(input_path.glob("*"))
+        if recursive:
+            pattern = "**/*"
+        else:
+            pattern = "*"
+        files = (x for x in input_path.glob(pattern) if x.is_file())
+
+        if match_filename is None:
+            selected = files
+        elif match_filename == "":
+            raise ValueError("Value for argument 'match-filename' should not be empty!")
+        else:
+            regex = re.compile(match_filename)
+            selected = (x for x in files if regex.fullmatch(x.name))
+
+        inputs = sorted(selected)
+
     else:
         raise ValueError(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
+
+    if dry_run:
+        # Inputs are already sorted.
+        print(*inputs, sep="\n")
+        return 0
 
     output_dir.mkdir(exist_ok=True)
 
