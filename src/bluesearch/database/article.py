@@ -22,11 +22,12 @@ import string
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Sequence, Tuple
+from typing import Generator, Iterable, Optional, Sequence, Tuple, overload
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
+from typing_extensions import Literal
 
 from bluesearch.database.identifiers import generate_uid
 
@@ -184,16 +185,9 @@ class JATSXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        abstract_pars = self.content.findall("./front/article-meta/abstract//p")
-        children_p = []
-        for paragraph in abstract_pars:
-            # Check if paragraph is not child of another paragraph
-            children_p += paragraph.findall(".//p")
-            if paragraph not in children_p:
-                text = self._element_to_str(paragraph)
-                # Check if text is not empty
-                if text:
-                    yield text
+        abstract = self.content.find("./front/article-meta/abstract")
+        if abstract:
+            yield from self.parse_section(abstract, title=False)
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -208,30 +202,10 @@ class JATSXMLParser(ArticleParser):
         text : str
             The paragraph content.
         """
-        # Abstract are removed because already parsed in abstract property.
-        abstract_p = self.content.findall("./front/article-meta/abstract//p")
-        # Caption are removed because already parsed later in the current method
-        # with the section name "Caption".
-        caption_p = self.content.findall("./body//caption/p")
-        # Acknowledgements are removed because not useful.
-        acknowledg_p = self.content.findall("./back/ack//p")
-
-        exclude_list = abstract_p + caption_p + acknowledg_p
-
         # Paragraphs of text body
-        children_p = []
-        section_dirs = self.get_paragraphs_sections_mapping()
-        for paragraph in self.content.findall(".//p"):
-            # Check that paragraph is not in the exclude list and
-            # that paragraph is not child of another paragraph.
-            if paragraph not in exclude_list and paragraph not in children_p:
-                children_p += paragraph.findall(".//p")
-                text = self._element_to_str(paragraph)
-                section_title = ""
-                if paragraph in section_dirs:
-                    section_title = section_dirs[paragraph]
-                if text:
-                    yield section_title, text
+        body = self.content.find("./body")
+        if body:
+            yield from self.parse_section(body, title=True)
 
         # Figure captions
         figs = self.content.findall("./body//fig")
@@ -246,8 +220,8 @@ class JATSXMLParser(ArticleParser):
         # Table captions
         tables = self.content.findall("./body//table-wrap")
         for table in tables:
-            caption_elements = table.findall(".//caption/p") or table.findall(
-                ".//caption/title"
+            caption_elements = table.findall("./caption/p") or table.findall(
+                "./caption/title"
             )
             if caption_elements is None:
                 continue
@@ -308,31 +282,56 @@ class JATSXMLParser(ArticleParser):
 
         return ids
 
-    def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
-        """Construct mapping between all paragraphs and their section name.
+    @overload
+    def parse_section(
+        self, section: Element, title: Literal[True]
+    ) -> Generator[tuple[str, str], None, None]:
+        ...
+
+    @overload
+    def parse_section(
+        self, section: Element, title: Literal[False]
+    ) -> Generator[str, None, None]:
+        ...
+
+    @overload
+    def parse_section(
+        self, section: Element, title: bool
+    ) -> Generator[tuple[str, str] | str, None, None]:
+        ...
+
+    def parse_section(
+        self, section: Element, title: bool
+    ) -> Generator[tuple[str, str] | str, None, None]:
+        """Parse section children depending on the tag.
+
+        Parameters
+        ----------
+        section
+            The input XML element.
+
+        title
+            If False, the method only outputs text. Otherwise,
+            the method also outputs the title of the section.
 
         Returns
         -------
-        mapping : dict
-            Dictionary whose keys are paragraphs and value are section title.
+        str
+            A parsed string representation of the input XML element.
         """
-        mapping = {}
-        for sec in self.content.findall(".//sec"):
-
-            section_title = ""
-            section_paragraphs = []
-
-            for element in sec:
-
-                if element.tag == "title":
-                    section_title = self._element_to_str(element)
-                elif element.tag == "p":
-                    section_paragraphs.append(element)
-
-            for paragraph in section_paragraphs:
-                mapping[paragraph] = section_title
-
-        return mapping
+        sec_title = self._element_to_str(section.find("title"))
+        for element in section:
+            if element.tag == "sec":
+                yield from self.parse_section(element, title=title)
+            elif element.tag in {"title", "caption", "fig", "table-wrap"}:
+                continue
+            else:
+                text = self._element_to_str(element)
+                if text:
+                    if title:
+                        yield sec_title, text
+                    else:
+                        yield text
 
     def _inner_text(self, element: Element) -> str:
         """Convert all inner text and sub-elements to one string.
