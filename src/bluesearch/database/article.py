@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import html
 import string
+import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -367,7 +368,7 @@ class JATSXMLParser(ArticleParser):
             text_parts.append(self._element_to_str(sub_element))
             # don't forget the text after the sub-element
             text_parts.append(html.unescape(sub_element.tail or ""))
-        return "".join(text_parts).replace("\xa0", " ").replace("\u2009", " ").strip()
+        return unicodedata.normalize("NFKC", "".join(text_parts)).strip()
 
     def _element_to_str(self, element: Element | None) -> str:
         """Convert an element and all its contents to a string.
