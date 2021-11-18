@@ -23,12 +23,11 @@ import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Sequence, Tuple, overload
+from typing import Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
-from typing_extensions import Literal
 
 from bluesearch.database.identifiers import generate_uid
 
@@ -188,7 +187,8 @@ class JATSXMLParser(ArticleParser):
         """
         abstract = self.content.find("./front/article-meta/abstract")
         if abstract:
-            yield from self.parse_section(abstract, title=False)
+            for _, text in self.parse_section(abstract):
+                yield text
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -206,7 +206,7 @@ class JATSXMLParser(ArticleParser):
         # Paragraphs of text body
         body = self.content.find("./body")
         if body:
-            yield from self.parse_section(body, title=True)
+            yield from self.parse_section(body)
 
         # Figure captions
         figs = self.content.findall("./body//fig")
@@ -283,27 +283,7 @@ class JATSXMLParser(ArticleParser):
 
         return ids
 
-    @overload
-    def parse_section(
-        self, section: Element, title: Literal[True]
-    ) -> Generator[tuple[str, str], None, None]:
-        ...
-
-    @overload
-    def parse_section(
-        self, section: Element, title: Literal[False]
-    ) -> Generator[str, None, None]:
-        ...
-
-    @overload
-    def parse_section(
-        self, section: Element, title: bool
-    ) -> Generator[tuple[str, str] | str, None, None]:
-        ...
-
-    def parse_section(
-        self, section: Element, title: bool
-    ) -> Generator[tuple[str, str] | str, None, None]:
+    def parse_section(self, section: Element) -> Generator[tuple[str, str], None, None]:
         """Parse section children depending on the tag.
 
         Parameters
@@ -311,28 +291,23 @@ class JATSXMLParser(ArticleParser):
         section
             The input XML element.
 
-        title
-            If False, the method only outputs text. Otherwise,
-            the method also outputs the title of the section.
-
         Returns
         -------
+        str
+            The section title.
         str
             A parsed string representation of the input XML element.
         """
         sec_title = self._element_to_str(section.find("title"))
         for element in section:
             if element.tag == "sec":
-                yield from self.parse_section(element, title=title)
+                yield from self.parse_section(element)
             elif element.tag in {"title", "caption", "fig", "table-wrap"}:
                 continue
             else:
                 text = self._element_to_str(element)
                 if text:
-                    if title:
-                        yield sec_title, text
-                    else:
-                        yield text
+                    yield sec_title, text
 
     def _inner_text(self, element: Element) -> str:
         """Convert all inner text and sub-elements to one string.
