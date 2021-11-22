@@ -16,6 +16,18 @@
 import requests
 
 
+def grobid_is_alive(host: str, port: int) -> bool:
+    try:
+        response = requests.get(f"http://{host}:{port}/api/isalive")
+    except requests.RequestException:
+        return False
+
+    if response.content == b"true":
+        return True
+    else:
+        return False
+
+
 def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: int) -> str:
     """Convert PDF file to TEI XML using GROBID server.
 
