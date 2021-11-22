@@ -1,5 +1,5 @@
 bluesearch.database.topic module
-========================================
+================================
 
 .. automodule:: bluesearch.database.topic
    :members:

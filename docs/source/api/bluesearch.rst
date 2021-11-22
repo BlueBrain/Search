@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 4
 
    bluesearch.database
+   bluesearch.entrypoint
    bluesearch.mining
    bluesearch.server
    bluesearch.widgets
@@ -22,7 +23,6 @@ Submodules
    bluesearch.search
    bluesearch.sql
    bluesearch.utils
-   bluesearch.version
 
 Module contents
 ---------------
