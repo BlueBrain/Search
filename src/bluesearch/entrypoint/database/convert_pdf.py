@@ -124,6 +124,19 @@ def run(
     int
         The exit code of the command
     """
+    logger.info("Initialising")
+    from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml
+
+    # Check the GROBID server
+    if not grobid_is_alive(grobid_host, grobid_port):
+        logger.error(
+            "The GROBID server is not alive; please check your connection "
+            "and server configuration"
+        )
+        return 1
+    else:
+        logger.info("The GROBID server is alive")
+
     # Check if the input file exists
     if not input_pdf_path.exists():
         logger.error(
@@ -146,8 +159,6 @@ def run(
 
     # Convert the PDF to XML
     logger.info("Converting PDF to XML")
-    from bluesearch.database.pdf import grobid_pdf_to_tei_xml
-
     xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
 
     # Write the XML file
