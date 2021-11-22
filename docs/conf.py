@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.abspath("."))
 
 project = "Blue Brain Search"
 author = "Blue Brain Project"
+version = bluesearch.__version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -54,19 +55,23 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
 html_theme = "sphinx-bluebrain-theme"
 html_title = "Blue Brain Search"
-html_theme_options = {"metadata_distribution": "bluesearch"}
-version = bluesearch.__version__
-
+html_theme_options = {
+    "metadata_distribution": "bluesearch",
+    "repo_name": "bluesearch",
+    "repo_url": "https://github.com/BlueBrain/Search",
+}
+# If true, the reST sources are included in the HTML build as _sources/name.
+html_copy_source = False
+# If true (and html_copy_source is true as well), links to the reST sources
+# will be added to the sidebar.
+html_show_sourcelink = False
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
-
-# Do not mention module names
+# A boolean that decides whether module names are prepended to all object names
+# (for object types where a “module” of some kind is defined), e.g. for
+# py:function directives.
 add_module_names = False
-
-# Blue brain theme specific
-html_show_sourcelink = False
