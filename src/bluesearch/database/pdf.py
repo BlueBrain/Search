@@ -17,6 +17,23 @@ import requests
 
 
 def grobid_is_alive(host: str, port: int) -> bool:
+    """Test if the GROBID server is alive.
+
+    This server API is documented here:
+    https://grobid.readthedocs.io/en/latest/Grobid-service/#service-checks
+
+    Parameters
+    ----------
+    host
+        Host of the GROBID server.
+    port
+        Port of the GROBID server.
+
+    Returns
+    -------
+    bool
+        Whether the GROBID server is alive.
+    """
     try:
         response = requests.get(f"http://{host}:{port}/api/isalive")
     except requests.RequestException:
