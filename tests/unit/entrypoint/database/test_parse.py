@@ -36,6 +36,12 @@ from bluesearch.entrypoint.database.parse import iter_parsers
             ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"],
             id="pubmed-xml-set",
         ),
+        pytest.param(
+            "tei-xml",
+            "tei_file.tei.xml",
+            ["94acbb74a7427ae4d58333e3145870e1"],
+            id="tei-xml",
+        ),
     ],
 )
 def test_iter_parsers(input_type, path, article_uids):
