@@ -3,6 +3,8 @@ import inspect
 import pathlib
 import unittest.mock
 
+import pytest
+
 from bluesearch.entrypoint.database import convert_pdf
 
 CONVERT_PDF_PARAMS = {
@@ -35,7 +37,46 @@ def test_run_has_consistent_parameters():
 
 
 class TestRun:
-    def test_nonexistent_pdf_errors(self):
+    @pytest.mark.parametrize(
+        ("is_alive", "expected_exit_code"),
+        (
+            (True, 0),
+            (False, 1),
+        ),
+    )
+    @unittest.mock.patch("bluesearch.database.pdf.grobid_pdf_to_tei_xml")
+    @unittest.mock.patch("bluesearch.database.pdf.grobid_is_alive")
+    def test_is_alive_check_works(
+        self,
+        grobid_is_alive,
+        grobid_pdf_to_tei_xml,
+        is_alive,
+        expected_exit_code,
+        tmp_path,
+    ):
+        # Configure mocks
+        grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
+        grobid_is_alive.return_value = is_alive
+
+        # Configure file paths
+        input_pdf_file = tmp_path / "my-file.pdf"
+        input_pdf_file.touch()
+        output_xml_file = tmp_path / "my-file.xml"
+
+        # Run the test
+        exit_code = convert_pdf.run(
+            "host",
+            1234,
+            input_pdf_file,
+            output_xml_file,
+            force=False,
+        )
+        assert exit_code == expected_exit_code
+
+    @unittest.mock.patch("bluesearch.database.pdf.grobid_is_alive")
+    def test_nonexistent_pdf_errors(self, grobid_is_alive):
+        grobid_is_alive.return_value = True
+
         input_pdf_file = pathlib.Path("/a/nonexistent/file.pdf")
         assert not input_pdf_file.exists()
         output_xml_file = pathlib.Path("/does/not/matter.xml")
@@ -45,7 +86,10 @@ class TestRun:
         )
         assert exit_code == 1
 
-    def test_output_file_exists_errors(self, tmp_path):
+    @unittest.mock.patch("bluesearch.database.pdf.grobid_is_alive")
+    def test_output_file_exists_errors(self, grobid_is_alive, tmp_path):
+        grobid_is_alive.return_value = True
+
         input_pdf_file = tmp_path / "my-file.pdf"
         input_pdf_file.touch()
         output_xml_file = tmp_path / "my-file.xml"
@@ -57,7 +101,12 @@ class TestRun:
         assert exit_code == 1
 
     @unittest.mock.patch("bluesearch.database.pdf.grobid_pdf_to_tei_xml")
-    def test_pdf_conversion_works(self, grobid_pdf_to_tei_xml, tmp_path):
+    @unittest.mock.patch("bluesearch.database.pdf.grobid_is_alive")
+    def test_pdf_conversion_works(
+        self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path
+    ):
+        grobid_is_alive.return_value = True
+
         # Prepare the input PDF file
         input_pdf_file = tmp_path / "my-file.pdf"
         with input_pdf_file.open("wb") as fh:
