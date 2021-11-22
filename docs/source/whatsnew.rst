@@ -29,6 +29,8 @@ Legend
 
 Latest
 ======
+- |Add| run the tox env ``check-apidoc`` in CI
+- |Add| tox environments ``apidoc`` and ``check-apidoc``
 - |Add| option ``--dry-run`` for ``bbs_database parse`` to display files to
   parse without parsing them.
 - |Add| option ``--recursive`` for ``bbs_database parse`` to parse files
