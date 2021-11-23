@@ -111,7 +111,8 @@ class TestJATSXMLArticleParser:
         paragraphs = jats_xml_parser.paragraphs
         assert inspect.isgenerator(paragraphs)
         paragraphs = tuple(paragraphs)
-        assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
+        assert len(paragraphs) == 7 + 1 + 2  # for paragraph, caption, table
+        # There are 3 caption but one is empty
 
         for i, paragraph in enumerate(paragraphs):
             assert isinstance(paragraph, tuple)
