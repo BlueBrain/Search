@@ -31,6 +31,7 @@ from bluesearch.database.article import (
     CORD19ArticleParser,
     JATSXMLParser,
     PubMedXMLParser,
+    TEIXMLParser,
 )
 
 logger = logging.getLogger(__name__)
@@ -55,7 +56,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "input_type",
         type=str,
-        choices=("cord19-json", "jats-xml", "pubmed-xml", "pubmed-xml-set"),
+        choices=(
+            "cord19-json",
+            "jats-xml",
+            "pubmed-xml",
+            "pubmed-xml-set",
+            "tei-xml",
+        ),
         help="""
         Format of the input.
         If parsing several articles, all articles must have the same format.
@@ -124,6 +131,11 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         articles = ElementTree.parse(str(input_path))
         for article in articles.iter("PubmedArticle"):
             yield PubMedXMLParser(article)
+
+    elif input_type == "tei-xml":
+        with input_path.open() as fp:
+            xml_content = fp.read()
+        yield TEIXMLParser(xml_content)
 
     else:
         raise ValueError(f"Unsupported input type '{input_type}'!")
