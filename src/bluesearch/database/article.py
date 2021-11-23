@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import html
 import string
+import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -150,7 +151,7 @@ class JATSXMLParser(ArticleParser):
         str
             The article title.
         """
-        titles = self.content.find(".//title-group/article-title")
+        titles = self.content.find("./front/article-meta/title-group/article-title")
         return self._element_to_str(titles)
 
     @property
@@ -163,7 +164,7 @@ class JATSXMLParser(ArticleParser):
             Every author, in the format "Given_Name(s) Surname".
         """
         authors = self.content.findall(
-            ".//contrib-group/contrib[@contrib-type='author']"
+            "./front/article-meta/contrib-group/contrib[@contrib-type='author']"
         )
         for author in authors:
             given_names = self._element_to_str(author.find("name/given-names"))
@@ -184,9 +185,10 @@ class JATSXMLParser(ArticleParser):
         str
             The paragraphs of the article abstract.
         """
-        abstract_pars = self.content.findall(".//abstract//p")
-        for paragraph in abstract_pars:
-            yield self._element_to_str(paragraph)
+        abstract = self.content.find("./front/article-meta/abstract")
+        if abstract:
+            for _, text in self.parse_section(abstract):
+                yield text
 
     @property
     def paragraphs(self) -> Generator[tuple[str, str], None, None]:
@@ -201,45 +203,32 @@ class JATSXMLParser(ArticleParser):
         text : str
             The paragraph content.
         """
-        # Abstract are removed because already parsed in abstract property.
-        abstract_p = self.content.findall(".//abstract/p")
-        # Caption are removed because already parsed later in the current method
-        # with the section name "Caption".
-        caption_p = self.content.findall(".//caption/p")
-        # Acknowledgements are removed because not useful.
-        acknowledg_p = self.content.findall(".//ack/p")
-
-        exclude_list = abstract_p + caption_p + acknowledg_p
-
         # Paragraphs of text body
-        section_dirs = self.get_paragraphs_sections_mapping()
-        for paragraph in self.content.findall(".//p"):
-            if paragraph not in exclude_list:
-                text = self._element_to_str(paragraph)
-                section_title = ""
-                if paragraph in section_dirs:
-                    section_title = section_dirs[paragraph]
-                yield section_title, text
+        body = self.content.find("./body")
+        if body:
+            yield from self.parse_section(body)
 
         # Figure captions
-        figs = self.content.findall(".//fig")
+        figs = self.content.findall("./body//fig")
         for fig in figs:
             fig_captions = fig.findall("caption")
             if fig_captions is None:
                 continue
             caption = " ".join(self._element_to_str(c) for c in list(fig_captions))
-            yield "Figure Caption", caption
+            if caption:
+                yield "Figure Caption", caption
 
         # Table captions
-        tables = self.content.findall(".//table-wrap")
+        tables = self.content.findall("./body//table-wrap")
         for table in tables:
-            caption_elements = table.findall(".//caption/p") or table.findall(
-                ".//caption/title"
+            caption_elements = table.findall("./caption/p") or table.findall(
+                "./caption/title"
             )
             if caption_elements is None:
                 continue
             caption = " ".join(self._element_to_str(c) for c in caption_elements)
-            yield "Table Caption", caption
+            if caption:
+                yield "Table Caption", caption
 
     @property
     def pubmed_id(self) -> Optional[str]:
@@ -294,31 +283,31 @@ class JATSXMLParser(ArticleParser):
 
         return ids
 
-    def get_paragraphs_sections_mapping(self) -> dict[Element, str]:
-        """Construct mapping between all paragraphs and their section name.
+    def parse_section(self, section: Element) -> Generator[tuple[str, str], None, None]:
+        """Parse section children depending on the tag.
+
+        Parameters
+        ----------
+        section
+            The input XML element.
 
         Returns
         -------
-        mapping : dict
-            Dictionary whose keys are paragraphs and value are section title.
+        str
+            The section title.
+        str
+            A parsed string representation of the input XML element.
         """
-        mapping = {}
-        for sec in self.content.findall(".//sec"):
-
-            section_title = ""
-            section_paragraphs = []
-
-            for element in sec:
-
-                if element.tag == "title":
-                    section_title = self._element_to_str(element)
-                elif element.tag == "p":
-                    section_paragraphs.append(element)
-
-            for paragraph in section_paragraphs:
-                mapping[paragraph] = section_title
-
-        return mapping
+        sec_title = self._element_to_str(section.find("title"))
+        for element in section:
+            if element.tag == "sec":
+                yield from self.parse_section(element)
+            elif element.tag in {"title", "caption", "fig", "table-wrap"}:
+                continue
+            else:
+                text = self._element_to_str(element)
+                if text:
+                    yield sec_title, text
 
     def _inner_text(self, element: Element) -> str:
         """Convert all inner text and sub-elements to one string.
@@ -354,7 +343,7 @@ class JATSXMLParser(ArticleParser):
             text_parts.append(self._element_to_str(sub_element))
             # don't forget the text after the sub-element
             text_parts.append(html.unescape(sub_element.tail or ""))
-        return "".join(text_parts).strip()
+        return unicodedata.normalize("NFKC", "".join(text_parts)).strip()
 
     def _element_to_str(self, element: Element | None) -> str:
         """Convert an element and all its contents to a string.
