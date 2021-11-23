@@ -29,6 +29,8 @@ Legend
 
 Latest
 ======
+- |Add| run the tox env ``check-apidoc`` in CI
+- |Add| tox environments ``apidoc`` and ``check-apidoc``
 - |Add| input type ``tei-xml`` for the ``bbs_database parse`` command.
 - |Add| option ``--dry-run`` for ``bbs_database parse`` to display files to
   parse without parsing them.

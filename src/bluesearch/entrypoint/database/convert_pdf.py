@@ -99,9 +99,12 @@ def run(
     able to combine the functions in this way:
 
     >>> import argparse
-    >>> parser = init_parser(argparse.ArgumentParser())
-    >>> args = parser.parse_args()
-    >>> run(**vars(args))
+    >>> from bluesearch.entrypoint.database import convert_pdf
+    >>> parser = convert_pdf.init_parser(argparse.ArgumentParser())
+    >>> # replace with true values and uncomment
+    >>> argv = ["host", "port", "pdf_path", "xml_path"]
+    >>> # args = parser.parse_args(argv)
+    >>> # convert_pdf.run(**vars(args))
 
     This will run the convert-pdf subcommand implemented here as a standalone
     application.
