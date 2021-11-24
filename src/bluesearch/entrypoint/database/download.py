@@ -73,7 +73,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "from_month",
         type=valid_date,
-        help="The start date for the download in format YYYY-MM",
+        help="The starting month (included) for the download in format YYYY-MM",
     )
     parser.add_argument(
         "output_dir",
@@ -91,21 +91,16 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def run(
-    source: str,
-    from_month: datetime,
-    output_dir: Path,
-    dry_run: bool
-) -> int:
+def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> int:
     """Download articles of a source from a specific date.
 
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    from bluesearch.database.download import get_pmc_urls, download_pmc_articles
+    from bluesearch.database.download import download_pmc_articles, get_pmc_urls
 
     if source == "pmc":
-        url_dict = dict()
+        url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
             url_dict[component] = get_pmc_urls(from_month, component)
 
@@ -118,7 +113,11 @@ def run(
             logger.info("Start downloading PMC papers.")
             for component, url_list in url_dict.items():
                 component_dir = output_dir / component
-                logger.info(f"Start downloading {component} in {component_dir.resolve()}")
+                logger.info(
+                    f"Start downloading {component} " f"in {component_dir.resolve()}"
+                )
                 component_dir.mkdir(exist_ok=True, parents=True)
                 download_pmc_articles(url_list, component_dir)
             return 0
+
+    return 0
