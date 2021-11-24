@@ -102,7 +102,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     if source == "pmc":
         url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
-            url_dict[component] = get_pmc_urls(from_month, component)
+            url_dict[component] = get_pmc_urls(component, from_month)
 
         if dry_run:
             for component, url_list in url_dict.items():

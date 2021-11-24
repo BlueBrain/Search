@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -56,15 +57,19 @@ def get_days_list(
     return days_list
 
 
-def get_pmc_urls(start_date: datetime, component: str) -> list[str]:
+def get_pmc_urls(
+    component: str, start_date: datetime, end_date: datetime | None = None
+) -> list[str]:
     """Get list of all PMC incremental files to download.
 
     Parameters
     ----------
-    start_date
-        Starting date to download the incremental files.
     component : {"author_manuscript", "oa_comm", "oa_noncomm"}
         Part of the PMC to download.
+    start_date
+        Starting date to download the incremental files.
+    end_date
+        Ending date. If None, today is considered as the ending date.
 
     Returns
     -------
@@ -82,7 +87,7 @@ def get_pmc_urls(start_date: datetime, component: str) -> list[str]:
             "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported."
         )
 
-    days_list = get_days_list(start_date=start_date)
+    days_list = get_days_list(start_date=start_date, end_date=end_date)
 
     url_list = []
     for day in days_list:
@@ -94,7 +99,7 @@ def get_pmc_urls(start_date: datetime, component: str) -> list[str]:
     return url_list
 
 
-def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
+def download_pmc_articles(url_list: list[str], output_dir: Path | str) -> None:
     """Download PMC articles.
 
     Parameters
@@ -109,6 +114,8 @@ def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
     ValueError
         If the chosen component does not exist on PMC.
     """
+    output_dir = pathlib.Path(output_dir)
+
     for url in url_list:
         logger.info(f"Requesting URL {url}")
         r = requests.get(url)
