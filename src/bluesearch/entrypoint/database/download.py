@@ -114,7 +114,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             for component, url_list in url_dict.items():
                 component_dir = output_dir / component
                 logger.info(
-                    f"Start downloading {component} " f"in {component_dir.resolve()}"
+                    f"Start downloading {component} in {component_dir.resolve()}"
                 )
                 component_dir.mkdir(exist_ok=True, parents=True)
                 download_pmc_articles(url_list, component_dir)
