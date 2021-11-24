@@ -5,7 +5,7 @@ import sys
 from collections import namedtuple
 from typing import Optional, Sequence
 
-from bluesearch.entrypoint.database import add, convert_pdf, init, parse
+from bluesearch.entrypoint.database import add, convert_pdf, download, init, parse
 
 Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
 
@@ -45,6 +45,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             help="Convert a PDF file to a TEI XML file.",
             init_parser=convert_pdf.init_parser,
             run=convert_pdf.run,
+        ),
+        "download": Cmd(
+            help="Download articles from different sources.",
+            init_parser=download.init_parser,
+            run=download.run,
         ),
         "init": Cmd(
             help="Initialize a database.",
