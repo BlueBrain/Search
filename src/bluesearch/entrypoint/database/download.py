@@ -65,37 +65,60 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.description = "Download articles."
 
     parser.add_argument(
-        "--output-dir",
-        "-o",
-        type=Path,
-        help="Directory to save the downloaded articles.",
-    )
-    parser.add_argument(
-        "--source",
-        "-s",
+        "source",
         type=str,
-        required=True,
         choices=("arxiv", "biorxiv", "medrxiv", "pmc", "pubmed"),
         help="Source of the download.",
     )
     parser.add_argument(
-        "--from-month",
-        "-f",
+        "from_month",
         type=valid_date,
-        required=True,
         help="The start date for the download in format YYYY-MM",
+    )
+    parser.add_argument(
+        "output_dir",
+        type=Path,
+        help="Directory to save the downloaded articles.",
+    )
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="""
+        Display requests for the download.
+        """,
     )
     return parser
 
 
 def run(
-    output_dir: Path,
     source: str,
     from_month: datetime,
+    output_dir: Path,
+    dry_run: bool
 ) -> int:
     """Download articles of a source from a specific date.
 
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    return 0
+    from bluesearch.database.download import get_pmc_urls, download_pmc_articles
+
+    if source == "pmc":
+        url_dict = dict()
+        for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
+            url_dict[component] = get_pmc_urls(from_month, component)
+
+        if dry_run:
+            for component, url_list in url_dict.items():
+                print(f"URL requests from {component}:")
+                print(*url_list, sep="\n")
+            return 0
+        else:
+            logger.info("Start downloading PMC papers.")
+            for component, url_list in url_dict.items():
+                component_dir = output_dir / component
+                logger.info(f"Start downloading {component} in {component_dir.resolve()}")
+                component_dir.mkdir(exist_ok=True, parents=True)
+                download_pmc_articles(url_list, component_dir)
+            return 0

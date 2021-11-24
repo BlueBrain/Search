@@ -23,11 +23,12 @@ from pathlib import Path
 
 import requests
 
-
 logger = logging.getLogger(__name__)
 
 
-def get_days_list(start_date: datetime, end_date: datetime | None = None) -> list[datetime]:
+def get_days_list(
+    start_date: datetime, end_date: datetime | None = None
+) -> list[datetime]:
     """Retrieve list of days between a start date and an end date.
 
     Parameters
@@ -55,8 +56,8 @@ def get_days_list(start_date: datetime, end_date: datetime | None = None) -> lis
     return days_list
 
 
-def download_pmc_articles(start_date: datetime, component: str, output_dir: Path) -> None:
-    """Download PMC articles.
+def get_pmc_urls(start_date: datetime, component: str) -> list[str]:
+    """Get list of all PMC incremental files to download.
 
     Parameters
     ----------
@@ -64,6 +65,44 @@ def download_pmc_articles(start_date: datetime, component: str, output_dir: Path
         Starting date to download the incremental files.
     component : {"author_manuscript", "oa_comm", "oa_noncomm"}
         Part of the PMC to download.
+
+    Returns
+    -------
+    list of str
+        List of all the requests to make on PMC
+    """
+    base_url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/"
+    if component in {"oa_comm", "oa_noncomm"}:
+        base_url += f"oa_bulk/{component}/xml/"
+    elif component == "author_manuscript":
+        base_url += "manuscript/xml/"
+    else:
+        raise ValueError(
+            f"Unexcepted component {component}. "
+            "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported."
+        )
+
+    days_list = get_days_list(start_date=start_date)
+
+    url_list = []
+    for day in days_list:
+        date_str = day.strftime("%Y-%m-%d")
+        path_name = f"{component}_xml.incr.{date_str}.tar.gz"
+        url = base_url + path_name
+        url_list.append(url)
+
+    return url_list
+
+
+def download_pmc_articles(
+    url_list: list[str], output_dir: Path
+) -> None:
+    """Download PMC articles.
+
+    Parameters
+    ----------
+    url_list
+        List of URLs to query.
     output_dir
         Output directory to save the download.
 
@@ -72,25 +111,15 @@ def download_pmc_articles(start_date: datetime, component: str, output_dir: Path
     ValueError
         If the chosen component does not exist on PMC.
     """
-    base_url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/"
-    if component in {"oa_comm", "oa_noncomm"}:
-        base_url += f"oa_bulk/{component}/xml/"
-    elif component == "author_manuscript":
-        base_url += "manuscript/xml/"
-    else:
-        raise ValueError(f"Unexcepted component {component}. "
-                         "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported.")
-
-    days_list = get_days_list(start_date=start_date)
-
-    for day in days_list:
-        date_str = day.strftime("%Y-%m-%d")
-        path_name = f"{component}_xml.incr.{date_str}.tar.gz"
-        url = base_url + path_name
+    for url in url_list:
+        logger.info(f"Requesting URL {url}")
         r = requests.get(url)
+        path_name = url.rpartition("/")[-1]
         if r.status_code != 200:
-            logger.warning(f"URL {url} does not exist or "
-                           f"there was an issue when trying to retrieve it.")
+            logger.warning(
+                f"URL {url} does not exist or "
+                f"there was an issue when trying to retrieve it."
+            )
             continue
-        with open(output_dir / path_name, 'wb') as f:
+        with open(output_dir / path_name, "wb") as f:
             f.write(r.content)
