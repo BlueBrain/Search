@@ -132,10 +132,14 @@ def get_pubmed_urls(
     pattern_date = re.compile("\\d{4}-\\d{2}-\\d{2}")
     pattern_filename = re.compile("pubmed\\d{2}n\\d{4}.xml.gz")
 
-    matches_raw = [
-        (re.search(pattern_date, e)[0], re.search(pattern_filename, e)[0])
-        for e in entries
-    ]
+    matches_raw = []
+
+    for e in entries:
+        match_date = re.search(pattern_date, e)
+        match_filename = re.search(pattern_filename, e)
+
+        if match_date is not None and match_filename is not None:
+            matches_raw.append((match_date[0], match_filename[0]))
 
     matches = [
         (datetime.strptime(date_str, "%Y-%m-%d"), filename)
