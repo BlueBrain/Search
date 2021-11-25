@@ -132,6 +132,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             return 0
 
         logger.info("Start downloading PubMed papers.")
+        output_dir.mkdir(exist_ok=True, parents=True)
         download_articles(url_list, output_dir)
         return 0
     else:

@@ -158,10 +158,9 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
     url_list
         List of URLs to query.
     output_dir
-        Output directory to save the download.
+        Output directory to save the download. We assume that it already
+        exists.
     """
-    output_dir.mkdir(exist_ok=True, parents=True)
-
     for url in url_list:
         logger.info(f"Requesting URL {url}")
         r = requests.get(url)
