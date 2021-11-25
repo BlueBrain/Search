@@ -118,7 +118,7 @@ def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
         logger.info(f"Requesting URL {url}")
         r = requests.get(url)
         _, _, file_name = url.rpartition("/")
-        if r.status_code != 200:
+        if not r.ok:
             logger.warning(
                 f"URL {url} does not exist or "
                 f"there was an issue when trying to retrieve it."
