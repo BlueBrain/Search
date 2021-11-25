@@ -75,6 +75,11 @@ def get_pmc_urls(
     -------
     list of str
         List of all the requests to make on PMC
+
+    Raises
+    ------
+    ValueError
+        If the chosen component does not exist on PMC.
     """
     base_url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/"
     if component in {"oa_comm", "oa_noncomm"}:
@@ -108,11 +113,6 @@ def download_pmc_articles(url_list: list[str], output_dir: Path | str) -> None:
         List of URLs to query.
     output_dir
         Output directory to save the download.
-
-    Raises
-    ------
-    ValueError
-        If the chosen component does not exist on PMC.
     """
     output_dir = pathlib.Path(output_dir)
 
