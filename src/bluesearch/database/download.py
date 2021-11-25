@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -101,6 +102,52 @@ def get_pmc_urls(
         url_list.append(url)
 
     return url_list
+
+
+def get_pubmed_urls(
+    start_date: datetime, end_date: datetime | None = None
+) -> list[str]:
+    """Get list of all PubMed incremental files to download.
+
+    Parameters
+    ----------
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date (inclusive). If None, today is considered as the ending date.
+
+    Returns
+    -------
+    list of str
+        List of all the PubMed urls (sorted chronologically).
+    """
+    if end_date is None:
+        end_date = datetime.today()
+
+    base_url = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/"
+    r = requests.get(base_url)
+
+    entries = [line for line in r.text.split("\n") if '.gz"' in line]
+
+    pattern_date = re.compile("\d{4}-\d{2}-\d{2}")
+    pattern_filename = re.compile("pubmed\d{2}n\d{4}.xml.gz")
+
+    matches_raw = [
+        (re.search(pattern_date, e)[0], re.search(pattern_filename, e)[0])
+        for e in entries
+    ]
+
+    matches = [
+        (datetime.strptime(date_str, "%Y-%m-%d"), filename)
+        for date_str, filename in matches_raw
+    ]
+
+    matches_filtered = [m for m in matches if start_date <= m[0] <= end_date]
+    matches_sorted = sorted(matches_filtered, key=lambda m: m[0])
+
+    filenames = [base_url + filename for date, filename in matches_sorted]
+
+    return filenames
 
 
 def download_articles(url_list: list[str], output_dir: Path) -> None:
