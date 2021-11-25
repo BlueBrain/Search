@@ -46,6 +46,7 @@ def test_get_pmc_urls(monkeypatch, component, expected_url_start):
     for url in url_list:
         assert url.startswith(expected_url_start)
 
+
 @responses.activate
 def test_get_pubmed_urls(monkeypatch, test_data_path):
     html_path = test_data_path / "pubmed_download_index.html"
