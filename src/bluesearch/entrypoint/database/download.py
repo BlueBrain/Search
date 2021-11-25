@@ -73,7 +73,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "from_month",
         type=convert_to_datetime,
-        help="The starting month (included) for the download in format YYYY-MM",
+        help="The starting month (included) for the download in format YYYY-MM. "
+        "All papers from the given month until today will be downloaded.",
     )
     parser.add_argument(
         "output_dir",
