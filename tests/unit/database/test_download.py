@@ -8,6 +8,7 @@ from bluesearch.database.download import (
     download_articles,
     get_days_list,
     get_pmc_urls,
+    get_pubmed_urls,
 )
 
 
@@ -42,6 +43,28 @@ def test_get_pmc_urls(monkeypatch, component, expected_url_start):
     url_list = get_pmc_urls(component, start_date, end_date=end_date)
     assert isinstance(url_list, list)
     assert len(url_list) == 23
+    for url in url_list:
+        assert url.startswith(expected_url_start)
+
+@responses.activate
+def test_get_pubmed_urls(monkeypatch, test_data_path):
+    html_path = test_data_path / "pubmed_download_index.html"
+    assert html_path.exists()
+
+    source_code = html_path.read_text()
+    expected_url_start = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/"
+    responses.add(
+        responses.GET,
+        expected_url_start,
+        body=source_code,
+    )
+
+    start_date = datetime.strptime("2020-10", "%Y-%m")
+    end_date = datetime(2020, 12, 16, 0, 0, 0, 0)
+
+    url_list = get_pubmed_urls(start_date, end_date=end_date)
+    assert isinstance(url_list, list)
+    assert len(url_list) == 6  # we counted it manually in html_path
     for url in url_list:
         assert url.startswith(expected_url_start)
 
