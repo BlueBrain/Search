@@ -104,7 +104,7 @@ def get_pmc_urls(
     return url_list
 
 
-def download_pmc_articles(url_list: list[str], output_dir: Path | str) -> None:
+def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
     """Download PMC articles.
 
     Parameters
@@ -114,8 +114,6 @@ def download_pmc_articles(url_list: list[str], output_dir: Path | str) -> None:
     output_dir
         Output directory to save the download.
     """
-    output_dir = pathlib.Path(output_dir)
-
     for url in url_list:
         logger.info(f"Requesting URL {url}")
         r = requests.get(url)
