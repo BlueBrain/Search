@@ -44,7 +44,7 @@ def convert_to_datetime(s: str) -> datetime:
     try:
         return datetime.strptime(s, "%Y-%m")
     except ValueError:
-        msg = "not a valid date: {0!r}".format(s)
+        msg = f"{s} is not a valid date"
         raise argparse.ArgumentTypeError(msg)
 
 
