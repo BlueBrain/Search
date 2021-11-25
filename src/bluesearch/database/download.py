@@ -117,12 +117,12 @@ def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
     for url in url_list:
         logger.info(f"Requesting URL {url}")
         r = requests.get(url)
-        path_name = url.rpartition("/")[-1]
+        _, _, file_name = url.rpartition("/")
         if r.status_code != 200:
             logger.warning(
                 f"URL {url} does not exist or "
                 f"there was an issue when trying to retrieve it."
             )
             continue
-        with open(output_dir / path_name, "wb") as f:
+        with open(output_dir / file_name, "wb") as f:
             f.write(r.content)
