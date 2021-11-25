@@ -35,16 +35,16 @@ def test_run_arguments():
 
 class TestRun:
     def test_pmc_download(self, capsys, monkeypatch, tmp_path):
-        def fake_download_pmc_articles_func(url_list, output_dir):
+        def fake_download_articles_func(url_list, output_dir):
             for url in url_list:
                 path = output_dir / url
                 path.touch()
 
-        fake_download_pmc_articles = Mock(side_effect=fake_download_pmc_articles_func)
+        fake_download_articles = Mock(side_effect=fake_download_articles_func)
 
         monkeypatch.setattr(
-            "bluesearch.database.download.download_pmc_articles",
-            fake_download_pmc_articles,
+            "bluesearch.database.download.download_articles",
+            fake_download_articles,
         )
 
         fake_get_pmc_urls = Mock(return_value=["fake1", "fake2"])
@@ -63,13 +63,13 @@ class TestRun:
         }
         for sub_dir in pmc_path.iterdir():
             assert len(list(sub_dir.iterdir())) == 2
-        assert fake_download_pmc_articles.call_count == 3
+        assert fake_download_articles.call_count == 3
         assert fake_get_pmc_urls.call_count == 3
 
         fake_get_pmc_urls.reset_mock()
-        fake_download_pmc_articles.reset_mock()
+        fake_download_articles.reset_mock()
         download.run("pmc", fake_datetime, pmc_path, dry_run=True)
         captured = capsys.readouterr()
         assert len(captured.out.split("\n")) == 10
         assert fake_get_pmc_urls.call_count == 3
-        assert fake_download_pmc_articles.call_count == 0
+        assert fake_download_articles.call_count == 0

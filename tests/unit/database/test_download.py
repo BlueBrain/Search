@@ -5,7 +5,7 @@ import pytest
 import responses
 
 from bluesearch.database.download import (
-    download_pmc_articles,
+    download_articles,
     get_days_list,
     get_pmc_urls,
 )
@@ -47,7 +47,7 @@ def test_get_pmc_urls(monkeypatch, component, expected_url_start):
 
 
 @responses.activate
-def test_download_pmc_articles(tmp_path):
+def test_download_articles(tmp_path):
     path_names = ["file1.txt", "file2.txt"]
     url_list = []
     for name in path_names:
@@ -55,7 +55,7 @@ def test_download_pmc_articles(tmp_path):
         url_list.append(url)
         responses.add(responses.GET, url, body="fake string")
 
-    download_pmc_articles(url_list, tmp_path)
+    download_articles(url_list, tmp_path)
     assert len(list(tmp_path.iterdir())) == 2
     for file in tmp_path.iterdir():
         assert file.name in path_names

@@ -103,8 +103,8 @@ def get_pmc_urls(
     return url_list
 
 
-def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
-    """Download PMC articles.
+def download_articles(url_list: list[str], output_dir: Path) -> None:
+    """Download articles.
 
     Parameters
     ----------
