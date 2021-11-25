@@ -23,8 +23,8 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-def valid_date(s: str) -> datetime:
-    """Check the input is a valid date.
+def convert_to_datetime(s: str) -> datetime:
+    """Try to convert a string to a datetime.
 
     Parameters
     ----------
@@ -72,7 +72,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "from_month",
-        type=valid_date,
+        type=convert_to_datetime,
         help="The starting month (included) for the download in format YYYY-MM",
     )
     parser.add_argument(
