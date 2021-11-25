@@ -129,8 +129,8 @@ def get_pubmed_urls(
 
     entries = [line for line in r.text.split("\n") if '.gz"' in line]
 
-    pattern_date = re.compile("\d{4}-\d{2}-\d{2}")
-    pattern_filename = re.compile("pubmed\d{2}n\d{4}.xml.gz")
+    pattern_date = re.compile("\\d{4}-\\d{2}-\\d{2}")
+    pattern_filename = re.compile("pubmed\\d{2}n\\d{4}.xml.gz")
 
     matches_raw = [
         (re.search(pattern_date, e)[0], re.search(pattern_filename, e)[0])
