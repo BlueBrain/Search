@@ -120,5 +120,6 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             component_dir.mkdir(exist_ok=True, parents=True)
             download_pmc_articles(url_list, component_dir)
         return 0
-
-    return 0
+    else:
+        logger.error(f"The source type {source!r} is not implemented yet")
+        return 1
