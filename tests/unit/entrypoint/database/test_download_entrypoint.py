@@ -24,8 +24,8 @@ def test_init_parser():
     assert not args.dry_run
 
     # Invalid date
+    parser = download.init_parser(argparse.ArgumentParser())
     with pytest.raises(SystemExit):
-        parser = download.init_parser(argparse.ArgumentParser())
         _ = parser.parse_args(["pmc", "invalid-date", "/path/to/download"])
 
 
