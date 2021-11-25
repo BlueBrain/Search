@@ -127,7 +127,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     elif source == "pubmed":
         url_list = get_pubmed_urls(from_month)
         if dry_run:
-            print(f"URL requests from:")
+            print("URL requests from:")
             print(*url_list, sep="\n")
             return 0
 
