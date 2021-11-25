@@ -98,7 +98,9 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    from bluesearch.database.download import download_articles, get_pmc_urls
+    from bluesearch.database.download import (
+        download_articles, get_pmc_urls, get_pubmed_urls,
+    )
 
     if source == "pmc":
         url_dict = {}
@@ -119,6 +121,16 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             )
             component_dir.mkdir(exist_ok=True, parents=True)
             download_articles(url_list, component_dir)
+        return 0
+    elif source == "pubmed":
+        url_list = get_pubmed_urls(from_month)
+        if dry_run:
+            print(f"URL requests from:")
+            print(*url_list, sep="\n")
+            return 0
+
+        logger.info("Start downloading PubMed papers.")
+        download_articles(url_list, output_dir)
         return 0
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
