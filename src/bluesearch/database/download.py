@@ -29,14 +29,14 @@ logger = logging.getLogger(__name__)
 def get_days_list(
     start_date: datetime, end_date: datetime | None = None
 ) -> list[datetime]:
-    """Retrieve list of days between a start date and an end date.
+    """Retrieve list of days between a start date and an end date (both inclusive).
 
     Parameters
     ----------
     start_date
-        Starting date.
+        Starting date (inclusive).
     end_date
-        Ending date. If None, today is considered as the ending date.
+        Ending date (inclusive). If None, today is considered as the ending date.
 
     Returns
     -------
