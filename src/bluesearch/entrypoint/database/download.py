@@ -99,7 +99,9 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     `get_parser` function.
     """
     from bluesearch.database.download import (
-        download_articles, get_pmc_urls, get_pubmed_urls,
+        download_articles,
+        get_pmc_urls,
+        get_pubmed_urls,
     )
 
     if source == "pmc":
