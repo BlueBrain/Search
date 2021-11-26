@@ -6,8 +6,8 @@ import responses
 
 from bluesearch.database.download import (
     download_articles,
+    generate_pmc_urls,
     get_days_list,
-    get_pmc_urls,
     get_pubmed_urls,
 )
 
@@ -35,12 +35,12 @@ def test_get_days_list():
         ("oa_noncomm", "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_noncomm/xml/"),
     ],
 )
-def test_get_pmc_urls(monkeypatch, component, expected_url_start):
+def test_generate_pmc_urls(monkeypatch, component, expected_url_start):
 
     start_date = datetime.strptime("2021-11", "%Y-%m")
     end_date = datetime(2021, 11, 23, 0, 0, 0, 0)
 
-    url_list = get_pmc_urls(component, start_date, end_date=end_date)
+    url_list = generate_pmc_urls(component, start_date, end_date=end_date)
     assert isinstance(url_list, list)
     assert len(url_list) == 23
     for url in url_list:

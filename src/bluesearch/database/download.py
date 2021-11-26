@@ -57,10 +57,10 @@ def get_days_list(
     return days_list
 
 
-def get_pmc_urls(
+def generate_pmc_urls(
     component: str, start_date: datetime, end_date: datetime | None = None
 ) -> list[str]:
-    """Get list of all PMC incremental files to download.
+    """Generate the list of all PMC incremental files to download.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ def get_pmc_urls(
 def get_pubmed_urls(
     start_date: datetime, end_date: datetime | None = None
 ) -> list[str]:
-    """Get list of all PubMed incremental files to download.
+    """Get from the Internet the list of all PubMed incremental files to download.
 
     Parameters
     ----------

@@ -46,8 +46,10 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         fake_download_articles,
     )
 
-    fake_get_pmc_urls = Mock(return_value=["fake1", "fake2"])
-    monkeypatch.setattr("bluesearch.database.download.get_pmc_urls", fake_get_pmc_urls)
+    fake_generate_pmc_urls = Mock(return_value=["fake1", "fake2"])
+    monkeypatch.setattr(
+        "bluesearch.database.download.generate_pmc_urls", fake_generate_pmc_urls
+    )
 
     fake_datetime = datetime(2021, 11, 1)
     pmc_path = tmp_path / "pmc"
@@ -61,14 +63,14 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
     for sub_dir in pmc_path.iterdir():
         assert len(list(sub_dir.iterdir())) == 2
     assert fake_download_articles.call_count == 3
-    assert fake_get_pmc_urls.call_count == 3
+    assert fake_generate_pmc_urls.call_count == 3
 
-    fake_get_pmc_urls.reset_mock()
+    fake_generate_pmc_urls.reset_mock()
     fake_download_articles.reset_mock()
     download.run("pmc", fake_datetime, pmc_path, dry_run=True)
     captured = capsys.readouterr()
     assert len(captured.out.split("\n")) == 10
-    assert fake_get_pmc_urls.call_count == 3
+    assert fake_generate_pmc_urls.call_count == 3
     assert fake_download_articles.call_count == 0
 
 
