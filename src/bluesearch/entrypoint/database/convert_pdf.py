@@ -193,7 +193,29 @@ def run(
     return 0
 
 
-def _prepare_output_paths(input_paths, output_dir, force):
+def _prepare_output_paths(
+    input_paths: Iterable[pathlib.Path],
+    output_dir: pathlib.Path | None,
+    force: bool,
+) -> dict[pathlib.Path, pathlib.Path]:
+    """Assign output XML paths to all input PDF paths.
+
+    Parameters
+    ----------
+    input_paths
+        A sequence of input PDF paths.
+    output_dir
+        The output directory. If None then the output files will be placed
+        in the same respective directory as the input PDF.
+    force
+        If False then the PDFs for which the outputs already exist will be
+        skipped.
+
+    Returns
+    -------
+    dict
+        A mapping from input paths to output paths.
+    """
     path_map = {}
 
     for input_path in input_paths:
