@@ -22,7 +22,6 @@ import logging
 import pathlib
 import textwrap
 from concurrent.futures import ThreadPoolExecutor
-from functools import partial
 from typing import Iterable
 
 from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml
@@ -182,7 +181,9 @@ def run(
         logger.warning("No files to process, stopping")
         return 0
 
-    output_dir.mkdir(exist_ok=True)
+    if output_dir is not None:
+        output_dir.mkdir(exist_ok=True)
+
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         executor.map(do_work, path_map)
 
