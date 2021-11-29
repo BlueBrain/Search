@@ -58,7 +58,9 @@ class TestPrepareOutputPaths:
             output_folder / "x.xml",
             output_folder / "y.xml",
         ]
-        path_map = convert_pdf._prepare_output_paths(input_paths, output_folder, force=False)
+        path_map = convert_pdf._prepare_output_paths(
+            input_paths, output_folder, force=False
+        )
         assert set(path_map) == set(input_paths)
         assert list(path_map.values()) == expected_output_paths
 
@@ -79,9 +81,7 @@ class TestPrepareOutputPaths:
 
         # Output file exists, but should be overwritten because of force=True
         output_xml.touch()
-        path_map = convert_pdf._prepare_output_paths(
-                [input_path], None, force=True
-        )
+        path_map = convert_pdf._prepare_output_paths([input_path], None, force=True)
         assert len(path_map) == 1
 
 
@@ -158,7 +158,9 @@ class TestRun:
         grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
 
         # Call the entry point
-        exit_code = convert_pdf.run("host", 1234, input_pdf_file, None, num_workers=1, force=False)
+        exit_code = convert_pdf.run(
+            "host", 1234, input_pdf_file, None, num_workers=1, force=False
+        )
 
         # Checks
         assert exit_code == 0
