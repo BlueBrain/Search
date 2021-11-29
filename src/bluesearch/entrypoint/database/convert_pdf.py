@@ -165,8 +165,15 @@ def run(
 
     # Convert
     def do_work(path):
-        _convert_pdf_file(grobid_host, grobid_port, path, output_dir, force)
+        try:
+            _convert_pdf_file(grobid_host, grobid_port, path, output_dir, force)
+        except Exception as exc:
+            logger.exception(
+                f"An error happened when processing {path.resolve().as_uri()}: "
+                f"{exc}"
+            )
 
+    output_dir.mkdir(exist_ok=True)
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         executor.map(do_work, input_paths)
 
