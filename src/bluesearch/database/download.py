@@ -119,39 +119,26 @@ def get_pubmed_urls(
     Returns
     -------
     list of str
-        List of all the PubMed urls (sorted chronologically).
+        List of all the PubMed urls.
     """
     if end_date is None:
         end_date = datetime.today()
 
     base_url = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/"
-    r = requests.get(base_url)
+    response = requests.get(base_url)
+    pattern = re.compile(r'<a href="(.*\.xml\.gz)">.*</a> *(\d{4}-\d{2}-\d{2})')
+    urls = []
 
-    entries = [line for line in r.text.split("\n") if '.gz"' in line]
+    for line in response.text.splitlines():
+        match = pattern.search(line)
+        if not match:
+            continue
+        file_name, date_str = match.groups()
+        date = datetime.strptime(date_str, "%Y-%m-%d")
+        if start_date <= date <= end_date:
+            urls.append(f"{base_url}/{file_name}")
 
-    pattern_date = re.compile("\\d{4}-\\d{2}-\\d{2}")
-    pattern_filename = re.compile("pubmed\\d{2}n\\d{4}.xml.gz")
-
-    matches_raw = []
-
-    for e in entries:
-        match_date = re.search(pattern_date, e)
-        match_filename = re.search(pattern_filename, e)
-
-        if match_date is not None and match_filename is not None:
-            matches_raw.append((match_date[0], match_filename[0]))
-
-    matches = [
-        (datetime.strptime(date_str, "%Y-%m-%d"), filename)
-        for date_str, filename in matches_raw
-    ]
-
-    matches_filtered = [m for m in matches if start_date <= m[0] <= end_date]
-    matches_sorted = sorted(matches_filtered, key=lambda m: m[0])
-
-    filenames = [base_url + filename for date, filename in matches_sorted]
-
-    return filenames
+    return urls
 
 
 def download_articles(url_list: list[str], output_dir: Path) -> None:
