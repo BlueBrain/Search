@@ -163,19 +163,25 @@ def run(
     else:
         input_paths = _keep_pdfs_only(input_path.iterdir())
 
+    failed_paths = []
+
     # Convert
-    def do_work(path):
+    def do_work(pdf_path):
         try:
-            _convert_pdf_file(grobid_host, grobid_port, path, output_dir, force)
+            _convert_pdf_file(grobid_host, grobid_port, pdf_path, output_dir, force)
         except Exception as exc:
             logger.exception(
-                f"An error happened when processing {path.resolve().as_uri()}: "
+                f"An error happened when processing {pdf_path.resolve().as_uri()}: "
                 f"{exc}"
             )
+            failed_paths.append(pdf_path)
 
     output_dir.mkdir(exist_ok=True)
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         executor.map(do_work, input_paths)
+
+    for path in failed_paths:
+        logger.warning(f"Failed to process {path.resolve().as_uri()}")
 
     return 0
 
