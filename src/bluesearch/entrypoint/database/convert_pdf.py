@@ -164,11 +164,13 @@ def run(
         input_paths = _keep_pdfs_only(input_path.iterdir())
 
     failed_paths = []
+    path_map = _prepare_output_paths(input_paths, output_dir, force)
 
     # Convert
     def do_work(pdf_path):
+        xml_path = path_map[pdf_path]
         try:
-            _convert_pdf_file(grobid_host, grobid_port, pdf_path, output_dir, force)
+            _convert_pdf_file(grobid_host, grobid_port, pdf_path, xml_path)
         except Exception as exc:
             logger.exception(
                 f"An error happened when processing {pdf_path.resolve().as_uri()}: "
@@ -176,9 +178,13 @@ def run(
             )
             failed_paths.append(pdf_path)
 
+    if len(path_map) == 0:
+        logger.warning("No files to process, stopping")
+        return 0
+
     output_dir.mkdir(exist_ok=True)
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        executor.map(do_work, input_paths)
+        executor.map(do_work, path_map)
 
     for path in failed_paths:
         logger.warning(f"Failed to process {path.resolve().as_uri()}")
@@ -211,12 +217,32 @@ def _keep_pdfs_only(pdf_paths: Iterable[pathlib.Path]) -> list[pathlib.Path]:
     return filtered_paths
 
 
+def _prepare_output_paths(input_paths, output_dir, force):
+    path_map = {}
+
+    for input_path in input_paths:
+        output_name = input_path.with_suffix(".xml").name
+        if output_dir is None:
+            output_path = input_path.parent / output_name
+        else:
+            output_path = output_dir / output_name
+
+        if output_path.exists() and not force:
+            logger.info(
+                "Not overwriting existing file %s, use --force to always overwrite.",
+                output_path.resolve().as_uri(),
+            )
+        else:
+            path_map[input_path] = output_path
+
+    return path_map
+
+
 def _convert_pdf_file(
     grobid_host: str,
     grobid_port: int,
     input_path: pathlib.Path,
-    output_dir: pathlib.Path | None,
-    force: bool,
+    output_path: pathlib.Path,
 ) -> None:
     """Convert a single PDF file to XML and write the XML file to disk.
 
@@ -228,25 +254,9 @@ def _convert_pdf_file(
         The port of the GROBID service.
     input_path
         The path to the input PDF file.
-    output_dir
+    output_path
         The output directory for the XML file.
-    force
-        If true overwrite the output file if it already exists. If false and
-        the output file already exists then do nothing.
     """
-    output_name = input_path.with_suffix(".xml").name
-    if output_dir is None:
-        output_path = input_path.parent / output_name
-    else:
-        output_path = output_dir / output_name
-
-    if output_path.exists() and not force:
-        logger.info(
-            "Not overwriting existing file %s, use --force to always overwrite.",
-            output_path.resolve().as_uri(),
-        )
-        return
-
     logger.info("Reading %s", input_path.resolve().as_uri())
     with input_path.open("rb") as fh_pdf:
         pdf_content = fh_pdf.read()
@@ -254,7 +264,6 @@ def _convert_pdf_file(
     logger.info("Converting %s to XML", input_path.resolve().as_uri())
     xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
 
-    logger.info("Writing %s to disk", output_path.resolve().as_uri())
     with output_path.open("w") as fh_xml:
         n_bytes = fh_xml.write(xml_content)
-    logger.info("Wrote %d bytes", n_bytes)
+    logger.info(f"Wrote {output_path.resolve().as_uri()} ({n_bytes:,d} bytes)")
