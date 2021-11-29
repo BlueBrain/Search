@@ -21,6 +21,8 @@ import argparse
 import logging
 import pathlib
 import textwrap
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Iterable
 
 from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml
@@ -83,6 +85,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-w",
+        "--num-workers",
+        type=int,
+        default=5,
+        help="The number of workers",
+    )
+    parser.add_argument(
         "--force",
         "-f",
         action="store_true",
@@ -101,6 +110,7 @@ def run(
     grobid_port: int,
     input_path: pathlib.Path,
     output_dir: pathlib.Path | None,
+    num_workers,
     *,
     force: bool,
 ) -> int:
@@ -154,8 +164,11 @@ def run(
         input_paths = _keep_pdfs_only(input_path.iterdir())
 
     # Convert
-    for input_path in input_paths:
-        _convert_pdf_file(grobid_host, grobid_port, input_path, output_dir, force)
+    def do_work(path):
+        _convert_pdf_file(grobid_host, grobid_port, path, output_dir, force)
+
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        executor.map(do_work, input_paths)
 
     return 0
 
