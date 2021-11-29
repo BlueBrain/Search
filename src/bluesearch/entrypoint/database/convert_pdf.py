@@ -226,7 +226,7 @@ def _prepare_output_paths(
             output_path = output_dir / output_name
 
         if output_path.exists() and not force:
-            logger.info(
+            logger.warning(
                 "Not overwriting existing file %s, use --force to always overwrite.",
                 output_path.resolve().as_uri(),
             )

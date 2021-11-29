@@ -1,5 +1,6 @@
 import argparse
 import inspect
+import logging
 import pathlib
 import unittest.mock
 
@@ -12,6 +13,7 @@ CONVERT_PDF_PARAMS = {
     "grobid_port",
     "input_path",
     "output_dir",
+    "num_workers",
     "force",
 }
 
@@ -27,11 +29,60 @@ def test_init_parser():
     assert args.grobid_port == 1234
     assert args.input_path == pathlib.Path("/input/path")
     assert args.output_dir is None
+    assert args.num_workers > 0
     assert args.force is False
 
 
 def test_run_has_consistent_parameters():
     assert inspect.signature(convert_pdf.run).parameters.keys() == CONVERT_PDF_PARAMS
+
+
+class TestPrepareOutputPaths:
+    def test_output_same_folder(self):
+        input_paths = [
+            pathlib.Path("/a/b/x.pdf"),
+            pathlib.Path("/c/d/y.pdf"),
+        ]
+        path_map = convert_pdf._prepare_output_paths(input_paths, None, force=False)
+        assert set(path_map) == set(input_paths)
+        for input_path, output_path in path_map.items():
+            assert output_path == input_path.with_suffix(".xml")
+
+    def test_output_fixed_folder(self):
+        output_folder = pathlib.Path("/output")
+        input_paths = [
+            pathlib.Path("/a/b/x.pdf"),
+            pathlib.Path("/c/d/y.pdf"),
+        ]
+        expected_output_paths = [
+            output_folder / "x.xml",
+            output_folder / "y.xml",
+        ]
+        path_map = convert_pdf._prepare_output_paths(input_paths, output_folder, force=False)
+        assert set(path_map) == set(input_paths)
+        assert list(path_map.values()) == expected_output_paths
+
+    def test_existing_files_are_skipped(self, tmp_path, caplog):
+        input_path = tmp_path / "x.pdf"
+        output_xml = tmp_path / "x.xml"
+        output_xml.touch()
+        with caplog.at_level(logging.WARNING):
+            path_map = convert_pdf._prepare_output_paths(
+                [input_path], None, force=False
+            )
+        assert len(path_map) == 0
+        assert "Not overwriting" in caplog.text
+
+    def test_force_option_works(self, tmp_path):
+        input_path = tmp_path / "x.pdf"
+        output_xml = tmp_path / "x.xml"
+
+        # Output file exists, but should be overwritten because of force=True
+        output_xml.touch()
+        path_map = convert_pdf._prepare_output_paths(
+                [input_path], None, force=True
+        )
+        assert len(path_map) == 1
 
 
 class TestRun:
@@ -68,6 +119,7 @@ class TestRun:
             1234,
             input_pdf_file,
             None,
+            num_workers=1,
             force=False,
         )
         assert exit_code == expected_exit_code
@@ -81,7 +133,7 @@ class TestRun:
         output_xml_file = pathlib.Path("/does/not/matter.xml")
 
         exit_code = convert_pdf.run(
-            "host", 1234, input_pdf_file, output_xml_file, force=False
+            "host", 1234, input_pdf_file, output_xml_file, num_workers=1, force=False
         )
         assert exit_code == 1
 
@@ -106,7 +158,7 @@ class TestRun:
         grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
 
         # Call the entry point
-        exit_code = convert_pdf.run("host", 1234, input_pdf_file, None, force=False)
+        exit_code = convert_pdf.run("host", 1234, input_pdf_file, None, num_workers=1, force=False)
 
         # Checks
         assert exit_code == 0
