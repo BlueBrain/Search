@@ -161,7 +161,7 @@ def run(
     if input_path.is_file():
         input_paths = [input_path]
     else:
-        input_paths = _keep_pdfs_only(input_path.iterdir())
+        input_paths = input_path.rglob("*.pdf")
 
     failed_paths = []
     path_map = _prepare_output_paths(input_paths, output_dir, force)
@@ -190,31 +190,6 @@ def run(
         logger.warning(f"Failed to process {path.resolve().as_uri()}")
 
     return 0
-
-
-def _keep_pdfs_only(pdf_paths: Iterable[pathlib.Path]) -> list[pathlib.Path]:
-    """Filter a collection of paths and paths to PDF files only.
-
-    Parameters
-    ----------
-    pdf_paths
-        An iterable of paths.
-
-    Returns
-    -------
-    A list of paths that are files and have the PDF file extension.
-    """
-    filtered_paths = []
-    for path in pdf_paths:
-        if not path.is_file():
-            logger.info("Will skip directory %s", path.resolve().as_uri())
-            continue
-        if path.suffix.lower() != ".pdf":
-            logger.info("Will skip non-PDF file %s", path.resolve().as_uri())
-            continue
-        filtered_paths.append(path)
-
-    return filtered_paths
 
 
 def _prepare_output_paths(input_paths, output_dir, force):
