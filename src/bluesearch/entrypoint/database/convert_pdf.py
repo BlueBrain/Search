@@ -18,12 +18,15 @@
 from __future__ import annotations
 
 import argparse
+import asyncio
 import logging
 import pathlib
 import textwrap
 from typing import Iterable
 
-from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml
+import aiohttp
+
+from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml, grobid_pdf_to_tei_xml_aio
 
 logger = logging.getLogger(__name__)
 
@@ -154,8 +157,13 @@ def run(
         input_paths = _keep_pdfs_only(input_path.iterdir())
 
     # Convert
-    for input_path in input_paths:
-        _convert_pdf_file(grobid_host, grobid_port, input_path, output_dir, force)
+    path_map = prepare_files(input_paths, output_dir, force)
+    if len(path_map) > 0:
+        output_dir.mkdir(exist_ok=True)
+        logger.info(f"Starting asynchronous PDF conversion: {len(path_map)} files")
+        asyncio.run(_convert_and_save_all(path_map, grobid_host, grobid_port))
+    else:
+        logger.info("No files to convert")
 
     return 0
 
@@ -185,50 +193,44 @@ def _keep_pdfs_only(pdf_paths: Iterable[pathlib.Path]) -> list[pathlib.Path]:
     return filtered_paths
 
 
-def _convert_pdf_file(
-    grobid_host: str,
-    grobid_port: int,
-    input_path: pathlib.Path,
-    output_dir: pathlib.Path | None,
-    force: bool,
-) -> None:
-    """Convert a single PDF file to XML and write the XML file to disk.
+def prepare_files(input_paths, output_dir, force):
+    path_map = {}
+    for pdf_path in input_paths:
+        output_name = pdf_path.with_suffix(".xml").name
+        if output_dir is None:
+            output_path = pdf_path.parent / output_name
+        else:
+            output_path = output_dir / output_name
 
-    Parameters
-    ----------
-    grobid_host
-        The host of the GROBID service.
-    grobid_port
-        The port of the GROBID service.
-    input_path
-        The path to the input PDF file.
-    output_dir
-        The output directory for the XML file.
-    force
-        If true overwrite the output file if it already exists. If false and
-        the output file already exists then do nothing.
-    """
-    output_name = input_path.with_suffix(".xml").name
-    if output_dir is None:
-        output_path = input_path.parent / output_name
-    else:
-        output_path = output_dir / output_name
+        if output_path.exists() and not force:
+            logger.info(
+                "Not overwriting existing file %s, use --force to always overwrite.",
+                output_path.resolve().as_uri(),
+            )
+        else:
+            path_map[pdf_path] = output_path
 
-    if output_path.exists() and not force:
-        logger.info(
-            "Not overwriting existing file %s, use --force to always overwrite.",
-            output_path.resolve().as_uri(),
-        )
-        return
+    return path_map
 
-    logger.info("Reading %s", input_path.resolve().as_uri())
-    with input_path.open("rb") as fh_pdf:
+
+async def _convert_and_save_all(path_map, grobid_host, grobid_port):
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            convert_and_save(pdf_path, xml_path, grobid_host, grobid_port, session)
+            for pdf_path, xml_path in path_map.items()
+        ]
+
+        await asyncio.gather(*tasks)
+
+
+async def convert_and_save(pdf_path, xml_path, grobid_host, grobid_port, session):
+    logger.info(f"Reading {pdf_path.resolve().as_uri()}")
+    with pdf_path.open("rb") as fh_pdf:
         pdf_content = fh_pdf.read()
 
-    logger.info("Converting %s to XML", input_path.resolve().as_uri())
-    xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
+    logger.info(f"Converting {pdf_path.resolve().as_uri()} to XML")
+    xml_content = await grobid_pdf_to_tei_xml_aio(pdf_content, grobid_host, grobid_port, session)
 
-    logger.info("Writing %s to disk", output_path.resolve().as_uri())
-    with output_path.open("w") as fh_xml:
+    with xml_path.open("w") as fh_xml:
         n_bytes = fh_xml.write(xml_content)
-    logger.info("Wrote %d bytes", n_bytes)
+    logger.info(f"Wrote {xml_path.resolve().as_uri()} to disk ({n_bytes:,d} bytes)")

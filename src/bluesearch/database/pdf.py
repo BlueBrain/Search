@@ -13,7 +13,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Module for PDF conversion."""
+import asyncio
+import logging
+
+import aiohttp
 import requests
+
+logger = logging.getLogger(__name__)
 
 
 def grobid_is_alive(host: str, port: int) -> bool:
@@ -66,16 +72,37 @@ def grobid_pdf_to_tei_xml(pdf_content: bytes, host: str, port: int) -> str:
     str
         TEI XML parsing of the PDF content.
     """
+    return asyncio.run(convert_single(pdf_content, host, port))
+
+
+async def convert_single(pdf_content, host, port):
+    async with aiohttp.ClientSession() as session:
+        xml_content = await grobid_pdf_to_tei_xml_aio(pdf_content, host, port, session)
+
+    return xml_content
+
+
+async def convert_and_save(pdf_content, xml_path, host, port, session):
+    # Conversion
+    logger.info(f"Using GROBID at {host}:{port} to convert PDF")
+    xml_content = await grobid_pdf_to_tei_xml_aio(pdf_content, host, port, session)
+
+    # Write XML file
+    logger.info(f"Writing XML file to {xml_path.resolve().as_uri()}")
+    with xml_path.open("w") as fh:
+        fh.write(xml_content)
+
+
+async def grobid_pdf_to_tei_xml_aio(
+    pdf_content: bytes,
+    host: str,
+    port: int,
+    session
+) -> str:
     url = f"http://{host}:{port}/api/processFulltextDocument"
     files = {"input": pdf_content}
     headers = {"Accept": "application/xml"}
-    timeout = 60
+    async with session.post(url, data=files, headers=headers) as response:
+        xml_content = await response.text()
 
-    response = requests.post(
-        url=url,
-        files=files,
-        headers=headers,
-        timeout=timeout,
-    )
-    response.raise_for_status()
-    return response.text
+    return xml_content
