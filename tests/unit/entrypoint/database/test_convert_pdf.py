@@ -145,6 +145,7 @@ class TestRun:
         self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path
     ):
         grobid_is_alive.return_value = True
+        output_dir = tmp_path / "output"
 
         # Prepare the input PDF file
         input_pdf_file = tmp_path / "my-file.pdf"
@@ -152,14 +153,14 @@ class TestRun:
             fh.write(b"PDF file content")
 
         # Prepare the output XML file path
-        output_xml_file = tmp_path / "my-file.xml"
+        output_xml_file = output_dir / "my-file.xml"
 
         # Set up the mock
         grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
 
         # Call the entry point
         exit_code = convert_pdf.run(
-            "host", 1234, input_pdf_file, None, num_workers=1, force=False
+            "host", 1234, input_pdf_file, output_dir, num_workers=1, force=False
         )
 
         # Checks
