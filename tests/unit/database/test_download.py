@@ -53,7 +53,7 @@ def test_get_pubmed_urls(monkeypatch, test_data_path):
     assert html_path.exists()
 
     source_code = html_path.read_text()
-    expected_url_start = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/"
+    expected_url_start = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles"
     responses.add(
         responses.GET,
         expected_url_start,
