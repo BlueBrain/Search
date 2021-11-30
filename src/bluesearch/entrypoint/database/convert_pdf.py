@@ -182,6 +182,7 @@ def run(
                 f"An error happened when processing {pdf_path.resolve().as_uri()}: "
                 f"{exc}"
             )
+            # lists seem to be thread-safe in Python
             failed_paths.append(pdf_path)
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
