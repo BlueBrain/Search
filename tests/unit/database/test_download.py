@@ -7,21 +7,21 @@ import responses
 from bluesearch.database.download import (
     download_articles,
     generate_pmc_urls,
-    get_days_list,
+    get_daterange_list,
     get_pubmed_urls,
 )
 
 
-def test_get_days_list():
+def test_get_daterange_list():
     start_date = datetime.strptime("2021-11", "%Y-%m")
     end_date = datetime.strptime("2021-12", "%Y-%m")
-    days_list = get_days_list(start_date, end_date)
+    days_list = get_daterange_list(start_date, end_date)
     assert isinstance(days_list, list)
     assert len(days_list) == 31  # 30 days in November + 1 in December
     for day in days_list:
         assert isinstance(day, datetime)
 
-    days_list = get_days_list(start_date)
+    days_list = get_daterange_list(start_date)
     assert isinstance(days_list, list)
     for day in days_list:
         assert isinstance(day, datetime)

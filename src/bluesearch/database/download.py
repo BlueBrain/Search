@@ -22,15 +22,16 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import boto3
 import requests
 
 logger = logging.getLogger(__name__)
 
 
-def get_days_list(
-    start_date: datetime, end_date: datetime | None = None
+def get_daterange_list(
+        start_date: datetime, end_date: datetime | None = None, delta: str = "day",
 ) -> list[datetime]:
-    """Retrieve list of days between a start date and an end date (both inclusive).
+    """Retrieve list of dates between a start date and an end date (both inclusive).
 
     Parameters
     ----------
@@ -38,6 +39,8 @@ def get_days_list(
         Starting date (inclusive).
     end_date
         Ending date (inclusive). If None, today is considered as the ending date.
+    delta : {"day", "month"}
+        Time difference between two consecutive dates.
 
     Returns
     -------
@@ -47,14 +50,24 @@ def get_days_list(
     if end_date is None:
         end_date = datetime.today()
 
-    delta = end_date - start_date
+    start_end_delta = end_date - start_date
 
-    days_list = []
-    for i in range(delta.days + 1):
-        day = start_date + timedelta(days=i)
-        days_list.append(day)
+    date_list = []
 
-    return days_list
+    if delta == "day":
+        timedelta_ = timedelta(days=1)
+        n_periods = start_end_delta.days
+
+    elif delta == "month":
+        raise NotImplementedError
+    else:
+        raise ValueError(f"Unknown delta: {delta}")
+
+    for i in range(n_periods + 1):
+        date = start_date + i * timedelta_
+        date_list.append(date)
+
+    return date_list
 
 
 def generate_pmc_urls(
@@ -92,7 +105,7 @@ def generate_pmc_urls(
             "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported."
         )
 
-    days_list = get_days_list(start_date=start_date, end_date=end_date)
+    days_list = get_daterange_list(start_date=start_date, end_date=end_date)
 
     url_list = []
     for day in days_list:
@@ -140,6 +153,43 @@ def get_pubmed_urls(
 
     return urls
 
+
+def get_s3_urls(
+    source: str,
+    start_date: datetime,
+    end_date: datetime | None = None
+) -> dict[str, List[str]]:
+    """Get S3 urls.
+
+    We actually send a request to the AWS server and there is a charge.
+
+    Parameters
+    ----------
+    source : {"medrxiv", "biorxiv"}
+        Name of the source.
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date. If None, today is considered as the ending date (inclusive).
+
+    Returns
+    -------
+    url_dict
+        Keys represent different months. Values represent lists of the
+        actual `.meca` files.
+
+    """
+    # checks
+    if end_date is None:
+        end_date = datetime.today()
+
+    if source not in {"medrxiv", "biorxiv"}:
+        raise ValueError(f"Unknown source: {source}")
+
+    # generate November_2019, December_2019, ...
+
+    # filtering objects using boto3
+    raise NotImplementedError
 
 def download_articles(url_list: list[str], output_dir: Path) -> None:
     """Download articles.

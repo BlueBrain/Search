@@ -102,6 +102,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         download_articles,
         generate_pmc_urls,
         get_pubmed_urls,
+        get_s3_urls,
     )
 
     if source == "pmc":
@@ -135,6 +136,15 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         output_dir.mkdir(exist_ok=True, parents=True)
         download_articles(url_list, output_dir)
         return 0
+    elif source in {"biorxiv", "medrxiv"}:
+        url_dict = get_s3_urls(source, from_month) # month -> list of .meca file paths
+
+        if dry_run:
+            for month, url_list in url_dict.items():
+                print(f"Month: {month}")
+                print(*url_list, sep="\n")
+            return 0
+
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

@@ -17,6 +17,7 @@
 
 Flask==2.0.1
 SQLAlchemy[mysql,pymysql]==1.4.21
+boto3==1.20.16
 catalogue==2.0.4
 cryptography==3.4.7
 defusedxml==0.6.0
