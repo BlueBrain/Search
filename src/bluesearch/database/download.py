@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -31,7 +32,10 @@ logger = logging.getLogger(__name__)
 def get_daterange_list(
         start_date: datetime, end_date: datetime | None = None, delta: str = "day",
 ) -> list[datetime]:
-    """Retrieve list of dates between a start date and an end date (both inclusive).
+    """Retrieve list of datetimes between a start date and an end date (both inclusive).
+
+    If `delta=day` then we discard hours, minutes, seconds and miliseconds.
+    If `delta=month` then we discard days, hours, minutes, seconds and miliseconds.
 
     Parameters
     ----------
@@ -50,22 +54,29 @@ def get_daterange_list(
     if end_date is None:
         end_date = datetime.today()
 
-    start_end_delta = end_date - start_date
-
     date_list = []
 
     if delta == "day":
-        timedelta_ = timedelta(days=1)
-        n_periods = start_end_delta.days
+        start_date = datetime(start_date.year, start_date.month, start_date.day)
+        end_date = datetime(end_date.year, end_date.month, end_date.day)
+
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date)
+            current_date += timedelta(days=1)
 
     elif delta == "month":
-        raise NotImplementedError
+        start_date = datetime(start_date.year, start_date.month)
+        end_date = datetime(end_date.year, end_date.month)
+
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date)
+            current_date_ = current_date + timedelta(days=32)
+            current_date = current_date_.replace(day=1)
+
     else:
         raise ValueError(f"Unknown delta: {delta}")
-
-    for i in range(n_periods + 1):
-        date = start_date + i * timedelta_
-        date_list.append(date)
 
     return date_list
 
@@ -187,9 +198,29 @@ def get_s3_urls(
         raise ValueError(f"Unknown source: {source}")
 
     # generate November_2019, December_2019, ...
+    date_list = get_daterange_list(
+        start_date=start_date,
+        end_date=end_date,
+        delta="month",
+    )
+
+    month_year_list = [date.strftime("%B_%Y") for date in date_list]
 
     # filtering objects using boto3
-    raise NotImplementedError
+    s3_resource = boto3.resource("s3")
+    bucket = s3_resource.Bucket(f"{source}-src-monthly")
+
+    url_dict = defaultdict(list)
+    for month_year in month_year_list:
+        objects = bucket.objects.filter(
+            Prefix=f"Current_Content/{month_year}",
+            RequestPayer="requester",
+        )
+        for obj in objects:
+            url_dict[month_year].append(obj.key)
+
+    return url_dict
+
 
 def download_articles(url_list: list[str], output_dir: Path) -> None:
     """Download articles.
