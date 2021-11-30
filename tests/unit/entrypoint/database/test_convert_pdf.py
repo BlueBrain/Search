@@ -175,7 +175,11 @@ class TestRun:
     )
     @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
     def test_pdf_conversion_exception(
-        self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path, caplog,
+        self,
+        grobid_is_alive,
+        grobid_pdf_to_tei_xml,
+        tmp_path,
+        caplog,
     ):
         grobid_is_alive.return_value = True
 
@@ -187,14 +191,13 @@ class TestRun:
         input_pdf_file_good = input_dir / "good.pdf"
         with input_pdf_file_good.open("wb") as fh:
             fh.write(b"PDF file content good")
-        output_xml_file_good = input_dir / "good.xml" # will exist
+        output_xml_file_good = input_dir / "good.xml"  # will exist
 
         # Bad content PDF
         input_pdf_file_bad = input_dir / "bad.pdf"
         with input_pdf_file_bad.open("wb") as fh:
             fh.write(b"PDF file content bad")
         output_xml_file_bad = input_dir / "bad.xml"  # will not exist
-
 
         # Set up the mock
         def fake_grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port):
@@ -246,7 +249,6 @@ class TestRun:
                 fh.write(b"PDF file content")
             output_xml_files.append(input_dir / f"my-file-{i}.xml")
 
-
         # Set up the mock
         grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
 
@@ -263,7 +265,6 @@ class TestRun:
         for output_xml_file in output_xml_files:
             with output_xml_file.open() as fh:
                 assert fh.read() == "<xml>parsed</xml>"
-
 
     @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
     def test_pdf_conversion_empty_dir(self, grobid_is_alive, tmp_path, caplog):
