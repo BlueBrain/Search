@@ -141,7 +141,7 @@ class TestRun:
         "bluesearch.entrypoint.database.convert_pdf.grobid_pdf_to_tei_xml"
     )
     @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
-    def test_pdf_conversion_works(
+    def test_pdf_conversion_works_input_file(
         self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path
     ):
         grobid_is_alive.return_value = True
@@ -168,3 +168,41 @@ class TestRun:
         grobid_pdf_to_tei_xml.assert_called_with(b"PDF file content", "host", 1234)
         with output_xml_file.open() as fh:
             assert fh.read() == "<xml>parsed</xml>"
+
+    @unittest.mock.patch(
+        "bluesearch.entrypoint.database.convert_pdf.grobid_pdf_to_tei_xml"
+    )
+    @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
+    def test_pdf_conversion_works_input_dir(
+        self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path
+    ):
+        grobid_is_alive.return_value = True
+
+        # Prepare the input PDF file
+        input_dir = tmp_path / "inputs"
+        input_dir.mkdir()
+
+        output_xml_files = []
+        for i in range(3):
+            input_pdf_file = input_dir / f"my-file-{i}.pdf"
+            with input_pdf_file.open("wb") as fh:
+                fh.write(b"PDF file content")
+            output_xml_files.append(input_dir / f"my-file-{i}.xml")
+
+
+        # Set up the mock
+        grobid_pdf_to_tei_xml.return_value = "<xml>parsed</xml>"
+
+        # Call the entry point
+        exit_code = convert_pdf.run(
+            "host", 1234, input_dir, None, num_workers=1, force=False
+        )
+
+        # Checks
+        assert exit_code == 0
+        assert grobid_pdf_to_tei_xml.call_count == 3
+        grobid_pdf_to_tei_xml.assert_called_with(b"PDF file content", "host", 1234)
+
+        for output_xml_file in output_xml_files:
+            with output_xml_file.open() as fh:
+                assert fh.read() == "<xml>parsed</xml>"
