@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -56,10 +57,10 @@ def get_days_list(
     return days_list
 
 
-def get_pmc_urls(
+def generate_pmc_urls(
     component: str, start_date: datetime, end_date: datetime | None = None
 ) -> list[str]:
-    """Get list of all PMC incremental files to download.
+    """Generate the list of all PMC incremental files to download.
 
     Parameters
     ----------
@@ -103,15 +104,53 @@ def get_pmc_urls(
     return url_list
 
 
-def download_pmc_articles(url_list: list[str], output_dir: Path) -> None:
-    """Download PMC articles.
+def get_pubmed_urls(
+    start_date: datetime, end_date: datetime | None = None
+) -> list[str]:
+    """Get from the Internet the list of all PubMed incremental files to download.
+
+    Parameters
+    ----------
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date (inclusive). If None, today is considered as the ending date.
+
+    Returns
+    -------
+    list of str
+        List of all the PubMed urls.
+    """
+    if end_date is None:
+        end_date = datetime.today()
+
+    base_url = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles"
+    response = requests.get(base_url)
+    pattern = re.compile(r'<a href="(.*\.xml\.gz)">.*</a> *(\d{4}-\d{2}-\d{2})')
+    urls = []
+
+    for line in response.text.splitlines():
+        match = pattern.search(line)
+        if not match:
+            continue
+        file_name, date_str = match.groups()
+        date = datetime.strptime(date_str, "%Y-%m-%d")
+        if start_date <= date <= end_date:
+            urls.append(f"{base_url}/{file_name}")
+
+    return urls
+
+
+def download_articles(url_list: list[str], output_dir: Path) -> None:
+    """Download articles.
 
     Parameters
     ----------
     url_list
         List of URLs to query.
     output_dir
-        Output directory to save the download.
+        Output directory to save the download. We assume that it already
+        exists.
     """
     for url in url_list:
         logger.info(f"Requesting URL {url}")
