@@ -66,8 +66,8 @@ def get_daterange_list(
             current_date += timedelta(days=1)
 
     elif delta == "month":
-        start_date = datetime(start_date.year, start_date.month)
-        end_date = datetime(end_date.year, end_date.month)
+        start_date = datetime(start_date.year, start_date.month, 1)
+        end_date = datetime(end_date.year, end_date.month, 1)
 
         current_date = start_date
         while current_date <= end_date:
