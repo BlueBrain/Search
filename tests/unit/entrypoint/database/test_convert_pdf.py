@@ -173,6 +173,62 @@ class TestRun:
         "bluesearch.entrypoint.database.convert_pdf.grobid_pdf_to_tei_xml"
     )
     @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
+    def test_pdf_conversion_exception(
+        self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path, caplog,
+    ):
+        grobid_is_alive.return_value = True
+
+        # Prepare the input PDF file
+        input_dir = tmp_path / "inputs"
+        input_dir.mkdir()
+
+        # Good content PDF
+        input_pdf_file_good = input_dir / "good.pdf"
+        with input_pdf_file_good.open("wb") as fh:
+            fh.write(b"PDF file content good")
+        output_xml_file_good = input_dir / "good.xml" # will exist
+
+        # Bad content PDF
+        input_pdf_file_bad = input_dir / "bad.pdf"
+        with input_pdf_file_bad.open("wb") as fh:
+            fh.write(b"PDF file content bad")
+        output_xml_file_bad = input_dir / "bad.xml"  # will not exist
+
+
+        # Set up the mock
+        def fake_grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port):
+            pdf_content_str = str(pdf_content)
+
+            if "bad" in pdf_content_str:
+                raise ValueError
+
+            return "<xml>parsed</xml>"
+
+        grobid_pdf_to_tei_xml.side_effect = fake_grobid_pdf_to_tei_xml
+
+        # Call the entry point
+        exit_code = convert_pdf.run(
+            "host", 1234, input_dir, None, num_workers=1, force=False
+        )
+
+        # Checks
+        assert exit_code == 0
+        assert grobid_pdf_to_tei_xml.call_count == 2
+
+        # Check the converted XMLs
+        assert output_xml_file_good.exists()
+        assert not output_xml_file_bad.exists()
+        with output_xml_file_good.open() as fh:
+            assert fh.read() == "<xml>parsed</xml>"
+
+        # Check failed log
+        assert str(input_pdf_file_bad) in caplog.text
+        assert str(input_pdf_file_good) not in caplog.text
+
+    @unittest.mock.patch(
+        "bluesearch.entrypoint.database.convert_pdf.grobid_pdf_to_tei_xml"
+    )
+    @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
     def test_pdf_conversion_works_input_dir(
         self, grobid_is_alive, grobid_pdf_to_tei_xml, tmp_path
     ):
