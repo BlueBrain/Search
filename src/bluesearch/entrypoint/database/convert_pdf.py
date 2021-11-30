@@ -165,6 +165,13 @@ def run(
     failed_paths = []
     path_map = _prepare_output_paths(input_paths, output_dir, force)
 
+    if len(path_map) == 0:
+        logger.warning("No files to process, stopping")
+        return 0
+
+    if output_dir is not None:
+        output_dir.mkdir(exist_ok=True)
+
     # Convert
     def do_work(pdf_path):
         xml_path = path_map[pdf_path]
@@ -176,13 +183,6 @@ def run(
                 f"{exc}"
             )
             failed_paths.append(pdf_path)
-
-    if len(path_map) == 0:
-        logger.warning("No files to process, stopping")
-        return 0
-
-    if output_dir is not None:
-        output_dir.mkdir(exist_ok=True)
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
         executor.map(do_work, path_map)
