@@ -262,3 +262,14 @@ class TestRun:
         for output_xml_file in output_xml_files:
             with output_xml_file.open() as fh:
                 assert fh.read() == "<xml>parsed</xml>"
+
+
+    @unittest.mock.patch("bluesearch.entrypoint.database.convert_pdf.grobid_is_alive")
+    def test_pdf_conversion_empty_dir(self, grobid_is_alive, tmp_path, caplog):
+        grobid_is_alive.return_value = True
+        exit_code = convert_pdf.run(
+            "host", 1234, tmp_path, None, num_workers=1, force=False
+        )
+
+        assert exit_code == 0
+        assert "No files to process, stopping" in caplog.text
