@@ -124,7 +124,7 @@ def get_pubmed_urls(
     if end_date is None:
         end_date = datetime.today()
 
-    base_url = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/"
+    base_url = "https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles"
     response = requests.get(base_url)
     pattern = re.compile(r'<a href="(.*\.xml\.gz)">.*</a> *(\d{4}-\d{2}-\d{2})')
     urls = []
