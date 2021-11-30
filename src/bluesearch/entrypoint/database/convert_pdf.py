@@ -255,11 +255,11 @@ def _convert_pdf_file(
     output_path
         The output directory for the XML file.
     """
-    logger.info("Reading %s", input_path.resolve().as_uri())
+    logger.info(f"Reading {input_path.resolve().as_uri()}")
     with input_path.open("rb") as fh_pdf:
         pdf_content = fh_pdf.read()
 
-    logger.info("Converting %s to XML", input_path.resolve().as_uri())
+    logger.info(f"Converting {input_path.resolve().as_uri()} to XML")
     xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
 
     with output_path.open("w") as fh_xml:
