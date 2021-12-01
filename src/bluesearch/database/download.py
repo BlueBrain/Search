@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_daterange_list(
-        start_date: datetime, end_date: datetime | None = None, delta: str = "day",
+    start_date: datetime,
+    end_date: datetime | None = None,
+    delta: str = "day",
 ) -> list[datetime]:
     """Retrieve list of datetimes between a start date and an end date (both inclusive).
 
@@ -168,7 +170,7 @@ def get_pubmed_urls(
 def get_s3_urls(
     bucket: boto3.resources.base.ServiceResource,
     start_date: datetime,
-    end_date: datetime | None = None
+    end_date: datetime | None = None,
 ) -> dict[str, list[str]]:
     """Get S3 urls.
 
@@ -246,7 +248,7 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
 def download_articles_s3(
     bucket: boto3.resources.base.ServiceResource,
     url_dict: dict[str, list[str]],
-    output_dir: Path
+    output_dir: Path,
 ) -> None:
     """Download articles from AWS S3.
 
@@ -268,4 +270,4 @@ def download_articles_s3(
         for url in url_list:
             output_path = parent_folder / url.split("/")[-1]
             logger.info(f"Downloading {url}")
-            bucket.download_file(url, str(output_path), {'RequestPayer':'requester'})
+            bucket.download_file(url, str(output_path), {"RequestPayer": "requester"})

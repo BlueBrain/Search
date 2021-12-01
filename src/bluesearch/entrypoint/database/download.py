@@ -161,7 +161,6 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
 
         download_articles_s3(bucket, url_dict, output_dir)
 
-
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1
