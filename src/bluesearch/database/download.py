@@ -259,8 +259,8 @@ def download_articles_s3(
         Keys represent different months. Values represent lists of the
         actual `.meca` files.
     output_dir
-        Output directory to save the download. We assume that it already
-        exists.
+        Output directory to save the download. It will be automatically created
+        in case it does not exist.
     """
     s3_resource = boto3.resource("s3")
     bucket = s3_resource.Bucket(f"{source}-src-monthly")
