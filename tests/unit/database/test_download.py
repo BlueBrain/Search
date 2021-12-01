@@ -1,6 +1,7 @@
 """Tests for download module."""
 from collections import namedtuple
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -152,5 +153,25 @@ def test_download_articles(tmp_path):
     for file in tmp_path.iterdir():
         assert file.name in path_names
 
-def test_download_articles_s3():
-    pass
+def test_download_articles_s3(tmp_path):
+    def fake_download_file(Key, Filename, ExtraArgs):
+        Path(Filename).touch()
+
+    fake_bucket = Mock()
+    fake_bucket.download_file.side_effect = fake_download_file
+
+    url_dict = {
+        "November_2018": ["Current_Content/November_2018/1.meca"],
+        "December_2018": ["Current_Content/December_2018/2.meca"],
+        "January_2019": [
+            "Current_Content/January_2019/3.meca",
+            "Current_Content/January_2019/4.meca",
+            ]
+    }
+
+    download_articles_s3(fake_bucket, url_dict, tmp_path)
+
+    assert (tmp_path / "Current_Content" / "November_2018" / "1.meca").exists()
+    assert (tmp_path / "Current_Content" / "December_2018" / "2.meca").exists()
+    assert (tmp_path / "Current_Content" / "January_2019" / "3.meca").exists()
+    assert (tmp_path / "Current_Content" / "January_2019" / "4.meca").exists()
