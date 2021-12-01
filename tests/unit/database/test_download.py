@@ -133,7 +133,7 @@ def test_get_s3_urls():
     assert isinstance(url_dict, dict)
     assert set(url_dict.keys()) == expected_keys
 
-    for month_year, url_list in url_dict.items():
+    for _, url_list in url_dict.items():
         assert len(url_list) == n_papers_per_month
 
 
