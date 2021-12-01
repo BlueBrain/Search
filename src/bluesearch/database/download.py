@@ -217,7 +217,9 @@ def get_s3_urls(
             RequestPayer="requester",
         )
         for obj in objects:
-            url_dict[month_year].append(obj.key)
+            key = obj.key
+            if key.endswith(".meca"):
+                url_dict[month_year].append(key)
 
     return url_dict
 
@@ -272,4 +274,4 @@ def download_articles_s3(
         for url in url_list:
             output_path = parent_folder / url.split("/")[-1]
             logger.info(f"Downloading {url}")
-            bucket.download_file(url, str(output_path))
+            bucket.download_file(url, str(output_path), {'RequestPayer':'requester'})
