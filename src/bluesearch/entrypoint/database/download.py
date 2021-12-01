@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Download articles from different sources."""
 import argparse
+import getpass
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -98,6 +99,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import boto3
     from bluesearch.database.download import (
         download_articles,
         download_articles_s3,
@@ -138,7 +140,18 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         download_articles(url_list, output_dir)
         return 0
     elif source in {"biorxiv", "medrxiv"}:
-        url_dict = get_s3_urls(source, from_month) # month -> list of .meca file paths
+
+        key_id = getpass.getpass("aws_access_key_id: ")
+        secret_access_key = getpass.getpass("aws_secret_access_key: ")
+
+        session = boto3.Session(
+            aws_access_key_id=key_id,
+            aws_secret_access_key=secret_access_key,
+        )
+        resource = session.resource("s3")
+        bucket = resource.Bucket(f"{source}-src-monthly")
+
+        url_dict = get_s3_urls(bucket, from_month)
 
         if dry_run:
             for month, url_list in url_dict.items():
@@ -146,7 +159,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
                 print(*url_list, sep="\n")
             return 0
 
-        download_articles_s3(source, url_dict, output_dir)
+        download_articles_s3(bucket, url_dict, output_dir)
 
 
     else:

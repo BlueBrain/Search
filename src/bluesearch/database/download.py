@@ -166,7 +166,7 @@ def get_pubmed_urls(
 
 
 def get_s3_urls(
-    source: str,
+    bucket,
     start_date: datetime,
     end_date: datetime | None = None
 ) -> dict[str, list[str]]:
@@ -176,8 +176,8 @@ def get_s3_urls(
 
     Parameters
     ----------
-    source : {"medrxiv", "biorxiv"}
-        Name of the source.
+    bucket
+        AWS bucket.
     start_date
         Starting date to download the incremental files (inclusive).
     end_date
@@ -194,9 +194,6 @@ def get_s3_urls(
     if end_date is None:
         end_date = datetime.today()
 
-    if source not in {"medrxiv", "biorxiv"}:
-        raise ValueError(f"Unknown source: {source}")
-
     # generate November_2019, December_2019, ...
     date_list = get_daterange_list(
         start_date=start_date,
@@ -207,9 +204,6 @@ def get_s3_urls(
     month_year_list = [date.strftime("%B_%Y") for date in date_list]
 
     # filtering objects using boto3
-    s3_resource = boto3.resource("s3")
-    bucket = s3_resource.Bucket(f"{source}-src-monthly")
-
     url_dict = defaultdict(list)
     for month_year in month_year_list:
         objects = bucket.objects.filter(
@@ -250,13 +244,13 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
 
 
 def download_articles_s3(
-    source: str, url_dict: dict[str, list[str]], output_dir: Path) -> None:
+    bucket, url_dict: dict[str, list[str]], output_dir: Path) -> None:
     """Download articles from AWS S3.
 
     Parameters
     ----------
-    source : {"medrxiv", "biorxiv"}
-        Name of the source.
+    bucket
+        AWS bucket.
     url_dict
         Keys represent different months. Values represent lists of the
         actual `.meca` files.
@@ -264,9 +258,6 @@ def download_articles_s3(
         Output directory to save the download. It will be automatically created
         in case it does not exist.
     """
-    s3_resource = boto3.resource("s3")
-    bucket = s3_resource.Bucket(f"{source}-src-monthly")
-
     for month_year, url_list in url_dict.items():
         parent_folder = output_dir / "Current_Content" / month_year
         parent_folder.mkdir(parents=True, exist_ok=True)
