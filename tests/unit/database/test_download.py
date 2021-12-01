@@ -1,5 +1,7 @@
 """Tests for download module."""
+from collections import namedtuple
 from datetime import datetime
+from unittest.mock import Mock
 
 import pytest
 import responses
@@ -106,7 +108,34 @@ def test_get_pubmed_urls(monkeypatch, test_data_path):
         assert url.startswith(expected_url_start)
 
 def test_get_s3_urls():
-    pass
+    n_papers_per_month = 20
+    S3object = namedtuple("S3object", ["key"])
+
+    fake_bucket = Mock()
+    return_value = [
+        S3object("whatever.meca") for _ in range(n_papers_per_month)
+    ] + [S3object("some_folder/")]
+    fake_bucket.objects.filter.return_value = return_value
+
+    start_date = datetime(2019, 11, 13)
+    end_date = datetime(2020, 2, 22)
+
+
+    url_dict = get_s3_urls(fake_bucket, start_date, end_date)
+
+
+    expected_keys = {
+        "November_2019",
+        "December_2019",
+        "January_2020",
+        "February_2020",
+    }
+
+    assert isinstance(url_dict, dict)
+    assert set(url_dict.keys()) == expected_keys
+
+    for month_year, url_list in url_dict.items():
+        assert len(url_list) == n_papers_per_month
 
 
 @responses.activate

@@ -192,10 +192,6 @@ def get_s3_urls(
         actual `.meca` files.
 
     """
-    # checks
-    if end_date is None:
-        end_date = datetime.today()
-
     # generate November_2019, December_2019, ...
     date_list = get_daterange_list(
         start_date=start_date,
