@@ -100,6 +100,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     `get_parser` function.
     """
     import boto3
+
     from bluesearch.database.download import (
         download_articles,
         download_s3_articles,

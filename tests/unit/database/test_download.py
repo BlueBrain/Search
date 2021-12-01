@@ -65,7 +65,6 @@ class TestGetDaterangeList:
             get_daterange_list(datetime.today(), delta="wrong delta")
 
 
-
 @pytest.mark.parametrize(
     ("component", "expected_url_start"),
     [
@@ -108,22 +107,21 @@ def test_get_pubmed_urls(monkeypatch, test_data_path):
     for url in url_list:
         assert url.startswith(expected_url_start)
 
+
 def test_get_s3_urls():
     n_papers_per_month = 20
     S3object = namedtuple("S3object", ["key"])
 
     fake_bucket = Mock()
-    return_value = [
-        S3object("whatever.meca") for _ in range(n_papers_per_month)
-    ] + [S3object("some_folder/")]
+    return_value = [S3object("whatever.meca") for _ in range(n_papers_per_month)] + [
+        S3object("some_folder/")
+    ]
     fake_bucket.objects.filter.return_value = return_value
 
     start_date = datetime(2019, 11, 13)
     end_date = datetime(2020, 2, 22)
 
-
     url_dict = get_s3_urls(fake_bucket, start_date, end_date)
-
 
     expected_keys = {
         "November_2019",
@@ -153,6 +151,7 @@ def test_download_articles(tmp_path):
     for file in tmp_path.iterdir():
         assert file.name in path_names
 
+
 def test_download_s3_articles(tmp_path):
     def fake_download_file(Key, Filename, ExtraArgs):
         Path(Filename).touch()
@@ -166,7 +165,7 @@ def test_download_s3_articles(tmp_path):
         "January_2019": [
             "Current_Content/January_2019/3.meca",
             "Current_Content/January_2019/4.meca",
-            ]
+        ],
     }
 
     download_s3_articles(fake_bucket, url_dict, tmp_path)

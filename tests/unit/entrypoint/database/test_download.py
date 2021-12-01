@@ -118,6 +118,7 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
     assert fake_get_pubmed_urls.call_count == 1
     assert fake_download_articles.call_count == 0
 
+
 @pytest.mark.parametrize("source", ["biorxiv", "medrxiv"])
 def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     def fake_download_s3_articles_func(bucket, url_dict, output_dir):
@@ -125,7 +126,6 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
             for url in url_list:
                 output_path = output_dir / url
                 output_path.touch()
-
 
     # Define mocks
     fake_getpass = Mock()
