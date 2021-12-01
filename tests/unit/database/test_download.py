@@ -9,7 +9,7 @@ import responses
 
 from bluesearch.database.download import (
     download_articles,
-    download_articles_s3,
+    download_s3_articles,
     generate_pmc_urls,
     get_daterange_list,
     get_pubmed_urls,
@@ -153,7 +153,7 @@ def test_download_articles(tmp_path):
     for file in tmp_path.iterdir():
         assert file.name in path_names
 
-def test_download_articles_s3(tmp_path):
+def test_download_s3_articles(tmp_path):
     def fake_download_file(Key, Filename, ExtraArgs):
         Path(Filename).touch()
 
@@ -169,7 +169,7 @@ def test_download_articles_s3(tmp_path):
             ]
     }
 
-    download_articles_s3(fake_bucket, url_dict, tmp_path)
+    download_s3_articles(fake_bucket, url_dict, tmp_path)
 
     assert (tmp_path / "Current_Content" / "November_2018" / "1.meca").exists()
     assert (tmp_path / "Current_Content" / "December_2018" / "2.meca").exists()

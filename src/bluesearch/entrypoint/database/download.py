@@ -102,7 +102,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     import boto3
     from bluesearch.database.download import (
         download_articles,
-        download_articles_s3,
+        download_s3_articles,
         generate_pmc_urls,
         get_pubmed_urls,
         get_s3_urls,
@@ -159,7 +159,8 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
                 print(*url_list, sep="\n")
             return 0
 
-        download_articles_s3(bucket, url_dict, output_dir)
+        logger.info(f"Start downloading {source} papers.")
+        download_s3_articles(bucket, url_dict, output_dir)
         return 0
 
     else:

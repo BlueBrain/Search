@@ -241,7 +241,7 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
             f.write(r.content)
 
 
-def download_articles_s3(
+def download_s3_articles(
     bucket: boto3.resources.base.ServiceResource,
     url_dict: dict[str, list[str]],
     output_dir: Path,
