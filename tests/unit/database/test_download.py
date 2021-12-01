@@ -6,25 +6,61 @@ import responses
 
 from bluesearch.database.download import (
     download_articles,
+    download_articles_s3,
     generate_pmc_urls,
     get_daterange_list,
     get_pubmed_urls,
+    get_s3_urls,
 )
 
 
-def test_get_daterange_list():
-    start_date = datetime.strptime("2021-11", "%Y-%m")
-    end_date = datetime.strptime("2021-12", "%Y-%m")
-    days_list = get_daterange_list(start_date, end_date)
-    assert isinstance(days_list, list)
-    assert len(days_list) == 31  # 30 days in November + 1 in December
-    for day in days_list:
-        assert isinstance(day, datetime)
+class TestGetDaterangeList:
+    def test_delta_day(self):
+        start_date = datetime.strptime("2021-11", "%Y-%m")
+        end_date = datetime.strptime("2021-12", "%Y-%m")
+        days_list = get_daterange_list(start_date, end_date, delta="day")
+        assert isinstance(days_list, list)
+        assert len(days_list) == 31  # 30 days in November + 1 in December
+        for day in days_list:
+            assert isinstance(day, datetime)
 
-    days_list = get_daterange_list(start_date)
-    assert isinstance(days_list, list)
-    for day in days_list:
-        assert isinstance(day, datetime)
+        days_list = get_daterange_list(start_date, delta="day")
+        assert isinstance(days_list, list)
+        for day in days_list:
+            assert isinstance(day, datetime)
+
+    def test_delta_month(self):
+        start_date = datetime.strptime("2020-11", "%Y-%m")
+        end_date = datetime.strptime("2021-11", "%Y-%m")
+
+        months_list = get_daterange_list(start_date, end_date, delta="month")
+        assert isinstance(months_list, list)
+        assert len(months_list) == 13
+
+        assert all(date.day == 1 for date in months_list)
+
+        months_indices = [date.month for date in months_list]
+
+        assert months_indices == [
+            11,
+            12,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+        ]
+
+    def test_delta_wrong(self):
+        with pytest.raises(ValueError, match="Unknown delta"):
+            get_daterange_list(datetime.today(), delta="wrong delta")
+
 
 
 @pytest.mark.parametrize(
@@ -69,6 +105,9 @@ def test_get_pubmed_urls(monkeypatch, test_data_path):
     for url in url_list:
         assert url.startswith(expected_url_start)
 
+def test_get_s3_urls():
+    pass
+
 
 @responses.activate
 def test_download_articles(tmp_path):
@@ -83,3 +122,6 @@ def test_download_articles(tmp_path):
     assert len(list(tmp_path.iterdir())) == 2
     for file in tmp_path.iterdir():
         assert file.name in path_names
+
+def test_download_articles_s3():
+    pass
