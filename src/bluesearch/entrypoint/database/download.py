@@ -100,6 +100,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     """
     from bluesearch.database.download import (
         download_articles,
+        download_articles_s3,
         generate_pmc_urls,
         get_pubmed_urls,
         get_s3_urls,
@@ -144,6 +145,9 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
                 print(f"Month: {month}")
                 print(*url_list, sep="\n")
             return 0
+
+        download_articles_s3(source, url_dict, output_dir)
+
 
     else:
         logger.error(f"The source type {source!r} is not implemented yet")

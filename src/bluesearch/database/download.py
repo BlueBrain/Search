@@ -169,7 +169,7 @@ def get_s3_urls(
     source: str,
     start_date: datetime,
     end_date: datetime | None = None
-) -> dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Get S3 urls.
 
     We actually send a request to the AWS server and there is a charge.
@@ -245,3 +245,31 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
             continue
         with open(output_dir / file_name, "wb") as f:
             f.write(r.content)
+
+
+def download_articles_s3(
+    source: str, url_dict: dict[str, list[str]], output_dir: Path) -> None:
+    """Download articles from AWS S3.
+
+    Parameters
+    ----------
+    source : {"medrxiv", "biorxiv"}
+        Name of the source.
+    url_dict
+        Keys represent different months. Values represent lists of the
+        actual `.meca` files.
+    output_dir
+        Output directory to save the download. We assume that it already
+        exists.
+    """
+    s3_resource = boto3.resource("s3")
+    bucket = s3_resource.Bucket(f"{source}-src-monthly")
+
+    for month_year, url_list in url_dict.items():
+        parent_folder = output_dir / "Current_Content" / month_year
+        parent_folder.mkdir(parents=True, exist_ok=True)
+
+        for url in url_list:
+            output_path = parent_folder / url.split("/")[-1]
+            logger.info(f"Downloading {url}")
+            bucket.download_file(url, str(output_path))
