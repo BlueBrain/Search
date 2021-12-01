@@ -166,7 +166,7 @@ def get_pubmed_urls(
 
 
 def get_s3_urls(
-    bucket,
+    bucket: boto3.resources.base.ServiceResource,
     start_date: datetime,
     end_date: datetime | None = None
 ) -> dict[str, list[str]]:
@@ -244,7 +244,10 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
 
 
 def download_articles_s3(
-    bucket, url_dict: dict[str, list[str]], output_dir: Path) -> None:
+    bucket: boto3.resources.base.ServiceResource,
+    url_dict: dict[str, list[str]],
+    output_dir: Path
+) -> None:
     """Download articles from AWS S3.
 
     Parameters
