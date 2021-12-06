@@ -70,7 +70,11 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "input_path",
         type=pathlib.Path,
         metavar="INPUT-PATH",
-        help="The path to a single PDF file or a directory with many PDF files.",
+        help="""
+        The path to a single PDF file or a directory with many PDF files. In
+        the latter case all files with the extension ".pdf" will be globbed
+        recursively in all subdirectories.
+        """,
     )
     parser.add_argument(
         "-o",
