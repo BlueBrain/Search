@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import logging
 import re
-from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -202,16 +201,14 @@ def get_s3_urls(
     month_year_list = [date.strftime("%B_%Y") for date in date_list]
 
     # filtering objects using boto3
-    url_dict = defaultdict(list)
+    url_dict = {}
     for month_year in month_year_list:
         objects = bucket.objects.filter(
             Prefix=f"Current_Content/{month_year}",
             RequestPayer="requester",
         )
-        for obj in objects:
-            key = obj.key
-            if key.endswith(".meca"):
-                url_dict[month_year].append(key)
+
+        url_dict[month_year] = [obj.key for obj in objects if obj.key.endswith(".meca")]
 
     return url_dict
 
