@@ -190,7 +190,7 @@ def run(
             failed_paths.append(pdf_path)
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        executor.map(do_work, path_map)
+        executor.map(do_work, path_map, timeout=60)
 
     for path in failed_paths:
         logger.warning(f"Failed to process {path.resolve().as_uri()}")
