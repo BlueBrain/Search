@@ -36,8 +36,8 @@ def get_daterange_list(
 ) -> list[datetime]:
     """Retrieve list of datetimes between a start date and an end date (both inclusive).
 
-    If `delta=day` then we discard hours, minutes, seconds and miliseconds.
-    If `delta=month` then we discard days, hours, minutes, seconds and miliseconds.
+    If `delta=day` then we discard hours, minutes, seconds and milliseconds.
+    If `delta=month` then we discard days, hours, minutes, seconds and milliseconds.
 
     Parameters
     ----------
