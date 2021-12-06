@@ -22,7 +22,6 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-import boto3
 import requests
 from boto3.resources.base import ServiceResource
 
