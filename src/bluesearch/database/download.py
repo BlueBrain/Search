@@ -24,6 +24,7 @@ from pathlib import Path
 
 import boto3
 import requests
+from boto3.resources.base import ServiceResource
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +168,7 @@ def get_pubmed_urls(
 
 
 def get_s3_urls(
-    bucket: boto3.resources.base.ServiceResource,
+    bucket: ServiceResource,
     start_date: datetime,
     end_date: datetime | None = None,
 ) -> dict[str, list[str]]:
@@ -239,7 +240,7 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
 
 
 def download_s3_articles(
-    bucket: boto3.resources.base.ServiceResource,
+    bucket: ServiceResource,
     url_dict: dict[str, list[str]],
     output_dir: Path,
 ) -> None:
