@@ -22,7 +22,7 @@ catalogue==2.0.4
 cryptography==3.4.7
 defusedxml==0.6.0
 en-core-sci-lg @ https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.4.0/en_core_sci_lg-0.4.0.tar.gz
-google-api-python-client==2.32.0
+google-cloud-storage==1.43.0
 h5py==3.3.0
 ipython==7.25.0
 ipywidgets==7.6.3
