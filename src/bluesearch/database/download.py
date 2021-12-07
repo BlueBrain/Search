@@ -24,6 +24,8 @@ from pathlib import Path
 
 import requests
 from boto3.resources.base import ServiceResource
+from google.api_core.page_iterator import HTTPIterator
+from google.cloud.storage import Blob, Bucket
 
 logger = logging.getLogger(__name__)
 
@@ -209,6 +211,46 @@ def get_s3_urls(
         )
 
         url_dict[month_year] = [obj.key for obj in objects if obj.key.endswith(".meca")]
+
+    return url_dict
+
+
+def get_gcs_urls(
+    bucket: Bucket,
+    start_date: datetime,
+    end_date: datetime | None = None,
+) -> dict[str, HTTPIterator]:
+    """Get Google Cloud Storage urls.
+
+    Parameters
+    ----------
+    bucket
+        GCS bucket.
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date. If None, today is considered as the ending date (inclusive).
+
+    Returns
+    -------
+    url_dict
+        Keys represent different months. Values are iterators holding blobs
+        corresponding to actual PDF files.
+    """
+    date_list = get_daterange_list(
+        start_date=start_date,
+        end_date=end_date,
+        delta="month",
+    )
+    yearmonth_list = [date.strftime("%y%m") for date in date_list]
+
+    client = bucket.client
+
+    url_dict = {}
+    for yearmonth in yearmonth_list:
+        iterator = client.list_blobs(bucket, prefix=f"arxiv/arxiv/pdf/{yearmonth}")
+
+        url_dict[yearmonth] = iterator
 
     return url_dict
 
