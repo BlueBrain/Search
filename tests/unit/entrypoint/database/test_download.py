@@ -117,3 +117,66 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
     assert len(captured.out.split("\n")) == 1 + 2 + 1
     assert fake_get_pubmed_urls.call_count == 1
     assert fake_download_articles.call_count == 0
+
+
+@pytest.mark.parametrize("source", ["biorxiv", "medrxiv"])
+def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
+    def fake_download_s3_articles_func(bucket, url_dict, output_dir):
+        for url_list in url_dict.values():
+            for url in url_list:
+                output_path = output_dir / url
+                output_path.touch()
+
+    # Define mocks
+    fake_getpass = Mock()
+    fake_getpass.getpass.return_value = "somecredentials"
+    fake_datetime = datetime(2021, 11, 1)
+
+    fake_get_s3_urls = Mock(
+        return_value={
+            "November_2018": ["1.meca"],
+            "December_2018": ["2.meca"],
+        }
+    )
+
+    fake_download_s3_articles = Mock(side_effect=fake_download_s3_articles_func)
+
+    # Patch
+    monkeypatch.setattr(
+        "bluesearch.entrypoint.database.download.getpass",
+        fake_getpass,
+    )
+    monkeypatch.setattr(
+        "bluesearch.database.download.get_s3_urls",
+        fake_get_s3_urls,
+    )
+    monkeypatch.setattr(
+        "bluesearch.database.download.download_s3_articles",
+        fake_download_s3_articles,
+    )
+
+    # Run the command (no dry run)
+    download.run(source, fake_datetime, tmp_path, dry_run=False)
+
+    # Asserts
+    fake_get_s3_urls.assert_called_once()
+    fake_download_s3_articles.assert_called_once()
+    assert fake_getpass.getpass.call_count == 2
+
+    assert len(list(tmp_path.iterdir())) == 2
+
+    # Reset mocks
+    fake_get_s3_urls.reset_mock()
+    fake_download_s3_articles.reset_mock()
+    fake_getpass.reset_mock()
+
+    # Run the command dry run
+    download.run(source, fake_datetime, tmp_path, dry_run=True)
+
+    # Asserts
+    fake_get_s3_urls.assert_called_once()
+    fake_download_s3_articles.assert_not_called()
+    assert fake_getpass.getpass.call_count == 2
+
+    stdout = capsys.readouterr().out
+    assert "Month: November_2018\n1.meca\nMonth: December_2018\n2.meca\n" in stdout

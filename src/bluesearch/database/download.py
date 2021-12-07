@@ -23,14 +23,20 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
+from boto3.resources.base import ServiceResource
 
 logger = logging.getLogger(__name__)
 
 
-def get_days_list(
-    start_date: datetime, end_date: datetime | None = None
+def get_daterange_list(
+    start_date: datetime,
+    end_date: datetime | None = None,
+    delta: str = "day",
 ) -> list[datetime]:
-    """Retrieve list of days between a start date and an end date (both inclusive).
+    """Retrieve list of datetimes between a start date and an end date (both inclusive).
+
+    If `delta=day` then we discard hours, minutes, seconds and milliseconds.
+    If `delta=month` then we discard days, hours, minutes, seconds and milliseconds.
 
     Parameters
     ----------
@@ -38,6 +44,8 @@ def get_days_list(
         Starting date (inclusive).
     end_date
         Ending date (inclusive). If None, today is considered as the ending date.
+    delta : {"day", "month"}
+        Time difference between two consecutive dates.
 
     Returns
     -------
@@ -47,14 +55,31 @@ def get_days_list(
     if end_date is None:
         end_date = datetime.today()
 
-    delta = end_date - start_date
+    date_list = []
 
-    days_list = []
-    for i in range(delta.days + 1):
-        day = start_date + timedelta(days=i)
-        days_list.append(day)
+    if delta == "day":
+        start_date = datetime(start_date.year, start_date.month, start_date.day)
+        end_date = datetime(end_date.year, end_date.month, end_date.day)
 
-    return days_list
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date)
+            current_date += timedelta(days=1)
+
+    elif delta == "month":
+        start_date = datetime(start_date.year, start_date.month, 1)
+        end_date = datetime(end_date.year, end_date.month, 1)
+
+        current_date = start_date
+        while current_date <= end_date:
+            date_list.append(current_date)
+            current_date_ = current_date + timedelta(days=32)
+            current_date = current_date_.replace(day=1)
+
+    else:
+        raise ValueError(f"Unknown delta: {delta}")
+
+    return date_list
 
 
 def generate_pmc_urls(
@@ -92,7 +117,7 @@ def generate_pmc_urls(
             "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported."
         )
 
-    days_list = get_days_list(start_date=start_date, end_date=end_date)
+    days_list = get_daterange_list(start_date=start_date, end_date=end_date)
 
     url_list = []
     for day in days_list:
@@ -141,6 +166,53 @@ def get_pubmed_urls(
     return urls
 
 
+def get_s3_urls(
+    bucket: ServiceResource,
+    start_date: datetime,
+    end_date: datetime | None = None,
+) -> dict[str, list[str]]:
+    """Get S3 urls.
+
+    We actually send a request to the AWS server and there is a charge.
+
+    Parameters
+    ----------
+    bucket
+        AWS bucket.
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date. If None, today is considered as the ending date (inclusive).
+
+    Returns
+    -------
+    url_dict
+        Keys represent different months. Values represent lists of the
+        actual `.meca` files.
+
+    """
+    # generate November_2019, December_2019, ...
+    date_list = get_daterange_list(
+        start_date=start_date,
+        end_date=end_date,
+        delta="month",
+    )
+
+    month_year_list = [date.strftime("%B_%Y") for date in date_list]
+
+    # filtering objects using boto3
+    url_dict = {}
+    for month_year in month_year_list:
+        objects = bucket.objects.filter(
+            Prefix=f"Current_Content/{month_year}",
+            RequestPayer="requester",
+        )
+
+        url_dict[month_year] = [obj.key for obj in objects if obj.key.endswith(".meca")]
+
+    return url_dict
+
+
 def download_articles(url_list: list[str], output_dir: Path) -> None:
     """Download articles.
 
@@ -164,3 +236,31 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
             continue
         with open(output_dir / file_name, "wb") as f:
             f.write(r.content)
+
+
+def download_s3_articles(
+    bucket: ServiceResource,
+    url_dict: dict[str, list[str]],
+    output_dir: Path,
+) -> None:
+    """Download articles from AWS S3.
+
+    Parameters
+    ----------
+    bucket
+        AWS bucket.
+    url_dict
+        Keys represent different months. Values represent lists of the
+        actual `.meca` files.
+    output_dir
+        Output directory to save the download. It will be automatically created
+        in case it does not exist.
+    """
+    for month_year, url_list in url_dict.items():
+        parent_folder = output_dir / "Current_Content" / month_year
+        parent_folder.mkdir(parents=True, exist_ok=True)
+
+        for url in url_list:
+            output_path = parent_folder / url.split("/")[-1]
+            logger.info(f"Downloading {url}")
+            bucket.download_file(url, str(output_path), {"RequestPayer": "requester"})
