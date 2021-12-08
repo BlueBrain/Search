@@ -165,11 +165,13 @@ def run(
     input_paths: Iterable[pathlib.Path]
     if input_path.is_file():
         input_paths = [input_path]
+        input_dir = input_path.parent
     else:
         input_paths = input_path.rglob("*.pdf")
+        input_dir = input_path
 
     # Set default output_dir as the same directory of input files
-    output_dir = output_dir or input_path.parent
+    output_dir = output_dir or input_dir
 
     path_map = _prepare_output_paths(input_paths, output_dir, force)
 
@@ -195,7 +197,7 @@ def run(
         pathlib.Path | None
             Return `input_pdf` if conversion failed, otherwise None.
         """
-        xml_path, pdf_path = path_map_item
+        pdf_path, xml_path = path_map_item
         try:
             _convert_pdf_file(grobid_host, grobid_port, pdf_path, xml_path)
         except Exception as exc:
