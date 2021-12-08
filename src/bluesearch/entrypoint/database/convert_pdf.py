@@ -141,6 +141,8 @@ def run(
         The path to the input PDF file or a directory with PDF files.
     output_dir
         The output directory for the XML files.
+    num_workers
+        The number of parallel workers.
     force
         If true overwrite the output file if it already exists.
 
