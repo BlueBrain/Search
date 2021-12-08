@@ -38,16 +38,6 @@ def test_run_has_consistent_parameters():
 
 
 class TestPrepareOutputPaths:
-    def test_output_same_folder(self):
-        input_paths = [
-            pathlib.Path("/a/b/x.pdf"),
-            pathlib.Path("/c/d/y.pdf"),
-        ]
-        path_map = convert_pdf._prepare_output_paths(input_paths, None, force=False)
-        assert set(path_map) == set(input_paths)
-        for input_path, output_path in path_map.items():
-            assert output_path == input_path.with_suffix(".xml")
-
     def test_output_fixed_folder(self):
         output_folder = pathlib.Path("/output")
         input_paths = [
@@ -70,7 +60,7 @@ class TestPrepareOutputPaths:
         output_xml.touch()
         with caplog.at_level(logging.WARNING):
             path_map = convert_pdf._prepare_output_paths(
-                [input_path], None, force=False
+                [input_path], tmp_path, force=False
             )
         assert len(path_map) == 0
         assert "Not overwriting" in caplog.text
@@ -81,7 +71,7 @@ class TestPrepareOutputPaths:
 
         # Output file exists, but should be overwritten because of force=True
         output_xml.touch()
-        path_map = convert_pdf._prepare_output_paths([input_path], None, force=True)
+        path_map = convert_pdf._prepare_output_paths([input_path], tmp_path, force=True)
         assert len(path_map) == 1
 
 

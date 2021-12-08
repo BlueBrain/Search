@@ -168,19 +168,34 @@ def run(
     else:
         input_paths = input_path.rglob("*.pdf")
 
-    failed_paths = []
+    # Set default output_dir as the same directory of input files
+    output_dir = output_dir or input_path.parent
+
     path_map = _prepare_output_paths(input_paths, output_dir, force)
 
     if len(path_map) == 0:
         logger.warning("No files to process, stopping")
         return 0
 
-    if output_dir is not None:
-        output_dir.mkdir(exist_ok=True)
+    output_dir.mkdir(exist_ok=True)
 
     # Convert
-    def do_work(pdf_path):
-        xml_path = path_map[pdf_path]
+    def do_work(
+        path_map_item: tuple[pathlib.Path, pathlib.Path]
+    ) -> pathlib.Path | None:
+        """Try to run conversion, or return name of input pdf if that fails.
+
+        Parameters
+        ----------
+        path_map_item
+            Key-value pair of `input_pdf` and `output_xml` paths.
+
+        Returns
+        -------
+        pathlib.Path | None
+            Return `input_pdf` if conversion failed, otherwise None.
+        """
+        xml_path, pdf_path = path_map_item
         try:
             _convert_pdf_file(grobid_host, grobid_port, pdf_path, xml_path)
         except Exception as exc:
@@ -188,21 +203,22 @@ def run(
                 f"An error happened when processing {pdf_path.resolve().as_uri()}: "
                 f"{exc}"
             )
-            # lists seem to be thread-safe in Python
-            failed_paths.append(pdf_path)
+            return pdf_path
+        return None
 
     with ThreadPoolExecutor(max_workers=num_workers) as executor:
-        executor.map(do_work, path_map, timeout=60)
+        failed_paths = executor.map(do_work, path_map.items(), timeout=60)
 
     for path in failed_paths:
-        logger.warning(f"Failed to process {path.resolve().as_uri()}")
+        if path is not None:
+            logger.warning(f"Failed to process {path.resolve().as_uri()}")
 
     return 0
 
 
 def _prepare_output_paths(
     input_paths: Iterable[pathlib.Path],
-    output_dir: pathlib.Path | None,
+    output_dir: pathlib.Path,
     force: bool,
 ) -> dict[pathlib.Path, pathlib.Path]:
     """Assign output XML paths to all input PDF paths.
@@ -212,8 +228,7 @@ def _prepare_output_paths(
     input_paths
         A sequence of input PDF paths.
     output_dir
-        The output directory. If None then the output files will be placed
-        in the same respective directory as the input PDF.
+        The output directory.
     force
         If False then the PDFs for which the outputs already exist will be
         skipped.
@@ -227,10 +242,7 @@ def _prepare_output_paths(
 
     for input_path in input_paths:
         output_name = input_path.with_suffix(".xml").name
-        if output_dir is None:
-            output_path = input_path.parent / output_name
-        else:
-            output_path = output_dir / output_name
+        output_path = output_dir / output_name
 
         if output_path.exists() and not force:
             logger.warning(
