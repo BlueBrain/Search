@@ -306,3 +306,34 @@ def download_s3_articles(
             output_path = parent_folder / url.split("/")[-1]
             logger.info(f"Downloading {url}")
             bucket.download_file(url, str(output_path), {"RequestPayer": "requester"})
+
+
+def download_gcs_blob(blob: Blob, out_dir: Path, *, flatten: bool = False) -> None:
+    """Download a Google Cloud Storage blob.
+
+    Parameters
+    ----------
+    blob
+        The blob to download.
+    out_dir
+        The output directory.
+    flatten
+        If false (default) then the directory structure encoded in the blob
+        will be recreated, otherwise the downloaded file will be placed
+        directly into the output directory. For example, if the blob name
+        is "my_files/subdir/file.bin" and flatten is true then the file
+        will be downloaded to "<output_dir>/file.bin", otherwise it will be
+        placed into "<output_dir>/my_files/subdir/file.bin".
+    """
+    path = Path(blob.name)
+    if flatten:
+        path = out_dir / path.name
+    else:
+        path = out_dir / path
+    logger.debug(f"Downloading {blob.name} to {path}")
+    path.parent.mkdir(exist_ok=True, parents=True)
+    pdf_content = blob.download_as_bytes()
+    # Not using download_to_file because an empty file is still created even
+    # if the blob does not exist.
+    with path.open("wb") as fh:
+        fh.write(pdf_content)
