@@ -177,7 +177,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             logger.error(
                 "The papers from before April 2007 follow a different format "
                 "and can't be downloaded. Please contact the developers if you "
-                "need them. To process please re-run the command with a "
+                "need them. To proceed please re-run the command with a "
                 "different starting month."
             )
             return 1
