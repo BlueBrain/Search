@@ -230,7 +230,7 @@ class TestArxivDownload:
         assert "different format" in caplog.text
 
     def test_dry_run(self, capsys, tmp_path, mocked):
-        # The dry run should print all months and blobs to stdouts
+        # The dry run should print all months and blobs to stdout
         download.run("arxiv", datetime(2021, 12, 1), tmp_path, dry_run=True)
         stdout, stderr = capsys.readouterr()
         for month, blobs in mocked.get_gcs_urls().items():
