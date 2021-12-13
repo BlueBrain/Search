@@ -1,10 +1,14 @@
 import argparse
 import inspect
+import logging
 import pathlib
+from collections import namedtuple
 from datetime import datetime
+from itertools import chain
 from unittest.mock import Mock
 
 import pytest
+from google.cloud.storage import Blob
 
 from bluesearch.entrypoint.database import download
 
@@ -180,3 +184,74 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
 
     stdout = capsys.readouterr().out
     assert "Month: November_2018\n1.meca\nMonth: December_2018\n2.meca\n" in stdout
+
+
+class TestArxivDownload:
+    @pytest.fixture
+    def mocked(self, monkeypatch):
+        """Set up mocks for all subsequent tests.
+
+        Need to mock:
+        * The Google Cloud Storage client and bucket
+        * get_gcs_urls
+        * download_gcs_blob
+
+        For a more convenient access pack all mocks into a namedtuple and yield.
+        """
+        client = Mock()
+        bucket = Mock()
+        get_gcs_urls = Mock()
+        get_gcs_urls.return_value = {
+            "2111": [Blob("blob_{i}", bucket) for i in range(101)],
+            "2112": [Blob("blob_x1", bucket), Blob("blob_x2", bucket)],
+        }
+        download_gcs_blob = Mock()
+        monkeypatch.setattr("google.cloud.storage.Client", client)
+        monkeypatch.setattr(
+            "bluesearch.database.download.download_gcs_blob",
+            download_gcs_blob,
+        )
+        monkeypatch.setattr(
+            "bluesearch.database.download.get_gcs_urls",
+            get_gcs_urls,
+        )
+
+        Mocked = namedtuple("Mocked", ["client", "get_gcs_urls", "download_gcs_blob"])
+        yield Mocked(client, get_gcs_urls, download_gcs_blob)
+
+    def test_date_older_than_0704_errors(self, mocked, caplog, tmp_path):
+        # At the moment we don't implement downloading months older than
+        # April 2007 (that's where arxiv's ID format changed).
+        # We expect seeing an error log and a non-zero exit code.
+        from_month = datetime(2007, 3, 1)
+        with caplog.at_level(logging.ERROR):
+            exit_code = download.run("arxiv", from_month, tmp_path, dry_run=True)
+        assert exit_code == 1
+        assert "different format" in caplog.text
+
+    def test_dry_run(self, capsys, tmp_path, mocked):
+        # The dry run should print all months and blobs to stdouts
+        download.run("arxiv", datetime(2021, 12, 1), tmp_path, dry_run=True)
+        stdout, stderr = capsys.readouterr()
+        for month, blobs in mocked.get_gcs_urls().items():
+            assert month in stdout
+            for blob in blobs:
+                assert blob.name in stdout
+
+    def test_normal_run(self, tmp_path, mocked):
+        # Under normal circumstances download_gcs_blob should be called as
+        # many times as there are blobs to download
+        download.run("arxiv", datetime(2021, 12, 1), tmp_path, dry_run=False)
+        n_blobs = sum(len(blobs) for blobs in mocked.get_gcs_urls().values())
+        assert mocked.download_gcs_blob.call_count == n_blobs
+
+    def test_worker_errors_are_reported(self, caplog, tmp_path, mocked):
+        # If a worker (download_gcs_blob) raises an error then it should
+        # appear in the error logs
+        error_msg = "something went wrong"
+        mocked.download_gcs_blob.side_effect = RuntimeError(error_msg)
+        with caplog.at_level(logging.ERROR):
+            download.run("arxiv", datetime(2021, 12, 1), tmp_path, dry_run=False)
+        assert error_msg in caplog.text
+        for blob in chain(*mocked.get_gcs_urls().values()):
+            assert f"{blob.name} failed" in caplog.text
