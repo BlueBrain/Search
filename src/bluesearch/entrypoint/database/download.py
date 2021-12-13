@@ -212,7 +212,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
                 )
                 job_names[future] = blob.name
                 n_blobs += 1
-                n_bytes += blob.size
+                n_bytes += blob.size or 0
                 if n_blobs % 100 == 0:
                     progress_info(n_blobs, n_bytes)
             progress_info(n_blobs, n_bytes)
