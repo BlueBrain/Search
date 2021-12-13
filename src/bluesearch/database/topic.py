@@ -20,20 +20,22 @@ from __future__ import annotations
 import html
 import pathlib
 from typing import Iterable, List, Tuple
-from xml.etree.ElementTree import Element  # nosec
+from xml.etree.ElementTree import Element, ParseError  # nosec
 
 import requests
 from defusedxml import ElementTree
 
+from bluesearch.database.article import JATSXMLParser
+
 
 # Journal Topic
-def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
-    """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
+def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
+    """Retrieve Medical Subject Heading from Journal's NLM Title.
 
     Parameters
     ----------
-    nlm_ta
-        NLM Title Abbreviation of Journal.
+    journal_title
+        NLM Title of Journal.
 
     Returns
     -------
@@ -49,10 +51,10 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
-    if "&" in nlm_ta:
+    if "&" in journal_title:
         raise ValueError(
             "Ampersands not allowed in the NLM title abbreviation. "
-            f"Try unescaping HTML characters first. Got:\n{nlm_ta}"
+            f"Try unescaping HTML characters first. Got:\n{journal_title}"
         )
 
     # The "format=text" parameter only matters when no result was found. With
@@ -60,7 +62,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f"{base_url}?term={nlm_ta}[ta]&report=xml&format=text"
+    url = f"{base_url}?term={journal_title}[Title]&report=xml&format=text"
 
     response = requests.get(url)
     response.raise_for_status()
@@ -270,5 +272,30 @@ def get_topics_for_pmc_article(
     """Extract journal and article topics of a PMC article."""
     journal_topics = []
     article_topics = []
+
+    # Determine pubmed id
+    parser = JATSXMLParser(pmc_path)
+    pubmed_id = parser.pubmed_id
+    if pubmed_id is not None:
+        article_meshes = request_mesh_from_pubmed_id([pubmed_id, ])
+        if pubmed_id in article_meshes:
+            article_meshes = article_meshes[pubmed_id]
+            for mesh in article_meshes:
+                for descriptor in mesh["descriptor"]:
+                    article_topics.append(descriptor["name"])
+
+    # Determine journal title
+    journal_title = parser.content.find("./front/journal-meta/journal-title-group/journal-title")
+    if journal_title is not None:
+        journal_title = journal_title.text
+        try:
+            journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
+        except ParseError:
+            return journal_topics, article_topics
+
+        if journal_meshes:
+            for mesh in journal_meshes:
+                for descriptor in mesh["descriptor"]:
+                    journal_topics.append(descriptor["name"])
 
     return journal_topics, article_topics
