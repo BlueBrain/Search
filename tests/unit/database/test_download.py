@@ -6,12 +6,15 @@ from unittest.mock import Mock
 
 import pytest
 import responses
+from google.cloud.storage import Bucket
 
 from bluesearch.database.download import (
     download_articles,
+    download_gcs_blob,
     download_s3_articles,
     generate_pmc_urls,
     get_daterange_list,
+    get_gcs_urls,
     get_pubmed_urls,
     get_s3_urls,
 )
@@ -174,3 +177,33 @@ def test_download_s3_articles(tmp_path):
     assert (tmp_path / "Current_Content" / "December_2018" / "2.meca").exists()
     assert (tmp_path / "Current_Content" / "January_2019" / "3.meca").exists()
     assert (tmp_path / "Current_Content" / "January_2019" / "4.meca").exists()
+
+
+def test_get_gcs_urls():
+    client = Mock()
+    bucket = Bucket(client, "my_dir/file.txt")
+    start_date = datetime(2021, 10, 1)
+    end_date = datetime(2021, 12, 1)
+    blobs_by_month = get_gcs_urls(bucket, start_date, end_date)
+    assert set(blobs_by_month) == {"2110", "2111", "2112"}
+    assert client.list_blobs.call_count == 3
+
+
+@pytest.mark.parametrize(
+    ("flatten", "name", "path"),
+    (
+        (False, "subdir/file.pdf", "subdir/file.pdf"),
+        (True, "subdir/file.pdf", "file.pdf"),
+    ),
+)
+def test_download_gcs_blob(flatten, name, path, tmp_path):
+    blob = Mock()
+    blob.name = name
+    blob.download_as_bytes.return_value = b"PDF content"
+
+    download_gcs_blob(blob, tmp_path, flatten=flatten)
+
+    pdf_path = tmp_path / path
+    assert pdf_path.exists()
+    with pdf_path.open("rb") as fh:
+        assert fh.read() == b"PDF content"
