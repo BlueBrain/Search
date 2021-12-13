@@ -16,8 +16,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Extract topic of articles."""
 import argparse
+import datetime
 import logging
+import re
 from pathlib import Path
+from typing import Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +73,15 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-m",
+        "--match-filename",
+        type=str,
+        help="""
+        Extract topic only of articles with a name matching the given regular
+        expression. Ignored when 'input_path' is a path to a file.
+        """,
+    )
+    parser.add_argument(
         "-R",
         "--recursive",
         action="store_true",
@@ -89,17 +101,80 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
 
 def run(
-        *,
-        input_source: str,
-        input_path: Path,
-        output_file: Path,
-        recursive: bool,
-        overwrite: bool,
+    *,
+    input_source: str,
+    input_path: Path,
+    output_file: Path,
+    match_filename: str,
+    recursive: bool,
+    overwrite: bool,
 ) -> int:
     """Extract topic of articles.
 
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import json
+
+    import bluesearch
+    from bluesearch.database.topic import get_topics_for_pmc_article
+
+    inputs: Iterable[Path]
+
+    if input_path.is_file():
+        inputs = [input_path]
+
+    elif input_path.is_dir():
+        if recursive:
+            pattern = "**/*"
+        else:
+            pattern = "*"
+        files = (x for x in input_path.glob(pattern) if x.is_file())
+
+        if match_filename is None:
+            selected = files
+        elif match_filename == "":
+            raise ValueError("Value for argument 'match-filename' should not be empty!")
+        else:
+            regex = re.compile(match_filename)
+            selected = (x for x in files if regex.fullmatch(x.name))
+
+        inputs = sorted(selected)
+
+    else:
+        raise ValueError(
+            "Argument 'input_path' should be a path to an existing file or directory!"
+        )
+
+    if output_file.exists() and not overwrite:
+        with open(output_file) as f:
+            all_results = json.load(f)
+    else:
+        all_results = []
+
+    if input_source == "pmc":
+        for path in inputs:
+            journal_topics, article_topics = get_topics_for_pmc_article(path)
+            all_results.append(
+                {
+                    "source": "pmc",
+                    "path": path,
+                    "topics": {
+                        "article": {
+                            "MeSH": article_topics,
+                        },
+                        "journal": {
+                            "MeSH": journal_topics,
+                        },
+                    },
+                    "metadata": {
+                        "created-date": datetime.datetime.now(),
+                        "bbs-version": bluesearch.version,
+                    },
+                }
+            )
+
+    with open(output_file, "wb") as f:
+        json.dump(all_results, f)
 
     return 0

@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import html
 import pathlib
-from typing import Iterable
+from typing import Iterable, List, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -261,3 +261,14 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
             meshs.append({"descriptor": descriptor_name, "qualifiers": qualifiers_name})
 
     return meshs
+
+
+# PMC source
+def get_topics_for_pmc_article(
+    pmc_path: pathlib.Path | str,
+) -> Tuple[List[str], List[str]]:
+    """Extract journal and article topics of a PMC article."""
+    journal_topics = []
+    article_topics = []
+
+    return journal_topics, article_topics
