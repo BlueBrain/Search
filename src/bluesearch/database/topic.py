@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Utils for journal/articles topics."""
 from __future__ import annotations
+from functools import lru_cache
 
 import html
 import pathlib
@@ -29,6 +30,7 @@ from bluesearch.database.article import JATSXMLParser
 
 
 # Journal Topic
+@lru_cache(maxsize=None)
 def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     """Retrieve Medical Subject Heading from Journal's NLM Title.
 
