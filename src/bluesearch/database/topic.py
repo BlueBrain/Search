@@ -270,34 +270,25 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
 # PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
-) -> Tuple[List[str], List[str]]:
-    """Extract journal and article topics of a PMC article."""
+) -> List[str]:
+    """Extract journal topics of a PMC article."""
     journal_topics = []
-    article_topics = []
-
-    # Determine pubmed id
-    parser = JATSXMLParser(pmc_path)
-    pubmed_id = parser.pubmed_id
-    if pubmed_id is not None:
-        article_meshes = request_mesh_from_pubmed_id([pubmed_id, ])
-        if pubmed_id in article_meshes:
-            article_meshes = article_meshes[pubmed_id]
-            for mesh in article_meshes:
-                for descriptor in mesh["descriptor"]:
-                    article_topics.append(descriptor["name"])
 
     # Determine journal title
+    parser = JATSXMLParser(pmc_path)
     journal_title = parser.content.find("./front/journal-meta/journal-title-group/journal-title")
-    if journal_title is not None:
-        journal_title = journal_title.text
-        try:
-            journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
-        except ParseError:
-            return journal_topics, article_topics
+    if journal_title is None:
+        return journal_topics
 
-        if journal_meshes:
-            for mesh in journal_meshes:
-                for descriptor in mesh["descriptor"]:
-                    journal_topics.append(descriptor["name"])
+    journal_title = journal_title.text
+    try:
+        journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
+    except ParseError:
+        return journal_topics
 
-    return journal_topics, article_topics
+    if journal_meshes:
+        for mesh in journal_meshes:
+            for descriptor in mesh["descriptor"]:
+                journal_topics.append(descriptor["name"])
+
+    return journal_topics
