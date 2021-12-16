@@ -154,15 +154,12 @@ def run(
 
     if input_source == "pmc":
         for path in inputs:
-            journal_topics, article_topics = get_topics_for_pmc_article(path)
+            journal_topics = get_topics_for_pmc_article(path)
             all_results.append(
                 {
                     "source": "pmc",
                     "path": path,
                     "topics": {
-                        "article": {
-                            "MeSH": article_topics,
-                        },
                         "journal": {
                             "MeSH": journal_topics,
                         },
@@ -174,7 +171,7 @@ def run(
                 }
             )
 
-    with open(output_file, "wb") as f:
+    with open(output_file, "w") as f:
         json.dump(all_results, f)
 
     return 0
