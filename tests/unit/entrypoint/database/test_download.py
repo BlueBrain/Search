@@ -184,16 +184,16 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
 
 
 @pytest.mark.parametrize(
-    ("source", "date"),
+    ("source", "expected_date"),
     [
         ("arxiv", "April 2007"),
         ("biorxiv", "December 2018"),
         ("medrxiv", "October 2020"),
         ("pmc", "September 2021"),
         ("pubmed", "December 2021"),
-    ]
+    ],
 )
-def test_structure_change(source, date, tmp_path, caplog):
+def test_structure_change(source, expected_date, tmp_path, caplog):
 
     limit_datetime = download.STRUCTURE_CHANGE[source]
     fake_datetime = limit_datetime - datetime.timedelta(days=32)
@@ -202,4 +202,4 @@ def test_structure_change(source, date, tmp_path, caplog):
         exit_code = download.run(source, fake_datetime, tmp_path, dry_run=False)
 
     assert exit_code == 1
-    assert date in caplog.text
+    assert expected_date in caplog.text
