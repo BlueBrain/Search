@@ -23,6 +23,14 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+STRUCTURE_CHANGE = {
+    "arxiv": datetime(2007, 4, 1),
+    "biorxiv": datetime(2018, 12, 1),
+    "medrxiv": datetime(2020, 10, 1),
+    "pmc": datetime(2021, 9, 1),
+    "pubmed": datetime(2021, 12, 1),  # This should change every year in December
+}
+
 
 def convert_to_datetime(s: str) -> datetime:
     """Try to convert a string to a datetime.
@@ -108,6 +116,15 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_pubmed_urls,
         get_s3_urls,
     )
+
+    if from_month < STRUCTURE_CHANGE[source]:
+        logger.error(
+            f"The papers from before {STRUCTURE_CHANGE[source].strftime('%B %Y')} "
+            "follow a different format and can't be downloaded. "
+            "Please contact the developers if you need them. "
+            "To proceed please re-run the command with a different starting month."
+        )
+        return 1
 
     if source == "pmc":
         url_dict = {}
