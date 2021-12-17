@@ -58,8 +58,8 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     # this parameter the returned text will be an empty string. See the
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
-    base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f"{base_url}?term={journal_title}[Title]&report=xml&format=text"
+    base_url = 'https://www.ncbi.nlm.nih.gov/nlmcatalog'
+    url = f'{base_url}?term="{journal_title}"[jo]&report=xml&format=text'
 
     response = requests.get(url)
     response.raise_for_status()
@@ -80,29 +80,32 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     if not text.startswith(header) or not text.endswith(footer):
         logger.error(f"Unexpected response for query\n{url}")
         return None
-    text = html.unescape(text[len(header): -len(footer)]).strip()
+    text = html.unescape(text[len(header)-5:]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
     if text == "":
         return None
 
-    try:
-        content = ElementTree.fromstring(text)
-    except ElementTree.ParseError:
-        # Occurs when the number of results of the research is bigger than one.
-        # It is the case for less than 1 % of the journal from PMC
-        logger.error(f"Parse Error was raised for {journal_title}")
-        return None
+    content = ElementTree.fromstring(text)
 
-    if not content.tag == "NCBICatalogRecord":
-        logger.error(f"Expected to find the NCBICatalogRecord tag but got {content.tag}")
-        return None
+    # When the number of results is equal to 1, we take it.
+    nlm_catalog_records = content.findall("./NCBICatalogRecord/NLMCatalogRecord")
+    if len(nlm_catalog_records) == 1:
+        mesh_headings = nlm_catalog_records[0].findall("./MeshHeadingList/MeshHeading")
+        return _parse_mesh_from_nlm_catalog(mesh_headings)
 
-    mesh_headings = content.findall("./NLMCatalogRecord/MeshHeadingList/MeshHeading")
-    meshs = _parse_mesh_from_nlm_catalog(mesh_headings)
+    # Otherwise we look for a perfect match of the title
+    for child in nlm_catalog_records:
+        title_main = child.find("./TitleMain/Title")
+        if title_main is None:
+            continue
+        journal_title = journal_title.lower().strip()
+        if title_main.text.lower().strip() in [journal_title, journal_title + ".", journal_title + " ."]:
+            mesh_headings = child.findall("./MeshHeadingList/MeshHeading")
+            return _parse_mesh_from_nlm_catalog(mesh_headings)
 
-    return meshs
+    return None
 
 
 # Article Topic
