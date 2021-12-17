@@ -195,7 +195,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
 )
 def test_structure_change(source, expected_date, tmp_path, caplog):
 
-    limit_datetime = download.STRUCTURE_CHANGE[source]
+    limit_datetime = download.MIN_DATE[source]
     fake_datetime = limit_datetime - datetime.timedelta(days=32)
 
     with caplog.at_level(logging.ERROR):

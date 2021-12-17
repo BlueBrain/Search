@@ -23,7 +23,10 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-STRUCTURE_CHANGE = {
+# Data conventions and formats are different prior to these dates. We
+# download only if the starting date is more recent or equal to the
+# respective threshold.
+MIN_DATE = {
     "arxiv": datetime(2007, 4, 1),
     "biorxiv": datetime(2018, 12, 1),
     "medrxiv": datetime(2020, 10, 1),
@@ -117,9 +120,9 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_s3_urls,
     )
 
-    if from_month < STRUCTURE_CHANGE[source]:
+    if from_month < MIN_DATE[source]:
         logger.error(
-            f"The papers from before {STRUCTURE_CHANGE[source].strftime('%B %Y')} "
+            f"The papers from before {MIN_DATE[source].strftime('%B %Y')} "
             "follow a different format and can't be downloaded. "
             "Please contact the developers if you need them. "
             "To proceed please re-run the command with a different starting month."
