@@ -441,11 +441,7 @@ class JSONL:
     """Collection of utility static functions handling `jsonl` files."""
 
     @staticmethod
-    def dump_jsonl(
-            data: List[Dict[str, str]],
-            path: pathlib.Path,
-            mode: str = "w"
-    ):
+    def dump_jsonl(data: List[Dict[str, str]], path: pathlib.Path, mode: str = "w"):
         """Save a list of dictionaries to a jsonl.
 
         Parameters

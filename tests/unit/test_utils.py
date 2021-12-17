@@ -16,9 +16,11 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import json
 import pathlib
+from typing import Any
 
 import h5py
 import numpy as np
@@ -345,7 +347,7 @@ class TestH5:
 def test_load_save_jsonl(tmpdir):
     path = pathlib.Path(str(tmpdir)) / "file.jsonl"
 
-    li = [{"a": 1, "b": "cc"}, {"k": 23}]
+    li: list[dict[str, Any]] = [{"a": 1, "b": "cc"}, {"k": 23}]
     JSONL.dump_jsonl(li, path)
     lo = JSONL.load_jsonl(path)
 

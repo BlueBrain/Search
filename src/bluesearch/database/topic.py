@@ -16,13 +16,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Utils for journal/articles topics."""
 from __future__ import annotations
-from functools import lru_cache
 
 import html
 import logging
 import pathlib
-from typing import Iterable, List, Tuple
-from xml.etree.ElementTree import Element, ParseError  # nosec
+from functools import lru_cache
+from typing import Iterable, List
+from xml.etree.ElementTree import Element  # nosec
 
 import requests
 from defusedxml import ElementTree
@@ -58,7 +58,7 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     # this parameter the returned text will be an empty string. See the
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
-    base_url = 'https://www.ncbi.nlm.nih.gov/nlmcatalog'
+    base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
     url = f'{base_url}?term="{journal_title}"[jo]&report=xml&format=text'
 
     response = requests.get(url)
@@ -80,7 +80,7 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     if not text.startswith(header) or not text.endswith(footer):
         logger.error(f"Unexpected response for query\n{url}")
         return None
-    text = html.unescape(text[len(header)-5:]).strip()
+    text = html.unescape(text[len(header) - 5 :]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
@@ -101,7 +101,11 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
         if title_main is None:
             continue
         journal_title = journal_title.lower().strip()
-        if title_main.text.lower().strip() in [journal_title, journal_title + ".", journal_title + " ."]:
+        if title_main.text.lower().strip() in [
+            journal_title,
+            journal_title + ".",
+            journal_title + " .",
+        ]:
             mesh_headings = child.findall("./MeshHeadingList/MeshHeading")
             return _parse_mesh_from_nlm_catalog(mesh_headings)
 
@@ -277,7 +281,9 @@ def get_topics_for_pmc_article(
     # Determine journal title
     logger.info(f"Reading file {pmc_path}")
     parser = JATSXMLParser(pmc_path)
-    journal_title = parser.content.find("./front/journal-meta/journal-title-group/journal-title")
+    journal_title = parser.content.find(
+        "./front/journal-meta/journal-title-group/journal-title"
+    )
     if journal_title is None:
         return journal_topics
 
@@ -290,6 +296,7 @@ def get_topics_for_pmc_article(
     logger.info(f"Request done for {pmc_path}")
 
     if journal_meshes:
+        journal_topics = []
         for mesh in journal_meshes:
             for descriptor in mesh["descriptor"]:
                 journal_topics.append(descriptor["name"])

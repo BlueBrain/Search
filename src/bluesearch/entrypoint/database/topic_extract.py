@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Extract topic of articles."""
+from __future__ import annotations
+
 import argparse
 import datetime
 import logging
 import re
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +162,7 @@ def run(
         print(*inputs, sep="\n")
         return 0
 
-    all_results = []
+    all_results: list[dict[str, Any]] = []
 
     if input_source == "pmc":
         for path in inputs:
