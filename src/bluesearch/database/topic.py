@@ -19,6 +19,7 @@ from __future__ import annotations
 from functools import lru_cache
 
 import html
+import logging
 import pathlib
 from typing import Iterable, List, Tuple
 from xml.etree.ElementTree import Element, ParseError  # nosec
@@ -27,6 +28,8 @@ import requests
 from defusedxml import ElementTree
 
 from bluesearch.database.article import JATSXMLParser
+
+logger = logging.getLogger(__name__)
 
 
 # Journal Topic
@@ -44,20 +47,12 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     meshs
         List containing all meshs of the Journal.
 
-    Raises
-    ------
-    ElementTree.ParseError
-        If more than one result is found with the given request.
-
     References
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
     if "&" in journal_title:
-        raise ValueError(
-            "Ampersands not allowed in the NLM title abbreviation. "
-            f"Try unescaping HTML characters first. Got:\n{journal_title}"
-        )
+        return None
 
     # The "format=text" parameter only matters when no result was found. With
     # this parameter the returned text will be an empty string. See the
@@ -83,8 +78,9 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     )
     footer = "</pre>"
     if not text.startswith(header) or not text.endswith(footer):
-        raise RuntimeError(f"Unexpected response for query\n{url}")
-    text = html.unescape(text[len(header) : -len(footer)]).strip()
+        logger.error(f"Unexpected response for query\n{url}")
+        return None
+    text = html.unescape(text[len(header): -len(footer)]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
@@ -96,12 +92,13 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     except ElementTree.ParseError:
         # Occurs when the number of results of the research is bigger than one.
         # It is the case for less than 1 % of the journal from PMC
-        raise ElementTree.ParseError("The parsing did not work")
+        logger.error(f"Parse Error was raised for {journal_title}")
+        return None
 
     if not content.tag == "NCBICatalogRecord":
-        raise RuntimeError(
-            f"Expected to find the NCBICatalogRecord tag but got {content.tag}"
-        )
+        logger.error(f"Expected to find the NCBICatalogRecord tag but got {content.tag}")
+        return None
+
     mesh_headings = content.findall("./NLMCatalogRecord/MeshHeadingList/MeshHeading")
     meshs = _parse_mesh_from_nlm_catalog(mesh_headings)
 
@@ -270,21 +267,24 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
 # PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
-) -> List[str]:
+) -> List[str] | None:
     """Extract journal topics of a PMC article."""
-    journal_topics = []
+    journal_topics = None
 
     # Determine journal title
+    logger.info(f"Reading file {pmc_path}")
     parser = JATSXMLParser(pmc_path)
     journal_title = parser.content.find("./front/journal-meta/journal-title-group/journal-title")
     if journal_title is None:
         return journal_topics
 
     journal_title = journal_title.text
-    try:
-        journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
-    except ParseError:
-        return journal_topics
+    logger.info(f"Journal Title: {journal_title}")
+    journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
+    logger.info(journal_meshes)
+
+    logger.error(f"Caching: {request_mesh_from_journal_title.cache_info()}")
+    logger.info(f"Request done for {pmc_path}")
 
     if journal_meshes:
         for mesh in journal_meshes:

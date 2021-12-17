@@ -97,6 +97,15 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         If output_file exists and overwrite is true, the output file is overwrote.
         """,
     )
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="""
+        Display files to parse without parsing them.
+        Especially useful when using '--match-filename' and / or '--recursive'.
+        """,
+    )
     return parser
 
 
@@ -108,16 +117,16 @@ def run(
     match_filename: str,
     recursive: bool,
     overwrite: bool,
+    dry_run: bool,
 ) -> int:
     """Extract topic of articles.
 
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import json
-
     import bluesearch
     from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.utils import JSONL
 
     inputs: Iterable[Path]
 
@@ -146,32 +155,34 @@ def run(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
 
-    if output_file.exists() and not overwrite:
-        with open(output_file) as f:
-            all_results = json.load(f)
-    else:
-        all_results = []
+    if dry_run:
+        # Inputs are already sorted.
+        print(*inputs, sep="\n")
+        return 0
+
+    all_results = []
 
     if input_source == "pmc":
         for path in inputs:
+            logger.info(f"Processing {path}")
             journal_topics = get_topics_for_pmc_article(path)
             all_results.append(
                 {
                     "source": "pmc",
-                    "path": path,
+                    "path": str(path),
                     "topics": {
                         "journal": {
                             "MeSH": journal_topics,
                         },
                     },
                     "metadata": {
-                        "created-date": datetime.datetime.now(),
-                        "bbs-version": bluesearch.version,
+                        "created-date": str(datetime.datetime.now()),
+                        "bbs-version": str(bluesearch.version.__version__),
                     },
                 }
             )
 
-    with open(output_file, "w") as f:
-        json.dump(all_results, f)
+    mode = "w" if overwrite else "a"
+    JSONL.dump_jsonl(all_results, output_file, mode)
 
     return 0

@@ -21,7 +21,7 @@ import json
 import pathlib
 import time
 import warnings
-from typing import Any, Dict, Set, Union
+from typing import Any, Dict, List, Set, Union
 
 import h5py
 import numpy as np
@@ -441,7 +441,11 @@ class JSONL:
     """Collection of utility static functions handling `jsonl` files."""
 
     @staticmethod
-    def dump_jsonl(data, path):
+    def dump_jsonl(
+            data: List[Dict[str, str]],
+            path: pathlib.Path,
+            mode: str = "w"
+    ):
         """Save a list of dictionaries to a jsonl.
 
         Parameters
@@ -450,10 +454,12 @@ class JSONL:
             List of dictionaries (json files).
         path : pathlib.Path
             File where to save it.
+        mode : {"w", "a"}
+            Mode of writing
         """
-        with path.open("w") as f:
+        with path.open(mode) as f:
             for x in data:
-                line = json.dumps(x)
+                line = json.dumps(x, indent=True, sort_keys=True)
                 f.write(line + "\n")
 
     @staticmethod
