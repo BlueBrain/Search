@@ -141,24 +141,36 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         raise ValueError(f"Unsupported input type '{input_type}'!")
 
 
-def run(
-    *,
-    input_type: str,
+def filter_files(
     input_path: Path,
-    output_dir: Path,
-    match_filename: Optional[str],
     recursive: bool,
-    dry_run: bool,
-) -> int:
-    """Parse one or several articles.
+    match_filename: Optional[str] = None,
+) -> Iterable[Path]:
+    """Create a list of files from input_file.
 
-    Parameter description and potential defaults are documented inside of the
-    `get_parser` function.
+    Parameters
+    ----------
+    input_path
+        File or directory to consider.
+    recursive
+        If True, directories and all subdirectories are considered in a recursive way.
+    match_filename
+        Only filename matching match_filename are kept.
+
+    Returns
+    -------
+    inputs : Iterable[pathlib.Path]
+        List of kept files.
+
+    Raises
+    ------
+    ValueError
+        If the input_path does not exists.
     """
     inputs: Iterable[Path]
 
     if input_path.is_file():
-        inputs = [input_path]
+        return [input_path]
 
     elif input_path.is_dir():
         if recursive:
@@ -175,12 +187,34 @@ def run(
             regex = re.compile(match_filename)
             selected = (x for x in files if regex.fullmatch(x.name))
 
-        inputs = sorted(selected)
+        return sorted(selected)
 
     else:
         raise ValueError(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
+
+
+def run(
+    *,
+    input_type: str,
+    input_path: Path,
+    output_dir: Path,
+    match_filename: Optional[str],
+    recursive: bool,
+    dry_run: bool,
+) -> int:
+    """Parse one or several articles.
+
+    Parameter description and potential defaults are documented inside of the
+    `get_parser` function.
+    """
+    try:
+        inputs = filter_files(input_path, recursive, match_filename)
+    except ValueError:
+        logger.error("Argument 'input_path' should be a path "
+                     "to an existing file or directory!")
+        return 1
 
     if dry_run:
         # Inputs are already sorted.

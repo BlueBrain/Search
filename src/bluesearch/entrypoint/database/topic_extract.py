@@ -130,34 +130,14 @@ def run(
     """
     import bluesearch
     from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.entrypoint.database.parse import filter_files
     from bluesearch.utils import JSONL
 
-    inputs: Iterable[Path]
-
-    if input_path.is_file():
-        inputs = [input_path]
-
-    elif input_path.is_dir():
-        if recursive:
-            pattern = "**/*"
-        else:
-            pattern = "*"
-        files = (x for x in input_path.glob(pattern) if x.is_file())
-
-        if match_filename is None:
-            selected = files
-        elif match_filename == "":
-            raise ValueError("Value for argument 'match-filename' should not be empty!")
-        else:
-            regex = re.compile(match_filename)
-            selected = (x for x in files if regex.fullmatch(x.name))
-
-        inputs = sorted(selected)
-
-    else:
-        logger.error(
-            "Argument 'input_path' should be a path to an existing file or directory!"
-        )
+    try:
+        inputs = filter_files(input_path, recursive, match_filename)
+    except ValueError:
+        logger.error("Argument 'input_path' should be a path "
+                     "to an existing file or directory!")
         return 1
 
     if dry_run:

@@ -1,4 +1,5 @@
 import json
+import logging
 from argparse import ArgumentError
 from pathlib import Path
 
@@ -6,7 +7,7 @@ import pytest
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
-from bluesearch.entrypoint.database.parse import iter_parsers
+from bluesearch.entrypoint.database.parse import iter_parsers, filter_files
 
 
 @pytest.mark.parametrize(
@@ -65,7 +66,7 @@ def test_unknown_input_type():
     assert f"invalid choice: '{wrong_type}'" in str(context)
 
 
-def test_cord19_json(jsons_path, tmp_path):
+def test_cord19_json(jsons_path, tmp_path, caplog):
     path_to_json = jsons_path / "document_parses" / "pmc_json"
     json_files = sorted(path_to_json.glob("*.json"))
     assert len(json_files) > 0
@@ -117,14 +118,16 @@ def test_cord19_json(jsons_path, tmp_path):
         assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist
-    with pytest.raises(ValueError):
-        args_and_opts = [
-            "parse",
-            "cord19-json",
-            str(path_to_json / "dir_that_does_not_exists"),
-            str(out_dir),
-        ]
-        main(args_and_opts)
+    args_and_opts = [
+        "parse",
+        "cord19-json",
+        str(path_to_json / "dir_that_does_not_exists"),
+        str(out_dir),
+    ]
+    with caplog.at_level(logging.ERROR):
+        exit_code = main(args_and_opts)
+    assert exit_code == 1
+    assert "Argument 'input_path'" in caplog.text
 
 
 def test_pubmed_xml_set(tmp_path):
@@ -149,32 +152,38 @@ def test_dry_run(capsys):
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
 
 
-def test_recursive(tmp_path):
-    input_path = "tests/data/cord19_v35/document_parses/pdf_json/"
-    main(["parse", "cord19-json", input_path, str(tmp_path), "--recursive"])
-    filenames = sorted(x.name for x in tmp_path.iterdir())
+def test_filtering_recursive(tmp_path):
+    input_path = Path("tests/data/cord19_v35/document_parses/pdf_json/")
+    inputs = filter_files(input_path, recursive=True)
+    filenames = sorted(x.name for x in inputs)
     expected = [
-        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
-        "bd8c3ef147501fab67a1f75d99c4327c.json",
+        "16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json",
+        "5f267fa1ef3a65e239aa974329e935a4d93dafd2.json",
     ]
     assert filenames == expected
 
 
 def test_filtering(tmp_path):
-    input_path = "tests/data/cord19_v35/"
-    options = ["--recursive", "--match-filename", "[a-z0-9]+\\.json"]
-    main(["parse", "cord19-json", input_path, str(tmp_path), *options])
-    filenames = sorted(x.name for x in tmp_path.iterdir())
+    input_path = Path("tests/data/cord19_v35/")
+    inputs = filter_files(
+        input_path,
+        recursive=True,
+        match_filename=r"[a-z0-9]+\.json"
+    )
+    filenames = sorted(x.name for x in inputs)
     expected = [
-        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
-        "bd8c3ef147501fab67a1f75d99c4327c.json",
+        "16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json",
+        "5f267fa1ef3a65e239aa974329e935a4d93dafd2.json",
     ]
     assert filenames == expected
 
 
 def test_filtering_empty(tmp_path):
     message = "Value for argument 'match-filename' should not be empty!"
-    input_path = "tests/data/cord19_v35/"
-    options = ["--recursive", "--match-filename", ""]
+    input_path = Path("tests/data/cord19_v35/")
     with pytest.raises(ValueError, match=message):
-        main(["parse", "cord19-json", input_path, str(tmp_path), *options])
+        _ = filter_files(
+            input_path,
+            recursive=True,
+            match_filename=""
+        )
