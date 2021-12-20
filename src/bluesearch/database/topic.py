@@ -86,7 +86,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
-    if text == "":
+    if text == "<pre></pre>":
         logger.error(f"Empty body for query\n{url}")
         return None
 

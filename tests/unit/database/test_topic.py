@@ -11,6 +11,10 @@ from bluesearch.database.topic import (
     request_mesh_from_pubmed_id,
 )
 
+# This function uses caching through @lru_cache. We want remove caching logic
+# during tests.
+request_mesh_from_nlm_ta = request_mesh_from_nlm_ta.__wrapped__
+
 
 class TestGetMeshFromNlmTa:
     @pytest.mark.network
