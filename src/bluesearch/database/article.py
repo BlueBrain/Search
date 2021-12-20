@@ -380,14 +380,14 @@ class JATSXMLParser(ArticleParser):
             return f"_{self._inner_text(element)}"
         elif element.tag == "sup":
             return f"^{self._inner_text(element)}"
-        elif element.tag == "inline-formula":
-            return "FORMULA"
-        elif element.tag == "disp-formula":
-            return "\nFORMULA-BLOCK"
-        elif element.tag in {"ext-link", "uri"}:
-            return "URL"
-        elif element.tag == "email":
-            return "EMAIL"
+        elif element.tag in {
+            "disp-formula",
+            "email",
+            "ext-link",
+            "inline-formula",
+            "uri",
+        }:
+            return ""
         else:
             # Default handling for all other element tags
             return self._inner_text(element)

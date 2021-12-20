@@ -21,6 +21,10 @@ import argparse
 import logging
 import pathlib
 import textwrap
+from concurrent.futures import ThreadPoolExecutor
+from typing import Iterable
+
+from bluesearch.database.pdf import grobid_is_alive, grobid_pdf_to_tei_xml
 
 logger = logging.getLogger(__name__)
 
@@ -63,22 +67,42 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         help="The port of the GROBID server.",
     )
     parser.add_argument(
-        "input_pdf_path",
+        "input_path",
         type=pathlib.Path,
-        metavar="INPUT-PDF-PATH",
-        help="The path of the input PDF file.",
+        metavar="INPUT-PATH",
+        help="""
+        The path to a single PDF file or a directory with many PDF files. In
+        the latter case all files with the extension ".pdf" will be globbed
+        recursively in all subdirectories.
+        """,
     )
     parser.add_argument(
-        "output_xml_path",
+        "-o",
+        "--output-dir",
         type=pathlib.Path,
-        metavar="OUTPUT-XML-PATH",
-        help="The path of the output XML file.",
+        metavar="OUTPUT-DIR",
+        help="""
+        The output directory where the XML file(s) will be saved. If not
+        provided the output files will be placed in the same directory as
+        the input files.
+        """,
+    )
+    parser.add_argument(
+        "-w",
+        "--num-workers",
+        type=int,
+        default=5,
+        help="The number of workers",
     )
     parser.add_argument(
         "--force",
         "-f",
         action="store_true",
-        help="Overwrite the output file if it already exits.",
+        help="""
+        Overwrite the output files if they already exits. Without this flag
+        all PDF files for which the output XML file already exists will
+        be skipped
+        """,
     )
 
     return parser
@@ -87,8 +111,9 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 def run(
     grobid_host: str,
     grobid_port: int,
-    input_pdf_path: pathlib.Path,
-    output_xml_path: pathlib.Path,
+    input_path: pathlib.Path,
+    output_dir: pathlib.Path | None,
+    num_workers,
     *,
     force: bool,
 ) -> int:
@@ -115,10 +140,12 @@ def run(
         The host of the GROBID service.
     grobid_port
         The port of the GROBID service.
-    input_pdf_path
-        The path to the input PDF file.
-    output_xml_path
-        The path to the output XML file.
+    input_path
+        The path to the input PDF file or a directory with PDF files.
+    output_dir
+        The output directory for the XML files.
+    num_workers
+        The number of parallel workers.
     force
         If true overwrite the output file if it already exists.
 
@@ -127,38 +154,138 @@ def run(
     int
         The exit code of the command
     """
+    # Check the GROBID server
+    if not grobid_is_alive(grobid_host, grobid_port):
+        logger.error("The GROBID server is not alive")
+        return 1
+
     # Check if the input file exists
-    if not input_pdf_path.exists():
-        logger.error(
-            f"The input file {str(input_pdf_path)!r} does not exist.",
-        )
+    if not input_path.exists():
+        logger.error(f"The input path {str(input_path)!r} does not exist")
         return 1
 
-    # Check if the output file already exists
-    if output_xml_path.exists() and not force:
-        logger.error(
-            f"The output file {str(output_xml_path)!r} already exists. "
-            "Either delete it or use the --force option to overwrite it.",
-        )
-        return 1
+    # Collect input paths
+    input_paths: Iterable[pathlib.Path]
+    if input_path.is_file():
+        input_paths = [input_path]
+        input_dir = input_path.parent
+    else:
+        input_paths = input_path.rglob("*.pdf")
+        input_dir = input_path
 
-    # Read the PDF file
-    logger.info("Reading the PDF file")
-    with input_pdf_path.open("rb") as fh_pdf:
-        pdf_content = fh_pdf.read()
+    # Set default output_dir as the same directory of input files
+    output_dir = output_dir or input_dir
 
-    # Convert the PDF to XML
-    logger.info("Converting PDF to XML")
-    from bluesearch.database.pdf import grobid_pdf_to_tei_xml
+    path_map = _prepare_output_paths(input_paths, output_dir, force)
 
-    xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
+    if len(path_map) == 0:
+        logger.warning("No files to process, stopping")
+        return 0
 
-    # Write the XML file
-    logger.info("Writing the XML file to disk")
-    with output_xml_path.open("w") as fh_xml:
-        n_bytes = fh_xml.write(xml_content)
-    logger.info("Wrote %d bytes to %s", n_bytes, output_xml_path.resolve().as_uri())
+    output_dir.mkdir(exist_ok=True)
 
-    logger.info("PDF conversion done")
+    # Convert
+    def do_work(
+        path_map_item: tuple[pathlib.Path, pathlib.Path]
+    ) -> pathlib.Path | None:
+        """Try to run conversion, or return name of input pdf if that fails.
+
+        Parameters
+        ----------
+        path_map_item
+            Key-value pair of `input_pdf` and `output_xml` paths.
+
+        Returns
+        -------
+        pathlib.Path | None
+            Return `input_pdf` if conversion failed, otherwise None.
+        """
+        pdf_path, xml_path = path_map_item
+        try:
+            _convert_pdf_file(grobid_host, grobid_port, pdf_path, xml_path)
+        except Exception as exc:
+            logger.exception(
+                f"An error happened when processing {pdf_path.resolve().as_uri()}: "
+                f"{exc}"
+            )
+            return pdf_path
+        return None
+
+    with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        failed_paths = executor.map(do_work, path_map.items(), timeout=60)
+
+    for path in failed_paths:
+        if path is not None:
+            logger.warning(f"Failed to process {path.resolve().as_uri()}")
 
     return 0
+
+
+def _prepare_output_paths(
+    input_paths: Iterable[pathlib.Path],
+    output_dir: pathlib.Path,
+    force: bool,
+) -> dict[pathlib.Path, pathlib.Path]:
+    """Assign output XML paths to all input PDF paths.
+
+    Parameters
+    ----------
+    input_paths
+        A sequence of input PDF paths.
+    output_dir
+        The output directory.
+    force
+        If False then the PDFs for which the outputs already exist will be
+        skipped.
+
+    Returns
+    -------
+    dict
+        A mapping from input paths to output paths.
+    """
+    path_map = {}
+
+    for input_path in input_paths:
+        output_name = input_path.with_suffix(".xml").name
+        output_path = output_dir / output_name
+
+        if output_path.exists() and not force:
+            logger.warning(
+                "Not overwriting existing file %s, use --force to always overwrite.",
+                output_path.resolve().as_uri(),
+            )
+        else:
+            path_map[input_path] = output_path
+
+    return path_map
+
+
+def _convert_pdf_file(
+    grobid_host: str,
+    grobid_port: int,
+    input_path: pathlib.Path,
+    output_path: pathlib.Path,
+) -> None:
+    """Convert a single PDF file to XML and write the XML file to disk.
+
+    Parameters
+    ----------
+    grobid_host
+        The host of the GROBID service.
+    grobid_port
+        The port of the GROBID service.
+    input_path
+        The path to the input PDF file.
+    output_path
+        The output directory for the XML file.
+    """
+    logger.info(f"Reading {input_path.resolve().as_uri()}")
+    with input_path.open("rb") as fh_pdf:
+        pdf_content = fh_pdf.read()
+
+    logger.info(f"Converting {input_path.resolve().as_uri()} to XML")
+    xml_content = grobid_pdf_to_tei_xml(pdf_content, grobid_host, grobid_port)
+
+    with output_path.open("w") as fh_xml:
+        n_bytes = fh_xml.write(xml_content)
+    logger.info(f"Wrote {output_path.resolve().as_uri()} ({n_bytes:,d} bytes)")
