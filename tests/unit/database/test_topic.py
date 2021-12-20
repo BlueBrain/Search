@@ -5,15 +5,15 @@ import pytest
 import responses
 from requests.exceptions import HTTPError
 
+from bluesearch.database.topic import extract_pubmed_id_from_pmc_file
 from bluesearch.database.topic import (
-    extract_pubmed_id_from_pmc_file,
-    request_mesh_from_nlm_ta,
-    request_mesh_from_pubmed_id,
+    request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
 )
+from bluesearch.database.topic import request_mesh_from_pubmed_id
 
 # This function uses caching through @lru_cache. We want remove caching logic
 # during tests.
-request_mesh_from_nlm_ta = request_mesh_from_nlm_ta.__wrapped__
+request_mesh_from_nlm_ta = request_mesh_from_nlm_ta_decorated.__wrapped__
 
 
 class TestGetMeshFromNlmTa:
@@ -40,7 +40,7 @@ class TestGetMeshFromNlmTa:
         responses.add(
             responses.GET,
             (
-                'https://www.ncbi.nlm.nih.gov/nlmcatalog?'
+                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
                 'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
             ),
             body=body,
