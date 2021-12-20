@@ -23,6 +23,24 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# Data conventions and formats are different prior to these dates. We
+# download only if the starting date is more recent or equal to the
+# respective threshold.
+MIN_DATE = {
+    # https://arxiv.org/help/arxiv_identifier#old
+    "arxiv": datetime(2007, 4, 1),
+    # https://www.biorxiv.org/tdm + looked into Current Content folder on GPFS
+    "biorxiv": datetime(2018, 12, 1),
+    # https://www.medrxiv.org/tdm + looked into Current Content folder on GPFS
+    "medrxiv": datetime(2020, 10, 1),
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/
+    "pmc": datetime(2021, 12, 1),
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "pubmed": datetime(2021, 12, 1),
+}
+
 
 def convert_to_datetime(s: str) -> datetime:
     """Try to convert a string to a datetime.
@@ -108,6 +126,15 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_pubmed_urls,
         get_s3_urls,
     )
+
+    if from_month < MIN_DATE[source]:
+        logger.error(
+            f"The papers from before {MIN_DATE[source].strftime('%B %Y')} "
+            "follow a different format and can't be downloaded. "
+            "Please contact the developers if you need them. "
+            "To proceed please re-run the command with a different starting month."
+        )
+        return 1
 
     if source == "pmc":
         url_dict = {}

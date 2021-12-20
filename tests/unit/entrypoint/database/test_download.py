@@ -1,7 +1,8 @@
 import argparse
+import datetime
 import inspect
+import logging
 import pathlib
-from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
@@ -19,7 +20,7 @@ def test_init_parser():
 
     # Test the values
     assert args.source == "pmc"
-    assert args.from_month == datetime(2020, 10, 1)
+    assert args.from_month == datetime.datetime(2020, 10, 1)
     assert args.output_dir == pathlib.Path("/path/to/download")
     assert not args.dry_run
 
@@ -51,7 +52,7 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.generate_pmc_urls", fake_generate_pmc_urls
     )
 
-    fake_datetime = datetime(2021, 11, 1)
+    fake_datetime = datetime.datetime(2021, 12, 2)
     pmc_path = tmp_path / "pmc"
     download.run("pmc", fake_datetime, pmc_path, dry_run=False)
     assert pmc_path.exists()
@@ -93,7 +94,7 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.get_pubmed_urls", fake_get_pubmed_urls
     )
 
-    fake_datetime = datetime(2021, 11, 1)
+    fake_datetime = datetime.datetime(2021, 12, 16)
     pubmed_path = tmp_path / "pubmed"
 
     # Run the command
@@ -130,7 +131,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     # Define mocks
     fake_getpass = Mock()
     fake_getpass.getpass.return_value = "somecredentials"
-    fake_datetime = datetime(2021, 11, 1)
+    fake_datetime = datetime.datetime(2021, 11, 1)
 
     fake_get_s3_urls = Mock(
         return_value={
@@ -180,3 +181,25 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
 
     stdout = capsys.readouterr().out
     assert "Month: November_2018\n1.meca\nMonth: December_2018\n2.meca\n" in stdout
+
+
+@pytest.mark.parametrize(
+    ("source", "expected_date"),
+    [
+        ("arxiv", "April 2007"),
+        ("biorxiv", "December 2018"),
+        ("medrxiv", "October 2020"),
+        ("pmc", "December 2021"),
+        ("pubmed", "December 2021"),
+    ],
+)
+def test_structure_change(source, expected_date, tmp_path, caplog):
+
+    limit_datetime = download.MIN_DATE[source]
+    fake_datetime = limit_datetime - datetime.timedelta(days=32)
+
+    with caplog.at_level(logging.ERROR):
+        exit_code = download.run(source, fake_datetime, tmp_path, dry_run=False)
+
+    assert exit_code == 1
+    assert expected_date in caplog.text
