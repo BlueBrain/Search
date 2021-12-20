@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     extract_pubmed_id_from_pmc_file,
-    request_mesh_from_journal_title,
+    request_mesh_from_nlm_ta,
     request_mesh_from_pubmed_id,
 )
 
@@ -22,7 +22,7 @@ class TestGetMeshFromNlmTa:
             "Wounds and Injuries",
         }
 
-        mesh = request_mesh_from_journal_title(nlm_ta)
+        mesh = request_mesh_from_nlm_ta(nlm_ta)
 
         assert mesh is not None
         assert len(mesh) == 3
@@ -74,13 +74,13 @@ class TestGetMeshFromNlmTa:
             },
         ]
 
-        mesh = request_mesh_from_journal_title("Trauma Surgery And Acute Care Open")
+        mesh = request_mesh_from_nlm_ta("Trauma Surgery And Acute Care Open")
         assert mesh == expected_output
 
     def test_ampersands_are_flagged(self):
         nlm_ta = "Title with &#x0201c;ampersands&#x0201d"
         with pytest.raises(ValueError, match="Ampersands not allowed"):
-            request_mesh_from_journal_title(nlm_ta)
+            request_mesh_from_nlm_ta(nlm_ta)
 
     @responses.activate
     def test_unexpected_response_doc_header_flagged(self):
@@ -90,7 +90,7 @@ class TestGetMeshFromNlmTa:
             body="should start with a fixed header",
         )
         with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_journal_title("Some title")
+            request_mesh_from_nlm_ta("Some title")
 
     @responses.activate
     def test_unexpected_response_doc_footer_flagged(self):
@@ -106,7 +106,7 @@ class TestGetMeshFromNlmTa:
             body=f"{header}the footer is missing though",
         )
         with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_journal_title("Some title")
+            request_mesh_from_nlm_ta("Some title")
 
     @responses.activate
     def test_no_nlm_ta_found_gives_none(self):
@@ -125,7 +125,7 @@ class TestGetMeshFromNlmTa:
             re.compile(""),
             body=f"{header}{body}{footer}",
         )
-        mesh = request_mesh_from_journal_title("Some title")
+        mesh = request_mesh_from_nlm_ta("Some title")
         assert mesh is None
 
     @responses.activate
@@ -145,7 +145,7 @@ class TestGetMeshFromNlmTa:
             body=f"{header}{body}{footer}",
         )
         with pytest.raises(ParseError, match="The parsing did not work"):
-            request_mesh_from_journal_title("Some title")
+            request_mesh_from_nlm_ta("Some title")
 
     @responses.activate
     def test_root_tag_is_checked(self):
@@ -166,7 +166,7 @@ class TestGetMeshFromNlmTa:
         with pytest.raises(
             RuntimeError, match="Expected to find the NCBICatalogRecord tag"
         ):
-            request_mesh_from_journal_title("Some title")
+            request_mesh_from_nlm_ta("Some title")
 
 
 @responses.activate

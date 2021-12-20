@@ -34,13 +34,13 @@ logger = logging.getLogger(__name__)
 
 # Journal Topic
 @lru_cache(maxsize=None)
-def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
+def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     """Retrieve Medical Subject Heading from Journal's NLM Title.
 
     Parameters
     ----------
-    journal_title
-        NLM Title of Journal.
+    nlm_ta
+        NLM Title Abbreviation of Journal.
 
     Returns
     -------
@@ -51,7 +51,7 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
-    if "&" in journal_title:
+    if "&" in nlm_ta:
         return None
 
     # The "format=text" parameter only matters when no result was found. With
@@ -59,7 +59,7 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f'{base_url}?term="{journal_title}"[jo]&report=xml&format=text'
+    url = f'{base_url}?term="{nlm_ta}"[ta]&report=xml&format=text'
 
     response = requests.get(url)
     response.raise_for_status()
@@ -80,7 +80,7 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
     if not text.startswith(header) or not text.endswith(footer):
         logger.error(f"Unexpected response for query\n{url}")
         return None
-    text = html.unescape(text[len(header) - 5 :]).strip()
+    text = html.unescape(text[len(header) - 5:]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
@@ -100,11 +100,11 @@ def request_mesh_from_journal_title(journal_title: str) -> list[dict] | None:
         title_main = child.find("./TitleMain/Title")
         if title_main is None:
             continue
-        journal_title = journal_title.lower().strip()
+        nlm_ta = nlm_ta.lower().strip()
         if title_main.text.lower().strip() in [
-            journal_title,
-            journal_title + ".",
-            journal_title + " .",
+            nlm_ta,
+            nlm_ta + ".",
+            nlm_ta + " .",
         ]:
             mesh_headings = child.findall("./MeshHeadingList/MeshHeading")
             return _parse_mesh_from_nlm_catalog(mesh_headings)
@@ -281,18 +281,17 @@ def get_topics_for_pmc_article(
     # Determine journal title
     logger.info(f"Reading file {pmc_path}")
     parser = JATSXMLParser(pmc_path)
-    journal_title = parser.content.find(
-        "./front/journal-meta/journal-title-group/journal-title"
+    nlm_ta = parser.content.find(
+        "./front/journal-meta/journal-id[@journal-id-type='nlm-ta']"
     )
-    if journal_title is None:
+    if nlm_ta is None:
         return journal_topics
 
-    journal_title = journal_title.text
-    logger.info(f"Journal Title: {journal_title}")
-    journal_meshes = request_mesh_from_journal_title(html.escape(journal_title))
+    nlm_ta = nlm_ta.text
+    logger.info(f"Journal Title: {nlm_ta}")
+    journal_meshes = request_mesh_from_nlm_ta(nlm_ta)
     logger.info(journal_meshes)
 
-    logger.error(f"Caching: {request_mesh_from_journal_title.cache_info()}")
     logger.info(f"Request done for {pmc_path}")
 
     if journal_meshes:
