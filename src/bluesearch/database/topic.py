@@ -80,7 +80,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     if not text.startswith(header) or not text.endswith(footer):
         logger.error(f"Unexpected response for query\n{url}")
         return None
-    text = html.unescape(text[len(header) - 5:]).strip()
+    text = html.unescape(text[len(header) - 5 :]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
@@ -89,7 +89,9 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
 
     content = ElementTree.fromstring(text)
 
-    mesh_headings = content.findall("./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading")
+    mesh_headings = content.findall(
+        "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
+    )
     return _parse_mesh_from_nlm_catalog(mesh_headings)
 
 
