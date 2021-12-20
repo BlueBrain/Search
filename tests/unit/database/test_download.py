@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 import responses
-from google.cloud.storage import Bucket
+from google.cloud.storage import Blob, Bucket
 
 from bluesearch.database.download import (
     download_articles,
@@ -180,13 +180,35 @@ def test_download_s3_articles(tmp_path):
 
 
 def test_get_gcs_urls():
-    client = Mock()
-    bucket = Bucket(client, "my_dir/file.txt")
+    fake_client = Mock()
+    fake_bucket = Bucket(fake_client, "my_dir/file.txt")
+    fake_blobs_by_prefix = {
+        "arxiv/arxiv/pdf/2110": [
+            Blob("topic-a/12.3450v1.pdf", fake_bucket),
+            Blob("topic-v/12.3450v2.pdf", fake_bucket),
+        ],
+        "arxiv/arxiv/pdf/2111": [
+            Blob("topic-v/99.3450v2.pdf", fake_bucket),
+            Blob("topic-v/99.3450v3.pdf", fake_bucket),
+            Blob("topic-v/99.3450v10.pdf", fake_bucket),
+        ],
+        "arxiv/arxiv/pdf/2112": [
+            Blob("topic-v/33.1v2.pdf", fake_bucket),
+            Blob("topic-v/44.1v2.pdf", fake_bucket),
+            Blob("topic-v/55.1v2.pdf", fake_bucket),
+            Blob("topic-v/55.1v1.pdf", fake_bucket),
+        ],
+    }
+
+    fake_client.list_blobs = lambda bucket, prefix: fake_blobs_by_prefix[prefix]
     start_date = datetime(2021, 10, 1)
     end_date = datetime(2021, 12, 1)
-    blobs_by_month = get_gcs_urls(bucket, start_date, end_date)
+    blobs_by_month = get_gcs_urls(fake_bucket, start_date, end_date)
+
     assert set(blobs_by_month) == {"2110", "2111", "2112"}
-    assert client.list_blobs.call_count == 3
+    assert blobs_by_month["2110"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2110"]
+    assert blobs_by_month["2111"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2111"][-1:]
+    assert blobs_by_month["2112"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2112"][:-1]
 
 
 @pytest.mark.parametrize(
