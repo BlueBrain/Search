@@ -52,6 +52,8 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
     if "&" in nlm_ta:
+        logger.error("Ampersands not allowed in the NLM title abbreviation. "
+                     f"Try unescaping HTML characters first. Got:\n{nlm_ta}")
         return None
 
     # The "format=text" parameter only matters when no result was found. With
@@ -80,15 +82,15 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     if not text.startswith(header) or not text.endswith(footer):
         logger.error(f"Unexpected response for query\n{url}")
         return None
-    text = html.unescape(text[len(header) - 5 :]).strip()
+    text = html.unescape(text[len(header) - 5:]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
     if text == "":
+        logger.error(f"Empty body for query\n{url}")
         return None
 
     content = ElementTree.fromstring(text)
-
     mesh_headings = content.findall(
         "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
     )

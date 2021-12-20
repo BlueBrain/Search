@@ -1,8 +1,8 @@
+import logging
 import re
 
 import pytest
 import responses
-from defusedxml.ElementTree import ParseError
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
@@ -15,7 +15,7 @@ from bluesearch.database.topic import (
 class TestGetMeshFromNlmTa:
     @pytest.mark.network
     def test_real_request_works(self):
-        nlm_ta = "Trauma Surgery And Acute Care Open"
+        nlm_ta = "Trauma Surg Acute Care Open"
         expected_descriptors = {
             "Critical Care",
             "Emergency Treatment",
@@ -36,8 +36,8 @@ class TestGetMeshFromNlmTa:
         responses.add(
             responses.GET,
             (
-                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                "term=Trauma Surgery And Acute Care Open[Title]&report=xml&format=text"
+                'https://www.ncbi.nlm.nih.gov/nlmcatalog?'
+                'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
             ),
             body=body,
         )
@@ -74,26 +74,30 @@ class TestGetMeshFromNlmTa:
             },
         ]
 
-        mesh = request_mesh_from_nlm_ta("Trauma Surgery And Acute Care Open")
+        mesh = request_mesh_from_nlm_ta("Trauma Surg And Acute Care Open")
         assert mesh == expected_output
 
-    def test_ampersands_are_flagged(self):
+    def test_ampersands_are_flagged(self, caplog):
         nlm_ta = "Title with &#x0201c;ampersands&#x0201d"
-        with pytest.raises(ValueError, match="Ampersands not allowed"):
-            request_mesh_from_nlm_ta(nlm_ta)
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta(nlm_ta)
+        assert meshes is None
+        assert "Ampersands not allowed" in caplog.text
 
     @responses.activate
-    def test_unexpected_response_doc_header_flagged(self):
+    def test_unexpected_response_doc_header_flagged(self, caplog):
         responses.add(
             responses.GET,
             re.compile(""),
             body="should start with a fixed header",
         )
-        with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Unexpected response" in caplog.text
 
     @responses.activate
-    def test_unexpected_response_doc_footer_flagged(self):
+    def test_unexpected_response_doc_footer_flagged(self, caplog):
         header = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
             '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
@@ -105,11 +109,13 @@ class TestGetMeshFromNlmTa:
             re.compile(""),
             body=f"{header}the footer is missing though",
         )
-        with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Unexpected response" in caplog.text
 
     @responses.activate
-    def test_no_nlm_ta_found_gives_none(self):
+    def test_no_nlm_ta_found_gives_none(self, caplog):
         header = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
             '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
@@ -125,48 +131,10 @@ class TestGetMeshFromNlmTa:
             re.compile(""),
             body=f"{header}{body}{footer}",
         )
-        mesh = request_mesh_from_nlm_ta("Some title")
-        assert mesh is None
-
-    @responses.activate
-    def test_invalid_xml_raises_correctly(self):
-        header = (
-            '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
-            "<pre>"
-        )
-        footer = "</pre>"
-        body = "<<invalid-xml>"
-
-        responses.add(
-            responses.GET,
-            re.compile(""),
-            body=f"{header}{body}{footer}",
-        )
-        with pytest.raises(ParseError, match="The parsing did not work"):
-            request_mesh_from_nlm_ta("Some title")
-
-    @responses.activate
-    def test_root_tag_is_checked(self):
-        header = (
-            '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
-            "<pre>"
-        )
-        footer = "</pre>"
-        body = "<wrong-root-tag>Should be NCBICatalogRecord.</wrong-root-tag>"
-
-        responses.add(
-            responses.GET,
-            re.compile(""),
-            body=f"{header}{body}{footer}",
-        )
-        with pytest.raises(
-            RuntimeError, match="Expected to find the NCBICatalogRecord tag"
-        ):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Empty body" in caplog.text
 
 
 @responses.activate
