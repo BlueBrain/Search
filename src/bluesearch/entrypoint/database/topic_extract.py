@@ -20,9 +20,8 @@ from __future__ import annotations
 import argparse
 import datetime
 import logging
-import re
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -136,8 +135,10 @@ def run(
     try:
         inputs = filter_files(input_path, recursive, match_filename)
     except ValueError:
-        logger.error("Argument 'input_path' should be a path "
-                     "to an existing file or directory!")
+        logger.error(
+            "Argument 'input_path' should be a path "
+            "to an existing file or directory!"
+        )
         return 1
 
     if dry_run:

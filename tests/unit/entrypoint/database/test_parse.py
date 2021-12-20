@@ -7,7 +7,7 @@ import pytest
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
-from bluesearch.entrypoint.database.parse import iter_parsers, filter_files
+from bluesearch.entrypoint.database.parse import filter_files, iter_parsers
 
 
 @pytest.mark.parametrize(
@@ -165,11 +165,7 @@ def test_filtering_recursive(tmp_path):
 
 def test_filtering(tmp_path):
     input_path = Path("tests/data/cord19_v35/")
-    inputs = filter_files(
-        input_path,
-        recursive=True,
-        match_filename=r"[a-z0-9]+\.json"
-    )
+    inputs = filter_files(input_path, recursive=True, match_filename=r"[a-z0-9]+\.json")
     filenames = sorted(x.name for x in inputs)
     expected = [
         "16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json",
@@ -182,8 +178,4 @@ def test_filtering_empty(tmp_path):
     message = "Value for argument 'match-filename' should not be empty!"
     input_path = Path("tests/data/cord19_v35/")
     with pytest.raises(ValueError, match=message):
-        _ = filter_files(
-            input_path,
-            recursive=True,
-            match_filename=""
-        )
+        _ = filter_files(input_path, recursive=True, match_filename="")

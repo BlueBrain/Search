@@ -212,8 +212,10 @@ def run(
     try:
         inputs = filter_files(input_path, recursive, match_filename)
     except ValueError:
-        logger.error("Argument 'input_path' should be a path "
-                     "to an existing file or directory!")
+        logger.error(
+            "Argument 'input_path' should be a path "
+            "to an existing file or directory!"
+        )
         return 1
 
     if dry_run:
