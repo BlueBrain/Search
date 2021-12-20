@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # Journal Topic
 @lru_cache(maxsize=None)
 def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
-    """Retrieve Medical Subject Heading from Journal's NLM Title.
+    """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
 
     Parameters
     ----------
