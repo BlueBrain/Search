@@ -27,11 +27,18 @@ logger = logging.getLogger(__name__)
 # download only if the starting date is more recent or equal to the
 # respective threshold.
 MIN_DATE = {
+    # https://arxiv.org/help/arxiv_identifier#old
     "arxiv": datetime(2007, 4, 1),
+    # https://www.biorxiv.org/tdm + looked into Current Content folder on GPFS
     "biorxiv": datetime(2018, 12, 1),
+    # https://www.medrxiv.org/tdm + looked into Current Content folder on GPFS
     "medrxiv": datetime(2020, 10, 1),
-    "pmc": datetime(2021, 9, 1),
-    "pubmed": datetime(2021, 12, 1),  # This should change every year in December
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/
+    "pmc": datetime(2021, 12, 1),
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "pubmed": datetime(2021, 12, 1),
 }
 
 

@@ -52,7 +52,7 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.generate_pmc_urls", fake_generate_pmc_urls
     )
 
-    fake_datetime = datetime.datetime(2021, 11, 1)
+    fake_datetime = datetime.datetime(2021, 12, 2)
     pmc_path = tmp_path / "pmc"
     download.run("pmc", fake_datetime, pmc_path, dry_run=False)
     assert pmc_path.exists()
@@ -189,7 +189,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
         ("arxiv", "April 2007"),
         ("biorxiv", "December 2018"),
         ("medrxiv", "October 2020"),
-        ("pmc", "September 2021"),
+        ("pmc", "December 2021"),
         ("pubmed", "December 2021"),
     ],
 )
