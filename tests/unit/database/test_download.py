@@ -209,9 +209,15 @@ def test_get_gcs_urls():
 
     assert fake_client.list_blobs.call_count == 3
     assert set(blobs_by_month) == {"2110", "2111", "2112"}
-    assert blobs_by_month["2110"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2110"]
-    assert blobs_by_month["2111"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2111"][-1:]
-    assert blobs_by_month["2112"] == fake_blobs_by_prefix["arxiv/arxiv/pdf/2112"][:-1]
+    assert set(blobs_by_month["2110"]) == set(
+        fake_blobs_by_prefix["arxiv/arxiv/pdf/2110"]
+    )
+    assert set(blobs_by_month["2111"]) == set(
+        fake_blobs_by_prefix["arxiv/arxiv/pdf/2111"][-1:]
+    )
+    assert set(blobs_by_month["2112"]) == set(
+        fake_blobs_by_prefix["arxiv/arxiv/pdf/2112"][:-1]
+    )
 
 
 @pytest.mark.parametrize(
