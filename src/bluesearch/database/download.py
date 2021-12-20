@@ -22,9 +22,9 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import pandas as pd
 import requests
 from boto3.resources.base import ServiceResource
-from google.api_core.page_iterator import HTTPIterator
 from google.cloud.storage import Blob, Bucket
 
 logger = logging.getLogger(__name__)
@@ -219,7 +219,7 @@ def get_gcs_urls(
     bucket: Bucket,
     start_date: datetime,
     end_date: datetime | None = None,
-) -> dict[str, HTTPIterator]:
+) -> dict[str, list[Blob]]:
     """Get Google Cloud Storage urls.
 
     Parameters
@@ -234,7 +234,7 @@ def get_gcs_urls(
     Returns
     -------
     url_dict
-        Keys represent different months. Values are iterators holding blobs
+        Keys represent different months. Values are list of blobs
         corresponding to actual PDF files.
     """
     date_list = get_daterange_list(
@@ -250,7 +250,28 @@ def get_gcs_urls(
     for yearmonth in yearmonth_list:
         iterator = client.list_blobs(bucket, prefix=f"arxiv/arxiv/pdf/{yearmonth}")
 
-        url_dict[yearmonth] = iterator
+        # If more than one version is found, we only keep the last one
+        df = pd.DataFrame(
+            (
+                (
+                    el,
+                    el.name,
+                    el.name.rsplit("v", 1)[0],
+                    int(el.name.rsplit("v", 1)[1].split(".")[0]),
+                )
+                for el in iterator
+            ),
+            columns=["blob", "fullname", "article", "version"],
+        )
+
+        df_latest = df[["article", "version"]].groupby("article", as_index=False).max()
+        fullname_latest = df_latest["name"] = (
+            df_latest["article"] + "v" + df_latest["version"].astype(str) + ".pdf"
+        )
+
+        url_dict[yearmonth] = df.loc[
+            df["fullname"].isin(fullname_latest), "blob"
+        ].to_list()
 
     return url_dict
 
