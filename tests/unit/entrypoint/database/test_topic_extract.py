@@ -1,0 +1,151 @@
+import argparse
+import inspect
+import logging
+import pathlib
+from unittest.mock import Mock
+
+from bluesearch.entrypoint.database import topic_extract
+from bluesearch.utils import JSONL
+
+TOPIC_EXTRACT_PARAMS = {
+    "input_source",
+    "input_path",
+    "output_file",
+    "match_filename",
+    "recursive",
+    "overwrite",
+    "dry_run",
+}
+
+
+def test_init_parser():
+    parser = topic_extract.init_parser(argparse.ArgumentParser())
+
+    args = parser.parse_args(["pmc", "/path/to/input", "/path/to/output"])
+    assert vars(args).keys() == TOPIC_EXTRACT_PARAMS
+
+    # Test the values
+    assert args.input_source == "pmc"
+    assert args.input_path == pathlib.Path("/path/to/input")
+    assert args.output_file == pathlib.Path("/path/to/output")
+    assert args.match_filename is None
+    assert not args.recursive
+    assert not args.overwrite
+    assert not args.dry_run
+
+
+def test_run_arguments():
+    assert (
+        inspect.signature(topic_extract.run).parameters.keys() == TOPIC_EXTRACT_PARAMS
+    )
+
+
+def test_input_path_not_correct(caplog):
+    with caplog.at_level(logging.ERROR):
+        exit_code = topic_extract.run(
+            input_source="pmc",
+            input_path=pathlib.Path("wrong_directory/"),
+            output_file=pathlib.Path(""),
+            match_filename=None,
+            recursive=False,
+            overwrite=False,
+            dry_run=False,
+        )
+    assert exit_code == 1
+    assert "Argument 'input_path'" in caplog.text
+
+
+def test_wrong_source(test_data_path, caplog, tmp_path):
+    pmc_path = test_data_path / "jats_article.xml"
+    with caplog.at_level(logging.ERROR):
+        exit_code = topic_extract.run(
+            input_source="wrong_type",
+            input_path=pmc_path,
+            output_file=tmp_path,
+            match_filename=None,
+            recursive=False,
+            overwrite=False,
+            dry_run=False,
+        )
+    assert exit_code == 1
+    assert "The source type" in caplog.text
+
+
+def test_dry_run(test_data_path, capsys, tmp_path):
+    pmc_path = test_data_path / "jats_article.xml"
+    exit_code = topic_extract.run(
+        input_source="pmc",
+        input_path=pmc_path,
+        output_file=tmp_path,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=True,
+    )
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert str(pmc_path) in captured.out
+
+
+def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
+    pmc_path = test_data_path / "jats_article.xml"
+    output_jsonl = tmp_path / "test.jsonl"
+    meshes = ["MeSH 1", "MeSH 2"]
+
+    get_topic_for_pmc_mock = Mock(return_value=meshes)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.get_topics_for_pmc_article", get_topic_for_pmc_mock
+    )
+
+    exit_code = topic_extract.run(
+        input_source="pmc",
+        input_path=pmc_path,
+        output_file=output_jsonl,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=False,
+    )
+    assert exit_code == 0
+    assert output_jsonl.exists()
+    results = JSONL.load_jsonl(output_jsonl)
+
+    assert len(results) == 1
+    result = results[0]
+    assert result["source"] == "pmc"
+    assert result["path"] == str(pmc_path)
+    assert isinstance(result["topics"], dict)
+    topics = result["topics"]
+    assert "article" not in topics
+    assert "journal" in topics
+    assert isinstance(topics["journal"], dict)
+    assert topics["journal"]["MeSH"] == meshes
+    assert "metadata" in result
+
+    # Test overwrite
+    exit_code = topic_extract.run(
+        input_source="pmc",
+        input_path=pmc_path,
+        output_file=output_jsonl,
+        match_filename=None,
+        recursive=False,
+        overwrite=True,
+        dry_run=False,
+    )
+    assert exit_code == 0
+    results = JSONL.load_jsonl(output_jsonl)
+    assert len(results) == 1  # Length still 1 because we overwrite
+
+    # Test appending
+    exit_code = topic_extract.run(
+        input_source="pmc",
+        input_path=pmc_path,
+        output_file=output_jsonl,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=False,
+    )
+    assert exit_code == 0
+    results = JSONL.load_jsonl(output_jsonl)
+    assert len(results) == 2  # Length 2 because we append the file

@@ -441,7 +441,9 @@ class JSONL:
     """Collection of utility static functions handling `jsonl` files."""
 
     @staticmethod
-    def dump_jsonl(data: List[Dict[str, str]], path: pathlib.Path, mode: str = "w"):
+    def dump_jsonl(
+        data: List[Dict[str, str]], path: pathlib.Path, overwrite: bool = True
+    ):
         """Save a list of dictionaries to a jsonl.
 
         Parameters
@@ -450,12 +452,13 @@ class JSONL:
             List of dictionaries (json files).
         path : pathlib.Path
             File where to save it.
-        mode : {"w", "a"}
-            Mode of writing
+        overwrite : bool
+            If yes, the file is overwritten. Otherwise, the file is appended.
         """
+        mode = "w" if overwrite else "a"
         with path.open(mode) as f:
             for x in data:
-                line = json.dumps(x, indent=True, sort_keys=True)
+                line = json.dumps(x, sort_keys=True)
                 f.write(line + "\n")
 
     @staticmethod

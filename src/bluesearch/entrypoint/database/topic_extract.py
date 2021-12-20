@@ -22,7 +22,7 @@ import datetime
 import logging
 import re
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +97,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         action="store_true",
         help="""
         If output_file exists and overwrite is true, the output file is overwrote.
+        Otherwise, the topic extraction results are going
+        to be appended to the `output_file`.
         """,
     )
     parser.add_argument(
@@ -116,7 +118,7 @@ def run(
     input_source: str,
     input_path: Path,
     output_file: Path,
-    match_filename: str,
+    match_filename: Optional[str],
     recursive: bool,
     overwrite: bool,
     dry_run: bool,
@@ -153,9 +155,10 @@ def run(
         inputs = sorted(selected)
 
     else:
-        raise ValueError(
+        logger.error(
             "Argument 'input_path' should be a path to an existing file or directory!"
         )
+        return 1
 
     if dry_run:
         # Inputs are already sorted.
@@ -183,8 +186,10 @@ def run(
                     },
                 }
             )
+    else:
+        logger.error(f"The source type {input_source!r} is not implemented yet")
+        return 1
 
-    mode = "w" if overwrite else "a"
-    JSONL.dump_jsonl(all_results, output_file, mode)
+    JSONL.dump_jsonl(all_results, output_file, overwrite)
 
     return 0
