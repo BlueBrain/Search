@@ -89,27 +89,8 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
 
     content = ElementTree.fromstring(text)
 
-    # When the number of results is equal to 1, we take it.
-    nlm_catalog_records = content.findall("./NCBICatalogRecord/NLMCatalogRecord")
-    if len(nlm_catalog_records) == 1:
-        mesh_headings = nlm_catalog_records[0].findall("./MeshHeadingList/MeshHeading")
-        return _parse_mesh_from_nlm_catalog(mesh_headings)
-
-    # Otherwise we look for a perfect match of the title
-    for child in nlm_catalog_records:
-        title_main = child.find("./TitleMain/Title")
-        if title_main is None:
-            continue
-        nlm_ta = nlm_ta.lower().strip()
-        if title_main.text.lower().strip() in [
-            nlm_ta,
-            nlm_ta + ".",
-            nlm_ta + " .",
-        ]:
-            mesh_headings = child.findall("./MeshHeadingList/MeshHeading")
-            return _parse_mesh_from_nlm_catalog(mesh_headings)
-
-    return None
+    mesh_headings = content.findall("./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading")
+    return _parse_mesh_from_nlm_catalog(mesh_headings)
 
 
 # Article Topic
