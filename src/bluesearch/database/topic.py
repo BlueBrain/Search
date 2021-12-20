@@ -266,7 +266,6 @@ def get_topics_for_pmc_article(
     journal_topics = None
 
     # Determine journal title
-    logger.info(f"Reading file {pmc_path}")
     parser = JATSXMLParser(pmc_path)
     nlm_ta = parser.content.find(
         "./front/journal-meta/journal-id[@journal-id-type='nlm-ta']"
@@ -275,7 +274,7 @@ def get_topics_for_pmc_article(
         return journal_topics
 
     nlm_ta = nlm_ta.text
-    logger.info(f"Journal Title: {nlm_ta}")
+    logger.info(f"Journal Title Abbreviation: {nlm_ta}")
     journal_meshes = request_mesh_from_nlm_ta(nlm_ta)
     logger.info(journal_meshes)
 
