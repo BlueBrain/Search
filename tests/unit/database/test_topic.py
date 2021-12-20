@@ -1,11 +1,15 @@
 import logging
 import re
+from unittest.mock import Mock
 
 import pytest
 import responses
 from requests.exceptions import HTTPError
 
-from bluesearch.database.topic import extract_pubmed_id_from_pmc_file
+from bluesearch.database.topic import (
+    extract_pubmed_id_from_pmc_file,
+    get_topics_for_pmc_article,
+)
 from bluesearch.database.topic import (
     request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
 )
@@ -323,3 +327,39 @@ def test_get_pubmedid(test_data_path):
     path = test_data_path / "jats_article.xml"
     pubmed_id = extract_pubmed_id_from_pmc_file(path)
     assert pubmed_id == "PMID"
+
+
+def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
+    path = test_data_path / "jats_article.xml"
+    fake_meshes = [
+        {
+            "descriptor": [
+                {
+                    "ID": "D017059",
+                    "major_topic": False,
+                    "name": "Models, Econometric",
+                }
+            ],
+            "qualifiers": [],
+        },
+        {
+            "descriptor": [
+                {
+                    "ID": "D012044",
+                    "major_topic": False,
+                    "name": "Regression Analysis",
+                }
+            ],
+            "qualifiers": [],
+        },
+    ]
+    request_mock = Mock(return_value=fake_meshes)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.request_mesh_from_nlm_ta", request_mock
+    )
+
+    expected_output = ["Models, Econometric", "Regression Analysis"]
+    journal_topics = get_topics_for_pmc_article(path)
+    assert journal_topics == expected_output
+    request_mock.assert_called_once()
+    request_mock.assert_called_with("Journal NLM TA")
