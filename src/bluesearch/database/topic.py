@@ -271,14 +271,14 @@ def get_topics_for_pmc_article(
         "./front/journal-meta/journal-id[@journal-id-type='nlm-ta']"
     )
     if nlm_ta is None:
+        logger.error(f"No NLM Title Abbreviation found for {pmc_path}")
         return journal_topics
 
     nlm_ta = nlm_ta.text
     logger.info(f"Journal Title Abbreviation: {nlm_ta}")
     journal_meshes = request_mesh_from_nlm_ta(nlm_ta)
-    logger.info(journal_meshes)
 
-    if journal_meshes:
+    if journal_meshes is not None:
         journal_topics = []
         for mesh in journal_meshes:
             for descriptor in mesh["descriptor"]:
