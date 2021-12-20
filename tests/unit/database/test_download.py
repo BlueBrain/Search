@@ -200,7 +200,9 @@ def test_get_gcs_urls():
         ],
     }
 
-    fake_client.list_blobs.side_effect = lambda bucket, prefix: fake_blobs_by_prefix[prefix]
+    fake_client.list_blobs.side_effect = lambda bucket, prefix: fake_blobs_by_prefix[
+        prefix
+    ]
     start_date = datetime(2021, 10, 1)
     end_date = datetime(2021, 12, 1)
     blobs_by_month = get_gcs_urls(fake_bucket, start_date, end_date)
