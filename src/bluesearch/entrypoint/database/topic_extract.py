@@ -155,7 +155,7 @@ def run(
             all_results.append(
                 {
                     "source": "pmc",
-                    "path": str(path),
+                    "path": str(path.resolve()),
                     "topics": {
                         "journal": {
                             "MeSH": journal_topics,
