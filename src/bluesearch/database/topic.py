@@ -262,7 +262,18 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
 ) -> List[str] | None:
-    """Extract journal topics of a PMC article."""
+    """Extract journal topics of a PMC article.
+
+    Parameters
+    ----------
+    pmc_path
+        Path to the PMC article to consider
+
+    Returns
+    -------
+    journal_topics : Optional[list[str]]
+        Journal topics for the given article.
+    """
     # Determine journal title
     parser = JATSXMLParser(pmc_path)
     nlm_ta = parser.content.find(
