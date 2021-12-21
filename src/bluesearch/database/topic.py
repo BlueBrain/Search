@@ -21,7 +21,7 @@ import html
 import logging
 import pathlib
 from functools import lru_cache
-from typing import Iterable, List
+from typing import Iterable, List, Optional, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -295,3 +295,44 @@ def get_topics_for_pmc_article(
             journal_topics.append(descriptor["name"])
 
     return journal_topics
+
+
+def get_topics_for_pubmed_article(article: Element) -> Tuple[Optional[list[str]], Optional[list[str]]]:
+    """Extract journal topics of a PubMed article.
+
+    Parameters
+    ----------
+    article
+        Article for which to extract journal and article topics.
+
+    Returns
+    -------
+    journal_topics : Optional[list[str]
+        Journal topics extracted for the given article.
+    article_topics : Optional[list[str]]
+        Article topics extracted for the given article.
+    """
+    journal_topics, article_topics = None, None
+
+    # Journal topic
+    medline_ta = article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
+    if medline_ta is not None:
+        journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
+        if journal_meshes is not None:
+            journal_topics = []
+            for mesh in journal_meshes:
+                for descriptor in mesh["descriptor"]:
+                    journal_topics.append(descriptor["name"])
+
+    # Article topic
+    mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
+    article_meshes = _parse_mesh_from_pubmed(mesh_headings)
+
+    if article_meshes:
+        article_topics = []
+        for mesh in article_meshes:
+            for descriptor in mesh["descriptor"]:
+                article_topics.append(descriptor["name"])
+
+    return journal_topics, article_topics
+
