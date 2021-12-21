@@ -95,7 +95,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--overwrite",
         action="store_true",
         help="""
-        If output_file exists and overwrite is true, the output file is overwrote.
+        If output_file exists and overwrite is true, the output file is overwritten.
         Otherwise, the topic extraction results are going
         to be appended to the `output_file`.
         """,
