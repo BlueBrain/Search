@@ -167,8 +167,6 @@ def filter_files(
     ValueError
         If the input_path does not exists.
     """
-    inputs: Iterable[Path]
-
     if input_path.is_file():
         return [input_path]
 
