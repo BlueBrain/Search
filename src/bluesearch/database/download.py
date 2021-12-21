@@ -22,8 +22,10 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+import pandas as pd
 import requests
 from boto3.resources.base import ServiceResource
+from google.cloud.storage import Blob, Bucket
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +215,67 @@ def get_s3_urls(
     return url_dict
 
 
+def get_gcs_urls(
+    bucket: Bucket,
+    start_date: datetime,
+    end_date: datetime | None = None,
+) -> dict[str, list[Blob]]:
+    """Get Google Cloud Storage urls.
+
+    Parameters
+    ----------
+    bucket
+        GCS bucket.
+    start_date
+        Starting date to download the incremental files (inclusive).
+    end_date
+        Ending date. If None, today is considered as the ending date (inclusive).
+
+    Returns
+    -------
+    url_dict
+        Keys represent different months. Values are list of blobs
+        corresponding to actual PDF files.
+    """
+    date_list = get_daterange_list(
+        start_date=start_date,
+        end_date=end_date,
+        delta="month",
+    )
+    yearmonth_list = [date.strftime("%y%m") for date in date_list]
+
+    client = bucket.client
+
+    url_dict = {}
+    for yearmonth in yearmonth_list:
+        iterator = client.list_blobs(bucket, prefix=f"arxiv/arxiv/pdf/{yearmonth}")
+
+        # If more than one version is found, we only keep the last one
+        df = pd.DataFrame(
+            (
+                (
+                    el,
+                    el.name,
+                    el.name.rsplit("v", 1)[0],
+                    int(el.name.rsplit("v", 1)[1].split(".")[0]),
+                )
+                for el in iterator
+            ),
+            columns=["blob", "fullname", "article", "version"],
+        )
+
+        df_latest = df[["article", "version"]].groupby("article", as_index=False).max()
+        fullname_latest = df_latest["name"] = (
+            df_latest["article"] + "v" + df_latest["version"].astype(str) + ".pdf"
+        )
+
+        url_dict[yearmonth] = df.loc[
+            df["fullname"].isin(fullname_latest), "blob"
+        ].to_list()
+
+    return url_dict
+
+
 def download_articles(url_list: list[str], output_dir: Path) -> None:
     """Download articles.
 
@@ -264,3 +327,34 @@ def download_s3_articles(
             output_path = parent_folder / url.split("/")[-1]
             logger.info(f"Downloading {url}")
             bucket.download_file(url, str(output_path), {"RequestPayer": "requester"})
+
+
+def download_gcs_blob(blob: Blob, out_dir: Path, *, flatten: bool = False) -> None:
+    """Download a Google Cloud Storage blob.
+
+    Parameters
+    ----------
+    blob
+        The blob to download.
+    out_dir
+        The output directory.
+    flatten
+        If false (default) then the directory structure encoded in the blob
+        will be recreated, otherwise the downloaded file will be placed
+        directly into the output directory. For example, if the blob name
+        is "my_files/subdir/file.bin" and flatten is true then the file
+        will be downloaded to "<output_dir>/file.bin", otherwise it will be
+        placed into "<output_dir>/my_files/subdir/file.bin".
+    """
+    path = Path(blob.name)
+    if flatten:
+        path = out_dir / path.name
+    else:
+        path = out_dir / path
+    logger.debug(f"Downloading {blob.name} to {path}")
+    path.parent.mkdir(exist_ok=True, parents=True)
+    pdf_content = blob.download_as_bytes()
+    # Not using download_to_file because an empty file is still created even
+    # if the blob does not exist.
+    with path.open("wb") as fh:
+        fh.write(pdf_content)
