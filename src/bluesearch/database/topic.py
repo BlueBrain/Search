@@ -297,7 +297,9 @@ def get_topics_for_pmc_article(
     return journal_topics
 
 
-def get_topics_for_pubmed_article(article: Element) -> Tuple[Optional[list[str]], Optional[list[str]]]:
+def get_topics_for_pubmed_article(
+    article: Element,
+) -> Tuple[Optional[list[str]], Optional[list[str]]]:
     """Extract journal topics of a PubMed article.
 
     Parameters
@@ -316,7 +318,7 @@ def get_topics_for_pubmed_article(article: Element) -> Tuple[Optional[list[str]]
 
     # Journal topic
     medline_ta = article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
-    if medline_ta is not None:
+    if medline_ta is not None and medline_ta.text is not None:
         journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
         if journal_meshes is not None:
             journal_topics = []
@@ -335,4 +337,3 @@ def get_topics_for_pubmed_article(article: Element) -> Tuple[Optional[list[str]]
                 article_topics.append(descriptor["name"])
 
     return journal_topics, article_topics
-
