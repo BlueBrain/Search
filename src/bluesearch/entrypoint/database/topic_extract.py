@@ -163,7 +163,7 @@ def run(
                     },
                     "metadata": {
                         "created-date": str(datetime.datetime.now()),
-                        "bbs-version": str(bluesearch.version.__version__),
+                        "bbs-version": bluesearch.version.__version__,
                     },
                 }
             )
