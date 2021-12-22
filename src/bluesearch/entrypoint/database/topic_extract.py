@@ -69,7 +69,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "output_file",
         type=Path,
         help="""
-        Path to the file where the results will be saved.
+        Path to the file where the topic information will be written.
         If it does not exist yet, the file is created.
         """,
     )
