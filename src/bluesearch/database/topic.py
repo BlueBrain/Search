@@ -65,7 +65,7 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
     params = {"term": f'"{nlm_ta}"[ta]', "report": "xml", "format": "text"}
 
-    response = requests.get(url, params=params)
+    response = requests.get(base_url, params=params)
     response.raise_for_status()
 
     # The way NCBI responds to these queries is weird: it takes the XML file,
@@ -82,14 +82,14 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     )
     footer = "</pre>"
     if not text.startswith(header) or not text.endswith(footer):
-        logger.error(f"Unexpected response for query\n{url}")
+        logger.error(f"Unexpected response for parameters \n{params}")
         return None
     text = html.unescape(text[len(header) - 5 :]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
     if text == "<pre></pre>":
-        logger.error(f"Empty body for query\n{url}")
+        logger.error(f"Empty body for parameters \n{params}")
         return None
 
     content = ElementTree.fromstring(text)
