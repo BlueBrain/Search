@@ -43,7 +43,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.description = "Extract topic of articles."
 
     parser.add_argument(
-        "input_source",
+        "source",
         type=str,
         choices=(
             "arxiv",
@@ -114,7 +114,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
 def run(
     *,
-    input_source: str,
+    source: str,
     input_path: Path,
     output_file: Path,
     match_filename: Optional[str],
@@ -148,7 +148,7 @@ def run(
 
     all_results: list[dict[str, Any]] = []
 
-    if input_source == "pmc":
+    if source == "pmc":
         for path in inputs:
             logger.info(f"Processing {path}")
             journal_topics = get_topics_for_pmc_article(path)
@@ -168,7 +168,7 @@ def run(
                 }
             )
     else:
-        logger.error(f"The source type {input_source!r} is not implemented yet")
+        logger.error(f"The source type {source!r} is not implemented yet")
         return 1
 
     JSONL.dump_jsonl(all_results, output_file, overwrite)

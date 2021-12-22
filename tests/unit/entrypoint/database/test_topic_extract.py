@@ -24,7 +24,7 @@ from bluesearch.entrypoint.database import topic_extract
 from bluesearch.utils import JSONL
 
 TOPIC_EXTRACT_PARAMS = {
-    "input_source",
+    "source",
     "input_path",
     "output_file",
     "match_filename",
@@ -41,7 +41,7 @@ def test_init_parser():
     assert vars(args).keys() == TOPIC_EXTRACT_PARAMS
 
     # Test the values
-    assert args.input_source == "pmc"
+    assert args.source == "pmc"
     assert args.input_path == pathlib.Path("/path/to/input")
     assert args.output_file == pathlib.Path("/path/to/output")
     assert args.match_filename is None
@@ -59,7 +59,7 @@ def test_run_arguments():
 def test_input_path_not_correct(caplog):
     with caplog.at_level(logging.ERROR):
         exit_code = topic_extract.run(
-            input_source="pmc",
+            source="pmc",
             input_path=pathlib.Path("wrong_directory/"),
             output_file=pathlib.Path(""),
             match_filename=None,
@@ -75,7 +75,7 @@ def test_wrong_source(test_data_path, caplog, tmp_path):
     pmc_path = test_data_path / "jats_article.xml"
     with caplog.at_level(logging.ERROR):
         exit_code = topic_extract.run(
-            input_source="wrong_type",
+            source="wrong_type",
             input_path=pmc_path,
             output_file=tmp_path,
             match_filename=None,
@@ -90,7 +90,7 @@ def test_wrong_source(test_data_path, caplog, tmp_path):
 def test_dry_run(test_data_path, capsys, tmp_path):
     pmc_path = test_data_path / "jats_article.xml"
     exit_code = topic_extract.run(
-        input_source="pmc",
+        source="pmc",
         input_path=pmc_path,
         output_file=tmp_path,
         match_filename=None,
@@ -114,7 +114,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     )
 
     exit_code = topic_extract.run(
-        input_source="pmc",
+        source="pmc",
         input_path=pmc_path,
         output_file=output_jsonl,
         match_filename=None,
@@ -140,7 +140,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
 
     # Test overwrite
     exit_code = topic_extract.run(
-        input_source="pmc",
+        source="pmc",
         input_path=pmc_path,
         output_file=output_jsonl,
         match_filename=None,
@@ -154,7 +154,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
 
     # Test appending
     exit_code = topic_extract.run(
-        input_source="pmc",
+        source="pmc",
         input_path=pmc_path,
         output_file=output_jsonl,
         match_filename=None,
