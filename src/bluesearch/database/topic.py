@@ -63,9 +63,9 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f'{base_url}?term="{nlm_ta}"[ta]&report=xml&format=text'
+    params = {"term": f'"{nlm_ta}"[ta]', "report": "xml", "format": "text"}
 
-    response = requests.get(url)
+    response = requests.get(url, params=params)
     response.raise_for_status()
 
     # The way NCBI responds to these queries is weird: it takes the XML file,
