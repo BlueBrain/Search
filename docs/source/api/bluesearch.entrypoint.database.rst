@@ -14,6 +14,7 @@ Submodules
    bluesearch.entrypoint.database.parent
    bluesearch.entrypoint.database.parse
    bluesearch.entrypoint.database.schemas
+   bluesearch.entrypoint.database.topic_extract
 
 Module contents
 ---------------

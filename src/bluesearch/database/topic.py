@@ -18,15 +18,22 @@
 from __future__ import annotations
 
 import html
+import logging
 import pathlib
-from typing import Iterable
+from functools import lru_cache
+from typing import Iterable, List
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
 from defusedxml import ElementTree
 
+from bluesearch.database.article import JATSXMLParser
+
+logger = logging.getLogger(__name__)
+
 
 # Journal Topic
+@lru_cache(maxsize=None)
 def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     """Retrieve Medical Subject Heading from Journal's NLM Title Abbreviation.
 
@@ -40,29 +47,25 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     meshs
         List containing all meshs of the Journal.
 
-    Raises
-    ------
-    ElementTree.ParseError
-        If more than one result is found with the given request.
-
     References
     ----------
     https://www.ncbi.nlm.nih.gov/books/NBK3799/#catalog.Title_Abbreviation_ta
     """
     if "&" in nlm_ta:
-        raise ValueError(
+        logger.error(
             "Ampersands not allowed in the NLM title abbreviation. "
             f"Try unescaping HTML characters first. Got:\n{nlm_ta}"
         )
+        return None
 
     # The "format=text" parameter only matters when no result was found. With
     # this parameter the returned text will be an empty string. See the
     # corresponding check further below. Without this parameter the output is
     # an HTML page, which is impossible to parse.
     base_url = "https://www.ncbi.nlm.nih.gov/nlmcatalog"
-    url = f"{base_url}?term={nlm_ta}[ta]&report=xml&format=text"
+    params = {"term": f'"{nlm_ta}"[ta]', "report": "xml", "format": "text"}
 
-    response = requests.get(url)
+    response = requests.get(base_url, params=params)
     response.raise_for_status()
 
     # The way NCBI responds to these queries is weird: it takes the XML file,
@@ -79,29 +82,21 @@ def request_mesh_from_nlm_ta(nlm_ta: str) -> list[dict] | None:
     )
     footer = "</pre>"
     if not text.startswith(header) or not text.endswith(footer):
-        raise RuntimeError(f"Unexpected response for query\n{url}")
-    text = html.unescape(text[len(header) : -len(footer)]).strip()
+        logger.error(f"Unexpected response for parameters \n{params}")
+        return None
+    text = html.unescape(text[len(header) - 5 :]).strip()
 
     # Empty text means topic abbreviation was not found. See comment about the
     # parameter "format=text" above.
-    if text == "":
+    if text == "<pre></pre>":
+        logger.error(f"Empty body for parameters \n{params}")
         return None
 
-    try:
-        content = ElementTree.fromstring(text)
-    except ElementTree.ParseError:
-        # Occurs when the number of results of the research is bigger than one.
-        # It is the case for less than 1 % of the journal from PMC
-        raise ElementTree.ParseError("The parsing did not work")
-
-    if not content.tag == "NCBICatalogRecord":
-        raise RuntimeError(
-            f"Expected to find the NCBICatalogRecord tag but got {content.tag}"
-        )
-    mesh_headings = content.findall("./NLMCatalogRecord/MeshHeadingList/MeshHeading")
-    meshs = _parse_mesh_from_nlm_catalog(mesh_headings)
-
-    return meshs
+    content = ElementTree.fromstring(text)
+    mesh_headings = content.findall(
+        "./NCBICatalogRecord/NLMCatalogRecord/MeshHeadingList/MeshHeading"
+    )
+    return _parse_mesh_from_nlm_catalog(mesh_headings)
 
 
 # Article Topic
@@ -261,3 +256,42 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
             meshs.append({"descriptor": descriptor_name, "qualifiers": qualifiers_name})
 
     return meshs
+
+
+# PMC source
+def get_topics_for_pmc_article(
+    pmc_path: pathlib.Path | str,
+) -> List[str] | None:
+    """Extract journal topics of a PMC article.
+
+    Parameters
+    ----------
+    pmc_path
+        Path to the PMC article to consider
+
+    Returns
+    -------
+    journal_topics : Optional[list[str]]
+        Journal topics for the given article.
+    """
+    # Determine journal title
+    parser = JATSXMLParser(pmc_path)
+    nlm_ta = parser.content.find(
+        "./front/journal-meta/journal-id[@journal-id-type='nlm-ta']"
+    )
+    if nlm_ta is None:
+        logger.error(f"No NLM Title Abbreviation found for {pmc_path}")
+        return None
+
+    nlm_ta = nlm_ta.text
+    logger.info(f"Journal Title Abbreviation: {nlm_ta}")
+    journal_meshes = request_mesh_from_nlm_ta(nlm_ta)
+    if journal_meshes is None:
+        return None
+
+    journal_topics = []
+    for mesh in journal_meshes:
+        for descriptor in mesh["descriptor"]:
+            journal_topics.append(descriptor["name"])
+
+    return journal_topics
