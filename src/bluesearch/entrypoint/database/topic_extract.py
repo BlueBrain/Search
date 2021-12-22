@@ -162,7 +162,9 @@ def run(
                         },
                     },
                     "metadata": {
-                        "created-date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "created-date": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
                         "bbs-version": bluesearch.version.__version__,
                     },
                 }
