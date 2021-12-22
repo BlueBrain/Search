@@ -18,10 +18,9 @@
 import argparse
 import json
 import logging
-import re
 import warnings
 from pathlib import Path
-from typing import Iterable, Iterator, Optional
+from typing import Iterator, Optional
 
 from defusedxml import ElementTree
 
@@ -141,58 +140,6 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         raise ValueError(f"Unsupported input type '{input_type}'!")
 
 
-def filter_files(
-    input_path: Path,
-    recursive: bool,
-    match_filename: Optional[str] = None,
-) -> Iterable[Path]:
-    """Create a list of files from input_file.
-
-    Parameters
-    ----------
-    input_path
-        File or directory to consider.
-    recursive
-        If True, directories and all subdirectories are considered in a recursive way.
-    match_filename
-        Only filename matching match_filename are kept.
-
-    Returns
-    -------
-    inputs : Iterable[pathlib.Path]
-        List of kept files.
-
-    Raises
-    ------
-    ValueError
-        If the input_path does not exists.
-    """
-    if input_path.is_file():
-        return [input_path]
-
-    elif input_path.is_dir():
-        if recursive:
-            pattern = "**/*"
-        else:
-            pattern = "*"
-        files = (x for x in input_path.glob(pattern) if x.is_file())
-
-        if match_filename is None:
-            selected = files
-        elif match_filename == "":
-            raise ValueError("Value for argument 'match-filename' should not be empty!")
-        else:
-            regex = re.compile(match_filename)
-            selected = (x for x in files if regex.fullmatch(x.name))
-
-        return sorted(selected)
-
-    else:
-        raise ValueError(
-            "Argument 'input_path' should be a path to an existing file or directory!"
-        )
-
-
 def run(
     *,
     input_type: str,
@@ -207,8 +154,10 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    from bluesearch.utils import find_files
+
     try:
-        inputs = filter_files(input_path, recursive, match_filename)
+        inputs = find_files(input_path, recursive, match_filename)
     except ValueError:
         logger.error(
             "Argument 'input_path' should be a path "

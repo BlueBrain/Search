@@ -23,7 +23,7 @@ import pytest
 
 from bluesearch.database.article import Article
 from bluesearch.entrypoint.database.parent import main
-from bluesearch.entrypoint.database.parse import filter_files, iter_parsers
+from bluesearch.entrypoint.database.parse import iter_parsers
 
 
 @pytest.mark.parametrize(
@@ -166,32 +166,3 @@ def test_dry_run(capsys):
     main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
     captured = capsys.readouterr()
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
-
-
-def test_filtering_recursive(tmp_path):
-    input_path = Path("tests/data/cord19_v35/document_parses/pdf_json/")
-    inputs = filter_files(input_path, recursive=True)
-    filenames = sorted(x.name for x in inputs)
-    expected = [
-        "16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json",
-        "5f267fa1ef3a65e239aa974329e935a4d93dafd2.json",
-    ]
-    assert filenames == expected
-
-
-def test_filtering(tmp_path):
-    input_path = Path("tests/data/cord19_v35/")
-    inputs = filter_files(input_path, recursive=True, match_filename=r"[a-z0-9]+\.json")
-    filenames = sorted(x.name for x in inputs)
-    expected = [
-        "16e82ce0e0c8a1b36497afc0d4392b4fe21eb174.json",
-        "5f267fa1ef3a65e239aa974329e935a4d93dafd2.json",
-    ]
-    assert filenames == expected
-
-
-def test_filtering_empty(tmp_path):
-    message = "Value for argument 'match-filename' should not be empty!"
-    input_path = Path("tests/data/cord19_v35/")
-    with pytest.raises(ValueError, match=message):
-        _ = filter_files(input_path, recursive=True, match_filename="")

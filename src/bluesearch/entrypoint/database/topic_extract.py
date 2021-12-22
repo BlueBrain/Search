@@ -129,11 +129,10 @@ def run(
     """
     import bluesearch
     from bluesearch.database.topic import get_topics_for_pmc_article
-    from bluesearch.entrypoint.database.parse import filter_files
-    from bluesearch.utils import JSONL
+    from bluesearch.utils import JSONL, find_files
 
     try:
-        inputs = filter_files(input_path, recursive, match_filename)
+        inputs = find_files(input_path, recursive, match_filename)
     except ValueError:
         logger.error(
             "Argument 'input_path' should be a path "

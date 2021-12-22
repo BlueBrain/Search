@@ -17,8 +17,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
 import json
 import pathlib
+import re
 import time
 import warnings
 from typing import Any, Dict, List, Set, Union
@@ -26,6 +28,58 @@ from typing import Any, Dict, List, Set, Union
 import h5py
 import numpy as np
 import spacy
+
+
+def find_files(
+    input_path: pathlib.Path,
+    recursive: bool,
+    match_filename: str | None = None,
+) -> list[pathlib.Path]:
+    """Find files inside of `input_path`.
+
+    Parameters
+    ----------
+    input_path
+        File or directory to consider.
+    recursive
+        If True, directories and all subdirectories are considered in a recursive way.
+    match_filename
+        Only filename matching match_filename are kept.
+
+    Returns
+    -------
+    inputs : list[pathlib.Path]
+        List of kept files.
+
+    Raises
+    ------
+    ValueError
+        If the input_path does not exists.
+    """
+    if input_path.is_file():
+        return [input_path]
+
+    elif input_path.is_dir():
+        if recursive:
+            pattern = "**/*"
+        else:
+            pattern = "*"
+        files = (x for x in input_path.glob(pattern) if x.is_file())
+
+        if match_filename is None:
+            selected = files
+        elif match_filename == "":
+            raise ValueError("Value for argument 'match-filename' should not be empty!")
+        else:
+            regex = re.compile(match_filename)
+            selected = (x for x in files if regex.fullmatch(x.name))
+
+        return sorted(selected)
+
+    else:
+        raise ValueError(
+            "Argument 'input_path' should be a path to an existing file or directory!"
+        )
 
 
 class Timer:
