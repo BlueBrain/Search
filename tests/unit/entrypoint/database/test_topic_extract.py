@@ -165,3 +165,42 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert exit_code == 0
     results = JSONL.load_jsonl(output_jsonl)
     assert len(results) == 2  # Length 2 because we append the file
+
+
+def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
+    pmc_path = test_data_path / "pubmed_articles.xml"
+    output_jsonl = tmp_path / "test.jsonl"
+    meshes = (["MeSH Journal 1", "MeSH Journal 2"], ["MeSH Article 1", "MeSH Article 2"])
+
+    get_topic_for_pubmed_mock = Mock(return_value=meshes)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.get_topics_for_pubmed_article", get_topic_for_pubmed_mock
+    )
+
+    exit_code = topic_extract.run(
+        source="pubmed",
+        input_path=pmc_path,
+        output_file=output_jsonl,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=False,
+    )
+    assert exit_code == 0
+    assert output_jsonl.exists()
+    results = JSONL.load_jsonl(output_jsonl)
+
+    assert len(results) == 2
+    result = results[0]
+    assert result["source"] == "pubmed"
+    assert result["path"] == str(pmc_path)
+    assert isinstance(result["topics"], dict)
+    topics = result["topics"]
+    assert "article" in topics
+    assert "journal" in topics
+    assert isinstance(topics["journal"], dict)
+    assert isinstance(topics["article"], dict)
+    assert topics["journal"]["MeSH"] == meshes[0]
+    assert topics["article"]["MeSH"] == meshes[1]
+    assert "metadata" in result
+    assert "element_in_file" in result["metadata"]
