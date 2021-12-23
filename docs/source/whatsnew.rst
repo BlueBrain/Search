@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Change| Paper UID to take into account also the :code:`arxiv id` (when available).
 - |Add| code to download :code:`arxiv` papers from a given date.
 - |Change| the behaviour of the entrypoint :code:`bbs_database download` when the
   specified :code:`--from-month` is too old and the source changed its structure of storing articles
