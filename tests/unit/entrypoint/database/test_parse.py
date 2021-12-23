@@ -172,34 +172,3 @@ def test_dry_run(capsys):
     main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
     captured = capsys.readouterr()
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
-
-
-def test_recursive(tmp_path):
-    input_path = "tests/data/cord19_v35/document_parses/pdf_json/"
-    main(["parse", "cord19-json", input_path, str(tmp_path), "--recursive"])
-    filenames = sorted(x.name for x in tmp_path.iterdir())
-    expected = [
-        "61ba28becef4945b919562ac76349af7.json",
-        "84ee8e7458ede952bbb567b06c34fdb2.json",
-    ]
-    assert filenames == expected
-
-
-def test_filtering(tmp_path):
-    input_path = "tests/data/cord19_v35/"
-    options = ["--recursive", "--match-filename", "[a-z0-9]+\\.json"]
-    main(["parse", "cord19-json", input_path, str(tmp_path), *options])
-    filenames = sorted(x.name for x in tmp_path.iterdir())
-    expected = [
-        "61ba28becef4945b919562ac76349af7.json",
-        "84ee8e7458ede952bbb567b06c34fdb2.json",
-    ]
-    assert filenames == expected
-
-
-def test_filtering_empty(tmp_path):
-    message = "Value for argument 'match-filename' should not be empty!"
-    input_path = "tests/data/cord19_v35/"
-    options = ["--recursive", "--match-filename", ""]
-    with pytest.raises(ValueError, match=message):
-        main(["parse", "cord19-json", input_path, str(tmp_path), *options])
