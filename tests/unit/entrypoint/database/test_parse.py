@@ -64,7 +64,7 @@ from bluesearch.entrypoint.database.parse import iter_parsers
             "1411.7903v4.xml",
             ["26f61b81976907d1fa5b779511fb1360"],
             id="tei-xml-arxiv",
-        )
+        ),
     ],
 )
 def test_iter_parsers(input_type, path, article_uids):
