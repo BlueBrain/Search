@@ -15,33 +15,39 @@ from bluesearch.entrypoint.database.parse import iter_parsers
         pytest.param(
             "cord19-json",
             "cord19_v35/document_parses/pmc_json/PMC7186928.xml.json",
-            ["84389eb01e19e3e17011deec5a785b52"],
+            ["990d33f52ed226346404cff23111989d"],
             id="cord19-json",
         ),
         pytest.param(
             "jats-xml",
             "jats_article.xml",
-            ["97c1ee74607e1c2d99e4fa6f0877b044"],
+            ["34eaed1a1a05166c0b8610336aee638d"],
             id="jats-xml",
         ),
         pytest.param(
             "pubmed-xml",
             "pubmed_article.xml",
-            ["645314d7b040d1e2b8ec7dbf9dd192c7"],
+            ["0e8400416a385b9a62d8178539b76daf"],
             id="pubmed-xml",
         ),
         pytest.param(
             "pubmed-xml-set",
             "pubmed_articles.xml",
-            ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"],
+            ["e9bb8ba085982a7cbb7d9ac2dbbafc7f", "49442b9ec575ae01f4934dfd79d03631"],
             id="pubmed-xml-set",
         ),
         pytest.param(
             "tei-xml",
-            "tei_file.tei.xml",
-            ["94acbb74a7427ae4d58333e3145870e1"],
+            "1411.7903v4.xml",
+            ["73604b8751f2f4ecf63a5cefd042f6a3"],
             id="tei-xml",
         ),
+        pytest.param(
+            "tei-xml-arxiv",
+            "1411.7903v4.xml",
+            ["26f61b81976907d1fa5b779511fb1360"],
+            id="tei-xml-arxiv",
+        )
     ],
 )
 def test_iter_parsers(input_type, path, article_uids):
@@ -133,7 +139,7 @@ def test_pubmed_xml_set(tmp_path):
     files = sorted(tmp_path.iterdir())
     assert len(files) == 2
 
-    uids = ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"]
+    uids = ["49442b9ec575ae01f4934dfd79d03631", "e9bb8ba085982a7cbb7d9ac2dbbafc7f"]
     for file, uid in zip(files, uids):
         assert file.name == f"{uid}.json"
         with file.open() as f:
@@ -154,8 +160,8 @@ def test_recursive(tmp_path):
     main(["parse", "cord19-json", input_path, str(tmp_path), "--recursive"])
     filenames = sorted(x.name for x in tmp_path.iterdir())
     expected = [
-        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
-        "bd8c3ef147501fab67a1f75d99c4327c.json",
+        "61ba28becef4945b919562ac76349af7.json",
+        "84ee8e7458ede952bbb567b06c34fdb2.json",
     ]
     assert filenames == expected
 
@@ -166,8 +172,8 @@ def test_filtering(tmp_path):
     main(["parse", "cord19-json", input_path, str(tmp_path), *options])
     filenames = sorted(x.name for x in tmp_path.iterdir())
     expected = [
-        "3e69dc78758b8ad2ad9cf2784dacdf01.json",
-        "bd8c3ef147501fab67a1f75d99c4327c.json",
+        "61ba28becef4945b919562ac76349af7.json",
+        "84ee8e7458ede952bbb567b06c34fdb2.json",
     ]
     assert filenames == expected
 
