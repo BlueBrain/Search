@@ -25,6 +25,8 @@ from bluesearch.database.article import (
         ("downloads/arxiv/arxiv/pdf/1802/1802.10298v99.json", "arxiv:1802.10298v99"),
         ("downloads/arxiv/arxiv/pdf/1411/1411.7903v4.json", "arxiv:1411.7903v4"),
         ("downloads/arxiv/q-bio/pdf/0309/0309033v2.pdf", "arxiv:q-bio/0309033v2"),
+        ("1411.7903v4.json", "arxiv:1411.7903v4"),
+        ("0309033v2.pdf", None),
     ),
 )
 def test_get_arxiv_id(path, expected_id):
