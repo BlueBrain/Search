@@ -18,10 +18,9 @@
 import argparse
 import json
 import logging
-import re
 import warnings
 from pathlib import Path
-from typing import Iterable, Iterator, Optional
+from typing import Iterator, Optional
 
 from defusedxml import ElementTree
 
@@ -159,32 +158,16 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    inputs: Iterable[Path]
+    from bluesearch.utils import find_files
 
-    if input_path.is_file():
-        inputs = [input_path]
-
-    elif input_path.is_dir():
-        if recursive:
-            pattern = "**/*"
-        else:
-            pattern = "*"
-        files = (x for x in input_path.glob(pattern) if x.is_file())
-
-        if match_filename is None:
-            selected = files
-        elif match_filename == "":
-            raise ValueError("Value for argument 'match-filename' should not be empty!")
-        else:
-            regex = re.compile(match_filename)
-            selected = (x for x in files if regex.fullmatch(x.name))
-
-        inputs = sorted(selected)
-
-    else:
-        raise ValueError(
-            "Argument 'input_path' should be a path to an existing file or directory!"
+    try:
+        inputs = find_files(input_path, recursive, match_filename)
+    except ValueError:
+        logger.error(
+            "Argument 'input_path' should be a path "
+            "to an existing file or directory!"
         )
+        return 1
 
     if dry_run:
         # Inputs are already sorted.

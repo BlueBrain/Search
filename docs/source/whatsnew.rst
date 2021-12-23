@@ -29,6 +29,10 @@ Legend
 
 Latest
 ======
+- |Add| code to download :code:`arxiv` papers from a given date.
+- |Change| the behaviour of the entrypoint :code:`bbs_database download` when the
+  specified :code:`--from-month` is too old and the source changed its structure of storing articles
+  meanwhile. Now print an error and exit.
 - |Add| code to download :code:`PMC` papers from a given date.
 - |Add| entrypoint :code:`bbs_database download`.
 - |Add| run the tox env ``check-apidoc`` in CI

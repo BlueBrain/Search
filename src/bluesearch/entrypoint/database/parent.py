@@ -5,7 +5,14 @@ import sys
 from collections import namedtuple
 from typing import Optional, Sequence
 
-from bluesearch.entrypoint.database import add, convert_pdf, download, init, parse
+from bluesearch.entrypoint.database import (
+    add,
+    convert_pdf,
+    download,
+    init,
+    parse,
+    topic_extract,
+)
 
 Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
 
@@ -60,6 +67,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             help="Parse raw files.",
             init_parser=parse.init_parser,
             run=parse.run,
+        ),
+        "topic-extract": Cmd(
+            help="Extract topic of article(s).",
+            init_parser=topic_extract.init_parser,
+            run=topic_extract.run,
         ),
     }
 

@@ -8,6 +8,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
     <front>
         <journal-meta>
+            <journal-id journal-id-type="nlm-ta">Journal NLM TA</journal-id>
             <journal-id journal-id-type="pmc">Journal ID PMC</journal-id>
             <journal-id journal-id-type="pubmed">Journal ID PubMed</journal-id>
             <journal-id journal-id-type="publisher">Journal ID Publisher</journal-id>

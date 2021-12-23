@@ -1,4 +1,21 @@
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
+import logging
 from argparse import ArgumentError
 from pathlib import Path
 
@@ -71,7 +88,7 @@ def test_unknown_input_type():
     assert f"invalid choice: '{wrong_type}'" in str(context)
 
 
-def test_cord19_json(jsons_path, tmp_path):
+def test_cord19_json(jsons_path, tmp_path, caplog):
     path_to_json = jsons_path / "document_parses" / "pmc_json"
     json_files = sorted(path_to_json.glob("*.json"))
     assert len(json_files) > 0
@@ -123,14 +140,16 @@ def test_cord19_json(jsons_path, tmp_path):
         assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist
-    with pytest.raises(ValueError):
-        args_and_opts = [
-            "parse",
-            "cord19-json",
-            str(path_to_json / "dir_that_does_not_exists"),
-            str(out_dir),
-        ]
-        main(args_and_opts)
+    args_and_opts = [
+        "parse",
+        "cord19-json",
+        str(path_to_json / "dir_that_does_not_exists"),
+        str(out_dir),
+    ]
+    with caplog.at_level(logging.ERROR):
+        exit_code = main(args_and_opts)
+    assert exit_code == 1
+    assert "Argument 'input_path'" in caplog.text
 
 
 def test_pubmed_xml_set(tmp_path):

@@ -18,10 +18,30 @@
 import argparse
 import getpass
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+from itertools import chain
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# Data conventions and formats are different prior to these dates. We
+# download only if the starting date is more recent or equal to the
+# respective threshold.
+MIN_DATE = {
+    # https://arxiv.org/help/arxiv_identifier#old
+    "arxiv": datetime(2007, 4, 1),
+    # https://www.biorxiv.org/tdm + looked into Current Content folder on GPFS
+    "biorxiv": datetime(2018, 12, 1),
+    # https://www.medrxiv.org/tdm + looked into Current Content folder on GPFS
+    "medrxiv": datetime(2020, 10, 1),
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/
+    "pmc": datetime(2021, 12, 1),
+    # This should change every year in December:
+    # see https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "pubmed": datetime(2021, 12, 1),
+}
 
 
 def convert_to_datetime(s: str) -> datetime:
@@ -109,6 +129,15 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_s3_urls,
     )
 
+    if from_month < MIN_DATE[source]:
+        logger.error(
+            f"The papers from before {MIN_DATE[source].strftime('%B %Y')} "
+            "follow a different format and can't be downloaded. "
+            "Please contact the developers if you need them. "
+            "To proceed please re-run the command with a different starting month."
+        )
+        return 1
+
     if source == "pmc":
         url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
@@ -163,7 +192,60 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         logger.info(f"Start downloading {source} papers.")
         download_s3_articles(bucket, url_dict, output_dir)
         return 0
+    elif source == "arxiv":
+        logger.info("Loading libraries")
+        from google.cloud.storage import Client
 
+        from bluesearch.database.download import download_gcs_blob, get_gcs_urls
+
+        client = Client.create_anonymous_client()
+        bucket = client.bucket("arxiv-dataset")
+
+        logger.info("Collecting download URLs")
+        blobs_by_month = get_gcs_urls(bucket, from_month)
+
+        if dry_run:
+            print("The following items will be downloaded:")
+            for month, month_blobs in blobs_by_month.items():
+                print(f"Month: {month}")
+                for blob in month_blobs:
+                    print(blob.name)
+            return 0
+
+        def progress_info(n_jobs, n_bytes_):
+            logger.info(f"{n_jobs} download jobs submitted ({n_bytes_:,d} bytes)")
+
+        job_names = {}
+        n_blobs = 0
+        n_bytes = 0
+        # The max_workers parameter already has a reasonable default if
+        # not specified. See python docs for ThreadPoolExecutor.
+        with ThreadPoolExecutor() as executor:
+            logger.info("Submitting download jobs to workers")
+            for blob in chain(*blobs_by_month.values()):
+                future = executor.submit(
+                    download_gcs_blob,
+                    blob,
+                    output_dir,
+                    flatten=True,
+                )
+                job_names[future] = blob.name
+                n_blobs += 1
+                n_bytes += blob.size or 0
+                if n_blobs % 100 == 0:
+                    progress_info(n_blobs, n_bytes)
+            progress_info(n_blobs, n_bytes)
+            logger.info("Waiting for the downloads to finish (may take a while)")
+            for future in as_completed(job_names):
+                job_name = job_names[future]
+                exc = future.exception()
+                if exc:
+                    logger.error("The job %s failed, reason: %s", job_name, exc)
+                else:
+                    logger.debug("The job %s succeeded.", job_name)
+            logger.info("Finished downloading")
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1
+
+    return 0
