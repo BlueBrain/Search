@@ -170,11 +170,15 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     pmc_path = test_data_path / "pubmed_articles.xml"
     output_jsonl = tmp_path / "test.jsonl"
-    meshes = (["MeSH Journal 1", "MeSH Journal 2"], ["MeSH Article 1", "MeSH Article 2"])
+    meshes = (
+        ["MeSH Journal 1", "MeSH Journal 2"],
+        ["MeSH Article 1", "MeSH Article 2"],
+    )
 
     get_topic_for_pubmed_mock = Mock(return_value=meshes)
     monkeypatch.setattr(
-        "bluesearch.database.topic.get_topics_for_pubmed_article", get_topic_for_pubmed_mock
+        "bluesearch.database.topic.get_topics_for_pubmed_article",
+        get_topic_for_pubmed_mock,
     )
 
     exit_code = topic_extract.run(
