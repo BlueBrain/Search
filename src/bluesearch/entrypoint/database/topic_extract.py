@@ -181,7 +181,7 @@ def run(
                 journal_topics, article_topics = get_topics_for_pubmed_article(article)
                 all_results.append(
                     {
-                        "source": "pmc",
+                        "source": "pubmed",
                         "path": str(path.resolve()),
                         "topics": {
                             "journal": {
