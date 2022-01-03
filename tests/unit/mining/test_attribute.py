@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Tests covering attribute extraction."""
+from __future__ import annotations
 
 import json
 from copy import deepcopy
