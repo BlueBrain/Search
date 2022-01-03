@@ -23,7 +23,7 @@ import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Sequence
+from typing import Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -851,11 +851,11 @@ class Article(DataClassJSONMixin):
     title: str
     authors: Sequence[str]
     abstract: Sequence[str]
-    section_paragraphs: Sequence[tuple[str, str]]
-    pubmed_id: str | None = None
-    pmc_id: str | None = None
-    doi: str | None = None
-    uid: str | None = None
+    section_paragraphs: Sequence[Tuple[str, str]]
+    pubmed_id: Optional[str] = None
+    pmc_id: Optional[str] = None
+    doi: Optional[str] = None
+    uid: Optional[str] = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
