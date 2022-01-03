@@ -24,7 +24,7 @@ import pathlib
 import re
 import time
 import warnings
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Set
 
 import h5py
 import numpy as np
@@ -541,7 +541,7 @@ class MissingEnvironmentVariable(Exception):
     """Exception for missing environment variables."""
 
 
-def check_entity_type_consistency(model_path: Union[str, pathlib.Path]) -> bool:
+def check_entity_type_consistency(model_path: str | pathlib.Path) -> bool:
     """Check that entity type of the model name is the same as in the ner pipe.
 
     Parameters
@@ -589,7 +589,7 @@ def check_entity_type_consistency(model_path: Union[str, pathlib.Path]) -> bool:
 
 
 def get_available_spacy_models(
-    data_and_models_dir: Union[str, pathlib.Path]
+    data_and_models_dir: str | pathlib.Path,
 ) -> Dict[str, pathlib.Path]:
     """List available spacy models for a given data directory.
 
@@ -628,7 +628,7 @@ def get_available_spacy_models(
 
 
 def load_spacy_model(
-    model_name: Union[str, pathlib.Path], device: str = "cpu", *args: Any, **kwargs: Any
+    model_name: str | pathlib.Path, device: str = "cpu", *args: Any, **kwargs: Any
 ) -> spacy.language.Language:
     """Spacy model load with informative error message.
 

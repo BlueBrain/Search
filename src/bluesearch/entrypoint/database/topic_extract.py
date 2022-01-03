@@ -21,7 +21,7 @@ import argparse
 import datetime
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def run(
     source: str,
     input_path: Path,
     output_file: Path,
-    match_filename: Optional[str],
+    match_filename: str | None,
     recursive: bool,
     overwrite: bool,
     dry_run: bool,

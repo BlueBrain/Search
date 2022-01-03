@@ -23,7 +23,7 @@ import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Sequence, Tuple
+from typing import Generator, Iterable, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
@@ -81,7 +81,7 @@ class ArticleParser(ABC):
         """
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -92,7 +92,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -103,7 +103,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -114,7 +114,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def uid(self) -> Optional[str]:
+    def uid(self) -> str | None:
         """Generate unique ID of the article based on different identifiers.
 
         Returns
@@ -231,7 +231,7 @@ class JATSXMLParser(ArticleParser):
                 yield "Table Caption", caption
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -242,7 +242,7 @@ class JATSXMLParser(ArticleParser):
         return self.ids.get("pmid")
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -253,7 +253,7 @@ class JATSXMLParser(ArticleParser):
         return self.ids.get("pmc")
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -477,7 +477,7 @@ class PubMedXMLParser(ArticleParser):
         return ()
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -489,7 +489,7 @@ class PubMedXMLParser(ArticleParser):
         return pubmed_id.text
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -503,7 +503,7 @@ class PubMedXMLParser(ArticleParser):
         return None if pmc_id is None else pmc_id.text
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -610,7 +610,7 @@ class CORD19ArticleParser(ArticleParser):
             yield "Caption", ref_entry["text"]
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -852,10 +852,10 @@ class Article(DataClassJSONMixin):
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[Tuple[str, str]]
-    pubmed_id: Optional[str] = None
-    pmc_id: Optional[str] = None
-    doi: Optional[str] = None
-    uid: Optional[str] = None
+    pubmed_id: str | None = None
+    pmc_id: str | None = None
+    doi: str | None = None
+    uid: str | None = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:

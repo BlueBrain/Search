@@ -1,5 +1,3 @@
-"""Model handling sentences embeddings."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,13 +14,14 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Model handling sentences embeddings."""
+from __future__ import annotations
 
 import logging
 import multiprocessing as mp
 import pathlib
 import pickle  # nosec
 from abc import ABC, abstractmethod
-from typing import Optional, Union
 
 import numpy as np
 import sentence_transformers
@@ -299,7 +298,7 @@ def compute_database_embeddings(connection, model, indices, batch_size=10):
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: Optional[Union[pathlib.Path, str]] = None,
+    checkpoint_path: pathlib.Path | str | None = None,
     device: str = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
