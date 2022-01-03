@@ -46,6 +46,11 @@ def get_arxiv_id(path: str | Path) -> Optional[str]:
     str or None
         arXiv ID, if possible to compute.
 
+    Raises
+    ------
+    ValueError
+        If no valid arXiv ID could be inferred from the file path.
+
     References
     ----------
     https://arxiv.org/help/arxiv_identifier
