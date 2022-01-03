@@ -128,7 +128,7 @@ def run(
     `get_parser` function.
     """
     import bluesearch
-    from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.database.topic import extract_topic_from_zipfile, get_topics_for_pmc_article
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -168,6 +168,30 @@ def run(
                     },
                 }
             )
+    elif source in {"biorxiv", "medrix"}:
+        for path in inputs:
+            logger.info(f"Processing {path}")
+            topic = extract_topic_from_zipfile(path)
+            all_results.append(
+                {
+                    "source": "biorxiv/medrix",
+                    "path": str(path.resolve()),
+                    "topics": {
+                        "article": {
+                            "Subject Area": topic,
+                        },
+                    },
+                    "metadata": {
+                        "created-date": datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        ),
+                        "bbs-version": bluesearch.version.__version__,
+                    },
+                }
+
+            )
+
+        pass
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

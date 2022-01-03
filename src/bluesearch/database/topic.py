@@ -20,6 +20,8 @@ from __future__ import annotations
 import html
 import logging
 import pathlib
+import re
+import zipfile
 from functools import lru_cache
 from typing import Iterable, List
 from xml.etree.ElementTree import Element  # nosec
@@ -295,3 +297,42 @@ def get_topics_for_pmc_article(
             journal_topics.append(descriptor["name"])
 
     return journal_topics
+
+def extract_topic_from_zipfile(path: pathlib.Path) -> str:
+    """Extract topic of a medRxiv and bioRxiv article.
+
+    Parameters
+    ----------
+    path
+        Path to the local path to the `.meca` file (which is nothing else
+        than a zip archive) with a fixed structured.
+
+    Returns
+    -------
+    topic : str
+        The subject area of the article.
+
+    Raises
+    ------
+    ValueError
+        Appropriate XML not found or no topic found.
+    """
+    with zipfile.ZipFile(path) as myzip:
+        xml_files = [x for x in myzip.namelist() if x.startswith("content/") and x.endswith(".xml")]
+
+        if len(xml_files) != 1:
+            raise ValueError("There needs to be exactly one .xml file inside of content/")
+
+        xml_file = xml_files[0]
+        pattern = "<subject>(.*)\<\/subject>"
+        with myzip.open(xml_file, "r") as f:
+            text = f.read().decode("utf-8")
+            match = re.search(pattern, text)
+
+            if match is None:
+                raise ValueError("No topic found")
+
+
+            topic = match.groups()[0]
+
+        return topic
