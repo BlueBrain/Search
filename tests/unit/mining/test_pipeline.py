@@ -1,5 +1,3 @@
-"""Collection of tests focused on the bluesearch.mining.pipeline module."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,8 +14,8 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Collection of tests focused on the bluesearch.mining.pipeline module."""
 
-from typing import Dict, List, Tuple
 from unittest.mock import Mock
 
 import pandas as pd
@@ -104,7 +102,7 @@ def test_without_relation(model_entities, debug, n_paragraphs):
         "in Brazil yesterday. And I am a filler too."
     )
 
-    models_relations: Dict[Tuple[str], List[REModel]] = {}
+    models_relations: dict[tuple[str], list[REModel]] = {}
     texts = n_paragraphs * [(text, {"important_parameter": 10})]
     df = run_pipeline(texts, model_entities, models_relations, debug)
 
@@ -143,7 +141,7 @@ def test_not_entity_label(model_entities):
 
     model_entities_m = Mock(spec=Language)
     model_entities_m.pipe.return_value = [(doc, {})]
-    models_relations: Dict[Tuple[str], List[REModel]] = {}
+    models_relations: dict[tuple[str], list[REModel]] = {}
 
     df_1 = run_pipeline(
         texts, model_entities_m, models_relations, excluded_entity_type="!"

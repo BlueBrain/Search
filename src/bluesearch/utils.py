@@ -24,7 +24,7 @@ import pathlib
 import re
 import time
 import warnings
-from typing import Any, Dict, List, Set
+from typing import Any
 
 import h5py
 import numpy as np
@@ -243,11 +243,11 @@ class H5:
         if not h5_paths_temp:
             raise ValueError("No temporary h5 files provided.")
 
-        all_indices: Set[int] = set()
+        all_indices: set[int] = set()
         dim = None
         for path_temp in h5_paths_temp:
             with h5py.File(path_temp, "r") as f:
-                current_indices_set: Set[int] = set(f[f"{dataset_name}_indices"][:, 0])
+                current_indices_set: set[int] = set(f[f"{dataset_name}_indices"][:, 0])
                 current_dim = f[f"{dataset_name}"].shape[1]
 
                 if dim is None:
@@ -497,7 +497,7 @@ class JSONL:
 
     @staticmethod
     def dump_jsonl(
-        data: List[Dict[str, str]], path: pathlib.Path, overwrite: bool = True
+        data: list[dict[str, str]], path: pathlib.Path, overwrite: bool = True
     ):
         """Save a list of dictionaries to a jsonl.
 
@@ -590,7 +590,7 @@ def check_entity_type_consistency(model_path: str | pathlib.Path) -> bool:
 
 def get_available_spacy_models(
     data_and_models_dir: str | pathlib.Path,
-) -> Dict[str, pathlib.Path]:
+) -> dict[str, pathlib.Path]:
     """List available spacy models for a given data directory.
 
     Parameters

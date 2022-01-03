@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 import textwrap
-from typing import Dict, Sequence
+from typing import Sequence
 
 from dotenv import load_dotenv
 
@@ -178,7 +178,7 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
 
 def parse_args_or_environment(
     parser: argparse.ArgumentParser,
-    env_variable_names: Dict[str, str],
+    env_variable_names: dict[str, str],
     argv: Sequence[str] | None = None,
 ) -> argparse.Namespace:
     """Parse CLI arguments with some defaults specified in the environment.

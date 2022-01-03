@@ -1,5 +1,3 @@
-"""The mining server."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,9 +14,10 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""The mining server."""
 
 import io
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Iterable
 
 import pandas as pd
 import spacy
@@ -59,7 +58,7 @@ class MiningServer(Flask):
         self.models_libs = models_libs
 
         self.logger.info("Loading the NER models")
-        self.ee_models: Dict[str, spacy.language.Language] = {}
+        self.ee_models: dict[str, spacy.language.Language] = {}
         self.logger.debug(f"EE models available:\n{str(self.models_libs['ee'])}")
         for entity_type, model_path in models_libs["ee"].items():
             self.logger.info(f"Entity type {entity_type}: loading model {model_path}")
@@ -252,7 +251,7 @@ class MiningServer(Flask):
 
             schema_df = self.read_df_from_str(schema_str)
 
-            texts: Iterable[Tuple[str, Dict[Any, Any]]] = [(text, {})]
+            texts: Iterable[tuple[str, dict[Any, Any]]] = [(text, {})]
             df_all, etypes_na = self.mine_texts(
                 texts=texts, schema_df=schema_df, debug=debug
             )

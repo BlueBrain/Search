@@ -1,5 +1,3 @@
-"""Implementation of the MiningSchma class."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,6 +14,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Implementation of the MiningSchma class."""
 
 import warnings
 
@@ -69,7 +68,7 @@ class MiningSchema:
         }
         # Make sure there are no duplicates to begin with
         self.schema_df = self.schema_df.drop_duplicates(ignore_index=True)
-        # 'row' has type Dict[str, Any]. It is valid for append(). Ignoring the error.
+        # 'row' has type dict[str, Any]. It is valid for append(). Ignoring the error.
         self.schema_df = self.schema_df.append(row, ignore_index=True)  # type: ignore[arg-type]  # noqa
         # If there are any duplicates at this point, then it must have
         # come from the appended row.

@@ -1,5 +1,3 @@
-"""Module for the Database Creation."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,13 +14,13 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Module for the Database Creation."""
 
 import io
 import logging
 import multiprocessing as mp
 import queue
 import traceback
-from typing import Dict, List
 
 import sqlalchemy
 import torch
@@ -407,19 +405,19 @@ class CreateMiningCache:
         )
 
         # Flags to let the workers know there won't be any new tasks.
-        can_finish: Dict[str, mp.synchronize.Event] = {
+        can_finish: dict[str, mp.synchronize.Event] = {
             etype: mp.Event() for etype in self.ee_models_paths
         }
 
         # Prepare the task queues for the workers - one task queue per model.
-        task_queues: Dict[str, mp.Queue] = {
+        task_queues: dict[str, mp.Queue] = {
             etype: mp.Queue() for etype in self.ee_models_paths
         }
 
         # Spawn the workers according to `workers_per_model`.
         self.logger.info("Spawning the worker processes")
         worker_processes = []
-        workers_by_queue: Dict[str, List[mp.Process]] = {
+        workers_by_queue: dict[str, list[mp.Process]] = {
             queue_name: [] for queue_name in task_queues
         }
         for etype, model_path in self.ee_models_paths.items():
@@ -487,7 +485,7 @@ class CreateMiningCache:
         self.logger.info("No more new tasks, just waiting for the workers to finish")
         # We'll transfer finished workers from `worker_processes`
         # to `finished_workers`. We're done when `worker_processes` is empty.
-        finished_workers: List[mp.Process] = []
+        finished_workers: list[mp.Process] = []
         while len(worker_processes) > 0:
             self.logger.debug(
                 f"Status: {len(worker_processes)} workers still alive, "

@@ -1,5 +1,5 @@
 import argparse
-from typing import Dict, Sequence
+from typing import Sequence
 
 import pytest
 
@@ -15,7 +15,7 @@ def test_parse_args_or_environment(monkeypatch):
 
     # --env-arg not provided at all
     argv: Sequence[str] = []
-    env_variable_names: Dict[str, str] = {}
+    env_variable_names: dict[str, str] = {}
     args = parse_args_or_environment(parser, env_variable_names, argv)
     assert "normal_arg" in args.__dict__
     assert "env_arg" not in args.__dict__
