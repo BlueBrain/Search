@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Parsing articles."""
+from __future__ import annotations
+
 import argparse
 import json
 import logging
 import warnings
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 
 from defusedxml import ElementTree
 
@@ -145,7 +147,7 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
-    match_filename: Optional[str],
+    match_filename: str | None,
     recursive: bool,
     dry_run: bool,
 ) -> int:
