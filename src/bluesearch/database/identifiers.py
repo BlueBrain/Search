@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 
 
-def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
+def generate_uid(identifiers: tuple[str | None, ...]) -> str:
     """Generate a deterministic UID for the given paper identifiers.
 
     Papers with the same values for the given identifiers get the same UID.
@@ -39,7 +39,7 @@ def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
 
     Returns
     -------
-    str or None
+    str
         A deterministic UID.
 
     Raises
