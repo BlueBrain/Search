@@ -12,6 +12,11 @@
             <journal-id journal-id-type="pmc">Journal ID PMC</journal-id>
             <journal-id journal-id-type="pubmed">Journal ID PubMed</journal-id>
             <journal-id journal-id-type="publisher">Journal ID Publisher</journal-id>
+            <journal-id journal-id-type="publisher-id">BIORXIV</journal-id>
+            <journal-title-group>
+                <journal-title>bioRxiv</journal-title>
+                <abbrev-journal-title abbrev-type="publisher">bioRxiv</abbrev-journal-title>
+            </journal-title-group>
             <issn>XXXX-XXXX</issn>
             <publisher>
                 <publisher-name>Publisher Name</publisher-name>
@@ -30,8 +35,8 @@
                              article-version-type="VoR"
             >Version of Record</article-version>
             <article-categories>
-                <subj-group>
-                    <subject>Subject 1</subject>
+                <subj-group subj-group-type="hwp-journal-coll">
+                  <subject>Subject 1</subject>
                 </subj-group>
             </article-categories>
             <title-group>

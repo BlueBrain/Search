@@ -29,7 +29,9 @@ from bluesearch.database.topic import (
 from bluesearch.database.topic import (
     request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
 )
-from bluesearch.database.topic import request_mesh_from_pubmed_id
+from bluesearch.database.topic import (
+    extract_info_from_zipfile, request_mesh_from_pubmed_id
+)
 
 # This function uses caching through @lru_cache. We want remove caching logic
 # during tests.
@@ -379,3 +381,17 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     assert journal_topics == expected_output
     request_mock.assert_called_once()
     request_mock.assert_called_with("Journal NLM TA")
+
+
+def test_extract_info_from_zipfile(test_data_path, tmp_path):
+    test_xml_path = test_data_path / "jats_article.xml"
+
+    # Put it inside of a `content` folder, zip it and then save in tmp_path
+
+
+    zip_path = ...
+    topic, journal = extract_info_from_zipfile(zip_path)
+
+
+    assert topic == "Subject 1"
+    assert journal == "bioRxiv"
