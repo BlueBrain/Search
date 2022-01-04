@@ -40,10 +40,17 @@ def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
     Returns
     -------
     str or None
-        A deterministic UID. The value is 'None' if all given identifiers are 'None'.
+        A deterministic UID.
+
+    Raises
+    ------
+    ValueError
+        If all identifiers are `None`.
     """
     if all(x is None for x in identifiers):
-        return None
+        raise ValueError(
+            f"Identifiers = {identifiers} are all `None`, UID cannot be computed."
+        )
     else:
         data = str(identifiers).encode()
         hashed = hashlib.md5(data).hexdigest()  # nosec
