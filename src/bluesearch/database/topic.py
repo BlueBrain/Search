@@ -298,8 +298,8 @@ def get_topics_for_pmc_article(
 
     return journal_topics
 
-def extract_topic_from_zipfile(path: pathlib.Path) -> str:
-    """Extract topic of a medRxiv and bioRxiv article.
+def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
+    """Extract topic and source of a medRxiv and bioRxiv article.
 
     Parameters
     ----------
@@ -312,10 +312,14 @@ def extract_topic_from_zipfile(path: pathlib.Path) -> str:
     topic : str
         The subject area of the article.
 
+    journal : str
+        The journal the article was published in. Should be either
+        "medRxiv" or "bioRxiv".
+
     Raises
     ------
     ValueError
-        Appropriate XML not found or no topic found.
+        Appropriate XML not found or the journal or topic are missing.
     """
     with zipfile.ZipFile(path) as myzip:
         xml_files = [x for x in myzip.namelist() if x.startswith("content/") and x.endswith(".xml")]
@@ -324,15 +328,21 @@ def extract_topic_from_zipfile(path: pathlib.Path) -> str:
             raise ValueError("There needs to be exactly one .xml file inside of content/")
 
         xml_file = xml_files[0]
-        pattern = "<subject>(.*)\<\/subject>"
+        pattern_topic = "<subject>(.*)\<\/subject>"
+        pattern_journal = "<journal-title>(.*)\<\/journal-title>"
+
         with myzip.open(xml_file, "r") as f:
             text = f.read().decode("utf-8")
-            match = re.search(pattern, text)
+            match_topic = re.search(pattern_topic, text)
+            match_journal = re.search(pattern_journal, text)
 
-            if match is None:
+            if match_topic is None:
                 raise ValueError("No topic found")
 
+            if match_journal is None:
+                raise ValueError("No journal found")
 
-            topic = match.groups()[0]
+            topic = match_topic.groups()[0]
+            journal = match_journal.groups()[0]
 
-        return topic
+        return topic, journal

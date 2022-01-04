@@ -128,7 +128,7 @@ def run(
     `get_parser` function.
     """
     import bluesearch
-    from bluesearch.database.topic import extract_topic_from_zipfile, get_topics_for_pmc_article
+    from bluesearch.database.topic import extract_info_from_zipfile, get_topics_for_pmc_article
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -171,10 +171,10 @@ def run(
     elif source in {"biorxiv", "medrix"}:
         for path in inputs:
             logger.info(f"Processing {path}")
-            topic = extract_topic_from_zipfile(path)
+            topic, journal = extract_info_from_zipfile(path)
             all_results.append(
                 {
-                    "source": "biorxiv/medrix",
+                    "source": journal,
                     "path": str(path.resolve()),
                     "topics": {
                         "article": {
