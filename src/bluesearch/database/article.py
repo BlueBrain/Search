@@ -74,7 +74,7 @@ def get_arxiv_id(path: str | Path) -> str | None:
         match_groups = match.groups()
         return f"arxiv:{match_groups[0]}/{match_groups[1]}"
 
-    raise ValueError(f"Could not extract arXiv ID from file path {path}\n")
+    raise ValueError(f"Could not extract arXiv ID from file path {path}")
 
 
 class ArticleParser(ABC):
