@@ -60,19 +60,19 @@ def get_arxiv_id(path: str | Path) -> str | None:
     # New format, since 2007-04, only needs path stem:
     # - since 2015-01 have format YYMM.NNNNN (i.e. 5 digits)
     # - up to 2014-12 have format YYMM.NNNN (i.e. 4 digits)
-    pattern = re.compile(r"\A(\d{4}\.\d{4}\d?v\d+)\Z")
-    match = re.search(pattern, path.stem)
+    pattern = re.compile(r"\d{4}\.\d{4}\d?v\d+")
+    match = pattern.fullmatch(path.stem)
     if match:
-        return f"arxiv:{match.groups()[0]}"
+        return f"arxiv:{match.string}"
 
     # Old format, up to 2007-03, needs to look at the whole path:
     # - some_path/arxiv/<archive>/<format>/YYMM/YYMMNNNv<version>.<ext>
     # Note: format may contain "-"
     pattern = re.compile(r"arxiv/([\w-]+)/\w+/\d{4}/(\d{7}v\d+)\.\w+\Z")
-    match = re.search(pattern, "/".join(path.parts[-5:]))
+    match = pattern.search("/".join(path.parts[-5:]))
     if match:
-        match_groups = match.groups()
-        return f"arxiv:{match_groups[0]}/{match_groups[1]}"
+        cat, id_ = match.groups()
+        return f"arxiv:{cat}/{id_}"
 
     raise ValueError(f"Could not extract arXiv ID from file path {path}")
 
