@@ -404,7 +404,7 @@ class TestExtractInfoFromZipfile:
         assert not zip_path.exists()
 
         # Create an empty zip file
-        with zipfile.ZipFile(zip_path, "w") as myzip:
+        with zipfile.ZipFile(zip_path, "w"):
             pass
 
         assert zip_path.exists()

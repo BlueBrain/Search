@@ -199,5 +199,5 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     result = JSONL.load_jsonl(output_file)
     assert len(result) == 1
 
-    result[0]["source"] == "JOURNAL"
-    result[0]["topics"]["article"]["Subject Area"] == "TOPIC"
+    assert result[0]["source"] == "JOURNAL"
+    assert result[0]["topics"]["article"]["Subject Area"] == "TOPIC"
