@@ -300,12 +300,12 @@ def get_topics_for_pmc_article(
 
 
 def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
-    """Extract topic and source of a medRxiv and bioRxiv article.
+    """Extract topic of a medRxiv/bioRxiv article.
 
     Parameters
     ----------
     path
-        Path to the local path to the `.meca` file (which is nothing else
+        Path to a `.meca` file (which is nothing else
         than a zip archive) with a fixed structured.
 
     Returns

@@ -418,11 +418,9 @@ class TestExtractInfoFromZipfile:
     def test_extraction_unsuccessful(
         self, test_data_path, tmp_path, line_to_delete, category
     ):
-        """Manually found relevant lines inside of `tests/data/biorxiv`.
+        """We manually found relevant lines inside of `tests/data/biorxiv.xml`.
 
-        We use a convention that the first line has the index of 1.
-
-        """
+        We use a convention that the first line has the index of 1."""
 
         test_xml_path = test_data_path / "biorxiv.xml"
         assert test_xml_path.exists()
