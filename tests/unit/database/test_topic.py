@@ -24,16 +24,14 @@ import responses
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
+    extract_info_from_zipfile,
     extract_pubmed_id_from_pmc_file,
     get_topics_for_pmc_article,
 )
 from bluesearch.database.topic import (
     request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
 )
-from bluesearch.database.topic import (
-    extract_info_from_zipfile,
-    request_mesh_from_pubmed_id,
-)
+from bluesearch.database.topic import request_mesh_from_pubmed_id
 
 # This function uses caching through @lru_cache. We want remove caching logic
 # during tests.
