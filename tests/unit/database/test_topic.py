@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
 import re
+import zipfile
 from unittest.mock import Mock
 
 import pytest
@@ -384,14 +385,19 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
 
 
 def test_extract_info_from_zipfile(test_data_path, tmp_path):
-    test_xml_path = test_data_path / "jats_article.xml"
+    test_xml_path = test_data_path / "biorxiv.xml"
+    assert test_xml_path.exists()
 
     # Put it inside of a `content` folder, zip it and then save in tmp_path
 
+    zip_path = tmp_path / "01234.meca"
 
-    zip_path = ...
+    with zipfile.ZipFile(zip_path, "w") as myzip:
+        myzip.write(test_xml_path, arcname="content/567.xml")
+
+
     topic, journal = extract_info_from_zipfile(zip_path)
 
 
-    assert topic == "Subject 1"
+    assert topic == "Neuroscience"
     assert journal == "bioRxiv"
