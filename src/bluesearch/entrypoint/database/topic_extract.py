@@ -128,7 +128,10 @@ def run(
     `get_parser` function.
     """
     import bluesearch
-    from bluesearch.database.topic import extract_info_from_zipfile, get_topics_for_pmc_article
+    from bluesearch.database.topic import (
+        extract_info_from_zipfile,
+        get_topics_for_pmc_article,
+    )
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -189,7 +192,6 @@ def run(
                         "bbs-version": bluesearch.version.__version__,
                     },
                 }
-
             )
 
         pass

@@ -31,7 +31,8 @@ from bluesearch.database.topic import (
     request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
 )
 from bluesearch.database.topic import (
-    extract_info_from_zipfile, request_mesh_from_pubmed_id
+    extract_info_from_zipfile,
+    request_mesh_from_pubmed_id,
 )
 
 # This function uses caching through @lru_cache. We want remove caching logic
@@ -384,7 +385,6 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     request_mock.assert_called_with("Journal NLM TA")
 
 
-
 class TestExtractInfoFromZipfile:
     def test_real_file(self, test_data_path, tmp_path):
         test_xml_path = test_data_path / "biorxiv.xml"
@@ -396,9 +396,7 @@ class TestExtractInfoFromZipfile:
         with zipfile.ZipFile(zip_path, "w") as myzip:
             myzip.write(test_xml_path, arcname="content/567.xml")
 
-
         topic, journal = extract_info_from_zipfile(zip_path)
-
 
         assert topic == "Neuroscience"
         assert journal == "bioRxiv"
@@ -417,8 +415,7 @@ class TestExtractInfoFromZipfile:
             extract_info_from_zipfile(zip_path)
 
     @pytest.mark.parametrize(
-            "line_to_delete, category",
-            [(26, "topic"), (8, "journal")]
+        "line_to_delete, category", [(26, "topic"), (8, "journal")]
     )
     def test_extraction_unsuccessful(
         self, test_data_path, tmp_path, line_to_delete, category
@@ -440,7 +437,7 @@ class TestExtractInfoFromZipfile:
 
         new_lines = [l for i, l in enumerate(orig_lines) if i != (line_to_delete - 1)]
         new_text = "\r\n".join(new_lines)
- 
+
         with modified_xml_path.open("w", encoding="utf-8") as f_new:
             f_new.write(new_text)
 

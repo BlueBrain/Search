@@ -168,6 +168,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     results = JSONL.load_jsonl(output_jsonl)
     assert len(results) == 2  # Length 2 because we append the file
 
+
 @pytest.mark.parametrize("source", ["biorxiv", "medrxiv"])
 def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     input_path = tmp_path / "1234.xml"
@@ -177,7 +178,10 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     # Mocking
     fake_extract_info_from_zipfile = Mock(side_effect=lambda p: ("TOPIC", "JOURNAL"))
 
-    monkeypatch.setattr("bluesearch.database.topic.extract_info_from_zipfile", fake_extract_info_from_zipfile)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.extract_info_from_zipfile",
+        fake_extract_info_from_zipfile,
+    )
 
     topic_extract.run(
         source=source,

@@ -298,6 +298,7 @@ def get_topics_for_pmc_article(
 
     return journal_topics
 
+
 def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
     """Extract topic and source of a medRxiv and bioRxiv article.
 
@@ -322,10 +323,16 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
         Appropriate XML not found or the journal or topic are missing.
     """
     with zipfile.ZipFile(path) as myzip:
-        xml_files = [x for x in myzip.namelist() if x.startswith("content/") and x.endswith(".xml")]
+        xml_files = [
+            x
+            for x in myzip.namelist()
+            if x.startswith("content/") and x.endswith(".xml")
+        ]
 
         if len(xml_files) != 1:
-            raise ValueError("There needs to be exactly one .xml file inside of content/")
+            raise ValueError(
+                "There needs to be exactly one .xml file inside of content/"
+            )
 
         xml_file = xml_files[0]
         pattern_topic = """<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)</subject>"""
