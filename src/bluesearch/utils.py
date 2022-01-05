@@ -17,15 +17,70 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import json
 import pathlib
+import re
 import time
 import warnings
-from typing import Any, Dict, Set, Union
+from typing import Any
 
 import h5py
 import numpy as np
 import spacy
+
+
+def find_files(
+    input_path: pathlib.Path,
+    recursive: bool,
+    match_filename: str | None = None,
+) -> list[pathlib.Path]:
+    """Find files inside of `input_path`.
+
+    Parameters
+    ----------
+    input_path
+        File or directory to consider.
+    recursive
+        If True, directories and all subdirectories are considered in a recursive way.
+    match_filename
+        Only filename matching match_filename are kept.
+
+    Returns
+    -------
+    inputs : list[pathlib.Path]
+        List of kept files.
+
+    Raises
+    ------
+    ValueError
+        If the input_path does not exists.
+    """
+    if input_path.is_file():
+        return [input_path]
+
+    elif input_path.is_dir():
+        if recursive:
+            pattern = "**/*"
+        else:
+            pattern = "*"
+        files = (x for x in input_path.glob(pattern) if x.is_file())
+
+        if match_filename is None:
+            selected = files
+        elif match_filename == "":
+            raise ValueError("Value for argument 'match-filename' should not be empty!")
+        else:
+            regex = re.compile(match_filename)
+            selected = (x for x in files if regex.fullmatch(x.name))
+
+        return sorted(selected)
+
+    else:
+        raise ValueError(
+            "Argument 'input_path' should be a path to an existing file or directory!"
+        )
 
 
 class Timer:
@@ -188,11 +243,11 @@ class H5:
         if not h5_paths_temp:
             raise ValueError("No temporary h5 files provided.")
 
-        all_indices: Set[int] = set()
+        all_indices: set[int] = set()
         dim = None
         for path_temp in h5_paths_temp:
             with h5py.File(path_temp, "r") as f:
-                current_indices_set: Set[int] = set(f[f"{dataset_name}_indices"][:, 0])
+                current_indices_set: set[int] = set(f[f"{dataset_name}_indices"][:, 0])
                 current_dim = f[f"{dataset_name}"].shape[1]
 
                 if dim is None:
@@ -441,7 +496,9 @@ class JSONL:
     """Collection of utility static functions handling `jsonl` files."""
 
     @staticmethod
-    def dump_jsonl(data, path):
+    def dump_jsonl(
+        data: list[dict[str, str]], path: pathlib.Path, overwrite: bool = True
+    ):
         """Save a list of dictionaries to a jsonl.
 
         Parameters
@@ -450,10 +507,13 @@ class JSONL:
             List of dictionaries (json files).
         path : pathlib.Path
             File where to save it.
+        overwrite : bool
+            If yes, the file is overwritten. Otherwise, the file is appended.
         """
-        with path.open("w") as f:
+        mode = "w" if overwrite else "a"
+        with path.open(mode) as f:
             for x in data:
-                line = json.dumps(x)
+                line = json.dumps(x, sort_keys=True)
                 f.write(line + "\n")
 
     @staticmethod
@@ -481,7 +541,7 @@ class MissingEnvironmentVariable(Exception):
     """Exception for missing environment variables."""
 
 
-def check_entity_type_consistency(model_path: Union[str, pathlib.Path]) -> bool:
+def check_entity_type_consistency(model_path: str | pathlib.Path) -> bool:
     """Check that entity type of the model name is the same as in the ner pipe.
 
     Parameters
@@ -529,8 +589,8 @@ def check_entity_type_consistency(model_path: Union[str, pathlib.Path]) -> bool:
 
 
 def get_available_spacy_models(
-    data_and_models_dir: Union[str, pathlib.Path]
-) -> Dict[str, pathlib.Path]:
+    data_and_models_dir: str | pathlib.Path,
+) -> dict[str, pathlib.Path]:
     """List available spacy models for a given data directory.
 
     Parameters
@@ -568,7 +628,7 @@ def get_available_spacy_models(
 
 
 def load_spacy_model(
-    model_name: Union[str, pathlib.Path], device: str = "cpu", *args: Any, **kwargs: Any
+    model_name: str | pathlib.Path, device: str = "cpu", *args: Any, **kwargs: Any
 ) -> spacy.language.Language:
     """Spacy model load with informative error message.
 

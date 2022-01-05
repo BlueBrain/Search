@@ -1,15 +1,39 @@
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+import logging
 import re
+from unittest.mock import Mock
 
 import pytest
 import responses
-from defusedxml.ElementTree import ParseError
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     extract_pubmed_id_from_pmc_file,
-    request_mesh_from_nlm_ta,
-    request_mesh_from_pubmed_id,
+    get_topics_for_pmc_article,
 )
+from bluesearch.database.topic import (
+    request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
+)
+from bluesearch.database.topic import request_mesh_from_pubmed_id
+
+# This function uses caching through @lru_cache. We want remove caching logic
+# during tests.
+request_mesh_from_nlm_ta = request_mesh_from_nlm_ta_decorated.__wrapped__
 
 
 class TestGetMeshFromNlmTa:
@@ -37,7 +61,7 @@ class TestGetMeshFromNlmTa:
             responses.GET,
             (
                 "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                "term=Trauma Surg Acute Care Open[ta]&report=xml&format=text"
+                'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
             ),
             body=body,
         )
@@ -74,26 +98,30 @@ class TestGetMeshFromNlmTa:
             },
         ]
 
-        mesh = request_mesh_from_nlm_ta("Trauma Surg Acute Care Open")
+        mesh = request_mesh_from_nlm_ta("Trauma Surg And Acute Care Open")
         assert mesh == expected_output
 
-    def test_ampersands_are_flagged(self):
+    def test_ampersands_are_flagged(self, caplog):
         nlm_ta = "Title with &#x0201c;ampersands&#x0201d"
-        with pytest.raises(ValueError, match="Ampersands not allowed"):
-            request_mesh_from_nlm_ta(nlm_ta)
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta(nlm_ta)
+        assert meshes is None
+        assert "Ampersands not allowed" in caplog.text
 
     @responses.activate
-    def test_unexpected_response_doc_header_flagged(self):
+    def test_unexpected_response_doc_header_flagged(self, caplog):
         responses.add(
             responses.GET,
             re.compile(""),
             body="should start with a fixed header",
         )
-        with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Unexpected response" in caplog.text
 
     @responses.activate
-    def test_unexpected_response_doc_footer_flagged(self):
+    def test_unexpected_response_doc_footer_flagged(self, caplog):
         header = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
             '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
@@ -105,11 +133,13 @@ class TestGetMeshFromNlmTa:
             re.compile(""),
             body=f"{header}the footer is missing though",
         )
-        with pytest.raises(RuntimeError, match="Unexpected response"):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Unexpected response" in caplog.text
 
     @responses.activate
-    def test_no_nlm_ta_found_gives_none(self):
+    def test_no_nlm_ta_found_gives_none(self, caplog):
         header = (
             '<?xml version="1.0" encoding="utf-8"?>\n'
             '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
@@ -125,48 +155,10 @@ class TestGetMeshFromNlmTa:
             re.compile(""),
             body=f"{header}{body}{footer}",
         )
-        mesh = request_mesh_from_nlm_ta("Some title")
-        assert mesh is None
-
-    @responses.activate
-    def test_invalid_xml_raises_correctly(self):
-        header = (
-            '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
-            "<pre>"
-        )
-        footer = "</pre>"
-        body = "<<invalid-xml>"
-
-        responses.add(
-            responses.GET,
-            re.compile(""),
-            body=f"{header}{body}{footer}",
-        )
-        with pytest.raises(ParseError, match="The parsing did not work"):
-            request_mesh_from_nlm_ta("Some title")
-
-    @responses.activate
-    def test_root_tag_is_checked(self):
-        header = (
-            '<?xml version="1.0" encoding="utf-8"?>\n'
-            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n'
-            "<pre>"
-        )
-        footer = "</pre>"
-        body = "<wrong-root-tag>Should be NCBICatalogRecord.</wrong-root-tag>"
-
-        responses.add(
-            responses.GET,
-            re.compile(""),
-            body=f"{header}{body}{footer}",
-        )
-        with pytest.raises(
-            RuntimeError, match="Expected to find the NCBICatalogRecord tag"
-        ):
-            request_mesh_from_nlm_ta("Some title")
+        with caplog.at_level(logging.ERROR):
+            meshes = request_mesh_from_nlm_ta("Some title")
+        assert meshes is None
+        assert "Empty body" in caplog.text
 
 
 @responses.activate
@@ -351,3 +343,39 @@ def test_get_pubmedid(test_data_path):
     path = test_data_path / "jats_article.xml"
     pubmed_id = extract_pubmed_id_from_pmc_file(path)
     assert pubmed_id == "PMID"
+
+
+def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
+    path = test_data_path / "jats_article.xml"
+    fake_meshes = [
+        {
+            "descriptor": [
+                {
+                    "ID": "D017059",
+                    "major_topic": False,
+                    "name": "Models, Econometric",
+                }
+            ],
+            "qualifiers": [],
+        },
+        {
+            "descriptor": [
+                {
+                    "ID": "D012044",
+                    "major_topic": False,
+                    "name": "Regression Analysis",
+                }
+            ],
+            "qualifiers": [],
+        },
+    ]
+    request_mock = Mock(return_value=fake_meshes)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.request_mesh_from_nlm_ta", request_mock
+    )
+
+    expected_output = ["Models, Econometric", "Regression Analysis"]
+    journal_topics = get_topics_for_pmc_article(path)
+    assert journal_topics == expected_output
+    request_mock.assert_called_once()
+    request_mock.assert_called_with("Journal NLM TA")

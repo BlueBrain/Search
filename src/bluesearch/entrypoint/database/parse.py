@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Parsing articles."""
+from __future__ import annotations
+
 import argparse
 import json
 import logging
 import warnings
 from pathlib import Path
-from typing import Iterable, Iterator
+from typing import Iterator
 
 from defusedxml import ElementTree
 
@@ -30,6 +32,7 @@ from bluesearch.database.article import (
     CORD19ArticleParser,
     JATSXMLParser,
     PubMedXMLParser,
+    TEIXMLParser,
 )
 
 logger = logging.getLogger(__name__)
@@ -54,7 +57,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "input_type",
         type=str,
-        choices=("cord19-json", "jats-xml", "pubmed-xml", "pubmed-xml-set"),
+        choices=(
+            "cord19-json",
+            "jats-xml",
+            "pubmed-xml",
+            "pubmed-xml-set",
+            "tei-xml",
+        ),
         help="""
         Format of the input.
         If parsing several articles, all articles must have the same format.
@@ -75,6 +84,32 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         help="""
         Path to a directory where parsed article(s) will be saved.
         If it does not exist yet, a directory with this path is created.
+        """,
+    )
+    parser.add_argument(
+        "-m",
+        "--match-filename",
+        type=str,
+        help="""
+        Parse only files with a name matching the given regular expression.
+        Ignored when 'input_path' is a path to a file.
+        """,
+    )
+    parser.add_argument(
+        "-R",
+        "--recursive",
+        action="store_true",
+        help="""
+        Parse files recursively.
+        """,
+    )
+    parser.add_argument(
+        "-n",
+        "--dry-run",
+        action="store_true",
+        help="""
+        Display files to parse without parsing them.
+        Especially useful when using '--match-filename' and / or '--recursive'.
         """,
     )
     return parser
@@ -98,6 +133,11 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         for article in articles.iter("PubmedArticle"):
             yield PubMedXMLParser(article)
 
+    elif input_type == "tei-xml":
+        with input_path.open() as fp:
+            xml_content = fp.read()
+        yield TEIXMLParser(xml_content)
+
     else:
         raise ValueError(f"Unsupported input type '{input_type}'!")
 
@@ -107,21 +147,30 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
+    match_filename: str | None,
+    recursive: bool,
+    dry_run: bool,
 ) -> int:
     """Parse one or several articles.
 
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    inputs: Iterable[Path]
-    if input_path.is_file():
-        inputs = [input_path]
-    elif input_path.is_dir():
-        inputs = sorted(input_path.glob("*"))
-    else:
-        raise ValueError(
-            "Argument 'input_path' should be a path to an existing file or directory!"
+    from bluesearch.utils import find_files
+
+    try:
+        inputs = find_files(input_path, recursive, match_filename)
+    except ValueError:
+        logger.error(
+            "Argument 'input_path' should be a path "
+            "to an existing file or directory!"
         )
+        return 1
+
+    if dry_run:
+        # Inputs are already sorted.
+        print(*inputs, sep="\n")
+        return 0
 
     output_dir.mkdir(exist_ok=True)
 

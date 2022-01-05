@@ -1,5 +1,3 @@
-"""Helper functions for server entry points."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,6 +14,8 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Helper functions for server entry points."""
+from __future__ import annotations
 
 import argparse
 import collections
@@ -23,7 +23,7 @@ import logging
 import os
 import sys
 import textwrap
-from typing import Dict, Optional, Sequence
+from typing import Sequence
 
 from dotenv import load_dotenv
 
@@ -178,8 +178,8 @@ class CombinedHelpFormatter(argparse.HelpFormatter):
 
 def parse_args_or_environment(
     parser: argparse.ArgumentParser,
-    env_variable_names: Dict[str, str],
-    argv: Optional[Sequence[str]] = None,
+    env_variable_names: dict[str, str],
+    argv: Sequence[str] | None = None,
 ) -> argparse.Namespace:
     """Parse CLI arguments with some defaults specified in the environment.
 

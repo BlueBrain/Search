@@ -41,6 +41,9 @@ class TestIdentifiers:
                 (None, "a"), "77f283f2e87b852ed7a881e6f638aa80", id="with-none-reverse"
             ),
             pytest.param((None, None), None, id="all-none"),
+            pytest.param(
+                (None, 0), "14536e026b2a39caf27f3da802e7fed6", id="none-and-zero"
+            ),
         ],
     )
     def test_generate_uid(self, identifiers, expected):
@@ -48,9 +51,14 @@ class TestIdentifiers:
         # this test checks that 'generate_uid(...)' is deterministic across platforms
         # and Python processes.
 
-        result = generate_uid(identifiers)
-        assert result == expected
+        if expected is None:
+            with pytest.raises(ValueError):
+                generate_uid(identifiers)
 
-        # Check determinism.
-        result_bis = generate_uid(identifiers)
-        assert result == result_bis
+        else:
+            result = generate_uid(identifiers)
+            assert result == expected
+
+            # Check determinism.
+            result_bis = generate_uid(identifiers)
+            assert result == result_bis

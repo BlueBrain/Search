@@ -16,12 +16,12 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import argparse
 import logging
 import pathlib
 import sys
-from typing import Optional
 
 import numpy as np
 import sqlalchemy
@@ -191,7 +191,7 @@ def run_compute_embeddings(argv=None):
     # Path preparation and checking
     out_file = pathlib.Path(args.outfile)
     temp_dir = None if args.temp_dir is None else pathlib.Path(args.temp_dir)
-    checkpoint_path: Optional[pathlib.Path] = None
+    checkpoint_path: pathlib.Path | None = None
     if args.checkpoint is not None:
         checkpoint_path = pathlib.Path(args.checkpoint)
     indices_path = (

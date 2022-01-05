@@ -49,10 +49,12 @@ PYTHON_REQUIRES = ">=3.7"
 INSTALL_REQUIRES = [
     "Flask",
     "SQLAlchemy[mysql,pymysql]",
+    "boto3",
     "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
     "defusedxml",
+    "google-cloud-storage",
     "h5py",
     "ipython",
     "ipywidgets",

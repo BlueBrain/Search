@@ -111,7 +111,8 @@ class TestJATSXMLArticleParser:
         paragraphs = jats_xml_parser.paragraphs
         assert inspect.isgenerator(paragraphs)
         paragraphs = tuple(paragraphs)
-        assert len(paragraphs) == 7 + 1 + 3  # for paragraph, caption, table
+        assert len(paragraphs) == 7 + 1 + 2  # for paragraph, caption, table
+        # There are 3 caption but one is empty
 
         for i, paragraph in enumerate(paragraphs):
             assert isinstance(paragraph, tuple)
@@ -160,7 +161,7 @@ class TestJATSXMLArticleParser:
                 "<p><p>Sub-tags</p> at beginning and <p>end</p>.</p>",
                 "Sub-tags at beginning and end.",
             ),
-            ("<p>My email is <email>me@epfl.ch</email></p>", "My email is EMAIL"),
+            ("<p>My email is <email>me@epfl.ch</email></p>", "My email is"),
         ),
     )
     def test_inner_text_extraction(
@@ -183,11 +184,11 @@ class TestJATSXMLArticleParser:
             ("<styled-content>Cool style</styled-content>", "Cool style"),
             ("<sub>subbed</sub>", "_subbed"),
             ("<sup>supped</sup>", "^supped"),
-            ("<inline-formula>Completely ignored</inline-formula>", "FORMULA"),
-            ("<disp-formula>Block formula</disp-formula>", "\nFORMULA-BLOCK"),
-            ("<ext-link>https://www.google.com</ext-link>", "URL"),
-            ("<uri>file:///path/to/file</uri>", "URL"),
-            ("<email>me@domain.ai</email>", "EMAIL"),
+            ("<inline-formula>Completely ignored</inline-formula>", ""),
+            ("<disp-formula>Block formula</disp-formula>", ""),
+            ("<ext-link>https://www.google.com</ext-link>", ""),
+            ("<uri>file:///path/to/file</uri>", ""),
+            ("<email>me@domain.ai</email>", ""),
             (
                 "<unknown-tag>Default: extract inner text.</unknown-tag>",
                 "Default: extract inner text.",

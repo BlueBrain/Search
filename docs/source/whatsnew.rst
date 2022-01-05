@@ -29,6 +29,23 @@ Legend
 
 Latest
 ======
+- |Change| :code:`uid` generation raises :code:`ValueError` if all identifiers
+  are :code:`None`.
+- |Add| code to download :code:`arxiv` papers from a given date.
+- |Change| the behaviour of the entrypoint :code:`bbs_database download` when the
+  specified :code:`--from-month` is too old and the source changed its structure of storing articles
+  meanwhile. Now print an error and exit.
+- |Add| code to download :code:`PMC` papers from a given date.
+- |Add| entrypoint :code:`bbs_database download`.
+- |Add| run the tox env ``check-apidoc`` in CI
+- |Add| tox environments ``apidoc`` and ``check-apidoc``
+- |Add| input type ``tei-xml`` for the ``bbs_database parse`` command.
+- |Add| option ``--dry-run`` for ``bbs_database parse`` to display files to
+  parse without parsing them.
+- |Add| option ``--recursive`` for ``bbs_database parse`` to parse files
+  recursively.
+- |Add| option ``--match-filename`` for ``bbs_database parse`` to parse only
+  files with a name matching a given regular expression.
 - |Change| split the CI job into smaller jobs
 - |Change| for :code:`bbs_database parse` the value for :code:`input_type` from
   :code:`pmc-xml` to :code:`jats-xml`.

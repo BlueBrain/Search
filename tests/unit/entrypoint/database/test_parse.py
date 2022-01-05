@@ -1,4 +1,21 @@
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
+import logging
 from argparse import ArgumentError
 from pathlib import Path
 
@@ -36,6 +53,12 @@ from bluesearch.entrypoint.database.parse import iter_parsers
             ["7f5169014607a1e5f4f55cc53ddba5eb", "f677f50f7c1760babf8cb08f11922362"],
             id="pubmed-xml-set",
         ),
+        pytest.param(
+            "tei-xml",
+            "tei_file.tei.xml",
+            ["94acbb74a7427ae4d58333e3145870e1"],
+            id="tei-xml",
+        ),
     ],
 )
 def test_iter_parsers(input_type, path, article_uids):
@@ -59,7 +82,7 @@ def test_unknown_input_type():
     assert f"invalid choice: '{wrong_type}'" in str(context)
 
 
-def test_cord19_json(jsons_path, tmp_path):
+def test_cord19_json(jsons_path, tmp_path, caplog):
     path_to_json = jsons_path / "document_parses" / "pmc_json"
     json_files = sorted(path_to_json.glob("*.json"))
     assert len(json_files) > 0
@@ -111,14 +134,16 @@ def test_cord19_json(jsons_path, tmp_path):
         assert isinstance(loaded_article, Article)
 
     # Test parsing something that doesn't exist
-    with pytest.raises(ValueError):
-        args_and_opts = [
-            "parse",
-            "cord19-json",
-            str(path_to_json / "dir_that_does_not_exists"),
-            str(out_dir),
-        ]
-        main(args_and_opts)
+    args_and_opts = [
+        "parse",
+        "cord19-json",
+        str(path_to_json / "dir_that_does_not_exists"),
+        str(out_dir),
+    ]
+    with caplog.at_level(logging.ERROR):
+        exit_code = main(args_and_opts)
+    assert exit_code == 1
+    assert "Argument 'input_path'" in caplog.text
 
 
 def test_pubmed_xml_set(tmp_path):
@@ -134,3 +159,10 @@ def test_pubmed_xml_set(tmp_path):
             data = json.load(f)
             loaded_uid = data["uid"]
             assert loaded_uid == uid
+
+
+def test_dry_run(capsys):
+    input_path = "tests/data/cord19_v35/"
+    main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
+    captured = capsys.readouterr()
+    assert captured.out == "tests/data/cord19_v35/metadata.csv\n"

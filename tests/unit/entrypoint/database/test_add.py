@@ -1,3 +1,5 @@
+from unittest.mock import Mock
+
 import pytest
 import sqlalchemy
 
@@ -23,7 +25,12 @@ def engine_sqlite(tmp_path):
     return eng
 
 
-def test_sqlite_cord19(engine_sqlite, tmp_path):
+def test_sqlite_cord19(engine_sqlite, tmp_path, monkeypatch, model_entities):
+    # Reuse a spacy model fixture
+    monkeypatch.setattr(
+        "bluesearch.utils.load_spacy_model", Mock(return_value=model_entities)
+    )
+
     parsed_dir = tmp_path / "parsed_files"
     parsed_dir.mkdir()
     n_files = 3
@@ -107,7 +114,12 @@ def test_no_articles(tmp_path):
         main(["add", "test.db", str(parsed_dir)])
 
 
-def test_no_sentences(tmp_path, engine_sqlite):
+def test_no_sentences(tmp_path, engine_sqlite, monkeypatch, model_entities):
+    # Reuse a spacy model fixture
+    monkeypatch.setattr(
+        "bluesearch.utils.load_spacy_model", Mock(return_value=model_entities)
+    )
+
     parsed_dir = tmp_path / "parsed_files"
     parsed_dir.mkdir()
 

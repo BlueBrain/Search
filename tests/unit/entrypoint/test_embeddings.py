@@ -131,7 +131,10 @@ def test_send_through(
         ),
     ],
 )
-@pytest.mark.parametrize("start_method", ["forkserver", "spawn"])
+@pytest.mark.parametrize(
+    "start_method",
+    ["forkserver", pytest.param("spawn", marks=pytest.mark.skip("Not the default"))],
+)
 @pytest.mark.parametrize("model", ["SBioBERT", "SBERT"])
 def test_mp_real(
     tmpdir,

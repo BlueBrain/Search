@@ -1,5 +1,3 @@
-"""Tests covering attribute extraction."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,10 +14,11 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Tests covering attribute extraction."""
+from __future__ import annotations
 
 import json
 from copy import deepcopy
-from typing import Dict, Set
 from unittest.mock import Mock
 
 import pandas as pd
@@ -675,8 +674,8 @@ class TestAttributeExtraction:
         assert expected == generated
 
     def test_iter_quantities_empty(self, extractor: AttributeExtractor):
-        measurement: Dict[str, str] = {}
-        expected: Set[str] = set()
+        measurement: dict[str, str] = {}
+        expected: set[str] = set()
         with pytest.warns(UserWarning) as warning_records:
             generated = set(extractor.iter_quantities(measurement))
         assert expected == generated
