@@ -168,7 +168,8 @@ def run(
                     },
                 }
             )
-    elif source in {"biorxiv", "medrix"}:
+
+    elif source in {"biorxiv", "medrxiv"}:
         for path in inputs:
             logger.info(f"Processing {path}")
             topic, journal = extract_info_from_zipfile(path)
