@@ -328,8 +328,8 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
             raise ValueError("There needs to be exactly one .xml file inside of content/")
 
         xml_file = xml_files[0]
-        pattern_topic = r"""<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)\<\/subject>"""
-        pattern_journal = r"<journal-title>(.*)\<\/journal-title>"
+        pattern_topic = """<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)</subject>"""
+        pattern_journal = "<journal-title>(.*)</journal-title>"
 
         with myzip.open(xml_file, "r") as f:
             text = f.read().decode("utf-8")
