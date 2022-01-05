@@ -22,7 +22,7 @@ from __future__ import annotations
 import hashlib
 
 
-def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
+def generate_uid(identifiers: tuple[str | None, ...]) -> str:
     """Generate a deterministic UID for the given paper identifiers.
 
     Papers with the same values for the given identifiers get the same UID.
@@ -39,11 +39,18 @@ def generate_uid(identifiers: tuple[str | None, ...]) -> str | None:
 
     Returns
     -------
-    str or None
-        A deterministic UID. The value is 'None' if all given identifiers are 'None'.
+    str
+        A deterministic UID.
+
+    Raises
+    ------
+    ValueError
+        If all identifiers are `None`.
     """
     if all(x is None for x in identifiers):
-        return None
+        raise ValueError(
+            f"Identifiers = {identifiers} are all `None`, UID cannot be computed."
+        )
     else:
         data = str(identifiers).encode()
         hashed = hashlib.md5(data).hexdigest()  # nosec
