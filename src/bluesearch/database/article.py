@@ -698,11 +698,8 @@ class TEIXMLParser(ArticleParser):
             self.content = ElementTree.fromstring(fp.read())
         self.tei_namespace = {"tei": "http://www.tei-c.org/ns/1.0"}
         self._tei_ids: dict[str, str] | None = None
-        if is_arxiv:
-            arxiv_id = get_arxiv_id(path)
-            self._arxiv_id = arxiv_id
-        else:
-            self._arxiv_id = None
+        self._arxiv_id = get_arxiv_id(path) if is_arxiv else None
+
 
     @property
     def title(self) -> str:
