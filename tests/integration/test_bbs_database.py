@@ -86,9 +86,10 @@ def setup_backend(request, tmp_path):
         }
 
         port = 22346
+        pw = "my-secret-pw"
         container = client.containers.run(
             image=f"{backend}:latest",
-            environment={f"{env_map[backend]}": "my-secret-pw"},
+            environment={f"{env_map[backend]}": pw},
             ports={f"{port_map[backend]}/tcp": port},
             detach=True,
             auto_remove=True,
@@ -96,13 +97,10 @@ def setup_backend(request, tmp_path):
 
         max_waiting_time = 2 * 60
         start = time.perf_counter()
-
+        url = f"{driver_map[backend]}://{user_map[backend]}:{pw}@127.0.0.1:{port}/"
         while time.perf_counter() - start < max_waiting_time:
             try:
-                engine = sqlalchemy.create_engine(
-                    f"{driver_map[backend]}://{user_map[backend]}:my-secret-pw@127.0.0.1:{port}/",
-                    isolation_level="AUTOCOMMIT",
-                )
+                engine = sqlalchemy.create_engine(url, isolation_level="AUTOCOMMIT")
                 # Container ready?
                 engine.execute(show_databases_map[backend]).fetchall()
                 break
