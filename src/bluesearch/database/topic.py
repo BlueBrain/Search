@@ -312,7 +312,6 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
     -------
     topic : str
         The subject area of the article.
-
     journal : str
         The journal the article was published in. Should be either
         "medRxiv" or "bioRxiv".
