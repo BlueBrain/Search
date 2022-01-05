@@ -384,20 +384,71 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     request_mock.assert_called_with("Journal NLM TA")
 
 
-def test_extract_info_from_zipfile(test_data_path, tmp_path):
-    test_xml_path = test_data_path / "biorxiv.xml"
-    assert test_xml_path.exists()
 
-    # Put it inside of a `content` folder, zip it and then save in tmp_path
+class TestExtractInfoFromZipfile:
+    def test_real_file(self, test_data_path, tmp_path):
+        test_xml_path = test_data_path / "biorxiv.xml"
+        assert test_xml_path.exists()
 
-    zip_path = tmp_path / "01234.meca"
+        # Put it inside of a `content` folder, zip it and then save in tmp_path
+        zip_path = tmp_path / "01234.meca"
 
-    with zipfile.ZipFile(zip_path, "w") as myzip:
-        myzip.write(test_xml_path, arcname="content/567.xml")
-
-
-    topic, journal = extract_info_from_zipfile(zip_path)
+        with zipfile.ZipFile(zip_path, "w") as myzip:
+            myzip.write(test_xml_path, arcname="content/567.xml")
 
 
-    assert topic == "Neuroscience"
-    assert journal == "bioRxiv"
+        topic, journal = extract_info_from_zipfile(zip_path)
+
+
+        assert topic == "Neuroscience"
+        assert journal == "bioRxiv"
+
+    def test_no_xml_files(self, tmp_path):
+        zip_path = tmp_path / "43214.meca"
+        assert not zip_path.exists()
+
+        # Create an empty zip file
+        with zipfile.ZipFile(zip_path, "w") as myzip:
+            pass
+
+        assert zip_path.exists()
+
+        with pytest.raises(ValueError, match="There needs to be exactly one"):
+            extract_info_from_zipfile(zip_path)
+
+    @pytest.mark.parametrize(
+            "line_to_delete, category",
+            [(26, "topic"), (8, "journal")]
+    )
+    def test_extraction_unsuccessful(
+        self, test_data_path, tmp_path, line_to_delete, category
+    ):
+        """Manually found relevant lines inside of `tests/data/biorxiv`.
+
+        We use a convention that the first line has the index of 1.
+
+        """
+
+        test_xml_path = test_data_path / "biorxiv.xml"
+        assert test_xml_path.exists()
+
+        # Delete a single line from the input xml file and save elsewhere
+        modified_xml_path = tmp_path / "biorxiv_modified.xml"
+
+        with test_xml_path.open("r", encoding="utf-8") as f_orig:
+            orig_lines = f_orig.read().splitlines()
+
+        new_lines = [l for i, l in enumerate(orig_lines) if i != (line_to_delete - 1)]
+        new_text = "\r\n".join(new_lines)
+ 
+        with modified_xml_path.open("w", encoding="utf-8") as f_new:
+            f_new.write(new_text)
+
+        # Create a zip archive
+        zip_path = tmp_path / "01234.meca"
+
+        with zipfile.ZipFile(zip_path, "w") as myzip:
+            myzip.write(modified_xml_path, arcname="content/567.xml")
+
+        with pytest.raises(ValueError, match=f"No {category} found"):
+            extract_info_from_zipfile(zip_path)
