@@ -302,6 +302,11 @@ def get_topics_for_pmc_article(
 def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
     """Extract topic of a medRxiv/bioRxiv article.
 
+    The `.meca` file should always have a fixed structure. Namely,
+    there is a folder `content` and inside of it there should be
+    a single `.xml` file containing the text and the metadata of the
+    article.
+
     Parameters
     ----------
     path
