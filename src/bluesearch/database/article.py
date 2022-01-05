@@ -700,7 +700,6 @@ class TEIXMLParser(ArticleParser):
         self._tei_ids: dict[str, str] | None = None
         self._arxiv_id = get_arxiv_id(path) if is_arxiv else None
 
-
     @property
     def title(self) -> str:
         """Get the article title.
