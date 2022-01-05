@@ -109,6 +109,7 @@ def setup_backend(request, tmp_path):
                 InterfaceError,
                 OperationalError,
                 pg8000.core.struct.error,
+                pg8000.dbapi.ProgrammingError,
             ):
                 # Container not ready, pause and then try again
                 time.sleep(0.1)
