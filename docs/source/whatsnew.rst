@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Change| Paper UID to take into account also the :code:`arxiv id` (when available).
 - |Change| :code:`uid` generation raises :code:`ValueError` if all identifiers
   are :code:`None`.
 - |Add| code to download :code:`arxiv` papers from a given date.
