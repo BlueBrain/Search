@@ -30,8 +30,8 @@ def get_docker_client():
 @pytest.fixture(
     params=[
         "sqlite",
-        "mysql",  # not used in production and slows down CI
-        "mariadb",
+        # "mysql",  # not used in production and slows down CI
+        # "mariadb", # not used in production and slows down CI
         "postgres",
     ]
 )
@@ -130,6 +130,7 @@ def setup_backend(request, tmp_path):
         raise ValueError
 
 
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
     # Parameters
     db_type, db_url = setup_backend
