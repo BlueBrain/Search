@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <link href="http://arxiv.org/api/query?search_query%3D%26id_list%3Dq-bio%2F0401024v1%2Cq-bio%2F0401014v1%2C1808.02949v2%26start%3D0%26max_results%3D400" rel="self" type="application/atom+xml"/>
+  <title type="html">ArXiv Query: search_query=&amp;id_list=q-bio/0401024v1,q-bio/0401014v1,1808.02949v2&amp;start=0&amp;max_results=400</title>
+  <id>http://arxiv.org/api/A+9fPrGUuO1OscO0gT4EFcXzHVM</id>
+  <updated>2022-01-10T00:00:00-05:00</updated>
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">3</opensearch:totalResults>
+  <opensearch:startIndex xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">0</opensearch:startIndex>
+  <opensearch:itemsPerPage xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">400</opensearch:itemsPerPage>
+  <entry>
+    <id>http://arxiv.org/abs/q-bio/0401024v1</id>
+    <updated>2004-01-16T23:12:38Z</updated>
+    <published>2004-01-16T23:12:38Z</published>
+    <title>Morphogenesis by coupled regulatory networks</title>
+    <summary>  Based on a recently proposed non-equilibrium mechanism for spatial pattern
+formation [cond-mat/0312366] we study how morphogenesis can be controlled by
+locally coupled discrete dynamical networks, similar to gene regulation
+networks of cells in a developing multicellular organism. As an example we
+study the developmental problem of domain formation and proportion regulation
+in the presence of noise and cell flow. We find that networks that solve this
+task exhibit a hierarchical structure of information processing and are of
+similar complexity as developmental circuits of living cells. A further focus
+of this paper is a detailed study of noise-induced dynamics, which is a major
+ingredient of the control dynamics in the developmental network model. A master
+equation for domain boundary readjustments is formulated and solved for the
+continuum limit. Evidence for a first order phase transition in equilibrium
+domain size at vanishing noise is given by finite size scaling. A second order
+phase transition at increased cell flow is studied in a mean field
+approximation. Finally, we discuss potential applications.
+</summary>
+    <author>
+      <name>Thimo Rohlf</name>
+    </author>
+    <author>
+      <name>Stefan Bornholdt</name>
+    </author>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">13 pages revTex, 17 figures (2 color)</arxiv:comment>
+    <link href="http://arxiv.org/abs/q-bio/0401024v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/q-bio/0401024v1" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="q-bio.MN" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="q-bio.MN" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cond-mat.dis-nn" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cond-mat.stat-mech" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/q-bio/0401014v1</id>
+    <updated>2004-01-09T22:21:11Z</updated>
+    <published>2004-01-09T22:21:11Z</published>
+    <title>Lattice gas cellular automata model for rippling and aggregation in
+  myxobacteria</title>
+    <summary>  A lattice-gas cellular automaton (LGCA) model is used to simulate rippling
+and aggregation in myxobacteria. An efficient way of representing cells of
+different cell size, shape and orientation is presented that may be easily
+extended to model later stages of fruiting body formation. This LGCA model is
+designed to investigate whether a refractory period, a minimum response time, a
+maximum oscillation period and non-linear dependence of reversals of cells on
+C-factor are necessary assumptions for rippling. It is shown that a refractory
+period of 2-3 minutes, a minimum response time of up to 1 minute and no maximum
+oscillation period best reproduce rippling in the experiments of {\it
+Myxoccoccus xanthus}. Non-linear dependence of reversals on C-factor is
+critical at high cell density. Quantitative simulations demonstrate that the
+increase in wavelength of ripples when a culture is diluted with non-signaling
+cells can be explained entirely by the decreased density of C-signaling cells.
+This result further supports the hypothesis that levels of C-signaling
+quantitatively depend on and modulate cell density. Analysis of the
+interpenetrating high density waves shows the presence of a phase shift
+analogous to the phase shift of interpenetrating solitons. Finally, a model for
+swarming, aggregation and early fruiting body formation is presented.
+</summary>
+    <author>
+      <name>Mark S. Alber</name>
+    </author>
+    <author>
+      <name>Yi Jiang</name>
+    </author>
+    <author>
+      <name>Maria A. Kiskowski</name>
+    </author>
+    <arxiv:doi xmlns:arxiv="http://arxiv.org/schemas/atom">10.1016/j.physd.2003.11.012</arxiv:doi>
+    <link title="doi" href="http://dx.doi.org/10.1016/j.physd.2003.11.012" rel="related"/>
+    <link href="http://arxiv.org/abs/q-bio/0401014v1" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/q-bio/0401014v1" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="q-bio.QM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="q-bio.QM" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="q-bio.OT" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/1808.02949v2</id>
+    <updated>2018-09-12T18:42:04Z</updated>
+    <published>2018-08-08T21:53:54Z</published>
+    <title>Exploiting ergodicity of the logistic map using deep-zoom to improve
+  security of chaos-based cryptosystems</title>
+    <summary>  This paper explores the deep-zoom properties of the chaotic k-logistic map,
+in order to propose an improved chaos-based cryptosystem. This map was shown to
+enhance the random features of the Logistic map, while at the same time
+reducing the predictability about its orbits. We incorporate its strengths to
+security into a previously published cryptosystem to provide an optimal
+pseudo-random number generator (PRNG) as its core operation. The result is a
+reliable method that does not have the weaknesses previously reported about the
+original cryptosystem.
+</summary>
+    <author>
+      <name>Jeaneth Machicao</name>
+    </author>
+    <author>
+      <name>Marcela Alves</name>
+    </author>
+    <author>
+      <name>Murilo S. Baptista</name>
+    </author>
+    <author>
+      <name>Odemir M. Bruno</name>
+    </author>
+    <arxiv:doi xmlns:arxiv="http://arxiv.org/schemas/atom">10.1142/S0129183119500335</arxiv:doi>
+    <link title="doi" href="http://dx.doi.org/10.1142/S0129183119500335" rel="related"/>
+    <arxiv:comment xmlns:arxiv="http://arxiv.org/schemas/atom">11 pages, 6 figures</arxiv:comment>
+    <link href="http://arxiv.org/abs/1808.02949v2" rel="alternate" type="text/html"/>
+    <link title="pdf" href="http://arxiv.org/pdf/1808.02949v2" rel="related" type="application/pdf"/>
+    <arxiv:primary_category xmlns:arxiv="http://arxiv.org/schemas/atom" term="cs.CR" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CR" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="nlin.CD" scheme="http://arxiv.org/schemas/atom"/>
+  </entry>
+</feed>

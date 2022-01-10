@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
+import pathlib
 import re
 from unittest.mock import Mock
 
@@ -24,6 +25,7 @@ from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     extract_pubmed_id_from_pmc_file,
+    get_topics_for_arxiv_articles,
     get_topics_for_pmc_article,
 )
 from bluesearch.database.topic import (
@@ -379,3 +381,48 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     assert journal_topics == expected_output
     request_mock.assert_called_once()
     request_mock.assert_called_with("Journal NLM TA")
+
+
+# arXiv source
+@responses.activate
+def test_get_topics_for_arxiv_articles(test_data_path):
+    with open(test_data_path / "arxiv_api_response.xml") as f:
+        body = f.read()
+    id_queries = [
+        "id_list=q-bio%2F0401024v1%2Cq-bio%2F0401014v1%2C1808.02949v2",
+        "id_list=q-bio%2F0401024v1%2Cq-bio%2F0401014v1%2C1808.02949v2%2C1808.02950v7",
+    ]
+    for id_query in id_queries:
+        responses.add(
+            responses.GET,
+            f"http://export.arxiv.org/api/query?{id_query}&max_results=400",
+            body=body,
+        )
+
+    # Test 1: everything should be fine
+    expected_output = {
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401024v1.pdf"): [
+            "q-bio.MN",
+            "cond-mat.dis-nn",
+            "cond-mat.stat-mech",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401014v1.pdf"): [
+            "q-bio.QM",
+            "q-bio.OT",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02949v2.pdf"): [
+            "cs.CR",
+            "nlin.CD",
+        ],
+    }
+    inputs = expected_output.keys()
+    article_topics = get_topics_for_arxiv_articles(inputs)
+    assert set(article_topics.keys()) == set(inputs)
+    assert article_topics == expected_output
+
+    # Test 2: number of returned metadata doesn't match
+    with pytest.raises(ValueError):
+        get_topics_for_arxiv_articles(
+            list(inputs)
+            + [pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02950v7.pdf")]
+        )

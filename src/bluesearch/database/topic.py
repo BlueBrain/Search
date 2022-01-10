@@ -320,6 +320,11 @@ def get_topics_for_arxiv_articles(
         Maps each of the paths to a list of corresponding arXiv article topics.
         See [2] for an explanation of arXiv topics taxonomy.
 
+    Raises
+    ------
+    ValueError
+        If the arXiv API does not return the correct number of metadata.
+
     References
     ----------
     [1] https://arxiv.org/help/api/user-manual
@@ -363,8 +368,8 @@ def get_topics_for_arxiv_articles(
         entries = etree.findall("./atom:entry", ns)
         if len(entries) != len(id_list):
             raise ValueError(
-                "Expected to find {len(id_list)} metadata, "
-                "but found {len(entries)}, for id_list = {id_list}"
+                f"Expected to find {len(id_list)} metadata, "
+                f"but found {len(entries)}, for id_list = {id_list}"
             )
         for el in entries:
             id_ = id_pattern.findall(el.find("./atom:id", ns).text)[0]
