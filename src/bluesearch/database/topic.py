@@ -20,6 +20,7 @@ from __future__ import annotations
 import html
 import logging
 import pathlib
+import re
 from functools import lru_cache
 from typing import Iterable
 from xml.etree.ElementTree import Element  # nosec
@@ -27,7 +28,7 @@ from xml.etree.ElementTree import Element  # nosec
 import requests
 from defusedxml import ElementTree
 
-from bluesearch.database.article import JATSXMLParser
+from bluesearch.database.article import JATSXMLParser, get_arxiv_id
 
 logger = logging.getLogger(__name__)
 
@@ -295,3 +296,81 @@ def get_topics_for_pmc_article(
             journal_topics.append(descriptor["name"])
 
     return journal_topics
+
+
+# arXiv source
+def get_topics_for_arxiv_articles(
+    arxiv_paths: Iterable[pathlib.Path] | Iterable[str], batch_size: int = 400
+) -> dict[pathlib.Path, list[str]]:
+    """Extract journal topics of one or more arXiv article.
+
+    Parameters
+    ----------
+    arxiv_paths
+        Full paths to the arXiv articles to consider.
+
+    batch_size
+        Metadata are retrieved using the arXiv API [1] in batches of size
+        `batch_size`. Large batches values may create long request URLs that
+        cause the arXiv API to fail.
+
+    Returns
+    -------
+    article_topics : dict[pathlib.Path , list[str]]
+        Maps each of the paths to a list of corresponding arXiv article topics.
+        See [2] for an explanation of arXiv topics taxonomy.
+
+    References
+    ----------
+    [1] https://arxiv.org/help/api/user-manual
+    [2] https://arxiv.org/category_taxonomy
+    """
+    # Get arXiv IDs of interest.
+    prefix = "arxiv:"  # Need to drop the initial "arxiv:" from the arXiv ID
+    id_2_path: dict[str, pathlib.Path] = {}
+    for p in arxiv_paths:
+        try:
+            arxiv_id = get_arxiv_id(p)[len(prefix) :]
+            id_2_path[arxiv_id] = pathlib.Path(p)
+        except ValueError as ve:
+            logger.error(f"Failed ID extraction: {ve}")
+
+    # Retrieve metadata in batches
+    ns = {
+        "atom": "http://www.w3.org/2005/Atom",
+        "arxiv": "http://arxiv.org/schemas/atom",
+        "opensearch": "http://a9.com/-/spec/opensearch/1.1/",
+    }
+    base_url = "http://export.arxiv.org/api/query"
+    id_pattern = re.compile(r"\Ahttp://arxiv.org/abs/(.*)")
+    ids = list(id_2_path.keys())
+    article_topics = {}
+    for i_start in range(0, len(ids), batch_size):
+        # Get a slice of arXiv ids
+        i_end = i_start + batch_size
+        id_list = ids[i_start:i_end]
+
+        # Send request to arXiv API for our slice of arXiv ids
+        params = {
+            "id_list": ",".join(id_list),
+            "max_results": str(batch_size),
+        }
+        res = requests.get(base_url, params)
+        res.raise_for_status()
+
+        # Process response to retrieve arXiv ids and corresponding topics
+        etree = ElementTree.fromstring(res.text)
+        entries = etree.findall("./atom:entry", ns)
+        if len(entries) != len(id_list):
+            raise ValueError(
+                "Expected to find {len(id_list)} metadata, "
+                "but found {len(entries)}, for id_list = {id_list}"
+            )
+        for el in entries:
+            id_ = id_pattern.findall(el.find("./atom:id", ns).text)[0]
+            categories = [
+                categ.get("term") for categ in el.findall("atom:category", ns)
+            ]
+            article_topics[id_2_path[id_]] = categories
+
+    return article_topics

@@ -33,7 +33,7 @@ from mashumaro import DataClassJSONMixin
 from bluesearch.database.identifiers import generate_uid
 
 
-def get_arxiv_id(path: str | Path) -> str | None:
+def get_arxiv_id(path: str | Path) -> str:
     """Compute arXiv ID, including version, from file path.
 
     Parameters
@@ -43,8 +43,8 @@ def get_arxiv_id(path: str | Path) -> str | None:
 
     Returns
     -------
-    str or None
-        arXiv ID, if possible to compute.
+    str
+        The computed arXiv ID.
 
     Raises
     ------

@@ -128,7 +128,10 @@ def run(
     `get_parser` function.
     """
     import bluesearch
-    from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.database.topic import (
+        get_topics_for_arxiv_articles,
+        get_topics_for_pmc_article,
+    )
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -168,6 +171,25 @@ def run(
                     },
                 }
             )
+    elif source == "arxiv":
+        all_results = [
+            {
+                "source": "arxiv",
+                "path": str(path.resolve()),
+                "topics": {
+                    "journal": {
+                        "arXiv": article_topics,
+                    },
+                },
+                "metadata": {
+                    "created-date": datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
+                    "bbs-version": bluesearch.version.__version__,
+                },
+            }
+            for path, article_topics in get_topics_for_arxiv_articles(inputs).items()
+        ]
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1
