@@ -126,11 +126,8 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import datetime
-
     from defusedxml import ElementTree
 
-    import bluesearch
     from bluesearch.database.article import ArticleSource
     from bluesearch.database.topic_info import TopicInfo
     from bluesearch.database.topic import (
@@ -169,34 +166,23 @@ def run(
             if journal_topics:
                 topic_info.add_journal_topics("MeSH", journal_topics)
             all_results.append(topic_info.json())
-    elif source == "pubmed":
+    elif article_source == ArticleSource.PUBMED:
         for path in inputs:
             logger.info(f"Processing {path}")
             articles = ElementTree.parse(input_path)
             for i, article in enumerate(articles.iter("PubmedArticle")):
+                topic_info = TopicInfo(
+                    source=article_source,
+                    path=path.resolve(),
+                    element_in_file=i,
+                )
                 article_topics = extract_article_topics_for_pubmed_article(article)
                 journal_topics = extract_journal_topics_for_pubmed_article(article)
-                all_results.append(
-                    {
-                        "source": "pubmed",
-                        "path": str(path.resolve()),
-                        "topics": {
-                            "journal": {
-                                "MeSH": journal_topics,
-                            },
-                            "article": {
-                                "MeSH": article_topics,
-                            },
-                        },
-                        "metadata": {
-                            "created-date": datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            "bbs-version": bluesearch.__version__,
-                            "element_in_file": i,
-                        },
-                    }
-                )
+                if article_topics:
+                    topic_info.add_article_topics("MeSH", article_topics)
+                if journal_topics:
+                    topic_info.add_journal_topics("MeSH", journal_topics)
+                all_results.append(topic_info.json())
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1
