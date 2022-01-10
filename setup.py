@@ -64,6 +64,7 @@ INSTALL_REQUIRES = [
     "pandas>=1",
     # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
     "mashumaro",
+    "pg8000",
     "python-dotenv",
     "requests",
     "scikit-learn",

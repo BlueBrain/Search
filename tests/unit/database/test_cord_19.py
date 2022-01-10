@@ -96,6 +96,7 @@ def test_mark_bad_sentences(fake_sqlalchemy_engine):
 class TestDatabaseCreation:
     """Tests the creation of the Database"""
 
+    @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
     def test_database_content(self, real_sqlalchemy_engine):
         """Tests that the two tables expected has been created."""
         inspector = sqlalchemy.inspect(real_sqlalchemy_engine)

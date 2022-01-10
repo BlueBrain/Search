@@ -38,7 +38,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--db-type",
         default="sqlite",
         type=str,
-        choices=("mariadb", "mysql", "sqlite"),
+        choices=("mariadb", "mysql", "postgres", "sqlite"),
         help="Type of the database.",
     )
     return parser
@@ -64,6 +64,9 @@ def run(
 
     elif db_type in {"mariadb", "mysql"}:
         engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
+
+    elif db_type == "postgres":
+        engine = sqlalchemy.create_engine(f"postgresql+pg8000://{db_url}")
 
     else:
         # This branch never reached because of `choices` in `argparse`
