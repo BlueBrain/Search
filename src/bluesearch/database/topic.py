@@ -320,11 +320,9 @@ def get_topics_for_pubmed_article(
     medline_ta = article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
     if medline_ta is not None and medline_ta.text is not None:
         journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
-        if journal_meshes is not None:
-            journal_topics = []
-            for mesh in journal_meshes:
-                for descriptor in mesh["descriptor"]:
-                    journal_topics.append(descriptor["name"])
+        journal_topics = [
+            desc["name"] for mesh in journal_meshes for desc in mesh["descriptor"]
+        ]
 
     # Article topic
     mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
