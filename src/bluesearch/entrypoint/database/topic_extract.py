@@ -131,8 +131,9 @@ def run(
 
     import bluesearch
     from bluesearch.database.topic import (
+        extract_article_topics_for_pubmed_article,
+        extract_journal_topics_for_pubmed_article,
         get_topics_for_pmc_article,
-        get_topics_for_pubmed_article,
     )
     from bluesearch.utils import JSONL, find_files
 
@@ -178,7 +179,8 @@ def run(
             logger.info(f"Processing {path}")
             articles = ElementTree.parse(input_path)
             for i, article in enumerate(articles.iter("PubmedArticle")):
-                journal_topics, article_topics = get_topics_for_pubmed_article(article)
+                article_topics = extract_article_topics_for_pubmed_article(article)
+                journal_topics = extract_journal_topics_for_pubmed_article(article)
                 all_results.append(
                     {
                         "source": "pubmed",

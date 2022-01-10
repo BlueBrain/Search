@@ -24,9 +24,10 @@ from defusedxml import ElementTree
 from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
+    extract_article_topics_for_pubmed_article,
+    extract_journal_topics_for_pubmed_article,
     extract_pubmed_id_from_pmc_file,
     get_topics_for_pmc_article,
-    get_topics_for_pubmed_article,
 )
 from bluesearch.database.topic import (
     request_mesh_from_nlm_ta as request_mesh_from_nlm_ta_decorated,
@@ -414,8 +415,9 @@ def test_get_topics_for_pubmed_article(test_data_path, monkeypatch):
     )
 
     expected_output = ["Models, Econometric", "Regression Analysis"]
-    journal_topics, article_topics = get_topics_for_pubmed_article(article)
+    journal_topics = extract_journal_topics_for_pubmed_article(article)
     assert journal_topics == expected_output
+    article_topics = extract_article_topics_for_pubmed_article(article)
     assert article_topics == ["Major Topic", "Minor Topic"]
     request_mock.assert_called_once()
     request_mock.assert_called_with("Medline TA")

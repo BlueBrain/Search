@@ -170,15 +170,19 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     pmc_path = test_data_path / "pubmed_articles.xml"
     output_jsonl = tmp_path / "test.jsonl"
-    meshes = (
-        ["MeSH Journal 1", "MeSH Journal 2"],
-        ["MeSH Article 1", "MeSH Article 2"],
+    journal_meshes = ["MeSH Journal 1", "MeSH Journal 2"]
+    article_meshes = ["MeSH Article 1", "MeSH Article 2"]
+
+    extract_article_topic_for_pubmed_mock = Mock(return_value=article_meshes)
+    monkeypatch.setattr(
+        "bluesearch.database.topic.extract_article_topics_for_pubmed_article",
+        extract_article_topic_for_pubmed_mock,
     )
 
-    get_topic_for_pubmed_mock = Mock(return_value=meshes)
+    extract_journal_topic_for_pubmed_mock = Mock(return_value=journal_meshes)
     monkeypatch.setattr(
-        "bluesearch.database.topic.get_topics_for_pubmed_article",
-        get_topic_for_pubmed_mock,
+        "bluesearch.database.topic.extract_journal_topics_for_pubmed_article",
+        extract_journal_topic_for_pubmed_mock,
     )
 
     exit_code = topic_extract.run(
@@ -193,6 +197,8 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert exit_code == 0
     assert output_jsonl.exists()
     results = JSONL.load_jsonl(output_jsonl)
+    assert extract_journal_topic_for_pubmed_mock.call_count == 2
+    assert extract_article_topic_for_pubmed_mock.call_count == 2
 
     assert len(results) == 2
     result = results[0]
@@ -204,7 +210,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert "journal" in topics
     assert isinstance(topics["journal"], dict)
     assert isinstance(topics["article"], dict)
-    assert topics["journal"]["MeSH"] == meshes[0]
-    assert topics["article"]["MeSH"] == meshes[1]
+    assert topics["journal"]["MeSH"] == journal_meshes
+    assert topics["article"]["MeSH"] == article_meshes
     assert "metadata" in result
     assert "element_in_file" in result["metadata"]
