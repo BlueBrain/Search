@@ -127,8 +127,7 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import bluesearch
-    from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.database.topic import TopicInfo, get_topics_for_pmc_article
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -151,23 +150,13 @@ def run(
         for path in inputs:
             logger.info(f"Processing {path}")
             journal_topics = get_topics_for_pmc_article(path)
-            all_results.append(
-                {
-                    "source": "pmc",
-                    "path": str(path.resolve()),
-                    "topics": {
-                        "journal": {
-                            "MeSH": journal_topics,
-                        },
-                    },
-                    "metadata": {
-                        "created-date": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "bbs-version": bluesearch.version.__version__,
-                    },
-                }
-            )
+
+            topic_info = TopicInfo()
+            topic_info.path = str(path.resolve())
+            topic_info.source = "pmc"
+            topic_info.journal_topics = {"MeSH": journal_topics}
+            all_results.append(topic_info.to_dict())
+
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

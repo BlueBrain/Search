@@ -17,6 +17,7 @@
 """Utils for journal/articles topics."""
 from __future__ import annotations
 
+import datetime
 import html
 import logging
 import pathlib
@@ -27,9 +28,61 @@ from xml.etree.ElementTree import Element  # nosec
 import requests
 from defusedxml import ElementTree
 
+import bluesearch
 from bluesearch.database.article import JATSXMLParser
 
 logger = logging.getLogger(__name__)
+
+
+class TopicInfo:
+
+    def __init__(self):
+
+        self.path = None
+        self.articles_topics = {}
+        self.journal_topics = {}
+        self.source = None
+
+        self.bbs_version = bluesearch.version.__version__
+
+    def to_dict(self) -> dict:
+        """Create a dictionary with the metadata.
+
+        Returns
+        -------
+        result : dict
+            Dictionary summarizing the topic info and metadata of an article.
+
+        Raises
+        ------
+        ValueError
+            If the path or source property is None.
+        """
+        if self.path is None:
+            raise ValueError("The property 'path' was never specified. "
+                             "Please specify it before using to_dict")
+
+        if self.source is None:
+            raise ValueError("The property 'source' was never specified. "
+                             "Please specify it before using to_dict")
+
+        result = {
+            "source": self.source,
+            "path": self.path,
+            "topics": {},
+            "metadata": {
+                "created-date": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "bbs-version": self.bbs_version,
+            },
+        }
+
+        if self.articles_topics:
+            result["topics"]["article"] = self.articles_topics
+
+        if self.journal_topics:
+            result["topics"]["journal"] = self.journal_topics
+
+        return result
 
 
 # Journal Topic
