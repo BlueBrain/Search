@@ -298,14 +298,14 @@ def get_topics_for_pmc_article(
 
 
 def get_topics_for_pubmed_article(
-    article: Element,
+    xml_article: Element,
 ) -> tuple[list[str] | None, list[str] | None]:
     """Extract journal topics of a PubMed article.
 
     Parameters
     ----------
-    article
-        Article for which to extract journal and article topics.
+    xml_article
+        XML parse of an article for which to extract journal and article topics.
 
     Returns
     -------
@@ -317,7 +317,7 @@ def get_topics_for_pubmed_article(
     journal_topics, article_topics = None, None
 
     # Journal topic
-    medline_ta = article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
+    medline_ta = xml_article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
     if medline_ta is not None and medline_ta.text is not None:
         journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
         journal_topics = [
@@ -325,11 +325,11 @@ def get_topics_for_pubmed_article(
         ]
 
     # Article topic
-    mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
+    mesh_headings = xml_article.findall("./MedlineCitation/MeshHeadingList")
     article_meshes = _parse_mesh_from_pubmed(mesh_headings)
 
-      article_topics = [
-          desc["name"] for mesh in article_meshes for desc in mesh["descriptor"]
-      ]
+    article_topics = [
+        desc["name"] for mesh in article_meshes for desc in mesh["descriptor"]
+    ]
 
     return journal_topics, article_topics
