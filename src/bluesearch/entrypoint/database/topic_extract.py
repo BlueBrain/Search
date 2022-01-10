@@ -176,7 +176,7 @@ def run(
     elif source == "pubmed":
         for path in inputs:
             logger.info(f"Processing {path}")
-            articles = ElementTree.parse(str(input_path))
+            articles = ElementTree.parse(input_path)
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 journal_topics, article_topics = get_topics_for_pubmed_article(article)
                 all_results.append(
