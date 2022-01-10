@@ -41,6 +41,7 @@ from bluesearch.embedding_models import (
 GPU_IS_AVAILABLE = torch.cuda.is_available()
 
 
+@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 class TestEmbeddingModels:
     """The included tests do not use real models."""
 

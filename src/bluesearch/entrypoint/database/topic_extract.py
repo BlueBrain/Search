@@ -127,8 +127,12 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    from defusedxml import ElementTree
+
     import bluesearch
     from bluesearch.database.topic import (
+        extract_article_topics_for_pubmed_article,
+        extract_journal_topics_for_pubmed_article,
         get_topics_for_arxiv_articles,
         get_topics_for_pmc_article,
     )
@@ -190,6 +194,34 @@ def run(
             }
             for path, article_topics in get_topics_for_arxiv_articles(inputs).items()
         ]
+    elif source == "pubmed":
+        for path in inputs:
+            logger.info(f"Processing {path}")
+            articles = ElementTree.parse(input_path)
+            for i, article in enumerate(articles.iter("PubmedArticle")):
+                article_topics = extract_article_topics_for_pubmed_article(article)
+                journal_topics = extract_journal_topics_for_pubmed_article(article)
+                all_results.append(
+                    {
+                        "source": "pubmed",
+                        "path": str(path.resolve()),
+                        "topics": {
+                            "journal": {
+                                "MeSH": journal_topics,
+                            },
+                            "article": {
+                                "MeSH": article_topics,
+                            },
+                        },
+                        "metadata": {
+                            "created-date": datetime.datetime.now().strftime(
+                                "%Y-%m-%d %H:%M:%S"
+                            ),
+                            "bbs-version": bluesearch.version.__version__,
+                            "element_in_file": i,
+                        },
+                    }
+                )
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

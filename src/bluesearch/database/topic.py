@@ -259,7 +259,6 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
     return meshs
 
 
-# PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
 ) -> list[str] | None:
@@ -298,7 +297,6 @@ def get_topics_for_pmc_article(
     return journal_topics
 
 
-# arXiv source
 def get_topics_for_arxiv_articles(
     arxiv_paths: Iterable[pathlib.Path] | Iterable[str], batch_size: int = 400
 ) -> dict[pathlib.Path, list[str]]:
@@ -379,3 +377,59 @@ def get_topics_for_arxiv_articles(
             article_topics[id_2_path[id_]] = categories
 
     return article_topics
+
+
+def extract_article_topics_for_pubmed_article(
+    xml_article: Element,
+) -> list[str] | None:
+    """Extract article topics of a PubMed article.
+
+    Parameters
+    ----------
+    xml_article
+        XML parse of an article for which to extract journal and article topics.
+
+    Returns
+    -------
+    article_topics : list[str] | None
+        Article topics extracted for the given article.
+    """
+    mesh_headings = xml_article.findall("./MedlineCitation/MeshHeadingList")
+    article_meshes = _parse_mesh_from_pubmed(mesh_headings)
+
+    article_topics = [
+        desc["name"] for mesh in article_meshes for desc in mesh["descriptor"]
+    ]
+
+    return article_topics
+
+
+def extract_journal_topics_for_pubmed_article(
+    xml_article: Element,
+) -> list[str] | None:
+    """Extract journal topics of a PubMed article.
+
+    Parameters
+    ----------
+    xml_article
+        XML parse of an article for which to extract journal and article topics.
+
+    Returns
+    -------
+    journal_topics : list[str] | None
+        Journal topics extracted for the given article.
+    """
+    # Journal topic
+    medline_ta = xml_article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
+    if medline_ta is None or medline_ta.text is None:
+        return None
+
+    journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
+    if journal_meshes is None:
+        return None
+
+    journal_topics = [
+        desc["name"] for mesh in journal_meshes for desc in mesh["descriptor"]
+    ]
+
+    return journal_topics
