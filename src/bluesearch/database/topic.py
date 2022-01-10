@@ -337,16 +337,14 @@ def extract_journal_topics_for_pubmed_article(
     journal_topics : list[str] | None
         Journal topics extracted for the given article.
     """
-    journal_topics = None
-
     # Journal topic
     medline_ta = xml_article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
     if medline_ta is None or medline_ta.text is None:
-        return journal_topics
+        return None
 
     journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
     if journal_meshes is None:
-        return journal_topics
+        return None
 
     journal_topics = [
         desc["name"] for mesh in journal_meshes for desc in mesh["descriptor"]
