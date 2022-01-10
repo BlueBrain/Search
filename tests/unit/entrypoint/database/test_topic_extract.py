@@ -84,7 +84,7 @@ def test_wrong_source(test_data_path, caplog, tmp_path):
             dry_run=False,
         )
     assert exit_code == 1
-    assert "The source type" in caplog.text
+    assert "Unknown article source" in caplog.text
 
 
 def test_dry_run(test_data_path, capsys, tmp_path):

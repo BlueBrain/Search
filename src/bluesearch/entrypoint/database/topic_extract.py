@@ -154,7 +154,11 @@ def run(
         print(*inputs, sep="\n")
         return 0
 
-    article_source = ArticleSource(source)
+    try:
+        article_source = ArticleSource(source)
+    except ValueError:
+        logger.error("Unknown article source: %s", source)
+        return 1
     all_results: list[dict[str, Any]] = []
 
     if article_source == ArticleSource.PMC:
