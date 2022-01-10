@@ -35,16 +35,15 @@ logger = logging.getLogger(__name__)
 
 
 class TopicInfo:
+    """Topic info and metadata of an article."""
 
     def __init__(self):
-
+        self.bbs_version = bluesearch.version.__version__
         self.path = None
         self.articles_topics = {}
         self.journal_topics = {}
-        self.source = None
         self.other_metadata = {}
-
-        self.bbs_version = bluesearch.version.__version__
+        self.source = None
 
     def to_dict(self) -> dict:
         """Create a dictionary with the metadata.
@@ -60,12 +59,16 @@ class TopicInfo:
             If the path or source property is None.
         """
         if self.path is None:
-            raise ValueError("The property 'path' was never specified. "
-                             "Please specify it before using to_dict")
+            raise ValueError(
+                "The property 'path' was never specified. "
+                "Please specify it before using to_dict"
+            )
 
         if self.source is None:
-            raise ValueError("The property 'source' was never specified. "
-                             "Please specify it before using to_dict")
+            raise ValueError(
+                "The property 'source' was never specified. "
+                "Please specify it before using to_dict"
+            )
 
         result = {
             "source": self.source,
@@ -85,7 +88,7 @@ class TopicInfo:
 
         if self.other_metadata:
             for key, value in self.other_metadata:
-                result["metadata"]["key"] = value
+                result["metadata"][key] = value
         return result
 
 

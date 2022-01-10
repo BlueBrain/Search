@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import argparse
-import datetime
 import logging
 from pathlib import Path
 from typing import Any
@@ -129,7 +128,6 @@ def run(
     """
     from defusedxml import ElementTree
 
-    import bluesearch
     from bluesearch.database.topic import (
         TopicInfo,
         extract_article_topics_for_pubmed_article,
