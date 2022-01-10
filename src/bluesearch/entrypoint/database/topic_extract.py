@@ -124,12 +124,12 @@ def run(
     """
     from defusedxml import ElementTree
 
-    from bluesearch.database.topic_info import TopicInfo
     from bluesearch.database.topic import (
         extract_article_topics_for_pubmed_article,
         extract_journal_topics_for_pubmed_article,
         get_topics_for_pmc_article,
     )
+    from bluesearch.database.topic_info import TopicInfo
     from bluesearch.utils import JSONL, find_files
 
     try:
