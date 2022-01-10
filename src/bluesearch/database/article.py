@@ -17,6 +17,7 @@
 """Abstraction of scientific article data and related tools."""
 from __future__ import annotations
 
+import enum
 import html
 import re
 import string
@@ -31,6 +32,17 @@ from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
 
 from bluesearch.database.identifiers import generate_uid
+
+
+class ArticleSource(enum.Enum):
+    """The source of an article."""
+
+    ARXIV = "arxiv"
+    BIORXIV = "biorxiv"
+    MEDRXIV = "medrxiv"
+    PMC = "pmc"
+    PUBMED = "pubmed"
+    UNKNOWN = None
 
 
 def get_arxiv_id(path: str | Path) -> str | None:
