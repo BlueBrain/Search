@@ -22,6 +22,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from bluesearch.database.article import ArticleSource
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,13 +46,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "source",
         type=str,
-        choices=(
-            "arxiv",
-            "biorxiv",
-            "medrxiv",
-            "pmc",
-            "pubmed",
-        ),
+        choices=[member.value for member in ArticleSource.__members__.values()],
         help="""
         Format of the input.
         If extracting topic of several articles, all articles must have the same format.
@@ -128,7 +124,6 @@ def run(
     """
     from defusedxml import ElementTree
 
-    from bluesearch.database.article import ArticleSource
     from bluesearch.database.topic_info import TopicInfo
     from bluesearch.database.topic import (
         extract_article_topics_for_pubmed_article,
