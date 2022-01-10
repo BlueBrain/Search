@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import argparse
-import datetime
 import logging
 from pathlib import Path
 from typing import Any
@@ -127,8 +126,9 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import bluesearch
+    from bluesearch.database.article import ArticleSource
     from bluesearch.database.topic import get_topics_for_pmc_article
+    from bluesearch.database.topic_info import TopicInfo
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -145,29 +145,17 @@ def run(
         print(*inputs, sep="\n")
         return 0
 
+    article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
 
-    if source == "pmc":
+    if article_source == ArticleSource.PMC:
         for path in inputs:
             logger.info(f"Processing {path}")
+            topic_info = TopicInfo(source=article_source, path=path.resolve())
             journal_topics = get_topics_for_pmc_article(path)
-            all_results.append(
-                {
-                    "source": "pmc",
-                    "path": str(path.resolve()),
-                    "topics": {
-                        "journal": {
-                            "MeSH": journal_topics,
-                        },
-                    },
-                    "metadata": {
-                        "created-date": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "bbs-version": bluesearch.version.__version__,
-                    },
-                }
-            )
+            if journal_topics:
+                topic_info.add_journal_topics("MeSH", journal_topics)
+            all_results.append(topic_info.json())
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

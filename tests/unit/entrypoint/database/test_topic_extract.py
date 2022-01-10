@@ -132,7 +132,6 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert result["path"] == str(pmc_path)
     assert isinstance(result["topics"], dict)
     topics = result["topics"]
-    assert "article" not in topics
     assert "journal" in topics
     assert isinstance(topics["journal"], dict)
     assert topics["journal"]["MeSH"] == meshes
