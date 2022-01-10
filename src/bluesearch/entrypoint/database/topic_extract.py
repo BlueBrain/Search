@@ -127,7 +127,15 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    from bluesearch.database.topic import TopicInfo, get_topics_for_pmc_article
+    from defusedxml import ElementTree
+
+    import bluesearch
+    from bluesearch.database.topic import (
+        TopicInfo,
+        extract_article_topics_for_pubmed_article,
+        extract_journal_topics_for_pubmed_article,
+        get_topics_for_pmc_article,
+    )
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -156,6 +164,22 @@ def run(
             topic_info.source = "pmc"
             topic_info.journal_topics = {"MeSH": journal_topics}
             all_results.append(topic_info.to_dict())
+
+    elif source == "pubmed":
+        for path in inputs:
+            logger.info(f"Processing {path}")
+            articles = ElementTree.parse(input_path)
+            for i, article in enumerate(articles.iter("PubmedArticle")):
+                article_topics = extract_article_topics_for_pubmed_article(article)
+                journal_topics = extract_journal_topics_for_pubmed_article(article)
+
+                topic_info = TopicInfo()
+                topic_info.path = str(path.resolve())
+                topic_info.source = "pubmed"
+                topic_info.journal_topics = {"MeSH": journal_topics}
+                topic_info.articles_topics = {"MeSH": article_topics}
+                topic_info.other_metadata = {"element_in_file": i}
+                all_results.append(topic_info.to_dict())
 
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
