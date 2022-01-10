@@ -42,7 +42,7 @@ class ArticleSource(enum.Enum):
     MEDRXIV = "medrxiv"
     PMC = "pmc"
     PUBMED = "pubmed"
-    UNKNOWN = None
+    UNKNOWN = "unknown"
 
 
 def get_arxiv_id(path: str | Path) -> str | None:
