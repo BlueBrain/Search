@@ -21,7 +21,7 @@ import html
 import logging
 import pathlib
 from functools import lru_cache
-from typing import Iterable, Optional, Tuple
+from typing import Iterable
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -299,7 +299,7 @@ def get_topics_for_pmc_article(
 
 def get_topics_for_pubmed_article(
     article: Element,
-) -> Tuple[Optional[list[str]], Optional[list[str]]]:
+) -> tuple[list[str] | None, list[str] | None]:
     """Extract journal topics of a PubMed article.
 
     Parameters
@@ -309,9 +309,9 @@ def get_topics_for_pubmed_article(
 
     Returns
     -------
-    journal_topics : Optional[list[str]
+    journal_topics : list[str] | None
         Journal topics extracted for the given article.
-    article_topics : Optional[list[str]]
+    article_topics : list[str] | None
         Article topics extracted for the given article.
     """
     journal_topics, article_topics = None, None
