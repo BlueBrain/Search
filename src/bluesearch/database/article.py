@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import html
+import re
 import string
 import unicodedata
 from abc import ABC, abstractmethod
@@ -30,6 +31,50 @@ from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
 
 from bluesearch.database.identifiers import generate_uid
+
+
+def get_arxiv_id(path: str | Path) -> str | None:
+    """Compute arXiv ID, including version, from file path.
+
+    Parameters
+    ----------
+    path
+        The file path to an arXiv article.
+
+    Returns
+    -------
+    str or None
+        arXiv ID, if possible to compute.
+
+    Raises
+    ------
+    ValueError
+        If no valid arXiv ID could be inferred from the file path.
+
+    References
+    ----------
+    https://arxiv.org/help/arxiv_identifier
+    """
+    path = Path(path)
+
+    # New format, since 2007-04, only needs path stem:
+    # - since 2015-01 have format YYMM.NNNNN (i.e. 5 digits)
+    # - up to 2014-12 have format YYMM.NNNN (i.e. 4 digits)
+    pattern = re.compile(r"\d{4}\.\d{4}\d?v\d+")
+    match = pattern.fullmatch(path.stem)
+    if match:
+        return f"arxiv:{match.string}"
+
+    # Old format, up to 2007-03, needs to look at the whole path:
+    # - some_path/arxiv/<archive>/<format>/YYMM/YYMMNNNv<version>.<ext>
+    # Note: format may contain "-"
+    pattern = re.compile(r"arxiv/([\w-]+)/\w+/\d{4}/(\d{7}v\d+)\.\w+\Z")
+    match = pattern.search("/".join(path.parts[-5:]))
+    if match:
+        cat, id_ = match.groups()
+        return f"arxiv:{cat}/{id_}"
+
+    raise ValueError(f"Could not extract arXiv ID from file path {path}")
 
 
 class ArticleParser(ABC):
@@ -81,7 +126,7 @@ class ArticleParser(ABC):
         """
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -92,7 +137,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -103,7 +148,18 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def doi(self) -> Optional[str]:
+    def arxiv_id(self) -> str | None:
+        """Get arXiv ID.
+
+        Returns
+        -------
+        str or None
+            arXiv ID if specified, otherwise None.
+        """
+        return None
+
+    @property
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -114,7 +170,7 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def uid(self) -> Optional[str]:
+    def uid(self) -> str | None:
         """Generate unique ID of the article based on different identifiers.
 
         Returns
@@ -123,7 +179,7 @@ class ArticleParser(ABC):
             If at least one identifier exists, unique id is created. Otherwise,
             the returned uid is None.
         """
-        return generate_uid((self.pubmed_id, self.pmc_id, self.doi))
+        return generate_uid((self.pubmed_id, self.pmc_id, self.arxiv_id, self.doi))
 
 
 class JATSXMLParser(ArticleParser):
@@ -231,7 +287,7 @@ class JATSXMLParser(ArticleParser):
                 yield "Table Caption", caption
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -242,7 +298,7 @@ class JATSXMLParser(ArticleParser):
         return self.ids.get("pmid")
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -253,7 +309,7 @@ class JATSXMLParser(ArticleParser):
         return self.ids.get("pmc")
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -477,7 +533,7 @@ class PubMedXMLParser(ArticleParser):
         return ()
 
     @property
-    def pubmed_id(self) -> Optional[str]:
+    def pubmed_id(self) -> str | None:
         """Get Pubmed ID.
 
         Returns
@@ -489,7 +545,7 @@ class PubMedXMLParser(ArticleParser):
         return pubmed_id.text
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -503,7 +559,7 @@ class PubMedXMLParser(ArticleParser):
         return None if pmc_id is None else pmc_id.text
 
     @property
-    def doi(self) -> Optional[str]:
+    def doi(self) -> str | None:
         """Get DOI.
 
         Returns
@@ -610,7 +666,7 @@ class CORD19ArticleParser(ArticleParser):
             yield "Caption", ref_entry["text"]
 
     @property
-    def pmc_id(self) -> Optional[str]:
+    def pmc_id(self) -> str | None:
         """Get PMC ID.
 
         Returns
@@ -630,14 +686,19 @@ class TEIXMLParser(ArticleParser):
 
     Parameters
     ----------
-    xml_content
-        The content of a TEI XML file.
+    path
+        The path to a TEI XML file.
+    is_arxiv
+        Set to `True` if the TEI XML file was generated by parsing an arXiv PDF.
     """
 
-    def __init__(self, xml_content: str):
-        self.content = ElementTree.fromstring(xml_content)
+    def __init__(self, path: str | Path, is_arxiv: bool | None = False):
+        path = Path(path)
+        with path.open() as fp:
+            self.content = ElementTree.fromstring(fp.read())
         self.tei_namespace = {"tei": "http://www.tei-c.org/ns/1.0"}
         self._tei_ids: dict[str, str] | None = None
+        self._arxiv_id = get_arxiv_id(path) if is_arxiv else None
 
     @property
     def title(self) -> str:
@@ -729,6 +790,17 @@ class TEIXMLParser(ArticleParser):
                 yield "Table Caption", caption_str
             else:
                 yield "Figure Caption", caption_str
+
+    @property
+    def arxiv_id(self) -> str | None:
+        """Get arXiv ID.
+
+        Returns
+        -------
+        str or None
+            arXiv ID if specified, otherwise None.
+        """
+        return self._arxiv_id
 
     @property
     def doi(self) -> str | None:
@@ -854,6 +926,7 @@ class Article(DataClassJSONMixin):
     section_paragraphs: Sequence[Tuple[str, str]]
     pubmed_id: Optional[str] = None
     pmc_id: Optional[str] = None
+    arxiv_id: Optional[str] = None
     doi: Optional[str] = None
     uid: Optional[str] = None
 
@@ -872,11 +945,20 @@ class Article(DataClassJSONMixin):
         section_paragraphs = tuple(parser.paragraphs)
         pubmed_id = parser.pubmed_id
         pmc_id = parser.pmc_id
+        arxiv_id = parser.arxiv_id
         doi = parser.doi
         uid = parser.uid
 
         return cls(
-            title, authors, abstract, section_paragraphs, pubmed_id, pmc_id, doi, uid
+            title,
+            authors,
+            abstract,
+            section_paragraphs,
+            pubmed_id,
+            pmc_id,
+            arxiv_id,
+            doi,
+            uid,
         )
 
     def iter_paragraphs(

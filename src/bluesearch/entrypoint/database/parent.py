@@ -1,9 +1,11 @@
 """Module implementing the high level CLI logic."""
+from __future__ import annotations
+
 import argparse
 import logging
 import sys
 from collections import namedtuple
-from typing import Optional, Sequence
+from typing import Sequence
 
 from bluesearch.entrypoint.database import (
     add,
@@ -33,7 +35,7 @@ def _setup_logging(logging_level: int) -> None:
     root_logger.addHandler(handler)
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     """Run CLI.
 
     This is the main entrypoint that defines different commands

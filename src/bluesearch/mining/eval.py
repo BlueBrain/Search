@@ -1,5 +1,3 @@
-"""Classes and functions for evaluating mining models predictions."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,13 +14,15 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Classes and functions for evaluating mining models predictions."""
+from __future__ import annotations
 
 import copy
 import json
 import string
 from collections import OrderedDict
 from pathlib import Path
-from typing import Optional, Union, overload
+from typing import overload
 
 import numpy as np
 import pandas as pd
@@ -369,7 +369,7 @@ def ner_report(
     iob_true: pd.Series,
     iob_pred: pd.Series,
     mode: str = "entity",
-    etypes_map: Optional[dict] = None,
+    etypes_map: dict | None = None,
     return_dict: Literal[False] = ...,
 ) -> str:
     ...
@@ -380,7 +380,7 @@ def ner_report(
     iob_true: pd.Series,
     iob_pred: pd.Series,
     mode: str = "entity",
-    etypes_map: Optional[dict] = None,
+    etypes_map: dict | None = None,
     *,
     return_dict: Literal[True],
 ) -> OrderedDict:
@@ -391,9 +391,9 @@ def ner_report(
     iob_true: pd.Series,
     iob_pred: pd.Series,
     mode: str = "entity",
-    etypes_map: Optional[dict] = None,
+    etypes_map: dict | None = None,
     return_dict: bool = False,
-) -> Union[str, OrderedDict]:
+) -> str | OrderedDict:
     """Build a summary report showing the main ner evaluation metrics.
 
     Evaluation is performed according to the definitions of "errors" from [1].
@@ -417,7 +417,7 @@ def ner_report(
 
     Returns
     -------
-    report : Union[str, OrderedDict]
+    report : str | OrderedDict
         Text summary of the precision, recall, F1 score for each entity type.
         Dictionary returned if output_dict is True. Dictionary has the
         following structure
@@ -505,9 +505,9 @@ def ner_errors(
     iob_pred: pd.Series,
     tokens: pd.Series,
     mode: str = "entity",
-    etypes_map: Optional[dict] = None,
+    etypes_map: dict | None = None,
     return_dict: bool = False,
-) -> Union[str, OrderedDict]:
+) -> str | OrderedDict:
     """Build a summary report for the named entity recognition.
 
     False positives and false negatives for each entity type are collected.
@@ -534,7 +534,7 @@ def ner_errors(
 
     Returns
     -------
-    report : Union[str, OrderedDict]
+    report : str | OrderedDict
         Text summary of the precision, recall, F1 score for each entity type.
         Dictionary returned if output_dict is True. Dictionary has the
         following structure
@@ -616,7 +616,7 @@ def ner_errors(
 def ner_confusion_matrix(
     iob_true: pd.Series,
     iob_pred: pd.Series,
-    normalize: Optional[str] = None,
+    normalize: str | None = None,
     mode: str = "entity",
 ) -> pd.DataFrame:
     """Compute confusion matrix to evaluate the accuracy of a NER model.

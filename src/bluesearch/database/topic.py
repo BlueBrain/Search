@@ -21,7 +21,7 @@ import html
 import logging
 import pathlib
 from functools import lru_cache
-from typing import Iterable, List, Optional, Tuple
+from typing import Iterable, Optional, Tuple
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -261,7 +261,7 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
 # PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
-) -> List[str] | None:
+) -> list[str] | None:
     """Extract journal topics of a PMC article.
 
     Parameters
@@ -271,7 +271,7 @@ def get_topics_for_pmc_article(
 
     Returns
     -------
-    journal_topics : Optional[list[str]]
+    journal_topics : list[str] | None
         Journal topics for the given article.
     """
     # Determine journal title
