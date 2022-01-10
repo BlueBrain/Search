@@ -328,10 +328,8 @@ def get_topics_for_pubmed_article(
     mesh_headings = article.findall("./MedlineCitation/MeshHeadingList")
     article_meshes = _parse_mesh_from_pubmed(mesh_headings)
 
-    if article_meshes:
-        article_topics = []
-        for mesh in article_meshes:
-            for descriptor in mesh["descriptor"]:
-                article_topics.append(descriptor["name"])
+      article_topics = [
+          desc["name"] for mesh in article_meshes for desc in mesh["descriptor"]
+      ]
 
     return journal_topics, article_topics
