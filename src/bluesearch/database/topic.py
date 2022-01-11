@@ -353,7 +353,7 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
             if match_journal is None:
                 raise ValueError("No journal found")
 
-            topic = match_topic.groups()[0]
-            journal = match_journal.groups()[0]
+            topic = match_topic.group(1)
+            journal = match_journal.group(1)
 
         return topic, journal
