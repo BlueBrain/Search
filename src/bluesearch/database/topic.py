@@ -339,8 +339,8 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
             )
 
         xml_file = xml_files[0]
-        pattern_topic = """<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)</subject>"""  # noqa
-        pattern_journal = "<journal-title>(.*)</journal-title>"
+        pattern_topic = r'<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)</subject>'  # noqa
+        pattern_journal = r"<journal-title>(.*)</journal-title>"
 
         with myzip.open(xml_file, "r") as f:
             text = f.read().decode("utf-8")
