@@ -29,6 +29,13 @@ Legend
 
 Latest
 ======
+- |Add| extraction of journal and article topics for :code:`pubmed` papers
+  through CLI command :code:`bbs_database topic-extract pubmed`.
+- |Add| extraction of journal topics for :code:`pmc` papers through CLI command
+  :code:`bbs_database topic-extract pmc`.
+- |Change| Paper UID to take into account also the :code:`arxiv id` (when available).
+- |Change| :code:`uid` generation raises :code:`ValueError` if all identifiers
+  are :code:`None`.
 - |Add| code to download :code:`arxiv` papers from a given date.
 - |Change| the behaviour of the entrypoint :code:`bbs_database download` when the
   specified :code:`--from-month` is too old and the source changed its structure of storing articles

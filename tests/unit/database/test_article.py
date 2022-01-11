@@ -13,7 +13,28 @@ from bluesearch.database.article import (
     JATSXMLParser,
     PubMedXMLParser,
     TEIXMLParser,
+    get_arxiv_id,
 )
+
+
+@pytest.mark.parametrize(
+    ("path", "expected_id"),
+    (
+        ("downloads/arxiv/arxiv/pdf/1802/1802.102998v99.xml", None),
+        ("downloads/arxiv/q-bio/pdf/0309/0309.033v2.pdf", None),
+        ("downloads/arxiv/arxiv/pdf/1802/1802.10298v99.xml", "arxiv:1802.10298v99"),
+        ("downloads/arxiv/arxiv/pdf/1411/1411.7903v4.json", "arxiv:1411.7903v4"),
+        ("downloads/arxiv/q-bio/pdf/0309/0309033v2.pdf", "arxiv:q-bio/0309033v2"),
+        ("1411.7903v4.xml", "arxiv:1411.7903v4"),
+        ("0309033v2.pdf", None),
+    ),
+)
+def test_get_arxiv_id(path, expected_id):
+    if expected_id is not None:
+        assert get_arxiv_id(path) == expected_id
+    else:
+        with pytest.raises(ValueError):
+            get_arxiv_id(path)
 
 
 class SimpleTestParser(ArticleParser):
@@ -73,12 +94,15 @@ def jats_xml_parser(test_data_path):
 
 @pytest.fixture(scope="session")
 def tei_xml_parser(test_data_path):
-    path = pathlib.Path(test_data_path) / "tei_file.tei.xml"
+    path = pathlib.Path(test_data_path) / "1411.7903v4.xml"
+    parser = TEIXMLParser(path)
+    return parser
 
-    with open(path) as f:
-        xml_content = f.read()
 
-    parser = TEIXMLParser(xml_content)
+@pytest.fixture(scope="session")
+def tei_xml_arxiv_parser(test_data_path):
+    path = pathlib.Path(test_data_path) / "1411.7903v4.xml"
+    parser = TEIXMLParser(path, is_arxiv=True)
     return parser
 
 
@@ -285,7 +309,7 @@ class TestPubMedXMLArticleParser:
     def test_uid(self, pubmed_xml_parser):
         uid = pubmed_xml_parser.uid
         assert isinstance(uid, str)
-        assert uid == "645314d7b040d1e2b8ec7dbf9dd192c7"
+        assert uid == "0e8400416a385b9a62d8178539b76daf"
 
 
 class TestCORD19ArticleParser:
@@ -414,6 +438,15 @@ class TestTEIXMLArticleParser:
         assert paragraphs[4][1] == "Fig. 1. Title."
         assert paragraphs[6][1] == "Table 1. Title."
 
+    def test_no_arxiv_id(self, tei_xml_parser):
+        arxiv_id = tei_xml_parser.arxiv_id
+        assert arxiv_id is None
+
+    def test_arxiv_id(self, tei_xml_arxiv_parser):
+        arxiv_id = tei_xml_arxiv_parser.arxiv_id
+        assert isinstance(arxiv_id, str)
+        assert arxiv_id == "arxiv:1411.7903v4"
+
     def test_doi(self, tei_xml_parser):
         doi = tei_xml_parser.doi
         assert isinstance(doi, str)
@@ -439,8 +472,11 @@ class TestTEIXMLArticleParser:
             ),
         ),
     )
-    def test_build_texts(self, xml_content, expected_texts):
-        parser = TEIXMLParser(f"<xml>{xml_content}</xml>")
+    def test_build_texts(self, xml_content, expected_texts, tmp_path):
+        tmp_file = tmp_path / "tmp.xml"
+        with tmp_file.open("w") as fp:
+            fp.write(f"<xml>{xml_content}</xml>")
+        parser = TEIXMLParser(tmp_file)
         # Patch the namespace because it's not used in test examples
         parser.tei_namespace["tei"] = ""
 
@@ -448,8 +484,11 @@ class TestTEIXMLArticleParser:
         for text, expected_text in zip_longest(texts, expected_texts, fillvalue=None):
             assert text == expected_text
 
-    def test_build_texts_raises_for_unknown_tag(self):
-        parser = TEIXMLParser("<xml><hahaha>HAHAHA</hahaha></xml>")
+    def test_build_texts_raises_for_unknown_tag(selfs, tmp_path):
+        tmp_file = tmp_path / "tmp.xml"
+        with tmp_file.open("w") as fp:
+            fp.write("<xml><hahaha>HAHAHA</hahaha></xml>")
+        parser = TEIXMLParser(tmp_file)
         with pytest.raises(RuntimeError, match=r"Unexpected tag"):
             for _ in parser._build_texts(parser.content):
                 # Do nothing, just force the generator to run

@@ -23,7 +23,7 @@ import pathlib
 import re
 import zipfile
 from functools import lru_cache
-from typing import Iterable, List
+from typing import Iterable
 from xml.etree.ElementTree import Element  # nosec
 
 import requests
@@ -263,7 +263,7 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
 # PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
-) -> List[str] | None:
+) -> list[str] | None:
     """Extract journal topics of a PMC article.
 
     Parameters
@@ -273,7 +273,7 @@ def get_topics_for_pmc_article(
 
     Returns
     -------
-    journal_topics : Optional[list[str]]
+    journal_topics : list[str] | None
         Journal topics for the given article.
     """
     # Determine journal title
@@ -357,3 +357,59 @@ def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
             journal = match_journal.group(1)
 
         return topic, journal
+
+
+def extract_article_topics_for_pubmed_article(
+    xml_article: Element,
+) -> list[str] | None:
+    """Extract article topics of a PubMed article.
+
+    Parameters
+    ----------
+    xml_article
+        XML parse of an article for which to extract journal and article topics.
+
+    Returns
+    -------
+    article_topics : list[str] | None
+        Article topics extracted for the given article.
+    """
+    mesh_headings = xml_article.findall("./MedlineCitation/MeshHeadingList")
+    article_meshes = _parse_mesh_from_pubmed(mesh_headings)
+
+    article_topics = [
+        desc["name"] for mesh in article_meshes for desc in mesh["descriptor"]
+    ]
+
+    return article_topics
+
+
+def extract_journal_topics_for_pubmed_article(
+    xml_article: Element,
+) -> list[str] | None:
+    """Extract journal topics of a PubMed article.
+
+    Parameters
+    ----------
+    xml_article
+        XML parse of an article for which to extract journal and article topics.
+
+    Returns
+    -------
+    journal_topics : list[str] | None
+        Journal topics extracted for the given article.
+    """
+    # Journal topic
+    medline_ta = xml_article.find("./MedlineCitation/MedlineJournalInfo/MedlineTA")
+    if medline_ta is None or medline_ta.text is None:
+        return None
+
+    journal_meshes = request_mesh_from_nlm_ta(medline_ta.text)
+    if journal_meshes is None:
+        return None
+
+    journal_topics = [
+        desc["name"] for mesh in journal_meshes for desc in mesh["descriptor"]
+    ]
+
+    return journal_topics

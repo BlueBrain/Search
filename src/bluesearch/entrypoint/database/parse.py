@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Parsing articles."""
+from __future__ import annotations
+
 import argparse
 import json
 import logging
 import warnings
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Iterator
 
 from defusedxml import ElementTree
 
@@ -61,11 +63,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
             "pubmed-xml",
             "pubmed-xml-set",
             "tei-xml",
+            "tei-xml-arxiv",
         ),
         help="""
         Format of the input.
         If parsing several articles, all articles must have the same format.
         'jats-xml' could be used for articles from PubMed Central, bioRxiv, and medRxiv.
+        'tei-xml-arxiv' should be used for TEI XML generated from arXiv PDF articles.
         """,
     )
     parser.add_argument(
@@ -131,10 +135,12 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         for article in articles.iter("PubmedArticle"):
             yield PubMedXMLParser(article)
 
-    elif input_type == "tei-xml":
-        with input_path.open() as fp:
-            xml_content = fp.read()
-        yield TEIXMLParser(xml_content)
+    elif input_type.startswith("tei-xml"):
+        if input_type == "tei-xml-arxiv":
+            is_arxiv = True
+        else:
+            is_arxiv = False
+        yield TEIXMLParser(input_path, is_arxiv=is_arxiv)
 
     else:
         raise ValueError(f"Unsupported input type '{input_type}'!")
@@ -145,7 +151,7 @@ def run(
     input_type: str,
     input_path: Path,
     output_dir: Path,
-    match_filename: Optional[str],
+    match_filename: str | None,
     recursive: bool,
     dry_run: bool,
 ) -> int:

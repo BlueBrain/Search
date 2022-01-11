@@ -1,5 +1,3 @@
-"""Tests covering the mining widget."""
-
 # Blue Brain Search is a text mining toolbox focused on scientific use cases.
 #
 # Copyright (C) 2020  Blue Brain Project, EPFL.
@@ -16,11 +14,13 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""Tests covering the mining widget."""
+from __future__ import annotations
 
 import json
 from copy import copy
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -52,7 +52,7 @@ class MiningWidgetBot:
 
     def __init__(self, mining_widget, capsys, monkeypatch):
         self.mining_widget = mining_widget
-        self._display_cached: List[Any] = []
+        self._display_cached: list[Any] = []
         self._capsys = capsys
 
         monkeypatch.setattr(
