@@ -181,7 +181,7 @@ def run(
                 "source": "arxiv",
                 "path": str(path.resolve()),
                 "topics": {
-                    "journal": {
+                    "article": {
                         "arXiv": article_topics,
                     },
                 },
