@@ -148,6 +148,7 @@ def test_mining_text(monkeypatch, capsys, mining_schema_df):
         "http://test/text",
         callback=request_callback,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     responses.add_callback(
@@ -155,6 +156,7 @@ def test_mining_text(monkeypatch, capsys, mining_schema_df):
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     mining_schema = MiningSchema()
@@ -188,6 +190,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine, mining_sch
         "http://test/database",
         callback=request_callback,
         content_type="text/csv",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     responses.add_callback(
@@ -195,6 +198,7 @@ def test_mining_database(monkeypatch, capsys, fake_sqlalchemy_engine, mining_sch
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     mining_schema = MiningSchema()
@@ -249,6 +253,7 @@ def test_save_load_checkpoint(monkeypatch, capsys, mining_schema_df, tmpdir):
         "http://test/text",
         callback=request_callback,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     responses.add_callback(
@@ -256,6 +261,7 @@ def test_save_load_checkpoint(monkeypatch, capsys, mining_schema_df, tmpdir):
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     mining_schema = MiningSchema()
