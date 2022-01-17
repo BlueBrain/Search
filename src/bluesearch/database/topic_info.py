@@ -40,7 +40,6 @@ class TopicInfo:
     element_in_file: int | None = None
     article_topics: dict[str, list[str]] = field(init=False, default_factory=dict)
     journal_topics: dict[str, list[str]] = field(init=False, default_factory=dict)
-    metadata: dict = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         """Run the post-initialization."""
@@ -96,7 +95,6 @@ class TopicInfo:
             The structure dictionary with all topic information.
         """
         metadata: dict[str, Any] = {
-            **copy.deepcopy(self.metadata),
             "created-date": self.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
             "bbs-version": bluesearch.__version__,
         }

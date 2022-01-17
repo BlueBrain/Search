@@ -12,12 +12,10 @@ class TestTopicInfo:
     def test_instantiation(self):
         source = ArticleSource.ARXIV
         path = pathlib.Path("/some/path.test")
-        metadata = {"some key": "some value"}
-        topic_info = TopicInfo(source, path, metadata=metadata)
+        topic_info = TopicInfo(source, path)
 
         assert topic_info.source == source
         assert topic_info.path == path
-        assert metadata == metadata
 
     @pytest.mark.parametrize(
         ("mapping", "kind", "topics", "result"),
@@ -51,7 +49,6 @@ class TestTopicInfo:
             source=ArticleSource.PUBMED,
             path=pathlib.Path("/some/path.test"),
             element_in_file=5,
-            metadata={"some key": "some value"},
         )
         topic_info.add_article_topics("MeSH", ["AT 1", "AT 2", "AT 3"])
         topic_info.add_journal_topics("MAP", ["JT 1", "JT 2"])
@@ -70,7 +67,6 @@ class TestTopicInfo:
         }
         assert start <= metadata["created-date"] <= end
         assert metadata["bbs-version"] == bluesearch.__version__
-        assert metadata["some key"] == "some value"
 
     def test_element_in_file(self):
         json = TopicInfo(ArticleSource.UNKNOWN, "").json()
