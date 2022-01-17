@@ -299,7 +299,9 @@ def get_topics_for_pmc_article(
     return journal_topics
 
 
-def extract_article_topics_from_medrxiv_article(path: pathlib.Path) -> tuple[str, str]:
+def extract_article_topics_from_medrxiv_article(
+    path: pathlib.Path | str,
+) -> tuple[str, str]:
     """Extract topic of a medRxiv/bioRxiv article.
 
     The `.meca` file should always have a fixed structure. Namely,
@@ -315,7 +317,7 @@ def extract_article_topics_from_medrxiv_article(path: pathlib.Path) -> tuple[str
 
     Returns
     -------
-    topic : str
+    topic : pathlib.Path or str
         The subject area of the article.
     journal : str
         The journal the article was published in. Should be either
@@ -326,6 +328,8 @@ def extract_article_topics_from_medrxiv_article(path: pathlib.Path) -> tuple[str
     ValueError
         Appropriate XML not found or the journal or topic are missing.
     """
+    path = pathlib.Path(path)
+
     with zipfile.ZipFile(path) as myzip:
         xml_files = [
             x
