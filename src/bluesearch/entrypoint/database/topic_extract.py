@@ -46,7 +46,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "source",
         type=str,
-        choices=[member.value for member in ArticleSource.__members__.values()],
+        choices=[member.value for member in ArticleSource],
         help="""
         Format of the input.
         If extracting topic of several articles, all articles must have the same format.
