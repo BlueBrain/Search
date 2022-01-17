@@ -47,7 +47,7 @@ class TopicInfo:
         self.path = pathlib.Path(self.path).resolve()
 
     @staticmethod
-    def add_topics(mapping: dict[str, list[str]], kind: str, topics: list[str]) -> None:
+    def _add_topics(mapping: dict[str, list[str]], kind: str, topics: list[str]) -> None:
         """Add topics to a mapping with collection of topics.
 
         Parameters
@@ -73,7 +73,7 @@ class TopicInfo:
         topics
             A list of the topics to add.
         """
-        self.add_topics(self.article_topics, kind, topics)
+        self._add_topics(self.article_topics, kind, topics)
 
     def add_journal_topics(self, kind: str, topics: list[str]) -> None:
         """Add journal topics.
@@ -85,7 +85,7 @@ class TopicInfo:
         topics
             A list of the topics to add.
         """
-        self.add_topics(self.journal_topics, kind, topics)
+        self._add_topics(self.journal_topics, kind, topics)
 
     def json(self) -> dict:
         """Convert the contents of this class to a structured dictionary.

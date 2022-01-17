@@ -39,7 +39,7 @@ class TestTopicInfo:
         ),
     )
     def test_add_topics(self, mapping, kind, topics, result):
-        TopicInfo.add_topics(mapping, kind, topics)
+        TopicInfo._add_topics(mapping, kind, topics)
         assert mapping == result
 
     def test_add_article_journal_topics(self):
