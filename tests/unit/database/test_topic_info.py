@@ -17,6 +17,14 @@ class TestTopicInfo:
         assert topic_info.source == source
         assert topic_info.path == path
 
+    def test_relative_path_is_resolved(self):
+        source = ArticleSource.ARXIV
+        path = pathlib.Path("relative/path")
+        topic_info = TopicInfo(source, path)
+
+        assert topic_info.source == source
+        assert topic_info.path == pathlib.Path.cwd() / path
+
     @pytest.mark.parametrize(
         ("mapping", "kind", "topics", "result"),
         (

@@ -44,6 +44,7 @@ class TopicInfo:
     def __post_init__(self) -> None:
         """Run the post-initialization."""
         self.creation_date = datetime.datetime.now()
+        self.path = pathlib.Path(self.path).resolve()
 
     @staticmethod
     def add_topics(mapping: dict[str, list[str]], kind: str, topics: list[str]) -> None:
