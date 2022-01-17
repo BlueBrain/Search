@@ -90,6 +90,10 @@ class TopicInfo:
     def json(self) -> dict:
         """Convert the contents of this class to a structured dictionary.
 
+        Apart from the source, path and topic entries a "metadata" top-level
+        key will be added containing a dictionary with entries "created-date"
+        and "bbs-version".
+
         Returns
         -------
         dict
