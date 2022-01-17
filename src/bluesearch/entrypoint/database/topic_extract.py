@@ -132,7 +132,7 @@ def run(
     import bluesearch
     from bluesearch.database.topic import (
         extract_article_topics_for_pubmed_article,
-        extract_info_from_zipfile,
+        extract_article_topics_from_medrxiv_article,
         extract_journal_topics_for_pubmed_article,
         get_topics_for_pmc_article,
     )
@@ -179,7 +179,7 @@ def run(
     elif source in {"biorxiv", "medrxiv"}:
         for path in inputs:
             logger.info(f"Processing {path}")
-            topic, journal = extract_info_from_zipfile(path)
+            topic, journal = extract_article_topics_from_medrxiv_article(path)
             all_results.append(
                 {
                     "source": journal,

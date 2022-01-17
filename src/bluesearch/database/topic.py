@@ -299,7 +299,7 @@ def get_topics_for_pmc_article(
     return journal_topics
 
 
-def extract_info_from_zipfile(path: pathlib.Path) -> tuple[str, str]:
+def extract_article_topics_from_medrxiv_article(path: pathlib.Path) -> tuple[str, str]:
     """Extract topic of a medRxiv/bioRxiv article.
 
     The `.meca` file should always have a fixed structure. Namely,

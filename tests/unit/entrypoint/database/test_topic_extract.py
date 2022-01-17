@@ -176,11 +176,11 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     input_path.touch()
 
     # Mocking
-    fake_extract_info_from_zipfile = Mock(side_effect=lambda p: ("TOPIC", "JOURNAL"))
+    fake_extract_article_topics_from_medrxiv_article = Mock(side_effect=lambda p: ("TOPIC", "JOURNAL"))
 
     monkeypatch.setattr(
-        "bluesearch.database.topic.extract_info_from_zipfile",
-        fake_extract_info_from_zipfile,
+        "bluesearch.database.topic.extract_article_topics_from_medrxiv_article",
+        fake_extract_article_topics_from_medrxiv_article,
     )
 
     topic_extract.run(
@@ -194,7 +194,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     )
 
     assert output_file.exists()
-    fake_extract_info_from_zipfile.assert_called_once()
+    fake_extract_article_topics_from_medrxiv_article.assert_called_once()
 
     result = JSONL.load_jsonl(output_file)
     assert len(result) == 1

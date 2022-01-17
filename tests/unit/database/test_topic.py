@@ -26,7 +26,7 @@ from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     extract_article_topics_for_pubmed_article,
-    extract_info_from_zipfile,
+    extract_article_topics_from_medrxiv_article,
     extract_journal_topics_for_pubmed_article,
     extract_pubmed_id_from_pmc_file,
     get_topics_for_pmc_article,
@@ -397,7 +397,7 @@ class TestExtractInfoFromZipfile:
         with zipfile.ZipFile(zip_path, "w") as myzip:
             myzip.write(test_xml_path, arcname="content/567.xml")
 
-        topic, journal = extract_info_from_zipfile(zip_path)
+        topic, journal = extract_article_topics_from_medrxiv_article(zip_path)
 
         assert topic == "Neuroscience"
         assert journal == "bioRxiv"
@@ -413,7 +413,7 @@ class TestExtractInfoFromZipfile:
         assert zip_path.exists()
 
         with pytest.raises(ValueError, match="There needs to be exactly one"):
-            extract_info_from_zipfile(zip_path)
+            extract_article_topics_from_medrxiv_article(zip_path)
 
     @pytest.mark.parametrize(
         "line_to_delete, category", [(26, "topic"), (8, "journal")]
@@ -447,7 +447,7 @@ class TestExtractInfoFromZipfile:
             myzip.write(modified_xml_path, arcname="content/567.xml")
 
         with pytest.raises(ValueError, match=f"No {category} found"):
-            extract_info_from_zipfile(zip_path)
+            extract_article_topics_from_medrxiv_article(zip_path)
 
 
 def test_get_topics_for_pubmed_article(test_data_path, monkeypatch):
