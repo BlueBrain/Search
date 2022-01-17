@@ -176,7 +176,9 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     input_path.touch()
 
     # Mocking
-    fake_extract_article_topics_from_medrxiv_article = Mock(side_effect=lambda p: ("TOPIC", "JOURNAL"))
+    fake_extract_article_topics_from_medrxiv_article = Mock(
+        side_effect=lambda p: ("TOPIC", "JOURNAL")
+    )
 
     monkeypatch.setattr(
         "bluesearch.database.topic.extract_article_topics_from_medrxiv_article",
