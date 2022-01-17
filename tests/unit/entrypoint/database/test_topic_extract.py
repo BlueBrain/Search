@@ -71,11 +71,11 @@ def test_input_path_not_correct(caplog):
     assert "Argument 'input_path'" in caplog.text
 
 
-def test_wrong_source(test_data_path, caplog, tmp_path):
+def test_source_type_not_implemented(test_data_path, caplog, tmp_path):
     pmc_path = test_data_path / "jats_article.xml"
     with caplog.at_level(logging.ERROR):
         exit_code = topic_extract.run(
-            source="wrong_type",
+            source="unknown",
             input_path=pmc_path,
             output_file=tmp_path,
             match_filename=None,
@@ -84,7 +84,7 @@ def test_wrong_source(test_data_path, caplog, tmp_path):
             dry_run=False,
         )
     assert exit_code == 1
-    assert "Unknown article source" in caplog.text
+    assert "not implemented" in caplog.text
 
 
 def test_dry_run(test_data_path, capsys, tmp_path):

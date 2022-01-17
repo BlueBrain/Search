@@ -45,7 +45,6 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
     parser.add_argument(
         "source",
-        type=str,
         choices=[member.value for member in ArticleSource],
         help="""
         Format of the input.
@@ -146,13 +145,8 @@ def run(
         print(*inputs, sep="\n")
         return 0
 
-    try:
-        article_source = ArticleSource(source)
-    except ValueError:
-        logger.error("Unknown article source: %s", source)
-        return 1
+    article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
-
     if article_source == ArticleSource.PMC:
         for path in inputs:
             logger.info(f"Processing {path}")
