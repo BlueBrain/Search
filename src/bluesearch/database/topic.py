@@ -20,7 +20,6 @@ from __future__ import annotations
 import html
 import logging
 import pathlib
-import re
 import zipfile
 from functools import lru_cache
 from typing import Iterable
@@ -343,22 +342,25 @@ def extract_article_topics_from_medrxiv_article(
             )
 
         xml_file = xml_files[0]
-        pattern_topic = r'<subj-group subj-group-type="hwp-journal-coll">\r\n<subject>(.*)</subject>'  # noqa
-        pattern_journal = r"<journal-title>(.*)</journal-title>"
 
+        # Parsing logic
         with myzip.open(xml_file, "r") as f:
-            text = f.read().decode("utf-8")
-            match_topic = re.search(pattern_topic, text)
-            match_journal = re.search(pattern_journal, text)
+            content = ElementTree.parse(f)
+            journal_element = content.find(
+                "./front/journal-meta/journal-title-group/journal-title"
+            )
+            topic_element = content.find(
+                "./front/article-meta/article-categories/subj-group[@subj-group-type='hwp-journal-coll']/subject"  # noqa
+            )
 
-            if match_topic is None:
+            if topic_element is None:
                 raise ValueError("No topic found")
 
-            if match_journal is None:
+            if journal_element is None:
                 raise ValueError("No journal found")
 
-            topic = match_topic.group(1)
-            journal = match_journal.group(1)
+            topic = topic_element.text
+            journal = journal_element.text
 
         return topic, journal
 
