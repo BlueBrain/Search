@@ -47,7 +47,9 @@ class TopicInfo:
         self.path = pathlib.Path(self.path).resolve()
 
     @staticmethod
-    def _add_topics(mapping: dict[str, list[str]], kind: str, topics: list[str]) -> None:
+    def _add_topics(
+        mapping: dict[str, list[str]], kind: str, topics: list[str]
+    ) -> None:
         """Add topics to a mapping with collection of topics.
 
         Parameters
