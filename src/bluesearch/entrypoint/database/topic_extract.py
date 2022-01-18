@@ -121,11 +121,8 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    import datetime
-
     from defusedxml import ElementTree
 
-    import bluesearch
     from bluesearch.database.topic import (
         extract_article_topics_for_pubmed_article,
         extract_article_topics_from_medrxiv_article,
