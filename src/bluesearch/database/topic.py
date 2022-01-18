@@ -329,11 +329,10 @@ def get_topics_for_arxiv_articles(
     [2] https://arxiv.org/category_taxonomy
     """
     # Get arXiv IDs of interest.
-    prefix = "arxiv:"  # Need to drop the initial "arxiv:" from the arXiv ID
     id_2_path: dict[str, pathlib.Path] = {}
     for p in arxiv_paths:
         try:
-            arxiv_id = get_arxiv_id(p)[len(prefix) :]
+            arxiv_id = get_arxiv_id(p, with_prefix=False)
             id_2_path[arxiv_id] = pathlib.Path(p)
         except ValueError as ve:
             logger.error(f"Failed ID extraction: {ve}")
