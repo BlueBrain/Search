@@ -45,18 +45,20 @@ class ArticleSource(enum.Enum):
     UNKNOWN = "unknown"
 
 
-def get_arxiv_id(path: str | Path) -> str | None:
+def get_arxiv_id(path: str | Path, with_prefix: bool = True) -> str:
     """Compute arXiv ID, including version, from file path.
 
     Parameters
     ----------
     path
         The file path to an arXiv article.
+    with_prefix
+        If `True`, the returned arXiv ID will include the prefix "arxiv:".
 
     Returns
     -------
-    str or None
-        arXiv ID, if possible to compute.
+    str
+        The computed arXiv ID.
 
     Raises
     ------
@@ -68,6 +70,7 @@ def get_arxiv_id(path: str | Path) -> str | None:
     https://arxiv.org/help/arxiv_identifier
     """
     path = Path(path)
+    prefix = "arxiv:" if with_prefix else ""
 
     # New format, since 2007-04, only needs path stem:
     # - since 2015-01 have format YYMM.NNNNN (i.e. 5 digits)
@@ -75,7 +78,7 @@ def get_arxiv_id(path: str | Path) -> str | None:
     pattern = re.compile(r"\d{4}\.\d{4}\d?v\d+")
     match = pattern.fullmatch(path.stem)
     if match:
-        return f"arxiv:{match.string}"
+        return f"{prefix}{match.string}"
 
     # Old format, up to 2007-03, needs to look at the whole path:
     # - some_path/arxiv/<archive>/<format>/YYMM/YYMMNNNv<version>.<ext>
@@ -84,7 +87,7 @@ def get_arxiv_id(path: str | Path) -> str | None:
     match = pattern.search("/".join(path.parts[-5:]))
     if match:
         cat, id_ = match.groups()
-        return f"arxiv:{cat}/{id_}"
+        return f"{prefix}{cat}/{id_}"
 
     raise ValueError(f"Could not extract arXiv ID from file path {path}")
 

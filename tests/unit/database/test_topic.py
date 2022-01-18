@@ -15,7 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
+import pathlib
 import re
+import zipfile
 from unittest.mock import Mock
 
 import pytest
@@ -25,8 +27,10 @@ from requests.exceptions import HTTPError
 
 from bluesearch.database.topic import (
     extract_article_topics_for_pubmed_article,
+    extract_article_topics_from_medrxiv_article,
     extract_journal_topics_for_pubmed_article,
     extract_pubmed_id_from_pmc_file,
+    get_topics_for_arxiv_articles,
     get_topics_for_pmc_article,
 )
 from bluesearch.database.topic import (
@@ -60,12 +64,15 @@ class TestGetMeshFromNlmTa:
         with open(test_data_path / "nlmcatalog_response.txt") as f:
             body = f.read()
 
+        params = {
+            "term": '"Trauma Surg And Acute Care Open"[ta]',
+            "report": "xml",
+            "format": "text",
+        }
         responses.add(
             responses.GET,
-            (
-                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
-            ),
+            url="https://www.ncbi.nlm.nih.gov/nlmcatalog",
+            match=[responses.matchers.query_param_matcher(params)],
             body=body,
         )
 
@@ -170,10 +177,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     with open(test_data_path / "efetchpubmed_response.txt") as f:
         body = f.read()
 
+    params = {"db": "pubmed", "id": "26633866,31755206", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=26633866,31755206&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        match=[responses.matchers.query_param_matcher(params)],
         body=body.encode("utf-8"),
     )
 
@@ -331,10 +339,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     assert list(meshs.keys()) == ["26633866", "31755206"]
     assert meshs == expected_output
 
+    params = {"db": "pubmed", "id": "0", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=0&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        match=[responses.matchers.query_param_matcher(params)],
         status=404,
     )
 
@@ -382,6 +391,116 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     assert journal_topics == expected_output
     request_mock.assert_called_once()
     request_mock.assert_called_with("Journal NLM TA")
+
+
+@responses.activate
+def test_get_topics_for_arxiv_articles(test_data_path):
+    with open(test_data_path / "arxiv_api_response.xml") as f:
+        body = f.read()
+    id_queries = [
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2",
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2,1808.02950v7",
+    ]
+    for id_query in id_queries:
+        params = {"id_list": id_query, "max_results": "400"}
+        responses.add(
+            responses.GET,
+            url="http://export.arxiv.org/api/query",
+            match=[responses.matchers.query_param_matcher(params)],
+            body=body,
+        )
+
+    # Test 1: everything should be fine
+    expected_output = {
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401024v1.pdf"): [
+            "q-bio.MN",
+            "cond-mat.dis-nn",
+            "cond-mat.stat-mech",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401014v1.pdf"): [
+            "q-bio.QM",
+            "q-bio.OT",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02949v2.pdf"): [
+            "cs.CR",
+            "nlin.CD",
+        ],
+    }
+    inputs = expected_output.keys()
+    article_topics = get_topics_for_arxiv_articles(inputs)
+    assert set(article_topics.keys()) == set(inputs)
+    assert article_topics == expected_output
+
+    # Test 2: number of returned metadata doesn't match
+    with pytest.raises(ValueError):
+        get_topics_for_arxiv_articles(
+            list(inputs)
+            + [pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02950v7.pdf")]
+        )
+
+
+class TestExtractInfoFromZipfile:
+    def test_real_file(self, test_data_path, tmp_path):
+        test_xml_path = test_data_path / "biorxiv.xml"
+        assert test_xml_path.exists()
+
+        # Put it inside of a `content` folder, zip it and then save in tmp_path
+        zip_path = tmp_path / "01234.meca"
+
+        with zipfile.ZipFile(zip_path, "w") as myzip:
+            myzip.write(test_xml_path, arcname="content/567.xml")
+
+        topic, journal = extract_article_topics_from_medrxiv_article(zip_path)
+
+        assert topic == "Neuroscience"
+        assert journal == "bioRxiv"
+
+    def test_no_xml_files(self, tmp_path):
+        zip_path = tmp_path / "43214.meca"
+        assert not zip_path.exists()
+
+        # Create an empty zip file
+        with zipfile.ZipFile(zip_path, "w"):
+            pass
+
+        assert zip_path.exists()
+
+        with pytest.raises(ValueError, match="There needs to be exactly one"):
+            extract_article_topics_from_medrxiv_article(zip_path)
+
+    @pytest.mark.parametrize(
+        "line_to_delete, category", [(26, "topic"), (8, "journal")]
+    )
+    def test_extraction_unsuccessful(
+        self, test_data_path, tmp_path, line_to_delete, category
+    ):
+        """We manually found relevant lines inside of `tests/data/biorxiv.xml`.
+
+        We use a convention that the first line has the index of 1."""
+
+        test_xml_path = test_data_path / "biorxiv.xml"
+        assert test_xml_path.exists()
+
+        # Delete a single line from the input xml file and save elsewhere
+        modified_xml_path = tmp_path / "biorxiv_modified.xml"
+
+        with test_xml_path.open("r", encoding="utf-8") as f_orig:
+            orig_lines = f_orig.read().splitlines()
+
+        new_lines = [l for i, l in enumerate(orig_lines) if i != (line_to_delete - 1)]
+        new_text = "\r\n".join(new_lines)
+
+        with modified_xml_path.open("w", encoding="utf-8") as f_new:
+            f_new.write(new_text)
+
+        # Create a zip archive
+        zip_path = tmp_path / "01234.meca"
+
+        with zipfile.ZipFile(zip_path, "w") as myzip:
+            myzip.write(modified_xml_path, arcname="content/567.xml")
+
+        with pytest.raises(ValueError, match=f"No {category} found"):
+            extract_article_topics_from_medrxiv_article(zip_path)
 
 
 def test_get_topics_for_pubmed_article(test_data_path, monkeypatch):

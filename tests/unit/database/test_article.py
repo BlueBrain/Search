@@ -18,23 +18,31 @@ from bluesearch.database.article import (
 
 
 @pytest.mark.parametrize(
-    ("path", "expected_id"),
+    ("path", "with_prefix", "expected_id"),
     (
-        ("downloads/arxiv/arxiv/pdf/1802/1802.102998v99.xml", None),
-        ("downloads/arxiv/q-bio/pdf/0309/0309.033v2.pdf", None),
-        ("downloads/arxiv/arxiv/pdf/1802/1802.10298v99.xml", "arxiv:1802.10298v99"),
-        ("downloads/arxiv/arxiv/pdf/1411/1411.7903v4.json", "arxiv:1411.7903v4"),
-        ("downloads/arxiv/q-bio/pdf/0309/0309033v2.pdf", "arxiv:q-bio/0309033v2"),
-        ("1411.7903v4.xml", "arxiv:1411.7903v4"),
-        ("0309033v2.pdf", None),
+        ("downloads/arxiv/arxiv/pdf/1802/1802.102998v99.xml", True, None),
+        ("downloads/arxiv/q-bio/pdf/0309/0309.033v2.pdf", True, None),
+        (
+            "downloads/arxiv/arxiv/pdf/1802/1802.10298v99.xml",
+            True,
+            "arxiv:1802.10298v99",
+        ),
+        ("downloads/arxiv/arxiv/pdf/1411/1411.7903v4.json", True, "arxiv:1411.7903v4"),
+        ("downloads/arxiv/q-bio/pdf/0309/0309033v2.pdf", True, "arxiv:q-bio/0309033v2"),
+        ("downloads/arxiv/q-bio/pdf/0309/0309.033v2.pdf", False, None),
+        ("downloads/arxiv/arxiv/pdf/1802/1802.10298v99.xml", False, "1802.10298v99"),
+        ("downloads/arxiv/arxiv/pdf/1411/1411.7903v4.json", False, "1411.7903v4"),
+        ("downloads/arxiv/q-bio/pdf/0309/0309033v2.pdf", False, "q-bio/0309033v2"),
+        ("1411.7903v4.xml", True, "arxiv:1411.7903v4"),
+        ("0309033v2.pdf", True, None),
     ),
 )
-def test_get_arxiv_id(path, expected_id):
+def test_get_arxiv_id(path, with_prefix, expected_id):
     if expected_id is not None:
-        assert get_arxiv_id(path) == expected_id
+        assert get_arxiv_id(path, with_prefix) == expected_id
     else:
         with pytest.raises(ValueError):
-            get_arxiv_id(path)
+            get_arxiv_id(path, with_prefix)
 
 
 class SimpleTestParser(ArticleParser):

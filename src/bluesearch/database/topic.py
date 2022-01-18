@@ -20,6 +20,8 @@ from __future__ import annotations
 import html
 import logging
 import pathlib
+import re
+import zipfile
 from functools import lru_cache
 from typing import Iterable
 from xml.etree.ElementTree import Element  # nosec
@@ -27,7 +29,7 @@ from xml.etree.ElementTree import Element  # nosec
 import requests
 from defusedxml import ElementTree
 
-from bluesearch.database.article import JATSXMLParser
+from bluesearch.database.article import JATSXMLParser, get_arxiv_id
 
 logger = logging.getLogger(__name__)
 
@@ -258,7 +260,6 @@ def _parse_mesh_from_pubmed(mesh_headings: Iterable[Element]) -> list[dict]:
     return meshs
 
 
-# PMC source
 def get_topics_for_pmc_article(
     pmc_path: pathlib.Path | str,
 ) -> list[str] | None:
@@ -295,6 +296,159 @@ def get_topics_for_pmc_article(
             journal_topics.append(descriptor["name"])
 
     return journal_topics
+
+
+def get_topics_for_arxiv_articles(
+    arxiv_paths: Iterable[pathlib.Path | str], batch_size: int = 400
+) -> dict[pathlib.Path, list[str]]:
+    """Extract journal topics of one or more arXiv article.
+
+    Parameters
+    ----------
+    arxiv_paths
+        Full paths to the arXiv articles to consider.
+
+    batch_size
+        Metadata are retrieved using the arXiv API [1] in batches of size
+        `batch_size`. Large batches values may create long request URLs that
+        cause the arXiv API to fail.
+
+    Returns
+    -------
+    article_topics : dict[pathlib.Path , list[str]]
+        Maps each of the paths to a list of corresponding arXiv article topics.
+        See [2] for an explanation of arXiv topics taxonomy.
+
+    Raises
+    ------
+    ValueError
+        If the arXiv API does not return the correct number of metadata.
+
+    References
+    ----------
+    [1] https://arxiv.org/help/api/user-manual
+    [2] https://arxiv.org/category_taxonomy
+    """
+    # Get arXiv IDs of interest.
+    id_2_path: dict[str, pathlib.Path] = {}
+    for p in arxiv_paths:
+        try:
+            arxiv_id = get_arxiv_id(p, with_prefix=False)
+            id_2_path[arxiv_id] = pathlib.Path(p)
+        except ValueError as ve:
+            logger.error(f"Failed ID extraction: {ve}")
+
+    # Retrieve metadata in batches
+    ns = {
+        "atom": "http://www.w3.org/2005/Atom",
+        "arxiv": "http://arxiv.org/schemas/atom",
+        "opensearch": "http://a9.com/-/spec/opensearch/1.1/",
+    }
+    base_url = "http://export.arxiv.org/api/query"
+    id_pattern = re.compile(r"http://arxiv.org/abs/(.*)")
+    ids = list(id_2_path.keys())
+    article_topics = {}
+    for i_start in range(0, len(ids), batch_size):
+        # Get a slice of arXiv ids
+        i_end = i_start + batch_size
+        id_list = ids[i_start:i_end]
+
+        # Send request to arXiv API for our slice of arXiv ids
+        params = {
+            "id_list": ",".join(id_list),
+            "max_results": str(batch_size),
+        }
+        res = requests.get(base_url, params)
+        res.raise_for_status()
+
+        # Process response to retrieve arXiv ids and corresponding topics
+        etree = ElementTree.fromstring(res.text)
+        entries = etree.findall("./atom:entry", ns)
+        if len(entries) != len(id_list):
+            raise ValueError(
+                f"Expected to find {len(id_list)} metadata, "
+                f"but found {len(entries)}, for id_list = {id_list}"
+            )
+        for el in entries:
+            atom_id = el.find("./atom:id", ns)
+            match = id_pattern.fullmatch(atom_id.text)
+            if match is None:
+                raise ValueError(f"Could not extract ID from {atom_id}")
+            else:
+                id_ = match.group(1)
+                categories = [
+                    categ.get("term") for categ in el.findall("atom:category", ns)
+                ]
+                article_topics[id_2_path[id_]] = categories
+
+    return article_topics
+
+
+def extract_article_topics_from_medrxiv_article(
+    path: pathlib.Path | str,
+) -> tuple[str, str]:
+    """Extract topic of a medRxiv/bioRxiv article.
+
+    The `.meca` file should always have a fixed structure. Namely,
+    there is a folder `content` and inside of it there should be
+    a single `.xml` file containing the text and the metadata of the
+    article.
+
+    Parameters
+    ----------
+    path
+        Path to a `.meca` file (which is nothing else
+        than a zip archive) with a fixed structured.
+
+    Returns
+    -------
+    topic : pathlib.Path or str
+        The subject area of the article.
+    journal : str
+        The journal the article was published in. Should be either
+        "medRxiv" or "bioRxiv".
+
+    Raises
+    ------
+    ValueError
+        Appropriate XML not found or the journal or topic are missing.
+    """
+    path = pathlib.Path(path)
+
+    with zipfile.ZipFile(path) as myzip:
+        xml_files = [
+            x
+            for x in myzip.namelist()
+            if x.startswith("content/") and x.endswith(".xml")
+        ]
+
+        if len(xml_files) != 1:
+            raise ValueError(
+                "There needs to be exactly one .xml file inside of content/"
+            )
+
+        xml_file = xml_files[0]
+
+        # Parsing logic
+        with myzip.open(xml_file, "r") as f:
+            content = ElementTree.parse(f)
+            journal_element = content.find(
+                "./front/journal-meta/journal-title-group/journal-title"
+            )
+            topic_element = content.find(
+                "./front/article-meta/article-categories/subj-group[@subj-group-type='hwp-journal-coll']/subject"  # noqa
+            )
+
+            if topic_element is None:
+                raise ValueError("No topic found")
+
+            if journal_element is None:
+                raise ValueError("No journal found")
+
+            topic = topic_element.text
+            journal = journal_element.text
+
+        return topic, journal
 
 
 def extract_article_topics_for_pubmed_article(

@@ -31,6 +31,8 @@ Latest
 ======
 - |Add| the :code:`bluesearch.database.topic_info.TopicInfo` class
 - |Add| the :code:`bluesearch.database.article.ArticleSource` enum class
+- |Add| extraction of journal and article topics for :code:`arxiv` papers
+  through CLI command :code:`bbs_database topic-extract arxiv`.
 - |Add| extraction of journal and article topics for :code:`pubmed` papers
   through CLI command :code:`bbs_database topic-extract pubmed`.
 - |Add| extraction of journal topics for :code:`pmc` papers through CLI command

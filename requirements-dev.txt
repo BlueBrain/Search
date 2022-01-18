@@ -21,6 +21,6 @@ en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_
 pytest-benchmark==3.4.1
 pytest-cov==2.12.1
 pytest==6.2.4
-responses==0.13.3
+responses==0.17.0
 sphinx-bluebrain-theme==0.2.4
 tox==3.24.0
