@@ -182,29 +182,13 @@ def run(
             topic_info = TopicInfo(source=article_source, path=path)
             topic_info.add_article_topics("arXiv", article_topics)
             all_results.append(topic_info.json())
-    elif source in {"biorxiv", "medrxiv"}:
+    elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
         for path in inputs:
             logger.info(f"Processing {path}")
             topic, journal = extract_article_topics_from_medrxiv_article(path)
-            all_results.append(
-                {
-                    "source": journal,
-                    "path": str(path.resolve()),
-                    "topics": {
-                        "article": {
-                            "Subject Area": topic,
-                        },
-                    },
-                    "metadata": {
-                        "created-date": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "bbs-version": bluesearch.version.__version__,
-                    },
-                }
-            )
-
-        pass
+            topic_info = TopicInfo(source=ArticleSource(journal), path=path)
+            topic_info.add_article_topics("Subject Area", [topic])
+            all_results.append(topic_info.json())
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

@@ -176,7 +176,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
     # Mocking
     fake_extract_article_topics_from_medrxiv_article = Mock(
-        side_effect=lambda p: ("TOPIC", "JOURNAL")
+        side_effect=lambda p: ("TOPIC", source)
     )
 
     monkeypatch.setattr(
@@ -200,8 +200,8 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     result = JSONL.load_jsonl(output_file)
     assert len(result) == 1
 
-    assert result[0]["source"] == "JOURNAL"
-    assert result[0]["topics"]["article"]["Subject Area"] == "TOPIC"
+    assert result[0]["source"] == source
+    assert result[0]["topics"]["article"]["Subject Area"] == ["TOPIC"]
 
 
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
