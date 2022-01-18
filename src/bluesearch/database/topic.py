@@ -298,7 +298,7 @@ def get_topics_for_pmc_article(
 
 
 def get_topics_for_arxiv_articles(
-    arxiv_paths: Iterable[pathlib.Path] | Iterable[str], batch_size: int = 400
+    arxiv_paths: Iterable[pathlib.Path | str], batch_size: int = 400
 ) -> dict[pathlib.Path, list[str]]:
     """Extract journal topics of one or more arXiv article.
 
