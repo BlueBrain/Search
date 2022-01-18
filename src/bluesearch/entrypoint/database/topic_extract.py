@@ -177,26 +177,11 @@ def run(
                 if journal_topics:
                     topic_info.add_journal_topics("MeSH", journal_topics)
                 all_results.append(topic_info.json())
-    elif source == "arxiv":
-        all_results = [
-            {
-                "source": "arxiv",
-                "path": str(path.resolve()),
-                "topics": {
-                    "article": {
-                        "arXiv": article_topics,
-                    },
-                },
-                "metadata": {
-                    "created-date": datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "bbs-version": bluesearch.version.__version__,
-                },
-            }
-            for path, article_topics in get_topics_for_arxiv_articles(inputs).items()
-        ]
-
+    elif article_source == ArticleSource.ARXIV:
+        for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
+            topic_info = TopicInfo(source=article_source, path=path)
+            topic_info.add_article_topics("arXiv", article_topics)
+            all_results.append(topic_info.json())
     elif source in {"biorxiv", "medrxiv"}:
         for path in inputs:
             logger.info(f"Processing {path}")
