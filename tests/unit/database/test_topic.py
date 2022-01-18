@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
+import pathlib
 import re
 import zipfile
 from unittest.mock import Mock
@@ -29,6 +30,7 @@ from bluesearch.database.topic import (
     extract_article_topics_from_medrxiv_article,
     extract_journal_topics_for_pubmed_article,
     extract_pubmed_id_from_pmc_file,
+    get_topics_for_arxiv_articles,
     get_topics_for_pmc_article,
 )
 from bluesearch.database.topic import (
@@ -62,12 +64,15 @@ class TestGetMeshFromNlmTa:
         with open(test_data_path / "nlmcatalog_response.txt") as f:
             body = f.read()
 
+        params = {
+            "term": '"Trauma Surg And Acute Care Open"[ta]',
+            "report": "xml",
+            "format": "text",
+        }
         responses.add(
             responses.GET,
-            (
-                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
-            ),
+            url="https://www.ncbi.nlm.nih.gov/nlmcatalog",
+            match=[responses.matchers.query_param_matcher(params)],
             body=body,
         )
 
@@ -172,10 +177,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     with open(test_data_path / "efetchpubmed_response.txt") as f:
         body = f.read()
 
+    params = {"db": "pubmed", "id": "26633866,31755206", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=26633866,31755206&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        match=[responses.matchers.query_param_matcher(params)],
         body=body.encode("utf-8"),
     )
 
@@ -333,10 +339,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     assert list(meshs.keys()) == ["26633866", "31755206"]
     assert meshs == expected_output
 
+    params = {"db": "pubmed", "id": "0", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=0&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        match=[responses.matchers.query_param_matcher(params)],
         status=404,
     )
 
@@ -384,6 +391,52 @@ def test_get_topics_for_pmc_article(test_data_path, monkeypatch):
     assert journal_topics == expected_output
     request_mock.assert_called_once()
     request_mock.assert_called_with("Journal NLM TA")
+
+
+@responses.activate
+def test_get_topics_for_arxiv_articles(test_data_path):
+    with open(test_data_path / "arxiv_api_response.xml") as f:
+        body = f.read()
+    id_queries = [
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2",
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2,1808.02950v7",
+    ]
+    for id_query in id_queries:
+        params = {"id_list": id_query, "max_results": "400"}
+        responses.add(
+            responses.GET,
+            url="http://export.arxiv.org/api/query",
+            match=[responses.matchers.query_param_matcher(params)],
+            body=body,
+        )
+
+    # Test 1: everything should be fine
+    expected_output = {
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401024v1.pdf"): [
+            "q-bio.MN",
+            "cond-mat.dis-nn",
+            "cond-mat.stat-mech",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/q-bio/pdf/0401/0401014v1.pdf"): [
+            "q-bio.QM",
+            "q-bio.OT",
+        ],
+        pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02949v2.pdf"): [
+            "cs.CR",
+            "nlin.CD",
+        ],
+    }
+    inputs = expected_output.keys()
+    article_topics = get_topics_for_arxiv_articles(inputs)
+    assert set(article_topics.keys()) == set(inputs)
+    assert article_topics == expected_output
+
+    # Test 2: number of returned metadata doesn't match
+    with pytest.raises(ValueError):
+        get_topics_for_arxiv_articles(
+            list(inputs)
+            + [pathlib.Path("fulltext-dataset/arxiv/arxiv/pdf/1808/1808.02950v7.pdf")]
+        )
 
 
 class TestExtractInfoFromZipfile:

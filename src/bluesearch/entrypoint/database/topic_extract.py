@@ -134,6 +134,7 @@ def run(
         extract_article_topics_for_pubmed_article,
         extract_article_topics_from_medrxiv_article,
         extract_journal_topics_for_pubmed_article,
+        get_topics_for_arxiv_articles,
         get_topics_for_pmc_article,
     )
     from bluesearch.utils import JSONL, find_files
@@ -175,6 +176,26 @@ def run(
                     },
                 }
             )
+
+    elif source == "arxiv":
+        all_results = [
+            {
+                "source": "arxiv",
+                "path": str(path.resolve()),
+                "topics": {
+                    "article": {
+                        "arXiv": article_topics,
+                    },
+                },
+                "metadata": {
+                    "created-date": datetime.datetime.now().strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    ),
+                    "bbs-version": bluesearch.version.__version__,
+                },
+            }
+            for path, article_topics in get_topics_for_arxiv_articles(inputs).items()
+        ]
 
     elif source in {"biorxiv", "medrxiv"}:
         for path in inputs:
