@@ -62,12 +62,15 @@ class TestGetMeshFromNlmTa:
         with open(test_data_path / "nlmcatalog_response.txt") as f:
             body = f.read()
 
+        params = {
+            "term": '"Trauma Surg And Acute Care Open"[ta]',
+            "report": "xml",
+            "format": "text",
+        }
         responses.add(
             responses.GET,
-            (
-                "https://www.ncbi.nlm.nih.gov/nlmcatalog?"
-                'term="Trauma Surg And Acute Care Open"[ta]&report=xml&format=text'
-            ),
+            url="https://www.ncbi.nlm.nih.gov/nlmcatalog",
+            match=[responses.matchers.query_param_matcher(params)],
             body=body,
         )
 
@@ -172,10 +175,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     with open(test_data_path / "efetchpubmed_response.txt") as f:
         body = f.read()
 
+    params = {"db": "pubmed", "id": "26633866,31755206", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=26633866,31755206&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?",
+        match=[responses.matchers.query_param_matcher(params)],
         body=body.encode("utf-8"),
     )
 
@@ -333,10 +337,11 @@ def test_get_mesh_from_pubmedid(test_data_path):
     assert list(meshs.keys()) == ["26633866", "31755206"]
     assert meshs == expected_output
 
+    params = {"db": "pubmed", "id": "0", "retmode": "xml"}
     responses.add(
         responses.GET,
-        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
-        "db=pubmed&id=0&retmode=xml",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
+        match=[responses.matchers.query_param_matcher(params)],
         status=404,
     )
 
@@ -391,13 +396,15 @@ def test_get_topics_for_arxiv_articles(test_data_path):
     with open(test_data_path / "arxiv_api_response.xml") as f:
         body = f.read()
     id_queries = [
-        "id_list=q-bio%2F0401024v1%2Cq-bio%2F0401014v1%2C1808.02949v2",
-        "id_list=q-bio%2F0401024v1%2Cq-bio%2F0401014v1%2C1808.02949v2%2C1808.02950v7",
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2",
+        "q-bio/0401024v1,q-bio/0401014v1,1808.02949v2,1808.02950v7",
     ]
     for id_query in id_queries:
+        params = {"id_list": id_query, "max_results": "400"}
         responses.add(
             responses.GET,
-            f"http://export.arxiv.org/api/query?{id_query}&max_results=400",
+            url="http://export.arxiv.org/api/query",
+            match=[responses.matchers.query_param_matcher(params)],
             body=body,
         )
 

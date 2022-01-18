@@ -369,11 +369,16 @@ def get_topics_for_arxiv_articles(
                 f"but found {len(entries)}, for id_list = {id_list}"
             )
         for el in entries:
-            id_ = id_pattern.fullmatch(el.find("./atom:id", ns).text).group(1)
-            categories = [
-                categ.get("term") for categ in el.findall("atom:category", ns)
-            ]
-            article_topics[id_2_path[id_]] = categories
+            atom_id = el.find("./atom:id", ns)
+            match = id_pattern.fullmatch(atom_id.text)
+            if match is None:
+                raise ValueError(f"Could not extract ID from {atom_id}")
+            else:
+                id_ = match.group(1)
+                categories = [
+                    categ.get("term") for categ in el.findall("atom:category", ns)
+                ]
+                article_topics[id_2_path[id_]] = categories
 
     return article_topics
 
