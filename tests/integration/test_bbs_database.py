@@ -5,7 +5,7 @@ import docker
 import pg8000
 import pytest
 import sqlalchemy
-from sqlalchemy.exc import InterfaceError, OperationalError
+from sqlalchemy.exc import InterfaceError, OperationalError, ProgrammingError
 
 from bluesearch.entrypoint.database.parent import main
 
@@ -108,6 +108,7 @@ def setup_backend(request, tmp_path):
                 ConnectionResetError,
                 InterfaceError,
                 OperationalError,
+                ProgrammingError,
                 pg8000.core.struct.error,
                 pg8000.dbapi.ProgrammingError,
             ):
