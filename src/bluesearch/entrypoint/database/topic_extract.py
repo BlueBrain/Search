@@ -152,7 +152,7 @@ def run(
 
     article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
-    if article_source == ArticleSource.PMC:
+    if article_source is ArticleSource.PMC:
         for path in inputs:
             logger.info(f"Processing {path}")
             topic_info = TopicInfo(source=article_source, path=path.resolve())
@@ -160,7 +160,7 @@ def run(
             if journal_topics:
                 topic_info.add_journal_topics("MeSH", journal_topics)
             all_results.append(topic_info.json())
-    elif article_source == ArticleSource.PUBMED:
+    elif article_source is ArticleSource.PUBMED:
         for path in inputs:
             logger.info(f"Processing {path}")
             articles = ElementTree.parse(input_path)
@@ -177,7 +177,7 @@ def run(
                 if journal_topics:
                     topic_info.add_journal_topics("MeSH", journal_topics)
                 all_results.append(topic_info.json())
-    elif article_source == ArticleSource.ARXIV:
+    elif article_source is ArticleSource.ARXIV:
         for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
             topic_info = TopicInfo(source=article_source, path=path)
             topic_info.add_article_topics("arXiv", article_topics)
