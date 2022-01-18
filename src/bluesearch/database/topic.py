@@ -344,7 +344,7 @@ def get_topics_for_arxiv_articles(
         "opensearch": "http://a9.com/-/spec/opensearch/1.1/",
     }
     base_url = "http://export.arxiv.org/api/query"
-    id_pattern = re.compile(r"\Ahttp://arxiv.org/abs/(.*)")
+    id_pattern = re.compile(r"http://arxiv.org/abs/(.*)")
     ids = list(id_2_path.keys())
     article_topics = {}
     for i_start in range(0, len(ids), batch_size):
@@ -369,7 +369,7 @@ def get_topics_for_arxiv_articles(
                 f"but found {len(entries)}, for id_list = {id_list}"
             )
         for el in entries:
-            id_ = id_pattern.findall(el.find("./atom:id", ns).text)[0]
+            id_ = id_pattern.fullmatch(el.find("./atom:id", ns).text).group(1)
             categories = [
                 categ.get("term") for categ in el.findall("atom:category", ns)
             ]
