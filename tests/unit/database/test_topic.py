@@ -178,7 +178,7 @@ def test_get_mesh_from_pubmedid(test_data_path):
     params = {"db": "pubmed", "id": "26633866,31755206", "retmode": "xml"}
     responses.add(
         responses.GET,
-        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?",
+        url="https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
         match=[responses.matchers.query_param_matcher(params)],
         body=body.encode("utf-8"),
     )
