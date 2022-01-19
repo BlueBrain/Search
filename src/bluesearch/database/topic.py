@@ -402,7 +402,7 @@ def extract_article_topics_from_medrxiv_article(
 
     Returns
     -------
-    topic : pathlib.Path or str
+    topic : str
         The subject area of the article.
     journal : str
         The journal the article was published in. Should be either

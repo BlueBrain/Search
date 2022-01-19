@@ -18,10 +18,11 @@
 from __future__ import annotations
 
 import argparse
-import datetime
 import logging
 from pathlib import Path
 from typing import Any
+
+from bluesearch.database.article import ArticleSource
 
 logger = logging.getLogger(__name__)
 
@@ -44,14 +45,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
     parser.add_argument(
         "source",
-        type=str,
-        choices=(
-            "arxiv",
-            "biorxiv",
-            "medrxiv",
-            "pmc",
-            "pubmed",
-        ),
+        choices=[member.value for member in ArticleSource],
         help="""
         Format of the input.
         If extracting topic of several articles, all articles must have the same format.
@@ -129,7 +123,6 @@ def run(
     """
     from defusedxml import ElementTree
 
-    import bluesearch
     from bluesearch.database.topic import (
         extract_article_topics_for_pubmed_article,
         extract_article_topics_from_medrxiv_article,
@@ -137,6 +130,7 @@ def run(
         get_topics_for_arxiv_articles,
         get_topics_for_pmc_article,
     )
+    from bluesearch.database.topic_info import TopicInfo
     from bluesearch.utils import JSONL, find_files
 
     try:
@@ -153,102 +147,45 @@ def run(
         print(*inputs, sep="\n")
         return 0
 
+    article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
-
-    if source == "pmc":
+    if article_source is ArticleSource.PMC:
         for path in inputs:
             logger.info(f"Processing {path}")
+            topic_info = TopicInfo(source=article_source, path=path.resolve())
             journal_topics = get_topics_for_pmc_article(path)
-            all_results.append(
-                {
-                    "source": "pmc",
-                    "path": str(path.resolve()),
-                    "topics": {
-                        "journal": {
-                            "MeSH": journal_topics,
-                        },
-                    },
-                    "metadata": {
-                        "created-date": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "bbs-version": bluesearch.version.__version__,
-                    },
-                }
-            )
-
-    elif source == "arxiv":
-        all_results = [
-            {
-                "source": "arxiv",
-                "path": str(path.resolve()),
-                "topics": {
-                    "article": {
-                        "arXiv": article_topics,
-                    },
-                },
-                "metadata": {
-                    "created-date": datetime.datetime.now().strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    ),
-                    "bbs-version": bluesearch.version.__version__,
-                },
-            }
-            for path, article_topics in get_topics_for_arxiv_articles(inputs).items()
-        ]
-
-    elif source in {"biorxiv", "medrxiv"}:
-        for path in inputs:
-            logger.info(f"Processing {path}")
-            topic, journal = extract_article_topics_from_medrxiv_article(path)
-            all_results.append(
-                {
-                    "source": journal,
-                    "path": str(path.resolve()),
-                    "topics": {
-                        "article": {
-                            "Subject Area": topic,
-                        },
-                    },
-                    "metadata": {
-                        "created-date": datetime.datetime.now().strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        ),
-                        "bbs-version": bluesearch.version.__version__,
-                    },
-                }
-            )
-
-        pass
-
-    elif source == "pubmed":
+            if journal_topics:
+                topic_info.add_journal_topics("MeSH", journal_topics)
+            all_results.append(topic_info.json())
+    elif article_source is ArticleSource.PUBMED:
         for path in inputs:
             logger.info(f"Processing {path}")
             articles = ElementTree.parse(input_path)
             for i, article in enumerate(articles.iter("PubmedArticle")):
+                topic_info = TopicInfo(
+                    source=article_source,
+                    path=path.resolve(),
+                    element_in_file=i,
+                )
                 article_topics = extract_article_topics_for_pubmed_article(article)
                 journal_topics = extract_journal_topics_for_pubmed_article(article)
-                all_results.append(
-                    {
-                        "source": "pubmed",
-                        "path": str(path.resolve()),
-                        "topics": {
-                            "journal": {
-                                "MeSH": journal_topics,
-                            },
-                            "article": {
-                                "MeSH": article_topics,
-                            },
-                        },
-                        "metadata": {
-                            "created-date": datetime.datetime.now().strftime(
-                                "%Y-%m-%d %H:%M:%S"
-                            ),
-                            "bbs-version": bluesearch.version.__version__,
-                            "element_in_file": i,
-                        },
-                    }
-                )
+                if article_topics:
+                    topic_info.add_article_topics("MeSH", article_topics)
+                if journal_topics:
+                    topic_info.add_journal_topics("MeSH", journal_topics)
+                all_results.append(topic_info.json())
+    elif article_source is ArticleSource.ARXIV:
+        for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
+            topic_info = TopicInfo(source=article_source, path=path)
+            topic_info.add_article_topics("arXiv", article_topics)
+            all_results.append(topic_info.json())
+    elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
+        for path in inputs:
+            logger.info(f"Processing {path}")
+            topic, journal = extract_article_topics_from_medrxiv_article(path)
+            topic_info = TopicInfo(source=ArticleSource(journal), path=path)
+            topic_info.add_article_topics("Subject Area", [topic])
+            all_results.append(topic_info.json())
     else:
         logger.error(f"The source type {source!r} is not implemented yet")
         return 1

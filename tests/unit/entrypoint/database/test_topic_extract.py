@@ -73,11 +73,11 @@ def test_input_path_not_correct(caplog):
     assert "Argument 'input_path'" in caplog.text
 
 
-def test_wrong_source(test_data_path, caplog, tmp_path):
+def test_source_type_not_implemented(test_data_path, caplog, tmp_path):
     pmc_path = test_data_path / "jats_article.xml"
     with caplog.at_level(logging.ERROR):
         exit_code = topic_extract.run(
-            source="wrong_type",
+            source="unknown",
             input_path=pmc_path,
             output_file=tmp_path,
             match_filename=None,
@@ -86,7 +86,7 @@ def test_wrong_source(test_data_path, caplog, tmp_path):
             dry_run=False,
         )
     assert exit_code == 1
-    assert "The source type" in caplog.text
+    assert "not implemented" in caplog.text
 
 
 def test_dry_run(test_data_path, capsys, tmp_path):
@@ -134,7 +134,6 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert result["path"] == str(pmc_path)
     assert isinstance(result["topics"], dict)
     topics = result["topics"]
-    assert "article" not in topics
     assert "journal" in topics
     assert isinstance(topics["journal"], dict)
     assert topics["journal"]["MeSH"] == meshes
@@ -177,7 +176,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
     # Mocking
     fake_extract_article_topics_from_medrxiv_article = Mock(
-        side_effect=lambda p: ("TOPIC", "JOURNAL")
+        side_effect=lambda p: ("TOPIC", source)
     )
 
     monkeypatch.setattr(
@@ -201,8 +200,8 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     result = JSONL.load_jsonl(output_file)
     assert len(result) == 1
 
-    assert result[0]["source"] == "JOURNAL"
-    assert result[0]["topics"]["article"]["Subject Area"] == "TOPIC"
+    assert result[0]["source"] == source
+    assert result[0]["topics"]["article"]["Subject Area"] == ["TOPIC"]
 
 
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):

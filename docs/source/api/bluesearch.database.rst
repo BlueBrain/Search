@@ -14,6 +14,7 @@ Submodules
    bluesearch.database.mining_cache
    bluesearch.database.pdf
    bluesearch.database.topic
+   bluesearch.database.topic_info
 
 Module contents
 ---------------

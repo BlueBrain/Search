@@ -23,6 +23,8 @@ from datetime import datetime
 from itertools import chain
 from pathlib import Path
 
+from bluesearch.database.article import ArticleSource
+
 logger = logging.getLogger(__name__)
 
 # Data conventions and formats are different prior to these dates. We
@@ -30,17 +32,17 @@ logger = logging.getLogger(__name__)
 # respective threshold.
 MIN_DATE = {
     # https://arxiv.org/help/arxiv_identifier#old
-    "arxiv": datetime(2007, 4, 1),
+    ArticleSource.ARXIV: datetime(2007, 4, 1),
     # https://www.biorxiv.org/tdm + looked into Current Content folder on GPFS
-    "biorxiv": datetime(2018, 12, 1),
+    ArticleSource.BIORXIV: datetime(2018, 12, 1),
     # https://www.medrxiv.org/tdm + looked into Current Content folder on GPFS
-    "medrxiv": datetime(2020, 10, 1),
+    ArticleSource.MEDRXIV: datetime(2020, 10, 1),
     # This should change every year in December:
     # see https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/
-    "pmc": datetime(2021, 12, 1),
+    ArticleSource.PMC: datetime(2021, 12, 1),
     # This should change every year in December:
     # see https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
-    "pubmed": datetime(2021, 12, 1),
+    ArticleSource.PUBMED: datetime(2021, 12, 1),
 }
 
 
@@ -88,7 +90,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "source",
         type=str,
-        choices=("arxiv", "biorxiv", "medrxiv", "pmc", "pubmed"),
+        choices=[member.value for member in ArticleSource],
         help="Source of the download.",
     )
     parser.add_argument(
@@ -129,16 +131,17 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_s3_urls,
     )
 
-    if from_month < MIN_DATE[source]:
+    article_source = ArticleSource(source)
+    if from_month < MIN_DATE[article_source]:
         logger.error(
-            f"The papers from before {MIN_DATE[source].strftime('%B %Y')} "
+            f"The papers from before {MIN_DATE[article_source].strftime('%B %Y')} "
             "follow a different format and can't be downloaded. "
             "Please contact the developers if you need them. "
             "To proceed please re-run the command with a different starting month."
         )
         return 1
 
-    if source == "pmc":
+    if article_source == ArticleSource.PMC:
         url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
             url_dict[component] = generate_pmc_urls(component, from_month)
@@ -158,7 +161,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             component_dir.mkdir(exist_ok=True, parents=True)
             download_articles(url_list, component_dir)
         return 0
-    elif source == "pubmed":
+    elif article_source == ArticleSource.PUBMED:
         url_list = get_pubmed_urls(from_month)
         if dry_run:
             print("URL requests from:")
@@ -169,7 +172,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         output_dir.mkdir(exist_ok=True, parents=True)
         download_articles(url_list, output_dir)
         return 0
-    elif source in {"biorxiv", "medrxiv"}:
+    elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
 
         key_id = getpass.getpass("aws_access_key_id: ")
         secret_access_key = getpass.getpass("aws_secret_access_key: ")
@@ -192,7 +195,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         logger.info(f"Start downloading {source} papers.")
         download_s3_articles(bucket, url_dict, output_dir)
         return 0
-    elif source == "arxiv":
+    elif article_source == ArticleSource.ARXIV:
         logger.info("Loading libraries")
         from google.cloud.storage import Client
 

@@ -26,6 +26,7 @@ from unittest.mock import Mock
 import pytest
 from google.cloud.storage import Blob
 
+from bluesearch.database.article import ArticleSource
 from bluesearch.entrypoint.database import download
 
 DOWNLOAD_PARAMS = {"source", "from_month", "output_dir", "dry_run"}
@@ -268,11 +269,11 @@ class TestArxivDownload:
 @pytest.mark.parametrize(
     ("source", "expected_date"),
     [
-        ("arxiv", "April 2007"),
-        ("biorxiv", "December 2018"),
-        ("medrxiv", "October 2020"),
-        ("pmc", "December 2021"),
-        ("pubmed", "December 2021"),
+        (ArticleSource.ARXIV, "April 2007"),
+        (ArticleSource.BIORXIV, "December 2018"),
+        (ArticleSource.MEDRXIV, "October 2020"),
+        (ArticleSource.PMC, "December 2021"),
+        (ArticleSource.PUBMED, "December 2021"),
     ],
 )
 def test_structure_change(source, expected_date, tmp_path, caplog):
@@ -281,7 +282,7 @@ def test_structure_change(source, expected_date, tmp_path, caplog):
     fake_datetime = limit_datetime - datetime.timedelta(days=32)
 
     with caplog.at_level(logging.ERROR):
-        exit_code = download.run(source, fake_datetime, tmp_path, dry_run=False)
+        exit_code = download.run(source.value, fake_datetime, tmp_path, dry_run=False)
 
     assert exit_code == 1
     assert expected_date in caplog.text
