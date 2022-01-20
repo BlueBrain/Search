@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-    """Initialise the argument parser for the add subcommand.
+    """Initialise the argument parser for the topic-extract subcommand.
 
     Parameters
     ----------
