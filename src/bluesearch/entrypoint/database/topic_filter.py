@@ -108,7 +108,7 @@ TopicRule = namedtuple(
     )
 )
 
-def extract_rules(config: dict) -> list[TopicRule]:
+def extract_rules(config: dict) -> tuple[list[TopicRule], list[TopicRules]]:
     raise NotImplementedError
 
 def check_satisfied(topic_rule: TopicRule, topic_info: dict) -> bool:
