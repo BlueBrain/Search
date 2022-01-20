@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from collections import namedtuple
 from pathlib import Path
 from typing import Any
 
@@ -99,6 +100,20 @@ def validate(value: Any, key: str | None = None, level: int = -1) -> None:
         for subkey, subvalue in value.items():
             validate(subvalue, subkey, level + 1)
 
+TopicRule = namedtuple(
+    "TopicRule", (
+        "level",  # "article" or "journal"
+        "source",  # "arxiv", ... , "pubmed"
+        "pattern",  # regex pattern to match
+    )
+)
+
+def extract_rules(config: dict) -> list[TopicRule]:
+    raise NotImplementedError
+
+def check_satisfied(topic_rule: TopicRule, topic_info: dict) -> bool:
+    raise NotImplementedError
+
 def run(
     *,
     extracted_topics: Path,
@@ -116,6 +131,7 @@ def run(
     import pandas as pd
 
     from bluesearch.database.article import ArticleSource
+    from bluesearch.database.topic_info import ArticleSource
     from bluesearch.utils import JSONL
 
 
@@ -128,11 +144,41 @@ def run(
     # Validation
     validate(config)
 
-    # For each (article | journal, source) tuple you should have a set of 
-    # patterns (order does not matter) that we will try to match
+    # Extract rules
+    topic_rules_accept, topic_rules_reject: list[TopicRule] = extract_rules(config)
 
-    topics = JSONL.load_jsonl(extracted_topics)
+    # Extract infos
+    topic_infos = JSONL.load_jsonl(extracted_topics)
 
+    # Populate
+    decisions = []  # If True we accept that give topic info
+
+    for topic_info in topic_infos:
+        # Go through rejection rules
+        rejected = False
+        for topic_rule in topic_rules_reject:
+            rule_satisfied = check_satisfied(topic_rule, topic_info)
+            if rule_satisifed:
+                rejected = True
+                break
+
+        if rejected:
+            decisions.append(False)
+            continue
+
+        
+        # Go through acceptance rules
+        accepted = False
+        for topic_rule in topic_rules_accept:
+            rule_satisfied = check_satisfied(topic_rule, topic_info)
+            if rule_satisfied:
+                accepted = True
+                break
+
+        decisions.append(accepted)
+
+
+    # Create output
     output_columns = [
         "path",
         "element_in_file",
