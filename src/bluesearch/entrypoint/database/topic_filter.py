@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
+from typing import Any
 
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,36 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
     return parser
 
+def validate(value: Any, key: str | None = None, level: int = -1) -> None:
+    """Validate if section names of the config file are correct."""
+
+    allowed_section_names = [
+        {"accept", "reject"},
+        {"article", "journal"},
+        {"pubmed", "arxiv", "pmc", "biorxiv", "medrxiv"}
+    ]
+
+    n_mandatory_levels = len(allowed_section_names)
+
+    if level == -1:
+        # The entire config file has been provided
+        pass
+
+    elif 0 <= level < n_mandatory_levels:
+        # We are in a level that we want to validate
+        if key not in allowed_section_names[level]:
+            raise ValueError(f"Illegal section named {key}")
+
+    elif level >= n_mandatory_levels:
+        # We are in a level that we don't want to validate
+        return
+
+    else:
+        raise ValueError(f"Illegal level {level}")
+
+    if isinstance(value, dict):
+        for subkey, subvalue in value.items():
+            validate(subvalue, subkey, level + 1)
 
 def run(
     *,
@@ -79,4 +110,38 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `init_parser` function.
     """
+    import pprint
+    import yaml
+
+    import pandas as pd
+
+    from bluesearch.database.article import ArticleSource
+    from bluesearch.utils import JSONL
+
+
+    # Create pattern list
+    with filter_config.open() as f_config:
+        config = yaml.safe_load(f_config)
+    
+    pprint.pprint(config)
+
+    # Validation
+    validate(config)
+
+    # For each (article | journal, source) tuple you should have a set of 
+    # patterns (order does not matter) that we will try to match
+
+    topics = JSONL.load_jsonl(extracted_topics)
+
+    output_columns = [
+        "path",
+        "element_in_file",
+        "accept",
+    ]
+
+    df = pd.DataFrame(columns=output_columns)
+
+    df.to_csv(output_file, index=False)
+
+
     return 0
