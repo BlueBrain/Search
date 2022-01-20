@@ -14,6 +14,7 @@ from bluesearch.entrypoint.database import (
     init,
     parse,
     topic_extract,
+    topic_filter,
 )
 
 Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
@@ -74,6 +75,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             help="Extract topic of article(s).",
             init_parser=topic_extract.init_parser,
             run=topic_extract.run,
+        ),
+        "topic-filter": Cmd(
+            help="Filter articles containing relevant topics.",
+            init_parser=topic_filter.init_parser,
+            run=topic_filter.run,
         ),
     }
 
