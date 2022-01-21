@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import enum
+import hashlib
 import html
 import re
 import string
@@ -30,8 +31,6 @@ from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
-
-from bluesearch.database.identifiers import generate_uid
 
 
 class ArticleSource(enum.Enum):
@@ -185,16 +184,31 @@ class ArticleParser(ABC):
         return None
 
     @property
-    def uid(self) -> str | None:
+    def uid(self) -> str:
         """Generate unique ID of the article based on different identifiers.
 
         Returns
         -------
-        str or None
-            If at least one identifier exists, unique id is created. Otherwise,
-            the returned uid is None.
+        str
+            A unique ID created by hashing the identifiers of the article.
+            If no identifier is available, then the unique ID is computed by
+            hashing the whole content of the article.
         """
-        return generate_uid((self.pubmed_id, self.pmc_id, self.arxiv_id, self.doi))
+        identifiers = (self.pubmed_id, self.pmc_id, self.arxiv_id, self.doi)
+        m = hashlib.md5()  # nosec
+
+        # If no identifier is available, hash whole article content.
+        if all(x is None for x in identifiers):
+            m.update(self.title.encode())
+            m.update(str(list(self.authors)).encode())
+            m.update(str(list(self.abstract)).encode())
+            m.update(str(list(self.paragraphs)).encode())
+
+        # If at least one identifier is available, hash identifiers.
+        else:
+            m.update(str(identifiers).encode())
+
+        return m.hexdigest()
 
 
 class JATSXMLParser(ArticleParser):
