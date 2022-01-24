@@ -183,32 +183,69 @@ class ArticleParser(ABC):
         """
         return None
 
-    @property
-    def uid(self) -> str:
-        """Generate unique ID of the article based on different identifiers.
+    @staticmethod
+    def get_uid_from_identifiers(identifiers: tuple[str | None, ...]) -> str:
+        """Generate a deterministic UID for a list of given paper identifiers.
+
+        Papers with the same values for the given identifiers get the same UID.
+
+        Missing values should have the value `None`, which is considered a value
+        by itself. Then, identifiers `(a, None)` and identifiers `(a, b)` have
+        two different UIDs.
+
+        Papers with all given identifiers unspecified have `None` as UID.
+
+        Parameters
+        ----------
+        identifiers
+            Values of the identifiers.
 
         Returns
         -------
         str
-            A unique ID created by hashing the identifiers of the article.
-            If no identifier is available, then the unique ID is computed by
-            hashing the whole content of the article.
+            A deterministic UID computed from the identifiers.
+
+        Raises
+        ------
+        ValueError
+            If all identifiers are `None`.
+        """
+        if all(x is None for x in identifiers):
+            raise ValueError(
+                f"Identifiers = {identifiers} are all `None`, UID cannot be computed."
+            )
+        else:
+            data = str(identifiers).encode()
+            hashed = hashlib.md5(data).hexdigest()  # nosec
+            return hashed
+
+    @property
+    def uid(self) -> str:
+        """Generate deterministic UID for an article.
+
+        The UID is usually created by hashing the identifiers of the article.
+        If no identifier is available, then the unique ID is computed by hashing
+        the whole content of the article.
+
+        Returns
+        -------
+        str
+            A deterministic UID.
         """
         identifiers = (self.pubmed_id, self.pmc_id, self.arxiv_id, self.doi)
-        m = hashlib.md5()  # nosec
 
         # If no identifier is available, hash whole article content.
         if all(x is None for x in identifiers):
+            m = hashlib.md5()  # nosec
             m.update(self.title.encode())
             m.update(str(list(self.authors)).encode())
             m.update(str(list(self.abstract)).encode())
             m.update(str(list(self.paragraphs)).encode())
+            return m.hexdigest()
 
         # If at least one identifier is available, hash identifiers.
         else:
-            m.update(str(identifiers).encode())
-
-        return m.hexdigest()
+            return self.get_uid_from_identifiers(identifiers)
 
 
 class JATSXMLParser(ArticleParser):
