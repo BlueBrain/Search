@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import typing
 from pathlib import Path
 
 import numpy as np
@@ -116,7 +117,7 @@ def filter_topics(
     topic_infos: list[TopicInfo],
     topic_rules_accept: list[TopicRule],
     topic_rules_reject: list[TopicRule],
-):
+) -> pd.DataFrame:
     """Filter topics.
 
     Parameters
@@ -146,8 +147,7 @@ def filter_topics(
             }
         )
 
-    output = pd.DataFrame(output_rows)
-    output = output.astype(
+    output = pd.DataFrame(output_rows).astype(
         {
             "path": str,
             "element_in_file": np.float64,  # to be able to handle nan
@@ -155,8 +155,7 @@ def filter_topics(
             "source": str,
         }
     )
-
-    return output
+    return typing.cast(pd.DataFrame, output)  # astype returns "DataFrame | Series"
 
 
 def run(
