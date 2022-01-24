@@ -19,10 +19,13 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from bluesearch.database.topic_info import ArticleSource
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +58,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "filter_config",
         type=Path,
         help="""
-        Path to a .YAML file that defines what topics are relevant.
+        Path to a .JSONL file that defines all the rules for filtering.
         """,
     )
     parser.add_argument(
@@ -69,44 +72,33 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
     return parser
 
-def validate(value: Any, key: str | None = None, level: int = -1) -> None:
-    """Validate if section names of the config file are correct."""
+@dataclass
+class TopicRule:
+    # None always represent wildcards
+    level: str | None = None  # "article" or "journal"
+    source: str | ArticleSource | None = None  # "arxiv", ... , "pubmed"
+    pattern: str | re.Pattern | None = None  # regex pattern to match
 
-    allowed_section_names = [
-        {"accept", "reject"},
-        {"article", "journal"},
-        {"pubmed", "arxiv", "pmc", "biorxiv", "medrxiv"}
-    ]
+    def __post_init__(self) -> None:
+        """Validate inputs."""
+        if self.level is not None and self.level not in {"article", "journal"}:
+            raise ValueError(f"Unsupported level {self.level}")
 
-    n_mandatory_levels = len(allowed_section_names)
+        if self.pattern is not None:
+            try:
+                self.pattern = re.compile(self.pattern)
+            except re.error:
+                raise ValueError(f"Unsupported pattern {self.pattern}") from None
 
-    if level == -1:
-        # The entire config file has been provided
-        pass
+        if self.source is not None:
+            try:
+                self.source = ArticleSource(self.source)
+            except ValueError:
+                raise ValueError(f"Unsupported source {self.source}") from None
 
-    elif 0 <= level < n_mandatory_levels:
-        # We are in a level that we want to validate
-        if key not in allowed_section_names[level]:
-            raise ValueError(f"Illegal section named {key}")
 
-    elif level >= n_mandatory_levels:
-        # We are in a level that we don't want to validate
-        return
 
-    else:
-        raise ValueError(f"Illegal level {level}")
 
-    if isinstance(value, dict):
-        for subkey, subvalue in value.items():
-            validate(subvalue, subkey, level + 1)
-
-TopicRule = namedtuple(
-    "TopicRule", (
-        "level",  # "article" or "journal"
-        "source",  # "arxiv", ... , "pubmed"
-        "pattern",  # regex pattern to match
-    )
-)
 
 def extract_rules(config: dict) -> tuple[list[TopicRule], list[TopicRules]]:
     raise NotImplementedError
@@ -115,7 +107,6 @@ def check_satisfied(topic_rule: TopicRule, topic_info: dict) -> bool:
     raise NotImplementedError
 
 def run(
-    *,
     extracted_topics: Path,
     filter_config: Path,
     output_file: Path,
@@ -131,7 +122,6 @@ def run(
     import pandas as pd
 
     from bluesearch.database.article import ArticleSource
-    from bluesearch.database.topic_info import ArticleSource
     from bluesearch.utils import JSONL
 
 
@@ -145,7 +135,7 @@ def run(
     validate(config)
 
     # Extract rules
-    topic_rules_accept, topic_rules_reject: list[TopicRule] = extract_rules(config)
+    topic_rules_accept, topic_rules_reject = extract_rules(config)
 
     # Extract infos
     topic_infos = JSONL.load_jsonl(extracted_topics)
@@ -180,9 +170,11 @@ def run(
 
     # Create output
     output_columns = [
-        "path",
+        "absolute_path",
         "element_in_file",
         "accept",
+        "source",
+        "version",
     ]
 
     df = pd.DataFrame(columns=output_columns)
