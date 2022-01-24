@@ -19,9 +19,17 @@ import argparse
 import inspect
 import pathlib
 
+import numpy as np
 import pandas as pd
+import pytest
 
+from bluesearch.database.topic_info import TopicInfo
+from bluesearch.database.topic_rule import TopicRule
 from bluesearch.entrypoint.database import topic_filter
+from bluesearch.entrypoint.database.topic_filter import (
+    filter_topics,
+    parse_filter_config,
+)
 from bluesearch.utils import JSONL
 
 TOPIC_FILTER_PARAMS = {
@@ -48,13 +56,13 @@ def test_run_arguments():
 
 
 EXTRACTED_TOPICS_EXAMPLE = [
-    # bioarxiv
+    # biorxiv
     {
         "metadata": {
             "bbs-version": "1.2.1.dev39",
             "created-date": "2022-01-18 10:06:12",
         },
-        "path": "path_bioarxiv_1",
+        "path": "path_biorxiv_1",
         "source": "biorxiv",
         "topics": {"article": {"Subject Area": ["Neuroscience"]}, "journal": {}},
     },
@@ -63,7 +71,7 @@ EXTRACTED_TOPICS_EXAMPLE = [
             "bbs-version": "0.2.1.dev39",
             "created-date": "2022-01-18 10:06:12",
         },
-        "path": "path_bioarxiv_2",
+        "path": "path_biorxiv_2",
         "source": "biorxiv",
         "topics": {"article": {"Subject Area": ["Microbiology"]}, "journal": {}},
     },
@@ -205,6 +213,76 @@ EXTRACTED_TOPICS_EXAMPLE = [
 ]
 
 
+def test_parse_filter_config():
+    # Wrong label
+    config = [
+        {
+            "pattern": None,  # -> null
+            "level": None,
+            "source": None,
+            "label": "wrong-label",
+        },
+    ]
+
+    with pytest.raises(ValueError):
+        parse_filter_config(config)
+
+    config = [
+        {
+            "pattern": None,  # -> null
+            "level": None,
+            "source": None,
+            "label": "accept",
+        },
+        {
+            "pattern": None,  # -> null
+            "level": None,
+            "source": "medrxiv",
+            "label": "reject",
+        },
+    ]
+    topic_rules_accept, topic_rules_reject = parse_filter_config(config)
+    assert topic_rules_accept == [TopicRule()]
+    assert topic_rules_reject == [TopicRule(source="medrxiv")]
+
+
+def test_filter_topics():
+    topic_infos = [TopicInfo.from_dict(data) for data in EXTRACTED_TOPICS_EXAMPLE]
+    topic_rules_accept = [
+        TopicRule(source="biorxiv"),
+        TopicRule(source="medrxiv"),
+        TopicRule(source="pubmed"),
+    ]
+    topic_rules_reject = [
+        TopicRule(source="pmc"),
+    ]
+    output = filter_topics(topic_infos, topic_rules_accept, topic_rules_reject)
+    assert isinstance(output, pd.DataFrame)
+    assert output.columns.tolist() == [
+        "path",
+        "element_in_file",
+        "accept",
+        "source",
+    ]
+    assert len(output) == len(EXTRACTED_TOPICS_EXAMPLE)
+    assert output["accept"].sum() == 3 * 2
+
+    assert "path_biorxiv_1" in str(output.iloc[0]["path"])
+    assert np.isnan(output.iloc[0]["element_in_file"])
+    assert output.iloc[0]["accept"]
+    assert output.iloc[0]["source"] == "biorxiv"
+
+    assert "path_pmc_1" in str(output.iloc[6]["path"])
+    assert np.isnan(output.iloc[6]["element_in_file"])
+    assert not output.iloc[6]["accept"]
+    assert output.iloc[6]["source"] == "pmc"
+
+    assert "path_pubmed_2" in str(output.iloc[9]["path"])
+    assert output.iloc[9]["element_in_file"] == 387
+    assert output.iloc[9]["accept"]
+    assert output.iloc[9]["source"] == "pubmed"
+
+
 def test_cli(tmp_path):
     config_path = tmp_path / "config_path.jsonl"
     extractions_path = tmp_path / "extractions.jsonl"
@@ -245,5 +323,3 @@ def test_cli(tmp_path):
         "accept",
         "source",
     ]
-
-    assert output["accept"].sum() == len(EXTRACTED_TOPICS_EXAMPLE)

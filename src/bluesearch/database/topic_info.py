@@ -136,7 +136,7 @@ class TopicInfo:
         """
         source = ArticleSource(data["source"])
         path = data["path"]
-        element_in_file = data.get("element_in_file")
+        element_in_file = data["metadata"].get("element_in_file")
         topic_info = cls(source, path, element_in_file)
         for topic_type, topics in data["topics"]["article"].items():
             topic_info.add_article_topics(topic_type, topics)

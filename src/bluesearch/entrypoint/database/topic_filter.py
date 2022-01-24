@@ -21,6 +21,12 @@ import argparse
 import logging
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
+from bluesearch.database.topic_info import TopicInfo
+from bluesearch.database.topic_rule import TopicRule, check_accepted
+
 logger = logging.getLogger(__name__)
 
 
@@ -67,26 +73,26 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def run(
-    extracted_topics: Path,
-    filter_config: Path,
-    output_file: Path,
-) -> int:
-    """Filter articles containing relevant topics.
+def parse_filter_config(config: list[dict]) -> tuple[list[TopicRule], list[TopicRule]]:
+    """Parse filter configuration.
 
-    Parameter description and potential defaults are documented inside of the
-    `init_parser` function.
+    Parameters
+    ----------
+    config
+        Topic Rules configuration
+
+    Returns
+    -------
+    topic_rules_accept : list[TopicRule]
+        List of accepted TopicRule
+    topic_rules_reject : list[TopicRule]
+        List of rejected TopicRule
+
+    Raises
+    ------
+    ValueError
+        If one of the label value is different from accept and reject.
     """
-    import pandas as pd
-
-    from bluesearch.database.topic_info import TopicInfo
-    from bluesearch.database.topic_rule import TopicRule, check_accepted
-    from bluesearch.utils import JSONL
-
-    # Create pattern list
-    config = JSONL.load_jsonl(filter_config)
-
-    # Extract rules
     topic_rules_accept, topic_rules_reject = [], []
     for raw_rule in config:
         rule = TopicRule(
@@ -101,13 +107,34 @@ def run(
         elif label == "reject":
             topic_rules_reject.append(rule)
         else:
-            ValueError(f"Unsupported label {label}")
+            raise ValueError(f"Unsupported label {label}")
 
-    # Populate
-    output_rows = []  # If True we accept that give topic info
+    return topic_rules_accept, topic_rules_reject
 
-    for topic_info_raw in JSONL.load_jsonl(extracted_topics):
-        topic_info = TopicInfo.from_dict(topic_info_raw)
+
+def filter_topics(
+    topic_infos: list[TopicInfo],
+    topic_rules_accept: list[TopicRule],
+    topic_rules_reject: list[TopicRule],
+):
+    """Filter topics.
+
+    Parameters
+    ----------
+    topic_infos
+        List of TopicInfo.
+    topic_rules_accept
+        List of accepted TopicRule.
+    topic_rules_reject
+        List of rejected TopicRule.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame containing all the topic info and if it is accepted or not.
+    """
+    output_rows = []
+    for topic_info in topic_infos:
         output_rows.append(
             {
                 "path": topic_info.path,
@@ -115,11 +142,46 @@ def run(
                 "accept": check_accepted(
                     topic_info, topic_rules_accept, topic_rules_reject
                 ),
-                "source": topic_info.source,
+                "source": topic_info.source.value,
             }
         )
 
-    df = pd.DataFrame(output_rows)
+    output = pd.DataFrame(output_rows)
+    output = output.astype({
+        "path": str,
+        "element_in_file": np.float64,  # to be able to handle nan
+        "accept": bool,
+        "source": str,
+    })
+
+    return output
+
+
+def run(
+    extracted_topics: Path,
+    filter_config: Path,
+    output_file: Path,
+) -> int:
+    """Filter articles containing relevant topics.
+
+    Parameter description and potential defaults are documented inside of the
+    `init_parser` function.
+    """
+    from bluesearch.utils import JSONL
+
+    # Create pattern list
+    config = JSONL.load_jsonl(filter_config)
+
+    # Extract rules
+    topic_rules_accept, topic_rules_reject = parse_filter_config(config)
+
+    # Populate
+    topic_infos = [
+        TopicInfo.from_dict(topic_info_raw)
+        for topic_info_raw in JSONL.load_jsonl(extracted_topics)
+    ]
+
+    df = filter_topics(topic_infos, topic_rules_accept, topic_rules_reject)
     df.to_csv(output_file, index=False)
 
     return 0
