@@ -9,6 +9,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import re
 
@@ -53,6 +54,8 @@ class TestTopicRule:
         rule_1 = TopicRule(pattern="some_pattern")
         rule_2 = TopicRule(pattern=re.compile("whatever"))
 
+        assert rule_1.pattern is not None
+        assert rule_2.pattern is not None
         assert rule_1.pattern.pattern == "some_pattern"
         assert rule_2.pattern.pattern == "whatever"
 
@@ -73,6 +76,7 @@ class TestTopicRule:
                         "some_key": ["pasta"],
                     },
                 },
+                "metadata": {},
             }
         )
 
@@ -107,12 +111,13 @@ def test_check_accepted():
                     "some_key": ["pasta"],
                 },
             },
+            "metadata": {},
         }
     )
 
     # No rules specified
-    topic_rules_accept = []
-    topic_rules_reject = []
+    topic_rules_accept: list[TopicRule] = []
+    topic_rules_reject: list[TopicRule] = []
     assert not check_accepted(topic_info, topic_rules_accept, topic_rules_reject)
 
     # Nothing matches
