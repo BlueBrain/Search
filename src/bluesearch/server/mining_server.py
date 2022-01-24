@@ -198,13 +198,13 @@ class MiningServer(Flask):
                         paragraph = retrieve_paragraph(
                             article_id, paragraph_pos, engine=self.connection
                         )
-                        all_paragraphs = all_paragraphs.append(paragraph)
+                        all_paragraphs = pd.concat([all_paragraphs, paragraph])
 
                 if all_article_ids:
                     articles = retrieve_articles(
                         article_ids=all_article_ids, engine=self.connection
                     )
-                    all_paragraphs = all_paragraphs.append(articles)
+                    all_paragraphs = pd.concat([all_paragraphs, articles])
 
                 texts = [
                     (
@@ -277,7 +277,7 @@ class MiningServer(Flask):
             df = run_pipeline(
                 texts=texts, model_entities=ee_model, models_relations={}, debug=debug
             )
-            df_all = df_all.append(df)
+            df_all = pd.concat([df_all, df])
 
         df_all = self.add_ontology_column(df_all, schema_df)
         self.logger.info(f"Mining completed. Mined {len(df_all)} items.")
