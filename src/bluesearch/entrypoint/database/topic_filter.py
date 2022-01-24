@@ -115,11 +115,7 @@ class TopicRule:
                 if any(self.pattern.search(topic) for topic in topic_list):
                     return True
 
-def extract_rules(config: dict) -> tuple[list[TopicRule], list[TopicRules]]:
-    raise NotImplementedError
-
-def check_satisfied(topic_rule: TopicRule, topic_info: dict) -> bool:
-    raise NotImplementedError
+        return False
 
 def run(
     extracted_topics: Path,
@@ -137,32 +133,41 @@ def run(
     import pandas as pd
 
     from bluesearch.database.article import ArticleSource
+    from bluesearch.database.topic_info import TopicInfo
     from bluesearch.utils import JSONL
 
 
     # Create pattern list
-    with filter_config.open() as f_config:
-        config = yaml.safe_load(f_config)
-    
-    pprint.pprint(config)
-
-    # Validation
-    validate(config)
+    config = JSONL.load_jsonl(filter_config)
 
     # Extract rules
-    topic_rules_accept, topic_rules_reject = extract_rules(config)
+    topic_rules_accept, topic_rules_reject = [], []
+    for raw_rule in config:
+        rule = TopicRule(
+            level=raw_rule.get("level"),
+            source=raw_rule.get("source"),
+            pattern=raw_rule.get("pattern"),
+        )
+        label = raw_rule["label"]
+
+        if label == "accept":
+            topic_rules_accept.append(rule)
+        elif label == "reject":
+            topic_rules_reject.append(rule)
+        else:
+            ValueError(f"Unsupported label {label}")
 
     # Extract infos
-    topic_infos = JSONL.load_jsonl(extracted_topics)
+    topic_infos = [TopicInfo.from_dict(d) for d in JSONL.load_jsonl(extracted_topics)]
 
     # Populate
-    decisions = []  # If True we accept that give topic info
+    decisions = []
 
     for topic_info in topic_infos:
         # Go through rejection rules
         rejected = False
         for topic_rule in topic_rules_reject:
-            rule_satisfied = check_satisfied(topic_rule, topic_info)
+            rule_satisfied = topic_rule.match(topic_info)
             if rule_satisifed:
                 rejected = True
                 break
@@ -175,26 +180,25 @@ def run(
         # Go through acceptance rules
         accepted = False
         for topic_rule in topic_rules_accept:
-            rule_satisfied = check_satisfied(topic_rule, topic_info)
+            rule_satisfied = topic_rule.match(topic_info)
             if rule_satisfied:
                 accepted = True
                 break
 
         decisions.append(accepted)
 
+    output_rows = []  # If True we accept that give topic info
+    for topic_info, decision in zip(topic_infos, decisions):
+        output_rows.append(
+            {
+                "path": topic_info.path,
+                "element_in_file": topic_info.element_in_file,
+                "accept": decision,
+                "source": topic_info.source,
+            }
+        )
 
-    # Create output
-    output_columns = [
-        "absolute_path",
-        "element_in_file",
-        "accept",
-        "source",
-        "version",
-    ]
-
-    df = pd.DataFrame(columns=output_columns)
-
+    df = pd.DataFrame(output_rows)
     df.to_csv(output_file, index=False)
-
 
     return 0

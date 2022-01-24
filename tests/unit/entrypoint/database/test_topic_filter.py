@@ -60,8 +60,8 @@ EXTRACTED_TOPICS_EXAMPLE = [
             "created-date": "2022-01-18 10:06:12",
         },
         "path": "path_bioarxiv_1",
-        "source": "bioRxiv",
-        "topics": {"article": {"Subject Area": "Neuroscience"}, "journal": {}},
+        "source": "biorxiv",
+        "topics": {"article": {"Subject Area": ["Neuroscience"]}, "journal": {}},
     },
     {
         "metadata": {
@@ -69,8 +69,8 @@ EXTRACTED_TOPICS_EXAMPLE = [
             "created-date": "2022-01-18 10:06:12",
         },
         "path": "path_bioarxiv_2",
-        "source": "bioRxiv",
-        "topics": {"article": {"Subject Area": "Microbiology"}, "journal": {}},
+        "source": "biorxiv",
+        "topics": {"article": {"Subject Area": ["Microbiology"]}, "journal": {}},
     },
     # medrxiv
     {
@@ -79,8 +79,8 @@ EXTRACTED_TOPICS_EXAMPLE = [
             "created-date": "2022-01-18 10:06:12",
         },
         "path": "path_medrxiv_1",
-        "source": "medRxiv",
-        "topics": {"article": {"Subject Area": "Epidemiology"}, "journal": {}},
+        "source": "medrxiv",
+        "topics": {"article": {"Subject Area": ["Epidemiology"]}, "journal": {}},
     },
     {
         "metadata": {
@@ -88,9 +88,9 @@ EXTRACTED_TOPICS_EXAMPLE = [
             "created-date": "2022-01-18 10:06:12",
         },
         "path": "path_medrxiv_2",
-        "source": "medRxiv",
+        "source": "medrxiv",
         "topics": {
-            "article": {"Subject Area": "Psychiatry and Clinical Psychology"},
+            "article": {"Subject Area": ["Psychiatry and Clinical Psychology"]},
             "journal": {},
         },
     },
@@ -306,25 +306,24 @@ def test_cli(tmp_path):
     JSONL.dump_jsonl(EXTRACTED_TOPICS_EXAMPLE, extractions_path)
 
     args_and_opts = [
-        str(extractions_path),
-        str(config_path),
-        str(output_path),
+        extractions_path,
+        config_path,
+        output_path,
     ]
 
     # Run CLI
-    topic_filter.run(args_and_opts)
+    topic_filter.run(*args_and_opts)
 
     # Assertions
     assert output_path.exists()
 
     output = pd.read_csv(output_path)
 
-    assert columns == [
-        "absolute_path",
+    assert output.columns.tolist() == [
+        "path",
         "element_in_file",
         "accept",
         "source",
-        "version",
     ]
 
     assert output["accept"].sum() == len(EXTRACTED_TOPICS_EXAMPLE)
