@@ -93,6 +93,7 @@ class TestTopicInfo:
                 "article": {"MeSH": ["AT 1", "AT 2", "AT 3"]},
                 "journal": {"MAP": ["JT 1", "JT 2"]},
             },
+            "metadata": {},
         }
         topic_info = TopicInfo.from_dict(data)
         assert topic_info.source is ArticleSource.PMC
