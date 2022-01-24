@@ -21,12 +21,10 @@ import copy
 import datetime
 import pathlib
 from dataclasses import dataclass, field
-from typing import Any, TypeVar
+from typing import Any
 
 import bluesearch
 from bluesearch.database.article import ArticleSource
-
-T = TypeVar("T")
 
 
 @dataclass

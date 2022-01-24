@@ -96,9 +96,24 @@ class TopicRule:
             except ValueError:
                 raise ValueError(f"Unsupported source {self.source}") from None
 
+    def match(self, topic_info: TopicInfo) -> bool:
+        """Determine whether a topic_info matches the rule."""
+        # Source
+        if self.source is not None and self.source is not topic_info.source:
+            return False
 
+        if self.pattern is None:
+            return True
 
+        if self.level is None or self.level == "article":
+            for topic_list in topic_info.article_topics.values():
+                if any(self.pattern.search(topic) for topic in topic_list):
+                    return True
 
+        if self.level is None or self.level == "journal":
+            for topic_list in topic_info.journal_topics.values():
+                if any(self.pattern.search(topic) for topic in topic_list):
+                    return True
 
 def extract_rules(config: dict) -> tuple[list[TopicRule], list[TopicRules]]:
     raise NotImplementedError
