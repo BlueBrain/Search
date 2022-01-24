@@ -83,7 +83,6 @@ def check_accepted(
       * At least one rule within `topic_rules_accept` is satisfied
       * No rules in `topic_rules_reject` are satisfied
     """
-
     # Go through rejection rules
     for topic_rule in topic_rules_reject:
         if topic_rule.match(topic_info):

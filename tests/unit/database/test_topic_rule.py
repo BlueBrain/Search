@@ -16,7 +16,7 @@ import pytest
 
 from bluesearch.database.article import ArticleSource
 from bluesearch.database.topic_info import TopicInfo
-from bluesearch.entrypoint.database.topic_filter import TopicRule
+from bluesearch.database.topic_rule import TopicRule, check_accepted
 
 
 class TestTopicRule:
@@ -91,3 +91,57 @@ class TestTopicRule:
         assert rule_5.match(info)
         assert not rule_6.match(info)
         assert not rule_7.match(info)
+
+
+def test_check_accepted():
+    topic_info = TopicInfo.from_dict(
+        {
+            "source": "arxiv",
+            "path": "some_path",
+            "topics": {
+                "article": {
+                    "some_key": ["book", "food"],
+                    "some_other_key": ["meat"],
+                },
+                "journal": {
+                    "some_key": ["pasta"],
+                },
+            },
+        }
+    )
+
+    # No rules specified
+    topic_rules_accept = []
+    topic_rules_reject = []
+    assert not check_accepted(topic_info, topic_rules_accept, topic_rules_reject)
+
+    # Nothing matches
+    topic_rules_accept = [
+        TopicRule(source="biorxiv"),
+    ]
+    topic_rules_reject = [
+        TopicRule(level="journal", pattern="837214"),
+        TopicRule(level="article", pattern="eataaa"),
+    ]
+    assert not check_accepted(topic_info, topic_rules_accept, topic_rules_reject)
+
+    # One reject rule is matching (no matter if one accept rule is matching)
+    topic_rules_accept = [
+        TopicRule(source="biorxiv"),
+        TopicRule(level="journal", pattern="asta"),
+    ]
+    topic_rules_reject = [
+        TopicRule(source="pmc"),
+        TopicRule(source="arxiv", level="article", pattern="oo"),
+    ]
+    assert not check_accepted(topic_info, topic_rules_accept, topic_rules_reject)
+
+    # No reject rule is matching but one accept rule is matching
+    topic_rules_accept = [
+        TopicRule(source="biorxiv"),
+        TopicRule(level="journal", pattern="asta"),
+    ]
+    topic_rules_reject = [
+        TopicRule(source="pmc"),
+    ]
+    assert check_accepted(topic_info, topic_rules_accept, topic_rules_reject)
