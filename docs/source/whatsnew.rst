@@ -29,6 +29,9 @@ Legend
 
 Latest
 ======
+- |Change| the UID of an article is computed by hashing the identifiers if those
+  exist, otherwise by hashing the article contents.
+  otherwise
 - |Add| the :code:`bluesearch.database.topic_info.TopicInfo` class
 - |Add| the :code:`bluesearch.database.article.ArticleSource` enum class
 - |Add| extraction of journal and article topics for :code:`arxiv` papers
