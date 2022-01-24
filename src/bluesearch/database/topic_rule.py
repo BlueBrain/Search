@@ -27,6 +27,8 @@ from bluesearch.database.topic_info import TopicInfo
 
 @dataclass
 class TopicRule:
+    """The topic rule."""
+
     # None always represent wildcards
     level: str | None = None  # "article" or "journal"
     source: str | ArticleSource | None = None  # "arxiv", ... , "pubmed"
@@ -72,9 +74,9 @@ class TopicRule:
 
 
 def check_accepted(
-        topic_info: TopicInfo,
-        topic_rules_accept: Iterable[TopicRule],
-        topic_rules_reject: Iterable[TopicRule],
+    topic_info: TopicInfo,
+    topic_rules_accept: Iterable[TopicRule],
+    topic_rules_reject: Iterable[TopicRule],
 ) -> bool:
     """Check whether the rules are satisfied.
 
@@ -82,6 +84,21 @@ def check_accepted(
     conditions to be accepted:
       * At least one rule within `topic_rules_accept` is satisfied
       * No rules in `topic_rules_reject` are satisfied
+
+    Parameters
+    ----------
+    topic_info
+        Topic info to accept or reject.
+    topic_rules_accept
+        List of topic rules to accept a given topic_info.
+    topic_rules_reject
+        List of topic rules to reject a given topic_info.
+
+    Returns
+    -------
+    bool
+        If True, the topic info matches satisfies both conditions explained above.
+        If False, at least one of the conditions is not satisfied.
     """
     # Go through rejection rules
     for topic_rule in topic_rules_reject:
