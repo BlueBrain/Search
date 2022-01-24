@@ -147,12 +147,14 @@ def filter_topics(
         )
 
     output = pd.DataFrame(output_rows)
-    output = output.astype({
-        "path": str,
-        "element_in_file": np.float64,  # to be able to handle nan
-        "accept": bool,
-        "source": str,
-    })
+    output = output.astype(
+        {
+            "path": str,
+            "element_in_file": np.float64,  # to be able to handle nan
+            "accept": bool,
+            "source": str,
+        }
+    )
 
     return output
 
