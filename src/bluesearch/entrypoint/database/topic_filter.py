@@ -20,12 +20,12 @@ from __future__ import annotations
 import argparse
 import logging
 import re
-from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Iterable
 
-from bluesearch.database.topic_info import ArticleSource
+from bluesearch.database.article import ArticleSource
+from bluesearch.database.topic_info import TopicInfo
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +71,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     )
 
     return parser
+
 
 @dataclass
 class TopicRule:
@@ -143,6 +144,7 @@ def check_accepted(
 
     return False
 
+
 def run(
     extracted_topics: Path,
     filter_config: Path,
@@ -153,15 +155,10 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `init_parser` function.
     """
-    import pprint
-    import yaml
-
     import pandas as pd
 
-    from bluesearch.database.article import ArticleSource
     from bluesearch.database.topic_info import TopicInfo
     from bluesearch.utils import JSONL
-
 
     # Create pattern list
     config = JSONL.load_jsonl(filter_config)
@@ -182,7 +179,6 @@ def run(
             topic_rules_reject.append(rule)
         else:
             ValueError(f"Unsupported label {label}")
-
 
     # Populate
     output_rows = []  # If True we accept that give topic info
