@@ -18,38 +18,50 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Optional
+
+import pydantic
 
 from bluesearch.database.article import ArticleSource
 from bluesearch.database.topic_info import TopicInfo
 
 
-@dataclass
-class TopicRule:
+class TopicRule(pydantic.BaseModel, arbitrary_types_allowed=True):
     """The topic rule."""
 
     # None always represent wildcards
-    level: str | None = None  # "article" or "journal"
-    source: str | ArticleSource | None = None  # "arxiv", ... , "pubmed"
-    pattern: str | re.Pattern | None = None  # regex pattern to match
+    level: Optional[str] = None  # "article" or "journal"
+    source: Optional[ArticleSource] = None  # "arxiv", ... , "pubmed"
+    pattern: Optional[re.Pattern] = None  # regex pattern to match
 
-    def __post_init__(self) -> None:
-        """Validate inputs."""
-        if self.level is not None and self.level not in {"article", "journal"}:
-            raise ValueError(f"Unsupported level {self.level}")
+    @pydantic.validator("level")
+    def check_level_value(cls, value):
+        """Check the level parameter value."""
+        if value is not None and value not in {"article", "journal"}:
+            raise ValueError(f"Unsupported level {value}")
+        return value
 
-        if self.pattern is not None:
+    @pydantic.validator("source", pre=True)
+    def convert_source_to_article_source(cls, value) -> ArticleSource | None:
+        """Check the source parameter value."""
+        if value is not None:
             try:
-                self.pattern = re.compile(self.pattern)
-            except re.error:
-                raise ValueError(f"Unsupported pattern {self.pattern}") from None
-
-        if self.source is not None:
-            try:
-                self.source = ArticleSource(self.source)
+                value = ArticleSource(value)
             except ValueError:
-                raise ValueError(f"Unsupported source {self.source}") from None
+                raise ValueError(f"Unsupported source {value}") from None
+
+        return value
+
+    @pydantic.validator("pattern", pre=True)
+    def convert_pattern_to_re(cls, value) -> re.Pattern | None:
+        """Check the pattern parameter value."""
+        if value is not None:
+            try:
+                value = re.compile(value)
+            except re.error:
+                raise ValueError(f"Unsupported pattern {value}") from None
+
+        return value
 
     def match(self, topic_info: TopicInfo) -> bool:
         """Determine whether a topic_info matches the rule."""
