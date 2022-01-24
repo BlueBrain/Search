@@ -314,9 +314,7 @@ def test_cli(tmp_path):
 
     # Assertions
     assert output_path.exists()
-
     output = pd.read_csv(output_path)
-
     assert output.columns.tolist() == [
         "path",
         "element_in_file",
