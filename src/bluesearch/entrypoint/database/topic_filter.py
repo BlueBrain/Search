@@ -23,7 +23,7 @@ import re
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable
 
 from bluesearch.database.topic_info import ArticleSource
 
@@ -117,6 +117,32 @@ class TopicRule:
 
         return False
 
+
+def check_accepted(
+    topic_info: TopicInfo,
+    topic_rules_accept: Iterable[TopicRule],
+    topic_rules_reject: Iterable[TopicRule],
+) -> bool:
+    """Check whether the rules are satisfied.
+
+    The `topic_info` needs to satisfy both of the below
+    conditions to be accepted:
+      * At least one rule within `topic_rules_accept` is satisfied
+      * No rules in `topic_rules_reject` are satisfied
+    """
+
+    # Go through rejection rules
+    for topic_rule in topic_rules_reject:
+        if topic_rule.match(topic_info):
+            return False
+
+    # Go through acceptance rules
+    for topic_rule in topic_rules_accept:
+        if topic_rule.match(topic_info):
+            return True
+
+    return False
+
 def run(
     extracted_topics: Path,
     filter_config: Path,
@@ -157,43 +183,19 @@ def run(
         else:
             ValueError(f"Unsupported label {label}")
 
-    # Extract infos
-    topic_infos = [TopicInfo.from_dict(d) for d in JSONL.load_jsonl(extracted_topics)]
 
     # Populate
-    decisions = []
-
-    for topic_info in topic_infos:
-        # Go through rejection rules
-        rejected = False
-        for topic_rule in topic_rules_reject:
-            rule_satisfied = topic_rule.match(topic_info)
-            if rule_satisifed:
-                rejected = True
-                break
-
-        if rejected:
-            decisions.append(False)
-            continue
-
-        
-        # Go through acceptance rules
-        accepted = False
-        for topic_rule in topic_rules_accept:
-            rule_satisfied = topic_rule.match(topic_info)
-            if rule_satisfied:
-                accepted = True
-                break
-
-        decisions.append(accepted)
-
     output_rows = []  # If True we accept that give topic info
-    for topic_info, decision in zip(topic_infos, decisions):
+
+    for topic_info_raw in JSONL.load_jsonl(extracted_topics):
+        topic_info = TopicInfo.from_dict(topic_info_raw)
         output_rows.append(
             {
                 "path": topic_info.path,
                 "element_in_file": topic_info.element_in_file,
-                "accept": decision,
+                "accept": check_accepted(
+                    topic_info, topic_rules_accept, topic_rules_reject
+                ),
                 "source": topic_info.source,
             }
         )
