@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import pathlib
 
@@ -82,3 +84,19 @@ class TestTopicInfo:
 
         json = TopicInfo(ArticleSource.UNKNOWN, "", element_in_file=5).json()
         assert json["metadata"].get("element_in_file") == 5
+
+    def test_from_dict(self):
+        data: dict[str, str | dict] = {
+            "source": "pmc",
+            "path": "/some/path.test",
+            "topics": {
+                "article": {"MeSH": ["AT 1", "AT 2", "AT 3"]},
+                "journal": {"MAP": ["JT 1", "JT 2"]},
+            },
+        }
+        topic_info = TopicInfo.from_dict(data)
+        assert topic_info.source is ArticleSource.PMC
+        assert topic_info.path == pathlib.Path("/some/path.test")
+        assert isinstance(data["topics"], dict)
+        assert topic_info.article_topics == data["topics"]["article"]
+        assert topic_info.journal_topics == data["topics"]["journal"]
