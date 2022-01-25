@@ -205,13 +205,13 @@ class ArticleSaver:
         full_articles, just_paragraphs = self._get_clean_state()
 
         articles = retrieve_articles(article_ids=full_articles, engine=self.connection)
-        self.df_chosen_texts = self.df_chosen_texts.append(articles)
+        self.df_chosen_texts = pd.concat([self.df_chosen_texts, articles])
 
         for (article_id, paragraph_pos_in_article) in just_paragraphs:
             paragraph = retrieve_paragraph(
                 article_id, paragraph_pos_in_article, engine=self.connection
             )
-            self.df_chosen_texts = self.df_chosen_texts.append(paragraph)
+            self.df_chosen_texts = pd.concat([self.df_chosen_texts, paragraph])
 
     def get_chosen_texts(self):
         """Retrieve the currently saved items.

@@ -325,7 +325,9 @@ def test_iob2idx(ner_annotations, dataset, annotator, etype, idxs):
         pd.testing.assert_frame_equal(
             iob2idx(ner_annotations[dataset][annotator], etype),
             pd.DataFrame(
-                data={"start": [], "end": []}, index=pd.Int64Index([]), dtype="int64"
+                data={"start": [], "end": []},
+                index=pd.Index([], dtype="int64"),
+                dtype="int64",
             ),
         )
 

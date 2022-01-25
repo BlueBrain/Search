@@ -167,7 +167,9 @@ class PatternCreator:
 
         new_row = self.raw2row({"label": label, "pattern": pattern_})
 
-        new_storage = self._storage.append(new_row.to_frame().T, ignore_index=True)
+        new_storage = pd.concat(
+            [self._storage, new_row.to_frame().T], ignore_index=True
+        )
         if check_exists and new_storage.duplicated().any():
             raise ValueError("The pattern already exists")
 
