@@ -94,8 +94,8 @@ def check_accepted(
 
     The `topic_info` needs to satisfy both of the below
     conditions to be accepted:
-      * At least one rule within `topic_rules_accept` is satisfied
-      * No rules in `topic_rules_reject` are satisfied
+    * At least one rule within `topic_rules_accept` is satisfied
+    * No rules in `topic_rules_reject` are satisfied
 
     Parameters
     ----------
