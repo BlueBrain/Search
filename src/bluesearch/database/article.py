@@ -193,8 +193,6 @@ class ArticleParser(ABC):
         by itself. Then, identifiers `(a, None)` and identifiers `(a, b)` have
         two different UIDs.
 
-        Papers with all given identifiers unspecified have `None` as UID.
-
         Parameters
         ----------
         identifiers
