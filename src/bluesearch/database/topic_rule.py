@@ -18,7 +18,7 @@
 from __future__ import annotations
 
 import re
-from typing import Iterable
+from typing import Any, Iterable
 
 from bluesearch.database.article import ArticleSource
 from bluesearch.database.topic_info import TopicInfo
@@ -72,6 +72,16 @@ class TopicRule:
                     return True
 
         return False
+
+    def __eq__(self, other: Any) -> bool:
+        """Compare to another topic rule."""
+        if not isinstance(other, TopicRule):
+            return False
+        return (
+            self.level == other.level
+            and self.source == other.source
+            and self.pattern == other.pattern
+        )
 
 
 def check_accepted(
