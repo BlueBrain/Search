@@ -38,7 +38,7 @@ class TestTopicRule:
         with pytest.raises(ValueError, match="Unsupported level"):
             TopicRule(level="wrong")
 
-    def test_source_validation(self):
+    def test_source_parameter(self):
         rule_1 = TopicRule(source="arxiv")
         rule_2 = TopicRule(source=ArticleSource("biorxiv"))
         rule_3 = TopicRule(source=ArticleSource.PUBMED)
@@ -47,10 +47,7 @@ class TestTopicRule:
         assert rule_2.source is ArticleSource.BIORXIV
         assert rule_3.source is ArticleSource.PUBMED
 
-        with pytest.raises(ValueError, match="Unsupported source"):
-            TopicRule(source="wrong_source")
-
-    def test_pattern_validation(self):
+    def test_pattern_parameter(self):
         rule_1 = TopicRule(pattern="some_pattern")
         rule_2 = TopicRule(pattern=re.compile("whatever"))
 
@@ -58,9 +55,6 @@ class TestTopicRule:
         assert rule_2.pattern is not None
         assert rule_1.pattern.pattern == "some_pattern"
         assert rule_2.pattern.pattern == "whatever"
-
-        with pytest.raises(ValueError, match="Unsupported pattern"):
-            TopicRule(pattern=r"\x")
 
     def test_matching(self):
         info = TopicInfo.from_dict(
