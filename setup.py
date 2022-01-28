@@ -65,7 +65,6 @@ INSTALL_REQUIRES = [
     # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
     "mashumaro",
     "pg8000",
-    "pydantic",
     "python-dotenv",
     "requests",
     "scikit-learn",
