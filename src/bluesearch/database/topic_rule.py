@@ -18,38 +18,39 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 from typing import Iterable
 
 from bluesearch.database.article import ArticleSource
 from bluesearch.database.topic_info import TopicInfo
 
 
-@dataclass
 class TopicRule:
-    """The topic rule."""
+    """Rule for accepting/rejecting an article based on topic matching criteria.
 
-    # None always represent wildcards
-    level: str | None = None  # "article" or "journal"
-    source: str | ArticleSource | None = None  # "arxiv", ... , "pubmed"
-    pattern: str | re.Pattern | None = None  # regex pattern to match
+    Parameters
+    ----------
+    level
+        Level of the topic information to match, must be "article" or "journal".
+        Passing `None` will match any level.
+    source
+        Article source, must be a valid ArticleSource (e.g. "arxiv", "pmc", ...).
+        Passing `None` will match any source.
+    pattern
+        Regular expression for matching the topic names of a given article.
+        Passing `None` will match the name of any topic.
+    """
 
-    def __post_init__(self) -> None:
-        """Validate inputs."""
-        if self.level is not None and self.level not in {"article", "journal"}:
-            raise ValueError(f"Unsupported level {self.level}")
-
-        if self.pattern is not None:
-            try:
-                self.pattern = re.compile(self.pattern)
-            except re.error:
-                raise ValueError(f"Unsupported pattern {self.pattern}") from None
-
-        if self.source is not None:
-            try:
-                self.source = ArticleSource(self.source)
-            except ValueError:
-                raise ValueError(f"Unsupported source {self.source}") from None
+    def __init__(
+        self,
+        level: str | None = None,
+        source: str | ArticleSource | None = None,
+        pattern: str | re.Pattern | None = None,
+    ):
+        if level is not None and level not in {"article", "journal"}:
+            raise ValueError(f"Unsupported level {level}.")
+        self.level = level
+        self.source = ArticleSource(source) if source is not None else None
+        self.pattern = re.compile(pattern) if pattern is not None else None
 
     def match(self, topic_info: TopicInfo) -> bool:
         """Determine whether a topic_info matches the rule."""
