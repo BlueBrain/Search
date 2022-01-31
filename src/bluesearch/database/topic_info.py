@@ -127,7 +127,7 @@ class TopicInfo:
         Parameters
         ----------
         data
-            The dictionary to parse
+            The dictionary to parse.
 
         Returns
         -------
