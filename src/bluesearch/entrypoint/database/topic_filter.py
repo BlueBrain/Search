@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 
 from bluesearch.database.topic_info import TopicInfo
-from bluesearch.database.topic_rule import TopicRule, check_accepted
+from bluesearch.database.topic_rule import TopicRule, check_topic_rules
 
 logger = logging.getLogger(__name__)
 
@@ -140,7 +140,7 @@ def filter_topics(
             {
                 "path": topic_info.path,
                 "element_in_file": topic_info.element_in_file,
-                "accept": check_accepted(
+                "accept": check_topic_rules(
                     topic_info, topic_rules_accept, topic_rules_reject
                 ),
                 "source": topic_info.source.value,

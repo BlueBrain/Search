@@ -89,7 +89,7 @@ class TopicRule:
         )
 
 
-def check_accepted(
+def check_topic_rules(
     topic_info: TopicInfo,
     topic_rules_accept: Iterable[TopicRule],
     topic_rules_reject: Iterable[TopicRule],
