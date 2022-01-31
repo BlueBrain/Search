@@ -85,9 +85,9 @@ def parse_filter_config(config: list[dict]) -> tuple[list[TopicRule], list[Topic
     Returns
     -------
     topic_rules_accept : list[TopicRule]
-        List of accepted TopicRule
+        List of acceptance TopicRule
     topic_rules_reject : list[TopicRule]
-        List of rejected TopicRule
+        List of rejection TopicRule
 
     Raises
     ------
