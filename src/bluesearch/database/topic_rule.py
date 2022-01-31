@@ -54,7 +54,6 @@ class TopicRule:
 
     def match(self, topic_info: TopicInfo) -> bool:
         """Determine whether a topic_info matches the rule."""
-        # Source
         if self.source is not None and self.source is not topic_info.source:
             return False
 
