@@ -497,7 +497,7 @@ class JSONL:
 
     @staticmethod
     def dump_jsonl(
-        data: list[dict], path: pathlib.Path, overwrite: bool = True
+        data: list[dict[str, Any]], path: pathlib.Path, overwrite: bool = True
     ) -> None:
         """Save a list of dictionaries to a jsonl.
 
