@@ -125,9 +125,9 @@ def filter_topics(
     topic_infos
         List of TopicInfo.
     topic_rules_accept
-        List of accepted TopicRule.
+        List of acceptance TopicRule.
     topic_rules_reject
-        List of rejected TopicRule.
+        List of rejection TopicRule.
 
     Returns
     -------
