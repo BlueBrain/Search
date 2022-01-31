@@ -53,7 +53,13 @@ class TopicRule:
         self.pattern = re.compile(pattern) if pattern is not None else None
 
     def match(self, topic_info: TopicInfo) -> bool:
-        """Determine whether a topic_info matches the rule."""
+        """Determine whether a topic_info matches the rule.
+
+        Note that the keys (topic sources) of the `topic_info.article_topics`
+        and `topic_info.journal_topics` dictionaries are completely disregarded.
+        And all the values (lists) are simply concatenated.
+
+        """
         if self.source is not None and self.source is not topic_info.source:
             return False
 
