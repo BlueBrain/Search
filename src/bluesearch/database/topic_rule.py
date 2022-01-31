@@ -117,13 +117,11 @@ def check_topic_rules(
         If False, at least one of the conditions is not satisfied.
     """
     # Go through rejection rules
-    for topic_rule in topic_rules_reject:
-        if topic_rule.match(topic_info):
-            return False
+     if any(reject_rule.match(topic_info) for reject_rule in topic_rules_reject):
+        return False
 
     # Go through acceptance rules
-    for topic_rule in topic_rules_accept:
-        if topic_rule.match(topic_info):
-            return True
+    if any(accept_rule.match(topic_info) for accept_rule in topic_rules_reject):
+        return True
 
     return False
