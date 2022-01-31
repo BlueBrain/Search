@@ -94,7 +94,7 @@ def check_topic_rules(
     topic_rules_accept: Iterable[TopicRule],
     topic_rules_reject: Iterable[TopicRule],
 ) -> bool:
-    """Check whether the rules are satisfied.
+    """Check whether the topic info of an article satisfies given topic rules."""
 
     The `topic_info` needs to satisfy both of the below
     conditions to be accepted:
