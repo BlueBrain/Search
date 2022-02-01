@@ -169,7 +169,8 @@ def run(
     if input_path is None:
         if sys.stdin.isatty():
             # Real terminal session
-            raise ValueError("No input files provided")
+            logger.error("No input files provided")
+            return 1
         else:
             # Piped session
             input_lines = sys.stdin.read().split()

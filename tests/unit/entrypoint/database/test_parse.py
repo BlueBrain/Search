@@ -175,12 +175,6 @@ def test_dry_run(capsys):
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
 
 class TestPipe:
-    def test_nothing_provided(self, monkeypatch):
-        """Both input_file and standard input are empty."""
-
-        with pytest.raises(ValueError, match="No input files provided"):
-            main(["parse", "cord19-json", "some_output_folder"])
-
     def test_piped_session(self, tmp_path):
         """Both input_file and standard input are empty."""
 
