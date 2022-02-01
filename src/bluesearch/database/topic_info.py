@@ -20,6 +20,7 @@ from __future__ import annotations
 import copy
 import datetime
 import pathlib
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -48,7 +49,7 @@ class TopicInfo:
 
     @staticmethod
     def _add_topics(
-        mapping: dict[str, list[str]], kind: str, topics: list[str]
+        mapping: dict[str, list[str]], kind: str, new_topics: Iterable[str]
     ) -> None:
         """Add topics to a mapping with collection of topics.
 
@@ -59,13 +60,14 @@ class TopicInfo:
             updated in-place. For example ``{"MeSH": ["topic 1", "topic 2"]}``.
         kind
             The topic kind. Corresponds to a key in ``mapping``.
-        topics
+        new_topics
             The topics to add. Corresponds to a value in ``mapping``.
         """
-        updated_topics = mapping.get(kind, []) + topics
-        mapping[kind] = sorted(set(updated_topics))
+        topics = mapping.get(kind, [])
+        topics.extend(new_topics)
+        mapping[kind] = sorted(set(topics))
 
-    def add_article_topics(self, kind: str, topics: list[str]) -> None:
+    def add_article_topics(self, kind: str, topics: Iterable[str]) -> None:
         """Add article topics.
 
         Parameters
@@ -73,11 +75,11 @@ class TopicInfo:
         kind
             The topic kind. For example "MeSH" or "MAG".
         topics
-            A list of the topics to add.
+            A collection of the topics to add.
         """
         self._add_topics(self.article_topics, kind, topics)
 
-    def add_journal_topics(self, kind: str, topics: list[str]) -> None:
+    def add_journal_topics(self, kind: str, topics: Iterable[str]) -> None:
         """Add journal topics.
 
         Parameters
@@ -85,7 +87,7 @@ class TopicInfo:
         kind
             The topic kind. For example "MeSH" or "MAG".
         topics
-            A list of the topics to add.
+            A collection of the topics to add.
         """
         self._add_topics(self.journal_topics, kind, topics)
 
