@@ -20,6 +20,7 @@ from __future__ import annotations
 import enum
 import hashlib
 import html
+import logging
 import re
 import string
 import unicodedata
@@ -31,6 +32,8 @@ from xml.etree.ElementTree import Element  # nosec
 
 from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
+
+logger = logging.getLogger(__name__)
 
 
 class ArticleSource(enum.Enum):
@@ -234,6 +237,10 @@ class ArticleParser(ABC):
 
         # If no identifier is available, hash whole article content.
         if all(x is None for x in identifiers):
+            logger.warning(
+                f"No identifier available, generating UID by hashing whole "
+                f'content for article "{self.title}"'
+            )
             m = hashlib.md5()  # nosec
             m.update(self.title.encode())
             m.update(str(list(self.authors)).encode())
