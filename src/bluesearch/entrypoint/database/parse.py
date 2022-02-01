@@ -79,8 +79,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         help="""
         Path to a file or directory. If a directory, all articles
         inside the directory will be parsed. If not provided the
-        user is supposed to pipe a list of article paths to the standard
-        input.
+        user is supposed to pipe a space separated list of article paths to
+        the standard input.
         """,
         nargs="?",
     )
