@@ -172,7 +172,7 @@ def run(
             raise ValueError("No input files provided")
         else:
             # Piped session
-            input_lines = sys.stdin.read().splitlines()
+            input_lines = sys.stdin.read().split()
             inputs = []
 
             for line in input_lines:
