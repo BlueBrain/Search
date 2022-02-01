@@ -121,7 +121,7 @@ def check_topic_rules(
         return False
 
     # Go through acceptance rules
-    if any(accept_rule.match(topic_info) for accept_rule in topic_rules_reject):
+    if any(accept_rule.match(topic_info) for accept_rule in topic_rules_accept):
         return True
 
     return False
