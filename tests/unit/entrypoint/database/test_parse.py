@@ -181,11 +181,12 @@ class TestPipe:
 
         file_a = tmp_path / "a.xml"
         file_b = tmp_path / "b.xml"
+        file_c = tmp_path / "c.xml"  # it is not going to exist
 
         file_a.touch()
         file_b.touch()
 
-        stdin = f"{file_a.resolve()} {file_b.resolve()}"
+        stdin = f"{file_a.resolve()} {file_b.resolve()} {file_c.resolve()}"
 
         res = subprocess.run(
             ["bbs_database", "parse", "-n", "cord19-json", "whatever"],
