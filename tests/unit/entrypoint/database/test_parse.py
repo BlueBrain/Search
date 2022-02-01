@@ -177,7 +177,7 @@ def test_dry_run(capsys):
 
 class TestPipe:
     def test_piped_session(self, tmp_path):
-        """Both input_file and standard input are empty."""
+        """The input_file is not provided by stdin contains filenames."""
 
         file_a = tmp_path / "a.xml"
         file_b = tmp_path / "b.xml"
