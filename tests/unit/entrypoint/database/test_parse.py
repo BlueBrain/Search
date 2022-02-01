@@ -190,16 +190,18 @@ class TestPipe:
         file_a.touch()
         file_b.touch()
 
-        stdin = str.encode(f"{file_a.resolve()} {file_b.resolve()}")
+        stdin = f"{file_a.resolve()} {file_b.resolve()}"
 
         res = subprocess.run(
             ["bbs_database", "parse", "-n", "cord19-json", "whatever"],
             input=stdin,
             check=True,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            capture_output=True,
+            text=True,
         )
 
         assert res.returncode == 0
 
-        stdout_expected = str.encode(f"{file_a.resolve()}\n{file_b.resolve()}\n")
+        stdout_expected = f"{file_a.resolve()}\n{file_b.resolve()}\n"
+
         assert res.stdout == stdout_expected
