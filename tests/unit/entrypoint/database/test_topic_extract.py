@@ -272,3 +272,18 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert topics["article"]["MeSH"] == ["topic1", "topic11", "topic12", "topic121"]
     assert "metadata" in result
     assert "element_in_file" in result["metadata"]
+
+
+@pytest.mark.parametrize("source", ["pubmed", "pmc"])
+def test_mesh_topic_db_is_enforced(source, caplog, tmp_path):
+    exit_code = topic_extract.run(
+        source=source,
+        input_path=tmp_path,
+        output_file=tmp_path,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=False,
+    )
+    assert exit_code != 0
+    assert "--mesh-topics-db is mandatory" in caplog.text
