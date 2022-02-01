@@ -202,5 +202,4 @@ class TestPipe:
         assert res.returncode == 0
 
         stdout_expected = str.encode(f"{file_a.resolve()}\n{file_b.resolve()}\n")
-        assert res.stdout == stdout_expected 
-
+        assert res.stdout == stdout_expected
