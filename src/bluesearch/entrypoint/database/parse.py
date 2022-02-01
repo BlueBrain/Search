@@ -153,7 +153,7 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
 def run(
     *,
     input_type: str,
-    input_path: Path or None,
+    input_path: Path | None,
     output_dir: Path,
     match_filename: str | None,
     recursive: bool,
