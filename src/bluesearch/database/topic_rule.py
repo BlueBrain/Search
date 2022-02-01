@@ -94,7 +94,7 @@ def check_topic_rules(
     topic_rules_accept: Iterable[TopicRule],
     topic_rules_reject: Iterable[TopicRule],
 ) -> bool:
-    """Check whether the topic info of an article satisfies given topic rules."""
+    """Check whether the topic info of an article satisfies given topic rules.
 
     The `topic_info` needs to satisfy both of the below
     conditions to be accepted:
@@ -117,7 +117,7 @@ def check_topic_rules(
         If False, at least one of the conditions is not satisfied.
     """
     # Go through rejection rules
-     if any(reject_rule.match(topic_info) for reject_rule in topic_rules_reject):
+    if any(reject_rule.match(topic_info) for reject_rule in topic_rules_reject):
         return False
 
     # Go through acceptance rules
