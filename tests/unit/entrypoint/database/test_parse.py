@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
 import logging
+import subprocess
 from argparse import ArgumentError
 from pathlib import Path
 
@@ -172,3 +173,34 @@ def test_dry_run(capsys):
     main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
     captured = capsys.readouterr()
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
+
+class TestPipe:
+    def test_nothing_provided(self, monkeypatch):
+        """Both input_file and standard input are empty."""
+
+        with pytest.raises(ValueError, match="No input files provided"):
+            main(["parse", "cord19-json", "some_output_folder"])
+
+    def test_piped_session(self, tmp_path):
+        """Both input_file and standard input are empty."""
+
+        file_a = tmp_path / "a.xml"
+        file_b = tmp_path / "b.xml"
+
+        file_a.touch()
+        file_b.touch()
+
+        stdin = str.encode(f"{file_a.resolve()} {file_b.resolve()}")
+
+        res = subprocess.run(
+            ["bbs_database", "parse", "-n", "cord19-json", "whatever"],
+            input=stdin,
+            check=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+        assert res.returncode == 0
+
+        stdout_expected = str.encode(f"{file_a.resolve()}\n{file_b.resolve()}\n")
+        assert res.stdout == stdout_expected 
+
