@@ -33,7 +33,9 @@ class MeSHTree:
 
     The MeSH topic ontology forms a tree with most general topics at the
     root and the most specific topics as the leafs. Here's a part of a MeSH
-    topic hierarchy:
+    topic hierarchy
+
+    .. code-block:: text
 
         Natural Science Disciplines [H01]
             Biological Science Disciplines [H01.158]
