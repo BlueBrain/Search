@@ -173,7 +173,7 @@ def parse_tree_numbers(nt_stream: TextIO) -> dict[str, str]:
         unique. For example, the two tree numbers `F04.096.628.255.500` and
         `H01.158.610.030` have both the same label "Cognitive Neuroscience".
     """
-    id_to_label = {}
+    id_to_label: dict[str, str] = {}
     id_to_tree_numbers = collections.defaultdict(list)
 
     # Regexes we need for parsing
@@ -198,7 +198,10 @@ def parse_tree_numbers(nt_stream: TextIO) -> dict[str, str]:
             logger.info(f"Parsed {i:,d} lines")
 
         # Parse the triple
-        subj, pred, obj = p_line.fullmatch(line.strip()).groups()
+        m_line = p_line.fullmatch(line.strip())
+        if not m_line:
+            raise RuntimeError(f"The line is not a valid triple: {line!r}")
+        subj, pred, obj = m_line.groups()
 
         # Extract the descriptor ID
         m_desc = p_desc.fullmatch(subj)
