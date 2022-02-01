@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
-    """Initialise the argument parser for the add subcommand.
+    """Initialise the argument parser for the topic-extract subcommand.
 
     Parameters
     ----------
@@ -134,7 +134,7 @@ def run(
     """Extract topic of articles.
 
     Parameter description and potential defaults are documented inside of the
-    `get_parser` function.
+    `init_parser` function.
     """
     from defusedxml import ElementTree
 

@@ -32,6 +32,8 @@ Latest
 - |Add| the ``--mesh-topic-db`` option to ``bbs_database parse``
 - |Add| the ``bbs_database parse-mesh-rdf`` command
 - |Add| the ``bluesearch.database.mesh`` module
+- |Add| entrypoint :code:`bbs_database topic-filter`.
+- |Add| the :code:`bluesearch.database.topic_rule.TopicRule` class
 - |Add| the :code:`bluesearch.database.topic_info.TopicInfo` class
 - |Add| the :code:`bluesearch.database.article.ArticleSource` enum class
 - |Add| extraction of journal and article topics for :code:`arxiv` papers

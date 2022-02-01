@@ -16,6 +16,7 @@ Submodules
    bluesearch.entrypoint.database.parse_mesh_rdf
    bluesearch.entrypoint.database.schemas
    bluesearch.entrypoint.database.topic_extract
+   bluesearch.entrypoint.database.topic_filter
 
 Module contents
 ---------------
