@@ -29,6 +29,9 @@ Legend
 
 Latest
 ======
+- |Add| the ``--mesh-topic-db`` option to ``bbs_database parse``
+- |Add| the ``bbs_database parse-mesh-rdf`` command
+- |Add| the ``bluesearch.database.mesh`` module
 - |Add| the :code:`bluesearch.database.topic_info.TopicInfo` class
 - |Add| the :code:`bluesearch.database.article.ArticleSource` enum class
 - |Add| extraction of journal and article topics for :code:`arxiv` papers
@@ -152,7 +155,7 @@ Version 0.1.1
 Version 0.1.0
 =============
 - |Add| in :code:`dvc` pipelines, the :code:`Dockerfile` now installs
-  `requirements.txt` to fix the versions of dependencies. 
+  `requirements.txt` to fix the versions of dependencies.
 - |Add| support for :code:`Python 3.9`.
 - |Add| Blue Brain Search as a Zenodo record. This provides a unique DOI, a DOI
   for each published release, and automatic preservation outside GitHub.
@@ -295,5 +298,3 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
-
