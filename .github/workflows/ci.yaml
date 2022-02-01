@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        tox-env: [lint, docs, check-apidoc, check-packaging]
+        tox-env: [lint, type, docs, check-apidoc, check-packaging]
     steps:
       - name: Cancel previous workflows that are still running
         uses: styfle/cancel-workflow-action@0.8.0

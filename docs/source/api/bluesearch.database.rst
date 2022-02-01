@@ -14,6 +14,7 @@ Submodules
    bluesearch.database.pdf
    bluesearch.database.topic
    bluesearch.database.topic_info
+   bluesearch.database.topic_rule
 
 Module contents
 ---------------

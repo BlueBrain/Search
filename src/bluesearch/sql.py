@@ -379,7 +379,7 @@ def retrieve_mining_cache(identifiers, etypes, engine):
         logger.debug("setting df_pars to emtpy because `not identifiers_pars == True`")
         df_pars = pd.DataFrame()
 
-    return df_pars.append(df_arts, ignore_index=True)
+    return pd.concat([df_pars, df_arts], ignore_index=True)
 
 
 class SentenceFilter:
