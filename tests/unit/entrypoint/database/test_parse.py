@@ -174,6 +174,7 @@ def test_dry_run(capsys):
     captured = capsys.readouterr()
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
 
+
 class TestPipe:
     def test_piped_session(self, tmp_path):
         """Both input_file and standard input are empty."""
