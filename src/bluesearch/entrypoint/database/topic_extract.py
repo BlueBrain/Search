@@ -129,7 +129,7 @@ def run(
     recursive: bool,
     overwrite: bool,
     dry_run: bool,
-    mesh_topic_db: Path | None,
+    mesh_topic_db: Path | None = None,
 ) -> int:
     """Extract topic of articles.
 
@@ -163,16 +163,11 @@ def run(
         return 0
 
     article_source = ArticleSource(source)
-    if article_source in {ArticleSource.PMC, ArticleSource.PUBMED}:
-        if mesh_topic_db is None:
-            logger.error(
-                "The option --mesh-topics-db is mandatory for source types "
-                '"pmc" and "pubmed".'
-            )
-            return 1
-
     all_results: list[dict[str, Any]] = []
     if article_source is ArticleSource.PMC:
+        if mesh_topic_db is None:
+            logger.error("The option --mesh-topics-db is mandatory for source type pmc")
+            return 1
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
@@ -184,6 +179,11 @@ def run(
                 )
             all_results.append(topic_info.json())
     elif article_source is ArticleSource.PUBMED:
+        if mesh_topic_db is None:
+            logger.error(
+                "The option --mesh-topics-db is mandatory for source type pubmed"
+            )
+            return 1
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
