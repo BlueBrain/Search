@@ -11,12 +11,9 @@ def test_commands_work(command):
     subprocess.run(["bbs_database", command, "--help"], check=True)
 
 
-def test_setup_logging():
-    """This test modifies logging levels globally.
+def test_setup_logging(caplog):
+    caplog.set_level(logging.WARNING)  # set root logger level to WARNING
 
-    However, it should not be a big deal since each CLI entrypoint ends up
-    calling `_setup_logging`.
-    """
     all_loggers = logging.root.manager.loggerDict
     bluesearch_loggers = {
         k: v
