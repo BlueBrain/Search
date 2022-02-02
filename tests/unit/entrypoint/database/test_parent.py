@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import subprocess
 
@@ -12,6 +14,10 @@ def test_commands_work(command):
 
 
 def test_setup_logging(caplog):
+    def get_levels(loggers: dict[str, logging.Logger]) -> dict[str, int]:
+        """Get logging level for each logger."""
+        return {name: logger.getEffectiveLevel() for name, logger in loggers.items()}
+
     caplog.set_level(logging.WARNING, logger="bluesearch")
 
     all_loggers = logging.root.manager.loggerDict
@@ -26,21 +32,13 @@ def test_setup_logging(caplog):
         if not k.startswith("bluesearch") and isinstance(v, logging.Logger)
     }
 
-    bluesearch_levels_before = {
-        name: logger.getEffectiveLevel() for name, logger in bluesearch_loggers.items()
-    }
-    external_levels_before = {
-        name: logger.getEffectiveLevel() for name, logger in external_loggers.items()
-    }
+    bluesearch_levels_before = get_levels(bluesearch_loggers)
+    external_levels_before = get_levels(external_loggers)
 
     _setup_logging(logging.DEBUG)
 
-    bluesearch_levels_after = {
-        name: logger.getEffectiveLevel() for name, logger in bluesearch_loggers.items()
-    }
-    external_levels_after = {
-        name: logger.getEffectiveLevel() for name, logger in external_loggers.items()
-    }
+    bluesearch_levels_after = get_levels(bluesearch_loggers)
+    external_levels_after = get_levels(external_loggers)
 
     assert set(bluesearch_levels_before.values()) == {logging.WARNING}
     assert set(bluesearch_levels_after.values()) == {logging.DEBUG}
