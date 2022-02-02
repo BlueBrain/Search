@@ -24,6 +24,7 @@ import logging
 import re
 import string
 import unicodedata
+import zipfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
@@ -518,6 +519,40 @@ class JATSXMLParser(ArticleParser):
         else:
             # Default handling for all other element tags
             return self._inner_text(element)
+
+
+class MecaParser(JATSXMLParser):
+    """Parser for .meca files.
+
+    This could be used for articles from bioRxiv, and medRxiv.
+
+    Parameters
+    ----------
+    path
+        The path to a .meca file.
+    """
+
+    def __init__(self, path: str | Path) -> None:
+
+        with zipfile.ZipFile(path) as myzip:
+            xml_files = [
+                x
+                for x in myzip.namelist()
+                if x.startswith("content/") and x.endswith(".xml")
+            ]
+
+            if len(xml_files) != 1:
+                raise ValueError(
+                    "There needs to be exactly one .xml file inside of content/"
+                )
+
+            xml_file = xml_files[0]
+
+            # Parsing logic
+            with myzip.open(xml_file, "r") as f:
+                self.content = ElementTree.parse(f)
+
+        self.ids = self.get_ids()
 
 
 class PubMedXMLParser(ArticleParser):
