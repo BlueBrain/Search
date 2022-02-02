@@ -12,7 +12,7 @@ def test_commands_work(command):
 
 
 def test_setup_logging(caplog):
-    caplog.set_level(logging.WARNING)  # set root logger level to WARNING
+    caplog.set_level(logging.WARNING, logger="bluesearch")
 
     all_loggers = logging.root.manager.loggerDict
     bluesearch_loggers = {
@@ -42,6 +42,7 @@ def test_setup_logging(caplog):
         name: logger.getEffectiveLevel() for name, logger in external_loggers.items()
     }
 
-    assert bluesearch_levels_before != bluesearch_levels_after
+    assert set(bluesearch_levels_before.values()) == {logging.WARNING}
     assert set(bluesearch_levels_after.values()) == {logging.DEBUG}
+
     assert external_levels_before == external_levels_after
