@@ -29,7 +29,7 @@ Legend
 
 Latest
 ======
-- |Add| the ``--mesh-topic-db`` option to ``bbs_database parse``
+- |Add| the ``--mesh-topic-db`` option to ``bbs_database topic-extract``
 - |Add| the ``bbs_database parse-mesh-rdf`` command
 - |Add| the ``bluesearch.database.mesh`` module
 - |Change| the UID of an article is computed by hashing the identifiers if those
