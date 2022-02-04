@@ -29,6 +29,7 @@ Legend
 
 Latest
 ======
+- |Add| :code:`MecaParser` to parse BiorXiv and MedrXiv articles in .meca format.
 - |Change| the UID of an article is computed by hashing the identifiers if those
   exist, otherwise by hashing the article contents.
 - |Add| entrypoint :code:`bbs_database topic-filter`.
