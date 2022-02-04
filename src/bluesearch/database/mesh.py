@@ -32,7 +32,7 @@ class MeSHTree:
     """The hierarchical tree of MeSH topics.
 
     The MeSH topic ontology forms a tree with most general topics at the
-    root and the most specific topics as the leafs. Here's a part of a MeSH
+    root and the most specific topics as the leaves. Here's a part of a MeSH
     topic hierarchy
 
     .. code-block:: text
