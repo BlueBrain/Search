@@ -63,10 +63,8 @@ class MeSHTree:
 
     def __init__(self, tree_number_to_label: dict[str, str]) -> None:
         self.tree_number_to_label = tree_number_to_label
-        self.label_to_tree_numbers: dict[str, list[str]] = {}
+        self.label_to_tree_numbers: dict[str, list[str]] = collections.defaultdict(list)
         for tree_number, label in tree_number_to_label.items():
-            if label not in self.label_to_tree_numbers:
-                self.label_to_tree_numbers[label] = []
             self.label_to_tree_numbers[label].append(tree_number)
 
     @classmethod
