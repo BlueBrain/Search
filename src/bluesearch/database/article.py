@@ -24,12 +24,12 @@ import logging
 import re
 import string
 import unicodedata
-import zipfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
+from zipfile import ZipFile
 
 from defusedxml import ElementTree
 from mashumaro import DataClassJSONMixin
@@ -534,7 +534,7 @@ class MecaParser(JATSXMLParser):
 
     def __init__(self, path: str | Path) -> None:
 
-        with zipfile.ZipFile(path) as myzip:
+        with ZipFile(path) as myzip:
             xml_files = [
                 x
                 for x in myzip.namelist()
