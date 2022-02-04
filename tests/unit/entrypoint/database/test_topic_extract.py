@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import argparse
+import gzip
 import inspect
 import logging
 import pathlib
@@ -205,7 +206,13 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
 
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
-    pmc_path = test_data_path / "pubmed_articles.xml"
+    pubmed_path = test_data_path / "pubmed_articles.xml"
+    zip_pubmed_path = tmp_path / "pubmed_articles.xml.gz"
+    with open(pubmed_path, "rb") as file_in, gzip.open(
+        zip_pubmed_path, "wb"
+    ) as gzip_out:
+        gzip_out.writelines(file_in)
+
     output_jsonl = tmp_path / "test.jsonl"
     journal_meshes = ["MeSH Journal 1", "MeSH Journal 2"]
     article_meshes = ["MeSH Article 1", "MeSH Article 2"]
@@ -224,7 +231,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
 
     exit_code = topic_extract.run(
         source="pubmed",
-        input_path=pmc_path,
+        input_path=zip_pubmed_path,
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
@@ -240,7 +247,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert len(results) == 2
     result = results[0]
     assert result["source"] == "pubmed"
-    assert result["path"] == str(pmc_path)
+    assert result["path"] == str(zip_pubmed_path)
     assert isinstance(result["topics"], dict)
     topics = result["topics"]
     assert "article" in topics

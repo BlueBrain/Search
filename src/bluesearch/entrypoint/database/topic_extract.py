@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import logging
 from pathlib import Path
 from typing import Any
@@ -160,7 +161,10 @@ def run(
     elif article_source is ArticleSource.PUBMED:
         for path in inputs:
             logger.info(f"Processing {path}")
-            articles = ElementTree.parse(input_path)
+            with gzip.open(path) as mygzip:
+                articles_str = mygzip.read()
+            articles = ElementTree.fromstring(articles_str)
+
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 topic_info = TopicInfo(
                     source=article_source,
