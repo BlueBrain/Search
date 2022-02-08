@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
 import logging
+import subprocess
 from argparse import ArgumentError
 from pathlib import Path
 
@@ -172,3 +173,31 @@ def test_dry_run(capsys):
     main(["parse", "cord19-json", input_path, "parsed/", "--dry-run"])
     captured = capsys.readouterr()
     assert captured.out == "tests/data/cord19_v35/metadata.csv\n"
+
+
+class TestPipe:
+    def test_piped_session(self, tmp_path):
+        """The input_file is not provided by stdin contains filenames."""
+
+        file_a = tmp_path / "a.xml"
+        file_b = tmp_path / "b.xml"
+        file_c = tmp_path / "c.xml"  # it is not going to exist
+
+        file_a.touch()
+        file_b.touch()
+
+        stdin = f"{file_a.resolve()} {file_b.resolve()} {file_c.resolve()}"
+
+        res = subprocess.run(
+            ["bbs_database", "parse", "-n", "cord19-json", "whatever"],
+            input=stdin,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+        assert res.returncode == 0
+
+        stdout_expected = f"{file_a.resolve()}\n{file_b.resolve()}\n"
+
+        assert res.stdout == stdout_expected
