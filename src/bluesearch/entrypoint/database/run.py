@@ -21,10 +21,12 @@ import argparse
 import json
 import logging
 import warnings
+from datetime import datetime
 from pathlib import Path
 from typing import Iterator
 
-from defusedxml import ElementTree
+import luigi
+from luigi.util import inherits, requires
 
 from bluesearch.database.article import ArticleSource
 
@@ -93,6 +95,102 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
+FOLDER = Path.cwd() / "luigi" / "temp"
+FOLDER.mkdir(exist_ok=True, parents=True)
+
+class DownloadTask(luigi.Task):
+    source = luigi.Parameter()
+    from_month = luigi.DateParameter()
+    def requires(self):
+        pass
+
+    def run(self):
+        print(self.__class__.__name__)
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def output(self):
+        output_file = FOLDER / "download_done.txt"
+        return luigi.LocalTarget(str(output_file))
+
+
+
+
+# @inherits(DownloadTask)
+@requires(DownloadTask)
+class TopicExtractTask(luigi.Task):
+    source = luigi.Parameter()
+
+    def run(self):
+        print(self.__class__.__name__)
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def output(self):
+        output_file = FOLDER / "extraction_done.txt"
+
+        return luigi.LocalTarget(str(output_file))
+
+# @inherits(TopicExtractTask)
+@requires(TopicExtractTask)
+class TopicFilterTask(luigi.Task):
+    filter_config = luigi.Parameter()
+
+    def run(self):
+        print(self.__class__.__name__)
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def output(self):
+        output_file = FOLDER / "filtering_done.txt"
+
+        return luigi.LocalTarget(str(output_file))
+
+@requires(TopicFilterTask)
+class ConvertPDFTask(luigi.Task):
+    def run(self):
+        print(self.__class__.__name__)
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def output(self):
+        output_file = FOLDER / "converting_pdf_done.txt"
+
+        return luigi.LocalTarget(str(output_file))
+
+
+@inherits(ConvertPDFTask, TopicFilterTask)
+# @requires(TopicFilterTask)
+class ParseTask(luigi.Task):
+    def run(self):
+        print(self.__class__.__name__)
+
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def requires(self):
+        if self.source == "arxiv":
+            return self.clone(ConvertPDFTask)
+        else:
+            return self.clone(TopicFilterTask)
+
+    def output(self):
+        output_file = FOLDER / "parsing_done.txt"
+
+        return luigi.LocalTarget(str(output_file))
+
+@requires(ParseTask)
+class AddTask(luigi.Task):
+    def run(self):
+        print(self.__class__.__name__)
+        output_file = Path(self.output().path)
+        output_file.touch()
+
+    def output(self):
+        output_file = FOLDER / "adding_done.txt"
+
+        return luigi.LocalTarget(str(output_file))
+
 def run(
     *,
     source: str,
@@ -105,5 +203,13 @@ def run(
     `get_parser` function.
     """
     logger.info("Starting the overall pipeline")
+
+
+    luigi.build(
+        [
+            AddTask(source=source, from_month=from_month, filter_config=filter_config)
+        ],
+        log_level="CRITICAL"
+    )
 
     return 0
