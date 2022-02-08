@@ -27,34 +27,11 @@ from typing import Iterator
 
 import luigi
 from luigi.util import inherits, requires
+from luigi.contrib.external_program import ExternalProgramTask
 
 from bluesearch.database.article import ArticleSource
 
 logger = logging.getLogger(__name__)
-
-def convert_to_datetime(s: str) -> datetime:
-    """Try to convert a string to a datetime.
-
-    Parameters
-    ----------
-    s
-        String to be check as a valid date.
-
-    Returns
-    -------
-    datetime
-        The date specified in the input string.
-
-    Raises
-    ------
-    ArgumentTypeError
-        When the specified string has not a valid date format.
-    """
-    try:
-        return datetime.strptime(s, "%Y-%m")
-    except ValueError:
-        msg = f"{s} is not a valid date"
-        raise argparse.ArgumentTypeError(msg)
 
 
 def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
@@ -81,7 +58,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "from_month",
-        type=convert_to_datetime,
+        type=str,
         help="The starting month (included) for the download in format YYYY-MM. "
         "All papers from the given month until today will be downloaded.",
     )
@@ -92,27 +69,44 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         Path to a .JSONL file that defines all the rules for filtering.
         """,
     )
+    parser.add_argument(
+        "output_dir",
+        type=Path,
+        help="""
+        Path to the output folder. All the results stored under
+        `output_dir/source/date` where date is concatenation of the
+        `from_month` and the day of execution of this command.
+        """,
+    )
     return parser
 
 
 FOLDER = Path.cwd() / "luigi" / "temp"
 FOLDER.mkdir(exist_ok=True, parents=True)
 
-class DownloadTask(luigi.Task):
-    source = luigi.Parameter()
-    from_month = luigi.DateParameter()
-    def requires(self):
-        pass
+BBS_BINARY = "bbs_database"
 
-    def run(self):
-        print(self.__class__.__name__)
-        output_file = Path(self.output().path)
-        output_file.touch()
+class DownloadTask(ExternalProgramTask):
+    source = luigi.Parameter()
+    from_month = luigi.Parameter()
+    output_dir = luigi.Parameter()
+
+    capture_output=False
 
     def output(self):
-        output_file = FOLDER / "download_done.txt"
-        return luigi.LocalTarget(str(output_file))
+        today = datetime.today()
+        date = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
 
+        output_dir = Path(self.output_dir) / self.source / date / "raw"
+
+        return luigi.LocalTarget(str(output_dir))
+
+
+    def program_args(self):
+        output_dir = self.output().path
+        return [
+            BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
+        ]
 
 
 
@@ -127,7 +121,7 @@ class TopicExtractTask(luigi.Task):
         output_file.touch()
 
     def output(self):
-        output_file = FOLDER / "extraction_done.txt"
+        output_file = Path(self.input().path).parent / "extraction_done.txt"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -142,7 +136,7 @@ class TopicFilterTask(luigi.Task):
         output_file.touch()
 
     def output(self):
-        output_file = FOLDER / "filtering_done.txt"
+        output_file = Path(self.input().path).parent / "filtering_done.txt"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -154,7 +148,7 @@ class ConvertPDFTask(luigi.Task):
         output_file.touch()
 
     def output(self):
-        output_file = FOLDER / "converting_pdf_done.txt"
+        output_file = Path(self.input().path).parent / "converting_pdf_done.txt"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -175,7 +169,7 @@ class ParseTask(luigi.Task):
             return self.clone(TopicFilterTask)
 
     def output(self):
-        output_file = FOLDER / "parsing_done.txt"
+        output_file = Path(self.input().path).parent / "parsing_done.txt"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -187,15 +181,23 @@ class AddTask(luigi.Task):
         output_file.touch()
 
     def output(self):
-        output_file = FOLDER / "adding_done.txt"
+        output_file = Path(self.input().path).parent / "adding_done.txt"
 
         return luigi.LocalTarget(str(output_file))
+
+@requires(AddTask)
+class ListTask(ExternalProgramTask):
+    capture_output = False
+    def program_args(self):
+        return ["ls", "-alh", "luigi/temp/"]
+
 
 def run(
     *,
     source: str,
-    from_month: datetime,
+    from_month: str,
     filter_config: Path,
+    output_dir: Path,
 ) -> int:
     """Run overall pipeline.
 
@@ -207,9 +209,16 @@ def run(
 
     luigi.build(
         [
-            AddTask(source=source, from_month=from_month, filter_config=filter_config)
+            AddTask(
+                source=source,
+                from_month=from_month,
+                filter_config=str(filter_config),
+                output_dir=str(output_dir),
+            )
+            # ListTask(source=source, from_month=from_month, filter_config=filter_config)
         ],
-        log_level="CRITICAL"
+        log_level="INFO",
+        # log_level="INFO"
     )
 
     return 0
