@@ -13,6 +13,7 @@ from bluesearch.entrypoint.database import (
     download,
     init,
     parse,
+    parse_mesh_rdf,
     run,
     topic_extract,
     topic_filter,
@@ -86,6 +87,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             help="Filter articles containing relevant topics.",
             init_parser=topic_filter.init_parser,
             run=topic_filter.run,
+        ),
+        "parse-mesh-rdf": Cmd(
+            help="Parse a MeSH RDF file to extract the topic tree structure.",
+            init_parser=parse_mesh_rdf.init_parser,
+            run=parse_mesh_rdf.run,
         ),
     }
 
