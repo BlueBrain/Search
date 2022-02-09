@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import sys
 import warnings
 from pathlib import Path
 from typing import Iterator
@@ -80,8 +81,11 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=Path,
         help="""
         Path to a file or directory. If a directory, all articles
-        inside the directory will be parsed.
+        inside the directory will be parsed. If not provided the
+        user is supposed to pipe a space separated list of article paths to
+        the standard input.
         """,
+        nargs="?",
     )
     parser.add_argument(
         "output_dir",
@@ -155,7 +159,7 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
 def run(
     *,
     input_type: str,
-    input_path: Path,
+    input_path: Path | None,
     output_dir: Path,
     match_filename: str | None,
     recursive: bool,
@@ -168,14 +172,30 @@ def run(
     """
     from bluesearch.utils import find_files
 
-    try:
-        inputs = find_files(input_path, recursive, match_filename)
-    except ValueError:
-        logger.error(
-            "Argument 'input_path' should be a path "
-            "to an existing file or directory!"
-        )
-        return 1
+    if input_path is None:
+        if sys.stdin.isatty():
+            # Real terminal session
+            logger.error("No input files provided")
+            return 1
+        else:
+            # Piped session
+            input_lines = sys.stdin.read().split()
+            inputs = []
+
+            for line in input_lines:
+                path = Path(line)
+                if path.exists():
+                    inputs.append(path)
+
+    else:
+        try:
+            inputs = find_files(input_path, recursive, match_filename)
+        except ValueError:
+            logger.error(
+                "Argument 'input_path' should be a path "
+                "to an existing file or directory!"
+            )
+            return 1
 
     if dry_run:
         # Inputs are already sorted.

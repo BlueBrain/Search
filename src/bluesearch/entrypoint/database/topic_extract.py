@@ -22,6 +22,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
+from bluesearch.database import mesh
 from bluesearch.database.article import ArticleSource
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,19 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         Especially useful when using '--match-filename' and / or '--recursive'.
         """,
     )
+    parser.add_argument(
+        "--mesh-topic-db",
+        type=Path,
+        help="""
+        The JSON file with MeSH topic hierarchy information. Mandatory for
+        source types "pmc" and "pubmed".
+
+        The JSON file should contain a flat dictionary with MeSH topic tree
+        numbers mapped to the corresponding topic labels. This file can be
+        produced using the `bbs_database parse-mesh-rdf` command. See that
+        command's description for more details.
+        """,
+    )
     return parser
 
 
@@ -115,6 +129,7 @@ def run(
     recursive: bool,
     overwrite: bool,
     dry_run: bool,
+    mesh_topic_db: Path | None = None,
 ) -> int:
     """Extract topic of articles.
 
@@ -150,14 +165,26 @@ def run(
     article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
     if article_source is ArticleSource.PMC:
+        if mesh_topic_db is None:
+            logger.error("The option --mesh-topics-db is mandatory for source type pmc")
+            return 1
+        mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
             topic_info = TopicInfo(source=article_source, path=path.resolve())
             journal_topics = get_topics_for_pmc_article(path)
             if journal_topics:
-                topic_info.add_journal_topics("MeSH", journal_topics)
+                topic_info.add_journal_topics(
+                    "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
+                )
             all_results.append(topic_info.json())
     elif article_source is ArticleSource.PUBMED:
+        if mesh_topic_db is None:
+            logger.error(
+                "The option --mesh-topics-db is mandatory for source type pubmed"
+            )
+            return 1
+        mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
             articles = ElementTree.parse(input_path)
@@ -170,9 +197,13 @@ def run(
                 article_topics = extract_article_topics_for_pubmed_article(article)
                 journal_topics = extract_journal_topics_for_pubmed_article(article)
                 if article_topics:
-                    topic_info.add_article_topics("MeSH", article_topics)
+                    topic_info.add_article_topics(
+                        "MeSH", mesh.resolve_parents(article_topics, mesh_tree)
+                    )
                 if journal_topics:
-                    topic_info.add_journal_topics("MeSH", journal_topics)
+                    topic_info.add_journal_topics(
+                        "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
+                    )
                 all_results.append(topic_info.json())
     elif article_source is ArticleSource.ARXIV:
         for path, article_topics in get_topics_for_arxiv_articles(inputs).items():

@@ -30,6 +30,9 @@ Legend
 Latest
 ======
 - |Add| :code:`MecaParser` to parse BiorXiv and MedrXiv articles in .meca format.
+- |Add| the ``--mesh-topic-db`` option to ``bbs_database topic-extract``
+- |Add| the ``bbs_database parse-mesh-rdf`` command
+- |Add| the ``bluesearch.database.mesh`` module
 - |Change| the UID of an article is computed by hashing the identifiers if those
   exist, otherwise by hashing the article contents.
 - |Add| entrypoint :code:`bbs_database topic-filter`.
@@ -157,7 +160,7 @@ Version 0.1.1
 Version 0.1.0
 =============
 - |Add| in :code:`dvc` pipelines, the :code:`Dockerfile` now installs
-  `requirements.txt` to fix the versions of dependencies. 
+  `requirements.txt` to fix the versions of dependencies.
 - |Add| support for :code:`Python 3.9`.
 - |Add| Blue Brain Search as a Zenodo record. This provides a unique DOI, a DOI
   for each published release, and automatic preservation outside GitHub.
@@ -300,5 +303,3 @@ Changes
 - |Add| Docker ecosystem with `.env` files and `docker-compose`.
 - |Change| search servers by merging `RemoteSearcher` and `LocalSearcher`
   into the new `SearchEngine`.
-
-
