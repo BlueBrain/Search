@@ -18,8 +18,11 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import logging
+import shutil
+import tarfile
 import warnings
 from datetime import datetime
 from pathlib import Path
@@ -78,20 +81,50 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         `from_month` and the day of execution of this command.
         """,
     )
+    parser.add_argument(
+        "db_url",
+        type=str,
+        help="""
+        The location of the database depending on the database type.
+
+        For MySQL and MariaDB the server URL should be provided, for SQLite the
+        location of the database file. Generally, the scheme part of
+        the URL should be omitted, e.g. for MySQL the URL should be
+        of the form 'my_sql_server.ch:1234/my_database' and for SQLite
+        of the form '/path/to/the/local/database.db'.
+        """,
+    )
+    parser.add_argument(
+        "--db-type",
+        default="sqlite",
+        type=str,
+        choices=("mariadb", "mysql", "postgres", "sqlite"),
+        help="Type of the database.",
+    )
+    parser.add_argument(
+        "--mesh-topic-db",
+        type=Path,
+        help="""
+        The JSON file with MeSH topic hierarchy information. Mandatory for
+        source types "pmc" and "pubmed".
+
+        The JSON file should contain a flat dictionary with MeSH topic tree
+        numbers mapped to the corresponding topic labels. This file can be
+        produced using the `bbs_database parse-mesh-rdf` command. See that
+        command's description for more details.
+        """,
+    )
     return parser
 
 
-FOLDER = Path.cwd() / "luigi" / "temp"
-FOLDER.mkdir(exist_ok=True, parents=True)
-
 BBS_BINARY = "bbs_database"
+CAPTURE_OUTPUT = False
 
 class DownloadTask(ExternalProgramTask):
     source = luigi.Parameter()
     from_month = luigi.Parameter()
     output_dir = luigi.Parameter()
 
-    capture_output=False
 
     def output(self):
         today = datetime.today()
@@ -108,10 +141,58 @@ class DownloadTask(ExternalProgramTask):
             BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
         ]
 
-
-
-# @inherits(DownloadTask)
 @requires(DownloadTask)
+class UnzipTask(ExternalProgramTask):
+    """Needs to support unziping of both pubmed and pmc."""
+    source = luigi.Parameter()
+
+
+    def output(self):
+        input_path = Path(self.input().path)
+        output_dir = input_path.parent / "raw_unzipped"
+
+        return luigi.LocalTarget(str(output_dir))
+
+    def run(self):
+        input_dir =  Path(self.input().path) # raw
+        output_dir = Path(self.output().path)  # raw_unzipped
+
+        
+        output_dir.mkdir(exist_ok=True, parents=True)
+        if self.source == "pmc":
+            # .tar.gz
+            # We want collapse the folder hierarchy
+            all_tar_files = input_dir.rglob("*.tar.gz")
+            for archive in all_tar_files:
+                output_path = output_dir / archive.stem
+                my_tar = tarfile.open(archive)
+                all_articles = [x for x in my_tar.getmembers() if x.isfile()]
+                for article in all_articles:
+                    output_path = output_dir / article.path.rpartition("/")[2]
+                    f_in = my_tar.extractfile(article)
+                    with open(output_path, "wb") as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                my_tar.close()
+
+        elif self.source == "pubmed":
+            # .xml.gz
+            all_zip_files = [p for p in input_dir.iterdir() if p.suffix == ".gz"]
+            if not all_zip_files:
+                raise ValueError("No zip files were found")
+
+            for archive in all_zip_files:
+                output_path = output_dir / archive.stem
+                with gzip.open(archive, "rb") as f_in:
+                    with open(output_path,"wb") as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+
+        else:
+            raise ValueError(f"Unsupported source {self.source}")
+
+
+
+
+@requires(DownloadTask, UnzipTask)
 class TopicExtractTask(luigi.Task):
     source = luigi.Parameter()
 
@@ -120,8 +201,15 @@ class TopicExtractTask(luigi.Task):
         output_file = Path(self.output().path)
         output_file.touch()
 
+    def requires(self):
+        if self.source in {"pmc", "pubmed"}:
+            return self.clone(UnzipTask)
+        else:
+            return self.clone(DownloadTask)
+
     def output(self):
-        output_file = Path(self.input().path).parent / "extraction_done.txt"
+        input_dir = self.input()[0]
+        output_file = Path(input_dir.path).parent / "extraction_done.txt"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -198,6 +286,9 @@ def run(
     from_month: str,
     filter_config: Path,
     output_dir: Path,
+    db_url: str,
+    db_type: str,
+    mesh_topic_db: Path
 ) -> int:
     """Run overall pipeline.
 
@@ -206,6 +297,8 @@ def run(
     """
     logger.info("Starting the overall pipeline")
 
+    DownloadTask.capture_output = CAPTURE_OUTPUT 
+    TopicExtractTask.capture_output = CAPTURE_OUTPUT 
 
     luigi.build(
         [
@@ -218,6 +311,8 @@ def run(
             # ListTask(source=source, from_month=from_month, filter_config=filter_config)
         ],
         log_level="INFO",
+        # workers=0,
+        local_scheduler=True,  # prevents the task already in progress errors
         # log_level="INFO"
     )
 
