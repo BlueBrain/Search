@@ -55,26 +55,30 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.description = "Run the overall pipeline."
 
     parser.add_argument(
-        "source",
+        "--source",
+        required=True,
         type=str,
         choices=[member.value for member in ArticleSource],
         help="Source of the articles.",
     )
     parser.add_argument(
-        "from_month",
+        "--from-month",
+        required=True,
         type=str,
         help="The starting month (included) for the download in format YYYY-MM. "
         "All papers from the given month until today will be downloaded.",
     )
     parser.add_argument(
-        "filter_config",
+        "--filter-config",
+        required=True,
         type=Path,
         help="""
         Path to a .JSONL file that defines all the rules for filtering.
         """,
     )
     parser.add_argument(
-        "output_dir",
+        "--output-dir",
+        required=True,
         type=Path,
         help="""
         Path to the output folder. All the results stored under
@@ -83,7 +87,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
-        "db_url",
+        "--db-url",
+        required=True,
         type=str,
         help="""
         The location of the database depending on the database type.
