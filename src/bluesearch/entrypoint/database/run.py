@@ -31,6 +31,7 @@ from typing import Iterator
 import luigi
 from luigi.util import inherits, requires
 from luigi.contrib.external_program import ExternalProgramTask
+from luigi.tools.deps_tree import print_tree
 
 from bluesearch.database.article import ArticleSource
 
@@ -114,6 +115,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         command's description for more details.
         """,
     )
+    parser.add_argument(
+        "--dry-run",
+        "-n",
+        action="store_true",
+        help="Prints out a diagram of the pipeline without running it.",
+    )
+
     return parser
 
 
@@ -192,7 +200,7 @@ class UnzipTask(ExternalProgramTask):
 
 
 
-@requires(DownloadTask, UnzipTask)
+@inherits(DownloadTask, UnzipTask)
 class TopicExtractTask(luigi.Task):
     source = luigi.Parameter()
 
@@ -208,8 +216,8 @@ class TopicExtractTask(luigi.Task):
             return self.clone(DownloadTask)
 
     def output(self):
-        input_dir = self.input()[0]
-        output_file = Path(input_dir.path).parent / "extraction_done.txt"
+        input_dir = self.input()
+        output_file = Path(input_dir.path).parent / "topic_infos.jsonl"
 
         return luigi.LocalTarget(str(output_file))
 
@@ -288,7 +296,8 @@ def run(
     output_dir: Path,
     db_url: str,
     db_type: str,
-    mesh_topic_db: Path
+    mesh_topic_db: Path,
+    dry_run: bool
 ) -> int:
     """Run overall pipeline.
 
@@ -300,20 +309,22 @@ def run(
     DownloadTask.capture_output = CAPTURE_OUTPUT 
     TopicExtractTask.capture_output = CAPTURE_OUTPUT 
 
-    luigi.build(
-        [
-            AddTask(
-                source=source,
-                from_month=from_month,
-                filter_config=str(filter_config),
-                output_dir=str(output_dir),
-            )
-            # ListTask(source=source, from_month=from_month, filter_config=filter_config)
-        ],
-        log_level="INFO",
-        # workers=0,
-        local_scheduler=True,  # prevents the task already in progress errors
-        # log_level="INFO"
+    final_task = AddTask(
+        source=source,
+        from_month=from_month,
+        filter_config=str(filter_config),
+        output_dir=str(output_dir),
     )
+
+    luigi_kwargs = {
+        "tasks": [final_task],
+        "log_level": "DEBUG",
+        "local_scheduler": True,
+    }
+    if dry_run:
+        print(print_tree(final_task, last=False))
+    else:
+
+        luigi.build(**luigi_kwargs)
 
     return 0
