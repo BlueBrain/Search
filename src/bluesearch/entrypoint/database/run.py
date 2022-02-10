@@ -154,6 +154,8 @@ class DownloadTask(ExternalProgramTask):
             BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
         ]
 
+
+
 @requires(DownloadTask)
 class UnzipTask(ExternalProgramTask):
     """Needs to support unziping of both pubmed and pmc."""
@@ -206,13 +208,9 @@ class UnzipTask(ExternalProgramTask):
 
 
 @inherits(DownloadTask, UnzipTask)
-class TopicExtractTask(luigi.Task):
+class TopicExtractTask(ExternalProgramTask):
     source = luigi.Parameter()
-
-    def run(self):
-        print(self.__class__.__name__)
-        output_file = Path(self.output().path)
-        output_file.touch()
+    mesh_topic_db = luigi.Parameter()
 
     def requires(self):
         if self.source in {"pmc", "pubmed"}:
@@ -225,6 +223,21 @@ class TopicExtractTask(luigi.Task):
         output_file = Path(input_dir.path).parent / "topic_infos.jsonl"
 
         return luigi.LocalTarget(str(output_file))
+
+
+    def program_args(self):
+        input_dir = self.input().path
+        output_dir = self.output().path
+
+        command = [
+            BBS_BINARY, "topic-extract", "-v", self.source, input_dir, output_dir, 
+        ]
+ 
+        if self.source in {"pmc", "pubmed"}:
+            command.append(f"--mesh-topic-db={self.mesh_topic_db}")
+
+        return command
+
 
 # @inherits(TopicExtractTask)
 @requires(TopicExtractTask)
@@ -319,6 +332,7 @@ def run(
         from_month=from_month,
         filter_config=str(filter_config),
         output_dir=str(output_dir),
+        mesh_topic_db=str(mesh_topic_db),
     )
 
     luigi_kwargs = {
