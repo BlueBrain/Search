@@ -30,6 +30,7 @@ from typing import Iterator
 
 import luigi
 import pandas as pd
+import sqlalchemy
 from luigi.util import inherits, requires
 from luigi.contrib.external_program import ExternalProgramTask
 from luigi.tools.deps_tree import print_tree
@@ -374,17 +375,53 @@ class ParseTask(ExternalProgramTask):
  
         return command
 
+
 @requires(ParseTask)
-class AddTask(luigi.Task):
-    def run(self):
-        print(self.__class__.__name__)
-        output_file = Path(self.output().path)
-        output_file.touch()
+class AddTask(ExternalProgramTask):
+    db_url = luigi.Parameter()
+    db_type = luigi.Parameter()
 
-    def output(self):
-        output_file = Path(self.input().path).parent / "adding_done.txt"
+    def complete(self):
+        # If all the articles are inside
+        if self.db_type == "sqlite":
+            prefix = "sqlite:///"
+        elif self.db_type == "postgres":
+            prefix = "postgresql+pg8000://"
+        else:
+            raise ValueError
 
-        return luigi.LocalTarget(str(output_file))
+        engine = sqlalchemy.create_engine(f"{prefix}{self.db_url}")
+
+        input_dir = Path(self.input().path)
+        all_uids = [article.stem for article in input_dir.iterdir() if article.suffix == ".json"]
+
+        new_uids = []
+        for uid in all_uids:
+            query = "SELECT article_id from articles WHERE article_id = ?"
+            res = engine.execute(query, (uid,)).fetchall()
+
+            if not res:
+                new_uids.append(uid)
+
+        return not new_uids
+
+
+    def program_args(self):
+        input_dir = Path(self.input().path)
+
+
+        command = [
+            BBS_BINARY,
+            "add",
+            self.db_url,
+            input_dir,
+            "-v",
+            f"--db-type={self.db_type}",
+        ]
+ 
+        return command
+
+
 
 @requires(AddTask)
 class ListTask(ExternalProgramTask):
@@ -424,6 +461,8 @@ def run(
         mesh_topic_db=str(mesh_topic_db),
         grobid_host=grobid_host,
         grobid_port=grobid_port,
+        db_url=db_url,
+        db_type=db_type,
     )
 
     luigi_kwargs = {
