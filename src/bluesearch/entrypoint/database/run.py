@@ -331,13 +331,7 @@ class ConvertPDFTask(ExternalProgramTask):
 
 
 @inherits(ConvertPDFTask, CreateSymlinksTask)
-class ParseTask(luigi.Task):
-    def run(self):
-        print(self.__class__.__name__)
-
-        output_file = Path(self.output().path)
-        output_file.touch()
-
+class ParseTask(ExternalProgramTask):
     def requires(self):
         if self.source == "arxiv":
             return self.clone(ConvertPDFTask)
@@ -345,9 +339,40 @@ class ParseTask(luigi.Task):
             return self.clone(TopicFilterTask)
 
     def output(self):
-        output_file = Path(self.input().path).parent / "parsing_done.txt"
+        output_file = Path(self.input().path).parent / "parsed"
 
         return luigi.LocalTarget(str(output_file))
+
+    def program_args(self):
+        output_dir = Path(self.output().path)
+        output_dir.mkdir(exist_ok=True)
+
+
+        if (output_dir.parent / "converted_pdfs").exists():
+            input_dir = output_dir.parent / "converted_pdfs"
+        else:
+            input_dir = output_dir.parent / "filtered"
+
+        # Determine parser
+        source2parser = {
+            "arxiv": "tei-xml-arxiv",
+            "biorxiv": "jatx-xml",
+            "medrxiv": "jatx-xml",
+            "pmc": "jatx-xml",
+            "pubmed": "pubmed-xml",
+        }
+        parser = source2parser[self.source]
+
+        command = [
+            BBS_BINARY,
+            "parse",
+            "-v",
+            parser,
+            input_dir, 
+            output_dir,
+        ]
+ 
+        return command
 
 @requires(ParseTask)
 class AddTask(luigi.Task):
