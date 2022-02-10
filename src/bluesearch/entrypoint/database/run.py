@@ -239,20 +239,24 @@ class TopicExtractTask(ExternalProgramTask):
         return command
 
 
-# @inherits(TopicExtractTask)
 @requires(TopicExtractTask)
-class TopicFilterTask(luigi.Task):
+class TopicFilterTask(ExternalProgramTask):
     filter_config = luigi.Parameter()
 
-    def run(self):
-        print(self.__class__.__name__)
-        output_file = Path(self.output().path)
-        output_file.touch()
-
     def output(self):
-        output_file = Path(self.input().path).parent / "filtering_done.txt"
+        output_file = Path(self.input().path).parent / "filtering.csv"
 
         return luigi.LocalTarget(str(output_file))
+
+    def program_args(self):
+        extracted_topics = self.input().path
+        output_file = self.output().path
+
+        command = [
+            BBS_BINARY, "topic-filter", "-v", extracted_topics, self.filter_config, output_file, 
+        ]
+ 
+        return command
 
 @requires(TopicFilterTask)
 class ConvertPDFTask(luigi.Task):
