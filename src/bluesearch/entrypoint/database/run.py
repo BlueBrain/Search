@@ -309,7 +309,7 @@ class ConvertPDFTask(ExternalProgramTask):
 
 
     def program_args(self):
-        input_dir = Path(self.input().path).parent / "raw"
+        input_dir = Path(self.input().path).parent / "filtered"
         output_dir = self.output().path
 
         command = [
@@ -319,7 +319,7 @@ class ConvertPDFTask(ExternalProgramTask):
             self.grobid_host,
             self.grobid_port, 
             input_dir,
-            f"--output_dir={output_dir}",
+            f"--output-dir={output_dir}",
         ]
  
         return command
