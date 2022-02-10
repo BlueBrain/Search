@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Iterator
 
 import luigi
+import pandas as pd
 from luigi.util import inherits, requires
 from luigi.contrib.external_program import ExternalProgramTask
 from luigi.tools.deps_tree import print_tree
@@ -125,6 +126,16 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "-n",
         action="store_true",
         help="Prints out a diagram of the pipeline without running it.",
+    )
+    parser.add_argument(
+        "--grobid-host",
+        type=str,
+        help="The host of the GROBID server.",
+    )
+    parser.add_argument(
+        "--grobid-port",
+        type=int,
+        help="The port of the GROBID server.",
     )
 
     return parser
@@ -258,21 +269,68 @@ class TopicFilterTask(ExternalProgramTask):
  
         return command
 
+
 @requires(TopicFilterTask)
-class ConvertPDFTask(luigi.Task):
+class CreateSymlinksTask(luigi.Task):
+    def output(self):
+        output_dir = Path(self.input().path).parent / "filtered"
+
+        return luigi.LocalTarget(str(output_dir))
+
     def run(self):
-        print(self.__class__.__name__)
-        output_file = Path(self.output().path)
-        output_file.touch()
+        output_dir = Path(self.output().path)
+        filtering_path = Path(self.input().path)
+        input_dir = output_dir.parent / "raw_unzipped" 
+
+        if (output_dir.parent / "raw_unzipped").exists():
+            input_dir = output_dir.parent / "raw_unzipped"
+        else:
+            input_dir = output_dir.parent / "raw"
+
+        filtering = pd.read_csv(filtering_path)
+        accepted = filtering[filtering.accept].path
+
+        def create_symlink(path):
+            input_path = Path(path)
+            output_path = output_dir / input_path.name
+            output_path.symlink_to(input_path)
+
+        output_dir.mkdir(exist_ok=True)
+
+        accepted.apply(create_symlink)
+
+
+
+
+@requires(CreateSymlinksTask)
+class ConvertPDFTask(ExternalProgramTask):
+    grobid_host = luigi.Parameter()
+    grobid_port = luigi.Parameter()
+
+
+    def program_args(self):
+        input_dir = Path(self.input().path).parent / "raw"
+        output_dir = self.output().path
+
+        command = [
+            BBS_BINARY,
+            "convert-pdf",
+            "-v",
+            self.grobid_host,
+            self.grobid_port, 
+            input_dir,
+            f"--output_dir={output_dir}",
+        ]
+ 
+        return command
 
     def output(self):
-        output_file = Path(self.input().path).parent / "converting_pdf_done.txt"
+        output_file = Path(self.input().path).parent / "converted_pdfs"
 
         return luigi.LocalTarget(str(output_file))
 
 
-@inherits(ConvertPDFTask, TopicFilterTask)
-# @requires(TopicFilterTask)
+@inherits(ConvertPDFTask, CreateSymlinksTask)
 class ParseTask(luigi.Task):
     def run(self):
         print(self.__class__.__name__)
@@ -318,8 +376,10 @@ def run(
     output_dir: Path,
     db_url: str,
     db_type: str,
-    mesh_topic_db: Path,
-    dry_run: bool
+    mesh_topic_db: Path | None,
+    dry_run: bool,
+    grobid_host: str | None,
+    grobid_port: int | None,
 ) -> int:
     """Run overall pipeline.
 
@@ -337,6 +397,8 @@ def run(
         filter_config=str(filter_config),
         output_dir=str(output_dir),
         mesh_topic_db=str(mesh_topic_db),
+        grobid_host=grobid_host,
+        grobid_port=grobid_port,
     )
 
     luigi_kwargs = {
