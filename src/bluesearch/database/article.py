@@ -309,7 +309,7 @@ class JATSXMLParser(ArticleParser):
 
     @classmethod
     def from_zip(cls, path: str | Path) -> JATSXMLParser:
-        """Read xml file and instantiate JATSXML Parser.
+        """Read xml file from a zipped .meca folder and instantiate JATSXML Parser.
 
         Parameters
         ----------
