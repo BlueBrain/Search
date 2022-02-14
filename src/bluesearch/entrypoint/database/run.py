@@ -142,19 +142,20 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-BBS_BINARY = ["gtimeout", "--preserve-status", "5" , "bbs_database"]
+BBS_BINARY = ["gtimeout", "--preserve-status", "5", "bbs_database"]
 BBS_BINARY = ["bbs_database"]
 CAPTURE_OUTPUT = False
+
 
 class DownloadTask(ExternalProgramTask):
     """Download raw files.
 
     They will be stored in the `raw/` folder.
     """
+
     source = luigi.Parameter()
     from_month = luigi.Parameter()
     output_dir = luigi.Parameter()
-
 
     def output(self) -> luigi.LocalTarget:
         """Define download folder."""
@@ -165,14 +166,17 @@ class DownloadTask(ExternalProgramTask):
 
         return luigi.LocalTarget(str(output_dir))
 
-
     def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         output_dir = self.output().path
         return [
-            *BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
+            *BBS_BINARY,
+            "download",
+            "-v",
+            self.source,
+            self.from_month,
+            output_dir,
         ]
-
 
 
 @requires(DownloadTask)
@@ -182,8 +186,8 @@ class UnzipTask(ExternalProgramTask):
     Only applicable in case of `pubmed` and `pmc`. The unzipped files
     are stored inside of `raw_unzipped`.
     """
-    source = luigi.Parameter()
 
+    source = luigi.Parameter()
 
     def output(self) -> luigi.LocalTarget:
         """Define unzipping folder."""
@@ -194,10 +198,9 @@ class UnzipTask(ExternalProgramTask):
 
     def run(self) -> None:
         """Unzip."""
-        input_dir =  Path(self.input().path) # raw
+        input_dir = Path(self.input().path)  # raw
         output_dir = Path(self.output().path)  # raw_unzipped
 
-        
         output_dir.mkdir(exist_ok=True, parents=True)
         if self.source == "pmc":
             # .tar.gz
@@ -223,13 +226,11 @@ class UnzipTask(ExternalProgramTask):
             for archive in all_zip_files:
                 output_path = output_dir / archive.stem
                 with gzip.open(archive, "rb") as f_in:
-                    with open(output_path,"wb") as f_out:
+                    with open(output_path, "wb") as f_out:
                         shutil.copyfileobj(f_in, f_out)
 
         else:
             raise ValueError(f"Unsupported source {self.source}")
-
-
 
 
 @inherits(DownloadTask, UnzipTask)
@@ -240,6 +241,7 @@ class TopicExtractTask(ExternalProgramTask):
     on the source. The output is going to be a single file
     `topic_infos.jsonl`.
     """
+
     source = luigi.Parameter()
     mesh_topic_db = luigi.Parameter()
 
@@ -257,21 +259,25 @@ class TopicExtractTask(ExternalProgramTask):
 
         return luigi.LocalTarget(str(output_file))
 
-
     def program_args(self):
         """Define subprocess arguments."""
         input_dir = self.input().path
         output_dir = self.output().path
 
         command = [
-            *BBS_BINARY, "topic-extract", "-v", self.source, input_dir, output_dir, 
+            *BBS_BINARY,
+            "topic-extract",
+            "-v",
+            self.source,
+            input_dir,
+            output_dir,
         ]
 
         if self.source in {"medrxiv", "biorxiv"}:
             command.extend(
                 ["-R", "-m", r".*\.meca$"],
             )
- 
+
         if self.source in {"pmc", "pubmed"}:
             command.append(f"--mesh-topic-db={self.mesh_topic_db}")
 
@@ -292,9 +298,14 @@ class TopicFilterTask(ExternalProgramTask):
         output_file = self.output().path
 
         command = [
-            *BBS_BINARY, "topic-filter", "-v", extracted_topics, self.filter_config, output_file, 
+            *BBS_BINARY,
+            "topic-filter",
+            "-v",
+            extracted_topics,
+            self.filter_config,
+            output_file,
         ]
- 
+
         return command
 
 
@@ -308,7 +319,7 @@ class CreateSymlinksTask(luigi.Task):
     def run(self):
         output_dir = Path(self.output().path)
         filtering_path = Path(self.input().path)
-        input_dir = output_dir.parent / "raw_unzipped" 
+        input_dir = output_dir.parent / "raw_unzipped"
 
         if (output_dir.parent / "raw_unzipped").exists():
             input_dir = output_dir.parent / "raw_unzipped"
@@ -328,13 +339,10 @@ class CreateSymlinksTask(luigi.Task):
         accepted.apply(create_symlink)
 
 
-
-
 @requires(CreateSymlinksTask)
 class ConvertPDFTask(ExternalProgramTask):
     grobid_host = luigi.Parameter()
     grobid_port = luigi.IntParameter()
-
 
     def program_args(self):
         input_dir = Path(self.input().path).parent / "filtered"
@@ -345,11 +353,11 @@ class ConvertPDFTask(ExternalProgramTask):
             "convert-pdf",
             "-v",
             self.grobid_host,
-            self.grobid_port, 
+            self.grobid_port,
             input_dir,
             f"--output-dir={output_dir}",
         ]
- 
+
         return command
 
     def output(self):
@@ -375,7 +383,6 @@ class ParseTask(ExternalProgramTask):
         output_dir = Path(self.output().path)
         output_dir.mkdir(exist_ok=True)
 
-
         if (output_dir.parent / "converted_pdfs").exists():
             input_dir = output_dir.parent / "converted_pdfs"
         else:
@@ -396,10 +403,10 @@ class ParseTask(ExternalProgramTask):
             "parse",
             "-v",
             parser,
-            input_dir, 
+            input_dir,
             output_dir,
         ]
- 
+
         return command
 
 
@@ -423,7 +430,9 @@ class AddTask(ExternalProgramTask):
         if not input_dir.exists():
             return False
 
-        all_uids = [article.stem for article in input_dir.iterdir() if article.suffix == ".json"]
+        all_uids = [
+            article.stem for article in input_dir.iterdir() if article.suffix == ".json"
+        ]
 
         new_uids = []
         for uid in all_uids:
@@ -435,10 +444,8 @@ class AddTask(ExternalProgramTask):
 
         return not new_uids
 
-
     def program_args(self):
         input_dir = Path(self.input().path)
-
 
         command = [
             *BBS_BINARY,
@@ -448,8 +455,9 @@ class AddTask(ExternalProgramTask):
             "-v",
             f"--db-type={self.db_type}",
         ]
- 
+
         return command
+
 
 def run(
     *,
@@ -471,8 +479,8 @@ def run(
     """
     logger.info("Starting the overall pipeline")
 
-    DownloadTask.capture_output = CAPTURE_OUTPUT 
-    TopicExtractTask.capture_output = CAPTURE_OUTPUT 
+    DownloadTask.capture_output = CAPTURE_OUTPUT
+    TopicExtractTask.capture_output = CAPTURE_OUTPUT
 
     final_task = AddTask(
         source=source,
@@ -485,7 +493,6 @@ def run(
         db_url=db_url,
         db_type=db_type,
     )
-
 
     luigi_kwargs = {
         "tasks": [final_task],

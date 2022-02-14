@@ -40,6 +40,7 @@ RUN_PARAMS = {
     "grobid_port",
 }
 
+
 def test_init_parser():
     parser = run.init_parser(argparse.ArgumentParser())
 
@@ -49,7 +50,7 @@ def test_init_parser():
             "--from-month=2021-12",
             "--filter-config=/path/to/config.jsonl",
             "--output-dir=some/output/dir",
-            "--db-url=some.url"
+            "--db-url=some.url",
         ]
     )
     assert vars(args).keys() == RUN_PARAMS
@@ -65,7 +66,7 @@ def test_run_arguments():
 
 
 @pytest.mark.parametrize(
-    "source,tasks", 
+    "source,tasks",
     [
         (
             "arxiv",
@@ -77,8 +78,7 @@ def test_run_arguments():
                 "ConvertPDFTask",
                 "ParseTask",
                 "AddTask",
-
-            )
+            ),
         ),
         (
             "biorxiv",
@@ -89,8 +89,7 @@ def test_run_arguments():
                 "CreateSymlinksTask",
                 "ParseTask",
                 "AddTask",
-
-            )
+            ),
         ),
         (
             "medrxiv",
@@ -101,8 +100,7 @@ def test_run_arguments():
                 "CreateSymlinksTask",
                 "ParseTask",
                 "AddTask",
-
-            )
+            ),
         ),
         (
             "pmc",
@@ -114,8 +112,7 @@ def test_run_arguments():
                 "CreateSymlinksTask",
                 "ParseTask",
                 "AddTask",
-
-            )
+            ),
         ),
         (
             "pubmed",
@@ -127,12 +124,9 @@ def test_run_arguments():
                 "CreateSymlinksTask",
                 "ParseTask",
                 "AddTask",
-
-            )
+            ),
         ),
-
-
-    ]
+    ],
 )
 def test_pipelines(source, tasks, tmp_path, capsys):
     run.run(
@@ -153,4 +147,3 @@ def test_pipelines(source, tasks, tmp_path, capsys):
 
     for stdout_line, task in zip(stdout_lines, tasks):
         assert task in stdout_line
-    
