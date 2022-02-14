@@ -164,62 +164,65 @@ def run(
 
     article_source = ArticleSource(source)
     all_results: list[dict[str, Any]] = []
-    if article_source is ArticleSource.PMC:
-        if mesh_topic_db is None:
-            logger.error("The option --mesh-topics-db is mandatory for source type pmc")
-            return 1
-        mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
-        for path in inputs:
-            logger.info(f"Processing {path}")
-            topic_info = TopicInfo(source=article_source, path=path.resolve())
-            journal_topics = get_topics_for_pmc_article(path)
-            if journal_topics:
-                topic_info.add_journal_topics(
-                    "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
-                )
-            all_results.append(topic_info.json())
-    elif article_source is ArticleSource.PUBMED:
-        if mesh_topic_db is None:
-            logger.error(
-                "The option --mesh-topics-db is mandatory for source type pubmed"
-            )
-            return 1
-        mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
-        for path in inputs:
-            logger.info(f"Processing {path}")
-            articles = ElementTree.parse(input_path)
-            for i, article in enumerate(articles.iter("PubmedArticle")):
-                topic_info = TopicInfo(
-                    source=article_source,
-                    path=path.resolve(),
-                    element_in_file=i,
-                )
-                article_topics = extract_article_topics_for_pubmed_article(article)
-                journal_topics = extract_journal_topics_for_pubmed_article(article)
-                if article_topics:
-                    topic_info.add_article_topics(
-                        "MeSH", mesh.resolve_parents(article_topics, mesh_tree)
-                    )
+    try:
+        if article_source is ArticleSource.PMC:
+            if mesh_topic_db is None:
+                logger.error("The option --mesh-topics-db is mandatory for source type pmc")
+                return 1
+            mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
+            for path in inputs:
+                logger.info(f"Processing {path}")
+                topic_info = TopicInfo(source=article_source, path=path.resolve())
+                journal_topics = get_topics_for_pmc_article(path)
                 if journal_topics:
                     topic_info.add_journal_topics(
                         "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
                     )
                 all_results.append(topic_info.json())
-    elif article_source is ArticleSource.ARXIV:
-        for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
-            topic_info = TopicInfo(source=article_source, path=path)
-            topic_info.add_article_topics("arXiv", article_topics)
-            all_results.append(topic_info.json())
-    elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
-        for path in inputs:
-            logger.info(f"Processing {path}")
-            topic, journal = extract_article_topics_from_medrxiv_article(path)
-            topic_info = TopicInfo(source=ArticleSource(journal), path=path)
-            topic_info.add_article_topics("Subject Area", [topic])
-            all_results.append(topic_info.json())
-    else:
-        logger.error(f"The source type {source!r} is not implemented yet")
-        return 1
+        elif article_source is ArticleSource.PUBMED:
+            if mesh_topic_db is None:
+                logger.error(
+                    "The option --mesh-topics-db is mandatory for source type pubmed"
+                )
+                return 1
+            mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
+            for path in inputs:
+                logger.info(f"Processing {path}")
+                articles = ElementTree.parse(input_path)
+                for i, article in enumerate(articles.iter("PubmedArticle")):
+                    topic_info = TopicInfo(
+                        source=article_source,
+                        path=path.resolve(),
+                        element_in_file=i,
+                    )
+                    article_topics = extract_article_topics_for_pubmed_article(article)
+                    journal_topics = extract_journal_topics_for_pubmed_article(article)
+                    if article_topics:
+                        topic_info.add_article_topics(
+                            "MeSH", mesh.resolve_parents(article_topics, mesh_tree)
+                        )
+                    if journal_topics:
+                        topic_info.add_journal_topics(
+                            "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
+                        )
+                    all_results.append(topic_info.json())
+        elif article_source is ArticleSource.ARXIV:
+            for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
+                topic_info = TopicInfo(source=article_source, path=path)
+                topic_info.add_article_topics("arXiv", article_topics)
+                all_results.append(topic_info.json())
+        elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
+            for path in inputs:
+                logger.info(f"Processing {path}")
+                topic, journal = extract_article_topics_from_medrxiv_article(path)
+                topic_info = TopicInfo(source=ArticleSource(journal), path=path)
+                topic_info.add_article_topics("Subject Area", [topic])
+                all_results.append(topic_info.json())
+        else:
+            logger.error(f"The source type {source!r} is not implemented yet")
+            return 1
+    except KeyboardInterrupt:
+        pass
 
     JSONL.dump_jsonl(all_results, output_file, overwrite)
 
