@@ -333,7 +333,7 @@ class CreateSymlinksTask(luigi.Task):
 @requires(CreateSymlinksTask)
 class ConvertPDFTask(ExternalProgramTask):
     grobid_host = luigi.Parameter()
-    grobid_port = luigi.Parameter()
+    grobid_port = luigi.IntParameter()
 
 
     def program_args(self):

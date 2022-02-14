@@ -62,3 +62,95 @@ def test_init_parser():
 
 def test_run_arguments():
     assert inspect.signature(run.run).parameters.keys() == RUN_PARAMS
+
+
+@pytest.mark.parametrize(
+    "source,tasks", 
+    [
+        (
+            "arxiv",
+            (
+                "DownloadTask",
+                "TopicExtractTask",
+                "TopicFilterTask",
+                "CreateSymlinksTask",
+                "ConvertPDFTask",
+                "ParseTask",
+                "AddTask",
+
+            )
+        ),
+        (
+            "biorxiv",
+            (
+                "DownloadTask",
+                "TopicExtractTask",
+                "TopicFilterTask",
+                "CreateSymlinksTask",
+                "ParseTask",
+                "AddTask",
+
+            )
+        ),
+        (
+            "medrxiv",
+            (
+                "DownloadTask",
+                "TopicExtractTask",
+                "TopicFilterTask",
+                "CreateSymlinksTask",
+                "ParseTask",
+                "AddTask",
+
+            )
+        ),
+        (
+            "pmc",
+            (
+                "DownloadTask",
+                "UnzipTask",
+                "TopicExtractTask",
+                "TopicFilterTask",
+                "CreateSymlinksTask",
+                "ParseTask",
+                "AddTask",
+
+            )
+        ),
+        (
+            "pubmed",
+            (
+                "DownloadTask",
+                "UnzipTask",
+                "TopicExtractTask",
+                "TopicFilterTask",
+                "CreateSymlinksTask",
+                "ParseTask",
+                "AddTask",
+
+            )
+        ),
+
+
+    ]
+)
+def test_pipelines(source, tasks, tmp_path, capsys):
+    run.run(
+        source=source,
+        from_month="whatever",
+        filter_config="whatever",
+        output_dir=tmp_path,
+        dry_run=True,
+        mesh_topic_db="whatever",
+        grobid_host="whatever",
+        grobid_port=1234,
+        db_url="whatever",
+        db_type="sqlite",
+    )
+
+    captured = capsys.readouterr()
+    stdout_lines = reversed(captured.out.splitlines()[1:])
+
+    for stdout_line, task in zip(stdout_lines, tasks):
+        assert task in stdout_line
+    
