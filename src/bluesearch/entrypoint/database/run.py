@@ -142,7 +142,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-BBS_BINARY = "bbs_database"
+BBS_BINARY = ["gtimeout", "--preserve-status", "5" , "bbs_database"]
+BBS_BINARY = ["bbs_database"]
 CAPTURE_OUTPUT = False
 
 class DownloadTask(ExternalProgramTask):
@@ -163,7 +164,7 @@ class DownloadTask(ExternalProgramTask):
     def program_args(self):
         output_dir = self.output().path
         return [
-            BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
+            *BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
         ]
 
 
@@ -242,7 +243,7 @@ class TopicExtractTask(ExternalProgramTask):
         output_dir = self.output().path
 
         command = [
-            BBS_BINARY, "topic-extract", "-v", self.source, input_dir, output_dir, 
+            *BBS_BINARY, "topic-extract", "-v", self.source, input_dir, output_dir, 
         ]
  
         if self.source in {"pmc", "pubmed"}:
@@ -265,7 +266,7 @@ class TopicFilterTask(ExternalProgramTask):
         output_file = self.output().path
 
         command = [
-            BBS_BINARY, "topic-filter", "-v", extracted_topics, self.filter_config, output_file, 
+            *BBS_BINARY, "topic-filter", "-v", extracted_topics, self.filter_config, output_file, 
         ]
  
         return command
@@ -314,7 +315,7 @@ class ConvertPDFTask(ExternalProgramTask):
         output_dir = self.output().path
 
         command = [
-            BBS_BINARY,
+            *BBS_BINARY,
             "convert-pdf",
             "-v",
             self.grobid_host,
@@ -365,7 +366,7 @@ class ParseTask(ExternalProgramTask):
         parser = source2parser[self.source]
 
         command = [
-            BBS_BINARY,
+            *BBS_BINARY,
             "parse",
             "-v",
             parser,
@@ -425,13 +426,8 @@ class AddTask(ExternalProgramTask):
         return command
 
 
-
-@requires(AddTask)
-class ListTask(ExternalProgramTask):
-    capture_output = False
-    def program_args(self):
-        return ["ls", "-alh", "luigi/temp/"]
-
+class worker(luigi.Config):
+    timeout = luigi.IntParameter(5)
 
 def run(
     *,
@@ -467,6 +463,7 @@ def run(
         db_url=db_url,
         db_type=db_type,
     )
+
 
     luigi_kwargs = {
         "tasks": [final_task],
