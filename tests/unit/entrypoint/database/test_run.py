@@ -31,17 +31,32 @@ RUN_PARAMS = {
     "source",
     "from_month",
     "filter_config",
+    "output_dir",
+    "db_url",
+    "db_type",
+    "mesh_topic_db",
+    "dry_run",
+    "grobid_host",
+    "grobid_port",
 }
 
 def test_init_parser():
     parser = run.init_parser(argparse.ArgumentParser())
 
-    args = parser.parse_args(["arxiv", "2021-12", "/path/to/config.jsonl"])
+    args = parser.parse_args(
+        [
+            "--source=arxiv",
+            "--from-month=2021-12",
+            "--filter-config=/path/to/config.jsonl",
+            "--output-dir=some/output/dir",
+            "--db-url=some.url"
+        ]
+    )
     assert vars(args).keys() == RUN_PARAMS
 
     # Test the values
     assert args.source == "arxiv"
-    assert args.from_month == datetime.datetime(2021, 12, 1)
+    assert args.from_month == "2021-12"
     assert args.filter_config == pathlib.Path("/path/to/config.jsonl")
 
 
