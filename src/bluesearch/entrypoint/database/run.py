@@ -338,7 +338,7 @@ class ParseTask(ExternalProgramTask):
         if self.source == "arxiv":
             return self.clone(ConvertPDFTask)
         else:
-            return self.clone(TopicFilterTask)
+            return self.clone(CreateSymlinksTask)
 
     def output(self):
         output_file = Path(self.input().path).parent / "parsed"
@@ -358,9 +358,9 @@ class ParseTask(ExternalProgramTask):
         # Determine parser
         source2parser = {
             "arxiv": "tei-xml-arxiv",
-            "biorxiv": "jatx-xml",
-            "medrxiv": "jatx-xml",
-            "pmc": "jatx-xml",
+            "biorxiv": "jats-xml",
+            "medrxiv": "jats-xml",
+            "pmc": "jats-xml",
             "pubmed": "pubmed-xml",
         }
         parser = source2parser[self.source]
