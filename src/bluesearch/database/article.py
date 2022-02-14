@@ -262,8 +262,8 @@ class JATSXMLParser(ArticleParser):
 
     Parameters
     ----------
-    path
-        The path to a JATS XML file.
+    xml_stream
+        The xml stream of the article.
     """
 
     def __init__(self, xml_stream: IO) -> None:
