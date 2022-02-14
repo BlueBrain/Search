@@ -147,12 +147,17 @@ BBS_BINARY = ["bbs_database"]
 CAPTURE_OUTPUT = False
 
 class DownloadTask(ExternalProgramTask):
+    """Download raw files.
+
+    They will be stored in the `raw/` folder.
+    """
     source = luigi.Parameter()
     from_month = luigi.Parameter()
     output_dir = luigi.Parameter()
 
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
+        """Define download folder."""
         today = datetime.today()
         date = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
 
@@ -161,7 +166,8 @@ class DownloadTask(ExternalProgramTask):
         return luigi.LocalTarget(str(output_dir))
 
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
+        """Define subprocess arguments."""
         output_dir = self.output().path
         return [
             *BBS_BINARY, "download", "-v", self.source, self.from_month, output_dir,
@@ -171,17 +177,23 @@ class DownloadTask(ExternalProgramTask):
 
 @requires(DownloadTask)
 class UnzipTask(ExternalProgramTask):
-    """Needs to support unziping of both pubmed and pmc."""
+    """Unzip raw files (if necessary).
+
+    Only applicable in case of `pubmed` and `pmc`. The unzipped files
+    are stored inside of `raw_unzipped`.
+    """
     source = luigi.Parameter()
 
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
+        """Define unzipping folder."""
         input_path = Path(self.input().path)
         output_dir = input_path.parent / "raw_unzipped"
 
         return luigi.LocalTarget(str(output_dir))
 
-    def run(self):
+    def run(self) -> None:
+        """Unzip."""
         input_dir =  Path(self.input().path) # raw
         output_dir = Path(self.output().path)  # raw_unzipped
 
@@ -222,16 +234,24 @@ class UnzipTask(ExternalProgramTask):
 
 @inherits(DownloadTask, UnzipTask)
 class TopicExtractTask(ExternalProgramTask):
+    """Topic extraction.
+
+    The input of this dask is either `raw/` or `raw_unzipped/` depending
+    on the source. The output is going to be a single file
+    `topic_infos.jsonl`.
+    """
     source = luigi.Parameter()
     mesh_topic_db = luigi.Parameter()
 
-    def requires(self):
+    def requires(self) -> luigi.Task:
+        """Define conditional dependencies."""
         if self.source in {"pmc", "pubmed"}:
             return self.clone(UnzipTask)
         else:
             return self.clone(DownloadTask)
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
+        """Define output file path."""
         input_dir = self.input()
         output_file = Path(input_dir.path).parent / "topic_infos.jsonl"
 
@@ -239,6 +259,7 @@ class TopicExtractTask(ExternalProgramTask):
 
 
     def program_args(self):
+        """Define subprocess arguments."""
         input_dir = self.input().path
         output_dir = self.output().path
 
@@ -429,10 +450,6 @@ class AddTask(ExternalProgramTask):
         ]
  
         return command
-
-
-class worker(luigi.Config):
-    timeout = luigi.IntParameter(5)
 
 def run(
     *,
