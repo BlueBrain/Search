@@ -393,6 +393,9 @@ class AddTask(ExternalProgramTask):
         engine = sqlalchemy.create_engine(f"{prefix}{self.db_url}")
 
         input_dir = Path(self.input().path)
+        if not input_dir.exists():
+            return False
+
         all_uids = [article.stem for article in input_dir.iterdir() if article.suffix == ".json"]
 
         new_uids = []
