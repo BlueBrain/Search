@@ -147,3 +147,4 @@ def test_pipelines(source, tasks, tmp_path, capsys):
 
     for stdout_line, task in zip(stdout_lines, tasks):
         assert task in stdout_line
+        assert "PENDING" in stdout_line
