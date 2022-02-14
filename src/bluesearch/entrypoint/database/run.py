@@ -480,7 +480,13 @@ def run(
     logger.info("Starting the overall pipeline")
 
     DownloadTask.capture_output = CAPTURE_OUTPUT
+    UnzipTask.capture_output = CAPTURE_OUTPUT
     TopicExtractTask.capture_output = CAPTURE_OUTPUT
+    TopicFilterTask.capture_output = CAPTURE_OUTPUT
+    CreateSymlinksTask.capture_output = CAPTURE_OUTPUT
+    ConvertPDFTask.capture_output = CAPTURE_OUTPUT
+    ParseTask.capture_output = CAPTURE_OUTPUT
+    AddTask.capture_output = CAPTURE_OUTPUT
 
     final_task = AddTask(
         source=source,
@@ -497,7 +503,7 @@ def run(
     luigi_kwargs = {
         "tasks": [final_task],
         "log_level": "DEBUG",
-        "local_scheduler": True,
+        "local_scheduler": False,
     }
     if dry_run:
         print(print_tree(final_task, last=False))

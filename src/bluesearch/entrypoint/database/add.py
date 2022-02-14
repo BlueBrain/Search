@@ -124,6 +124,7 @@ def run(
     sentence_mappings = []
 
     for article in articles:
+        logger.info(f"Processing {article.uid}")
 
         article_mapping = {
             "article_id": article.uid,
