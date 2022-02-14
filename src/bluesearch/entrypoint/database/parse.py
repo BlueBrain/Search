@@ -32,7 +32,6 @@ from bluesearch.database.article import (
     ArticleParser,
     CORD19ArticleParser,
     JATSXMLParser,
-    MecaParser,
     PubMedXMLParser,
     TEIXMLParser,
 )
@@ -132,10 +131,10 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
             yield CORD19ArticleParser(data)
 
     elif input_type == "jats-xml":
-        yield JATSXMLParser(input_path)
+        yield JATSXMLParser.from_xml(input_path)
 
-    elif input_type == "meca":
-        yield MecaParser(input_path)
+    elif input_type == "jats-meca":
+        yield JATSXMLParser.from_zip(input_path)
 
     elif input_type == "pubmed-xml":
         yield PubMedXMLParser(input_path)

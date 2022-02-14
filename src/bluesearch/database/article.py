@@ -26,8 +26,9 @@ import string
 import unicodedata
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from io import StringIO
 from pathlib import Path
-from typing import Generator, Iterable, Optional, Sequence, Tuple
+from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -265,10 +266,79 @@ class JATSXMLParser(ArticleParser):
         The path to a JATS XML file.
     """
 
-    def __init__(self, path: str | Path) -> None:
+    def __init__(self, xml_stream: IO) -> None:
         super().__init__()
-        self.content = ElementTree.parse(str(path))
+        self.content = ElementTree.parse(xml_stream)
         self.ids = self.get_ids()
+
+    @classmethod
+    def from_string(cls, xml_string: str) -> JATSXMLParser:
+        """Read xml string and instantiate JATSXML Parser.
+
+        Parameters
+        ----------
+        xml_string
+            Raw content of the article
+
+        Returns
+        -------
+        JATSXMLParser
+            Parser containing the article content.
+        """
+        with StringIO(xml_string) as stream:
+            obj = cls(stream)
+        return obj
+
+    @classmethod
+    def from_xml(cls, path: str | Path) -> JATSXMLParser:
+        """Read xml file and instantiate JATSXML Parser.
+
+        Parameters
+        ----------
+        path
+            Path to the article (with .xml extension)
+
+        Returns
+        -------
+        JATSXMLParser
+            Parser containing the article content.
+        """
+        with open(path) as fh:
+            obj = cls(fh)
+        return obj
+
+    @classmethod
+    def from_zip(cls, path: str | Path) -> JATSXMLParser:
+        """Read xml file and instantiate JATSXML Parser.
+
+        Parameters
+        ----------
+        path
+            Path to the article (with .meca extension)
+
+        Returns
+        -------
+        JATSXMLParser
+            Parser containing the article content.
+        """
+        with ZipFile(path) as myzip:
+            xml_files = [
+                x
+                for x in myzip.namelist()
+                if x.startswith("content/") and x.endswith(".xml")
+            ]
+
+            if len(xml_files) != 1:
+                raise ValueError(
+                    "There needs to be exactly one .xml file inside of content/"
+                )
+
+            xml_file = xml_files[0]
+
+            # Parsing logic
+            with myzip.open(xml_file, "r") as fh:
+                obj = cls(fh)
+        return obj
 
     @property
     def title(self) -> str:
@@ -519,40 +589,6 @@ class JATSXMLParser(ArticleParser):
         else:
             # Default handling for all other element tags
             return self._inner_text(element)
-
-
-class MecaParser(JATSXMLParser):
-    """Parser for .meca files.
-
-    This could be used for articles from bioRxiv, and medRxiv.
-
-    Parameters
-    ----------
-    path
-        The path to a .meca file.
-    """
-
-    def __init__(self, path: str | Path) -> None:
-
-        with ZipFile(path) as myzip:
-            xml_files = [
-                x
-                for x in myzip.namelist()
-                if x.startswith("content/") and x.endswith(".xml")
-            ]
-
-            if len(xml_files) != 1:
-                raise ValueError(
-                    "There needs to be exactly one .xml file inside of content/"
-                )
-
-            xml_file = xml_files[0]
-
-            # Parsing logic
-            with myzip.open(xml_file, "r") as f:
-                self.content = ElementTree.parse(f)
-
-        self.ids = self.get_ids()
 
 
 class PubMedXMLParser(ArticleParser):

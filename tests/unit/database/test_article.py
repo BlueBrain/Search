@@ -32,7 +32,6 @@ from bluesearch.database.article import (
     ArticleParser,
     CORD19ArticleParser,
     JATSXMLParser,
-    MecaParser,
     PubMedXMLParser,
     TEIXMLParser,
     get_arxiv_id,
@@ -118,17 +117,17 @@ class SimpleTestParser(ArticleParser):
 @pytest.fixture(scope="session")
 def jats_xml_parser(test_data_path):
     path = pathlib.Path(test_data_path) / "jats_article.xml"
-    parser = JATSXMLParser(path.resolve())
+    parser = JATSXMLParser.from_xml(path.resolve())
     return parser
 
 
 @pytest.fixture
-def meca_parser(test_data_path, tmp_path):
+def jats_meca_parser(test_data_path, tmp_path):
     test_xml_path = test_data_path / "biorxiv.xml"
     zip_path = tmp_path / "01234.meca"
     with zipfile.ZipFile(zip_path, "w") as myzip:
         myzip.write(test_xml_path, arcname="content/567.xml")
-    parser = MecaParser(zip_path.resolve())
+    parser = JATSXMLParser.from_zip(zip_path.resolve())
 
     return parser
 
@@ -270,8 +269,8 @@ class TestJATSXMLArticleParser:
 
 
 class TestMecaArticleParser:
-    def test_init(self, meca_parser):
-        assert isinstance(meca_parser.content, xml.etree.ElementTree.ElementTree)
+    def test_init(self, jats_meca_parser):
+        assert isinstance(jats_meca_parser.content, xml.etree.ElementTree.ElementTree)
 
     def test_wrong_file(self, test_data_path, tmp_path):
         test_xml_path = test_data_path / "biorxiv.xml"
@@ -280,7 +279,7 @@ class TestMecaArticleParser:
             for i in range(2):
                 myzip.write(test_xml_path, arcname=f"content/{i}.xml")
         with pytest.raises(ValueError):
-            _ = MecaParser(zip_path.resolve())
+            _ = JATSXMLParser.from_zip(zip_path.resolve())
 
 
 @pytest.fixture(scope="session")
