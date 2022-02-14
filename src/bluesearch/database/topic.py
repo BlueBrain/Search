@@ -276,10 +276,16 @@ def get_topics_for_pmc_article(
         Journal topics for the given article.
     """
     # Determine journal title
-    if str(pmc_path).endswith(".xml"):
+    *_, extension = str(pmc_path).lower().rpartition(".")
+    if extension == "xml":
         parser = JATSXMLParser.from_xml(pmc_path)
-    else:
+    elif extension == "meca" or extension == "zip":
         parser = JATSXMLParser.from_zip(pmc_path)
+    else:
+        raise ValueError(
+            f"Unknown file extension for JATS XML: {extension!r}. Only XML and ZIP "
+            f"are supported. File: {str(pmc_path)!r}"
+        )
 
     nlm_ta = parser.content.find(
         "./front/journal-meta/journal-id[@journal-id-type='nlm-ta']"
