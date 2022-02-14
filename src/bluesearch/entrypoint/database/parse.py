@@ -61,7 +61,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         choices=(
             "cord19-json",
             "jats-xml",
-            "meca",
+            "jats-meca",
             "pubmed-xml",
             "pubmed-xml-set",
             "tei-xml",
@@ -71,7 +71,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         Format of the input.
         If parsing several articles, all articles must have the same format.
         'jats-xml' could be used for articles from PubMed Central.
-        'meca' could be used for articles from bioRxiv and medRxiv.
+        'jats-meca' could be used for articles from bioRxiv and medRxiv.
         'tei-xml-arxiv' should be used for TEI XML generated from arXiv PDF articles.
         """,
     )

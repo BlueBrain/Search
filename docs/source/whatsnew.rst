@@ -29,7 +29,8 @@ Legend
 
 Latest
 ======
-- |Add| :code:`MecaParser` to parse BiorXiv and MedrXiv articles in .meca format.
+- |Add| possibility to read `.xml` and `.meca` file extensions in :code:`JATSXMLParser`
+to parse BiorXiv and MedrXiv articles
 - |Add| the ``--mesh-topic-db`` option to ``bbs_database topic-extract``
 - |Add| the ``bbs_database parse-mesh-rdf`` command
 - |Add| the ``bluesearch.database.mesh`` module
