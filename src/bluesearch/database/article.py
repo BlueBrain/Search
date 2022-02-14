@@ -33,7 +33,7 @@ from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
 from defusedxml import ElementTree
-from mashumaro import DataClassJSONMixin
+from mashumaro.mixins.json import DataClassJSONMixin
 
 logger = logging.getLogger(__name__)
 
