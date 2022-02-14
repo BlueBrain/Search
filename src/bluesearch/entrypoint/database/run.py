@@ -415,7 +415,7 @@ class AddTask(ExternalProgramTask):
 
 
         command = [
-            BBS_BINARY,
+            *BBS_BINARY,
             "add",
             self.db_url,
             input_dir,
