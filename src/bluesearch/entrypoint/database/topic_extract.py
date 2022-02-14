@@ -187,7 +187,7 @@ def run(
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
-            articles = ElementTree.parse(input_path)
+            articles = ElementTree.parse(path)
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 topic_info = TopicInfo(
                     source=article_source,
@@ -214,6 +214,7 @@ def run(
         for path in inputs:
             logger.info(f"Processing {path}")
             topic, journal = extract_article_topics_from_medrxiv_article(path)
+            journal = journal.lower()
             topic_info = TopicInfo(source=ArticleSource(journal), path=path)
             topic_info.add_article_topics("Subject Area", [topic])
             all_results.append(topic_info.json())

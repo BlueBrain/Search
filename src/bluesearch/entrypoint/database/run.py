@@ -245,6 +245,11 @@ class TopicExtractTask(ExternalProgramTask):
         command = [
             *BBS_BINARY, "topic-extract", "-v", self.source, input_dir, output_dir, 
         ]
+
+        if self.source in {"medrxiv", "biorxiv"}:
+            command.extend(
+                ["-R", "-m", r".*\.meca$"],
+            )
  
         if self.source in {"pmc", "pubmed"}:
             command.append(f"--mesh-topic-db={self.mesh_topic_db}")
@@ -290,7 +295,7 @@ class CreateSymlinksTask(luigi.Task):
             input_dir = output_dir.parent / "raw"
 
         filtering = pd.read_csv(filtering_path)
-        accepted = filtering[filtering.accept].path
+        accepted = pd.Series(filtering[filtering.accept].path.unique())
 
         def create_symlink(path):
             input_path = Path(path)
@@ -361,7 +366,7 @@ class ParseTask(ExternalProgramTask):
             "biorxiv": "jats-xml",
             "medrxiv": "jats-xml",
             "pmc": "jats-xml",
-            "pubmed": "pubmed-xml",
+            "pubmed": "pubmed-xml-set",
         }
         parser = source2parser[self.source]
 
