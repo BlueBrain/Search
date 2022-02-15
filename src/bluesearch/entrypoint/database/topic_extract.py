@@ -188,9 +188,8 @@ def run(
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
-            with gzip.open(path) as mygzip:
-                articles_str = mygzip.read()
-            articles = ElementTree.fromstring(articles_str)
+            with gzip.open(input_path) as xml_stream:
+                articles = ElementTree.parse(xml_stream)
 
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 topic_info = TopicInfo(

@@ -29,6 +29,8 @@ Legend
 
 Latest
 ======
+- |Change| the file extension used to read :code:`PubMed` articles from unzipped `.xml`
+  to `.xml.gz` in :code:`bbs_database topic-extract` and :code:`bbs_database parse` entrypoints
 - |Add| possibility to read `.xml` and `.meca` file extensions in :code:`JATSXMLParser`
   to parse BiorXiv and MedrXiv articles
 - |Add| the ``--mesh-topic-db`` option to ``bbs_database topic-extract``

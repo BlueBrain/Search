@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import argparse
-import gzip
 import inspect
 import json
 import logging
@@ -218,15 +217,11 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     assert result[0]["topics"]["article"]["Subject Area"] == ["TOPIC"]
 
 
-def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
+def test_pubmed_source(
+    test_data_path, pubmed_xml_gz_path, capsys, monkeypatch, tmp_path
+):
 
     mesh_tree_path = tmp_path / "mesh_tree.json"
-    pubmed_path = test_data_path / "pubmed_articles.xml"
-    zip_pubmed_path = tmp_path / "pubmed_articles.xml.gz"
-    with open(pubmed_path, "rb") as file_in, gzip.open(
-        zip_pubmed_path, "wb"
-    ) as gzip_out:
-        gzip_out.writelines(file_in)
 
     output_jsonl = tmp_path / "test.jsonl"
     mesh_tree_numbers = {
@@ -252,7 +247,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
 
     exit_code = topic_extract.run(
         source="pubmed",
-        input_path=zip_pubmed_path,
+        input_path=pubmed_xml_gz_path,
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
@@ -269,7 +264,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert len(results) == 2
     result = results[0]
     assert result["source"] == "pubmed"
-    assert result["path"] == str(zip_pubmed_path)
+    assert result["path"] == str(pubmed_xml_gz_path)
     assert isinstance(result["topics"], dict)
     topics = result["topics"]
     assert "article" in topics
