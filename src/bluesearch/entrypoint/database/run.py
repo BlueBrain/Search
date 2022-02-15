@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import gzip
 import logging
 import shutil
@@ -27,6 +28,7 @@ from pathlib import Path
 
 import pandas as pd
 import sqlalchemy
+from defusedxml import ElementTree
 
 import luigi
 from bluesearch.database.article import ArticleSource
@@ -322,6 +324,7 @@ class PerformFilteringTask(luigi.Task):
 
     def run(self):
         """Create symlinks."""
+
         output_dir = Path(self.output().path)
 
         filtering = pd.read_csv(self.input().path)
@@ -330,10 +333,26 @@ class PerformFilteringTask(luigi.Task):
 
         if self.source == "pubmed":
             # Find all input files (.xml.gz)
+            all_input_files = [Path(p) for p in filtering["path"].unique()]
 
             # Iteratively Load each  of the files in memory
+            for input_file in all_input_files:
+	            # Unzip it	
+                with gzip.open(input_file) as xml_stream:
+                    article_set = ElementTree.parse(xml_stream)
+
+
                 # Create a copy of the XML
-                # Remove elements that were not accepted from the copy
+                article_set_copy = copy.deepcopy(article_set)
+
+                # Find elements that were not accepted
+                to_remove = filtering[(filtering["path"] == str(input_file)) & (~filtering["accept"])]
+
+                for eif in to_remove["element_in_file"].tolist():
+                    # Remove the corresponding <PubmedArticle> from the copy
+
+
+
                 # Store the copy with removed elements
 
             # Iteratively zip and save all of the "pruned" copies
