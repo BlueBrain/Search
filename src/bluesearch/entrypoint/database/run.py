@@ -503,7 +503,7 @@ def run(
     luigi_kwargs = {
         "tasks": [final_task],
         "log_level": "DEBUG",
-        "local_scheduler": False,
+        "local_scheduler": True,
     }
     if dry_run:
         print(print_tree(final_task, last=False))
