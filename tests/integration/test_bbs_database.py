@@ -130,7 +130,6 @@ def setup_backend(request, tmp_path):
         raise ValueError
 
 
-@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 def test_bbs_database(tmp_path, setup_backend, jsons_path, caplog):
     # Parameters
     db_type, db_url = setup_backend
