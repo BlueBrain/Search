@@ -392,8 +392,8 @@ class ParseTask(ExternalProgramTask):
         # Determine parser
         source2parser = {
             "arxiv": "tei-xml-arxiv",
-            "biorxiv": "jats-xml",
-            "medrxiv": "jats-xml",
+            "biorxiv": "jats-meca",
+            "medrxiv": "jats-meca",
             "pmc": "jats-xml",
             "pubmed": "pubmed-xml-set",
         }
@@ -437,8 +437,8 @@ class AddTask(ExternalProgramTask):
 
         new_uids = []
         for uid in all_uids:
-            query = "SELECT article_id from articles WHERE article_id = ?"
-            res = engine.execute(query, (uid,)).fetchall()
+            query = sqlalchemy.text("SELECT article_id from articles WHERE article_id = :uid")
+            res = engine.execute(query, uid=uid).fetchall()
 
             if not res:
                 new_uids.append(uid)
