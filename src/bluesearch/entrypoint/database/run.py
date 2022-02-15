@@ -284,14 +284,22 @@ class TopicExtractTask(ExternalProgramTask):
 
 @requires(TopicExtractTask)
 class TopicFilterTask(ExternalProgramTask):
+    """Run topic filtering entrypoint.
+
+    It inputs `topic_infos.jsonl` and `filter_config` (rules) and it
+    generates a file `filtering.csv`.
+    """
+
     filter_config = luigi.Parameter()
 
     def output(self):
+        """Define output file."""
         output_file = Path(self.input().path).parent / "filtering.csv"
 
         return luigi.LocalTarget(str(output_file))
 
     def program_args(self):
+        """Define subprocess arguments."""
         extracted_topics = self.input().path
         output_file = self.output().path
 
@@ -309,16 +317,22 @@ class TopicFilterTask(ExternalProgramTask):
 
 @requires(TopicFilterTask)
 class CreateSymlinksTask(luigi.Task):
+    """Create folder of symlinked articles.
+
+    We only symlink those articles that made it through the topic-filtering
+    stage. The only input is the `filtering.csv`.
+    """
     def output(self):
+        """Define output folder."""
         output_dir = Path(self.input().path).parent / "filtered"
 
         return luigi.LocalTarget(str(output_dir))
 
     def run(self):
+        """Create symlinks."""
         output_dir = Path(self.output().path)
-        filtering_path = Path(self.input().path)
 
-        filtering = pd.read_csv(filtering_path)
+        filtering = pd.read_csv(self.input())
         accepted = pd.Series(filtering[filtering.accept].path.unique())
 
         def create_symlink(path):
@@ -333,10 +347,16 @@ class CreateSymlinksTask(luigi.Task):
 
 @requires(CreateSymlinksTask)
 class ConvertPDFTask(ExternalProgramTask):
+    """Convert PDFs to XMLs.
+
+    Assumes that there is a GROBID server up and running. Only necessary
+    when `source=arxiv`. The output is the folder `converted_pdfs/`.
+    """
     grobid_host = luigi.Parameter()
     grobid_port = luigi.IntParameter()
 
     def program_args(self):
+        """Define subprocess arguments."""
         input_dir = Path(self.input().path).parent / "filtered"
         output_dir = self.output().path
 
@@ -353,6 +373,7 @@ class ConvertPDFTask(ExternalProgramTask):
         return command
 
     def output(self):
+        """Define output folder."""
         output_file = Path(self.input().path).parent / "converted_pdfs"
 
         return luigi.LocalTarget(str(output_file))
@@ -360,18 +381,26 @@ class ConvertPDFTask(ExternalProgramTask):
 
 @inherits(ConvertPDFTask, CreateSymlinksTask)
 class ParseTask(ExternalProgramTask):
+    """Parse articles.
+
+    The input is all the articles inside of `filtered/` (or in case of
+    `source="arxiv"` `converted_pdfs/`.
+    """
     def requires(self):
+        """Define conditional dependencies."""
         if self.source == "arxiv":
             return self.clone(ConvertPDFTask)
         else:
             return self.clone(CreateSymlinksTask)
 
     def output(self):
+        """Define output folder."""
         output_file = Path(self.input().path).parent / "parsed"
 
         return luigi.LocalTarget(str(output_file))
 
     def program_args(self):
+        """Define subprocess arguments."""
         output_dir = Path(self.output().path)
         output_dir.mkdir(exist_ok=True)
 
@@ -404,10 +433,16 @@ class ParseTask(ExternalProgramTask):
 
 @requires(ParseTask)
 class AddTask(ExternalProgramTask):
+    """Add parsed articles to the database.
+
+    This step is considered done if all articles inside of `parsed/` are
+    already in the database.
+    """
     db_url = luigi.Parameter()
     db_type = luigi.Parameter()
 
     def complete(self):
+        """Check if all articles inside of `parsed/` are in the database."""
         # If all the articles are inside
         if self.db_type == "sqlite":
             prefix = "sqlite:///"
@@ -439,6 +474,7 @@ class AddTask(ExternalProgramTask):
         return not new_uids
 
     def program_args(self):
+        """Define subprocess arguments."""
         input_dir = Path(self.input().path)
 
         command = [
