@@ -218,7 +218,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
 
 def test_pubmed_source(
-        test_data_path, pubmed_xml_gz_path, capsys, monkeypatch, tmp_path
+    test_data_path, pubmed_xml_gz_path, capsys, monkeypatch, tmp_path
 ):
 
     mesh_tree_path = tmp_path / "mesh_tree.json"
