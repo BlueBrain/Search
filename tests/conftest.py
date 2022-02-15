@@ -492,7 +492,7 @@ def pubmed_articles_zipped_path(test_data_path, tmp_path):
     pubmed_path = test_data_path / "pubmed_articles.xml"
     zip_pubmed_path = tmp_path / "pubmed_articles.xml.gz"
     with open(pubmed_path, "rb") as file_in, gzip.open(
-            zip_pubmed_path, "wb"
+        zip_pubmed_path, "wb"
     ) as gzip_out:
         gzip_out.writelines(file_in)
     return zip_pubmed_path

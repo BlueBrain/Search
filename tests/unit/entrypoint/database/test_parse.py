@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-import gzip
 import json
 import logging
 import subprocess
@@ -72,7 +71,10 @@ def test_iter_parsers(input_type, path, article_uids):
 
 def test_iter_parsers_pubmed_xml_set(pubmed_articles_zipped_path):
     parsers = iter_parsers("pubmed-xml-set", pubmed_articles_zipped_path)
-    article_uids = ["e9bb8ba085982a7cbb7d9ac2dbbafc7f", "49442b9ec575ae01f4934dfd79d03631"]
+    article_uids = [
+        "e9bb8ba085982a7cbb7d9ac2dbbafc7f",
+        "49442b9ec575ae01f4934dfd79d03631",
+    ]
     for parser, uid in zip(parsers, article_uids):
         assert parser.uid == uid
 

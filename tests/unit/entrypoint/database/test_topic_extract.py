@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import argparse
-import gzip
 import inspect
 import json
 import logging
@@ -218,7 +217,9 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
     assert result[0]["topics"]["article"]["Subject Area"] == ["TOPIC"]
 
 
-def test_pubmed_source(test_data_path, pubmed_articles_zipped_path, capsys, monkeypatch, tmp_path):
+def test_pubmed_source(
+    test_data_path, pubmed_articles_zipped_path, capsys, monkeypatch, tmp_path
+):
 
     mesh_tree_path = tmp_path / "mesh_tree.json"
 
