@@ -437,7 +437,9 @@ class AddTask(ExternalProgramTask):
 
         new_uids = []
         for uid in all_uids:
-            query = sqlalchemy.text("SELECT article_id from articles WHERE article_id = :uid")
+            query = sqlalchemy.text(
+                "SELECT article_id from articles WHERE article_id = :uid"
+            )
             res = engine.execute(query, uid=uid).fetchall()
 
             if not res:
