@@ -16,6 +16,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 import argparse
 import inspect
+import json
 import logging
 import pathlib
 from unittest.mock import Mock
@@ -33,6 +34,7 @@ TOPIC_EXTRACT_PARAMS = {
     "recursive",
     "overwrite",
     "dry_run",
+    "mesh_topic_db",
 }
 
 
@@ -108,7 +110,15 @@ def test_dry_run(test_data_path, capsys, tmp_path):
 def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     pmc_path = test_data_path / "jats_article.xml"
     output_jsonl = tmp_path / "test.jsonl"
-    meshes = ["MeSH 1", "MeSH 2"]
+    mesh_tree_path = tmp_path / "mesh_tree.json"
+    mesh_tree_numbers = {
+        "A1": "topic1",
+        "A1.1": "topic11",
+        "A1.2": "topic12",
+        "A1.2.1": "topic121",
+    }
+    mesh_tree_path.write_text(json.dumps(mesh_tree_numbers))
+    meshes = ["topic11", "topic12"]
 
     get_topic_for_pmc_mock = Mock(return_value=meshes)
     monkeypatch.setattr(
@@ -123,6 +133,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         recursive=False,
         overwrite=False,
         dry_run=False,
+        mesh_topic_db=mesh_tree_path,
     )
     assert exit_code == 0
     assert output_jsonl.exists()
@@ -136,7 +147,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
     topics = result["topics"]
     assert "journal" in topics
     assert isinstance(topics["journal"], dict)
-    assert topics["journal"]["MeSH"] == meshes
+    assert topics["journal"]["MeSH"] == ["topic1", "topic11", "topic12"]
     assert "metadata" in result
 
     # Test overwrite
@@ -148,6 +159,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         recursive=False,
         overwrite=True,
         dry_run=False,
+        mesh_topic_db=mesh_tree_path,
     )
     assert exit_code == 0
     results = JSONL.load_jsonl(output_jsonl)
@@ -162,6 +174,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         recursive=False,
         overwrite=False,
         dry_run=False,
+        mesh_topic_db=mesh_tree_path,
     )
     assert exit_code == 0
     results = JSONL.load_jsonl(output_jsonl)
@@ -205,11 +218,18 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
 
 def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
+    mesh_tree_path = tmp_path / "mesh_tree.json"
     pmc_path = test_data_path / "pubmed_articles.xml"
     output_jsonl = tmp_path / "test.jsonl"
-    journal_meshes = ["MeSH Journal 1", "MeSH Journal 2"]
-    article_meshes = ["MeSH Article 1", "MeSH Article 2"]
-
+    mesh_tree_numbers = {
+        "A1": "topic1",
+        "A1.1": "topic11",
+        "A1.2": "topic12",
+        "A1.2.1": "topic121",
+    }
+    mesh_tree_path.write_text(json.dumps(mesh_tree_numbers))
+    journal_meshes = ["topic11", "topic12"]
+    article_meshes = ["topic11", "topic121"]
     extract_article_topic_for_pubmed_mock = Mock(return_value=article_meshes)
     monkeypatch.setattr(
         "bluesearch.database.topic.extract_article_topics_for_pubmed_article",
@@ -230,6 +250,7 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
         recursive=False,
         overwrite=False,
         dry_run=False,
+        mesh_topic_db=mesh_tree_path,
     )
     assert exit_code == 0
     assert output_jsonl.exists()
@@ -247,7 +268,22 @@ def test_pubmed_source(test_data_path, capsys, monkeypatch, tmp_path):
     assert "journal" in topics
     assert isinstance(topics["journal"], dict)
     assert isinstance(topics["article"], dict)
-    assert topics["journal"]["MeSH"] == journal_meshes
-    assert topics["article"]["MeSH"] == article_meshes
+    assert topics["journal"]["MeSH"] == ["topic1", "topic11", "topic12"]
+    assert topics["article"]["MeSH"] == ["topic1", "topic11", "topic12", "topic121"]
     assert "metadata" in result
     assert "element_in_file" in result["metadata"]
+
+
+@pytest.mark.parametrize("source", ["pubmed", "pmc"])
+def test_mesh_topic_db_is_enforced(source, caplog, tmp_path):
+    exit_code = topic_extract.run(
+        source=source,
+        input_path=tmp_path,
+        output_file=tmp_path,
+        match_filename=None,
+        recursive=False,
+        overwrite=False,
+        dry_run=False,
+    )
+    assert exit_code != 0
+    assert "--mesh-topics-db is mandatory" in caplog.text

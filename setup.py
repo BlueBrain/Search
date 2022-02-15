@@ -63,7 +63,7 @@ INSTALL_REQUIRES = [
     "numpy>=1.20.1",
     "pandas>=1",
     # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
-    "mashumaro",
+    "mashumaro>=3.0",
     "pg8000",
     "python-dotenv",
     "requests",
