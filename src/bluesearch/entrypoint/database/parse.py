@@ -141,9 +141,8 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         yield PubMedXMLParser(input_path)
 
     elif input_type == "pubmed-xml-set":
-        with gzip.open(input_path) as mygzip:
-            articles_str = mygzip.read()
-        articles = ElementTree.fromstring(articles_str)
+        with gzip.open(input_path) as xml_stream:
+            articles = ElementTree.parse(xml_stream)
         for article in articles.iter("PubmedArticle"):
             yield PubMedXMLParser(article)
 
