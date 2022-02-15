@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import logging
 from pathlib import Path
 from typing import Any
@@ -187,7 +188,10 @@ def run(
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
-            articles = ElementTree.parse(path)
+            with gzip.open(path) as mygzip:
+                articles_str = mygzip.read()
+            articles = ElementTree.fromstring(articles_str)
+
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 topic_info = TopicInfo(
                     source=article_source,
