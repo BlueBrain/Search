@@ -488,7 +488,7 @@ def mining_schema_df():
 
 
 @pytest.fixture()
-def pubmed_articles_zipped_path(test_data_path, tmp_path):
+def pubmed_xml_gz_path(test_data_path, tmp_path):
     pubmed_path = test_data_path / "pubmed_articles.xml"
     zip_pubmed_path = tmp_path / "pubmed_articles.xml.gz"
     with open(pubmed_path, "rb") as file_in, gzip.open(

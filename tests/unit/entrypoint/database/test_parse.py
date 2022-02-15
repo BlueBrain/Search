@@ -69,8 +69,8 @@ def test_iter_parsers(input_type, path, article_uids):
         assert parser.uid == uid
 
 
-def test_iter_parsers_pubmed_xml_set(pubmed_articles_zipped_path):
-    parsers = iter_parsers("pubmed-xml-set", pubmed_articles_zipped_path)
+def test_iter_parsers_pubmed_xml_set(pubmed_xml_gz_path):
+    parsers = iter_parsers("pubmed-xml-set", pubmed_xml_gz_path)
     article_uids = [
         "e9bb8ba085982a7cbb7d9ac2dbbafc7f",
         "49442b9ec575ae01f4934dfd79d03631",
@@ -157,9 +157,9 @@ def test_cord19_json(jsons_path, tmp_path, caplog):
     assert "Argument 'input_path'" in caplog.text
 
 
-def test_pubmed_xml_set(pubmed_articles_zipped_path, tmp_path):
+def test_pubmed_xml_set(pubmed_xml_gz_path, tmp_path):
     output_dir = tmp_path / "test"
-    main(["parse", "pubmed-xml-set", str(pubmed_articles_zipped_path), str(output_dir)])
+    main(["parse", "pubmed-xml-set", str(pubmed_xml_gz_path), str(output_dir)])
     files = sorted(output_dir.iterdir())
     assert len(files) == 2
 

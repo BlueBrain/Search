@@ -218,7 +218,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
 
 
 def test_pubmed_source(
-    test_data_path, pubmed_articles_zipped_path, capsys, monkeypatch, tmp_path
+        test_data_path, pubmed_xml_gz_path, capsys, monkeypatch, tmp_path
 ):
 
     mesh_tree_path = tmp_path / "mesh_tree.json"
@@ -247,7 +247,7 @@ def test_pubmed_source(
 
     exit_code = topic_extract.run(
         source="pubmed",
-        input_path=pubmed_articles_zipped_path,
+        input_path=pubmed_xml_gz_path,
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
@@ -264,7 +264,7 @@ def test_pubmed_source(
     assert len(results) == 2
     result = results[0]
     assert result["source"] == "pubmed"
-    assert result["path"] == str(pubmed_articles_zipped_path)
+    assert result["path"] == str(pubmed_xml_gz_path)
     assert isinstance(result["topics"], dict)
     topics = result["topics"]
     assert "article" in topics
