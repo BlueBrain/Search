@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import logging
 import sys
@@ -140,7 +141,9 @@ def iter_parsers(input_type: str, input_path: Path) -> Iterator[ArticleParser]:
         yield PubMedXMLParser(input_path)
 
     elif input_type == "pubmed-xml-set":
-        articles = ElementTree.parse(str(input_path))
+        with gzip.open(input_path) as mygzip:
+            articles_str = mygzip.read()
+        articles = ElementTree.fromstring(articles_str)
         for article in articles.iter("PubmedArticle"):
             yield PubMedXMLParser(article)
 

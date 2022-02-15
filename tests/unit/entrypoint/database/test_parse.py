@@ -50,7 +50,7 @@ from bluesearch.entrypoint.database.parse import iter_parsers
         ),
         pytest.param(
             "pubmed-xml-set",
-            "pubmed_articles.xml",
+            "pubmed_articles.xml.gz",
             ["e9bb8ba085982a7cbb7d9ac2dbbafc7f", "49442b9ec575ae01f4934dfd79d03631"],
             id="pubmed-xml-set",
         ),
@@ -154,7 +154,7 @@ def test_cord19_json(jsons_path, tmp_path, caplog):
 
 
 def test_pubmed_xml_set(tmp_path):
-    input_path = "tests/data/pubmed_articles.xml"
+    input_path = "tests/data/pubmed_articles.xml.gz"
     main(["parse", "pubmed-xml-set", input_path, str(tmp_path)])
     files = sorted(tmp_path.iterdir())
     assert len(files) == 2
