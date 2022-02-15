@@ -128,10 +128,10 @@ def test_pipelines(source, tasks, tmp_path, capsys):
     run.run(
         source=source,
         from_month="whatever",
-        filter_config="whatever",
+        filter_config=pathlib.Path("whatever"),
         output_dir=tmp_path,
         dry_run=True,
-        mesh_topic_db="whatever",
+        mesh_topic_db=pathlib.Path("whatever"),
         grobid_host="whatever",
         grobid_port=1234,
         db_url="whatever",

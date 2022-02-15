@@ -212,7 +212,7 @@ class UnzipTask(ExternalProgramTask):
                     output_path = output_dir / article.path.rpartition("/")[2]
                     f_in = my_tar.extractfile(article)
                     with open(output_path, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+                        shutil.copyfileobj(f_in, f_out)  # type: ignore
                 my_tar.close()
 
         elif self.source == "pubmed":
@@ -223,9 +223,9 @@ class UnzipTask(ExternalProgramTask):
 
             for archive in all_zip_files:
                 output_path = output_dir / archive.stem
-                with gzip.open(archive, "rb") as f_in:
-                    with open(output_path, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)
+                with gzip.open(archive, "rb") as f_in_2:
+                    with open(output_path, "wb") as f_out_2:
+                        shutil.copyfileobj(f_in_2, f_out_2)
 
         else:
             raise ValueError(f"Unsupported source {self.source}")
