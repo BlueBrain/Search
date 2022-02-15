@@ -218,18 +218,6 @@ class UnzipTask(ExternalProgramTask):
                         shutil.copyfileobj(f_in, f_out)  # type: ignore
                 my_tar.close()
 
-        elif self.source == "pubmed":
-            # .xml.gz
-            all_zip_files = [p for p in input_dir.iterdir() if p.suffix == ".gz"]
-            if not all_zip_files:
-                raise ValueError("No zip files were found")
-
-            for archive in all_zip_files:
-                output_path = output_dir / archive.stem
-                with gzip.open(archive, "rb") as f_in_2:
-                    with open(output_path, "wb") as f_out_2:
-                        shutil.copyfileobj(f_in_2, f_out_2)
-
         else:
             raise ValueError(f"Unsupported source {self.source}")
 
@@ -248,7 +236,7 @@ class TopicExtractTask(ExternalProgramTask):
 
     def requires(self) -> luigi.Task:
         """Define conditional dependencies."""
-        if self.source in {"pmc", "pubmed"}:
+        if self.source in {"pmc"}:
             return self.clone(UnzipTask)
         else:
             return self.clone(DownloadTask)
