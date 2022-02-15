@@ -142,6 +142,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 BBS_BINARY = ["bbs_database"]
 VERBOSITY = ["-v"]  # for the entrypoint subprocesses
 CAPTURE_OUTPUT = False
+OUTPUT_DIR_RAW = None  # make sure the same datestamp for all tasks
 
 
 class DownloadTask(ExternalProgramTask):
@@ -156,12 +157,14 @@ class DownloadTask(ExternalProgramTask):
 
     def output(self) -> luigi.LocalTarget:
         """Define download folder."""
-        today = datetime.today()
-        date = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
+        global OUTPUT_DIR_RAW
+        if OUTPUT_DIR_RAW is None:
+            today = datetime.today()
+            date = f"{self.from_month}_{today.strftime('%Y-%m-%d:%M-%S')}"
 
-        output_dir = Path(self.output_dir) / self.source / date / "raw"
+            OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / date / "raw"
 
-        return luigi.LocalTarget(str(output_dir))
+        return luigi.LocalTarget(str(OUTPUT_DIR_RAW))
 
     def program_args(self) -> list[str]:
         """Define subprocess arguments."""
@@ -333,7 +336,7 @@ class CreateSymlinksTask(luigi.Task):
         """Create symlinks."""
         output_dir = Path(self.output().path)
 
-        filtering = pd.read_csv(self.input())
+        filtering = pd.read_csv(self.input().path)
         accepted = pd.Series(filtering[filtering.accept].path.unique())
 
         def create_symlink(path):
