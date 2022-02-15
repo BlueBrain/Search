@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+import gzip
 import json
 import time
 import warnings
@@ -485,3 +485,14 @@ def mining_schema_df():
     schema_file = ROOT_PATH / "tests" / "data" / "mining" / "request" / "request.csv"
     df = pd.read_csv(schema_file)
     return df
+
+
+@pytest.fixture()
+def pubmed_articles_zipped_path(test_data_path, tmp_path):
+    pubmed_path = test_data_path / "pubmed_articles.xml"
+    zip_pubmed_path = tmp_path / "pubmed_articles.xml.gz"
+    with open(pubmed_path, "rb") as file_in, gzip.open(
+            zip_pubmed_path, "wb"
+    ) as gzip_out:
+        gzip_out.writelines(file_in)
+    return zip_pubmed_path
