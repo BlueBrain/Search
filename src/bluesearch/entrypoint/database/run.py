@@ -319,10 +319,10 @@ class TopicFilterTask(ExternalProgramTask):
 
 
 @requires(TopicFilterTask)
-class CreateSymlinksTask(luigi.Task):
-    """Create folder of symlinked articles.
+class PerformFilteringTask(luigi.Task):
+    """Create folder that only contains relevant articles.
 
-    We only symlink those articles that made it through the topic-filtering
+    We only consider those articles that made it through the topic-filtering
     stage. The only input is the `filtering.csv`.
     """
 
@@ -349,7 +349,7 @@ class CreateSymlinksTask(luigi.Task):
         accepted.apply(create_symlink)
 
 
-@requires(CreateSymlinksTask)
+@requires(PerformFilteringTask)
 class ConvertPDFTask(ExternalProgramTask):
     """Convert PDFs to XMLs.
 
@@ -384,7 +384,7 @@ class ConvertPDFTask(ExternalProgramTask):
         return luigi.LocalTarget(str(output_file))
 
 
-@inherits(ConvertPDFTask, CreateSymlinksTask)
+@inherits(ConvertPDFTask, PerformFilteringTask)
 class ParseTask(ExternalProgramTask):
     """Parse articles.
 
@@ -397,7 +397,7 @@ class ParseTask(ExternalProgramTask):
         if self.source == "arxiv":
             return self.clone(ConvertPDFTask)
         else:
-            return self.clone(CreateSymlinksTask)
+            return self.clone(PerformFilteringTask)
 
     def output(self):
         """Define output folder."""
@@ -520,7 +520,7 @@ def run(
     UnzipTask.capture_output = CAPTURE_OUTPUT
     TopicExtractTask.capture_output = CAPTURE_OUTPUT
     TopicFilterTask.capture_output = CAPTURE_OUTPUT
-    CreateSymlinksTask.capture_output = CAPTURE_OUTPUT
+    PerformFilteringTask.capture_output = CAPTURE_OUTPUT
     ConvertPDFTask.capture_output = CAPTURE_OUTPUT
     ParseTask.capture_output = CAPTURE_OUTPUT
     AddTask.capture_output = CAPTURE_OUTPUT
