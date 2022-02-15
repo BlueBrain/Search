@@ -142,7 +142,6 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-BBS_BINARY = ["gtimeout", "--preserve-status", "5", "bbs_database"]
 BBS_BINARY = ["bbs_database"]
 CAPTURE_OUTPUT = False
 
@@ -170,6 +169,7 @@ class DownloadTask(ExternalProgramTask):
         """Define subprocess arguments."""
         output_dir = self.output().path
         return [
+            "custom_timeout",
             *BBS_BINARY,
             "download",
             "-v",
