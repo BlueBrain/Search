@@ -16,16 +16,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import argparse
-import datetime
 import inspect
 import pathlib
 
-import numpy as np
-import pandas as pd
 import pytest
 
 from bluesearch.entrypoint.database import run
-from bluesearch.utils import JSONL
 
 RUN_PARAMS = {
     "source",

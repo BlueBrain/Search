@@ -19,14 +19,11 @@ from __future__ import annotations
 
 import argparse
 import gzip
-import json
 import logging
 import shutil
 import tarfile
-import warnings
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator
 
 import luigi
 import pandas as pd
@@ -320,12 +317,6 @@ class CreateSymlinksTask(luigi.Task):
     def run(self):
         output_dir = Path(self.output().path)
         filtering_path = Path(self.input().path)
-        input_dir = output_dir.parent / "raw_unzipped"
-
-        if (output_dir.parent / "raw_unzipped").exists():
-            input_dir = output_dir.parent / "raw_unzipped"
-        else:
-            input_dir = output_dir.parent / "raw"
 
         filtering = pd.read_csv(filtering_path)
         accepted = pd.Series(filtering[filtering.accept].path.unique())
