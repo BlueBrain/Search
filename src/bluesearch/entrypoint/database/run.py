@@ -143,6 +143,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
 
 BBS_BINARY = ["bbs_database"]
+VERBOSITY = ["-v"]  # for the entrypoint subprocesses
 CAPTURE_OUTPUT = False
 
 
@@ -172,7 +173,7 @@ class DownloadTask(ExternalProgramTask):
             "custom_timeout",
             *BBS_BINARY,
             "download",
-            "-v",
+            *VERBOSITY,
             self.source,
             self.from_month,
             output_dir,
@@ -267,7 +268,7 @@ class TopicExtractTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "topic-extract",
-            "-v",
+            *VERBOSITY,
             self.source,
             input_dir,
             output_dir,
@@ -300,7 +301,7 @@ class TopicFilterTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "topic-filter",
-            "-v",
+            *VERBOSITY,
             extracted_topics,
             self.filter_config,
             output_file,
@@ -351,7 +352,7 @@ class ConvertPDFTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "convert-pdf",
-            "-v",
+            *VERBOSITY,
             self.grobid_host,
             self.grobid_port,
             input_dir,
@@ -401,7 +402,7 @@ class ParseTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "parse",
-            "-v",
+            *VERBOSITY,
             parser,
             input_dir,
             output_dir,
@@ -450,9 +451,9 @@ class AddTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "add",
+            *VERBOSITY,
             self.db_url,
             input_dir,
-            "-v",
             f"--db-type={self.db_type}",
         ]
 
