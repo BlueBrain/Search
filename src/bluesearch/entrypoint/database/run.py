@@ -337,16 +337,29 @@ class PerformFilteringTask(luigi.Task):
         output_dir = Path(self.output().path)
 
         filtering = pd.read_csv(self.input().path)
-        accepted = pd.Series(filtering[filtering.accept].path.unique())
-
-        def create_symlink(path):
-            input_path = Path(path)
-            output_path = output_dir / input_path.name
-            output_path.symlink_to(input_path)
 
         output_dir.mkdir(exist_ok=True)
 
-        accepted.apply(create_symlink)
+        if self.source == "pubmed":
+            # Find all input files (.xml.gz)
+
+            # Iteratively Load each  of the files in memory
+                # Create a copy of the XML
+                # Remove elements that were not accepted from the copy
+                # Store the copy with removed elements
+
+            # Iteratively zip and save all of the "pruned" copies
+            pass
+
+        else:
+            accepted = pd.Series(filtering[filtering.accept].path.unique())
+            def create_symlink(path):
+                input_path = Path(path)
+                output_path = output_dir / input_path.name
+                output_path.symlink_to(input_path)
+
+
+            accepted.apply(create_symlink)
 
 
 @requires(PerformFilteringTask)
