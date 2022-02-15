@@ -41,7 +41,6 @@ from bluesearch.embedding_models import (
 GPU_IS_AVAILABLE = torch.cuda.is_available()
 
 
-@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 class TestEmbeddingModels:
     """The included tests do not use real models."""
 
@@ -199,7 +198,6 @@ class TestEmbeddingModels:
 # the first test using docker. I tried changing different things in the said
 # fixture, but without success. Last resort solution was to ignore this
 # warning using the decorator below.
-@pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 @pytest.mark.parametrize("batch_size", [1, 5, 1000])
 def test_compute_database(
     fake_sqlalchemy_engine,
