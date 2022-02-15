@@ -25,14 +25,14 @@ import tarfile
 from datetime import datetime
 from pathlib import Path
 
-import luigi
 import pandas as pd
 import sqlalchemy
-from luigi.util import inherits, requires
+
+import luigi
+from bluesearch.database.article import ArticleSource
 from luigi.contrib.external_program import ExternalProgramTask
 from luigi.tools.deps_tree import print_tree
-
-from bluesearch.database.article import ArticleSource
+from luigi.util import inherits, requires
 
 logger = logging.getLogger(__name__)
 
