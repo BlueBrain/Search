@@ -160,7 +160,7 @@ class DownloadTask(ExternalProgramTask):
         global OUTPUT_DIR_RAW
         if OUTPUT_DIR_RAW is None:
             today = datetime.today()
-            date = f"{self.from_month}_{today.strftime('%Y-%m-%d:%M-%S')}"
+            date = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
 
             OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / date / "raw"
 
