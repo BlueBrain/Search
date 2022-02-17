@@ -337,26 +337,29 @@ class PerformFilteringTask(luigi.Task):
 
             # Iteratively Load each  of the files in memory
             for input_file in all_input_files:
-	            # Unzip it	
+                # Unzip it
                 with gzip.open(input_file) as xml_stream:
                     article_set = ElementTree.parse(xml_stream)
 
 
                 # Create a copy of the XML
-                article_set_copy = copy.deepcopy(article_set)
+                # article_set_copy = copy.deepcopy(article_set)
+                root = article_set.getroot()
 
                 # Find elements that were not accepted
                 to_remove = filtering[(filtering["path"] == str(input_file)) & (~filtering["accept"])]
+                article_nodes = root.findall("PubmedArticle")
 
-                for eif in to_remove["element_in_file"].tolist():
+
+                for eif in to_remove["element_in_file"].astype(int).tolist():
                     # Remove the corresponding <PubmedArticle> from the copy
-
-
+                    root.remove(article_nodes[eif])
 
                 # Store the copy with removed elements
+                output_file = output_dir / input_file.stem
+                article_set.write(output_file)
+                # Zipping TODO
 
-            # Iteratively zip and save all of the "pruned" copies
-            pass
 
         else:
             accepted = pd.Series(filtering[filtering.accept].path.unique())
