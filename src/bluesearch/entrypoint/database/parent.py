@@ -22,10 +22,10 @@ Cmd = namedtuple("Cmd", ["help", "init_parser", "run"])
 
 
 def _setup_logging(logging_level: int) -> None:
-    root_logger = logging.getLogger()
+    bluesearch_logger = logging.getLogger("bluesearch")
 
     # Logging level
-    root_logger.setLevel(logging_level)
+    bluesearch_logger.setLevel(logging_level)
 
     # Formatter
     fmt = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
@@ -34,7 +34,7 @@ def _setup_logging(logging_level: int) -> None:
     # Handler
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-    root_logger.addHandler(handler)
+    bluesearch_logger.addHandler(handler)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
