@@ -342,15 +342,15 @@ class PerformFilteringTask(luigi.Task):
                 with gzip.open(input_file) as xml_stream:
                     article_set = ElementTree.parse(xml_stream)
 
-
                 # Create a copy of the XML
                 # article_set_copy = copy.deepcopy(article_set)
                 root = article_set.getroot()
 
                 # Find elements that were not accepted
-                to_remove = filtering[(filtering["path"] == str(input_file)) & (~filtering["accept"])]
+                to_remove = filtering[
+                    (filtering["path"] == str(input_file)) & (~filtering["accept"])
+                ]
                 article_nodes = root.findall("PubmedArticle")
-
 
                 for eif in to_remove["element_in_file"].astype(int).tolist():
                     # Remove the corresponding <PubmedArticle> from the copy
@@ -359,17 +359,16 @@ class PerformFilteringTask(luigi.Task):
                 # Store the copy with removed elements
                 output_file = output_dir / input_file.name
                 out_bytes = tostring(root)
-                with gzip.open(output_file, 'wb') as f:
-                        f.write(out_bytes)
-
+                with gzip.open(output_file, "wb") as f:
+                    f.write(out_bytes)
 
         else:
             accepted = pd.Series(filtering[filtering.accept].path.unique())
+
             def create_symlink(path):
                 input_path = Path(path)
                 output_path = output_dir / input_path.name
                 output_path.symlink_to(input_path)
-
 
             accepted.apply(create_symlink)
 
