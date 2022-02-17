@@ -186,7 +186,7 @@ class DownloadTask(ExternalProgramTask):
 class UnzipTask(ExternalProgramTask):
     """Unzip raw files (if necessary).
 
-    Only applicable in case of `pubmed` and `pmc`. The unzipped files
+    Only applicable in case of `pmc`. The unzipped files
     are stored inside of `raw_unzipped`.
     """
 
