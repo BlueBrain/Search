@@ -29,6 +29,7 @@ from pathlib import Path
 import pandas as pd
 import sqlalchemy
 from defusedxml import ElementTree
+from defusedxml.cElementTree import tostring
 
 import luigi
 from bluesearch.database.article import ArticleSource
@@ -356,9 +357,10 @@ class PerformFilteringTask(luigi.Task):
                     root.remove(article_nodes[eif])
 
                 # Store the copy with removed elements
-                output_file = output_dir / input_file.stem
-                article_set.write(output_file)
-                # Zipping TODO
+                output_file = output_dir / input_file.name
+                out_bytes = tostring(root)
+                with gzip.open(output_file, 'wb') as f:
+                        f.write(out_bytes)
 
 
         else:
