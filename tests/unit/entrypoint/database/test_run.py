@@ -114,7 +114,6 @@ def test_run_arguments():
             "pubmed",
             (
                 "DownloadTask",
-                "UnzipTask",
                 "TopicExtractTask",
                 "TopicFilterTask",
                 "PerformFilteringTask",

@@ -29,7 +29,7 @@ from pathlib import Path
 import pandas as pd
 import sqlalchemy
 from defusedxml import ElementTree
-from defusedxml.cElementTree import tostring
+from defusedxml.ElementTree import tostring
 
 import luigi
 from bluesearch.database.article import ArticleSource
