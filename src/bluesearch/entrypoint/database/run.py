@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 import argparse
-import copy
 import gzip
 import logging
 import shutil
@@ -325,7 +324,6 @@ class PerformFilteringTask(luigi.Task):
 
     def run(self):
         """Create symlinks."""
-
         output_dir = Path(self.output().path)
 
         filtering = pd.read_csv(self.input().path)
