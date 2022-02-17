@@ -562,7 +562,7 @@ def run(
 
     luigi_kwargs = {
         "tasks": [final_task],
-        "log_level": "DEBUG",
+        "log_level": "WARNING",
         "local_scheduler": True,
     }
     if dry_run:
