@@ -31,6 +31,7 @@ author = "Blue Brain Project"
 version = bluesearch.__version__
 
 # -- General configuration ---------------------------------------------------
+suppress_warnings = ["ref.ref"]  # because of luigi.util.requires
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
