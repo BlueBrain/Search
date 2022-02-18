@@ -172,7 +172,6 @@ class DownloadTask(ExternalProgramTask):
         """Define subprocess arguments."""
         output_dir = self.output().path
         return [
-            "custom_timeout",
             *BBS_BINARY,
             "download",
             *VERBOSITY,
