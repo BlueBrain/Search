@@ -249,7 +249,7 @@ class TopicExtractTask(ExternalProgramTask):
 
         return luigi.LocalTarget(str(output_file))
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         input_dir = self.input().path
         output_dir = self.output().path
@@ -284,13 +284,13 @@ class TopicFilterTask(ExternalProgramTask):
 
     filter_config = luigi.Parameter()
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
         """Define output file."""
         output_file = Path(self.input().path).parent / "filtering.csv"
 
         return luigi.LocalTarget(str(output_file))
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         extracted_topics = self.input().path
         output_file = self.output().path
@@ -315,13 +315,13 @@ class PerformFilteringTask(luigi.Task):
     stage. The only input is the `filtering.csv`.
     """
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
         """Define output folder."""
         output_dir = Path(self.input().path).parent / "filtered"
 
         return luigi.LocalTarget(str(output_dir))
 
-    def run(self):
+    def run(self) -> None:
         """Create symlinks."""
         output_dir = Path(self.output().path)
 
@@ -381,7 +381,7 @@ class ConvertPDFTask(ExternalProgramTask):
     grobid_host = luigi.Parameter()
     grobid_port = luigi.IntParameter()
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         input_dir = Path(self.input().path).parent / "filtered"
         output_dir = self.output().path
@@ -398,7 +398,7 @@ class ConvertPDFTask(ExternalProgramTask):
 
         return command
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
         """Define output folder."""
         output_file = Path(self.input().path).parent / "converted_pdfs"
 
@@ -413,20 +413,20 @@ class ParseTask(ExternalProgramTask):
     `source="arxiv"` `converted_pdfs/`.
     """
 
-    def requires(self):
+    def requires(self) -> luigi.Task:
         """Define conditional dependencies."""
         if self.source == "arxiv":
             return self.clone(ConvertPDFTask)
         else:
             return self.clone(PerformFilteringTask)
 
-    def output(self):
+    def output(self) -> luigi.LocalTarget:
         """Define output folder."""
         output_file = Path(self.input().path).parent / "parsed"
 
         return luigi.LocalTarget(str(output_file))
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         output_dir = Path(self.output().path)
         output_dir.mkdir(exist_ok=True)
@@ -451,8 +451,8 @@ class ParseTask(ExternalProgramTask):
             "parse",
             *VERBOSITY,
             parser,
-            input_dir,
-            output_dir,
+            str(input_dir),
+            str(output_dir),
         ]
 
         return command
@@ -469,7 +469,7 @@ class AddTask(ExternalProgramTask):
     db_url = luigi.Parameter()
     db_type = luigi.Parameter()
 
-    def complete(self):
+    def complete(self) -> bool:
         """Check if all articles inside of `parsed/` are in the database."""
         # If all the articles are inside
         if self.db_type == "sqlite":
@@ -501,7 +501,7 @@ class AddTask(ExternalProgramTask):
 
         return not new_uids
 
-    def program_args(self):
+    def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         input_dir = Path(self.input().path)
 
