@@ -186,24 +186,24 @@ def test_get_gcs_urls():
         "arxiv/arxiv/pdf/2109": [
             Blob("topic-a/99.6767v1.1.pdf", fake_bucket),  # invalid version
             Blob("topic-v/99.6767v1.2.pdf", fake_bucket),  # invalid version
-            Blob("topic-v/99.6767v1a.pdf", fake_bucket),   # invalid version
+            Blob("topic-v/99.6767v1a.pdf", fake_bucket),  # invalid version
             Blob("topic-v/99.6767v10.pdf", fake_bucket),
-            Blob("topic-v/99.6767v3.pdf", fake_bucket),    # older version
+            Blob("topic-v/99.6767v3.pdf", fake_bucket),  # older version
         ],
         "arxiv/arxiv/pdf/2110": [
-            Blob("topic-a/12.3450v1.pdf", fake_bucket),     # older version
+            Blob("topic-a/12.3450v1.pdf", fake_bucket),  # older version
             Blob("topic-v/12.3450v2.pdf", fake_bucket),
         ],
         "arxiv/arxiv/pdf/2111": [
-            Blob("topic-v/99.3450v2.pdf", fake_bucket),     # older version
-            Blob("topic-v/99.3450v3.pdf", fake_bucket),     # older version
+            Blob("topic-v/99.3450v2.pdf", fake_bucket),  # older version
+            Blob("topic-v/99.3450v3.pdf", fake_bucket),  # older version
             Blob("topic-v/99.3450v10.pdf", fake_bucket),
         ],
         "arxiv/arxiv/pdf/2112": [
             Blob("topic-v/33.1v2.pdf", fake_bucket),
             Blob("topic-v/44.1v2.pdf", fake_bucket),
             Blob("topic-v/55.1v2.pdf", fake_bucket),
-            Blob("topic-v/55.1v1.pdf", fake_bucket),        # older version
+            Blob("topic-v/55.1v1.pdf", fake_bucket),  # older version
         ],
     }
 
