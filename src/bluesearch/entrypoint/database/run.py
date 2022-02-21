@@ -140,7 +140,9 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "--identifier",
         type=str,
-        help="Custom name of the identifier. If not specified, we use `from-month_today`",
+        help="""Custom name of the identifier. If not specified, we use
+        `from-month_today`
+        """,
     )
 
     return parser
