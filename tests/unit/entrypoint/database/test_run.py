@@ -34,6 +34,7 @@ RUN_PARAMS = {
     "dry_run",
     "grobid_host",
     "grobid_port",
+    "identifier",
 }
 
 
@@ -135,6 +136,7 @@ def test_pipelines(source, tasks, tmp_path, capsys):
         grobid_port=1234,
         db_url="whatever",
         db_type="sqlite",
+        identifier=None,
     )
 
     captured = capsys.readouterr()

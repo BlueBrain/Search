@@ -137,6 +137,11 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=int,
         help="The port of the GROBID server.",
     )
+    parser.add_argument(
+        "--identifier",
+        type=str,
+        help="Custom name of the identifier. If not specified, we use `from-month_today`",
+    )
 
     return parser
 
@@ -156,15 +161,20 @@ class DownloadTask(ExternalProgramTask):
     source = luigi.Parameter()
     from_month = luigi.Parameter()
     output_dir = luigi.Parameter()
+    identifier = luigi.OptionalParameter()
 
     def output(self) -> luigi.LocalTarget:
         """Define download folder."""
         global OUTPUT_DIR_RAW
         if OUTPUT_DIR_RAW is None:
             today = datetime.today()
-            date = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
+            if self.identifier is None:
+                identifier = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
+            else:
+                identifier = self.identifier
 
-            OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / date / "raw"
+
+            OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / identifier / "raw"
 
         return luigi.LocalTarget(str(OUTPUT_DIR_RAW))
 
@@ -529,6 +539,7 @@ def run(
     dry_run: bool,
     grobid_host: str | None,
     grobid_port: int | None,
+    identifier: str | None,
 ) -> int:
     """Run overall pipeline.
 
@@ -556,6 +567,7 @@ def run(
         grobid_port=grobid_port,
         db_url=db_url,
         db_type=db_type,
+        identifier=identifier,
     )
 
     luigi_kwargs = {
