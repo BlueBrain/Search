@@ -246,21 +246,23 @@ def get_gcs_urls(
 
     client = bucket.client
 
+    def _extract_blob_info(blob: Blob) -> tuple[Blob, str, str, int] | None:
+        try:
+            name = blob.name
+            full_name = blob.name.rsplit("v", 1)[0]
+            article = int(blob.name.rsplit("v", 1)[1].split(".")[0])
+        except ValueError:
+            return None
+        return blob, name, full_name, article
+
     url_dict = {}
     for yearmonth in yearmonth_list:
-        iterator = client.list_blobs(bucket, prefix=f"arxiv/arxiv/pdf/{yearmonth}")
+        all_blobs = client.list_blobs(bucket, prefix=f"arxiv/arxiv/pdf/{yearmonth}")
 
         # If more than one version is found, we only keep the last one
+        blobs_info = (_extract_blob_info(blob) for blob in all_blobs)
         df = pd.DataFrame(
-            (
-                (
-                    el,
-                    el.name,
-                    el.name.rsplit("v", 1)[0],
-                    int(el.name.rsplit("v", 1)[1].split(".")[0]),
-                )
-                for el in iterator
-            ),
+            (info for info in blobs_info if info is not None),
             columns=["blob", "fullname", "article", "version"],
         )
 
