@@ -421,7 +421,7 @@ class ParseTask(ExternalProgramTask):
     """Parse articles.
 
     The input is all the articles inside of `filtered/` (or in case of
-    `source="arxiv"` `converted_pdfs/`.
+    `source="arxiv"` `converted_pdfs/`).
     """
 
     def requires(self) -> luigi.Task:
