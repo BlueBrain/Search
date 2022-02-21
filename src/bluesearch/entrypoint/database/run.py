@@ -238,7 +238,7 @@ class UnzipTask(ExternalProgramTask):
 class TopicExtractTask(ExternalProgramTask):
     """Topic extraction.
 
-    The input of this dask is either `raw/` or `raw_unzipped/` depending
+    The input of this task is either `raw/` or `raw_unzipped/` depending
     on the source. The output is going to be a single file
     `topic_infos.jsonl`.
     """
@@ -344,7 +344,7 @@ class PerformFilteringTask(luigi.Task):
             # Find all input files (.xml.gz)
             all_input_files = [Path(p) for p in filtering["path"].unique()]
 
-            # Iteratively Load each  of the files in memory
+            # Iteratively load each  of the files in memory
             for input_file in all_input_files:
                 # Unzip it
                 with gzip.open(input_file) as xml_stream:
