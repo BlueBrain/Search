@@ -173,7 +173,6 @@ class DownloadTask(ExternalProgramTask):
             else:
                 identifier = self.identifier
 
-
             OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / identifier / "raw"
 
         return luigi.LocalTarget(str(OUTPUT_DIR_RAW))
