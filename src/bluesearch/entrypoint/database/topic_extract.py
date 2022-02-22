@@ -192,6 +192,7 @@ def run(
                 articles = ElementTree.parse(xml_stream)
 
             for i, article in enumerate(articles.iter("PubmedArticle")):
+                logger.info(f"Processing element in file {i}")
                 topic_info = TopicInfo(
                     source=article_source,
                     path=path.resolve(),
