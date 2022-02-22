@@ -282,6 +282,12 @@ class TopicExtractTask(ExternalProgramTask):
         if self.source in {"pmc", "pubmed"}:
             command.append(f"--mesh-topic-db={self.mesh_topic_db}")
 
+        if self.source == "pubmed":
+            command.extend(
+                ["-R", "-m", r".*\.xml\.gz$"],
+            )
+
+
         return command
 
 
