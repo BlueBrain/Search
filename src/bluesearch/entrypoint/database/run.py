@@ -287,7 +287,6 @@ class TopicExtractTask(ExternalProgramTask):
                 ["-R", "-m", r".*\.xml\.gz$"],
             )
 
-
         return command
 
 
