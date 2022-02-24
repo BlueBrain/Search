@@ -144,6 +144,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         `from-month_today`
         """,
     )
+    parser.add_argument(
+        "--final-task",
+        type=str,
+        help="""Name of the task where to manually stop the pipeline. Note
+        that the task itself will be included.
+        """,
+    )
 
     return parser
 
@@ -533,6 +540,30 @@ class AddTask(ExternalProgramTask):
         return command
 
 
+def get_all_dependencies(task: luigi.Task) -> set[luigi.Task]:
+    """Get all dependencies of a given task.
+
+    Parameters
+    ----------
+    task
+        Input task
+
+    Returns
+    -------
+    set[luigi.Task]
+        All the tasks that the `input` depends on.
+    """
+    current_deps = set(task.deps())
+    if not current_deps:
+        return set()
+
+    else:
+        deps = set()
+        for current_dep in current_deps:
+            deps |= get_all_dependencies(current_dep)
+
+        return deps | current_deps
+
 def run(
     *,
     source: str,
@@ -546,6 +577,7 @@ def run(
     grobid_host: str | None,
     grobid_port: int | None,
     identifier: str | None,
+    final_task: str | None,
 ) -> int:
     """Run overall pipeline.
 
@@ -563,7 +595,7 @@ def run(
     ParseTask.capture_output = CAPTURE_OUTPUT
     AddTask.capture_output = CAPTURE_OUTPUT
 
-    final_task = AddTask(
+    add_task_inst = AddTask(
         source=source,
         from_month=from_month,
         filter_config=str(filter_config),
@@ -575,14 +607,24 @@ def run(
         db_type=db_type,
         identifier=identifier,
     )
+    if final_task is None:
+        selected_task_inst = add_task_inst
+    else:
+        all_dependencies = get_all_dependencies(add_task_inst)
+        all_dependencies_map = {t.__class__.__name__: t for t in all_dependencies}
+
+        if final_task in all_dependencies_map:
+            selected_task_inst = all_dependencies_map[final_task]
+        else:
+            raise ValueError(f"Unrecognized final task {final_task}")
 
     luigi_kwargs = {
-        "tasks": [final_task],
+        "tasks": [selected_task_inst],
         "log_level": "WARNING",
         "local_scheduler": True,
     }
     if dry_run:
-        print(print_tree(final_task, last=False))
+        print(print_tree(selected_task_inst, last=False))
     else:
 
         luigi.build(**luigi_kwargs)
