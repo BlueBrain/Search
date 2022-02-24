@@ -18,6 +18,8 @@
 import argparse
 import inspect
 import pathlib
+from subprocess import Popen
+from unittest.mock import Mock
 
 import pytest
 
@@ -35,6 +37,7 @@ RUN_PARAMS = {
     "grobid_host",
     "grobid_port",
     "identifier",
+    "final_task",
 }
 
 
@@ -137,6 +140,7 @@ def test_pipelines(source, tasks, tmp_path, capsys):
         db_url="whatever",
         db_type="sqlite",
         identifier=None,
+        final_task=None,
     )
 
     captured = capsys.readouterr()
@@ -145,3 +149,93 @@ def test_pipelines(source, tasks, tmp_path, capsys):
     for stdout_line, task in zip(stdout_lines, tasks):
         assert task in stdout_line
         assert "PENDING" in stdout_line
+
+
+@pytest.mark.parametrize(
+    "source", 
+    [
+        "arxiv",
+        "biorxiv",
+        "medrxiv",
+        "pmc",
+        "pubmed",
+    ]
+)
+def test_all(
+    tmp_path,
+    monkeypatch,
+    source,
+):
+    identifier = "ABC"
+    root_dir = tmp_path / source / identifier
+
+    fake_Popen_inst = Mock(spec=Popen)
+    fake_Popen_inst.returncode = 0
+    
+    def create_output(args, **kwargs):
+        entrypoint = args[1]
+
+        if entrypoint == "download":
+            output_path = root_dir / "raw/"
+            output_path.mkdir(parents=True)
+
+        elif entrypoint == "topic-extract":
+            output_path = root_dir / "topic_infos.jsonl"
+            output_path.touch()
+
+        elif entrypoint == "topic-filter":
+            output_path = root_dir / "filtering.csv"
+            output_path.touch()
+
+        elif entrypoint == "convert-pdf":
+            output_path = root_dir / "converted_pdfs/"
+            output_path.mkdir()
+
+        elif entrypoint == "parse":
+            output_path = root_dir / "parsed/"
+            output_path.mkdir()
+
+        elif entrypoint == "add":
+            pass
+
+        return fake_Popen_inst
+
+
+    fake_Popen_class = Mock(side_effect=create_output)
+    monkeypatch.setattr("subprocess.Popen", fake_Popen_class)
+    monkeypatch.setattr(run.UnzipTask, "run", lambda _: (root_dir / "raw_unzipped").mkdir())
+    monkeypatch.setattr(run.PerformFilteringTask, "run", lambda _: (root_dir / "filtered/").mkdir())
+    monkeypatch.setattr(run.AddTask, "complete", lambda _: False)
+
+    run.run(
+        source=source,
+        from_month="1234-11",
+        filter_config=pathlib.Path("aa"),
+        output_dir=tmp_path,
+        dry_run=False,
+        mesh_topic_db=pathlib.Path("whatever"),
+        grobid_host="112431321",
+        grobid_port=8000,
+        db_url="whatever",
+        db_type="sqlite",
+        identifier=identifier,
+        final_task="AddTask",
+    )
+    assert (root_dir / "raw").exists()
+    if source == "pmc":
+        assert (root_dir / "raw_unzipped").exists()
+
+    assert (root_dir / "topic_infos.jsonl").exists()
+    assert (root_dir / "filtering.csv").exists()
+    assert (root_dir / "filtered").exists()
+
+    if source == "arxiv":
+        assert (root_dir / "converted_pdfs").exists()
+
+    assert (root_dir / "parsed").exists()
+
+    if source == "arxiv":
+        assert fake_Popen_class.call_count == 6
+    else:
+        assert fake_Popen_class.call_count == 5
+

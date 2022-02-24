@@ -158,7 +158,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 BBS_BINARY = ["bbs_database"]
 VERBOSITY = ["-v"]  # for the entrypoint subprocesses
 CAPTURE_OUTPUT = False
-OUTPUT_DIR_RAW = None  # make sure the same datestamp for all tasks
+IDENTIFIER = None  # make sure the same for all tasks
 
 
 class DownloadTask(ExternalProgramTask):
@@ -174,17 +174,21 @@ class DownloadTask(ExternalProgramTask):
 
     def output(self) -> luigi.LocalTarget:
         """Define download folder."""
-        global OUTPUT_DIR_RAW
-        if OUTPUT_DIR_RAW is None:
-            today = datetime.today()
-            if self.identifier is None:
+        global IDENTIFIER
+        if self.identifier is not None:
+            identifier = self.identifier
+
+        else:
+            if IDENTIFIER is None:
+                today = datetime.today()
                 identifier = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
+                IDENTIFIER = identifier
             else:
-                identifier = self.identifier
+                identifier = IDENTIFIER
 
-            OUTPUT_DIR_RAW = Path(self.output_dir) / self.source / identifier / "raw"
+        output_dir = Path(self.output_dir) / self.source / identifier / "raw"
 
-        return luigi.LocalTarget(str(OUTPUT_DIR_RAW))
+        return luigi.LocalTarget(str(output_dir))
 
     def program_args(self) -> list[str]:
         """Define subprocess arguments."""
@@ -452,7 +456,6 @@ class ParseTask(ExternalProgramTask):
     def program_args(self) -> list[str]:
         """Define subprocess arguments."""
         output_dir = Path(self.output().path)
-        output_dir.mkdir(exist_ok=True)
 
         if (output_dir.parent / "converted_pdfs").exists():
             input_dir = output_dir.parent / "converted_pdfs"
