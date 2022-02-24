@@ -551,14 +551,14 @@ def get_all_dependencies(task: luigi.Task) -> set[luigi.Task]:
     Returns
     -------
     set[luigi.Task]
-        All the tasks that the `input` depends on.
+        All the tasks that the `input` depends on including itself.
     """
     current_deps = set(task.deps())
     if not current_deps:
         return set()
 
     else:
-        deps = set()
+        deps = {task}
         for current_dep in current_deps:
             deps |= get_all_dependencies(current_dep)
 
