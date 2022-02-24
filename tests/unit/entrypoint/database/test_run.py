@@ -152,14 +152,14 @@ def test_pipelines(source, tasks, tmp_path, capsys):
 
 
 @pytest.mark.parametrize(
-    "source", 
+    "source",
     [
         "arxiv",
         "biorxiv",
         "medrxiv",
         "pmc",
         "pubmed",
-    ]
+    ],
 )
 def test_all(
     tmp_path,
@@ -171,7 +171,7 @@ def test_all(
 
     fake_Popen_inst = Mock(spec=Popen)
     fake_Popen_inst.returncode = 0
-    
+
     def create_output(args, **kwargs):
         entrypoint = args[1]
 
@@ -200,11 +200,14 @@ def test_all(
 
         return fake_Popen_inst
 
-
     fake_Popen_class = Mock(side_effect=create_output)
     monkeypatch.setattr("subprocess.Popen", fake_Popen_class)
-    monkeypatch.setattr(run.UnzipTask, "run", lambda _: (root_dir / "raw_unzipped").mkdir())
-    monkeypatch.setattr(run.PerformFilteringTask, "run", lambda _: (root_dir / "filtered/").mkdir())
+    monkeypatch.setattr(
+        run.UnzipTask, "run", lambda _: (root_dir / "raw_unzipped").mkdir()
+    )
+    monkeypatch.setattr(
+        run.PerformFilteringTask, "run", lambda _: (root_dir / "filtered/").mkdir()
+    )
     monkeypatch.setattr(run.AddTask, "complete", lambda _: False)
 
     run.run(
@@ -238,4 +241,3 @@ def test_all(
         assert fake_Popen_class.call_count == 6
     else:
         assert fake_Popen_class.call_count == 5
-

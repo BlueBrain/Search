@@ -567,6 +567,7 @@ def get_all_dependencies(task: luigi.Task) -> set[luigi.Task]:
 
         return deps | current_deps
 
+
 def run(
     *,
     source: str,
