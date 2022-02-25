@@ -359,6 +359,9 @@ def get_topics_for_arxiv_articles(
     ids = list(id_2_path.keys())
     article_topics = {}
     for i_start in range(0, len(ids), batch_size):
+        logger.info(
+            f"Processing batch {i_start//batch_size} out of {len(ids)//batch_size}"
+        )
         # Get a slice of arXiv ids
         i_end = i_start + batch_size
         id_list = ids[i_start:i_end]
