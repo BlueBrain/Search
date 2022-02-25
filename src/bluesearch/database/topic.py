@@ -371,6 +371,7 @@ def get_topics_for_arxiv_articles(
             "id_list": ",".join(id_list),
             "max_results": str(batch_size),
         }
+        logger.debug(f"Requesting topic info on arxiv ids: {id_list}")
         res = requests.get(base_url, params)
         res.raise_for_status()
 
