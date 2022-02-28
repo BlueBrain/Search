@@ -72,9 +72,10 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.generate_pmc_urls", fake_generate_pmc_urls
     )
 
-    fake_datetime = datetime.datetime(2021, 12, 2)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
     pmc_path = tmp_path / "pmc"
-    download.run("pmc", fake_datetime, pmc_path, dry_run=False)
+    download.run("pmc", from_month, to_month, pmc_path, dry_run=False)
     assert pmc_path.exists()
     assert {path.name for path in pmc_path.iterdir()} == {
         "author_manuscript",
@@ -88,7 +89,7 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
 
     fake_generate_pmc_urls.reset_mock()
     fake_download_articles.reset_mock()
-    download.run("pmc", fake_datetime, pmc_path, dry_run=True)
+    download.run("pmc", from_month, to_month, pmc_path, dry_run=True)
     captured = capsys.readouterr()
     assert len(captured.out.split("\n")) == 10
     assert fake_generate_pmc_urls.call_count == 3
