@@ -203,7 +203,7 @@ def run(
         resource = session.resource("s3")
         bucket = resource.Bucket(f"{source}-src-monthly")
 
-        url_dict = get_s3_urls(bucket, from_month)
+        url_dict = get_s3_urls(bucket, start_date=from_date, end_date=to_date)
 
         if dry_run:
             for month, url_list in url_dict.items():

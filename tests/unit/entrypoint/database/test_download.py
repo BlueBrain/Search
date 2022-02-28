@@ -153,7 +153,8 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     # Define mocks
     fake_getpass = Mock()
     fake_getpass.getpass.return_value = "somecredentials"
-    fake_datetime = datetime.datetime(2021, 11, 1)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
 
     fake_get_s3_urls = Mock(
         return_value={
@@ -179,7 +180,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     )
 
     # Run the command (no dry run)
-    download.run(source, fake_datetime, tmp_path, dry_run=False)
+    download.run(source, from_month, to_month, tmp_path, dry_run=False)
 
     # Asserts
     fake_get_s3_urls.assert_called_once()
@@ -194,7 +195,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     fake_getpass.reset_mock()
 
     # Run the command dry run
-    download.run(source, fake_datetime, tmp_path, dry_run=True)
+    download.run(source, from_month, to_month, tmp_path, dry_run=True)
 
     # Asserts
     fake_get_s3_urls.assert_called_once()
