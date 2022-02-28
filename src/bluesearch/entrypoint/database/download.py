@@ -125,7 +125,7 @@ def run(
     from_month: datetime,
     to_month: datetime,
     output_dir: Path,
-    dry_run: bool
+    dry_run: bool,
 ) -> int:
     """Download articles of a source from a specific date.
 
@@ -144,7 +144,11 @@ def run(
 
     from_date = datetime(from_month.year, from_month.month, 1)
     to_date = datetime(to_month.year, to_month.month, 1)
-    to_date -= timedelta(days=1)
+    to_date -= timedelta(days=1)  # last day of the previous month
+
+    if datetime.today() <= to_date:
+        logger.error(f"Invalid to_date={to_date}")
+        return 1
 
     article_source = ArticleSource(source)
     if from_month < MIN_DATE[article_source]:

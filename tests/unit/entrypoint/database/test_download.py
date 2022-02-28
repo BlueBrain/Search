@@ -29,7 +29,9 @@ from google.cloud.storage import Blob
 from bluesearch.database.article import ArticleSource
 from bluesearch.entrypoint.database import download
 
-DOWNLOAD_PARAMS = {"source", "from_month", "to_month", "output_dir", "dry_run"}
+DOWNLOAD_PARAMS = {
+    "source", "from_month", "to_month", "output_dir", "dry_run"
+}
 
 
 def test_init_parser():
@@ -291,3 +293,20 @@ def test_structure_change(source, expected_date, tmp_path, caplog):
 
     assert exit_code == 1
     assert expected_date in caplog.text
+
+
+def test_too_soon(tmp_path, caplog):
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2555, 1, 1)
+
+    with caplog.at_level(logging.ERROR):
+        retcode = download.run(
+            "arxiv",
+            from_month,
+            to_month,
+            tmp_path,
+            dry_run=True,
+        )
+
+    assert retcode == 1
+    assert "Invalid to_date"  in caplog.text
