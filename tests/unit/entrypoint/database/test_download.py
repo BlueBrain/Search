@@ -29,9 +29,7 @@ from google.cloud.storage import Blob
 from bluesearch.database.article import ArticleSource
 from bluesearch.entrypoint.database import download
 
-DOWNLOAD_PARAMS = {
-    "source", "from_month", "to_month", "output_dir", "dry_run"
-}
+DOWNLOAD_PARAMS = {"source", "from_month", "to_month", "output_dir", "dry_run"}
 
 
 def test_init_parser():
@@ -243,7 +241,13 @@ class TestArxivDownload:
 
     def test_dry_run(self, capsys, tmp_path, mocked):
         # The dry run should print all months and blobs to stdout
-        download.run("arxiv", datetime.datetime(2021, 12, 1), datetime.datetime(2021, 2, 1), tmp_path, dry_run=True)
+        download.run(
+            "arxiv",
+            datetime.datetime(2021, 12, 1),
+            datetime.datetime(2021, 2, 1),
+            tmp_path,
+            dry_run=True,
+        )
         stdout, stderr = capsys.readouterr()
         for month, blobs in mocked.get_gcs_urls().items():
             assert month in stdout
@@ -253,7 +257,13 @@ class TestArxivDownload:
     def test_normal_run(self, tmp_path, mocked):
         # Under normal circumstances download_gcs_blob should be called as
         # many times as there are blobs to download
-        download.run("arxiv", datetime.datetime(2021, 12, 1), datetime.datetime(2021, 2, 1), tmp_path, dry_run=False)
+        download.run(
+            "arxiv",
+            datetime.datetime(2021, 12, 1),
+            datetime.datetime(2021, 2, 1),
+            tmp_path,
+            dry_run=False,
+        )
         n_blobs = sum(len(blobs) for blobs in mocked.get_gcs_urls().values())
         assert mocked.download_gcs_blob.call_count == n_blobs
 
@@ -264,7 +274,11 @@ class TestArxivDownload:
         mocked.download_gcs_blob.side_effect = RuntimeError(error_msg)
         with caplog.at_level(logging.ERROR):
             download.run(
-                "arxiv", datetime.datetime(2021, 12, 1), datetime.datetime(2021, 2, 1), tmp_path, dry_run=False
+                "arxiv",
+                datetime.datetime(2021, 12, 1),
+                datetime.datetime(2021, 2, 1),
+                tmp_path,
+                dry_run=False,
             )
         assert error_msg in caplog.text
         for blob in chain(*mocked.get_gcs_urls().values()):
@@ -287,9 +301,10 @@ def test_structure_change(source, expected_date, tmp_path, caplog):
     from_month = limit_datetime - datetime.timedelta(days=32)
     to_month = datetime.datetime(2022, 1, 1)
 
-
     with caplog.at_level(logging.ERROR):
-        exit_code = download.run(source.value, from_month, to_month, tmp_path, dry_run=False)
+        exit_code = download.run(
+            source.value, from_month, to_month, tmp_path, dry_run=False
+        )
 
     assert exit_code == 1
     assert expected_date in caplog.text
@@ -309,4 +324,4 @@ def test_too_soon(tmp_path, caplog):
         )
 
     assert retcode == 1
-    assert "Invalid to_date"  in caplog.text
+    assert "Invalid to_date" in caplog.text

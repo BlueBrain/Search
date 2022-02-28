@@ -102,7 +102,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "to_month",
         type=convert_to_datetime,
-        help="The ending month (excluded) for the download in format YYYY-MM. "
+        help="The ending month (excluded) for the download in format YYYY-MM. ",
     )
     parser.add_argument(
         "output_dir",
@@ -228,9 +228,7 @@ def run(
         bucket = client.bucket("arxiv-dataset")
 
         logger.info("Collecting download URLs")
-        blobs_by_month = get_gcs_urls(
-            bucket, start_date=from_date, end_date=to_date
-        )
+        blobs_by_month = get_gcs_urls(bucket, start_date=from_date, end_date=to_date)
 
         if dry_run:
             print("The following items will be downloaded:")
