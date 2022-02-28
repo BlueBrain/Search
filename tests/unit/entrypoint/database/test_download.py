@@ -29,13 +29,13 @@ from google.cloud.storage import Blob
 from bluesearch.database.article import ArticleSource
 from bluesearch.entrypoint.database import download
 
-DOWNLOAD_PARAMS = {"source", "from_month", "output_dir", "dry_run"}
+DOWNLOAD_PARAMS = {"source", "from_month", "to_month", "output_dir", "dry_run"}
 
 
 def test_init_parser():
     parser = download.init_parser(argparse.ArgumentParser())
 
-    args = parser.parse_args(["pmc", "2020-10", "/path/to/download"])
+    args = parser.parse_args(["pmc", "2020-10", "2020-12", "/path/to/download"])
     assert vars(args).keys() == DOWNLOAD_PARAMS
 
     # Test the values

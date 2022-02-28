@@ -97,7 +97,12 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "from_month",
         type=convert_to_datetime,
         help="The starting month (included) for the download in format YYYY-MM. "
-        "All papers from the given month until today will be downloaded.",
+        "All papers from the given month until `end_month` will be downloaded.",
+    )
+    parser.add_argument(
+        "to_month",
+        type=convert_to_datetime,
+        help="The ending month (excluded) for the download in format YYYY-MM. "
     )
     parser.add_argument(
         "output_dir",
@@ -115,7 +120,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> int:
+def run(
+    source: str,
+    from_month: datetime,
+    end_month: datetime,
+    output_dir: Path,
+    dry_run: bool
+) -> int:
     """Download articles of a source from a specific date.
 
     Parameter description and potential defaults are documented inside of the
