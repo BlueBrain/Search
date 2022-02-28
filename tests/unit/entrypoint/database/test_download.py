@@ -115,11 +115,12 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.get_pubmed_urls", fake_get_pubmed_urls
     )
 
-    fake_datetime = datetime.datetime(2021, 12, 16)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
     pubmed_path = tmp_path / "pubmed"
 
     # Run the command
-    download.run("pubmed", fake_datetime, pubmed_path, dry_run=False)
+    download.run("pubmed", from_month, to_month, pubmed_path, dry_run=False)
 
     # Asserts
     assert pubmed_path.exists()
@@ -132,7 +133,7 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
     fake_download_articles.reset_mock()
 
     # Run the command (dry run)
-    download.run("pubmed", fake_datetime, pubmed_path, dry_run=True)
+    download.run("pubmed", from_month, to_month, pubmed_path, dry_run=True)
 
     # Asserts
     captured = capsys.readouterr()

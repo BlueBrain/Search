@@ -181,7 +181,7 @@ def run(
             download_articles(url_list, component_dir)
         return 0
     elif article_source == ArticleSource.PUBMED:
-        url_list = get_pubmed_urls(from_month)
+        url_list = get_pubmed_urls(start_date=from_date, end_date=to_date)
         if dry_run:
             print("URL requests from:")
             print(*url_list, sep="\n")
