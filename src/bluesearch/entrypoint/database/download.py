@@ -19,7 +19,7 @@ import argparse
 import getpass
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import chain
 from pathlib import Path
 
@@ -123,7 +123,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 def run(
     source: str,
     from_month: datetime,
-    end_month: datetime,
+    to_month: datetime,
     output_dir: Path,
     dry_run: bool
 ) -> int:
@@ -142,6 +142,10 @@ def run(
         get_s3_urls,
     )
 
+    from_date = datetime(from_month.year, from_month.month, 1)
+    to_date = datetime(to_month.year, to_month.month, 1)
+    to_date -= timedelta(days=1)
+
     article_source = ArticleSource(source)
     if from_month < MIN_DATE[article_source]:
         logger.error(
@@ -155,7 +159,11 @@ def run(
     if article_source == ArticleSource.PMC:
         url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
-            url_dict[component] = generate_pmc_urls(component, from_month)
+            url_dict[component] = generate_pmc_urls(
+                component,
+                start_date=from_date,
+                end_date=to_date,
+            )
 
         if dry_run:
             for component, url_list in url_dict.items():
