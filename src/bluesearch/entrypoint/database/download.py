@@ -224,7 +224,9 @@ def run(
         bucket = client.bucket("arxiv-dataset")
 
         logger.info("Collecting download URLs")
-        blobs_by_month = get_gcs_urls(bucket, from_month)
+        blobs_by_month = get_gcs_urls(
+            bucket, start_date=from_date, end_date=to_date
+        )
 
         if dry_run:
             print("The following items will be downloaded:")
