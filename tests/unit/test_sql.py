@@ -183,7 +183,9 @@ class TestSQLQueries:
                 == len(set(article_id)) * test_parameters["n_sections_per_article"]
             )
 
-    def test_retrieve_existing_article_ids(self, fake_sqlalchemy_engine, test_parameters):
+    def test_retrieve_existing_article_ids(
+        self, fake_sqlalchemy_engine, test_parameters
+    ):
         article_ids = retrieve_existing_article_ids(fake_sqlalchemy_engine)
         assert isinstance(article_ids, list)
         assert len(article_ids) == test_parameters["n_articles"]
