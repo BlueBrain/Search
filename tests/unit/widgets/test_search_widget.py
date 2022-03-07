@@ -178,7 +178,6 @@ def activate_responses(fake_sqlalchemy_engine):
         http_address,
         callback=partial(request_callback, searcher=searcher),
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
     return http_address
 
@@ -223,7 +222,6 @@ def test_paging(
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
@@ -309,7 +307,6 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
         "http://test",
         callback=partial(request_callback, searcher=searcher),
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     responses.add_callback(
@@ -317,7 +314,6 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     k = 1
@@ -357,7 +353,6 @@ def test_article_saver_gets_updated(
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     k = 10
@@ -429,7 +424,6 @@ def test_article_saver_global(fake_sqlalchemy_engine, monkeypatch, capsys, savin
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     k = 10
@@ -492,7 +486,6 @@ def test_inclusion_text(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
@@ -526,7 +519,6 @@ def test_make_report(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdir):
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
@@ -561,7 +553,6 @@ def test_report_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdi
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
@@ -596,7 +587,6 @@ def get_search_widget_bot(
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
-        # match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
