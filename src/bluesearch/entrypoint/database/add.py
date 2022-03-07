@@ -137,11 +137,13 @@ def run(
         article_mappings.append(article_mapping)
 
         # Integrate abstract into the sentences table
-        entire_text = [("Abstract", "\n".join(article.abstract)), *article.section_paragraphs]
+        entire_text = [
+            ("Abstract", "\n".join(article.abstract)),
+            *article.section_paragraphs,
+        ]
 
         swapped = (
-            (text, (section, ppos))
-            for ppos, (section, text) in enumerate(entire_text)
+            (text, (section, ppos)) for ppos, (section, text) in enumerate(entire_text)
         )
         for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True):
             for spos, sent in enumerate(doc.sents):
