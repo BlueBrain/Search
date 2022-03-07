@@ -117,9 +117,12 @@ def run(
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
-    # Filter articles already present in the database
+    # Keep only articles not already present in the database
     existing_uids = retrieve_existing_article_ids(engine)
     articles = [article for article in articles if article.uid not in existing_uids]
+
+    if not articles:
+        raise RuntimeWarning(f"All articles are already saved in '{db_url}'!")
 
     logger.info("Loading spacy model")
     nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
