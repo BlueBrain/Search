@@ -30,6 +30,7 @@ from bluesearch.sql import (
     retrieve_article_ids,
     retrieve_article_metadata_from_article_id,
     retrieve_articles,
+    retrieve_existing_article_ids,
     retrieve_mining_cache,
     retrieve_paragraph,
     retrieve_paragraph_from_sentence_id,
@@ -181,6 +182,11 @@ class TestSQLQueries:
                 articles.shape[0]
                 == len(set(article_id)) * test_parameters["n_sections_per_article"]
             )
+
+    def test_retrieve_existing_article_ids(self, fake_sqlalchemy_engine, test_parameters):
+        article_ids = retrieve_existing_article_ids(fake_sqlalchemy_engine)
+        assert isinstance(article_ids, list)
+        assert len(article_ids) == test_parameters["n_articles"]
 
     def test_retrieve_articles_ids(self, fake_sqlalchemy_engine, test_parameters):
         article_ids_dict = retrieve_article_ids(fake_sqlalchemy_engine)
