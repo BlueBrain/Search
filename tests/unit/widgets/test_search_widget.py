@@ -587,6 +587,7 @@ def get_search_widget_bot(
         "http://test/help",
         callback=request_callback_help,
         content_type="application/json",
+        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
     )
 
     widget = SearchWidget(
