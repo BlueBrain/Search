@@ -82,7 +82,7 @@ EXTRAS_REQUIRE = {
         "pytest-benchmark",
         "pytest-cov",
         "pytest>=4.6",
-        "responses>=0.15.0",
+        "responses>=0.19.0",
         "sphinx-bluebrain-theme",
         "tox",
     ],
