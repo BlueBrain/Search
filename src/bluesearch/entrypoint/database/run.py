@@ -232,14 +232,13 @@ class UnzipTask(ExternalProgramTask):
             all_tar_files = input_dir.rglob("*.tar.gz")
             for archive in all_tar_files:
                 output_path = output_dir / archive.stem
-                my_tar = tarfile.open(archive)
-                all_articles = [x for x in my_tar.getmembers() if x.isfile()]
-                for article in all_articles:
-                    output_path = output_dir / article.path.rpartition("/")[2]
-                    f_in = my_tar.extractfile(article)
-                    with open(output_path, "wb") as f_out:
-                        shutil.copyfileobj(f_in, f_out)  # type: ignore
-                my_tar.close()
+                with tarfile.open(archive) as my_tar:
+                    all_articles = [x for x in my_tar.getmembers() if x.isfile()]
+                    for article in all_articles:
+                        output_path = output_dir / article.path.rpartition("/")[2]
+                        f_in = my_tar.extractfile(article)
+                        with open(output_path, "wb") as f_out:
+                            shutil.copyfileobj(f_in, f_out)  # type: ignore
 
         else:
             raise ValueError(f"Unsupported source {self.source}")
