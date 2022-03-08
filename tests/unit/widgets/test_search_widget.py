@@ -170,15 +170,16 @@ def create_searcher(engine, n_dim=2):
     return searcher
 
 
-def activate_responses(fake_sqlalchemy_engine):
+def activate_responses(fake_sqlalchemy_engine, add_callback=True):
     searcher = create_searcher(fake_sqlalchemy_engine)
     http_address = "http://test"
-    responses.add_callback(
-        responses.POST,
-        http_address,
-        callback=partial(request_callback, searcher=searcher),
-        content_type="application/json",
-    )
+    if add_callback:
+        responses.add_callback(
+            responses.POST,
+            http_address,
+            callback=partial(request_callback, searcher=searcher),
+            content_type="application/json",
+        )
     return http_address
 
 
@@ -578,17 +579,17 @@ def test_report_article_saver(fake_sqlalchemy_engine, monkeypatch, capsys, tmpdi
 
 
 def get_search_widget_bot(
-    fake_sqlalchemy_engine, monkeypatch, capsys, checkpoint_path=None
+    fake_sqlalchemy_engine, monkeypatch, capsys, checkpoint_path=None, add_callback=True
 ):
-    http_address = activate_responses(fake_sqlalchemy_engine)
+    http_address = activate_responses(fake_sqlalchemy_engine, add_callback=add_callback)
 
-    responses.add_callback(
-        responses.POST,
-        "http://test/help",
-        callback=request_callback_help,
-        content_type="application/json",
-        match_querystring=None,  # https://github.com/getsentry/responses/issues/464
-    )
+    if add_callback:
+        responses.add_callback(
+            responses.POST,
+            "http://test/help",
+            callback=request_callback_help,
+            content_type="application/json",
+        )
 
     widget = SearchWidget(
         bbs_search_url=http_address,
@@ -619,7 +620,9 @@ def test_saved_results(fake_sqlalchemy_engine, monkeypatch, capsys):
     assert all(value == "" for value in saved_results["Paragraph #"])
 
     # Test not saving because article saver is None
-    bot = get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys)
+    bot = get_search_widget_bot(
+        fake_sqlalchemy_engine, monkeypatch, capsys, add_callback=False
+    )
     bot.search_widget.article_saver = None
     bot.click("investigate_button")
     displayed = bot.display_cached
@@ -629,7 +632,9 @@ def test_saved_results(fake_sqlalchemy_engine, monkeypatch, capsys):
     assert len(saved_results) == 0
 
     # Test not saving because article saver is None
-    bot = get_search_widget_bot(fake_sqlalchemy_engine, monkeypatch, capsys)
+    bot = get_search_widget_bot(
+        fake_sqlalchemy_engine, monkeypatch, capsys, add_callback=False
+    )
     bot.set_value("default_value_article_saver", _Save.PARAGRAPH)
     bot.click("investigate_button")
     displayed = bot.display_cached
