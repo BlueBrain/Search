@@ -623,8 +623,6 @@ def run(
 
     luigi_kwargs = {
         "tasks": [selected_task_inst],
-        "log_level": "WARNING",
-        "local_scheduler": True,
     }
     if dry_run:
         print(print_tree(selected_task_inst, last=False))
