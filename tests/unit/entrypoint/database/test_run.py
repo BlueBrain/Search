@@ -26,8 +26,8 @@ from bluesearch.entrypoint.database import run
 
 RUN_PARAMS = {
     "final_task",
-    "config_path",
-    "luigi_config",
+    "luigi_config_path",
+    "luigi_config_args",
     "dry_run",
 }
 
@@ -40,9 +40,9 @@ def test_init_parser():
 
     # # Test the values
     assert args.final_task is None
-    assert args.luigi_config is None
+    assert args.luigi_config_args is None
     assert args.dry_run is False
-    assert args.config_path is None
+    assert args.luigi_config_path is None
 
 
 def test_run_arguments():
@@ -113,7 +113,7 @@ def test_run_arguments():
 )
 def test_pipelines(source, tasks, tmp_path, capsys):
     run.run(
-        luigi_config=f"GlobalParams.source:{source},"
+        luigi_config_args=f"GlobalParams.source:{source},"
         f"DownloadTask.output_dir:{tmp_path}",
         dry_run=True,
     )
@@ -186,7 +186,7 @@ def test_all(
     monkeypatch.setattr(run.AddTask, "complete", lambda _: False)
 
     run.run(
-        luigi_config=f"GlobalParams.source:{source},"
+        luigi_config_args=f"GlobalParams.source:{source},"
         f"DownloadTask.output_dir:{tmp_path},"
         f"DownloadTask.identifier:{identifier}",
         dry_run=False,

@@ -70,14 +70,20 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         help="Final task of the luigi pipeline.",
     )
     parser.add_argument(
-        "--config-path",
+        "--luigi-config-path",
         type=Path,
-        help="Configuration Path.",
+        help="Path to Luigi configuration file. By default, "
+        "luigi is looking into: /etc/luigi/luigi.cfg, luigi.cfg"
+        "and the environment variable LUIGI_CONFIG_PATH."
+        "If a path is specified, it is the one used.",
     )
     parser.add_argument(
-        "--luigi-config",
+        "--luigi-config-args",
         type=str,
-        help="Configuration parameters.",
+        help="Comma separated key-value arguments for Luigi configuration, "
+        "e.g. '--luigi-config GlobalParams.source:arxiv,"
+        "DownloadTask.from-month:2021-04'. Overwrites the content of Luigi "
+        "configuration file (see --luigi-config-path).",
     )
     parser.add_argument(
         "--dry-run",
@@ -502,8 +508,8 @@ def run(
     *,
     dry_run: bool,
     final_task: str | None = None,
-    config_path: Path | None = None,
-    luigi_config: str | None = None,
+    luigi_config_path: Path | None = None,
+    luigi_config_args: str | None = None,
 ) -> int:
     """Run overall pipeline.
 
@@ -521,17 +527,19 @@ def run(
     ParseTask.capture_output = CAPTURE_OUTPUT
     AddTask.capture_output = CAPTURE_OUTPUT
 
-    if config_path:
-        if not pathlib.Path(config_path).exists():
-            raise ValueError(f"The configuration path {config_path} does not exist!")
+    if luigi_config_path:
+        if not pathlib.Path(luigi_config_path).exists():
+            raise ValueError(
+                f"The configuration path {luigi_config_path} " f"does not exist!"
+            )
 
         config = luigi.configuration.get_config()
-        config.add_config_path(config_path)
+        config.add_config_path(luigi_config_path)
         config.reload()
 
-    if luigi_config:
+    if luigi_config_args:
         config = luigi.configuration.get_config()
-        for param in luigi_config.split(","):
+        for param in luigi_config_args.split(","):
             change = re.split(r"[.:]", param, maxsplit=3)
             config.set(*change)
 
