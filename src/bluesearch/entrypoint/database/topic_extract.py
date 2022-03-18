@@ -173,7 +173,11 @@ def run(
         for path in inputs:
             logger.info(f"Processing {path}")
             topic_info = TopicInfo(source=article_source, path=path.resolve())
-            journal_topics = get_topics_for_pmc_article(path)
+            try:
+                journal_topics = get_topics_for_pmc_article(path)
+            except Exception:
+                logger.error(f"Failed to extract topic from {path}")
+
             if journal_topics:
                 topic_info.add_journal_topics(
                     "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
@@ -188,17 +192,22 @@ def run(
         mesh_tree = mesh.MeSHTree.load(mesh_topic_db)
         for path in inputs:
             logger.info(f"Processing {path}")
-            with gzip.open(input_path) as xml_stream:
+            with gzip.open(path) as xml_stream:
                 articles = ElementTree.parse(xml_stream)
 
             for i, article in enumerate(articles.iter("PubmedArticle")):
+                logger.info(f"Processing element in file {i}")
                 topic_info = TopicInfo(
                     source=article_source,
                     path=path.resolve(),
                     element_in_file=i,
                 )
-                article_topics = extract_article_topics_for_pubmed_article(article)
-                journal_topics = extract_journal_topics_for_pubmed_article(article)
+                try:
+                    article_topics = extract_article_topics_for_pubmed_article(article)
+                    journal_topics = extract_journal_topics_for_pubmed_article(article)
+                except Exception:
+                    logger.error(f"Failed to extract topic from {i}")
+
                 if article_topics:
                     topic_info.add_article_topics(
                         "MeSH", mesh.resolve_parents(article_topics, mesh_tree)
@@ -212,13 +221,19 @@ def run(
         for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
             topic_info = TopicInfo(source=article_source, path=path)
             topic_info.add_article_topics("arXiv", article_topics)
+
             all_results.append(topic_info.json())
     elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
         for path in inputs:
             logger.info(f"Processing {path}")
-            topic, journal = extract_article_topics_from_medrxiv_article(path)
+            try:
+                topic, journal = extract_article_topics_from_medrxiv_article(path)
+            except Exception:
+                logger.error(f"Failed to extract topic from {path}")
+            journal = journal.lower()
             topic_info = TopicInfo(source=ArticleSource(journal), path=path)
             topic_info.add_article_topics("Subject Area", [topic])
+
             all_results.append(topic_info.json())
     else:
         logger.error(f"The source type {source!r} is not implemented yet")

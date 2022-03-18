@@ -14,6 +14,7 @@ from bluesearch.entrypoint.database import (
     init,
     parse,
     parse_mesh_rdf,
+    run,
     topic_extract,
     topic_filter,
 )
@@ -71,6 +72,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             help="Parse raw files.",
             init_parser=parse.init_parser,
             run=parse.run,
+        ),
+        "run": Cmd(
+            help="Run the pipeline.",
+            init_parser=run.init_parser,
+            run=run.run,
         ),
         "topic-extract": Cmd(
             help="Extract topic of article(s).",

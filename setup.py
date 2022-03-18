@@ -60,10 +60,11 @@ INSTALL_REQUIRES = [
     "ipywidgets",
     "jupyterlab>=3",
     "langdetect",
-    "numpy>=1.20.1",
-    "pandas>=1",
+    "luigi",
     # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
     "mashumaro>=3.0",
+    "numpy>=1.20.1",
+    "pandas>=1",
     "pg8000",
     "python-dotenv",
     "requests",
