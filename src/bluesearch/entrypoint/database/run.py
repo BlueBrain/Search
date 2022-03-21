@@ -24,7 +24,6 @@ import pathlib
 import re
 import shutil
 import tarfile
-from datetime import datetime
 from pathlib import Path
 
 import luigi
