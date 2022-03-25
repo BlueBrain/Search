@@ -74,6 +74,7 @@ class TestGetDaterangeList:
         ("author_manuscript", "https://ftp.ncbi.nlm.nih.gov/pub/pmc/manuscript/xml/"),
         ("oa_comm", "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_comm/xml/"),
         ("oa_noncomm", "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_noncomm/xml/"),
+        ("oa_other", "https://ftp.ncbi.nlm.nih.gov/pub/pmc/oa_bulk/oa_other/xml/"),
     ],
 )
 def test_generate_pmc_urls(monkeypatch, component, expected_url_start):

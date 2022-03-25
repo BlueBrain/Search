@@ -91,7 +91,7 @@ def generate_pmc_urls(
 
     Parameters
     ----------
-    component : {"author_manuscript", "oa_comm", "oa_noncomm"}
+    component : {"author_manuscript", "oa_comm", "oa_noncomm", "oa_other"}
         Part of the PMC to download.
     start_date
         Starting date to download the incremental files.
@@ -108,16 +108,19 @@ def generate_pmc_urls(
     ValueError
         If the chosen component does not exist on PMC.
     """
-    base_url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/"
-    if component in {"oa_comm", "oa_noncomm"}:
-        base_url += f"oa_bulk/{component}/xml/"
-    elif component == "author_manuscript":
-        base_url += "manuscript/xml/"
-    else:
+    avail_components = {"author_manuscript", "oa_comm", "oa_noncomm", "oa_other"}
+    if component not in avail_components:
         raise ValueError(
             f"Unexcepted component {component}. "
-            "Only {'author_manuscript', 'oa_comm', 'oa_noncomm'} are supported."
+            f"Only {avail_components} "
+            "are supported."
         )
+
+    base_url = "https://ftp.ncbi.nlm.nih.gov/pub/pmc/"
+    if component == "author_manuscript":
+        base_url += "manuscript/xml/"
+    else:
+        base_url += f"oa_bulk/{component}/xml/"
 
     days_list = get_daterange_list(start_date=start_date, end_date=end_date)
 

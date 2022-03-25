@@ -143,7 +143,8 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
 
     if article_source == ArticleSource.PMC:
         url_dict = {}
-        for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
+        avail_components = ["author_manuscript", "oa_comm", "oa_noncomm", "oa_other"]
+        for component in avail_components:
             url_dict[component] = generate_pmc_urls(component, from_month)
 
         if dry_run:

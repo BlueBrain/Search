@@ -80,6 +80,7 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         "author_manuscript",
         "oa_comm",
         "oa_noncomm",
+        "oa_other",
     }
     for sub_dir in pmc_path.iterdir():
         assert len(list(sub_dir.iterdir())) == 2
