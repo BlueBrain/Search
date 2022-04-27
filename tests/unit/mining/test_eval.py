@@ -637,5 +637,5 @@ def test_check_consistent_iob(iob_pred, raises):
     if not raises:
         _check_consistent_iob(iob_true, iob_pred)
     else:
-        with pytest.raises(ValueError, match=fr".*{raises}.*"):
+        with pytest.raises(ValueError, match=rf".*{raises}.*"):
             _check_consistent_iob(iob_true, iob_pred)

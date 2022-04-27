@@ -288,7 +288,7 @@ def test_correct_results_order(fake_sqlalchemy_engine, monkeypatch, capsys):
         / 2 ** (1 / 2),  # 45 degrees
     }
 
-    norm = (0.1 ** 2 + 0.9 ** 2) ** (1 / 2)
+    norm = (0.1**2 + 0.9**2) ** (1 / 2)
     precomputed_embeddings["SBioBERT"][most_relevant_sbiobert_id - 1, :] = (
         torch.tensor([0.1, 0.9]) / norm
     )
