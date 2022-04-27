@@ -37,7 +37,7 @@ def test_grobid_is_alive(body, expected_result):
     port = 12345
     responses.add(
         responses.GET,
-        re.compile(fr"http://{host}:{port}/.*"),
+        re.compile(rf"http://{host}:{port}/.*"),
         body=body,
     )
     assert grobid_is_alive(host, port) is expected_result
