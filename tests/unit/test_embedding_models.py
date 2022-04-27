@@ -132,7 +132,7 @@ class TestEmbeddingModels:
         if backend in ("TfidfVectorizer", "CountVectorizer"):
             assert skl_vectorizer.dim == 19
         elif backend == "HashingVectorizer":
-            assert skl_vectorizer.dim == 2 ** 20
+            assert skl_vectorizer.dim == 2**20
         else:
             raise ValueError(f"Don't know what to do with backend {backend}")
 
