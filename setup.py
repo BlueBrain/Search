@@ -74,6 +74,8 @@ INSTALL_REQUIRES = [
     "spacy[transformers]>=3.0.6",
     # torch==1.9.0 contains patch allowing reproducible saving of models
     "torch>=1.9.0",
+    "elasticsearch==8.3.3",
+    "python-decouple==3.6"
 ]
 
 EXTRAS_REQUIRE = {
