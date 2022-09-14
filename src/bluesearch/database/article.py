@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
+from typing import IO, Generator, Iterable, Optional, Sequence, Tuple, Any
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -266,7 +266,7 @@ class JATSXMLParser(ArticleParser):
         The xml stream of the article.
     """
 
-    def __init__(self, xml_stream: IO) -> None:
+    def __init__(self, xml_stream: IO[Any]) -> None:
         super().__init__()
         self.content = ElementTree.parse(xml_stream)
         self.ids = self.get_ids()
@@ -722,7 +722,7 @@ class CORD19ArticleParser(ArticleParser):
         The contents of a JSON-file from the CORD-19 database.
     """
 
-    def __init__(self, json_file: dict) -> None:
+    def __init__(self, json_file: dict[str, Any]) -> None:
         # data is a reference to json_file, so we shouldn't modify its contents
         self.data = json_file
 
@@ -818,7 +818,7 @@ class CORD19ArticleParser(ArticleParser):
         """
         return self.data.get("paper_id")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
@@ -956,7 +956,7 @@ class TEIXMLParser(ArticleParser):
         return self.tei_ids.get("DOI")
 
     @property
-    def tei_ids(self) -> dict:
+    def tei_ids(self) -> dict[str, Any]:
         """Extract all IDs of the TEI XML.
 
         Returns
