@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import gzip
 import logging
 from pathlib import Path
@@ -129,6 +130,26 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
+def create_individual_json(path, topic_info):
+    """Create json containing the extracted topics.
+
+    Parameters
+    ----------
+    path
+        Path of the original article
+    topic_info
+        Topics extracted for the given article.
+    """
+    folder = path.parent.parent / "topic"
+    if not folder.exists():
+        folder.mkdir()
+
+    new_path = folder / f"{path.stem}.json"
+    with new_path.open("w") as f:
+        line = json.dumps(topic_info.json())
+        f.write(line)
+
+
 def run(
     *,
     source: str,
@@ -146,7 +167,6 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `init_parser` function.
     """
-    import json
     from defusedxml import ElementTree
 
     from bluesearch.database.topic import (
@@ -194,14 +214,7 @@ def run(
                 )
 
             if inc_individual_json:
-                folder = path.parent.parent / "topic"
-                if not folder.exists():
-                    folder.mkdir()
-
-                new_path = folder / f"{path.stem}.json"
-                with new_path.open("w") as f:
-                    line = json.dumps(topic_info.json())
-                    f.write(line)
+                create_individual_json(path, topic_info)
 
             all_results.append(topic_info.json())
     elif article_source is ArticleSource.PUBMED:
@@ -241,7 +254,11 @@ def run(
                 all_results.append(topic_info.json())
                 topics_per_file.append(topic_info.json())
 
-            new_path = path.parent.parent / "topic" / f"{path.stem}.json"
+            folder = path.parent.parent / "topic"
+            if not folder.exists():
+                folder.mkdir()
+
+            new_path = folder / f"{path.stem}.json"
             JSONL.dump_jsonl(topics_per_file, new_path)
 
     elif article_source is ArticleSource.ARXIV:
@@ -250,14 +267,7 @@ def run(
             topic_info.add_article_topics("arXiv", article_topics)
 
             if inc_individual_json:
-                folder = path.parent.parent / "topic"
-                if not folder.exists():
-                    folder.mkdir()
-
-                new_path = folder / f"{path.stem}.json"
-                with new_path.open("w") as f:
-                    line = json.dumps(topic_info.json())
-                    f.write(line)
+                create_individual_json(path, topic_info)
 
             all_results.append(topic_info.json())
     elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
@@ -272,14 +282,7 @@ def run(
             topic_info.add_article_topics("Subject Area", [topic])
 
             if inc_individual_json:
-                folder = path.parent.parent / "topic"
-                if not folder.exists():
-                    folder.mkdir()
-
-                new_path = folder / f"{path.stem}.json"
-                with new_path.open("w") as f:
-                    line = json.dumps(topic_info.json())
-                    f.write(line)
+                create_individual_json(path, topic_info)
 
             all_results.append(topic_info.json())
     else:
