@@ -54,6 +54,7 @@ INSTALL_REQUIRES = [
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
     "defusedxml",
+    "elasticsearch==8.3.3",
     "google-cloud-storage",
     "h5py",
     "ipython",
@@ -66,6 +67,7 @@ INSTALL_REQUIRES = [
     "numpy>=1.20.1",
     "pandas>=1",
     "pg8000",
+    "python-decouple==3.6",
     "python-dotenv",
     "requests",
     "scikit-learn",
@@ -74,8 +76,6 @@ INSTALL_REQUIRES = [
     "spacy[transformers]>=3.0.6",
     # torch==1.9.0 contains patch allowing reproducible saving of models
     "torch>=1.9.0",
-    "elasticsearch==8.3.3",
-    "python-decouple==3.6"
 ]
 
 EXTRAS_REQUIRE = {
