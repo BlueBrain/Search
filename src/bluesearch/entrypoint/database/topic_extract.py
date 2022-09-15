@@ -79,6 +79,14 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-i",
+        "--inc-individual-json",
+        action="store_true",
+        help="""
+        If True, individual json are also saved.
+        """,
+    )
+    parser.add_argument(
         "-R",
         "--recursive",
         action="store_true",
@@ -127,6 +135,7 @@ def run(
     input_path: Path,
     output_file: Path,
     match_filename: str | None,
+    inc_individual_json: bool,
     recursive: bool,
     overwrite: bool,
     dry_run: bool,
@@ -137,6 +146,7 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `init_parser` function.
     """
+    import json
     from defusedxml import ElementTree
 
     from bluesearch.database.topic import (
@@ -182,6 +192,17 @@ def run(
                 topic_info.add_journal_topics(
                     "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
                 )
+
+            if inc_individual_json:
+                folder = path.parent.parent / "topic"
+                if not folder.exists():
+                    folder.mkdir()
+
+                new_path = folder / f"{path.stem}.json"
+                with new_path.open("w") as f:
+                    line = json.dumps(topic_info.json())
+                    f.write(line)
+
             all_results.append(topic_info.json())
     elif article_source is ArticleSource.PUBMED:
         if mesh_topic_db is None:
@@ -194,6 +215,7 @@ def run(
             logger.info(f"Processing {path}")
             with gzip.open(path) as xml_stream:
                 articles = ElementTree.parse(xml_stream)
+            topics_per_file = []
 
             for i, article in enumerate(articles.iter("PubmedArticle")):
                 logger.info(f"Processing element in file {i}")
@@ -217,10 +239,25 @@ def run(
                         "MeSH", mesh.resolve_parents(journal_topics, mesh_tree)
                     )
                 all_results.append(topic_info.json())
+                topics_per_file.append(topic_info.json())
+
+            new_path = path.parent.parent / "topic" / f"{path.stem}.json"
+            JSONL.dump_jsonl(topics_per_file, new_path)
+
     elif article_source is ArticleSource.ARXIV:
         for path, article_topics in get_topics_for_arxiv_articles(inputs).items():
             topic_info = TopicInfo(source=article_source, path=path)
             topic_info.add_article_topics("arXiv", article_topics)
+
+            if inc_individual_json:
+                folder = path.parent.parent / "topic"
+                if not folder.exists():
+                    folder.mkdir()
+
+                new_path = folder / f"{path.stem}.json"
+                with new_path.open("w") as f:
+                    line = json.dumps(topic_info.json())
+                    f.write(line)
 
             all_results.append(topic_info.json())
     elif article_source in {ArticleSource.BIORXIV, ArticleSource.MEDRXIV}:
@@ -233,6 +270,16 @@ def run(
             journal = journal.lower()
             topic_info = TopicInfo(source=ArticleSource(journal), path=path)
             topic_info.add_article_topics("Subject Area", [topic])
+
+            if inc_individual_json:
+                folder = path.parent.parent / "topic"
+                if not folder.exists():
+                    folder.mkdir()
+
+                new_path = folder / f"{path.stem}.json"
+                with new_path.open("w") as f:
+                    line = json.dumps(topic_info.json())
+                    f.write(line)
 
             all_results.append(topic_info.json())
     else:

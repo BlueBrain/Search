@@ -113,6 +113,14 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """,
     )
     parser.add_argument(
+        "-i",
+        "--include-topic",
+        action="store_true",
+        help="""
+        If True, include topic inside the parsed json.
+        """,
+    )
+    parser.add_argument(
         "-n",
         "--dry-run",
         action="store_true",
@@ -164,6 +172,7 @@ def run(
     output_dir: Path,
     match_filename: str | None,
     recursive: bool,
+    include_topic: bool,
     dry_run: bool,
 ) -> int:
     """Parse one or several articles.
@@ -171,6 +180,8 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
+    import json
+
     from bluesearch.utils import find_files
 
     if input_path is None:
@@ -211,7 +222,7 @@ def run(
         try:
             parsers = iter_parsers(input_type, input_path)
 
-            for parser in parsers:
+            for i, parser in enumerate(parsers):
                 article = Article.parse(parser)
                 output_file = output_dir / f"{article.uid}.json"
 
@@ -219,6 +230,21 @@ def run(
                     raise FileExistsError(f"Output '{output_file}' already exists!")
                 else:
                     serialized = article.to_json()
+
+                    if include_topic:
+                        topic_path = input_path.parent.parent / "topic" / f"{input_path.stem}.json"
+                        with topic_path.open() as f:
+                            topic_json = json.load(f)
+
+                        serialized = json.loads(serialized)
+
+                        if input_type == "pubmed-xml-set":
+                            serialized["topics"] = topic_json[i]["topics"]
+                        else:
+                            serialized["topics"] = topic_json["topics"]
+
+                        serialized = json.dumps(serialized)
+
                     output_file.write_text(serialized, "utf-8")
 
         except Exception as e:

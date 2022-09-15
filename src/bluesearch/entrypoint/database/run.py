@@ -225,6 +225,7 @@ class TopicExtractTask(ExternalProgramTask):
             *BBS_BINARY,
             "topic-extract",
             *VERBOSITY,
+            "--i",
             GlobalParams().source,
             input_dir,
             output_dir,
@@ -432,6 +433,7 @@ class ParseTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "parse",
+            "--i",
             *VERBOSITY,
             parser,
             str(input_dir),
