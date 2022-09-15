@@ -232,7 +232,11 @@ def run(
                     serialized = article.to_json()
 
                     if include_topic:
-                        topic_path = input_path.parent.parent / "topic" / f"{input_path.stem}.json"
+                        topic_path = (
+                            input_path.parent.parent
+                            / "topic"
+                            / f"{input_path.stem}.json"
+                        )
                         with topic_path.open() as f:
                             topic_json = json.load(f)
 

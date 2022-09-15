@@ -35,6 +35,7 @@ TOPIC_EXTRACT_PARAMS = {
     "overwrite",
     "dry_run",
     "mesh_topic_db",
+    "inc_individual_json",
 }
 
 
@@ -68,6 +69,7 @@ def test_input_path_not_correct(caplog):
             output_file=pathlib.Path(""),
             match_filename=None,
             recursive=False,
+            inc_individual_json=False,
             overwrite=False,
             dry_run=False,
         )
@@ -84,6 +86,7 @@ def test_source_type_not_implemented(test_data_path, caplog, tmp_path):
             output_file=tmp_path,
             match_filename=None,
             recursive=False,
+            inc_individual_json=False,
             overwrite=False,
             dry_run=False,
         )
@@ -99,6 +102,7 @@ def test_dry_run(test_data_path, capsys, tmp_path):
         output_file=tmp_path,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=True,
     )
@@ -131,6 +135,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=False,
         mesh_topic_db=mesh_tree_path,
@@ -157,6 +162,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=True,
         dry_run=False,
         mesh_topic_db=mesh_tree_path,
@@ -172,6 +178,7 @@ def test_pmc_source(test_data_path, capsys, monkeypatch, tmp_path):
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=False,
         mesh_topic_db=mesh_tree_path,
@@ -203,6 +210,7 @@ def test_medbiorxiv_source(capsys, monkeypatch, tmp_path, source):
         output_file=output_file,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=False,
     )
@@ -251,6 +259,7 @@ def test_pubmed_source(
         output_file=output_jsonl,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=False,
         mesh_topic_db=mesh_tree_path,
@@ -285,6 +294,7 @@ def test_mesh_topic_db_is_enforced(source, caplog, tmp_path):
         output_file=tmp_path,
         match_filename=None,
         recursive=False,
+        inc_individual_json=False,
         overwrite=False,
         dry_run=False,
     )
