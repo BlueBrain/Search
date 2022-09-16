@@ -22,11 +22,10 @@ import multiprocessing as mp
 import pathlib
 import pickle  # nosec
 from abc import ABC, abstractmethod
-from typing import Any, Optional
 
 import numpy as np
+import sentence_transformers
 import sqlalchemy
-from sentence_transformers import SentenceTransformer
 
 from bluesearch.sql import retrieve_sentences_from_sentence_ids
 from bluesearch.utils import H5
@@ -39,10 +38,10 @@ class EmbeddingModel(ABC):
 
     @property
     @abstractmethod
-    def dim(self) -> int:
+    def dim(self):
         """Return dimension of the embedding."""
 
-    def preprocess(self, raw_sentence: str) -> str:
+    def preprocess(self, raw_sentence):
         """Preprocess the sentence (Tokenization, ...) if needed by the model.
 
         This is a default implementation that perform no preprocessing.
@@ -60,7 +59,7 @@ class EmbeddingModel(ABC):
         """
         return raw_sentence
 
-    def preprocess_many(self, raw_sentences: list[str]) -> list[Any]:
+    def preprocess_many(self, raw_sentences):
         """Preprocess multiple sentences.
 
         This is a default implementation and can be overridden by children classes.
@@ -78,7 +77,7 @@ class EmbeddingModel(ABC):
         return [self.preprocess(sentence) for sentence in raw_sentences]
 
     @abstractmethod
-    def embed(self, preprocessed_sentence: str) -> np.ndarray[Any, Any]:
+    def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
         Parameters
@@ -92,7 +91,7 @@ class EmbeddingModel(ABC):
             One dimensional vector representing the embedding of the given sentence.
         """
 
-    def embed_many(self, preprocessed_sentences: list[str]) -> np.ndarray[Any, Any]:
+    def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for all provided sentences.
 
         This is a default implementation. Children classes can implement more
@@ -125,20 +124,18 @@ class SentTransformer(EmbeddingModel):
     https://github.com/UKPLab/sentence-transformers
     """
 
-    def __init__(
-        self, model_name_or_path: pathlib.Path | str, device: Optional[str] = None
-    ):
+    def __init__(self, model_name_or_path, device=None):
 
-        self.senttransf_model = SentenceTransformer(
+        self.senttransf_model = sentence_transformers.SentenceTransformer(
             str(model_name_or_path), device=device
         )
 
     @property
-    def dim(self) -> int:
+    def dim(self):
         """Return dimension of the embedding."""
-        return self.senttransf_model.get_sentence_embedding_dimension()
+        return 768
 
-    def embed(self, preprocessed_sentence: str) -> np.ndarray[Any, Any]:
+    def embed(self, preprocessed_sentence):
         """Compute the sentences embeddings for a given sentence.
 
         Parameters
@@ -153,7 +150,7 @@ class SentTransformer(EmbeddingModel):
         """
         return self.embed_many([preprocessed_sentence]).squeeze()
 
-    def embed_many(self, preprocessed_sentences: list[str]) -> np.ndarray[Any, Any]:
+    def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
 
         Parameters
@@ -180,13 +177,13 @@ class SklearnVectorizer(EmbeddingModel):
         The path of the scikit-learn model to use for the embeddings in Pickle format.
     """
 
-    def __init__(self, checkpoint_path: pathlib.Path | str):
+    def __init__(self, checkpoint_path):
         self.checkpoint_path = pathlib.Path(checkpoint_path)
         with self.checkpoint_path.open("rb") as f:
             self.model = pickle.load(f)  # nosec
 
     @property
-    def dim(self) -> int:
+    def dim(self):
         """Return dimension of the embedding.
 
         Returns
@@ -204,7 +201,7 @@ class SklearnVectorizer(EmbeddingModel):
                 f"{type(self.model)} could not be computed."
             )
 
-    def embed(self, preprocessed_sentence: str) -> np.ndarray[Any, Any]:
+    def embed(self, preprocessed_sentence):
         """Embed one given sentence.
 
         Parameters
@@ -221,7 +218,7 @@ class SklearnVectorizer(EmbeddingModel):
         embedding = self.embed_many([preprocessed_sentence])
         return embedding.squeeze()
 
-    def embed_many(self, preprocessed_sentences: list[str]) -> np.ndarray[Any, Any]:
+    def embed_many(self, preprocessed_sentences):
         """Compute sentence embeddings for multiple sentences.
 
         Parameters
@@ -240,12 +237,7 @@ class SklearnVectorizer(EmbeddingModel):
         return embeddings
 
 
-def compute_database_embeddings(
-    connection: sqlalchemy.engine.Engine,
-    model: EmbeddingModel,
-    indices: np.ndarray[Any, Any],
-    batch_size: int = 10,
-) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
+def compute_database_embeddings(connection, model, indices, batch_size=10):
     """Compute sentences embeddings.
 
     The embeddings are computed for a given model and a given database
@@ -306,7 +298,7 @@ def compute_database_embeddings(
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: pathlib.Path | str,
+    checkpoint_path: pathlib.Path | str | None = None,
     device: str = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
@@ -412,20 +404,20 @@ class MPEmbedder:
 
     def __init__(
         self,
-        database_url: str,
-        model_name_or_class: str,
-        indices: np.ndarray[Any, Any],
-        h5_path_output: pathlib.Path,
-        checkpoint_path: pathlib.Path | str,
-        batch_size_inference: int = 16,
-        batch_size_transfer: int = 1000,
-        n_processes: int = 2,
-        gpus: Optional[list[Any]] = None,
-        delete_temp: bool = True,
-        temp_folder: Optional[pathlib.Path] = None,
-        h5_dataset_name: Optional[str] = None,
-        start_method: str = "forkserver",
-        preinitialize: bool = True,
+        database_url,
+        model_name_or_class,
+        indices,
+        h5_path_output,
+        batch_size_inference=16,
+        batch_size_transfer=1000,
+        n_processes=2,
+        checkpoint_path=None,
+        gpus=None,
+        delete_temp=True,
+        temp_folder=None,
+        h5_dataset_name=None,
+        start_method="forkserver",
+        preinitialize=True,
     ):
         self.database_url = database_url
         self.model_name_or_class = model_name_or_class
@@ -453,7 +445,7 @@ class MPEmbedder:
 
         self.gpus = gpus
 
-    def do_embedding(self) -> None:
+    def do_embedding(self):
         """Do the parallelized embedding."""
         if self.preinitialize:
             self.logger.info("Preinitializing model (download of checkpoints)")
@@ -515,15 +507,15 @@ class MPEmbedder:
 
     @staticmethod
     def run_embedding_worker(
-        database_url: str,
-        model_name_or_class: str,
-        indices: np.ndarray[Any, Any],
-        temp_h5_path: pathlib.Path,
-        batch_size: int,
-        checkpoint_path: pathlib.Path,
-        gpu: int,
-        h5_dataset_name: str,
-    ) -> None:
+        database_url,
+        model_name_or_class,
+        indices,
+        temp_h5_path,
+        batch_size,
+        checkpoint_path,
+        gpu,
+        h5_dataset_name,
+    ):
         """Run per worker function.
 
         Parameters
