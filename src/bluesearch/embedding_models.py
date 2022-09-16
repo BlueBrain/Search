@@ -583,7 +583,9 @@ class MPEmbedder:
         batch_size = min(n_indices, batch_size)
 
         logger.info("Populating h5 files")
-        splits = np.array_split(np.arange(n_indices), n_indices / batch_size)
+        splits = np.array_split(
+            np.arange(n_indices), n_indices / batch_size
+        )  # type:ignore
         splits = [split for split in splits if len(split) > 0]
 
         for split_ix, pos_indices in enumerate(splits):
