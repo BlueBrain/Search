@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch
 urllib3.disable_warnings()
 
 
-def connect():
+def connect() -> Elasticsearch:
     """return a client connect to BBP K8S"""
     client = Elasticsearch(
         config("ES_URL"),
