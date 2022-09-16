@@ -182,7 +182,7 @@ def run(
     """
     import json
 
-    from bluesearch.utils import find_files
+    from bluesearch.utils import JSONL, find_files
 
     if input_path is None:
         if sys.stdin.isatty():
@@ -237,17 +237,14 @@ def run(
                             / "topic"
                             / f"{input_path.stem}.json"
                         )
-                        with topic_path.open() as f:
-                            topic_json = json.load(f)
+                        topic_json = JSONL.load_jsonl(topic_path)
 
-                        serialized = json.loads(serialized)
-
+                        serialized_json = json.loads(serialized)
                         if input_type == "pubmed-xml-set":
-                            serialized["topics"] = topic_json[i]["topics"]
+                            serialized_json["topics"] = topic_json[i]["topics"]
                         else:
-                            serialized["topics"] = topic_json["topics"]
-
-                        serialized = json.dumps(serialized)
+                            serialized_json["topics"] = topic_json[0]["topics"]
+                        serialized = json.dumps(serialized_json)
 
                     output_file.write_text(serialized, "utf-8")
 
