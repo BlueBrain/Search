@@ -138,6 +138,14 @@ class SentTransformer(EmbeddingModel):
         """Return dimension of the embedding."""
         return self.senttransf_model.get_sentence_embedding_dimension()
 
+    @property
+    def normalized(self) -> bool:
+        """Return true is the model as a normalization module"""
+        for _, module in self.senttransf_model._modules.items():
+            if str(module) == "Normalize()":
+                return True
+        return False
+
     def embed(self, preprocessed_sentence: str) -> np.ndarray[Any, Any]:
         """Compute the sentences embeddings for a given sentence.
 

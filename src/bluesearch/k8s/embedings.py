@@ -1,6 +1,7 @@
 import logging
 
 import elasticsearch
+import numpy as np
 import tqdm
 from elasticsearch.helpers import scan
 
@@ -33,6 +34,8 @@ def embed_locally(
     )
     for hit in scan(client, query=query, index="paragraphs"):
         emb = model.embed(hit["_source"]["text"])
+        if not model.normalized:
+            emb /= np.linalg.norm(emb)
         client.update(
             index="paragraphs", doc={"embedding": emb.tolist()}, id=hit["_id"]
         )
