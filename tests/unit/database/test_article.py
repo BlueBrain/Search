@@ -582,6 +582,9 @@ class TestArticle:
             assert text == text_want
 
         assert article.topics == {}
+        test_dict = {"test_dict": ["this", "is", "a", "test"]}
+        article.topics.update(test_dict)
+        assert article.topics == test_dict
 
     def test_str(self):
         parser = SimpleTestParser()
