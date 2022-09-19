@@ -7,13 +7,13 @@ logger = logging.getLogger(__name__)
 
 
 def add_index(
-    index: str | list[str],
+    index: str,
     settings: Optional[dict[str, Any]] = None,
     mappings: Optional[dict[str, Any]] = None,
 ) -> None:
     client = connect()
 
-    if any(x in client.indices.get_alias().keys() for x in list(index)):
+    if index in client.indices.get_alias().keys():
         raise RuntimeError("Index already in ES")
 
     try:
@@ -26,7 +26,7 @@ def add_index(
 def remove_index(index: str | list[str]) -> None:
     client = connect()
 
-    if not all(x in client.indices.get_alias().keys() for x in list(index)):
+    if index not in client.indices.get_alias().keys():
         raise RuntimeError("Index not in ES")
 
     try:

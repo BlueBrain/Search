@@ -18,8 +18,12 @@ def connect() -> Elasticsearch:
     )
 
     if not client.ping():
-        raise RuntimeError("Cannot connect to BBP K8S")
+        raise RuntimeError(f"Cannot connect to BBP K8S: {client.info()}")
 
     logger.info("Connected to BBP K8S")
 
     return client
+
+
+if __name__ == "__main__":
+    connect()
