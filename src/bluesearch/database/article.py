@@ -1072,7 +1072,7 @@ class Article(DataClassJSONMixin):
     arxiv_id: Optional[str] = None
     doi: Optional[str] = None
     uid: Optional[str] = None
-    topics: Optional[Dict[str, List[str]]] = field(default_factory=dict)
+    topics: Dict[str, List[str]] = field(default_factory=dict)
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
