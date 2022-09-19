@@ -17,6 +17,7 @@
 """Abstraction of scientific article data and related tools."""
 from __future__ import annotations
 
+import dataclasses
 import enum
 import hashlib
 import html
@@ -25,10 +26,10 @@ import re
 import string
 import unicodedata
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
+from typing import Dict, IO, Generator, Iterable, List, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -1071,7 +1072,7 @@ class Article(DataClassJSONMixin):
     arxiv_id: Optional[str] = None
     doi: Optional[str] = None
     uid: Optional[str] = None
-    topics: Optional[dict[str, Optional[list[str]]]] = None
+    topics: Optional[Dict[str, List[str]]] = field(default_factory=dict)
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -1091,7 +1092,6 @@ class Article(DataClassJSONMixin):
         arxiv_id = parser.arxiv_id
         doi = parser.doi
         uid = parser.uid
-        topics = None
 
         return cls(
             title,
@@ -1103,7 +1103,6 @@ class Article(DataClassJSONMixin):
             arxiv_id,
             doi,
             uid,
-            topics,
         )
 
     def iter_paragraphs(
