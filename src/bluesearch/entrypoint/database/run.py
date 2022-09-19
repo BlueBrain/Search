@@ -105,6 +105,7 @@ class GlobalParams(luigi.Config):
     """Global configuration."""
 
     source = luigi.Parameter()
+    include_topic = luigi.Parameter(default=False)
 
 
 class DownloadTask(ExternalProgramTask):
@@ -225,11 +226,13 @@ class TopicExtractTask(ExternalProgramTask):
             *BBS_BINARY,
             "topic-extract",
             *VERBOSITY,
-            "--i",
             GlobalParams().source,
             input_dir,
             output_dir,
         ]
+
+        if GlobalParams().include_topic:
+            command.extend("--i")
 
         if GlobalParams().source in {"medrxiv", "biorxiv"}:
             command.extend(
@@ -433,12 +436,14 @@ class ParseTask(ExternalProgramTask):
         command = [
             *BBS_BINARY,
             "parse",
-            "--i",
             *VERBOSITY,
             parser,
             str(input_dir),
             str(output_dir),
         ]
+
+        if GlobalParams().include_topic:
+            command.extend("--i")
 
         return command
 
