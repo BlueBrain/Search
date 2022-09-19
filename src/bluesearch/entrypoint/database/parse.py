@@ -229,7 +229,6 @@ def run(
                 if output_file.exists():
                     raise FileExistsError(f"Output '{output_file}' already exists!")
                 else:
-                    serialized = article.to_json()
 
                     if include_topic:
                         topic_path = (
@@ -239,13 +238,12 @@ def run(
                         )
                         topic_json = JSONL.load_jsonl(topic_path)
 
-                        serialized_json = json.loads(serialized)
                         if input_type == "pubmed-xml-set":
-                            serialized_json["topics"] = topic_json[i]["topics"]
+                            article.topics = topic_json[i]["topics"]
                         else:
-                            serialized_json["topics"] = topic_json[0]["topics"]
-                        serialized = json.dumps(serialized_json)
+                            article.topics = topic_json[0]["topics"]
 
+                    serialized = article.to_json()
                     output_file.write_text(serialized, "utf-8")
 
         except Exception as e:

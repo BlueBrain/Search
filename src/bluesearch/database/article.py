@@ -1071,6 +1071,7 @@ class Article(DataClassJSONMixin):
     arxiv_id: Optional[str] = None
     doi: Optional[str] = None
     uid: Optional[str] = None
+    topics: Optional[dict[str, Optional[list[str]]]] = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
@@ -1090,6 +1091,7 @@ class Article(DataClassJSONMixin):
         arxiv_id = parser.arxiv_id
         doi = parser.doi
         uid = parser.uid
+        topics = None
 
         return cls(
             title,
@@ -1101,6 +1103,7 @@ class Article(DataClassJSONMixin):
             arxiv_id,
             doi,
             uid,
+            topics,
         )
 
     def iter_paragraphs(
