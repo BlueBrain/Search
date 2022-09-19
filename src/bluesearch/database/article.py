@@ -25,10 +25,10 @@ import re
 import string
 import unicodedata
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from io import StringIO
 from pathlib import Path
-from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
+from typing import IO, Dict, Generator, Iterable, List, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -1071,6 +1071,7 @@ class Article(DataClassJSONMixin):
     arxiv_id: Optional[str] = None
     doi: Optional[str] = None
     uid: Optional[str] = None
+    topics: Dict[str, Dict[str, List[str]]] = field(default_factory=dict)
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
