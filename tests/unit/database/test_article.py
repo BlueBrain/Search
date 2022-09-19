@@ -581,7 +581,7 @@ class TestArticle:
         ):
             assert text == text_want
 
-        assert article.topics == dict()
+        assert article.topics == {}
 
     def test_str(self):
         parser = SimpleTestParser()
