@@ -67,7 +67,6 @@ INSTALL_REQUIRES = [
     "numpy>=1.20.1",
     "pandas>=1",
     "pg8000",
-    "python-decouple==3.6",
     "python-dotenv",
     "requests",
     "scikit-learn",
