@@ -126,16 +126,19 @@ def run(
     for article in articles:
         logger.info(f"Processing {article.uid}")
 
-        article_mapping = {
-            "article_id": article.uid,
-            "title": article.title,
-            "authors": ", ".join(article.authors),
-            "abstract": "\n".join(article.abstract),
-            "pubmed_id": article.pubmed_id,
-            "pmc_id": article.pmc_id,
-            "doi": article.doi,
-        }
-        article_mappings.append(article_mapping)
+        try:
+            article_mapping = {
+                "article_id": article.uid,
+                "title": article.title,
+                "authors": ", ".join(article.authors),
+                "abstract": "\n".join(article.abstract),
+                "pubmed_id": article.pubmed_id,
+                "pmc_id": article.pmc_id,
+                "doi": article.doi,
+            }
+            article_mappings.append(article_mapping)
+        except:
+            continue
 
         swapped = (
             (text, (section, ppos))

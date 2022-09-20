@@ -204,7 +204,8 @@ def run(
                 )
                 try:
                     article_topics = extract_article_topics_for_pubmed_article(article)
-                    journal_topics = extract_journal_topics_for_pubmed_article(article)
+                    # journal_topics = extract_journal_topics_for_pubmed_article(article)
+                    journal_topics = None
                 except Exception:
                     logger.error(f"Failed to extract topic from {i}")
 
