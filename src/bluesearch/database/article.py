@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from typing import IO, Generator, Iterable, Optional, Sequence, Tuple, Any
+from typing import IO, Generator, Iterable, Sequence, Tuple, Any
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -1066,11 +1066,11 @@ class Article(DataClassJSONMixin):
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[Tuple[str, str]]
-    pubmed_id: Optional[str] = None
-    pmc_id: Optional[str] = None
-    arxiv_id: Optional[str] = None
-    doi: Optional[str] = None
-    uid: Optional[str] = None
+    pubmed_id: str | None = None
+    pmc_id: str | None = None
+    arxiv_id: str | None = None
+    doi: str | None = None
+    uid: str | None = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
