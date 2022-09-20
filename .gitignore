@@ -151,9 +151,6 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# trunk
-.trunk
-
 # mypy
 .mypy_cache/
 .dmypy.json
