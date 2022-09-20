@@ -54,7 +54,7 @@ INSTALL_REQUIRES = [
     # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
     "cryptography>=3.2",
     "defusedxml",
-    "elasticsearch==8.3.3",
+    "elasticsearch>=8",
     "google-cloud-storage",
     "h5py",
     "ipython",
