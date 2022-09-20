@@ -1,3 +1,4 @@
+from __future__ import annotations
 import logging
 from typing import Any, Optional
 
@@ -46,8 +47,8 @@ MAPPINGS_PARAGRAPHS = {
 
 def add_index(
     index: str,
-    settings: Optional[dict[str, Any]] = None,
-    mappings: Optional[dict[str, Any]] = None,
+    settings: dict[str, Any] | None = None,
+    mappings: dict[str, Any] | None = None,
 ) -> None:
     client = connect()
 
