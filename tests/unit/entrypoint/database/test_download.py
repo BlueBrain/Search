@@ -29,13 +29,13 @@ from google.cloud.storage import Blob
 from bluesearch.database.article import ArticleSource
 from bluesearch.entrypoint.database import download
 
-DOWNLOAD_PARAMS = {"source", "from_month", "output_dir", "dry_run"}
+DOWNLOAD_PARAMS = {"source", "from_month", "to_month", "output_dir", "dry_run"}
 
 
 def test_init_parser():
     parser = download.init_parser(argparse.ArgumentParser())
 
-    args = parser.parse_args(["pmc", "2020-10", "/path/to/download"])
+    args = parser.parse_args(["pmc", "2020-10", "2020-12", "/path/to/download"])
     assert vars(args).keys() == DOWNLOAD_PARAMS
 
     # Test the values
@@ -72,9 +72,10 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.generate_pmc_urls", fake_generate_pmc_urls
     )
 
-    fake_datetime = datetime.datetime(2021, 12, 2)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
     pmc_path = tmp_path / "pmc"
-    download.run("pmc", fake_datetime, pmc_path, dry_run=False)
+    download.run("pmc", from_month, to_month, pmc_path, dry_run=False)
     assert pmc_path.exists()
     assert {path.name for path in pmc_path.iterdir()} == {
         "author_manuscript",
@@ -88,7 +89,7 @@ def test_pmc_download(capsys, monkeypatch, tmp_path):
 
     fake_generate_pmc_urls.reset_mock()
     fake_download_articles.reset_mock()
-    download.run("pmc", fake_datetime, pmc_path, dry_run=True)
+    download.run("pmc", from_month, to_month, pmc_path, dry_run=True)
     captured = capsys.readouterr()
     assert len(captured.out.split("\n")) == 10
     assert fake_generate_pmc_urls.call_count == 3
@@ -114,11 +115,12 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
         "bluesearch.database.download.get_pubmed_urls", fake_get_pubmed_urls
     )
 
-    fake_datetime = datetime.datetime(2021, 12, 16)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
     pubmed_path = tmp_path / "pubmed"
 
     # Run the command
-    download.run("pubmed", fake_datetime, pubmed_path, dry_run=False)
+    download.run("pubmed", from_month, to_month, pubmed_path, dry_run=False)
 
     # Asserts
     assert pubmed_path.exists()
@@ -131,7 +133,7 @@ def test_pubmed_download(capsys, monkeypatch, tmp_path):
     fake_download_articles.reset_mock()
 
     # Run the command (dry run)
-    download.run("pubmed", fake_datetime, pubmed_path, dry_run=True)
+    download.run("pubmed", from_month, to_month, pubmed_path, dry_run=True)
 
     # Asserts
     captured = capsys.readouterr()
@@ -151,7 +153,8 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     # Define mocks
     fake_getpass = Mock()
     fake_getpass.getpass.return_value = "somecredentials"
-    fake_datetime = datetime.datetime(2021, 11, 1)
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2022, 1, 1)
 
     fake_get_s3_urls = Mock(
         return_value={
@@ -177,7 +180,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     )
 
     # Run the command (no dry run)
-    download.run(source, fake_datetime, tmp_path, dry_run=False)
+    download.run(source, from_month, to_month, tmp_path, dry_run=False)
 
     # Asserts
     fake_get_s3_urls.assert_called_once()
@@ -192,7 +195,7 @@ def test_biorxiv_medrxiv_download(source, monkeypatch, tmp_path, capsys):
     fake_getpass.reset_mock()
 
     # Run the command dry run
-    download.run(source, fake_datetime, tmp_path, dry_run=True)
+    download.run(source, from_month, to_month, tmp_path, dry_run=True)
 
     # Asserts
     fake_get_s3_urls.assert_called_once()
@@ -238,7 +241,13 @@ class TestArxivDownload:
 
     def test_dry_run(self, capsys, tmp_path, mocked):
         # The dry run should print all months and blobs to stdout
-        download.run("arxiv", datetime.datetime(2021, 12, 1), tmp_path, dry_run=True)
+        download.run(
+            "arxiv",
+            datetime.datetime(2021, 12, 1),
+            datetime.datetime(2021, 2, 1),
+            tmp_path,
+            dry_run=True,
+        )
         stdout, stderr = capsys.readouterr()
         for month, blobs in mocked.get_gcs_urls().items():
             assert month in stdout
@@ -248,7 +257,13 @@ class TestArxivDownload:
     def test_normal_run(self, tmp_path, mocked):
         # Under normal circumstances download_gcs_blob should be called as
         # many times as there are blobs to download
-        download.run("arxiv", datetime.datetime(2021, 12, 1), tmp_path, dry_run=False)
+        download.run(
+            "arxiv",
+            datetime.datetime(2021, 12, 1),
+            datetime.datetime(2021, 2, 1),
+            tmp_path,
+            dry_run=False,
+        )
         n_blobs = sum(len(blobs) for blobs in mocked.get_gcs_urls().values())
         assert mocked.download_gcs_blob.call_count == n_blobs
 
@@ -259,7 +274,11 @@ class TestArxivDownload:
         mocked.download_gcs_blob.side_effect = RuntimeError(error_msg)
         with caplog.at_level(logging.ERROR):
             download.run(
-                "arxiv", datetime.datetime(2021, 12, 1), tmp_path, dry_run=False
+                "arxiv",
+                datetime.datetime(2021, 12, 1),
+                datetime.datetime(2021, 2, 1),
+                tmp_path,
+                dry_run=False,
             )
         assert error_msg in caplog.text
         for blob in chain(*mocked.get_gcs_urls().values()):
@@ -279,10 +298,30 @@ class TestArxivDownload:
 def test_structure_change(source, expected_date, tmp_path, caplog):
 
     limit_datetime = download.MIN_DATE[source]
-    fake_datetime = limit_datetime - datetime.timedelta(days=32)
+    from_month = limit_datetime - datetime.timedelta(days=32)
+    to_month = datetime.datetime(2022, 1, 1)
 
     with caplog.at_level(logging.ERROR):
-        exit_code = download.run(source.value, fake_datetime, tmp_path, dry_run=False)
+        exit_code = download.run(
+            source.value, from_month, to_month, tmp_path, dry_run=False
+        )
 
     assert exit_code == 1
     assert expected_date in caplog.text
+
+
+def test_too_soon(tmp_path, caplog):
+    from_month = datetime.datetime(2021, 12, 1)
+    to_month = datetime.datetime(2555, 1, 1)
+
+    with caplog.at_level(logging.ERROR):
+        retcode = download.run(
+            "arxiv",
+            from_month,
+            to_month,
+            tmp_path,
+            dry_run=True,
+        )
+
+    assert retcode == 1
+    assert "Invalid to_date" in caplog.text

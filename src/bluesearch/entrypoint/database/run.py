@@ -24,7 +24,6 @@ import pathlib
 import re
 import shutil
 import tarfile
-from datetime import datetime
 from pathlib import Path
 
 import luigi
@@ -98,7 +97,6 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 BBS_BINARY = ["bbs_database"]
 VERBOSITY = ["-v"]  # for the entrypoint subprocesses
 CAPTURE_OUTPUT = False
-IDENTIFIER = None  # make sure the same for all tasks
 
 
 class GlobalParams(luigi.Config):
@@ -114,22 +112,17 @@ class DownloadTask(ExternalProgramTask):
     """
 
     from_month = luigi.Parameter()
+    to_month = luigi.Parameter()
     output_dir = luigi.Parameter()
     identifier = luigi.OptionalParameter()
 
     def output(self) -> luigi.LocalTarget:
         """Define download folder."""
-        global IDENTIFIER
         if self.identifier is not None:
             identifier = self.identifier
 
         else:
-            if IDENTIFIER is None:
-                today = datetime.today()
-                identifier = f"{self.from_month}_{today.strftime('%Y-%m-%d')}"
-                IDENTIFIER = identifier
-            else:
-                identifier = IDENTIFIER
+            identifier = f"{self.from_month}_{self.to_month}"
 
         output_dir = Path(self.output_dir) / GlobalParams().source / identifier / "raw"
 
@@ -144,6 +137,7 @@ class DownloadTask(ExternalProgramTask):
             *VERBOSITY,
             GlobalParams().source,
             self.from_month,
+            self.to_month,
             output_dir,
         ]
 
