@@ -5,6 +5,44 @@ from bluesearch.k8s.connect import connect
 
 logger = logging.getLogger(__name__)
 
+SETTINGS = {"number_of_shards": 2, "number_of_replicas": 1}
+
+MAPPINGS_ARTICLES = {
+    "dynamic": "strict",
+    "properties": {
+        "article_id": {"type": "keyword"},
+        "doi": {"type": "keyword"},
+        "pmc_id": {"type": "keyword"},
+        "pubmed_id": {"type": "keyword"},
+        "arxiv_id": {"type": "keyword"},
+        "title": {"type": "text"},
+        "authors": {"type": "text"},
+        "abstract": {"type": "text"},
+        "journal": {"type": "keyword"},
+        "publish_time": {"type": "date", "format": "yyyy-MM-dd"},
+        "license": {"type": "keyword"},
+        "is_english": {"type": "boolean"},
+        "topics": {"type": "keyword"},
+    },
+}
+
+MAPPINGS_PARAGRAPHS = {
+    "dynamic": "strict",
+    "properties": {
+        "article_id": {"type": "keyword"},
+        "section_name": {"type": "keyword"},
+        "paragraph_id": {"type": "short"},
+        "text": {"type": "text"},
+        "is_bad": {"type": "boolean"},
+        "embedding": {
+            "type": "dense_vector",
+            "dims": 384,
+            "index": True,
+            "similarity": "dot_product",
+        },
+    },
+}
+
 
 def add_index(
     index: str,
