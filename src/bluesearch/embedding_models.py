@@ -22,7 +22,7 @@ import multiprocessing as mp
 import pathlib
 import pickle  # nosec
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 import sqlalchemy
@@ -126,7 +126,7 @@ class SentTransformer(EmbeddingModel):
     """
 
     def __init__(
-        self, model_name_or_path: pathlib.Path | str, device: Optional[str] = None
+        self, model_name_or_path: pathlib.Path | str, device: str | None = None
     ):
 
         self.senttransf_model = SentenceTransformer(
@@ -428,10 +428,10 @@ class MPEmbedder:
         batch_size_inference: int = 16,
         batch_size_transfer: int = 1000,
         n_processes: int = 2,
-        gpus: Optional[list[Any]] = None,
+        gpus: list[Any] | None = None,
         delete_temp: bool = True,
-        temp_folder: Optional[pathlib.Path] = None,
-        h5_dataset_name: Optional[str] = None,
+        temp_folder: pathlib.Path | None = None,
+        h5_dataset_name: str | None = None,
         start_method: str = "forkserver",
         preinitialize: bool = True,
     ):

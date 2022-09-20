@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 
 import elasticsearch
@@ -19,10 +21,8 @@ def embed_locally(
     model = SentTransformer(model_name)
 
     # get paragraphs without embeddings
-    query = {"query": {"bool": {"must_not": {"exists": {"field": "embedding"}}}}}
-    paragraph_count = client.count(index="paragraphs", body=query)[  # type: ignore
-        "count"
-    ]
+    query = {"bool": {"must_not": {"exists": {"field": "embedding"}}}}
+    paragraph_count = client.count(index="paragraphs", query=query)["count"]
     logger.info("There are {paragraph_count} paragraphs without embeddings")
 
     # creates embeddings for all the documents withouts embeddings and updates them
