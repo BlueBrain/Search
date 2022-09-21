@@ -19,7 +19,7 @@ import argparse
 import getpass
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import chain
 from pathlib import Path
 
@@ -97,7 +97,12 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "from_month",
         type=convert_to_datetime,
         help="The starting month (included) for the download in format YYYY-MM. "
-        "All papers from the given month until today will be downloaded.",
+        "All papers from the given month until `end_month` will be downloaded.",
+    )
+    parser.add_argument(
+        "to_month",
+        type=convert_to_datetime,
+        help="The ending month (excluded) for the download in format YYYY-MM. ",
     )
     parser.add_argument(
         "output_dir",
@@ -115,7 +120,13 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> int:
+def run(
+    source: str,
+    from_month: datetime,
+    to_month: datetime,
+    output_dir: Path,
+    dry_run: bool,
+) -> int:
     """Download articles of a source from a specific date.
 
     Parameter description and potential defaults are documented inside of the
@@ -131,6 +142,14 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         get_s3_urls,
     )
 
+    from_date = datetime(from_month.year, from_month.month, 1)
+    to_date = datetime(to_month.year, to_month.month, 1)
+    to_date -= timedelta(days=1)  # last day of the previous month
+
+    if datetime.today() <= to_date:
+        logger.error(f"Invalid to_date={to_date}")
+        return 1
+
     article_source = ArticleSource(source)
     if from_month < MIN_DATE[article_source]:
         logger.error(
@@ -144,7 +163,11 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
     if article_source == ArticleSource.PMC:
         url_dict = {}
         for component in {"author_manuscript", "oa_comm", "oa_noncomm"}:
-            url_dict[component] = generate_pmc_urls(component, from_month)
+            url_dict[component] = generate_pmc_urls(
+                component,
+                start_date=from_date,
+                end_date=to_date,
+            )
 
         if dry_run:
             for component, url_list in url_dict.items():
@@ -162,7 +185,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
             download_articles(url_list, component_dir)
         return 0
     elif article_source == ArticleSource.PUBMED:
-        url_list = get_pubmed_urls(from_month)
+        url_list = get_pubmed_urls(start_date=from_date, end_date=to_date)
         if dry_run:
             print("URL requests from:")
             print(*url_list, sep="\n")
@@ -184,7 +207,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         resource = session.resource("s3")
         bucket = resource.Bucket(f"{source}-src-monthly")
 
-        url_dict = get_s3_urls(bucket, from_month)
+        url_dict = get_s3_urls(bucket, start_date=from_date, end_date=to_date)
 
         if dry_run:
             for month, url_list in url_dict.items():
@@ -205,7 +228,7 @@ def run(source: str, from_month: datetime, output_dir: Path, dry_run: bool) -> i
         bucket = client.bucket("arxiv-dataset")
 
         logger.info("Collecting download URLs")
-        blobs_by_month = get_gcs_urls(bucket, from_month)
+        blobs_by_month = get_gcs_urls(bucket, start_date=from_date, end_date=to_date)
 
         if dry_run:
             print("The following items will be downloaded:")
