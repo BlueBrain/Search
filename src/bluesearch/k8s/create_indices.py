@@ -1,3 +1,20 @@
+# Blue Brain Search is a text mining toolbox focused on scientific use cases.
+#
+# Copyright (C) 2020  Blue Brain Project, EPFL.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""creates an index on ES with the provided name, settings and mappings."""
 from __future__ import annotations
 
 import logging
@@ -51,6 +68,7 @@ def add_index(
     settings: dict[str, Any] | None = None,
     mappings: dict[str, Any] | None = None,
 ) -> None:
+    """Add the index to ES."""
     client = connect()
 
     if index in client.indices.get_alias().keys():
@@ -64,6 +82,7 @@ def add_index(
 
 
 def remove_index(index: str | list[str]) -> None:
+    """Remove the index from ES."""
     client = connect()
 
     if index not in client.indices.get_alias().keys():
