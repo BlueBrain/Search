@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
         env:
           discovery.type: single-node
         options: >-
