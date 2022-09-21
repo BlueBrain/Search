@@ -11,6 +11,12 @@ on:
 jobs:
   tox:
     runs-on: ubuntu-latest
+    services:
+      elasticsearch:
+        image: elasticsearch:8.3.3
+        ports:
+        - 9200/tcp
+        options: -e="discovery.type=single-node" --health-cmd="curl http://localhost:9200/_cluster/health" --health-interval=10s --health-timeout=5s --health-retries=10
     strategy:
       matrix:
         tox-env: [lint, type, docs, check-apidoc, check-packaging]
