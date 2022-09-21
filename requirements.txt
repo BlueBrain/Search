@@ -40,4 +40,3 @@ sentence-transformers==2.0.0
 spacy==3.0.7
 spacy-transformers==1.0.3
 torch==1.9.0
-elasticsearch==8.3.3
