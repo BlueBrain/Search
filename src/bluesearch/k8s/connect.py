@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def connect() -> Elasticsearch:
-    """Return a client connect to BBP K8S."""
+    """Return a client connect ES."""
     client = Elasticsearch(
         os.environ["ES_URL"],
         basic_auth=("elastic", os.environ["ES_PASS"]),
@@ -37,9 +37,9 @@ def connect() -> Elasticsearch:
     )
 
     if not client.ping():
-        raise RuntimeError(f"Cannot connect to BBP K8S: {client.info()}")
+        raise RuntimeError(f"Cannot connect to ES: {os.environ['ES_URL']}")
 
-    logger.info("Connected to BBP K8S")
+    logger.info("Connected to ES")
 
     return client
 

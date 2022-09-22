@@ -20,7 +20,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from bluesearch.k8s.connect import connect
+from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
@@ -64,13 +64,12 @@ MAPPINGS_PARAGRAPHS = {
 
 
 def add_index(
+    client: Elasticsearch,
     index: str,
     settings: dict[str, Any] | None = None,
     mappings: dict[str, Any] | None = None,
 ) -> None:
     """Add the index to ES."""
-    client = connect()
-
     if index in client.indices.get_alias().keys():
         raise RuntimeError("Index already in ES")
 
@@ -81,10 +80,10 @@ def add_index(
         print("Elasticsearch add_index ERROR:", err)
 
 
-def remove_index(index: str | list[str]) -> None:
+def remove_index(
+    client: Elasticsearch,
+    index: str | list[str]) -> None:
     """Remove the index from ES."""
-    client = connect()
-
     if index not in client.indices.get_alias().keys():
         raise RuntimeError("Index not in ES")
 
