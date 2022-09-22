@@ -80,9 +80,7 @@ def add_index(
         print("Elasticsearch add_index ERROR:", err)
 
 
-def remove_index(
-    client: Elasticsearch,
-    index: str | list[str]) -> None:
+def remove_index(client: Elasticsearch, index: str | list[str]) -> None:
     """Remove the index from ES."""
     if index not in client.indices.get_alias().keys():
         raise RuntimeError("Index not in ES")
