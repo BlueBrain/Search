@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from typing import IO, Generator, Iterable, Sequence, Tuple, Any
+from typing import IO, Any, Generator, Iterable, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
