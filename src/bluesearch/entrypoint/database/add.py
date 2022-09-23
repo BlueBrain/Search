@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Adding articles to the database."""
+from __future__ import annotations
+
 import argparse
 import logging
 from pathlib import Path
@@ -73,6 +75,23 @@ def _upload_sql(
     article_mappings: list[dict[str, Any]],
     paragraph_mappings: list[dict[str, Any]],
 ) -> None:
+    """Upload the mappings to a SQL database.
+
+    Parameters
+    ----------
+    db_url
+        The location of the database.
+    db_type
+        Type of the database.
+    article_mappings
+        The mappings of the articles to upload.
+    paragraph_mappings
+        The mappings of the paragraphs to upload.
+
+    Returns
+    -------
+    None
+    """
 
     import sqlalchemy
 
@@ -127,6 +146,21 @@ def _upload_es(
     article_mappings: list[dict[str, Any]],
     paragraph_mappings: list[dict[str, Any]],
 ) -> None:
+    """Upload the mappings to an Elasticsearch database.
+
+    Parameters
+    ----------
+    db_url
+        The location of the database.
+    article_mappings
+        The mappings of the articles to upload.
+    paragraph_mappings
+        The mappings of the paragraphs to upload.
+   
+    Returns
+    -------
+    None
+    """
 
     import tqdm
     import urllib3
@@ -177,6 +211,18 @@ def _upload_es(
     def bulk_paragraphs(
         paragraph_mappings: list[dict[str, Any]], progress: Any = None
     ) -> Iterable[dict[str, Any]]:
+        """Yield a paragraph mapping as a document to upload to Elasticsearch.
+
+        Parameters
+        ----------
+        paragraph_mappings
+            The mappings of the paragraphs to upload.
+
+        Returns
+        -------
+        Iterable[dict[str, Any]]
+            A generator of documents to upload to Elasticsearch.
+        """
         for paragraph in paragraph_mappings:
             doc = {
                 "_index": "paragraphs",
