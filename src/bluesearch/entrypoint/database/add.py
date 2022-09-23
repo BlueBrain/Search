@@ -117,7 +117,7 @@ def run(
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
     logger.info("Loading spacy model")
-    nlp = load_spacy_model("en_core_sci_lg", disable=["ner"])
+    nlp = load_spacy_model("en_core_web_sm", disable=["ner"])
 
     logger.info("Splitting text into sentences")
     article_mappings = []
