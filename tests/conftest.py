@@ -518,5 +518,5 @@ def get_es_client(monkeypatch):
 
     if client is not None:
         for index in client.indices.get_alias().keys():
-            if index in ['articles', 'paragraphs', 'test_index']:
+            if index in ["articles", "paragraphs", "test_index"]:
                 remove_index(client, index)
