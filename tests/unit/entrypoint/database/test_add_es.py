@@ -14,10 +14,10 @@ def test(get_es_client, tmp_path):
         title="some test title",
         authors="some test authors",
         abstract="some test abstract",
-        section_paragraphs=(
-            "some test section_paragraphs 1client",
-            "some test section_paragraphs 2",
-        ),
+        section_paragraphs=[
+            ("intro", "some test section_paragraphs 1client"),
+            ("summary", "some test section_paragraphs 2"),
+        ],
         uid="some test uid",
     )
 
@@ -25,10 +25,10 @@ def test(get_es_client, tmp_path):
         title="SOME test title",
         authors="SOME test authors",
         abstract="SOME test abstract",
-        section_paragraphs=(
-            "SOME test section_paragraphs 1",
-            "SOME test section_paragraphs 2",
-        ),
+        section_paragraphs=[
+            ("intro", "some TESTTT section_paragraphs 1client"),
+            ("summary", "some other test section_paragraphs 2"),
+        ],
         uid="SOME test uid",
     )
 
