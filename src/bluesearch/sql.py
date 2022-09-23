@@ -278,7 +278,9 @@ def retrieve_articles(article_ids, engine):
     sql_query = sql_query.bindparams(sql.bindparam("articles_ids", expanding=True))
     all_sentences = pd.read_sql(sql_query, engine, params={"articles_ids": article_ids})
 
-    groupby_var = all_sentences.groupby(by=["article_id", "paragraph_pos_in_article"])
+    groupby_var = all_sentences.groupby(
+        by=["article_id", "paragraph_pos_in_article"], group_keys=False
+    )
     paragraphs = groupby_var["text"].apply(lambda x: " ".join(x))
     section_name = groupby_var["section_name"].unique().apply(lambda x: x[0])
 

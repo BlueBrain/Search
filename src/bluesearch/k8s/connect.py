@@ -14,29 +14,35 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""connects to ES."""
+import logging
+import os
 
-Flask==2.0.1
-SQLAlchemy[mysql,pymysql]==1.4.21
-boto3==1.20.16
-catalogue==2.0.4
-cryptography==3.4.7
-defusedxml==0.6.0
-google-cloud-storage==1.43.0
-h5py==3.3.0
-ipython==7.31.1
-ipywidgets==7.6.3
-jupyterlab==3.0.17
-langdetect==1.0.9
-luigi==3.0.3
-mashumaro==3.0
-numpy==1.21.0
-pandas==1.3.0
-pg8000==1.23.0
-python-dotenv==0.18.0
-requests==2.26.0
-scikit-learn==0.24.2
-sentence-transformers==2.0.0
-spacy==3.0.7
-spacy-transformers==1.0.3
-torch==1.9.0
-elasticsearch==8.3.3
+import urllib3
+from dotenv import load_dotenv
+from elasticsearch import Elasticsearch
+
+load_dotenv()
+urllib3.disable_warnings()
+
+logger = logging.getLogger(__name__)
+
+
+def connect() -> Elasticsearch:
+    """Return a client connect ES."""
+    client = Elasticsearch(
+        os.environ["ES_URL"],
+        basic_auth=("elastic", os.environ["ES_PASS"]),
+        verify_certs=False,
+    )
+
+    if not client.ping():
+        raise RuntimeError(f"Cannot connect to ES: {os.environ['ES_URL']}")
+
+    logger.info("Connected to ES")
+
+    return client
+
+
+if __name__ == "__main__":
+    connect()
