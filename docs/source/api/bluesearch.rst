@@ -9,6 +9,7 @@ Subpackages
 
    bluesearch.database
    bluesearch.entrypoint
+   bluesearch.k8s
    bluesearch.mining
    bluesearch.server
    bluesearch.widgets
