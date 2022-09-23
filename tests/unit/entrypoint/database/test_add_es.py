@@ -65,3 +65,23 @@ def test(get_es_client, tmp_path):
     # verify paragraphs
     resp = client.search(index="paragraphs", query={"match_all": {}})
     assert resp["hits"]["total"]["value"] == 4
+
+    all_docs = set()
+    for doc in resp["hits"]["hits"]:
+        all_docs.add(
+            (
+                doc["_source"]["article_id"],
+                doc["_source"]["paragraph_id"],
+                doc["_source"]["section_name"],
+                doc["_source"]["text"],
+            )
+        )
+
+    all_docs_expected = {
+        ("1", 0, "intro", "some test section_paragraphs 1client"),
+        ("1", 1, "summary", "some test section_paragraphs 2"),
+        ("2", 0, "intro", "some TESTTT section_paragraphs 1client"),
+        ("2", 1, "summary", "some other test section_paragraphs 2"),
+    }
+
+    assert all_docs == all_docs_expected
