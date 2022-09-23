@@ -92,7 +92,6 @@ def _upload_sql(
     -------
     None
     """
-
     import sqlalchemy
 
     if db_type == "sqlite":
@@ -156,12 +155,11 @@ def _upload_es(
         The mappings of the articles to upload.
     paragraph_mappings
         The mappings of the paragraphs to upload.
-   
+
     Returns
     -------
     None
     """
-
     import tqdm
     import urllib3
     from decouple import config
