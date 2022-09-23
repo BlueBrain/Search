@@ -69,7 +69,23 @@ def add_index(
     settings: dict[str, Any] | None = None,
     mappings: dict[str, Any] | None = None,
 ) -> None:
-    """Add the index to ES."""
+    """Add an index to ES.
+
+    Parameters
+    ----------
+    client: Elasticsearch
+        Elasticsearch client.
+    index: str
+        Name of the index.
+    settings: dict[str, Any] | None
+        Settings of the index.
+    mappings: dict[str, Any] | None
+        Mappings of the index.
+
+    Returns
+    -------
+    None
+    """
     if index in client.indices.get_alias().keys():
         raise RuntimeError("Index already in ES")
 
@@ -81,7 +97,19 @@ def add_index(
 
 
 def remove_index(client: Elasticsearch, index: str | list[str]) -> None:
-    """Remove the index from ES."""
+    """Remove an index from ES.
+
+    Parameters
+    ----------
+    client: Elasticsearch
+        Elasticsearch client.
+    index: str | list[str]
+        Name of the index.
+
+    Returns
+    -------
+    None
+    """
     if index not in client.indices.get_alias().keys():
         raise RuntimeError("Index not in ES")
 
