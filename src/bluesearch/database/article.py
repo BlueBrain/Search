@@ -28,7 +28,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from io import StringIO
 from pathlib import Path
-from typing import IO, Any, Generator, Iterable, Sequence, Tuple
+from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
@@ -266,7 +266,7 @@ class JATSXMLParser(ArticleParser):
         The xml stream of the article.
     """
 
-    def __init__(self, xml_stream: IO[Any]) -> None:
+    def __init__(self, xml_stream: IO) -> None:
         super().__init__()
         self.content = ElementTree.parse(xml_stream)
         self.ids = self.get_ids()
@@ -722,7 +722,7 @@ class CORD19ArticleParser(ArticleParser):
         The contents of a JSON-file from the CORD-19 database.
     """
 
-    def __init__(self, json_file: dict[str, Any]) -> None:
+    def __init__(self, json_file: dict) -> None:
         # data is a reference to json_file, so we shouldn't modify its contents
         self.data = json_file
 
@@ -818,7 +818,7 @@ class CORD19ArticleParser(ArticleParser):
         """
         return self.data.get("paper_id")
 
-    def __str__(self) -> str:
+    def __str__(self):
         """Get the string representation of the parser instance."""
         return f'CORD-19 article ID={self.data["paper_id"]}'
 
@@ -956,7 +956,7 @@ class TEIXMLParser(ArticleParser):
         return self.tei_ids.get("DOI")
 
     @property
-    def tei_ids(self) -> dict[str, Any]:
+    def tei_ids(self) -> dict:
         """Extract all IDs of the TEI XML.
 
         Returns
@@ -1066,11 +1066,11 @@ class Article(DataClassJSONMixin):
     authors: Sequence[str]
     abstract: Sequence[str]
     section_paragraphs: Sequence[Tuple[str, str]]
-    pubmed_id: str | None = None
-    pmc_id: str | None = None
-    arxiv_id: str | None = None
-    doi: str | None = None
-    uid: str | None = None
+    pubmed_id: Optional[str] = None
+    pmc_id: Optional[str] = None
+    arxiv_id: Optional[str] = None
+    doi: Optional[str] = None
+    uid: Optional[str] = None
 
     @classmethod
     def parse(cls, parser: ArticleParser) -> Article:
