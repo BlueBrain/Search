@@ -90,8 +90,8 @@ def _upload_es(
                 "_id": article["article_id"],
                 "_source": {
                     "article_id": article["article_id"],
-                    "authors": article["title"],
-                    "title": article["authors"],
+                    "authors": article["authors"],
+                    "title": article["title"],
                     "abstract": article["abstract"],
                     "pubmed_id": article["pubmed_id"],
                     "pmc_id": article["pmc_id"],
@@ -184,8 +184,8 @@ def run(
         article_mapping = {
             "article_id": article.uid,
             "title": article.title,
-            "authors": ", ".join(article.authors),
-            "abstract": "\n".join(article.abstract),
+            "authors": article.authors,
+            "abstract": article.abstract,
             "pubmed_id": article.pubmed_id,
             "pmc_id": article.pmc_id,
             "doi": article.doi,
