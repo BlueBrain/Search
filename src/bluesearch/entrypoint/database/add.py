@@ -15,12 +15,9 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Adding articles to the database."""
-from __future__ import annotations
-
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Iterable
 
 logger = logging.getLogger(__name__)
 
@@ -63,180 +60,10 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         "--db-type",
         default="sqlite",
         type=str,
-        choices=("mariadb", "mysql", "postgres", "sqlite", "elasticsearch"),
+        choices=("mariadb", "mysql", "postgres", "sqlite"),
         help="Type of the database.",
     )
     return parser
-
-
-def _upload_sql(
-    db_url: str,
-    db_type: str,
-    article_mappings: list[dict[str, Any]],
-    paragraph_mappings: list[dict[str, Any]],
-) -> None:
-    """Upload the mappings to a SQL database.
-
-    Parameters
-    ----------
-    db_url
-        The location of the database.
-    db_type
-        Type of the database.
-    article_mappings
-        The mappings of the articles to upload.
-    paragraph_mappings
-        The mappings of the paragraphs to upload.
-
-    Returns
-    -------
-    None
-    """
-    import sqlalchemy
-
-    if db_type == "sqlite":
-        engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
-    elif db_type in {"mariadb", "mysql"}:
-        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
-    elif db_type == "postgres":
-        engine = sqlalchemy.create_engine(f"postgresql+pg8000://{db_url}")
-    else:
-        # This branch never reached because of `choices` in `argparse`
-        raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
-
-    article_keys = [
-        "article_id",
-        "title",
-        "authors",
-        "abstract",
-        "pubmed_id",
-        "pmc_id",
-        "doi",
-    ]
-    article_fields = ", ".join(article_keys)
-    article_binds = f":{', :'.join(article_keys)}"
-    article_query = sqlalchemy.text(
-        f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
-    )
-
-    logger.info("Adding entries to the articles table")
-    with engine.begin() as con:
-        con.execute(article_query, *article_mappings)
-
-    paragraphs_keys = [
-        "section_name",
-        "text",
-        "article_id",
-        "paragraph_pos_in_article",
-    ]
-    paragraphs_fields = ", ".join(paragraphs_keys)
-    paragraphs_binds = f":{', :'.join(paragraphs_keys)}"
-    paragraph_query = sqlalchemy.text(
-        f"INSERT INTO sentences({paragraphs_fields}) VALUES({paragraphs_binds})"
-    )
-
-    logger.info("Adding entries to the sentences table")
-    with engine.begin() as con:
-        con.execute(paragraph_query, *paragraph_mappings)
-
-
-def _upload_es(
-    db_url: str,
-    article_mappings: list[dict[str, Any]],
-    paragraph_mappings: list[dict[str, Any]],
-) -> None:
-    """Upload the mappings to an Elasticsearch database.
-
-    Parameters
-    ----------
-    db_url
-        The location of the database.
-    article_mappings
-        The mappings of the articles to upload.
-    paragraph_mappings
-        The mappings of the paragraphs to upload.
-
-    Returns
-    -------
-    None
-    """
-    import tqdm
-    import urllib3
-    from decouple import config
-    from elasticsearch import Elasticsearch
-    from elasticsearch.helpers import bulk
-
-    urllib3.disable_warnings()
-
-    client = Elasticsearch(
-        db_url,
-        basic_auth=("elastic", config("ES_PASS")),
-        verify_certs=False,
-    )
-
-    progress = tqdm.tqdm(
-        desc="Uploading articles", total=len(article_mappings), unit="articles"
-    )
-
-    def bulk_articles(
-        article_mappings: list[dict[str, Any]], progress: Any = None
-    ) -> Iterable[dict[str, Any]]:
-        for article in article_mappings:
-            doc = {
-                "_index": "articles",
-                "_id": article["article_id"],
-                "_source": {
-                    "article_id": article["article_id"],
-                    "authors": article["title"],
-                    "title": article["authors"],
-                    "abstract": article["abstract"],
-                    "pubmed_id": article["pubmed_id"],
-                    "pmc_id": article["pmc_id"],
-                    "doi": article["doi"],
-                },
-            }
-            if progress:
-                progress.update(1)
-            yield doc
-
-    resp = bulk(client, bulk_articles(article_mappings, progress))
-    print(resp)
-
-    progress = tqdm.tqdm(
-        desc="Uploading paragraphs", total=len(paragraph_mappings), unit="paragraphs"
-    )
-
-    def bulk_paragraphs(
-        paragraph_mappings: list[dict[str, Any]], progress: Any = None
-    ) -> Iterable[dict[str, Any]]:
-        """Yield a paragraph mapping as a document to upload to Elasticsearch.
-
-        Parameters
-        ----------
-        paragraph_mappings
-            The mappings of the paragraphs to upload.
-
-        Returns
-        -------
-        Iterable[dict[str, Any]]
-            A generator of documents to upload to Elasticsearch.
-        """
-        for paragraph in paragraph_mappings:
-            doc = {
-                "_index": "paragraphs",
-                "_source": {
-                    "article_id": paragraph["article_id"],
-                    "section_name": paragraph["section_name"],
-                    "text": paragraph["text"],
-                    "paragraph_id": paragraph["paragraph_pos_in_article"],
-                },
-            }
-            if progress:
-                progress.update(1)
-            yield doc
-
-    resp = bulk(client, bulk_paragraphs(paragraph_mappings, progress))
-    print(resp)
 
 
 def run(
@@ -252,7 +79,23 @@ def run(
     """
     from typing import Iterable
 
+    import sqlalchemy
+
     from bluesearch.database.article import Article
+    from bluesearch.utils import load_spacy_model
+
+    if db_type == "sqlite":
+        engine = sqlalchemy.create_engine(f"sqlite:///{db_url}")
+
+    elif db_type in {"mariadb", "mysql"}:
+        engine = sqlalchemy.create_engine(f"mysql+pymysql://{db_url}")
+
+    elif db_type == "postgres":
+        engine = sqlalchemy.create_engine(f"postgresql+pg8000://{db_url}")
+
+    else:
+        # This branch never reached because of `choices` in `argparse`
+        raise ValueError(f"Unrecognized database type {db_type}.")  # pragma: nocover
 
     inputs: Iterable[Path]
     if parsed_path.is_file():
@@ -273,9 +116,12 @@ def run(
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
-    logger.info("Splitting text into paragraphs")
+    logger.info("Loading spacy model")
+    nlp = load_spacy_model("en_core_web_sm", disable=["ner"])
+
+    logger.info("Splitting text into sentences")
     article_mappings = []
-    paragraph_mappings = []
+    sentence_mappings = []
 
     for article in articles:
         logger.info(f"Processing {article.uid}")
@@ -291,25 +137,61 @@ def run(
         }
         article_mappings.append(article_mapping)
 
-        for ppos, (section, text) in enumerate(article.section_paragraphs):
-            paragraph_mapping = {
-                "section_name": section,
-                "text": text,
-                "article_id": article.uid,
-                "paragraph_pos_in_article": ppos,
-            }
-            paragraph_mappings.append(paragraph_mapping)
-
-    if not paragraph_mappings:
-        raise RuntimeWarning(f"No sentence was extracted from '{parsed_path}'!")
+        swapped = (
+            (text, (section, ppos))
+            for ppos, (section, text) in enumerate(article.section_paragraphs)
+        )
+        for doc, (section, ppos) in nlp.pipe(swapped, as_tuples=True):
+            for spos, sent in enumerate(doc.sents):
+                sentence_mapping = {
+                    "section_name": section,
+                    "text": sent.text,
+                    "article_id": article.uid,
+                    "paragraph_pos_in_article": ppos,
+                    "sentence_pos_in_paragraph": spos,
+                }
+                sentence_mappings.append(sentence_mapping)
 
     # Persistence.
-    if db_type in ["mariadb", "mysql", "postgres", "sqlite"]:
-        _upload_sql(db_url, db_type, article_mappings, paragraph_mappings)
-    elif db_type == "elasticsearch":
-        _upload_es(db_url, article_mappings, paragraph_mappings)
-    else:
-        raise RuntimeError("Database {db_type} not supported")
+
+    article_keys = [
+        "article_id",
+        "title",
+        "authors",
+        "abstract",
+        "pubmed_id",
+        "pmc_id",
+        "doi",
+    ]
+    article_fields = ", ".join(article_keys)
+    article_binds = f":{', :'.join(article_keys)}"
+    article_query = sqlalchemy.text(
+        f"INSERT INTO articles({article_fields}) VALUES({article_binds})"
+    )
+
+    logger.info("Adding entries to the articles table")
+    with engine.begin() as con:
+        con.execute(article_query, *article_mappings)
+
+    if not sentence_mappings:
+        raise RuntimeWarning(f"No sentence was extracted from '{parsed_path}'!")
+
+    sentences_keys = [
+        "section_name",
+        "text",
+        "article_id",
+        "paragraph_pos_in_article",
+        "sentence_pos_in_paragraph",
+    ]
+    sentences_fields = ", ".join(sentences_keys)
+    sentences_binds = f":{', :'.join(sentences_keys)}"
+    sentence_query = sqlalchemy.text(
+        f"INSERT INTO sentences({sentences_fields}) VALUES({sentences_binds})"
+    )
+
+    logger.info("Adding entries to the sentences table")
+    with engine.begin() as con:
+        con.execute(sentence_query, *sentence_mappings)
 
     logger.info("Adding done")
     return 0
