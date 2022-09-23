@@ -496,3 +496,27 @@ def pubmed_xml_gz_path(test_data_path, tmp_path):
     ) as gzip_out:
         gzip_out.writelines(file_in)
     return zip_pubmed_path
+
+
+@pytest.fixture()
+def get_es_client(monkeypatch):
+    from bluesearch.k8s.connect import connect
+    from bluesearch.k8s.create_indices import remove_index
+
+    ES_URL = "http://localhost:9200"
+    ES_PASS = ""
+
+    monkeypatch.setenv("ES_URL", ES_URL)
+    monkeypatch.setenv("ES_PASS", ES_PASS)
+
+    try:
+        client = connect()
+    except RuntimeError:
+        client = None
+
+    yield client
+
+    if client is not None:
+        for index in client.indices.get_alias().keys():
+            if index in ['articles', 'paragraphs', 'test_index']:
+                remove_index(client, index)
