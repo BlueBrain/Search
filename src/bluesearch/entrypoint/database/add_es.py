@@ -150,7 +150,7 @@ def run(
         )
 
     if len(inputs) == 0:
-        raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
+        raise RuntimeWarning(f"No articles found at '{parsed_path}'!")
 
     logger.info("Uploading articles to the database...")
     progress = tqdm.tqdm(desc="Uploading articles", total=len(inputs), unit="articles")
@@ -158,7 +158,7 @@ def run(
     logger.info(f"Uploaded {resp[0]} articles.")
 
     if resp[0] == 0:
-        raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
+        raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
 
     logger.info("Uploading articles to the database...")
     progress = tqdm.tqdm(
@@ -166,6 +166,9 @@ def run(
     )
     resp = bulk(client, bulk_paragraphs(inputs, progress))
     logger.info(f"Uploaded {resp[0]} paragraphs.")
+
+    if resp[0] == 0:
+        raise RuntimeWarning(f"No paragraphs were loaded to ES from '{parsed_path}'!")
 
     logger.info("Adding done")
     return 0
