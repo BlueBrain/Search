@@ -314,7 +314,7 @@ def compute_database_embeddings(
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: pathlib.Path | str | None = None,
+    checkpoint_path: pathlib.Path | str,
     device: str = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
@@ -593,7 +593,7 @@ class MPEmbedder:
         logger.info("Populating h5 files")
         splits = np.array_split(
             np.arange(n_indices), n_indices / batch_size
-        )  # type:ignore
+        )
         splits = [split for split in splits if len(split) > 0]
 
         for split_ix, pos_indices in enumerate(splits):
