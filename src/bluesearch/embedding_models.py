@@ -314,7 +314,7 @@ def compute_database_embeddings(
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: pathlib.Path | str,
+    checkpoint_path: pathlib.Path | str | None = None,
     device: str = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
@@ -529,7 +529,7 @@ class MPEmbedder:
         temp_h5_path: pathlib.Path,
         batch_size: int,
         checkpoint_path: pathlib.Path,
-        gpu: int,
+        gpu: int | None,
         h5_dataset_name: str,
     ) -> None:
         """Run per worker function.
