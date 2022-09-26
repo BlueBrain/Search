@@ -8,6 +8,7 @@ Submodules
    :maxdepth: 4
 
    bluesearch.entrypoint.database.add
+   bluesearch.entrypoint.database.add_es
    bluesearch.entrypoint.database.convert_pdf
    bluesearch.entrypoint.database.download
    bluesearch.entrypoint.database.init
