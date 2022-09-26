@@ -1,11 +1,19 @@
+from pathlib import Path
+
 import pytest
+from elasticsearch import Elasticsearch
 
 from bluesearch.entrypoint.database import add_es
 
 
-def test(get_es_client, tmp_path):
+def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     from bluesearch.database.article import Article
-    from bluesearch.k8s.create_indices import MAPPINGS_ARTICLES, MAPPINGS_PARAGRAPHS, SETTINGS, add_index
+    from bluesearch.k8s.create_indices import (
+        MAPPINGS_ARTICLES,
+        MAPPINGS_PARAGRAPHS,
+        SETTINGS,
+        add_index,
+    )
 
     client = get_es_client
     if client is None:
@@ -36,14 +44,14 @@ def test(get_es_client, tmp_path):
     article_1_path = tmp_path / "article_1.json"
     article_2_path = tmp_path / "article_2.json"
 
-    article_1_path.write_text(article_1.to_json())
-    article_2_path.write_text(article_2.to_json())
+    article_1_path.write_text(article_1.to_json())  # type: ignore
+    article_2_path.write_text(article_2.to_json())  # type: ignore
 
     assert set(client.indices.get_alias().keys()) == set()
     add_index(client, "articles", SETTINGS, MAPPINGS_ARTICLES)
     add_index(client, "paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
 
-    add_es.run(parsed_path=tmp_path)
+    add_es.run(client, parsed_path=tmp_path)
     client.indices.refresh(index=["articles", "paragraphs"])
 
     assert set(client.indices.get_alias().keys()) == {"articles", "paragraphs"}

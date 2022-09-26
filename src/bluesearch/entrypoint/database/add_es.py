@@ -20,7 +20,13 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Optional
+
+import tqdm
+from elasticsearch import Elasticsearch
+from elasticsearch.helpers import bulk
+
+from bluesearch.database.article import Article
 
 logger = logging.getLogger(__name__)
 
@@ -51,99 +57,81 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     return parser
 
 
-def _upload_es(
-    article_mappings: list[dict[str, Any]],
-    paragraph_mappings: list[dict[str, Any]],
-) -> None:
-    """Upload the mappings to an Elasticsearch database.
+def bulk_articles(
+    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+) -> Iterable[dict[str, Any]]:
+    """Yield an article mapping as a document to upload to Elasticsearch.
 
     Parameters
     ----------
-    article_mappings
-        The mappings of the articles to upload.
+    inputs
+        Paths to the parsed files.
+    progress
+        Progress bar to update.
+
+    Yields
+    ------
+    dict[str, Any]
+        A document to upload to Elasticsearch.
+    """
+    for inp in inputs:
+        serialized = inp.read_text("utf-8")
+        article = Article.from_json(serialized)
+        doc = {
+            "_index": "articles",
+            "_id": article.uid,
+            "_source": {
+                "article_id": article.uid,
+                "authors": article.authors,
+                "title": article.title,
+                "abstract": article.abstract,
+                "pubmed_id": article.pubmed_id,
+                "pmc_id": article.pmc_id,
+                "doi": article.doi,
+            },
+        }
+        if progress:
+            progress.update(1)
+        yield doc
+
+
+def bulk_paragraphs(
+    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+) -> Iterable[dict[str, Any]]:
+    """Yield a paragraph mapping as a document to upload to Elasticsearch.
+
+    Parameters
+    ----------
     paragraph_mappings
         The mappings of the paragraphs to upload.
+    progress
+        Progress bar to update.
 
-    Returns
-    -------
-    None
+    Yields
+    ------
+    dict[str, Any]
+        A document to upload to Elasticsearch.
     """
-    import tqdm
-    import urllib3
-    from bluesearch.k8s.connect import connect
-    from elasticsearch.helpers import bulk
-
-    urllib3.disable_warnings()
-
-    client = connect()
-
-    progress = tqdm.tqdm(
-        desc="Uploading articles", total=len(article_mappings), unit="articles"
-    )
-
-    def bulk_articles(
-        article_mappings: list[dict[str, Any]], progress: Any = None
-    ) -> Iterable[dict[str, Any]]:
-        for article in article_mappings:
-            doc = {
-                "_index": "articles",
-                "_id": article["article_id"],
-                "_source": {
-                    "article_id": article["article_id"],
-                    "authors": article["authors"],
-                    "title": article["title"],
-                    "abstract": article["abstract"],
-                    "pubmed_id": article["pubmed_id"],
-                    "pmc_id": article["pmc_id"],
-                    "doi": article["doi"],
-                },
-            }
-            if progress:
-                progress.update(1)
-            yield doc
-
-    resp = bulk(client, bulk_articles(article_mappings, progress))
-    logger.info(f"Uploaded {resp[0]} articles.")
-
-    progress = tqdm.tqdm(
-        desc="Uploading paragraphs", total=len(paragraph_mappings), unit="paragraphs"
-    )
-
-    def bulk_paragraphs(
-        paragraph_mappings: list[dict[str, Any]], progress: Any = None
-    ) -> Iterable[dict[str, Any]]:
-        """Yield a paragraph mapping as a document to upload to Elasticsearch.
-
-        Parameters
-        ----------
-        paragraph_mappings
-            The mappings of the paragraphs to upload.
-
-        Returns
-        -------
-        Iterable[dict[str, Any]]
-            A generator of documents to upload to Elasticsearch.
-        """
-        for paragraph in paragraph_mappings:
+    for inp in inputs:
+        serialized = inp.read_text("utf-8")
+        article = Article.from_json(serialized)
+        for ppos, (section, text) in enumerate(article.section_paragraphs):
             doc = {
                 "_index": "paragraphs",
                 "_source": {
-                    "article_id": paragraph["article_id"],
-                    "section_name": paragraph["section_name"],
-                    "text": paragraph["text"],
-                    "paragraph_id": paragraph["paragraph_pos_in_article"],
+                    "article_id": article.uid,
+                    "section_name": section,
+                    "text": text,
+                    "paragraph_id": ppos,
                 },
             }
             if progress:
                 progress.update(1)
             yield doc
 
-    resp = bulk(client, bulk_paragraphs(paragraph_mappings, progress))
-    logger.info(f"Uploaded {resp[0]} paragraphs.")
-
 
 def run(
-    *,
+    client: Elasticsearch,
     parsed_path: Path,
 ) -> int:
     """Add an entry to the database.
@@ -151,10 +139,6 @@ def run(
     Parameter description and potential defaults are documented inside of the
     `get_parser` function.
     """
-    from typing import Iterable
-
-    from bluesearch.database.article import Article
-
     inputs: Iterable[Path]
     if parsed_path.is_file():
         inputs = [parsed_path]
@@ -165,47 +149,23 @@ def run(
             "Argument 'parsed_path' should be a path to an existing file or directory!"
         )
 
-    articles = []
-    for inp in inputs:
-        serialized = inp.read_text("utf-8")
-        article = Article.from_json(serialized)
-        articles.append(article)
-
-    if not articles:
+    if len(inputs) == 0:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
-    logger.info("Splitting text into paragraphs")
-    article_mappings = []
-    paragraph_mappings = []
+    logger.info("Uploading articles to the database...")
+    progress = tqdm.tqdm(desc="Uploading articles", total=len(inputs), unit="articles")
+    resp = bulk(client, bulk_articles(inputs, progress))
+    logger.info(f"Uploaded {resp[0]} articles.")
 
-    for article in articles:
-        logger.info(f"Processing {article.uid}")
+    if resp[0] == 0:
+        raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
 
-        article_mapping = {
-            "article_id": article.uid,
-            "title": article.title,
-            "authors": article.authors,
-            "abstract": article.abstract,
-            "pubmed_id": article.pubmed_id,
-            "pmc_id": article.pmc_id,
-            "doi": article.doi,
-        }
-        article_mappings.append(article_mapping)
-
-        for ppos, (section, text) in enumerate(article.section_paragraphs):
-            paragraph_mapping = {
-                "section_name": section,
-                "text": text,
-                "article_id": article.uid,
-                "paragraph_pos_in_article": ppos,
-            }
-            paragraph_mappings.append(paragraph_mapping)
-
-    if not paragraph_mappings:
-        raise RuntimeWarning(f"No sentence was extracted from '{parsed_path}'!")
-
-    # Persistence.
-    _upload_es(article_mappings, paragraph_mappings)
+    logger.info("Uploading articles to the database...")
+    progress = tqdm.tqdm(
+        desc="Uploading paragraphs", total=len(inputs), unit="articles"
+    )
+    resp = bulk(client, bulk_paragraphs(inputs, progress))
+    logger.info(f"Uploaded {resp[0]} paragraphs.")
 
     logger.info("Adding done")
     return 0
