@@ -1,3 +1,4 @@
+"""Embed the paragraphs in the database."""
 from __future__ import annotations
 
 import logging
@@ -8,16 +9,23 @@ import tqdm
 from elasticsearch.helpers import scan
 
 from bluesearch.embedding_models import SentTransformer
-from bluesearch.k8s.connect import connect
 
 logger = logging.getLogger(__name__)
 
 
 def embed_locally(
-    client: elasticsearch.Elasticsearch = connect(),
+    client: elasticsearch.Elasticsearch,
     model_name: str = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
 ) -> None:
+    """Embed the paragraphs in the database locally.
 
+    Parameters
+    ----------
+    client
+        Elasticsearch client.
+    model_name
+        Name of the model to use for the embedding.
+    """
     model = SentTransformer(model_name)
 
     # get paragraphs without embeddings
@@ -40,7 +48,3 @@ def embed_locally(
             index="paragraphs", doc={"embedding": emb.tolist()}, id=hit["_id"]
         )
         progress.update(1)
-
-
-if __name__ == "__main__":
-    embed_locally()

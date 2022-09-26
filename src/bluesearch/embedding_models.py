@@ -140,7 +140,7 @@ class SentTransformer(EmbeddingModel):
 
     @property
     def normalized(self) -> bool:
-        """Return true is the model as a normalization module"""
+        """Return true is the model as a normalization module."""
         for _, module in self.senttransf_model._modules.items():
             if str(module) == "Normalize()":
                 return True
