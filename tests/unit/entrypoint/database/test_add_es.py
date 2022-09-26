@@ -44,8 +44,8 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     article_1_path = tmp_path / "article_1.json"
     article_2_path = tmp_path / "article_2.json"
 
-    article_1_path.write_text(article_1.to_json())  # type: ignore
-    article_2_path.write_text(article_2.to_json())  # type: ignore
+    article_1_path.write_text(article_1.to_json())
+    article_2_path.write_text(article_2.to_json())
 
     assert set(client.indices.get_alias().keys()) == set()
     add_index(client, "articles", SETTINGS, MAPPINGS_ARTICLES)
