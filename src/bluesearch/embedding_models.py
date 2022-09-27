@@ -350,29 +350,24 @@ def get_embedding_model(
     sentence_embedding_model : EmbeddingModel
         The sentence embedding model instance.
     """
-    if checkpoint_path is None and model_name_or_class in [
-        "SentTransformer",
-        "SklearnVectorizer",
-    ]:
-        raise ValueError(
-            "If 'model_name_or_class' in ['SentTransformer', 'SklearnVectorizer'], \
-                'checkpoint_path' should be provided."
-        )
+    if model_name_or_class in {"SentTransformer", "SklearnVectorizer"}:
+        if checkpoint_path is not None:
+            if model_name_or_class == "SentTransformer":
+                model = SentTransformer(checkpoint_path, device)
+            elif model_name_or_class == "SklearnVectorizer":
+                model = SklearnVectorizer(checkpoint_path)
+        else:
+            raise ValueError("Checkpoint path must be provided for this model.")
+    elif model_name_or_class == "BioBERT NLI+STS":
+        model = SentTransformer("clagator/biobert_v1.1_pubmed_nli_sts", device)
+    elif model_name_or_class == "SBioBERT":
+        model = SentTransformer("gsarti/biobert-nli", device)
+    elif model_name_or_class == "SBERT":
+        model = SentTransformer("bert-base-nli-mean-tokens", device)
+    else:
+        raise ValueError("Unknown model name or class.")
 
-    configs = {
-        # Transformer models.
-        "SentTransformer": lambda: SentTransformer(checkpoint_path, device),
-        "BioBERT NLI+STS": lambda: SentTransformer(
-            "clagator/biobert_v1.1_pubmed_nli_sts", device
-        ),
-        "SBioBERT": lambda: SentTransformer("gsarti/biobert-nli", device),
-        "SBERT": lambda: SentTransformer("bert-base-nli-mean-tokens", device),
-        # Scikit-learn models.
-        "SklearnVectorizer": lambda: SklearnVectorizer(checkpoint_path),
-    }
-    if model_name_or_class not in configs:
-        raise ValueError(f"Unknown model name or class: {model_name_or_class}")
-    return configs[model_name_or_class]()
+    return model
 
 
 class MPEmbedder:
@@ -537,9 +532,9 @@ class MPEmbedder:
         indices: np.ndarray[Any, Any],
         temp_h5_path: pathlib.Path,
         batch_size: int,
-        checkpoint_path: pathlib.Path,
-        gpu: int | None,
-        h5_dataset_name: str,
+        checkpoint_path: pathlib.Path | None = None,
+        gpu: int | None = None,
+        h5_dataset_name: str | None = None,
     ) -> None:
         """Run per worker function.
 
