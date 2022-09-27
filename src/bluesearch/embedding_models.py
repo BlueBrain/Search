@@ -350,25 +350,27 @@ def get_embedding_model(
     sentence_embedding_model : EmbeddingModel
         The sentence embedding model instance.
     """
-    if model_name_or_class in {"SentTransformer", "SklearnVectorizer"}:
+    if model_name_or_class in ["SentTransformer", "SklearnVectorizer"]:
         if checkpoint_path is not None:
             if model_name_or_class == "SentTransformer":
-                model = SentTransformer(checkpoint_path, device)
+                return SentTransformer(checkpoint_path, device)
             elif model_name_or_class == "SklearnVectorizer":
-                model = SklearnVectorizer(checkpoint_path)
+                return SklearnVectorizer(checkpoint_path)
+            else:
+                raise ValueError(
+                    f"Something went wrong, model {model_name_or_class} not "
+                    f"implemented."
+                )
         else:
             raise ValueError("Checkpoint path must be provided for this model.")
     elif model_name_or_class == "BioBERT NLI+STS":
-        model = SentTransformer("clagator/biobert_v1.1_pubmed_nli_sts", device)
+        return SentTransformer("clagator/biobert_v1.1_pubmed_nli_sts", device)
     elif model_name_or_class == "SBioBERT":
-        model = SentTransformer("gsarti/biobert-nli", device)
+        return SentTransformer("gsarti/biobert-nli", device)
     elif model_name_or_class == "SBERT":
-        model = SentTransformer("bert-base-nli-mean-tokens", device)
+        return SentTransformer("bert-base-nli-mean-tokens", device)
     else:
         raise ValueError("Unknown model name or class.")
-
-    return model
-
 
 class MPEmbedder:
     """Embedding of sentences with multiprocessing.
