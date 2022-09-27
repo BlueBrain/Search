@@ -70,10 +70,8 @@ jobs:
             tox-env: py310
         exclude:
           - python-version: 3.8
-            tox-env: py38
             os: macos-latest
           - python-version: 3.9
-            tox-env: py39
             os: macos-latest
     steps:
       - name: Cancel previous workflows that are still running
