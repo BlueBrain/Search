@@ -84,8 +84,6 @@ class TestEmbeddingModels:
         embed_method = getattr(sbert, "embed" if n_sentences == 1 else "embed_many")
 
         # Assertions
-        assert sbert.dim == 768
-
         preprocessed_sentence = preprocess_method(dummy_sentence)
         assert preprocessed_sentence == dummy_sentence
 
@@ -282,16 +280,16 @@ class TestGetEmbeddingModel:
             get_embedding_model("wrong_model_name")
 
     @pytest.mark.parametrize(
-        "name, underlying_class",
+        "name, underlying_class, model_name",
         [
-            ("BioBERT NLI+STS", "SentTransformer"),
-            ("SentTransformer", "SentTransformer"),
-            ("SklearnVectorizer", "SklearnVectorizer"),
-            ("SBioBERT", "SentTransformer"),
-            ("SBERT", "SentTransformer"),
+            ("BioBERT NLI+STS", "SentTransformer", None),
+            ("SentTransformer", "SentTransformer", "fake_model_name"),
+            ("SklearnVectorizer", "SklearnVectorizer", "fake_checkpoint"),
+            ("SBioBERT", "SentTransformer", None),
+            ("SBERT", "SentTransformer", None),
         ],
     )
-    def test_returns_instance(self, monkeypatch, name, underlying_class):
+    def test_returns_instance(self, monkeypatch, name, underlying_class, model_name):
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
@@ -299,7 +297,7 @@ class TestGetEmbeddingModel:
             f"bluesearch.embedding_models.{underlying_class}", fake_class
         )
 
-        returned_instance = get_embedding_model(name)
+        returned_instance = get_embedding_model(name, model_name)
 
         assert returned_instance is fake_instance
 
