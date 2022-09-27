@@ -430,7 +430,7 @@ class MPEmbedder:
         model_name_or_class: str,
         indices: np.ndarray[Any, Any],
         h5_path_output: pathlib.Path,
-        checkpoint_path: pathlib.Path | str,
+        checkpoint_path: pathlib.Path | str | None = None,
         batch_size_inference: int = 16,
         batch_size_transfer: int = 1000,
         n_processes: int = 2,
