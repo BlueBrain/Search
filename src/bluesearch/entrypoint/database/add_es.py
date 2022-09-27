@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import logging
 from pathlib import Path
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Tuple
 
 import tqdm
 from elasticsearch import Elasticsearch
@@ -57,7 +57,8 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
 
     parser.add_argument(
         "indices",
-        type=tuple[str],
+        type=str,
+        nargs='+',
         help="List with two elements for articles and paragraphs index's names.",
     )
     return parser
