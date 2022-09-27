@@ -314,7 +314,7 @@ def compute_database_embeddings(
 
 def get_embedding_model(
     model_name_or_class: str,
-    checkpoint_path: pathlib.Path | str,
+    checkpoint_path: pathlib.Path | str | None = None,
     device: str = "cpu",
 ) -> EmbeddingModel:
     """Load a sentence embedding model from its name or its class and checkpoint.
@@ -350,6 +350,15 @@ def get_embedding_model(
     sentence_embedding_model : EmbeddingModel
         The sentence embedding model instance.
     """
+    if checkpoint_path is None and model_name_or_class in [
+        "SentTransformer",
+        "SklearnVectorizer",
+    ]:
+        raise ValueError(
+            "If 'model_name_or_class' in ['SentTransformer', 'SklearnVectorizer'], \
+                'checkpoint_path' should be provided."
+        )
+
     configs = {
         # Transformer models.
         "SentTransformer": lambda: SentTransformer(checkpoint_path, device),
@@ -591,9 +600,7 @@ class MPEmbedder:
         batch_size = min(n_indices, batch_size)
 
         logger.info("Populating h5 files")
-        splits = np.array_split(
-            np.arange(n_indices), n_indices / batch_size
-        )
+        splits = np.array_split(np.arange(n_indices), n_indices / batch_size)
         splits = [split for split in splits if len(split) > 0]
 
         for split_ix, pos_indices in enumerate(splits):
