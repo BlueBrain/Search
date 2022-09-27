@@ -54,11 +54,17 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=Path,
         help="Path to a parsed file or to a directory of parsed files.",
     )
+
+    parser.add_argument(
+        "indices",
+        type=tuple[str],
+        help="List with two elements for articles and paragraphs index's names.",
+    )
     return parser
 
 
 def bulk_articles(
-    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path], index: str, progress: Optional[tqdm.std.tqdm] = None
 ) -> Iterable[dict[str, Any]]:
     """Yield an article mapping as a document to upload to Elasticsearch.
 
@@ -78,7 +84,7 @@ def bulk_articles(
         serialized = inp.read_text("utf-8")
         article = Article.from_json(serialized)
         doc = {
-            "_index": "articles",
+            "_index": index,
             "_id": article.uid,
             "_source": {
                 "article_id": article.uid,
@@ -96,7 +102,7 @@ def bulk_articles(
 
 
 def bulk_paragraphs(
-    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path], index: str, progress: Optional[tqdm.std.tqdm] = None
 ) -> Iterable[dict[str, Any]]:
     """Yield a paragraph mapping as a document to upload to Elasticsearch.
 
@@ -117,7 +123,7 @@ def bulk_paragraphs(
         article = Article.from_json(serialized)
         for ppos, (section, text) in enumerate(article.section_paragraphs):
             doc = {
-                "_index": "paragraphs",
+                "_index": index,
                 "_source": {
                     "article_id": article.uid,
                     "section_name": section,
@@ -133,6 +139,7 @@ def bulk_paragraphs(
 def run(
     client: Elasticsearch,
     parsed_path: Path,
+    indices: tuple[str, str] = ("articles", "paragraphs"),
 ) -> int:
     """Add an entry to the database.
 
@@ -152,19 +159,19 @@ def run(
     if len(inputs) == 0:
         raise RuntimeWarning(f"No articles found at '{parsed_path}'!")
 
-    logger.info("Uploading articles to the database...")
+    logger.info("Uploading articles to the {indices[0]} index...")
     progress = tqdm.tqdm(desc="Uploading articles", total=len(inputs), unit="articles")
-    resp = bulk(client, bulk_articles(inputs, progress))
+    resp = bulk(client, bulk_articles(inputs, indices[0], progress))
     logger.info(f"Uploaded {resp[0]} articles.")
 
     if resp[0] == 0:
         raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
 
-    logger.info("Uploading articles to the database...")
+    logger.info("Uploading articles to the {indices[1]} index...")
     progress = tqdm.tqdm(
         desc="Uploading paragraphs", total=len(inputs), unit="articles"
     )
-    resp = bulk(client, bulk_paragraphs(inputs, progress))
+    resp = bulk(client, bulk_paragraphs(inputs, indices[1], progress))
     logger.info(f"Uploaded {resp[0]} paragraphs.")
 
     if resp[0] == 0:

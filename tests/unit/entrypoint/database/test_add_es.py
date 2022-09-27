@@ -13,6 +13,7 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
         MAPPINGS_PARAGRAPHS,
         SETTINGS,
         add_index,
+        remove_index,
     )
 
     client = get_es_client
@@ -47,17 +48,23 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     article_1_path.write_text(article_1.to_json())
     article_2_path.write_text(article_2.to_json())
 
-    assert set(client.indices.get_alias().keys()) == set()
-    add_index(client, "articles", SETTINGS, MAPPINGS_ARTICLES)
-    add_index(client, "paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
+    assert (
+        set(client.indices.get_alias().keys()) & {"test_articles", "test_paragraphs"}
+    ) == set()
+    add_index(client, "test_articles", SETTINGS, MAPPINGS_ARTICLES)
+    add_index(client, "test_paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
 
-    add_es.run(client, parsed_path=tmp_path)
-    client.indices.refresh(index=["articles", "paragraphs"])
+    add_es.run(
+        client, parsed_path=tmp_path, indices=("test_articles", "test_paragraphs")
+    )
+    client.indices.refresh(index=["test_articles", "test_paragraphs"])
 
-    assert set(client.indices.get_alias().keys()) == {"articles", "paragraphs"}
+    assert set(client.indices.get_alias().keys()) >= (
+        {"test_articles", "test_paragraphs"}
+    )
 
     # verify articles
-    resp = client.search(index="articles", query={"match_all": {}})
+    resp = client.search(index="test_articles", query={"match_all": {}})
     assert resp["hits"]["total"]["value"] == 2
 
     for doc in resp["hits"]["hits"]:
@@ -71,7 +78,7 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
             assert doc["_source"]["title"] == "SOME test title"
 
     # verify paragraphs
-    resp = client.search(index="paragraphs", query={"match_all": {}})
+    resp = client.search(index="test_paragraphs", query={"match_all": {}})
     assert resp["hits"]["total"]["value"] == 4
 
     all_docs = set()
@@ -93,3 +100,6 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     }
 
     assert all_docs == all_docs_expected
+
+    remove_index(client, "test_articles")
+    remove_index(client, "test_paragraphs")

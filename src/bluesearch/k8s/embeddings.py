@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 def embed_locally(
     client: elasticsearch.Elasticsearch,
     model_name: str = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
+    index: str = "paragraphs",
 ) -> None:
     """Embed the paragraphs in the database locally.
 
@@ -30,7 +31,7 @@ def embed_locally(
 
     # get paragraphs without embeddings
     query = {"bool": {"must_not": {"exists": {"field": "embedding"}}}}
-    paragraph_count = client.count(index="paragraphs", query=query)["count"]
+    paragraph_count = client.count(index=index, query=query)["count"]
     logger.info("There are {paragraph_count} paragraphs without embeddings")
 
     # creates embeddings for all the documents withouts embeddings and updates them
@@ -40,11 +41,9 @@ def embed_locally(
         unit=" Paragraphs",
         desc="Updating embeddings",
     )
-    for hit in scan(client, query=query, index="paragraphs"):
+    for hit in scan(client, query={"query": query}, index=index):
         emb = model.embed(hit["_source"]["text"])
         if not model.normalized:
             emb /= np.linalg.norm(emb)
-        client.update(
-            index="paragraphs", doc={"embedding": emb.tolist()}, id=hit["_id"]
-        )
+        client.update(index=index, doc={"embedding": emb.tolist()}, id=hit["_id"])
         progress.update(1)
