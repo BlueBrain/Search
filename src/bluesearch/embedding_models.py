@@ -372,6 +372,7 @@ def get_embedding_model(
     else:
         raise ValueError("Unknown model name or class.")
 
+
 class MPEmbedder:
     """Embedding of sentences with multiprocessing.
 
