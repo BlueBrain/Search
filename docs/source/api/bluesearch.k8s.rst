@@ -9,7 +9,7 @@ Submodules
 
    bluesearch.k8s.connect
    bluesearch.k8s.create_indices
-   bluesearch.k8s.embedings
+   bluesearch.k8s.embeddings
 
 Module contents
 ---------------
