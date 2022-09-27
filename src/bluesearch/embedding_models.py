@@ -25,8 +25,8 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 import numpy as np
-import sqlalchemy
 import sentence_transformers
+import sqlalchemy
 
 from bluesearch.sql import retrieve_sentences_from_sentence_ids
 from bluesearch.utils import H5
