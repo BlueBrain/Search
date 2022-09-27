@@ -407,3 +407,33 @@ class TestMPEmbedder:
 
         args, _ = fake_h5.concatenate.call_args
         assert len(args[2]) == n_processes
+
+
+@pytest.mark.parametrize(
+    "model_name",
+    [
+        "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
+        "sentence-transformers/multi-qa-mpnet-base-dot-v1",
+    ],
+)
+def test_embedding_size(model_name):
+    model = SentTransformer(model_name)
+    if model_name == "sentence-transformers/multi-qa-mpnet-base-dot-v1":
+        assert model.dim == 768
+    elif model_name == "sentence-transformers/multi-qa-MiniLM-L6-cos-v1":
+        assert model.dim == 384
+
+
+@pytest.mark.parametrize(
+    "model_name",
+    [
+        "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
+        "sentence-transformers/multi-qa-mpnet-base-dot-v1",
+    ],
+)
+def test_model_is_normalized(model_name):
+    model = SentTransformer(model_name)
+    if model_name == "sentence-transformers/multi-qa-mpnet-base-dot-v1":
+        assert not model.normalized
+    elif model_name == "sentence-transformers/multi-qa-MiniLM-L6-cos-v1":
+        assert model.normalized
