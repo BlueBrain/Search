@@ -58,7 +58,7 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
     parser.add_argument(
         "indices",
         type=str,
-        nargs='+',
+        nargs="+",
         help="List with two elements for articles and paragraphs index's names.",
     )
     return parser
