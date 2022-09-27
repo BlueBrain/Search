@@ -26,7 +26,7 @@ from typing import Any
 
 import numpy as np
 import sqlalchemy
-from sentence_transformers import SentenceTransformer
+import sentence_transformers
 
 from bluesearch.sql import retrieve_sentences_from_sentence_ids
 from bluesearch.utils import H5
@@ -129,7 +129,7 @@ class SentTransformer(EmbeddingModel):
         self, model_name_or_path: pathlib.Path | str, device: str | None = None
     ):
 
-        self.senttransf_model = SentenceTransformer(
+        self.senttransf_model = sentence_transformers.SentenceTransformer(
             str(model_name_or_path), device=device
         )
 
