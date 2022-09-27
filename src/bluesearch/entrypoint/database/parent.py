@@ -9,6 +9,7 @@ from typing import Sequence
 
 from bluesearch.entrypoint.database import (
     add,
+    add_es,
     convert_pdf,
     download,
     init,
@@ -52,6 +53,11 @@ def main(argv: Sequence[str] | None = None) -> int:
             help="Add parsed files to the database.",
             init_parser=add.init_parser,
             run=add.run,
+        ),
+        "add_es": Cmd(
+            help="Add parsed files to ES.",
+            init_parser=add_es.init_parser,
+            run=add_es.run,
         ),
         "convert-pdf": Cmd(
             help="Convert a PDF file to a TEI XML file.",
