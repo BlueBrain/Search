@@ -12,6 +12,8 @@ def test_add_embeddings(get_es_client):
     from bluesearch.k8s.embeddings import embed_locally
 
     client = get_es_client
+    if client is None:
+        pytest.skip("Elastic search is not available")
 
     add_index(client, "test_paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
 
