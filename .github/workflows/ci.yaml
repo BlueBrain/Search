@@ -22,7 +22,7 @@ jobs:
       - name: Checkout latest commit
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # fetch all history with version tags
+          fetch-depth: 0 # fetch all history with version tags
       - name: Set up python
         uses: actions/setup-python@v2
         with:
@@ -40,20 +40,6 @@ jobs:
         run: tox -vv -e ${{ matrix.tox-env }}
   unit-tests:
     runs-on: ${{ matrix.os }}
-    if: matrix.os == 'ubuntu-latest'
-    services:
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
-        options: >-
-          --health-cmd "curl http://localhost:9200/_cluster/health"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-        ports:
-        - 9200:9200
     env:
       PIP_CACHE_DIR: .cache/pip
     strategy:
@@ -81,7 +67,7 @@ jobs:
       - name: Checkout latest commit
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # fetch all history with version tags
+          fetch-depth: 0 # fetch all history with version tags
       - name: Set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -103,5 +89,7 @@ jobs:
         run: |
           brew install mysql
           brew install docker
+          docker pull docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+          docker create -p 9200:9200 --health-cmd "curl http://localhost:9200/_cluster/health" --health-interval 10s --health-timeout 5s --health-retries 10 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e GITHUB_ACTIONS=true -e CI=true docker.elastic.co/elasticsearch/elasticsearch:8.3.3
       - name: Run unit tests
         run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
