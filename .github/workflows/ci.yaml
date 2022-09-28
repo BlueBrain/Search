@@ -99,6 +99,8 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
       - name: Install mysql
         if: matrix.os == 'macos-latest'
-        run: brew install mysql
+        run: |
+          brew install mysql
+          brew install docker
       - name: Run unit tests
         run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
