@@ -40,6 +40,7 @@ jobs:
         run: tox -vv -e ${{ matrix.tox-env }}
   unit-tests:
     runs-on: ${{ matrix.os }}
+    if: matrix.os == 'ubuntu-latest'
     services:
       elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
