@@ -38,14 +38,27 @@ jobs:
           pip install tox
       - name: Run tox ${{ matrix.tox-env }}
         run: tox -vv -e ${{ matrix.tox-env }}
-  unit-tests:
+  unit-tests-ubuntu:
     runs-on: ${{ matrix.os }}
+    services:
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+        options: >-
+          --health-cmd "curl http://localhost:9200/_cluster/health"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 9200:9200
     env:
       PIP_CACHE_DIR: .cache/pip
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
         python-version: ["3.8", "3.9", "3.10"]
         include:
           - python-version: 3.8
@@ -54,11 +67,45 @@ jobs:
             tox-env: py39
           - python-version: 3.10
             tox-env: py310
-        exclude:
-          - python-version: 3.8
-            os: macos-latest
-          - python-version: 3.9
-            os: macos-latest
+    steps:
+      - name: Cancel previous workflows that are still running
+        uses: styfle/cancel-workflow-action@0.8.0
+        with:
+          access_token: ${{ github.token }}
+      - name: Checkout latest commit
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # fetch all history with version tags
+      - name: Set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        with:
+          path: .cache/pip
+          key: ${{ matrix.tox-env }}-${{ matrix.os }}-${{ hashFiles('tox.ini') }}
+      - name: Set up environment
+        run: |
+          pip install --upgrade pip
+          pip install tox
+      - name: Set up tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+      - name: Run unit tests
+        run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
+  unit-tests-macos:
+    runs-on: ${{ matrix.os }}
+    env:
+      PIP_CACHE_DIR: .cache/pip
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest]
+        python-version: ["3.10"]
+        include:
+          - python-version: 3.10
+            tox-env: py310
     steps:
       - name: Cancel previous workflows that are still running
         uses: styfle/cancel-workflow-action@0.8.0
@@ -85,11 +132,6 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
       - name: Install mysql
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install mysql
-          brew install docker --cask
-          docker pull docker.elastic.co/elasticsearch/elasticsearch:8.3.3
-          docker create -p 9200:9200 --health-cmd "curl http://localhost:9200/_cluster/health" --health-interval 10s --health-timeout 5s --health-retries 10 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e GITHUB_ACTIONS=true -e CI=true docker.elastic.co/elasticsearch/elasticsearch:8.3.3
+        run: brew install mysql
       - name: Run unit tests
         run: tox -vv -e ${{ matrix.tox-env }} -- --color=yes
