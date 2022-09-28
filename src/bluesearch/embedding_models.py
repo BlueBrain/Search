@@ -50,7 +50,7 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        raw_sentence : str
+        raw_sentence
             Raw sentence to embed.
 
         Returns
@@ -60,14 +60,14 @@ class EmbeddingModel(ABC):
         """
         return raw_sentence
 
-    def preprocess_many(self, raw_sentences: list[str]) -> list[Any]:
+    def preprocess_many(self, raw_sentences: list[str]) -> list[str]:
         """Preprocess multiple sentences.
 
         This is a default implementation and can be overridden by children classes.
 
         Parameters
         ----------
-        raw_sentences : list of str
+        raw_sentences
             List of str representing raw sentences that we want to embed.
 
         Returns
@@ -83,12 +83,12 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        preprocessed_sentence : str
+        preprocessed_sentence
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding : numpy.array
+        embedding
             One dimensional vector representing the embedding of the given sentence.
         """
 
@@ -100,12 +100,12 @@ class EmbeddingModel(ABC):
 
         Parameters
         ----------
-        preprocessed_sentences : list of str
+        preprocessed_sentences
             List of preprocessed sentences.
 
         Returns
         -------
-        embeddings : np.ndarray
+        embeddings
             2D numpy array with shape `(len(preprocessed_sentences), self.dim)`.
             Each row is an embedding of a sentence in `preprocessed_sentences`.
         """
@@ -117,7 +117,7 @@ class SentTransformer(EmbeddingModel):
 
     Parameters
     ----------
-    model_name_or_path : pathlib.Path or str
+    model_name_or_path
         The name or the path of the Transformer model to load.
 
     References
@@ -151,12 +151,12 @@ class SentTransformer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence : str
+        preprocessed_sentence
             Preprocessed sentence to embed.
 
         Returns
         -------
-        embedding : numpy.array
+        embedding
             Embedding of the given sentence of shape (768,).
         """
         return self.embed_many([preprocessed_sentence]).squeeze()
@@ -166,12 +166,12 @@ class SentTransformer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences : list of str
+        preprocessed_sentences
             Preprocessed sentences to embed.
 
         Returns
         -------
-        embedding : numpy.array
+        embedding
             Embedding of the specified sentences of shape
             `(len(preprocessed_sentences), 768)`.
         """
@@ -184,7 +184,7 @@ class SklearnVectorizer(EmbeddingModel):
 
     Parameters
     ----------
-    checkpoint_path : pathlib.Path or str
+    checkpoint_path
         The path of the scikit-learn model to use for the embeddings in Pickle format.
     """
 
@@ -199,7 +199,7 @@ class SklearnVectorizer(EmbeddingModel):
 
         Returns
         -------
-        dim : int
+        dim
             The dimension of the embedding.
         """
         if hasattr(self.model, "n_features"):  # e.g. HashingVectorizer
@@ -217,13 +217,13 @@ class SklearnVectorizer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentence : str
+        preprocessed_sentence
             Preprocessed sentence to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embedding : numpy.ndarray
+        embedding
             Array of shape `(dim,)` with the sentence embedding.
         """
         embedding = self.embed_many([preprocessed_sentence])
@@ -234,13 +234,13 @@ class SklearnVectorizer(EmbeddingModel):
 
         Parameters
         ----------
-        preprocessed_sentences : iterable of str
+        preprocessed_sentences
             Preprocessed sentences to embed. Can by obtained using the
             `preprocess` or `preprocess_many` methods.
 
         Returns
         -------
-        embeddings : numpy.ndarray
+        embeddings
             Array of shape `(len(preprocessed_sentences), dim)` with the
             sentence embeddings.
         """
@@ -261,14 +261,14 @@ def compute_database_embeddings(
 
     Parameters
     ----------
-    connection : sqlalchemy.engine.Engine
+    connection
         Connection to the database.
-    model : EmbeddingModel
+    model
         Instance of the EmbeddingModel of choice.
-    indices : np.ndarray
+    indices
         1D array storing the sentence_ids for which we want to perform the
         embedding.
-    batch_size : int
+    batch_size
         Number of sentences to preprocess and embed at the same time. Should
         lead to major speedups. Note that the last batch will have a length of
         `n_sentences % batch_size` (unless it is 0). Note that some models
@@ -277,10 +277,10 @@ def compute_database_embeddings(
 
     Returns
     -------
-    final_embeddings : np.array
+    final_embeddings
         2D numpy array with all sentences embeddings for the given models. Its
         shape is `(len(retrieved_indices), dim)`.
-    retrieved_indices : np.ndarray
+    retrieved_indices
         1D array of sentence_ids that we managed to embed. Note that the order
         corresponds exactly to the rows in `final_embeddings`.
     """
@@ -347,7 +347,7 @@ def get_embedding_model(
 
     Returns
     -------
-    sentence_embedding_model : EmbeddingModel
+    sentence_embedding_model
         The sentence embedding model instance.
     """
     if model_name_or_class in ["SentTransformer", "SklearnVectorizer"]:
@@ -378,48 +378,48 @@ class MPEmbedder:
 
     Parameters
     ----------
-    database_url : str
+    database_url
         URL of the database.
-    model_name_or_class : str
+    model_name_or_class
         The name or class of the model for which to compute the embeddings.
-    indices : np.ndarray
+    indices
         1D array storing the sentence_ids for which we want to compute the
         embedding.
-    h5_path_output : pathlib.Path
+    h5_path_output
         Path to where the output h5 file will be lying.
-    batch_size_inference : int
+    batch_size_inference
         Number of sentences to preprocess and embed at the same time. Should
         lead to major speedups. Note that the last batch will have a length of
         `n_sentences % batch_size` (unless it is 0). Note that some models
         (SBioBERT) might perform padding to the longest sentence in the batch
         and bigger batch size might not lead to a speedup.
-    batch_size_transfer : int
+    batch_size_transfer
         Batch size to be used for transfering data from the temporary h5 files to the
         final h5 file.
-    n_processes : int
+    n_processes
         Number of processes to use. Note that each process gets
         `len(indices) / n_processes` sentences to embed.
-    checkpoint_path : pathlib.Path or None
+    checkpoint_path
         If 'model_name_or_class' is the class, the path of the model to load.
         Otherwise, this argument is ignored.
-    gpus : None or list
+    gpus
         If not specified, all processes will be using CPU. If not None, then
         it needs to be a list of length `n_processes` where each element
         represents the GPU id (integer) to be used. None elements will
         be interpreted as CPU.
-    delete_temp : bool
+    delete_temp
         If True, the temporary h5 files are deleted after the final h5 is created.
         Disabling this flag is useful for testing and debugging purposes.
     temp_folder : None or pathlib.Path
         If None, then all temporary h5 files stored into the same folder as the output
         h5 file. Otherwise they are stored in the specified folder.
-    h5_dataset_name : str or None
+    h5_dataset_name
         The name of the dataset in the H5 file.
         Otherwise, the value of 'model_name_or_class' is used.
     start_method : str, {"fork", "forkserver", "spawn"}
         Start method for multiprocessing. Note that using "fork" might
         lead to problems when doing GPU inference.
-    preinitialize : bool
+    preinitialize
         If True we instantiate the model before running multiprocessing
         in order to download any checkpoints. Once instantiated, the model
         will be deleted.
@@ -543,24 +543,24 @@ class MPEmbedder:
 
         Parameters
         ----------
-        database_url : str
+        database_url
             URL of the database.
-        model_name_or_class : str
+        model_name_or_class
             The name or class of the model for which to compute the embeddings.
-        indices : np.ndarray
+        indices
             1D array of sentences ids indices representing what
             the worker needs to embed.
-        temp_h5_path : pathlib.Path
+        temp_h5_path
             Path to where we store the temporary h5 file.
-        batch_size : int
+        batch_size
             Number of sentences in the batch.
-        checkpoint_path : pathlib.Path or None
+        checkpoint_path
             If 'model_name_or_class' is the class, the path of the model to load.
             Otherwise, this argument is ignored.
-        gpu : int or None
+        gpu
             If None, we are going to use a CPU. Otherwise, we use a GPU
             with the specified id.
-        h5_dataset_name : str or None
+        h5_dataset_name
             The name of the dataset in the H5 file.
         """
         current_process = mp.current_process()

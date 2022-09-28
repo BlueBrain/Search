@@ -280,7 +280,7 @@ class TestGetEmbeddingModel:
             get_embedding_model("wrong_model_name")
 
     @pytest.mark.parametrize(
-        "name, underlying_class, model_name",
+        "name, underlying_class, checkpoint",
         [
             ("BioBERT NLI+STS", "SentTransformer", None),
             ("SentTransformer", "SentTransformer", "fake_model_name"),
@@ -289,7 +289,7 @@ class TestGetEmbeddingModel:
             ("SBERT", "SentTransformer", None),
         ],
     )
-    def test_returns_instance(self, monkeypatch, name, underlying_class, model_name):
+    def test_returns_instance(self, monkeypatch, name, underlying_class, checkpoint):
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
@@ -297,7 +297,7 @@ class TestGetEmbeddingModel:
             f"bluesearch.embedding_models.{underlying_class}", fake_class
         )
 
-        returned_instance = get_embedding_model(name, model_name)
+        returned_instance = get_embedding_model(name, checkpoint)
 
         assert returned_instance is fake_instance
 
@@ -410,30 +410,24 @@ class TestMPEmbedder:
 
 
 @pytest.mark.parametrize(
-    "model_name",
+    ("model_name", "expected_dim"),
     [
-        "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
-        "sentence-transformers/multi-qa-mpnet-base-dot-v1",
+        ("sentence-transformers/multi-qa-MiniLM-L6-cos-v1", 384),
+        ("sentence-transformers/multi-qa-mpnet-base-dot-v1", 768),
     ],
 )
-def test_embedding_size(model_name):
+def test_embedding_size(model_name, expected_dim):
     model = SentTransformer(model_name)
-    if model_name == "sentence-transformers/multi-qa-mpnet-base-dot-v1":
-        assert model.dim == 768
-    elif model_name == "sentence-transformers/multi-qa-MiniLM-L6-cos-v1":
-        assert model.dim == 384
+    assert model.dim == expected_dim
 
 
 @pytest.mark.parametrize(
-    "model_name",
+    ("model_name", "is_normalized"),
     [
-        "sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
-        "sentence-transformers/multi-qa-mpnet-base-dot-v1",
+        ("sentence-transformers/multi-qa-MiniLM-L6-cos-v1", True),
+        ("sentence-transformers/multi-qa-mpnet-base-dot-v1", False),
     ],
 )
-def test_model_is_normalized(model_name):
+def test_model_is_normalized(model_name, is_normalized):
     model = SentTransformer(model_name)
-    if model_name == "sentence-transformers/multi-qa-mpnet-base-dot-v1":
-        assert not model.normalized
-    elif model_name == "sentence-transformers/multi-qa-MiniLM-L6-cos-v1":
-        assert model.normalized
+    assert model.normalized is is_normalized
