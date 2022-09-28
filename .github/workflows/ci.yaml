@@ -88,7 +88,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           brew install mysql
-          brew install docker
+          brew cask install docker
           docker pull docker.elastic.co/elasticsearch/elasticsearch:8.3.3
           docker create -p 9200:9200 --health-cmd "curl http://localhost:9200/_cluster/health" --health-interval 10s --health-timeout 5s --health-retries 10 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e GITHUB_ACTIONS=true -e CI=true docker.elastic.co/elasticsearch/elasticsearch:8.3.3
       - name: Run unit tests
