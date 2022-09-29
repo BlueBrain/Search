@@ -49,7 +49,7 @@ MAPPINGS_PARAGRAPHS = {
     "dynamic": "strict",
     "properties": {
         "article_id": {"type": "keyword"},
-        "section_name": {"type": "keyword"},
+        "section": {"type": "keyword"},
         "paragraph_id": {"type": "short"},
         "text": {"type": "text"},
         "is_bad": {"type": "boolean"},

@@ -115,12 +115,25 @@ def bulk_paragraphs(
     for inp in inputs:
         serialized = inp.read_text("utf-8")
         article = Article.from_json(serialized)
+        # add abstract to paragraphs in order to be able to search for abstracts
+        for i, abstract in enumerate(article.abstract):
+            doc = {
+                "_index": "paragraphs",
+                "_source": {
+                    "article_id": article.uid,
+                    "section": "abstract",
+                    "text": abstract,
+                    "paragraph_id": i,
+                },
+            }
+            yield doc
+        # add body paragraphs
         for ppos, (section, text) in enumerate(article.section_paragraphs):
             doc = {
                 "_index": "paragraphs",
                 "_source": {
                     "article_id": article.uid,
-                    "section_name": section,
+                    "section": section,
                     "text": text,
                     "paragraph_id": ppos,
                 },
@@ -160,7 +173,7 @@ def run(
     if resp[0] == 0:
         raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
 
-    logger.info("Uploading articles to the database...")
+    logger.info("Uploading paragraphs to the database...")
     progress = tqdm.tqdm(
         desc="Uploading paragraphs", total=len(inputs), unit="articles"
     )
