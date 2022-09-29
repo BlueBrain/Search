@@ -173,7 +173,7 @@ def run(
     if resp[0] == 0:
         raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
 
-    logger.info("Uploading articles to the database...")
+    logger.info("Uploading paragraphs to the database...")
     progress = tqdm.tqdm(
         desc="Uploading paragraphs", total=len(inputs), unit="articles"
     )
