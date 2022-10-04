@@ -202,12 +202,7 @@ def embed_bentoml(
     embedding
         Embedding of the text.
     """
-    url = (
-        "http://"
-        + os.environ["BENTOML_URL"]
-        + "/"
-        + model_name
-    )
+    url = "http://" + os.environ["BENTOML_URL"] + "/" + model_name
 
     # create payload
     response = requests.post(

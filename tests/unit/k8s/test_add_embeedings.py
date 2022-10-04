@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
 def test_add_embeddings_locally(get_es_client):
@@ -47,8 +48,8 @@ def test_add_embeddings_locally(get_es_client):
 
 
 def test_embedding_bentoml():
-    from bluesearch.k8s.embeddings import embed_locally, embed_bentoml
+    from bluesearch.k8s.embeddings import embed_bentoml, embed_locally
 
     emb_local = embed_locally("some test text")
     emb_bentoml = embed_bentoml("some test text")
-    assert np.allclose(emb_local, emb_bentoml, rtol=1e-04, atol=1e-07).all()
+    assert np.allclose(emb_local, emb_bentoml, rtol=1e-04, atol=1e-07)
