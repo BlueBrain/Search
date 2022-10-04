@@ -28,7 +28,6 @@ from elasticsearch.helpers import bulk
 from bluesearch.database.article import Article
 from bluesearch.k8s.connect import connect
 
-
 logger = logging.getLogger(__name__)
 
 
