@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import tqdm
-from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 from bluesearch.database.article import Article
