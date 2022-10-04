@@ -27,6 +27,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 from bluesearch.database.article import Article
+from bluesearch.k8s.connect import connect
+
 
 logger = logging.getLogger(__name__)
 
@@ -54,18 +56,25 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         type=Path,
         help="Path to a parsed file or to a directory of parsed files.",
     )
-
     parser.add_argument(
-        "indices",
+        "--articles-index-name",
         type=str,
-        nargs="+",
-        help="List with two elements for articles and paragraphs index's names.",
+        default="articles",
+        help="Desired name of the index holding articles.",
+    )
+    parser.add_argument(
+        "--paragraphs-index-name",
+        type=str,
+        default="paragraphs",
+        help="Desired name of the index holding paragraphs.",
     )
     return parser
 
 
 def bulk_articles(
-    inputs: Iterable[Path], index: str, progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path],
+    index: str,
+    progress: Optional[tqdm.std.tqdm] = None,
 ) -> Iterable[dict[str, Any]]:
     """Yield an article mapping as a document to upload to Elasticsearch.
 
@@ -103,7 +112,9 @@ def bulk_articles(
 
 
 def bulk_paragraphs(
-    inputs: Iterable[Path], index: str, progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path],
+    index: str,
+    progress: Optional[tqdm.std.tqdm] = None,
 ) -> Iterable[dict[str, Any]]:
     """Yield a paragraph mapping as a document to upload to Elasticsearch.
 
@@ -138,9 +149,9 @@ def bulk_paragraphs(
 
 
 def run(
-    client: Elasticsearch,
     parsed_path: Path,
-    indices: tuple[str, str] = ("articles", "paragraphs"),
+    articles_index_name: str,
+    paragraphs_index_name: str,
 ) -> int:
     """Add an entry to the database.
 
@@ -160,19 +171,21 @@ def run(
     if len(inputs) == 0:
         raise RuntimeWarning(f"No articles found at '{parsed_path}'!")
 
-    logger.info("Uploading articles to the {indices[0]} index...")
+    # Creating a client
+    client = connect()
+    logger.info("Uploading articles to the {articles_index_name} index...")
     progress = tqdm.tqdm(desc="Uploading articles", total=len(inputs), unit="articles")
-    resp = bulk(client, bulk_articles(inputs, indices[0], progress))
+    resp = bulk(client, bulk_articles(inputs, articles_index_name, progress))
     logger.info(f"Uploaded {resp[0]} articles.")
 
     if resp[0] == 0:
         raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
 
-    logger.info("Uploading articles to the {indices[1]} index...")
+    logger.info("Uploading articles to the {paragraphs_index_name} index...")
     progress = tqdm.tqdm(
         desc="Uploading paragraphs", total=len(inputs), unit="articles"
     )
-    resp = bulk(client, bulk_paragraphs(inputs, indices[1], progress))
+    resp = bulk(client, bulk_paragraphs(inputs, paragraphs_index_name, progress))
     logger.info(f"Uploaded {resp[0]} paragraphs.")
 
     if resp[0] == 0:
