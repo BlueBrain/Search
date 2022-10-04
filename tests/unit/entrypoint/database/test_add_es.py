@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 from elasticsearch import Elasticsearch
@@ -6,7 +7,7 @@ from elasticsearch import Elasticsearch
 from bluesearch.entrypoint.database import add_es
 
 
-def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
+def test(get_es_client: Elasticsearch, tmp_path: Path, monkeypatch) -> None:
     from bluesearch.database.article import Article
     from bluesearch.k8s.create_indices import (
         MAPPINGS_ARTICLES,
@@ -19,6 +20,9 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     client = get_es_client
     if client is None:
         pytest.skip("Elastic search is not available")
+
+    fake_connect = Mock(return_value=client)
+    monkeypatch.setattr("bluesearch.entrypoint.database.add_es.connect", fake_connect)
 
     article_1 = Article(
         title="some test title",
@@ -55,8 +59,12 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     add_index(client, "test_paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
 
     add_es.run(
-        client, parsed_path=tmp_path, indices=("test_articles", "test_paragraphs")
+        parsed_path=tmp_path,
+        articles_index_name="test_articles",
+        paragraphs_index_name="test_paragraphs",
     )
+
+    assert fake_connect.call_count == 1
     client.indices.refresh(index=["test_articles", "test_paragraphs"])
 
     assert set(client.indices.get_alias().keys()) >= (
