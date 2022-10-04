@@ -167,7 +167,7 @@ def run(
         )
 
     if len(inputs) == 0:
-        raise RuntimeWarning(f"No articles found at '{parsed_path}'!")
+        raise ValueError(f"No articles found at '{parsed_path}'!")
 
     # Creating a client
     client = connect()
@@ -177,7 +177,7 @@ def run(
     logger.info(f"Uploaded {resp[0]} articles.")
 
     if resp[0] == 0:
-        raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
+        raise ValueError(f"No articles were loaded to ES from '{parsed_path}'!")
 
     logger.info("Uploading articles to the {paragraphs_index_name} index...")
     progress = tqdm.tqdm(
@@ -187,7 +187,7 @@ def run(
     logger.info(f"Uploaded {resp[0]} paragraphs.")
 
     if resp[0] == 0:
-        raise RuntimeWarning(f"No paragraphs were loaded to ES from '{parsed_path}'!")
+        raise ValueError(f"No paragraphs were loaded to ES from '{parsed_path}'!")
 
     logger.info("Adding done")
     return 0

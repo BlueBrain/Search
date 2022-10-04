@@ -24,6 +24,18 @@ def test_init_parser():
     assert args_dict["parsed_path"] == Path("some_path")
 
 
+def test_errors(tmp_path):
+    some_folder = tmp_path / "something"
+
+    with pytest.raises(ValueError, match="should be a path to"):
+        add_es.run(some_folder, "", "")
+
+    some_folder.mkdir()
+
+    with pytest.raises(ValueError, match="No articles"):
+        add_es.run(some_folder, "", "")
+
+
 def test_big(get_es_client: Elasticsearch, tmp_path: Path, monkeypatch) -> None:
     from bluesearch.database.article import Article
     from bluesearch.k8s.create_indices import (
