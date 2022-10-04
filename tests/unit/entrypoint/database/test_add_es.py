@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 from elasticsearch import Elasticsearch
@@ -6,18 +7,22 @@ from elasticsearch import Elasticsearch
 from bluesearch.entrypoint.database import add_es
 
 
-def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
+def test(get_es_client: Elasticsearch, tmp_path: Path, monkeypatch) -> None:
     from bluesearch.database.article import Article
     from bluesearch.k8s.create_indices import (
         MAPPINGS_ARTICLES,
         MAPPINGS_PARAGRAPHS,
         SETTINGS,
         add_index,
+        remove_index,
     )
 
     client = get_es_client
     if client is None:
         pytest.skip("Elastic search is not available")
+
+    fake_connect = Mock(return_value=client)
+    monkeypatch.setattr("bluesearch.entrypoint.database.add_es.connect", fake_connect)
 
     article_1 = Article(
         title="some test title",
@@ -47,17 +52,27 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     article_1_path.write_text(article_1.to_json())
     article_2_path.write_text(article_2.to_json())
 
-    assert set(client.indices.get_alias().keys()) == set()
-    add_index(client, "articles", SETTINGS, MAPPINGS_ARTICLES)
-    add_index(client, "paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
+    assert (
+        set(client.indices.get_alias().keys()) & {"test_articles", "test_paragraphs"}
+    ) == set()
+    add_index(client, "test_articles", SETTINGS, MAPPINGS_ARTICLES)
+    add_index(client, "test_paragraphs", SETTINGS, MAPPINGS_PARAGRAPHS)
 
-    add_es.run(client, parsed_path=tmp_path)
-    client.indices.refresh(index=["articles", "paragraphs"])
+    add_es.run(
+        parsed_path=tmp_path,
+        articles_index_name="test_articles",
+        paragraphs_index_name="test_paragraphs",
+    )
 
-    assert set(client.indices.get_alias().keys()) == {"articles", "paragraphs"}
+    assert fake_connect.call_count == 1
+    client.indices.refresh(index=["test_articles", "test_paragraphs"])
+
+    assert set(client.indices.get_alias().keys()) >= (
+        {"test_articles", "test_paragraphs"}
+    )
 
     # verify articles
-    resp = client.search(index="articles", query={"match_all": {}})
+    resp = client.search(index="test_articles", query={"match_all": {}})
     assert resp["hits"]["total"]["value"] == 2
 
     for doc in resp["hits"]["hits"]:
@@ -71,7 +86,7 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
             assert doc["_source"]["title"] == "SOME test title"
 
     # verify paragraphs
-    resp = client.search(index="paragraphs", query={"match_all": {}})
+    resp = client.search(index="test_paragraphs", query={"match_all": {}})
     assert resp["hits"]["total"]["value"] == 4
 
     all_docs = set()
@@ -93,3 +108,6 @@ def test(get_es_client: Elasticsearch, tmp_path: Path) -> None:
     }
 
     assert all_docs == all_docs_expected
+
+    remove_index(client, "test_articles")
+    remove_index(client, "test_paragraphs")
