@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -7,7 +8,35 @@ from elasticsearch import Elasticsearch
 from bluesearch.entrypoint.database import add_es
 
 
-def test(get_es_client: Elasticsearch, tmp_path: Path, monkeypatch) -> None:
+def test_init_parser():
+    parser = argparse.ArgumentParser("test parser")
+
+    parser = add_es.init_parser(parser)
+
+    args = parser.parse_args(["some_path"])
+
+    args_dict = vars(args)
+
+    assert "parsed_path" in args_dict
+    assert "articles_index_name" in args_dict
+    assert "paragraphs_index_name" in args_dict
+
+    assert args_dict["parsed_path"] == Path("some_path")
+
+
+def test_errors(tmp_path):
+    some_folder = tmp_path / "something"
+
+    with pytest.raises(ValueError, match="should be a path to"):
+        add_es.run(some_folder, "", "")
+
+    some_folder.mkdir()
+
+    with pytest.raises(ValueError, match="No articles"):
+        add_es.run(some_folder, "", "")
+
+
+def test_big(get_es_client: Elasticsearch, tmp_path: Path, monkeypatch) -> None:
     from bluesearch.database.article import Article
     from bluesearch.k8s.create_indices import (
         MAPPINGS_ARTICLES,
