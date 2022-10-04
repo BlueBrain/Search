@@ -64,6 +64,8 @@ def embed(
         embed = functools.partial(
             embed_seldon, namespace=namespace, model_name=model_name, polling=polling
         )
+    elif embedding_method == "bentoml":
+        embed = functools.partial(embed_bentoml, model_name=model_name)
     elif embedding_method == "local":
         embed = functools.partial(
             embed_locally,
@@ -178,3 +180,51 @@ def embed_seldon(
     tensor /= np.linalg.norm(tensor)
 
     return tensor.tolist()
+
+
+def embed_bentoml(
+    text: str, model_name: str = "minilm", polling: str = "mean"
+) -> list[float]:
+    """Embed the paragraphs in the database using BentoML.
+
+    Parameters
+    ----------
+    text
+        Text to embed.
+    model_name
+        Name of the BentoML deployment.
+
+    Returns
+    -------
+    embedding
+        Embedding of the text.
+    """
+    url = (
+        "http://"
+        + os.environ["BENTOML_URL"]
+        + "/"
+        + model_name
+    )
+
+    # create payload
+    response = requests.post(
+        url,
+        headers={"accept": "application/json", "Content-Type": "text/plain"},
+        data="string",
+    )
+
+    # convert the response to a numpy array
+    tensor = response.json()
+    tensor = np.vstack(tensor[0])
+
+    # apply the polling method
+    if polling:
+        if polling == "max":
+            tensor = np.max(tensor, axis=0)
+        elif polling == "mean":
+            tensor = np.mean(tensor, axis=0)
+
+    # normalize the embedding
+    tensor /= np.linalg.norm(tensor)
+
+    return tensor

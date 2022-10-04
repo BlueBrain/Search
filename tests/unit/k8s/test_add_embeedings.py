@@ -2,14 +2,14 @@ import pytest
 
 
 @pytest.mark.filterwarnings("ignore::DeprecationWarning")
-def test_add_embeddings(get_es_client):
+def test_add_embeddings_locally(get_es_client):
     from bluesearch.k8s.create_indices import (
         MAPPINGS_PARAGRAPHS,
         SETTINGS,
         add_index,
         remove_index,
     )
-    from bluesearch.k8s.embeddings import embed_locally
+    from bluesearch.k8s.embeddings import embed
 
     client = get_es_client
     if client is None:
@@ -31,10 +31,11 @@ def test_add_embeddings(get_es_client):
     paragraph_count = client.count(index="test_paragraphs", query=query)
     assert paragraph_count["count"] == 3
 
-    embed_locally(
+    embed(
         client,
-        model_name="sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
         index="test_paragraphs",
+        embedding_method="local",
+        model_name="sentence-transformers/multi-qa-MiniLM-L6-cos-v1",
     )
     client.indices.refresh(index="test_paragraphs")
 
