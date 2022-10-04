@@ -62,11 +62,11 @@ def embed(
     """
     if embedding_method == "seldon":
         embed = functools.partial(
-            _embed_seldon, namespace=namespace, model_name=model_name, polling=polling
+            embed_seldon, namespace=namespace, model_name=model_name, polling=polling
         )
     elif embedding_method == "local":
         embed = functools.partial(
-            _embed_locally,
+            embed_locally,
             model_name=model_name,
         )
 
@@ -88,7 +88,7 @@ def embed(
         progress.update(1)
 
 
-def _embed_locally(
+def embed_locally(
     text: str, model_name: str = "sentence-transformers/multi-qa-MiniLM-L6-cos-v1"
 ) -> list[float]:
     """Embed the paragraphs in the database locally.
@@ -112,7 +112,7 @@ def _embed_locally(
     return emb.tolist()
 
 
-def _embed_seldon(
+def embed_seldon(
     text: str,
     namespace: str = "seldon",
     model_name: str = "minilm",
