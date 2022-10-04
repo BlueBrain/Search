@@ -164,6 +164,9 @@ def embed_seldon(
         },
     )
 
+    if not response.status_code == 200:
+        raise ValueError("Error in the request")
+
     # convert the response to a numpy array
     tensor = response.json()["outputs"][0]["data"][0]
     tensor = tensor[3:-3].split("], [")
@@ -210,8 +213,11 @@ def embed_bentoml(
     response = requests.post(
         url,
         headers={"accept": "application/json", "Content-Type": "text/plain"},
-        data="string",
+        data=text,
     )
+
+    if not response.status_code == 200:
+        raise ValueError("Error in the request")
 
     # convert the response to a numpy array
     tensor = response.json()
