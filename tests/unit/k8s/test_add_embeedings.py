@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pytest
 
@@ -48,6 +50,9 @@ def test_add_embeddings_locally(get_es_client):
 
 
 def test_embedding_bentoml():
+    if os.environ.get("BENTOML_URL") is None:
+        pytest.skip("BENTOML_URL is not available")
+
     from bluesearch.k8s.embeddings import embed_bentoml, embed_locally
 
     emb_local = embed_locally("some test text")
