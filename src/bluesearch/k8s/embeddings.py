@@ -42,6 +42,7 @@ def embed(
     model_name: str = "minilm",
     namespace: str = "seldon",
     polling: str = "mean",
+    force: bool = False,
 ) -> None:
     """Embed the paragraphs in the database locally.
 
@@ -71,9 +72,14 @@ def embed(
             embed_locally,
             model_name=model_name,
         )
+    else:
+        raise ValueError(f"Unknown embedding method: {embedding_method}")
 
     # get paragraphs without embeddings
-    query = {"bool": {"must_not": {"exists": {"field": "embedding"}}}}
+    if force:
+        query = {"query": {"match_all": {}}}
+    else:
+        query = {"query": {"bool": {"must_not": {"exists": {"field": "embedding"}}}}}
     paragraph_count = client.count(index=index, query=query)["count"]
     logger.info("There are {paragraph_count} paragraphs without embeddings")
 
@@ -202,7 +208,7 @@ def embed_bentoml(
     embedding
         Embedding of the text.
     """
-    url = "http://" + os.environ["BENTOML_URL"] + "/" + model_name
+    url = "http://" + os.environ["BENTOML_EMBEDDING_URL"] + "/" + model_name
 
     # create payload
     response = requests.post(
