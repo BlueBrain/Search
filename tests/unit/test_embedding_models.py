@@ -84,8 +84,6 @@ class TestEmbeddingModels:
         embed_method = getattr(sbert, "embed" if n_sentences == 1 else "embed_many")
 
         # Assertions
-        assert sbert.dim == 768
-
         preprocessed_sentence = preprocess_method(dummy_sentence)
         assert preprocessed_sentence == dummy_sentence
 
@@ -282,16 +280,16 @@ class TestGetEmbeddingModel:
             get_embedding_model("wrong_model_name")
 
     @pytest.mark.parametrize(
-        "name, underlying_class",
+        "name, underlying_class, checkpoint",
         [
-            ("BioBERT NLI+STS", "SentTransformer"),
-            ("SentTransformer", "SentTransformer"),
-            ("SklearnVectorizer", "SklearnVectorizer"),
-            ("SBioBERT", "SentTransformer"),
-            ("SBERT", "SentTransformer"),
+            ("BioBERT NLI+STS", "SentTransformer", None),
+            ("SentTransformer", "SentTransformer", "fake_model_name"),
+            ("SklearnVectorizer", "SklearnVectorizer", "fake_checkpoint"),
+            ("SBioBERT", "SentTransformer", None),
+            ("SBERT", "SentTransformer", None),
         ],
     )
-    def test_returns_instance(self, monkeypatch, name, underlying_class):
+    def test_returns_instance(self, monkeypatch, name, underlying_class, checkpoint):
         fake_instance = Mock()
         fake_class = Mock(return_value=fake_instance)
 
@@ -299,7 +297,7 @@ class TestGetEmbeddingModel:
             f"bluesearch.embedding_models.{underlying_class}", fake_class
         )
 
-        returned_instance = get_embedding_model(name)
+        returned_instance = get_embedding_model(name, checkpoint)
 
         assert returned_instance is fake_instance
 
@@ -409,3 +407,27 @@ class TestMPEmbedder:
 
         args, _ = fake_h5.concatenate.call_args
         assert len(args[2]) == n_processes
+
+
+@pytest.mark.parametrize(
+    ("model_name", "expected_dim"),
+    [
+        ("sentence-transformers/multi-qa-MiniLM-L6-cos-v1", 384),
+        ("sentence-transformers/multi-qa-mpnet-base-dot-v1", 768),
+    ],
+)
+def test_embedding_size(model_name, expected_dim):
+    model = SentTransformer(model_name)
+    assert model.dim == expected_dim
+
+
+@pytest.mark.parametrize(
+    ("model_name", "is_normalized"),
+    [
+        ("sentence-transformers/multi-qa-MiniLM-L6-cos-v1", True),
+        ("sentence-transformers/multi-qa-mpnet-base-dot-v1", False),
+    ],
+)
+def test_model_is_normalized(model_name, is_normalized):
+    model = SentTransformer(model_name)
+    assert model.normalized is is_normalized
