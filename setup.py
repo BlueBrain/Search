@@ -47,20 +47,10 @@ CLASSIFIERS = [
 PYTHON_REQUIRES = ">=3.7"
 
 INSTALL_REQUIRES = [
-    "Flask",
-    "SQLAlchemy[mysql,pymysql]",
-    "boto3",
     "catalogue>=2.0.3",  # see https://github.com/explosion/catalogue/issues/17
-    # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
-    "cryptography>=3.2",
     "defusedxml",
-    "elasticsearch>=8",
-    "google-cloud-storage",
+    "elasticsearch==8.3.3",
     "h5py",
-    "ipython",
-    "ipywidgets",
-    "jupyterlab>=3",
-    "langdetect",
     "luigi",
     # Serialization framework on top of dataclasses, e.g. 'Article' to and from JSON.
     "mashumaro>=3.0",
@@ -78,6 +68,18 @@ INSTALL_REQUIRES = [
 ]
 
 EXTRAS_REQUIRE = {
+    "full": [
+        "boto3",
+        "Flask",
+        "SQLAlchemy[mysql,pymysql]",
+        # Required to encrypt mysql password; >= 3.2 to fix RSA decryption vulnerability
+        "cryptography>=3.2",
+        "google-cloud-storage",
+        "ipython",
+        "ipywidgets",
+        "jupyterlab>=3",
+        "langdetect",
+    ],
     "dev": [
         "Sphinx",
         "docker",
