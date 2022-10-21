@@ -80,7 +80,7 @@ def embed(
     if force:
         query: dict[str, Any] = {"query": {"match_all": {}}}
     else:
-        query: dict[str, Any] = {
+        query = {
             "query": {"bool": {"must_not": {"exists": {"field": "embedding"}}}}
         }
     paragraph_count = client.count(index=index, query=query)["count"]
