@@ -20,6 +20,7 @@ from __future__ import annotations
 import functools
 import logging
 import os
+from typing import Any
 
 import elasticsearch
 import numpy as np
@@ -77,9 +78,11 @@ def embed(
 
     # get paragraphs without embeddings
     if force:
-        query = {"query": {"match_all": {}}}
+        query: dict[str, Any] = {"query": {"match_all": {}}}
     else:
-        query = {"query": {"bool": {"must_not": {"exists": {"field": "embedding"}}}}}
+        query: dict[str, Any] = {
+            "query": {"bool": {"must_not": {"exists": {"field": "embedding"}}}}
+        }
     paragraph_count = client.count(index=index, query=query)["count"]
     logger.info("There are {paragraph_count} paragraphs without embeddings")
 
