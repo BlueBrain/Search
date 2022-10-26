@@ -25,6 +25,8 @@ import requests
 import tqdm
 from dotenv import load_dotenv
 from elasticsearch.helpers import scan
+import pandas as pd
+from datetime import datetime
 
 load_dotenv()
 
@@ -77,9 +79,9 @@ def run(
         unit=" Paragraphs",
         desc="Updating NER",
     )
-    for hit in scan(client, query={"query": query}, index=index):
+    for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
         try:
-            results = run_ner_remote(
+            results = run_ner_model_remote(
                 hit["_source"]["text"],
                 url,
                 ner_method,
@@ -99,7 +101,7 @@ def run(
     progress.close()
 
 
-def run_ner_remote(text: str, url: str, source: str) -> list[dict]:
+def run_ner_model_remote(text: str, url: str, source: str) -> list[dict]:
     """Run NER on the remote server for a specific paragraph text.
 
     Parameters
@@ -132,10 +134,11 @@ def run_ner_remote(text: str, url: str, source: str) -> list[dict]:
     out = []
     for res in results:
         row = {}
-        row["entity"] = res["entity_group"]
-        row["word"] = res["word"]
+        row["entity_type"] = res["entity_group"]
+        row["entity"] = res["word"]
         row["start"] = res["start"]
         row["end"] = res["end"]
+        row["score"] = 0 if source == "ruler" else res["score"]
         row["source"] = source
         out.append(row)
 
@@ -169,3 +172,80 @@ def handle_conflicts(results_paragraph: list[dict]) -> list[dict]:
 
     results_cleaned.sort(key=lambda x: x["start"])
     return results_cleaned
+
+
+def retrieve_csv(
+    client: elasticsearch.Elasticsearch,
+    index: str = "paragraphs",
+    ner_method: str = "both",
+    output_path: str = "./",
+) -> None:
+    """Retrieve the NER results from the database and save them in a csv file.
+
+    Parameters
+    ----------
+    client
+        Elasticsearch client.
+    index
+        Name of the ES index.
+    ner_method
+        Method to use to perform NER.
+    """
+    now = datetime.now().strftime('%d_%m_%Y_%H_%M')
+
+    if ner_method == "both":
+        query = {
+            "bool": {
+                "filter": [
+                    {"exists": {"field": "ner_ml_json_v2"}},
+                    {"exists": {"field": "ner_ruler_json_v2"}},
+                ]
+            }
+        }
+    elif ner_method in ["ml", "ruler"]:
+        query = {"exists": {"field": f"ner_{ner_method}_json_v2"}}
+    else:
+        raise ValueError("The ner_method should be either 'ml', 'ruler' or 'both'.")
+
+    paragraph_count = client.count(index=index, query=query)["count"]
+    logger.info(
+        f"There are {paragraph_count} paragraphs with NER {ner_method} results."
+    )
+
+    progress = tqdm.tqdm(
+        total=paragraph_count,
+        position=0,
+        unit=" Paragraphs",
+        desc="Retrieving NER",
+    )
+    results = []
+    for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
+        if ner_method == "both":
+            results_paragraph = [
+                *hit["_source"]["ner_ml_json_v2"],
+                *hit["_source"]["ner_ruler_json_v2"],
+            ]
+            results_paragraph = handle_conflicts(results_paragraph)
+        else:
+            results_paragraph = hit["_source"][f"ner_{ner_method}_json_v2"]
+
+        for res in results_paragraph:
+            row = {}
+            row["entity_type"] = res["entity_type"]
+            row["entity"] = res["entity"]
+            row["start"] = res["start"]
+            row["end"] = res["end"]
+            row["source"] = res["source"]
+            row["paragraph_id"] = hit["_id"]
+            row["article_id"] = hit["_source"]["article_id"]
+            results.append(row)
+
+        progress.update(1)
+        logger.info(
+            f"Retrieved NER for paragraph {hit['_id']}, progress: {progress.n}"
+        )
+
+    progress.close()
+
+    df = pd.DataFrame(results)
+    df.to_csv(f"{output_path}/ner_es_results{ner_method}_{now}.csv", index=False)
