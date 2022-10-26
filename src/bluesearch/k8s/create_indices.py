@@ -52,6 +52,8 @@ MAPPINGS_PARAGRAPHS = {
         "section_name": {"type": "keyword"},
         "paragraph_id": {"type": "short"},
         "text": {"type": "text"},
+        "ner_ml": {"type": "flattened"},
+        "ner_ruler": {"type": "flattened"},
         "is_bad": {"type": "boolean"},
         "embedding": {
             "type": "dense_vector",
@@ -117,5 +119,25 @@ def remove_index(client: Elasticsearch, index: str | list[str]) -> None:
         client.indices.delete(index=index)
         logger.info(f"Index {index} deleted successfully")
 
+    except Exception as err:
+        print("Elasticsearch add_index ERROR:", err)
+
+
+def update_index_mapping(
+    client: Elasticsearch,
+    index: str,
+    settings: dict[str, Any] | None = None,
+    mappings: dict[str, Any] | None = None,
+) -> None:
+    """Update the index with a new mapping and settings."""
+    if index not in client.indices.get_alias().keys():
+        raise RuntimeError("Index not in ES")
+
+    try:
+        if settings:
+            client.indices.put_settings(index=index, body=settings)
+        if mappings:
+            client.indices.put_mapping(index=index, body=mappings)
+        logger.info(f"Index {index} updated successfully")
     except Exception as err:
         print("Elasticsearch add_index ERROR:", err)
