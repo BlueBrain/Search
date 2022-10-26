@@ -54,6 +54,7 @@ MAPPINGS_PARAGRAPHS = {
         "text": {"type": "text"},
         "ner_ml": {"type": "flattened"},
         "ner_ruler": {"type": "flattened"},
+        "re": {"type": "flattened"},
         "is_bad": {"type": "boolean"},
         "embedding": {
             "type": "dense_vector",
@@ -127,7 +128,7 @@ def update_index_mapping(
     client: Elasticsearch,
     index: str,
     settings: dict[str, Any] | None = None,
-    mappings: dict[str, Any] | None = None,
+    properties: dict[str, Any] | None = None,
 ) -> None:
     """Update the index with a new mapping and settings."""
     if index not in client.indices.get_alias().keys():
@@ -135,9 +136,9 @@ def update_index_mapping(
 
     try:
         if settings:
-            client.indices.put_settings(index=index, body=settings)
-        if mappings:
-            client.indices.put_mapping(index=index, body=mappings)
+            client.indices.put_settings(index=index, settings=settings)
+        if properties:
+            client.indices.put_mapping(index=index, properties=properties)
         logger.info(f"Index {index} updated successfully")
     except Exception as err:
         print("Elasticsearch add_index ERROR:", err)
