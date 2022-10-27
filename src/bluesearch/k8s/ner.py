@@ -198,7 +198,7 @@ def retrieve_csv(
     now = datetime.now().strftime("%d_%m_%Y_%H_%M")
 
     if ner_method == "both":
-        query = {
+        query: dict[str, dict[str, Any]] = {
             "bool": {
                 "filter": [
                     {"exists": {"field": "ner_ml_json_v2"}},
