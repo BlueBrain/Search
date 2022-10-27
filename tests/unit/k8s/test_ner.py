@@ -2,7 +2,7 @@ import pytest
 import responses
 
 from bluesearch.k8s.create_indices import add_index
-from bluesearch.k8s.ner import run, run_ner_model_remote, retrieve_csv
+from bluesearch.k8s.ner import run_ner_model_remote
 
 
 @responses.activate
@@ -20,19 +20,19 @@ def test_run_ner_model_remote(get_es_client):
     text = "There is a cat and a mouse in the house."
     expected_response = [
         {
-            'entity_group': 'ORGANISM',
-            'score': 0.9439833760261536,
-            'word': 'cat',
-            'start': 11,
-            'end': 14
+            "entity_group": "ORGANISM",
+            "score": 0.9439833760261536,
+            "word": "cat",
+            "start": 11,
+            "end": 14,
         },
         {
-            'entity_group': 'ORGANISM',
-            'score': 0.9975798726081848,
-            'word': 'mouse',
-            'start': 21,
-            'end': 26
-        }
+            "entity_group": "ORGANISM",
+            "score": 0.9975798726081848,
+            "word": "mouse",
+            "start": 21,
+            "end": 26,
+        },
     ]
 
     responses.add(
@@ -57,4 +57,3 @@ def test_run_ner_model_remote(get_es_client):
     out = run_ner_model_remote(text, url, source="ruler")
     assert out[0]["score"] == 0
     assert out[1]["score"] == 0
-

@@ -19,16 +19,16 @@ from __future__ import annotations
 
 import logging
 import os
+from datetime import datetime
 from typing import Any
 
 import elasticsearch
 import numpy as np
+import pandas as pd
 import requests
 import tqdm
 from dotenv import load_dotenv
 from elasticsearch.helpers import scan
-import pandas as pd
-from datetime import datetime
 
 load_dotenv()
 
@@ -192,8 +192,10 @@ def retrieve_csv(
         Name of the ES index.
     ner_method
         Method to use to perform NER.
+    output_path
+        Path where one wants to save the csv file.
     """
-    now = datetime.now().strftime('%d_%m_%Y_%H_%M')
+    now = datetime.now().strftime("%d_%m_%Y_%H_%M")
 
     if ner_method == "both":
         query = {
@@ -243,9 +245,7 @@ def retrieve_csv(
             results.append(row)
 
         progress.update(1)
-        logger.info(
-            f"Retrieved NER for paragraph {hit['_id']}, progress: {progress.n}"
-        )
+        logger.info(f"Retrieved NER for paragraph {hit['_id']}, progress: {progress.n}")
 
     progress.close()
 
