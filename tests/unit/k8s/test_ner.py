@@ -4,6 +4,7 @@ import responses
 from bluesearch.k8s.create_indices import add_index, remove_index
 from bluesearch.k8s.ner import run, run_ner_model_remote
 
+
 @pytest.fixture()
 def model_response():
     url = "fake_url"
@@ -32,6 +33,7 @@ def model_response():
         json=expected_response,
     )
 
+
 @responses.activate
 def test_run_ner_model_remote(model_response):
     url = "fake_url"
@@ -53,6 +55,7 @@ def test_run_ner_model_remote(model_response):
     assert isinstance(out, list)
     assert out[0]["score"] == 0
     assert out[1]["score"] == 0
+
 
 @responses.activate
 def test_run(get_es_client, model_response):
@@ -79,14 +82,12 @@ def test_run(get_es_client, model_response):
             "article_id": "2",
             "paragraph_id": "1",
             "text": "There is a cat and a mouse in the house.",
-        }
+        },
     ]
 
     for fd in fake_data:
-        client.update(
-            index=index, doc=fd, id=fd["paragraph_id"]
-        )
-    
+        client.update(index=index, doc=fd, id=fd["paragraph_id"])
+
     run(client, "v1", index=index)
 
     # check that the results are in the database
