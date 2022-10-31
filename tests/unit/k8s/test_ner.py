@@ -88,7 +88,7 @@ def test_run(get_es_client, model_response):
     for fd in fake_data:
         client.update(index=index, doc=fd, id=fd["paragraph_id"])
 
-    run(client, "v1", index=index)
+    run(client, "v1", index=index, run_async=False)
 
     # check that the results are in the database
     query = {"bool": {"must": {"term": {"field": {"ner_ml_version": "v1"}}}}}
