@@ -21,7 +21,6 @@ import logging
 import os
 import time
 from datetime import datetime
-from itertools import product
 from multiprocessing import Pool
 from typing import Any
 
