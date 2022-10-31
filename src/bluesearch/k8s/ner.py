@@ -139,11 +139,12 @@ def run_ner_model_remote(
     hit: dict[str, Any],
     url: str,
     ner_method: str,
-    index: str,
-    version: str,
-) -> None:
+    index: str | None = None,
+    version: str | None = None,
+    client: elasticsearch.Elasticsearch | None = None,
+) -> list[dict[str, Any]] | None:
     """Perform NER on a paragraph using a remote server.
-    
+
     Parameters
     ----------
     hit
@@ -157,7 +158,12 @@ def run_ner_model_remote(
     version
         Version of the NER pipeline.
     """
-    client = connect.connect()
+    if client is None and index is None and version is None:
+        logger.info("Running NER in inference mode only.")
+    elif client is None and index is not None and version is not None:
+        client = connect.connect()
+    elif client is None and (index is not None or version is not None):
+        raise ValueError("Index and version should be both None or not None.")
 
     url = "http://" + url + "/predict"
 
@@ -194,17 +200,23 @@ def run_ner_model_remote(
         row["source"] = ner_method
         out.append(row)
 
-    # update the NER field in the document
-    client.update(index=index, doc={f"ner_{ner_method}_json_v2": out}, id=hit["_id"])
-    # update the version of the NER
-    client.update(
-        index=index, doc={f"ner_{ner_method}_version": version}, id=hit["_id"]
-    )
+    if client is not None and index is not None and version is not None:
+        # update the NER field in the document
+        client.update(
+            index=index, doc={f"ner_{ner_method}_json_v2": out}, id=hit["_id"]
+        )
+        # update the version of the NER
+        client.update(
+            index=index, doc={f"ner_{ner_method}_version": version}, id=hit["_id"]
+        )
+        return None
+    else:
+        return out
 
 
 def handle_conflicts(results_paragraph: list[dict]) -> list[dict]:
     """Handle conflicts between the NER pipeline and the entity ruler.
-    
+
     Parameters
     ----------
     results_paragraph

@@ -17,7 +17,7 @@ def test_run_ner_model_remote(get_es_client):
 
     url = "fake_url"
     expected_url = "http://" + url + "/predict"
-    text = "There is a cat and a mouse in the house."
+    hit = {"_source": {"text": "There is a cat and a mouse in the house."}}
     expected_response = [
         {
             "entity_group": "ORGANISM",
@@ -42,7 +42,7 @@ def test_run_ner_model_remote(get_es_client):
         json=expected_response,
     )
 
-    out = run_ner_model_remote(text, url, source="ml")
+    out = run_ner_model_remote(hit, url, ner_method="ml")
     assert isinstance(out, list)
     assert len(out) == 2
 
@@ -54,6 +54,6 @@ def test_run_ner_model_remote(get_es_client):
     assert out[0]["start"] == 11
     assert out[0]["end"] == 14
 
-    out = run_ner_model_remote(text, url, source="ruler")
+    out = run_ner_model_remote(hit, url, ner_method="ruler")
     assert out[0]["score"] == 0
     assert out[1]["score"] == 0
