@@ -55,5 +55,6 @@ def test_run_ner_model_remote(get_es_client):
     assert out[0]["end"] == 14
 
     out = run_ner_model_remote(hit, url, ner_method="ruler")
+    assert isinstance(out, list)
     assert out[0]["score"] == 0
     assert out[1]["score"] == 0
