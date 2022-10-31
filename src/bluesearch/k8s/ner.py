@@ -54,12 +54,18 @@ def run(
     ----------
     client
         Elasticsearch client.
+    version
+        Version of the NER pipeline.
     index
         Name of the ES index.
     ner_method
         Method to use to perform NER.
     force
         If True, force the NER to be performed even in all paragraphs.
+    n_threads
+        Number of threads to use.
+    run_async
+        If True, run the NER asynchronously.
     """
     # get NER method function and url
     if ner_method == "ml":
@@ -95,7 +101,7 @@ def run(
         for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
             # add a new thread to the pool
             res = pool.apply_async(
-                reu_ner_model_remote,
+                run_ner_model_remote,
                 args=(
                     hit,
                     url,
@@ -117,7 +123,7 @@ def run(
         pool.join()
     else:
         for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
-            reu_ner_model_remote(
+            run_ner_model_remote(
                 hit,
                 url,
                 ner_method,
@@ -129,14 +135,28 @@ def run(
     progress.close()
 
 
-def reu_ner_model_remote(
+def run_ner_model_remote(
     hit: dict[str, Any],
     url: str,
     ner_method: str,
     index: str,
     version: str,
 ) -> None:
-    """Perform NER on a paragraph using a remote server."""
+    """Perform NER on a paragraph using a remote server.
+    
+    Parameters
+    ----------
+    hit
+        Elasticsearch hit.
+    url
+        URL of the NER server.
+    ner_method
+        Method to use to perform NER.
+    index
+        Name of the ES index.
+    version
+        Version of the NER pipeline.
+    """
     client = connect.connect()
 
     url = "http://" + url + "/predict"
@@ -183,7 +203,13 @@ def reu_ner_model_remote(
 
 
 def handle_conflicts(results_paragraph: list[dict]) -> list[dict]:
-    """Handle conflicts between the NER pipeline and the entity ruler."""
+    """Handle conflicts between the NER pipeline and the entity ruler.
+    
+    Parameters
+    ----------
+    results_paragraph
+        List of entities found by the NER pipeline.
+    """
     # if there is only one entity, it will be kept
     if len(results_paragraph) <= 1:
         return results_paragraph
