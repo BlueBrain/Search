@@ -17,16 +17,20 @@
 """Perform Name Entity Recognition (NER) on paragraphs."""
 import logging
 import os
+import time
+from datetime import datetime
+from multiprocessing import Pool
 from typing import Any
 
 import elasticsearch
 import numpy as np
+import pandas as pd
 import requests
 import tqdm
 from dotenv import load_dotenv
 from elasticsearch.helpers import scan
-import pandas as pd
-from datetime import datetime
+
+from bluesearch.k8s import connect
 
 load_dotenv()
 
@@ -35,9 +39,12 @@ logger = logging.getLogger(__name__)
 
 def run(
     client: elasticsearch.Elasticsearch,
+    version: str,
     index: str = "paragraphs",
     ner_method: str = "ml",
     force: bool = False,
+    n_threads: int = 4,
+    run_async: bool = True,
 ) -> None:
     """Run the NER pipeline on the paragraphs in the database.
 
@@ -64,10 +71,10 @@ def run(
     if force:
         query: dict[str, Any] = {"match_all": {}}
     else:
-        query = {
-            "bool": {"must_not": {"exists": {"field": f"ner_{ner_method}_json_v2"}}}
-        }
-    paragraph_count = client.count(index=index, query=query)["count"]
+        query = {"bool": {"must_not": {"term": {f"ner_{ner_method}_version": version}}}}
+    paragraph_count = client.options(request_timeout=30).count(
+        index=index, query=query
+    )["count"]
     logger.info(
         f"There are {paragraph_count} paragraphs without NER {ner_method} results."
     )
@@ -79,70 +86,98 @@ def run(
         unit=" Paragraphs",
         desc="Updating NER",
     )
-    for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
-        try:
-            results = run_ner_model_remote(
-                hit["_source"]["text"],
+    if run_async:
+        # start a pool of workers
+        pool = Pool(processes=n_threads)
+        open_threads = []
+        for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
+            # add a new thread to the pool
+            res = pool.apply_async(
+                reu_ner_model_remote,
+                args=(
+                    hit,
+                    url,
+                    ner_method,
+                    index,
+                    version,
+                ),
+            )
+            open_threads.append(res)
+            progress.update(1)
+            # check if any thread is done
+            open_threads = [thr for thr in open_threads if not thr.ready()]
+            # wait if too many threads are running
+            while len(open_threads) > n_threads:
+                time.sleep(0.1)
+                open_threads = [thr for thr in open_threads if not thr.ready()]
+        # wait for all threads to finish
+        pool.close()
+        pool.join()
+    else:
+        for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
+            reu_ner_model_remote(
+                hit,
                 url,
                 ner_method,
+                index,
+                version,
             )
-            client.update(
-                index=index, doc={f"ner_{ner_method}_json_v2": results}, id=hit["_id"]
-            )
-
             progress.update(1)
-            logger.info(
-                f"Updated NER for paragraph {hit['_id']}, progress: {progress.n}"
-            )
-        except Exception as e:
-            print(e)
-            logger.error(f"Error in paragraph {hit['_id']}, progress: {progress.n}")
 
     progress.close()
 
 
-def run_ner_model_remote(text: str, url: str, source: str) -> list[dict]:
-    """Run NER on the remote server for a specific paragraph text.
+def reu_ner_model_remote(
+    hit: dict[str, Any],
+    url: str,
+    ner_method: str,
+    index: str,
+    version: str,
+) -> None:
+    """Perform NER on a paragraph using a remote server."""
+    client = connect.connect()
 
-    Parameters
-    ----------
-    text
-        Text to perform NER on.
-    url
-        URL of the remote server.
-    source
-        Source model of the NER results.
-
-    Returns
-    -------
-    results
-        List of dictionaries with the NER results.
-    """
     url = "http://" + url + "/predict"
 
     response = requests.post(
         url,
         headers={"accept": "application/json", "Content-Type": "text/plain"},
-        data=text.encode("utf-8"),
+        data=hit["_source"]["text"].encode("utf-8"),
     )
 
     if not response.status_code == 200:
         raise ValueError("Error in the request")
 
     results = response.json()
-
     out = []
-    for res in results:
+    if results:
+        for res in results:
+            row = {}
+            row["entity_type"] = res["entity_group"]
+            row["entity"] = res["word"]
+            row["start"] = res["start"]
+            row["end"] = res["end"]
+            row["score"] = 0 if ner_method == "ruler" else res["score"]
+            row["source"] = ner_method
+            out.append(row)
+    else:
+        # if no entity is found, return an empty row,
+        # necessary for ES to find the field in the document
         row = {}
-        row["entity_type"] = res["entity_group"]
-        row["entity"] = res["word"]
-        row["start"] = res["start"]
-        row["end"] = res["end"]
-        row["score"] = 0 if source == "ruler" else res["score"]
-        row["source"] = source
+        row["entity_type"] = "Empty"
+        row["entity"] = ""
+        row["start"] = 0
+        row["end"] = 0
+        row["score"] = 0
+        row["source"] = ner_method
         out.append(row)
 
-    return out
+    # update the NER field in the document
+    client.update(index=index, doc={f"ner_{ner_method}_json_v2": out}, id=hit["_id"])
+    # update the version of the NER
+    client.update(
+        index=index, doc={f"ner_{ner_method}_version": version}, id=hit["_id"]
+    )
 
 
 def handle_conflicts(results_paragraph: list[dict]) -> list[dict]:
@@ -191,7 +226,7 @@ def retrieve_csv(
     ner_method
         Method to use to perform NER.
     """
-    now = datetime.now().strftime('%d_%m_%Y_%H_%M')
+    now = datetime.now().strftime("%d_%m_%Y_%H_%M")
 
     if ner_method == "both":
         query = {
@@ -241,11 +276,15 @@ def retrieve_csv(
             results.append(row)
 
         progress.update(1)
-        logger.info(
-            f"Retrieved NER for paragraph {hit['_id']}, progress: {progress.n}"
-        )
+        logger.info(f"Retrieved NER for paragraph {hit['_id']}, progress: {progress.n}")
 
     progress.close()
 
     df = pd.DataFrame(results)
     df.to_csv(f"{output_path}/ner_es_results{ner_method}_{now}.csv", index=False)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.WARNING)
+    client = connect.connect()
+    run(client, version="v2")
