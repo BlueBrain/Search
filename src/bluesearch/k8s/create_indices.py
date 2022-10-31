@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 SETTINGS = {"number_of_shards": 2, "number_of_replicas": 1}
 
-MAPPINGS_ARTICLES = {
+MAPPINGS_ARTICLES: dict[str, Any] = {
     "dynamic": "strict",
     "properties": {
         "article_id": {"type": "keyword"},
