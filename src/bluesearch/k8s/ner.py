@@ -124,11 +124,12 @@ def run(
     else:
         for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
             run_ner_model_remote(
-                hit,
-                url,
-                ner_method,
-                index,
-                version,
+                hit=hit,
+                url=url,
+                ner_method=ner_method,
+                index=index,
+                version=version,
+                client=client,
             )
             progress.update(1)
 
