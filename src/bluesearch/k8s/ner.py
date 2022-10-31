@@ -21,7 +21,6 @@ import logging
 import os
 import time
 from datetime import datetime
-from itertools import product
 from multiprocessing import Pool
 from typing import Any
 
@@ -134,116 +133,6 @@ def run(
             progress.update(1)
 
     progress.close()
-
-
-def prepare_text_for_re(
-    text: str,
-    subj: dict,
-    obj: dict,
-    subject_symbols: tuple[str, str] = ("[[ ", " ]]"),
-    object_symbols: tuple[str, str] = ("<< ", " >>"),
-) -> str:
-    """Add the subj and obj annotation to the text."""
-    if subj["start"] < obj["start"]:
-        first, second = subj, obj
-        first_symbols, second_symbols = subject_symbols, object_symbols
-    else:
-        first, second = obj, subj
-        first_symbols, second_symbols = object_symbols, subject_symbols
-
-    attribute = "word"
-
-    part_1 = text[: first["start"]]
-    part_2 = f"{first_symbols[0]}{first[attribute]}{first_symbols[1]}"
-    part_3 = text[first["end"]: second["start"]]
-    part_4 = f"{second_symbols[0]}{second[attribute]}{second_symbols[1]}"
-    part_5 = text[second["end"]:]
-
-    out = part_1 + part_2 + part_3 + part_4 + part_5
-
-    return out
-
-
-def run_re_model_remote(
-    hit: dict[str, Any],
-    url: str,
-    index: str,
-    version: str,
-) -> None:
-    """Perform RE on a paragraph using a remote server.
-
-    Parameters
-    ----------
-    hit
-        Elasticsearch hit.
-    url
-        URL of the Relation Extraction (RE) server.
-    index
-        Name of the ES index.
-    version
-        Version of the Relation Extraction pipeline.
-    """
-
-    url = "http://" + url + "/predict"
-
-    matrix: list[tuple[str, str]] = [
-        ("BRAIN_REGION", "ORGANISM"),
-        ("CELL_COMPARTMENT", "CELL_TYPE"),
-        ("CELL_TYPE", "BRAIN_REGION"),
-        ("CELL_TYPE", "ORGANISM"),
-        ("GENE", "BRAIN_REGION"),
-        ("GENE", "CELL_COMPARTMENT"),
-        ("GENE", "CELL_TYPE"),
-        ("GENE", "ORGANISM"),
-    ]
-
-    text = hit["_source"]["text"].encode("utf-8")
-    ner_ml = hit["_source"]["ner_ml_json_v2"]
-    ner_ruler = hit["_source"]["ner_ruler_json_v2"]
-
-    results_cleaned = handle_conflicts(ner_ml.extend(ner_ruler))
-
-    out = []
-
-    for subj, obj in product(results_cleaned, results_cleaned):
-        if subj == obj:
-            continue
-        if (subj["entity"], obj["entity"]) in matrix:
-            text_processed = prepare_text_for_re(text, subj, obj)
-
-            response = requests.post(
-                url,
-                headers={"accept": "application/json", "Content-Type": "text/plain"},
-                data=text_processed,
-            )
-
-            if not response.status_code == 200:
-                raise ValueError("Error in the request")
-
-            result = response.json()
-            row = {}
-            if result:
-                row["label"] = result[0]["label"]
-                row["score"] = result[0]["score"]
-                row["subject_entity"] = subj["entity"]
-                row["subject_word"] = subj["word"]
-                row["subject_start"] = subj["start"]
-                row["subject_end"] = subj["end"]
-                row["subject_source"] = subj["source"]
-                row["object_entity"] = obj["entity"]
-                row["object_word"] = obj["word"]
-                row["object_start"] = obj["start"]
-                row["object_end"] = obj["end"]
-                row["object_source"] = obj["source"]
-                row["source"] = "ml"
-                out.append(row)
-
-    # update the RE field in the document
-    client.update(index=index, doc={f"re_ml": out}, id=hit["_id"])
-    # update the version of the Relation Extraction
-    client.update(
-        index=index, doc={f"re_ml_version": version}, id=hit["_id"]
-    )
 
 
 def run_ner_model_remote(
