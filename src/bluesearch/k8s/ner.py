@@ -167,9 +167,9 @@ def prepare_text_for_re(
 def run_re_model_remote(
     hit: dict[str, Any],
     url: str,
-    index: str | None = None,
-    version: str | None = None,
-) -> list[dict[str, Any]] | None:
+    index: str,
+    version: str,
+) -> None:
     """Perform RE on a paragraph using a remote server.
 
     Parameters
@@ -250,9 +250,10 @@ def run_ner_model_remote(
     hit: dict[str, Any],
     url: str,
     ner_method: str,
-    index: str,
-    version: str,
-) -> None:
+    index: str | None = None,
+    version: str | None = None,
+    client: elasticsearch.Elasticsearch | None = None,
+) -> list[dict[str, Any]] | None:
     """Perform NER on a paragraph using a remote server.
 
     Parameters
