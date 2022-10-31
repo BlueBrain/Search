@@ -53,8 +53,11 @@ MAPPINGS_PARAGRAPHS = {
         "paragraph_id": {"type": "short"},
         "text": {"type": "text"},
         "ner_ml": {"type": "flattened"},
+        "ner_ml_version": {"type": "keyword"},
         "ner_ruler": {"type": "flattened"},
+        "ner_ruler_version": {"type": "keyword"},
         "re": {"type": "flattened"},
+        "re_version": {"type": "keyword"},
         "is_bad": {"type": "boolean"},
         "embedding": {
             "type": "dense_vector",
