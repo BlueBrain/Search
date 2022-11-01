@@ -106,11 +106,10 @@ def test_run(monkeypatch, get_es_client, model_response):
     run(client, "v1", index=index, run_async=False)
     client.indices.refresh(index=index)
 
-    time.sleep(60)
-
     # check that the results are in the database
     query = {"bool": {"must": {"term": {"ner_ml_version": "v1"}}}}
     paragraph_count = client.count(index=index, query=query)["count"]
+    time.sleep(60)
     assert paragraph_count == 3
 
     # check that the results are correct
