@@ -1,5 +1,6 @@
 import pytest
 import responses
+import time
 
 from bluesearch.k8s.create_indices import MAPPINGS_PARAGRAPHS, add_index, remove_index
 from bluesearch.k8s.ner import run, run_ner_model_remote
@@ -108,6 +109,7 @@ def test_run(monkeypatch, get_es_client, model_response):
     # check that the results are in the database
     query = {"bool": {"must": {"term": {"ner_ml_version": "v1"}}}}
     paragraph_count = client.count(index=index, query=query)["count"]
+    time.sleep(60)
     assert paragraph_count == 3
 
     # check that the results are correct
