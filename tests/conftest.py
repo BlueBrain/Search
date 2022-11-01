@@ -520,5 +520,3 @@ def get_es_client(monkeypatch):
         for index in client.indices.get_alias().keys():
             if index in ["test_articles", "test_paragraphs", "test_index"]:
                 remove_index(client, index)
-                time.sleep(1)
-
