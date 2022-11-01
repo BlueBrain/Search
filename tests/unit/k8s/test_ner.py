@@ -1,5 +1,6 @@
 import pytest
 import responses
+import time
 
 from bluesearch.k8s.create_indices import MAPPINGS_PARAGRAPHS, add_index, remove_index
 from bluesearch.k8s.ner import run, run_ner_model_remote
@@ -104,6 +105,8 @@ def test_run(monkeypatch, get_es_client, model_response):
 
     run(client, "v1", index=index, run_async=False)
     client.indices.refresh(index=index)
+
+    time.sleep(60)
 
     # check that the results are in the database
     query = {"bool": {"must": {"term": {"ner_ml_version": "v1"}}}}
