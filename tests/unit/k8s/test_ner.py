@@ -137,6 +137,7 @@ def test_run(monkeypatch, get_es_client, model_response):
 
     remove_index(client, index)
 
+
 @pytest.mark.parametrize(
     ("raw_ents", "cleaned_ents"),
     [
