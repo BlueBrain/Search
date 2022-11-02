@@ -2,7 +2,7 @@ import pytest
 import responses
 
 from bluesearch.k8s.create_indices import MAPPINGS_PARAGRAPHS, add_index, remove_index
-from bluesearch.k8s.ner import run, run_ner_model_remote
+from bluesearch.k8s.ner import run, run_ner_model_remote, handle_conflicts
 
 
 @pytest.fixture()
@@ -136,3 +136,365 @@ def test_run(monkeypatch, get_es_client, model_response):
     assert paragraph_count == 0
 
     remove_index(client, index)
+
+@pytest.mark.parametrize(
+    ("raw_ents", "cleaned_ents"),
+    [
+        pytest.param([], [], id="empty list"),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                },
+            ],
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                },
+            ],
+            id="one element",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 10,
+                    "end": 15,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 10,
+                    "end": 15,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            id="no overlap",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            id="perfect overlap",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 5,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 2,
+                    "end": 20,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 2,
+                    "end": 20,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            id="overlap - ML longer",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 50,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 25,
+                    "end": 60,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 1,
+                    "end": 50,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            id="overlap - RULES longer",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 1,
+                    "end": 50,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 25,
+                    "end": 40,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 1,
+                    "end": 50,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            id="overlap - ML subset of RULES",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 4,
+                    "end": 24,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 2,
+                    "end": 40,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 2,
+                    "end": 40,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            id="overlap - RULES subset of ML",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 10,
+                    "end": 30,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 20,
+                    "end": 40,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            [
+                {
+                    "start": 20,
+                    "end": 40,
+                    "word": "word",
+                    "source": "ML",
+                },
+            ],
+            id="overlap - same length",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 10,
+                    "end": 30,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 15,
+                    "end": 20,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 23,
+                    "end": 34,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 31,
+                    "end": 33,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            [
+                {
+                    "start": 10,
+                    "end": 30,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 31,
+                    "end": 33,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            id="more entries - 1",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 10,
+                    "end": 30,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 20,
+                    "end": 50,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 35,
+                    "end": 100,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            [
+                {
+                    "start": 10,
+                    "end": 30,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 35,
+                    "end": 100,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            id="more entries - 2",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 35,
+                    "end": 100,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            [
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 35,
+                    "end": 100,
+                    "word": "word",
+                    "source": "RULES",
+                },
+            ],
+            id="entries with only 2 chars",
+        ),
+        pytest.param(
+            [
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "RULES",
+                },
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 12,
+                    "end": 15,
+                    "word": " word",
+                    "source": "RULES",
+                },
+            ],
+            [
+                {
+                    "start": 10,
+                    "end": 12,
+                    "word": "word",
+                    "source": "ML",
+                },
+                {
+                    "start": 12,
+                    "end": 15,
+                    "word": " word",
+                    "source": "RULES",
+                },
+            ],
+            id="overlap with whitespace",
+        ),
+    ],
+)
+def test_handle_conflicts(raw_ents, cleaned_ents):
+    """Test handle_conflicts function."""
+    assert cleaned_ents == handle_conflicts(raw_ents)
