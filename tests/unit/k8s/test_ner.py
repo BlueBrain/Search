@@ -2,7 +2,7 @@ import pytest
 import responses
 
 from bluesearch.k8s.create_indices import MAPPINGS_PARAGRAPHS, add_index, remove_index
-from bluesearch.k8s.ner import run, run_ner_model_remote, handle_conflicts
+from bluesearch.k8s.ner import handle_conflicts, run, run_ner_model_remote
 
 
 @pytest.fixture()
