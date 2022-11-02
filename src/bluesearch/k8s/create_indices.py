@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 SETTINGS = {"number_of_shards": 2, "number_of_replicas": 1}
 
-MAPPINGS_ARTICLES = {
+MAPPINGS_ARTICLES: dict[str, Any] = {
     "dynamic": "strict",
     "properties": {
         "article_id": {"type": "keyword"},
@@ -52,6 +52,12 @@ MAPPINGS_PARAGRAPHS = {
         "section_name": {"type": "keyword"},
         "paragraph_id": {"type": "short"},
         "text": {"type": "text"},
+        "ner_ml_json_v2": {"type": "flattened"},
+        "ner_ml_version": {"type": "keyword"},
+        "ner_ruler_json_v2": {"type": "flattened"},
+        "ner_ruler_version": {"type": "keyword"},
+        "re": {"type": "flattened"},
+        "re_version": {"type": "keyword"},
         "is_bad": {"type": "boolean"},
         "embedding": {
             "type": "dense_vector",
@@ -117,5 +123,25 @@ def remove_index(client: Elasticsearch, index: str | list[str]) -> None:
         client.indices.delete(index=index)
         logger.info(f"Index {index} deleted successfully")
 
+    except Exception as err:
+        print("Elasticsearch add_index ERROR:", err)
+
+
+def update_index_mapping(
+    client: Elasticsearch,
+    index: str,
+    settings: dict[str, Any] | None = None,
+    properties: dict[str, Any] | None = None,
+) -> None:
+    """Update the index with a new mapping and settings."""
+    if index not in client.indices.get_alias().keys():
+        raise RuntimeError("Index not in ES")
+
+    try:
+        if settings:
+            client.indices.put_settings(index=index, settings=settings)
+        if properties:
+            client.indices.put_mapping(index=index, properties=properties)
+        logger.info(f"Index {index} updated successfully")
     except Exception as err:
         print("Elasticsearch add_index ERROR:", err)
