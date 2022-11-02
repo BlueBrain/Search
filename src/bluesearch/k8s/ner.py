@@ -236,8 +236,8 @@ def handle_conflicts(results_paragraph: list[dict]) -> list[dict]:
 
     array = np.zeros(max([x["end"] for x in temp]))
     for res in temp:
-        add_one = 1 if res["word"][0] == " " else 0
-        sub_one = 1 if res["word"][-1] == " " else 0
+        add_one = 1 if res["entity"][0] == " " else 0
+        sub_one = 1 if res["entity"][-1] == " " else 0
         if len(results_cleaned) == 0:
             results_cleaned.append(res)
             array[res["start"] + add_one : res["end"] - sub_one] = 1
