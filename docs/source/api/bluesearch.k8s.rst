@@ -9,6 +9,9 @@ Submodules
 
    bluesearch.k8s.connect
    bluesearch.k8s.create_indices
+   bluesearch.k8s.ner
+   bluesearch.k8s.relation_extraction
+   bluesearch.k8s.run_ner
 
 Module contents
 ---------------
