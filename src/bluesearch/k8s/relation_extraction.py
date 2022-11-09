@@ -17,6 +17,7 @@
 """Perform Relation Extraction (RE) using a remote server."""
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -98,18 +99,18 @@ def run(
                 ),
             )
             open_threads.append(res)
-            progress.update(1)
             # check if any thread is done
             open_threads = [thr for thr in open_threads if not thr.ready()]
             # wait if too many threads are running
             while len(open_threads) > n_threads:
                 time.sleep(0.1)
                 open_threads = [thr for thr in open_threads if not thr.ready()]
+            progress.update(1)
         # wait for all threads to finish
         pool.close()
         pool.join()
     else:
-        for hit in scan(client, query={"query": query}, index=index, scroll="12h"):
+        for hit in scan(client, query={"query": query}, index=index, scroll="24h"):
             run_re_model_remote(
                 hit=hit,
                 url=url,
@@ -137,7 +138,7 @@ def prepare_text_for_re(
         first, second = obj, subj
         first_symbols, second_symbols = object_symbols, subject_symbols
 
-    attribute = "word"
+    attribute = "entity"
 
     part_1 = text[: first["start"]]
     part_2 = f"{first_symbols[0]}{first[attribute]}{first_symbols[1]}"
@@ -194,41 +195,46 @@ def run_re_model_remote(
     ner_ml = hit["_source"]["ner_ml_json_v2"]
     ner_ruler = hit["_source"]["ner_ruler_json_v2"]
 
-    results_cleaned = handle_conflicts(ner_ml.extend(ner_ruler))
+    results_cleaned = handle_conflicts([*ner_ml, *ner_ruler])
 
-    out = []
+    texts = []
+    sub_obj = []
     for subj, obj in product(results_cleaned, results_cleaned):
         if subj == obj:
             continue
-        if (subj["entity"], obj["entity"]) in matrix:
+        if (subj["entity_type"], obj["entity_type"]) in matrix:
             text_processed = prepare_text_for_re(text, subj, obj)
+            texts.append(text_processed)
+            sub_obj.append((subj, obj))
 
-            response = requests.post(
-                url,
-                headers={"accept": "application/json", "Content-Type": "text/plain"},
-                data=text_processed.encode("utf-8"),
-            )
+    response = requests.post(
+        url,
+        headers={"accept": "application/json", "Content-Type": "application/json"},
+        data=json.dumps(texts).encode("utf-8"),
+    )
 
-            if not response.status_code == 200:
-                raise ValueError("Error in the request")
+    if not response.status_code == 200:
+        raise ValueError("Error in the request")
 
-            result = response.json()
+    result = response.json()
+    out = []
+    if result:
+        for (subj, obj), res in zip(sub_obj, result):
             row = {}
-            if result:
-                row["label"] = result[0]["label"]
-                row["score"] = result[0]["score"]
-                row["subject_entity_type"] = subj["entity_type"]
-                row["subject_entity"] = subj["entity"]
-                row["subject_start"] = subj["start"]
-                row["subject_end"] = subj["end"]
-                row["subject_source"] = subj["source"]
-                row["object_entity_type"] = obj["entity_type"]
-                row["object_entity"] = obj["entity"]
-                row["object_start"] = obj["start"]
-                row["object_end"] = obj["end"]
-                row["object_source"] = obj["source"]
-                row["source"] = "ml"
-                out.append(row)
+            row["label"] = res["label"]
+            row["score"] = res["score"]
+            row["subject_entity_type"] = subj["entity_type"]
+            row["subject_entity"] = subj["entity"]
+            row["subject_start"] = subj["start"]
+            row["subject_end"] = subj["end"]
+            row["subject_source"] = subj["source"]
+            row["object_entity_type"] = obj["entity_type"]
+            row["object_entity"] = obj["entity"]
+            row["object_start"] = obj["start"]
+            row["object_end"] = obj["end"]
+            row["object_source"] = obj["source"]
+            row["source"] = "ml"
+            out.append(row)
 
     if client is not None and index is not None and version is not None:
         # update the RE field in the document
@@ -238,3 +244,9 @@ def run_re_model_remote(
         return None
     else:
         return out
+
+
+if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s:%(message)s", level=logging.WARNING)
+    client = connect.connect()
+    run(client, version="v1", run_async=False, n_threads=8)
