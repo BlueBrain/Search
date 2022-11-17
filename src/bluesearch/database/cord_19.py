@@ -332,7 +332,7 @@ class CORD19DatabaseCreation:
 
         return pmc_json, pdf_json
 
-    def _sentences_table(self, model_name="en_core_sci_lg"):
+    def _sentences_table(self, model_name="en_core_web_sm"):
         """Fill the sentences table thanks to all the json files.
 
         For each paragraph, all sentences are extracted and populate
