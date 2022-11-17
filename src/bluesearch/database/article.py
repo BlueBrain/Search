@@ -32,6 +32,7 @@ from typing import IO, Generator, Iterable, Optional, Sequence, Tuple
 from xml.etree.ElementTree import Element  # nosec
 from zipfile import ZipFile
 
+from bs4 import BeautifulSoup as bs
 from defusedxml import ElementTree
 from mashumaro.mixins.json import DataClassJSONMixin
 
@@ -589,6 +590,164 @@ class JATSXMLParser(ArticleParser):
         else:
             # Default handling for all other element tags
             return self._inner_text(element)
+
+
+class XOCSXMLParser(ArticleParser):
+    """Parser for the XML format of the SCOPUS article XML."""
+
+    def __init__(self, data: str) -> None:
+        super().__init__()
+
+        self.content: bs = bs(data, "lxml-xml")
+
+        if self.content.find("full-text-retrieval-response"):
+            self.type = "full"
+        elif self.content.find("abstracts-retrieval-response"):
+            self.type = "abstract"
+        else:
+            raise ValueError("Invalid XML format.")
+
+    def _strip_text(self, text: str) -> str:
+        """Strip text.
+
+        Parameters
+        ----------
+        text
+            The input text.
+
+        Returns
+        -------
+        str
+            The stripped text.
+        """
+        return "\n".join(line.strip() for line in text.split("\n") if line.strip())
+
+    @property
+    def title(self) -> str:
+        """Get title.
+
+        Returns
+        -------
+        str or None
+            Title if specified, otherwise None.
+        """
+        return self._strip_text(self.content.find("coredata").find("dc:title").text)
+
+    @property
+    def abstract(self) -> str:
+        """Get abstract.
+
+        Returns
+        -------
+        str or None
+            Abstract if specified, otherwise None.
+        """
+        abstract = self.content.find("coredata").find("dc:description")
+        if abstract.find("ce:para"):
+            return self._strip_text(abstract.find("ce:para").text)
+        else:
+            return self._strip_text(abstract.text)
+
+    @property
+    def authors(self) -> Iterable[str]:
+        """Get authors.
+
+        Returns
+        -------
+        Iterable
+            List of authors.
+        """
+        if self.type == "abstract":
+            authors = self.content.find("authors").findAll("author")
+        if self.type == "full":
+            authors = self.content.find("coredata").findAll("dc:creator")
+
+        out = []
+        for author in authors:
+            if author.find("ce:indexed-name"):
+                out.append(author.find("ce:indexed-name").text.strip())
+            else:
+                out.append(author.text.strip())
+        return out
+
+    @property
+    def pubmed_id(self) -> str | None:
+        """Get PubMed ID.
+
+        Returns
+        -------
+        str or None
+            PubMed ID if specified, otherwise None.
+        """
+        if self.content.find("pubmed-id"):
+            return self.content.find("pubmed-id").text
+        else:
+            return None
+
+    @property
+    def pmc_id(self) -> str | None:
+        """Get PMC ID."""
+        return None
+
+    @property
+    def doi(self) -> str | None:
+        """Get DOI.
+
+        Returns
+        -------
+        str or None
+            DOI if specified, otherwise None.
+        """
+        return self.content.find("coredata").find("prism:doi").text
+
+    @property
+    def uid(self) -> str:
+        """Get UID.
+
+        Returns
+        -------
+        str or None
+            UID if specified, otherwise None.
+        """
+        return self.content.find("coredata").find("prism:doi").text
+
+    @property
+    def paragraphs(self) -> Iterable[tuple[str, str]]:
+        """Get paragraphs.
+
+        Returns
+        -------
+        generator
+            Paragraphs generator.
+        """
+        if self.type == "abstract":
+            yield ("abstract", self.abstract)
+
+        elif self.type == "full":
+
+            yield ("abstract", self.abstract)
+
+            xdoc = self.content.find("xocs:doc")
+            body = xdoc.find("body")
+
+            if xdoc.find("simple-article"):
+                sections = body.find_all("ce:sections")
+                for section in sections:
+                    for paragraph in section.find_all("ce:para", recursive=False):
+                        yield ("", self._strip_text(paragraph.text))
+
+            elif xdoc.find("article"):
+                sections = body.find_all("ce:section")
+                for section in sections:
+                    section_title = section.find("ce:section-title").text
+                    for paragraph in section.find_all("ce:para", recursive=False):
+                        yield (
+                            self._strip_text(section_title),
+                            self._strip_text(paragraph.text),
+                        )
+
+            else:
+                raise ValueError("Invalid XOCS-ARTICLE format.")
 
 
 class PubMedXMLParser(ArticleParser):

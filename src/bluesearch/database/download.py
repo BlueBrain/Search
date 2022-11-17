@@ -21,6 +21,7 @@ import logging
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import requests
@@ -296,7 +297,7 @@ def download_articles(url_list: list[str], output_dir: Path) -> None:
         if not r.ok:
             logger.warning(
                 f"URL {url} does not exist or "
-                f"there was an issue when trying to retrieve it."
+                "there was an issue when trying to retrieve it."
             )
             continue
         with open(output_dir / file_name, "wb") as f:
@@ -360,3 +361,78 @@ def download_gcs_blob(blob: Blob, out_dir: Path, *, flatten: bool = False) -> No
     # if the blob does not exist.
     with path.open("wb") as fh:
         fh.write(pdf_content)
+
+
+QUERY_DEFAULT = (
+    "KEY(neuroscience) AND SRCTYPE('j') AND LANGUAGE('English') AND PUBSTAGE('final')"
+    " AND PUBYEAR IS 2021 AND OA(ALL)"
+)
+
+
+def scopus_search(
+    query: str = QUERY_DEFAULT,
+):
+    """Search Scopus for articles."""
+    import os
+
+    from dotenv import load_dotenv
+    from elsapy.elsclient import ElsClient
+    from elsapy.elssearch import ElsSearch
+
+    load_dotenv()
+
+    client = ElsClient(os.getenv("SCOPUS_API_KEY"))
+
+    auth_srch = ElsSearch(query, "scopus")
+
+    auth_srch.execute(client, get_all=True)
+    logger.info(f"Found {len(auth_srch.results)} results")
+
+    return auth_srch.results
+
+
+def scopus_download(results: list[dict[str, Any]]):
+    """Download articles from Scopus."""
+    import os
+
+    import requests
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
+    headers = {
+        "Accept": "application/json",
+    }
+
+    params = {
+        "apiKey": os.getenv("SCOPUS_API_KEY"),
+        "httpAccept": "text/xml",
+    }
+
+    not_found = 0
+    abstracts = 0
+    i = 0
+    for result in results:
+        logger.info(f"Downloading {result['prism:doi']}")
+
+        url = f"https://api.elsevier.com/content/article/doi/{result['prism:doi']}"
+        response = requests.get(url, params=params, headers=headers)
+
+        if response.status_code == 404:
+            url = f"https://api.elsevier.com/content/abstract/doi/{result['prism:doi']}"
+            response = requests.get(url, params=params, headers=headers)
+            abstracts += 1
+
+        if response.status_code == 200:
+            yield response.text
+
+        else:
+            logger.info(f"Could not find {result['prism:doi']}")
+            not_found += 1
+
+        i += 1
+
+    logger.info(f"Tried to download {i} articles")
+    logger.info(f"Got {not_found} not found")
+    logger.info(f"Got {abstracts} abstracts")
+    logger.info(f"Got {i - not_found - abstracts} full articles")

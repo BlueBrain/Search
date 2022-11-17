@@ -23,10 +23,10 @@ from pathlib import Path
 from typing import Any, Iterable, Optional
 
 import tqdm
-from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
 from bluesearch.database.article import Article
+from bluesearch.k8s import connect
 
 logger = logging.getLogger(__name__)
 
@@ -45,20 +45,35 @@ def init_parser(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:
         The initialised argument parser. The same object as the `parser`
         argument.
     """
-    parser.description = "Add entries to a database. \
-        ENV variables are used to configure the database connection.\
-        ES_URL and ES_PASS are required."
+    parser.description = (
+        "Add entries to a database. ENV variables are used to configure the"
+        " database connection. ES_URL and ES_PASS are required."
+    )
 
     parser.add_argument(
         "parsed_path",
         type=Path,
         help="Path to a parsed file or to a directory of parsed files.",
     )
+    parser.add_argument(
+        "--articles-index-name",
+        type=str,
+        default="articles",
+        help="Desired name of the index holding articles.",
+    )
+    parser.add_argument(
+        "--paragraphs-index-name",
+        type=str,
+        default="paragraphs",
+        help="Desired name of the index holding paragraphs.",
+    )
     return parser
 
 
 def bulk_articles(
-    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path],
+    index: str,
+    progress: Optional[tqdm.std.tqdm] = None,
 ) -> Iterable[dict[str, Any]]:
     """Yield an article mapping as a document to upload to Elasticsearch.
 
@@ -78,7 +93,7 @@ def bulk_articles(
         serialized = inp.read_text("utf-8")
         article = Article.from_json(serialized)
         doc = {
-            "_index": "articles",
+            "_index": index,
             "_id": article.uid,
             "_source": {
                 "article_id": article.uid,
@@ -96,7 +111,9 @@ def bulk_articles(
 
 
 def bulk_paragraphs(
-    inputs: Iterable[Path], progress: Optional[tqdm.std.tqdm] = None
+    inputs: Iterable[Path],
+    index: str,
+    progress: Optional[tqdm.std.tqdm] = None,
 ) -> Iterable[dict[str, Any]]:
     """Yield a paragraph mapping as a document to upload to Elasticsearch.
 
@@ -115,22 +132,9 @@ def bulk_paragraphs(
     for inp in inputs:
         serialized = inp.read_text("utf-8")
         article = Article.from_json(serialized)
-        # add abstract to paragraphs in order to be able to search for abstracts
-        for i, abstract in enumerate(article.abstract):
-            doc = {
-                "_index": "paragraphs",
-                "_source": {
-                    "article_id": article.uid,
-                    "section": "abstract",
-                    "text": abstract,
-                    "paragraph_id": i,
-                },
-            }
-            yield doc
-        # add body paragraphs
         for ppos, (section, text) in enumerate(article.section_paragraphs):
             doc = {
-                "_index": "paragraphs",
+                "_index": index,
                 "_source": {
                     "article_id": article.uid,
                     "section": section,
@@ -144,8 +148,9 @@ def bulk_paragraphs(
 
 
 def run(
-    client: Elasticsearch,
     parsed_path: Path,
+    articles_index_name: str,
+    paragraphs_index_name: str,
 ) -> int:
     """Add an entry to the database.
 
@@ -163,25 +168,94 @@ def run(
         )
 
     if len(inputs) == 0:
-        raise RuntimeWarning(f"No articles found at '{parsed_path}'!")
+        raise ValueError(f"No articles found at '{parsed_path}'!")
 
-    logger.info("Uploading articles to the database...")
+    # Creating a client
+    client = connect.connect()
+    logger.info("Uploading articles to the {articles_index_name} index...")
     progress = tqdm.tqdm(desc="Uploading articles", total=len(inputs), unit="articles")
-    resp = bulk(client, bulk_articles(inputs, progress))
+    resp = bulk(client, bulk_articles(inputs, articles_index_name, progress))
     logger.info(f"Uploaded {resp[0]} articles.")
 
     if resp[0] == 0:
-        raise RuntimeWarning(f"No articles were loaded to ES from '{parsed_path}'!")
+        raise ValueError(f"No articles were loaded to ES from '{parsed_path}'!")
 
-    logger.info("Uploading paragraphs to the database...")
+    logger.info("Uploading articles to the {paragraphs_index_name} index...")
     progress = tqdm.tqdm(
         desc="Uploading paragraphs", total=len(inputs), unit="articles"
     )
-    resp = bulk(client, bulk_paragraphs(inputs, progress))
+    resp = bulk(client, bulk_paragraphs(inputs, paragraphs_index_name, progress))
     logger.info(f"Uploaded {resp[0]} paragraphs.")
 
     if resp[0] == 0:
-        raise RuntimeWarning(f"No paragraphs were loaded to ES from '{parsed_path}'!")
+        raise ValueError(f"No paragraphs were loaded to ES from '{parsed_path}'!")
 
     logger.info("Adding done")
     return 0
+
+
+def single_upload(article, force: bool = False) -> None:
+    """Upload a single article to the database.
+
+    Parameters
+    ----------
+    article
+        The article to upload.
+    """
+    client = connect.connect()
+
+    # Check if the article already exists
+    if not force and client.exists(index="articles", id=article.uid):
+        logger.info(f"Article {article.uid} already exists. Skipping...")
+        return
+
+    doc = {
+        "article_id": article.uid,
+        "authors": article.authors,
+        "title": article.title,
+        "abstract": article.abstract,
+        "pubmed_id": article.pubmed_id,
+        "pmc_id": article.pmc_id,
+        "doi": article.doi,
+    }
+    client.index(index="articles", id=article.uid, document=doc)
+
+    for ppos, (section, text) in enumerate(article.paragraphs):
+        doc = {
+            "article_id": article.uid,
+            "section": section,
+            "text": text,
+            "paragraph_id": ppos,
+        }
+        client.index(index="paragraphs", document=doc)
+
+
+def run_scopus(force: bool = False) -> None:
+    """Download and upload all articles from Scopus."""
+    from bluesearch.database.article import XOCSXMLParser
+    from bluesearch.database.download import scopus_download, scopus_search
+    from bluesearch.entrypoint.database.add_es import single_upload
+
+    for y in range(2022, 1999, -1):
+        logger.info(f"Starting year {y}")
+        results = scopus_search(
+            'KEY(neuroscience) AND SRCTYPE("j") AND LANGUAGE("English") AND'
+            f' PUBSTAGE("final") AND PUBYEAR IS {y} AND OA(ALL)'
+        )
+        logger.info(f"Found {len(results)} results")
+        for xml in tqdm.tqdm(scopus_download(results), total=len(results)):
+            try:
+                article = XOCSXMLParser(xml)
+                single_upload(article, force=force)
+            except Exception as e:
+                logger.error(f"Error while parsing article: {e}")
+
+
+if __name__ == "__main__":
+    logging.basicConfig(
+        filename="run_scopus.log",
+        format="%(levelname)s:%(message)s",
+        level=logging.INFO,
+    )
+    logger.addHandler(logging.StreamHandler())
+    run_scopus(force=True)
