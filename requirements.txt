@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-Flask==2.0.1
+Flask==2.3.2
 SQLAlchemy[mysql,pymysql]==1.4.21
 boto3==1.20.16
 catalogue==2.0.4
