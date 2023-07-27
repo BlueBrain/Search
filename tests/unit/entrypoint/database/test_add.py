@@ -126,7 +126,7 @@ def test_no_sentences(tmp_path, engine_sqlite, monkeypatch, model_entities):
     article = Article(
         title="Title",
         authors=["Author"],
-        abstract="Abstract",
+        abstract=[],
         section_paragraphs=[],
         pubmed_id="PubMed ID",
         pmc_id="PMC ID",
