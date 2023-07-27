@@ -16,12 +16,14 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+from __future__ import annotations
 
 import logging
 from typing import cast
 
 import numpy as np
 import pandas as pd
+import sqlalchemy
 import sqlalchemy.sql as sql
 
 
@@ -56,6 +58,24 @@ def get_titles(article_ids, engine):
         titles = {article_id: title for article_id, title in response}
 
     return titles
+
+
+def retrieve_existing_article_ids(engine: sqlalchemy.engine.Engine) -> list[str]:
+    """Retrieve all articles_ids from a database.
+
+    Parameters
+    ----------
+    engine : sqlalchemy.engine.Engine
+        SQLAlchemy Engine connected to the database.
+
+    Returns
+    -------
+    article_ids : list[str]
+        List of existing article_ids
+    """
+    result_proxy = engine.execute("SELECT article_id FROM articles")
+    article_ids = [result[0] for result in result_proxy.fetchall()]
+    return article_ids
 
 
 def retrieve_article_ids(engine):

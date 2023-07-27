@@ -95,6 +95,16 @@ def test_sqlite_cord19(engine_sqlite, tmp_path, monkeypatch, model_entities):
     (n_rows_sentences,) = engine_sqlite.execute(query_sentences).fetchone()
     assert n_rows_sentences > 0
 
+    # Test adding something that is already in the database
+    with pytest.raises(RuntimeWarning):
+        args_and_opts = [
+            "add",
+            engine_sqlite.url.database,
+            str(parsed_dir),
+            "--db-type=sqlite",
+        ]
+        main(args_and_opts)
+
     # Test adding something that does not exist
     with pytest.raises(ValueError):
         args_and_opts = [

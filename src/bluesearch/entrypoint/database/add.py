@@ -82,6 +82,7 @@ def run(
     import sqlalchemy
 
     from bluesearch.database.article import Article
+    from bluesearch.sql import retrieve_existing_article_ids
     from bluesearch.utils import load_spacy_model
 
     if db_type == "sqlite":
@@ -115,6 +116,13 @@ def run(
 
     if not articles:
         raise RuntimeWarning(f"No article was loaded from '{parsed_path}'!")
+
+    # Keep only articles not already present in the database
+    existing_uids = retrieve_existing_article_ids(engine)
+    articles = [article for article in articles if article.uid not in existing_uids]
+
+    if not articles:
+        raise RuntimeWarning(f"All articles are already saved in '{db_url}'!")
 
     logger.info("Loading spacy model")
     nlp = load_spacy_model("en_core_web_sm", disable=["ner"])
